@@ -8,7 +8,7 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 - Unity/oyun uygulaması başlamadı; çalışan oyun/build yok.
 - P1–P6 KILITLI. P0'ın açılması sonraki fazlara geçiş veya herhangi bir görevin tamamlanması değildir.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
-- Ekip erişimleri henüz doğrulanmadı. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
+- Utkuuzun14 ve MertKAYAR hesaplarına yazma (write) daveti gönderildi; kabul ve gerçek push/pull testi bekleniyor. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi, faz testi veya ekip kapanış kaydı yok.
 - Ortak sorumlular atandı; P0 ekip toplantısı tamamlanmadı. Kaynak/üretim yöntemi, saatler, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık.
 
@@ -17,8 +17,8 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 | Rol | Kişi | GitHub hesabı | Haftalık saat | Temel bilgisayar özellikleri |
 |---|---|---|---|---|
 | A | Mehmet | mehmetalisahingm | Henüz verilmedi | Henüz verilmedi |
-| B | Utku | Henüz verilmedi | Henüz verilmedi | Henüz verilmedi |
-| C | Mert | Henüz verilmedi | Henüz verilmedi | Henüz verilmedi |
+| B | Utku | Utkuuzun14 | Henüz verilmedi | Henüz verilmedi |
+| C | Mert | MertKAYAR | Henüz verilmedi | Henüz verilmedi |
 
 İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; deneyimler bilinmediğinden uzmanlık iddiası değildir. Mert bilgileri toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya özel cihaz adı, seri numarası veya gereksiz kişisel bilgi yazılmaz.
 
@@ -30,7 +30,7 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 | Yerel kod araçları | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diğer bilgisayarlar doğrulanmadı |
 | Git ve varlık düzeni | P0 Utku; büyük ikili varlıktan önce uygun LFS |
 | Repo ana dalı | main; ilk plan paylaşıldı |
-| Ekip erişim testi | P0 Mert koordine eder, Mehmet yetki verir; üç kişi kendi branch'ine pushlayacak |
+| Ekip erişim testi | Mehmet iki hesaba write daveti gönderdi; davet kabulü bekleniyor. Mert koordine eder; üç kişinin kendi branch'ine push/pull testi henüz yapılmadı |
 | Örnek build | P0 Mehmet üretir; üç kişi kendi bilgisayarında çalıştırır |
 | Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
 | Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
@@ -56,7 +56,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 | Görev | Sahip | Durum | Kanıt / kalan iş |
 |---|---|---|---|
 | P0-A | Mehmet | BEKLIYOR | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1); uygulama/build ve ortak karar takibi bekliyor |
-| P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap ve dosya düzeni bekliyor |
+| P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap biliniyor, davet kabulü ve dosya düzeni bekliyor |
 | P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); görsel/ses kaynak planı, saat/donanım, karar kaydı ve erişim testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
@@ -125,3 +125,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, kapasite/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |
 | 2026-08-31 | Plan 1.4: kullanıcının ortak sorumlulukları üstlenme ve görsel/sesi Mert'e verme talimatı işlendi. Diğer geliştirme işleri, gerçek testler ve üç kişilik faz kapısı korundu; uzmanlık, harcama veya tamam kaydı üretilmedi |
 | 2026-08-31 | Kullanıcının indirme/kurulum isteğiyle Mehmet'in bilgisayarına Unity 6000.3.23f1, Windows IL2CPP desteği ve VS Code Unity/C# eklentileri kuruldu. Unity sürümü, imzası ve Windows modül dosyaları doğrulandı; eski Unity korundu. Proje, lisansla proje açılışı ve build testi yapılmadı; P0 kapanmadı |
+| 2026-08-31 | Kullanıcının verdiği Utkuuzun14 ve MertKAYAR hesaplarına write davetleri gönderildi ve GitHub API üzerinden doğrulandı; davet kabulü veya gerçek push/pull testi tamamlandı sayılmadı |
