@@ -26,7 +26,8 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 
 | Konu | Durum / sorumlu |
 |---|---|
-| Unity/URP | 6.3 LTS önerildi; kesin yama ve gereken paketler P0'da Mehmet tarafından doğrulanacak |
+| Unity/URP | Mehmet'te Unity 6.3 LTS (6000.3.23f1) ve Windows Build Support (IL2CPP) kuruldu; çalıştırılan editör sürümü doğrulandı. Ortak proje/URP ve paket sürümlerinin sabitlenmesi henüz yapılmadı |
+| Yerel kod araçları | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diğer bilgisayarlar doğrulanmadı |
 | Git ve varlık düzeni | P0 Utku; büyük ikili varlıktan önce uygun LFS |
 | Repo ana dalı | main; ilk plan paylaşıldı |
 | Ekip erişim testi | P0 Mert koordine eder, Mehmet yetki verir; üç kişi kendi branch'ine pushlayacak |
@@ -123,3 +124,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hesap/saat bilgileri uydurulmadı, hiçbir oyun testi tamamlandı sayılmadı |
 | 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, kapasite/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |
 | 2026-08-31 | Plan 1.4: kullanıcının ortak sorumlulukları üstlenme ve görsel/sesi Mert'e verme talimatı işlendi. Diğer geliştirme işleri, gerçek testler ve üç kişilik faz kapısı korundu; uzmanlık, harcama veya tamam kaydı üretilmedi |
+| 2026-08-31 | Kullanıcının indirme/kurulum isteğiyle Mehmet'in bilgisayarına Unity 6000.3.23f1, Windows IL2CPP desteği ve VS Code Unity/C# eklentileri kuruldu. Unity sürümü, imzası ve Windows modül dosyaları doğrulandı; eski Unity korundu. Proje, lisansla proje açılışı ve build testi yapılmadı; P0 kapanmadı |
