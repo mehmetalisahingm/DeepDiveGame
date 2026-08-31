@@ -6,6 +6,7 @@ Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazı
 
 - Kapsam ve teslim: [PHASES.md](PHASES.md).
 - Güncel faz ve kişi görevi: [STATUS.md](STATUS.md).
+- P0 ekip/üretim/bütçe/tasarım kararları: [toplantı gündemi ve kayıt](P0_MEETING.md); Mert koordine eder, ekip karar verir.
 - Sistem bağlantıları: [CONTRACTS.md](CONTRACTS.md).
 - Kapanış: tek kısa [faz kaydı](../templates/PHASE_REPORT.md).
 - Ortak kod: [GitHub deposu](https://github.com/mehmetalisahingm/DeepDiveGame); proje ZIP'leri birleştirilmez.
@@ -38,7 +39,7 @@ Mehmet oyuncu/ekipman, Utku sualtı/canlı, Mert kasaba/ekonomi UI dosyalarını
 
 Ana sahne, input haritası, paket listesi, katman ve render ayarları birlikte koordine edilir. Aynı ana sahne/prefab üzerinde aynı anda çalışılmaz; ayrı parçalar birleştirilir. Dosya taşıma ve silmede .meta eşleşmesi korunur.
 
-P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya grafik varlık seçimi P0'ı bekletmez.
+P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya nihai grafik varlık seçimi P0'ı bekletmez; kaynak yöntemi ve üretim sorumluluğu P0 toplantısında belirlenir. Dış varlık ilk kez eklenmeden kaynak/lisans/atıf ve public repoda ham dosya paylaşım izni kontrol edilir; izin belirsizse eklenmez.
 
 ## Araçları kademeli ekleme
 
@@ -65,6 +66,10 @@ P2'de temel his katmanıyla hareket/av/oksijen-çanta, P3'te kamera/tam döngü/
 Haftalık saatler ve alt iş süreleriyle yükü kontrol edin. Erken bitiren, sahibinden devraldığı belirli alt işi yapabilir; hangi dosyayı değiştireceği kısa kayda yazılır. Eski fazdan gelen hata mevcut fazda bir düzeltme görevi olur ve ilgili regresyon tekrar denenir.
 
 Yeni özellik, ikinci bölge, faz sırası değişikliği veya zorunlu kabulün kaldırılması sessizce yapılamaz. Kullanıcının açık kararından sonra ilgili plan ve durum belgeleri birlikte güncellenir. Rutin uygulama tercihleri ve faz içi yardım için yeni bir tören gerekmez.
+
+Sistemler arası tasarım anlaşmazlığı için P0 toplantısında kabul edilen T05 yöntemi kullanılır; henüz yöntem kabul edilmediyse koordinatörün tek taraflı son söz hakkı yoktur. Oyun davranışı üzerindeki uzlaşma, ücretli harcama veya kapsam değişikliği yetkisi değildir.
+
+Geçici yokluk ve kalıcı ayrılma kuralı T02'de kaydedilir. Üye ayrıldığında başkası onun adına tamam yazmaz; ekip/kapsam ve faz kapısı açıkça yeniden kararlaştırılmadan sonraki faza geçilmez. Kod, açık işler, kaynak listesi ve hesap erişimi devir ihtiyacı birlikte ele alınır.
 
 ## AI yardımcısına başlangıç mesajı
 

@@ -22,6 +22,8 @@ PHASES içindeki zorunlu maddeler kısa satırlar hâlinde kaydedilir. Sonuçlar
 | Birleşmiş build kontrolü | CALISTIRILMADI |
 
 - Açık sorun / varsa manuel araç kontrolü:
+- P0 ise D01–D11 ve P0_MEETING T01–T07 gerçek karar kaydı; ertelenen seçimlerin geçici sınırı/sorumlusu/takip noktası:
+- P1 ise insan netcode inceleyicisinin gösterimi ve yedeğin tekrar kontrolü:
 - P2 ise temel his katmanı ve hareket/av/oksijen-çanta gözlemleri; devam/düzeltme kararı:
 - P3 ise kamera/tam döngü/tekrar dalma gözlemleri; devam/düzeltme kararı:
 - Mehmet'in gerçek tamam kaydı: YOK

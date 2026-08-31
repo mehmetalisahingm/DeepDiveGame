@@ -15,6 +15,7 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 - PLAN_HAZIR, P0 planının hazır olduğunu ve Unity/oyun uygulamasının başlamadığını belirtir.
 - Sadece açık fazın verilen görevini uygula. Kullanıcının plan düzenleme isteği, oyun geliştirmesine veya sonraki faza geçmeye izin vermez.
 - P0 hafiftir: ortak sürüm, proje, dosya düzeni, ekip/erişim ve örnek build. Branch koruması P1'de, CI P2'de ele alınır.
+- P0 toplantısında docs/plan/P0_MEETING.md gündemi de ele alınır. Üretim, kapasite/ayrılma, hedef, bütçe, tasarım yetkisi ve netcode sorumluluğu önerilerini ekip kararı veya uzmanlık kanıtı sayma; gerçek kararları uydurma. Kayıt sahibi host olmadan aynı kampanyaya devam edilemeyeceği D06 sınırını koru.
 - Gelecek faz sözleşmeleri taslak olabilir; ihtiyaç duyulan fazdan önce kesinleşir. Bütün geleceğin API'sini P0'da uygulama.
 - İlk oynanabilir sürüm tek dalış bölgesidir. P2'de kontrol/av/oksijen-çanta testi, P3'te kamera ve tam döngü testi yapılmadan sonraki faza geçme; ikinci bölge ekleme.
 - P2/P3 testinden önce plandaki temel hareket, vuruş, nefes, UI ve sualtı ışık/sis geri bildirimini sağla. Nihai cila veya kapsamlı animasyon sistemi ekleme; his katmanını P4'e erteleme.

@@ -1,6 +1,6 @@
 # Güncel durum ve görev takibi
 
-Plan 1.2 — 31 Ağustos 2026. Kullanıcının onayladığı isimli dağılım, sade P0, P2/P3 oynama testleri ve tek bölgelik ilk sürüm.
+Plan 1.3 — 31 Ağustos 2026. İsimli dağılım, sade P0, ekip toplantısı gündemi, P2/P3 oynama testleri ve tek bölgelik ilk sürüm. Yeni toplantı önerileri henüz ekip kararı değildir.
 
 ## Mevcut sınır
 
@@ -10,6 +10,7 @@ Plan 1.2 — 31 Ağustos 2026. Kullanıcının onayladığı isimli dağılım, 
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
 - Ekip erişimleri henüz doğrulanmadı. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi, faz testi veya ekip kapanış kaydı yok.
+- P0 ekip toplantısı yapılmadı; görsel/ses üretimi, kapasite/ayrılma, ürün hedefi, bütçe, tasarım yetkisi, netcode sorumlusu/yedeği ve D06 farkındalığı henüz kaydedilmedi.
 
 ## Ekip
 
@@ -55,7 +56,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 |---|---|---|---|
 | P0-A | Mehmet | BEKLIYOR | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1); uygulama/build bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap ve dosya düzeni bekliyor |
-| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); saat/donanım ve ekip erişim testi bekliyor |
+| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); saat/donanım, D01–D11 ve T01–T07 görüşmesi, ekip erişim testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
@@ -97,6 +98,10 @@ Kararların ayrıntısı PHASES içindedir. İsimli plan yazılması, ekip gör�
 | D10 | Tek bölgelik ilk sürüm plan kapsamı | Ekip görüşmesi henüz yapılmadı |
 | D11 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
 
+## P0 ekip kararları
+
+[Toplantı gündemi ve tek karar tablosu](P0_MEETING.md) T01–T07'nin kaynağıdır. Mert görüşmeyi koordine eder, üç kişi karar verir. Tüm başlıklar GORUSULMEDI; atanmış sanat/ses veya netcode uzmanı, kabul edilmiş bütçe/gelir paylaşımı, ticari hedef ya da teslim tarihi yok. Mehmet'in bağlantı sahipliği, ağ uzmanlığı kanıtı değildir. Bu belge güncellemesi bir ekip onayı veya oyun testi sayılmaz.
+
 ## Faz kapanışı
 
 Tek kısa kayıtta şu bilgiler yeterlidir:
@@ -116,3 +121,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Kullanıcının verdiği isimlerle Mehmet=A, Utku=B, Mert=C başlangıç dağılımı yapıldı |
 | 2026-08-31 | Görüşülen sadeleştirme isimli görev planına işlendi: hafif P0, P1 koruma, P2 CI, P3 oynanış kontrolü ve tek bölgelik ilk sürüm; hiçbir oyun fazı tamamlanmadı |
 | 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hesap/saat bilgileri uydurulmadı, hiçbir oyun testi tamamlandı sayılmadı |
+| 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, kapasite/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |

@@ -1,6 +1,6 @@
 # Mehmet, Utku ve Mert — faz planı
 
-Plan sürümü: 1.2 — 31 Ağustos 2026. İsimli görevler, hafif P0, P2/P3 oynama testleri ve temel his katmanı.
+Plan sürümü: 1.3 — 31 Ağustos 2026. İsimli görevler, hafif P0 ve ekip kararları, P2/P3 oynama testleri ve temel his katmanı.
 
 Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md), bağlantılar [CONTRACTS.md](CONTRACTS.md), birleştirme düzeni [WORKFLOW.md](WORKFLOW.md) içindedir.
 
@@ -20,7 +20,7 @@ Bu bir başlangıç atamasıdır; deneyim seviyeleri ve haftalık saatler henüz
 
 Çekirdek oyun: küçük kasabada hazırlan → dalışa git → avla ve kaydet → oksijen bitmeden dön → gelir elde et → ekipman geliştir → tekrar dal.
 
-P0'da yaklaşık 30 dakikalık bir ekip görüşmesinde aşağıdaki çalışma kararları kaydedilir. Teknik ayrıntılar ihtiyaç duyulan fazdan önce netleşir; P0'da tüm geleceğin API tasarımı yapılmaz. Kaynak konsept yalnızca dalış ekipmanları dükkânını adlandırıyor; diğer hizmetlerin adları varsayımdır.
+P0'da aşağıdaki çalışma kararları ve [kısa toplantı gündemi](P0_MEETING.md) toplam 45–60 dakikalık görüşmede ele alınır. Görsel/ses üretimi, kapasite/ayrılma, ürün hedefi, bütçe, tasarım yetkisi ve insan netcode sorumluluğu oyun kodundan önce konuşulur; öneriler ekip kararı sayılmaz. Teknik ayrıntılar ihtiyaç duyulan fazdan önce netleşir; P0'da tüm geleceğin API tasarımı yapılmaz. Kaynak konsept yalnızca dalış ekipmanları dükkânını adlandırıyor; diğer hizmetlerin adları varsayımdır.
 
 | Kimlik | Başlangıç kararı | Sınır |
 |---|---|---|
@@ -29,7 +29,7 @@ P0'da yaklaşık 30 dakikalık bir ekip görüşmesinde aşağıdaki çalışma 
 | D03 | Bir ev sahibi ve en çok üç katılımcı; kritik sonuçları ev sahibi doğrular | Solo aynı mantığı yerelde kullanır; Relay zorunlu değildir |
 | D04 | Kamera canlı/olay, süre, görüş ve kadraj üzerinden puanlanan kayıt üretir | Gerçek video dosyası ve video paylaşımı yok |
 | D05 | Ortak para/ekipman havuzu; kişisel oksijen ve taşıma çantası | Satın alma/tahsis ev sahibinde doğrulanır |
-| D06 | Kampanya ev sahibinin bilgisayarında saklanır | Bulut kayıt ve hesaplar arası ilerleme aktarımı yok |
+| D06 | Kampanya ev sahibinin bilgisayarında saklanır | Kayıt sahibi host yokken aynı kampanya sürdürülemez; başka host ayrı kampanya açabilir. Bulut kayıt ve ilerleme aktarımı yok |
 | D07 | Sağlık/oksijen bitince dalış boyunca pasif kalınır; güvenli dönmeyen av/çekim kaybolur | Yaşayanlar devam eder; herkes pasifse dalış kapanır; kurtarma yok |
 | D08 | Yeni katılım kasabada; ev sahibi koparsa menüye dönüş ve son sağlam kayıt | Dalışa geç katılma, otomatik yeniden bağlanma ve ev sahibi devri yok |
 | D09 | Üç küçük hizmet: ekipman, av alımı, görüntü değerlendirme | Tek ortak işlem altyapısı; son iki ad kullanıcıdan verilmiş sayılmaz |
@@ -44,9 +44,11 @@ Amaç: kısa kurulum, çalışan örnek build ve üç kişinin değişiklik payl
 |---|---|---|
 | P0-A | Mehmet | Unity/URP projesini açar; tam editör/paket sürümünü sabitler; kamera, ışık ve basit nesneli sahneyi hazırlar; Windows build alır. Repo sahibi olarak Utku/Mert için gerekli erişimleri sağlar. |
 | P0-B | Utku | Unity .gitignore, görünür .meta ve metin serileştirme ayarlarını düzenler; oyuncu/dünya/kasaba klasör ve sahne sahipliğini belirler; Mehmet'in ilk Unity commit'ini gereksiz dosya/referans açısından kontrol eder. |
-| P0-C | Mert | Üç kişinin GitHub hesabı, haftalık saatleri ve temel donanımını kaydeder; D01–D11 görüşmesini ve erişim testini koordine eder; temiz klondan projeyi açıp kısa kurulum rehberini doğrular. |
+| P0-C | Mert | Üç kişinin GitHub hesabı, haftalık saatleri ve temel donanımını kaydeder; D01–D11 ve P0_MEETING içindeki T01–T07 görüşmesini ve erişim testini koordine eder; gerçek kararları kısa kayda işler; temiz klondan projeyi açıp kısa kurulum rehberini doğrular. |
 
 Birlikte: herkes kendi deneme branch'ine küçük bir değişiklik pushlar; başkasının birleşmiş değişikliğini alır. Mert'in görevi erişimi koordine etmektir; yönetici izni gerektiren işlemi Mehmet yapar.
+
+Toplantı hazırlığı da paylaşılır: Mehmet ekipman/HUD, Utku sualtı/canlı/VFX, Mert kasaba/UI için görsel ve ses ihtiyaçlarını getirir; herkes kapasitesini ve ağ deneyimini belirtir. Üretim, bütçe, tasarım ve netcode sorumluları toplantıda seçilir; kod sahipliği uzmanlık veya harcama yetkisi sayılmaz.
 
 Bitiş koşulları:
 - [ ] Üç kişi aynı sürümle ortak projeyi açıyor.
@@ -54,6 +56,7 @@ Bitiş koşulları:
 - [ ] Mehmet'in ürettiği örnek Windows build'i üç bilgisayarda çalışıyor; üç ayrı build üretmek şart değil.
 - [ ] .gitignore/.meta düzeni doğru; gerekli sürümler ve kısa kurulum adımları kayıtlı.
 - [ ] Kişiler/kapasiteler, D01–D11 başlangıç kararları ve P1 bağlantı tipleri kısa biçimde kaydedildi.
+- [ ] P0_MEETING içindeki T01–T07 için uygulanabilir çalışma kararları kaydedildi; ertelenen seçimlerin geçici sınırı, sorumlusu ve takip noktası belli. İnsan netcode sorumlusu/yedeği ve D06 sınırı açık.
 
 Birleştirmeyi koordine eden: Mehmet.
 Kapalı kapsam: gerçek co-op, balık AI, oksijen, ekonomi ve oyun özellikleri. Branch koruması P1'e, otomatik build P2'ye planlanır. Büyük ikili varlık henüz yoksa LFS kurulumu ilk böyle varlık eklenmeden önce yapılır.
@@ -74,6 +77,7 @@ Bitiş koşulları:
 - [ ] Oyuncular birbirini görüyor, hareket ediyor ve aynı dalış alanına geçiyor.
 - [ ] Dalışta yeni katılım reddediliyor; katılımcı/ev sahibi ayrılması kontrollü sonuçlanıyor.
 - [ ] Özellik PR'ları bir başka kişinin incelemesinden geçiyor; basit branch koruması doğrulandı veya erişim engeli ve uygulanacak manuel kural açıkça kaydedildi.
+- [ ] T06'da seçilen kişi gerçek projede host yetkisi/sahiplik/kopma akışını ve loglarla hata izlemeyi gösterdi; yedeği kontrolü tekrarladı. Sonuç aynı faz kaydında; P0'da uzmanlık varsayılmadı.
 
 Birleştirmeyi koordine eden: Utku.
 Kapalı kapsam: oksijen tüketimi, avlanma, satış, kamera puanı ve ayrıntılı harita.

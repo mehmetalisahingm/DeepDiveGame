@@ -6,6 +6,8 @@ Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'd
 
 ## Sistem sahipliği
 
+Bu tablo uygulama sahipliğidir; görsel/ses üretim yöntemi, tasarımda son söz veya insan netcode inceleyicisini kendiliğinden belirlemez. Bunlar [P0 toplantısında](P0_MEETING.md) seçilir. Ağ inceleyicisi atanması, alan sahiplerinin kendi co-op uygulama ve test sorumluluğunu devretmez.
+
 | Alan | Sahip | Sınır |
 |---|---|---|
 | Oyuncu kontrolü ve ekipman kullanımı | Mehmet | Giriş, yürüme/yüzme, zıpkın/kamera kullanım isteği, oksijen/sağlık, kuşanılan ekipmanın etkisi |
@@ -94,6 +96,7 @@ Kalite eşikleri ve fiyat katsayıları Utku/Mert'in ortak veri tablosunda tutul
 
 ### Dalış sonu ve kalıcı kayıt
 
+- D06: kampanya kayıt sahibi host'un bilgisayarındadır. O host yokken diğerleri aynı kampanyayı sürdüremez; başka host'un açtığı ayrı kampanya öncekinin ilerlemesini otomatik almaz. Manuel kayıt aktarımı, bulut senkronu ve host devri v1 kapsamında değildir.
 - Güvenli dönüşte uygun geçici av/çekimler kampanyanın bekleyen satış/değerlendirme verisine aktarılır ve kontrol noktası yazılır.
 - Satış/satın alma/görev ödülü aynı kalıcı işlem güncellemesinde işlenir; yeniden açılışta yinelenen para üretmez.
 - Kayıt geçici dosyaya yazılır, doğrulanır ve güvenli şekilde önceki kaydın yerini alır; son sağlam yedek korunur.

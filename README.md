@@ -10,7 +10,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 - Aktif çalışma **P0 — Ortak temel ve kararlar (ACIK)**. Görev kayıtları açıldı; Unity/oyun uygulaması ve çalışan build henüz yok.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
-- Plan 1.2: sade P0; P2'de erken hareket/av testi, P3'te kamera/tam döngü testi; test öncesi temel his katmanı ve ilk sürümde tek dalış bölgesi.
+- Plan 1.3: sade P0 ve ekip kararları; P2'de erken hareket/av testi, P3'te kamera/tam döngü testi; test öncesi temel his katmanı ve ilk sürümde tek dalış bölgesi.
 
 ## Şimdi kim ne yapacak? — P0
 
@@ -21,6 +21,10 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 | **Mert (C)** | Ekip hesap/saat/donanım bilgileri, kısa karar görüşmesi, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
 
 **İlk iş:** Üçünüz de [Mert'in ekip kaydına](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) GitHub hesabınızı, haftalık yaklaşık saatinizi ve temel donanımınızı yazın. Utku/Mert'in kullanıcı adları henüz bilinmiyor; hesap atamaları bu bilgi gelince yapılacak.
+
+**Oyun kodundan önce:** [P0 toplantı gündemini](docs/plan/P0_MEETING.md) birlikte görüşün: görsel/ses üretimi, zaman ve ayrılma ihtimali, ürün hedefi, bütçe, tasarımda karar yöntemi, insan netcode sorumlusu/yedeği. Mert kaydeder; kararları üçünüz verirsiniz. Öneriler henüz onaylanmadı; süre, bütçe ve uzmanlık varsayılmadı. Proje/sürüm/erişim hazırlığı bu sırada sürebilir.
+
+**D06 sınırı:** Kayıt sahibi host yoksa aynı kampanyaya devam edilemez. Başka host ayrı kampanya açabilir; ilerleme otomatik taşınmaz. V1'e bulut kayıt veya host devri eklenmedi.
 
 Herkes aynı sürümle projeyi açacak, kendi deneme branch'ine pushlayacak ve ortak build'i çalıştıracak. PR, engel ve test sonucunu kendi görev kaydınıza yazın; bitmeyen işi tamamlandı göstermeyin. P0 bitmeden P1'e geçilmez.
 
