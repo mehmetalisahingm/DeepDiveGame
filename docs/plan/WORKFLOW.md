@@ -58,7 +58,7 @@ Koruma kurulana kadar da küçük PR ve bir başka kişinin incelemesi kuralı g
 4. Faz PR'ı main'e birleşir; birleşmiş build açılır ve ilgili davranış kontrol edilir. Çakışma davranışı değiştirdiyse ilgili test yeniden yapılır.
 5. STATUS güncellenir; ancak sonra sıradaki tek faz açılır.
 
-P3'te teknik testlere ek olarak oynanış değerlendirmesi gerekir. Faz açıkken bir kişi gelecekteki faza ait kod, sahne veya içerik ekleyemez. Başkasının onayı veya testi uydurulamaz.
+P2'de temel his katmanıyla hareket/av/oksijen-çanta, P3'te kamera/tam döngü/tekrar dalma değerlendirmesi gerekir. Faz açıkken bir kişi gelecekteki faza ait kod, sahne veya içerik ekleyemez. Başkasının onayı veya testi uydurulamaz.
 
 ## İş yükü ve değişiklik
 

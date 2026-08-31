@@ -1,12 +1,12 @@
 # Güncel durum ve görev takibi
 
-Plan 1.1 — 31 Ağustos 2026. İsimli dağılım, sade P0 ve tek bölgelik ilk sürüm.
+Plan 1.2 — 31 Ağustos 2026. Kullanıcının onayladığı isimli dağılım, sade P0, P2/P3 oynama testleri ve tek bölgelik ilk sürüm.
 
 ## Mevcut sınır
 
-- Sıradaki faz: P0. Durum: PLAN_HAZIR.
+- Aktif faz: P0. Durum: ACIK. Kullanıcının başlama isteğiyle GitHub görev kayıtları açıldı; oyun uygulaması henüz yapılmadı.
 - Unity/oyun uygulaması başlamadı; çalışan oyun/build yok.
-- P1–P6 KILITLI. İsim atamak veya belge değiştirmek faz açmaz.
+- P1–P6 KILITLI. P0'ın açılması sonraki fazlara geçiş veya herhangi bir görevin tamamlanması değildir.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
 - Ekip erişimleri henüz doğrulanmadı. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi, faz testi veya ekip kapanış kaydı yok.
@@ -39,7 +39,7 @@ Plan 1.1 — 31 Ağustos 2026. İsimli dağılım, sade P0 ve tek bölgelik ilk 
 
 | Faz | Durum | Birleştirme koordinatörü | Kapanış kaydı / main commit |
 |---|---|---|---|
-| P0 | PLAN_HAZIR | Mehmet | Yok |
+| P0 | ACIK | Mehmet | GitHub görevleri açıldı; kapanış yok |
 | P1 | KILITLI | Utku | Yok |
 | P2 | KILITLI | Mert | Yok |
 | P3 | KILITLI | Mehmet | Yok |
@@ -53,9 +53,9 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 
 | Görev | Sahip | Durum | Kanıt / kalan iş |
 |---|---|---|---|
-| P0-A | Mehmet | BEKLIYOR | Yok |
-| P0-B | Utku | BEKLIYOR | Yok |
-| P0-C | Mert | BEKLIYOR | İsimler atandı; hesap/saat/donanım ve ekip erişim testi bekliyor |
+| P0-A | Mehmet | BEKLIYOR | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1); uygulama/build bekliyor |
+| P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap ve dosya düzeni bekliyor |
+| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); saat/donanım ve ekip erişim testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
@@ -104,7 +104,7 @@ Tek kısa kayıtta şu bilgiler yeterlidir:
 - O fazın kabul testleri hangi build/commit'te geçti; yapılmayan test var mı?
 - Mehmet, Utku ve Mert'in gerçek tamam mesajları nerede?
 - main'e birleşmiş build kontrol edildi mi?
-- P3 ise oynanış değerlendirmesinde devam mı, düzeltme mi kararı verildi?
+- P2/P3 ise temel his katmanıyla oynanış testinde devam mı, düzeltme mi kararı verildi?
 
 Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz kendiliğinden açılmaz.
 
@@ -115,3 +115,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Plan 1.0 ve public repo başlangıcı oluşturuldu |
 | 2026-08-31 | Kullanıcının verdiği isimlerle Mehmet=A, Utku=B, Mert=C başlangıç dağılımı yapıldı |
 | 2026-08-31 | Görüşülen sadeleştirme isimli görev planına işlendi: hafif P0, P1 koruma, P2 CI, P3 oynanış kontrolü ve tek bölgelik ilk sürüm; hiçbir oyun fazı tamamlanmadı |
+| 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hesap/saat bilgileri uydurulmadı, hiçbir oyun testi tamamlandı sayılmadı |

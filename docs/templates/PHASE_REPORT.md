@@ -22,7 +22,8 @@ PHASES içindeki zorunlu maddeler kısa satırlar hâlinde kaydedilir. Sonuçlar
 | Birleşmiş build kontrolü | CALISTIRILMADI |
 
 - Açık sorun / varsa manuel araç kontrolü:
-- P3 ise oynanış gözlemleri ve devam/düzeltme kararı:
+- P2 ise temel his katmanı ve hareket/av/oksijen-çanta gözlemleri; devam/düzeltme kararı:
+- P3 ise kamera/tam döngü/tekrar dalma gözlemleri; devam/düzeltme kararı:
 - Mehmet'in gerçek tamam kaydı: YOK
 - Utku'nun gerçek tamam kaydı: YOK
 - Mert'in gerçek tamam kaydı: YOK

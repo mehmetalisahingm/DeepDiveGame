@@ -1,6 +1,6 @@
 # Mehmet, Utku ve Mert — faz planı
 
-Plan sürümü: 1.1 — 31 Ağustos 2026.
+Plan sürümü: 1.2 — 31 Ağustos 2026. İsimli görevler, hafif P0, P2/P3 oynama testleri ve temel his katmanı.
 
 Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md), bağlantılar [CONTRACTS.md](CONTRACTS.md), birleştirme düzeni [WORKFLOW.md](WORKFLOW.md) içindedir.
 
@@ -82,9 +82,9 @@ Kapalı kapsam: oksijen tüketimi, avlanma, satış, kamera puanı ve ayrıntıl
 
 | Görev | Sorumlu | Yapacağı iş |
 |---|---|---|
-| P2-A | Mehmet | Oksijen/sağlık, zıpkın kullanımı, etkileşim isteği, dalgıç göstergeleri ve oksijen bitince pasif kalmayı yapar. |
-| P2-B | Utku | Tek balık türünün yüzme/kaçma/vurulma davranışını ve tekil av nesnesini yapar. Mevcut build komutunu CI'a bağlar; hesap/lisans gereken adımlarda Mehmet destek olur. |
-| P2-C | Mert | Oyuncu çantası, ağırlık sınırı, av ekleme doğrulaması, güvenli dönüşte avı koruma, kayıpta temizleme ve dalış özetini yapar. |
+| P2-A | Mehmet | Oksijen/sağlık, zıpkın, etkileşim, dalgıç göstergeleri ve pasif kalmayı yapar. Yüzme/nişan hissini ayarlar; temel atış/vuruş geri bildirimi ve düşük oksijende nefes/uyarı sesi ekler. |
+| P2-B | Utku | Tek balığın yüzme/kaçma/vurulma davranışını, basit vurulma tepkisini ve tekil av nesnesini yapar; temel sualtı sisi/ışığını ekler. Oynanabilir av döngüsünden sonra mevcut build komutunu CI'a bağlar; hesap/lisansta Mehmet destek olur. |
+| P2-C | Mert | Çanta, ağırlık sınırı, av ekleme, güvenli dönüş, kayıpta temizleme ve dalış özetini yapar. Av alındı/çanta dolu/geri dönüldü durumlarına anlaşılır temel UI geri bildirimi ekler; kısa oynama testini koordine eder. |
 
 Bağlantı: Mehmet zıpkın/toplama isteği gönderir → Utku vurulma ve avı doğrular → Mert çantaya ekler. Çanta doluyken avı yok etmezsiniz. Bu sözleşme P2 işlerine başlamadan kesinleşir.
 
@@ -93,7 +93,17 @@ Bitiş koşulları:
 - [ ] Aynı avı iki kişi aynı anda alınca yalnızca bir çantaya ekleniyor.
 - [ ] Dolu çanta avı kaybettirmiyor; oksijen/pasif oyuncu ve herkesin başarısızlığı doğru işliyor.
 - [ ] Art arda iki dalışta eski av, oyuncu veya sayaç kalmıyor.
+- [ ] Yüzme ayarı, vuruş tepkisi, oksijen nefes/uyarısı, çanta bildirimi ve basit sualtı sisi/ışığı test öncesinde mevcut; geri bildirimsiz boş sahne üzerinden tasarım kararı verilmiyor.
 - [ ] Otomatik build gerçek commit üzerinde denendi. Lisans/erişim engeli varsa nedeni ve sorumlusu kaydedildi; ekipçe doğrulanmış manuel build komutu kullanılıyor. Yapılmayan CI başarılı sayılmıyor.
+
+P3 öncesi kısa oynama testi (10–15 dakika):
+- Yüzmek, nişan almak ve avlanmak anlaşılır ve keyifli mi?
+- Oksijen devam etmekle geri dönmek arasında anlamlı bir karar yaratıyor mu?
+- Çanta kapasitesi hangi avı alma/bırakma kararını değiştiriyor mu?
+- Mehmet kontrol hissini, Utku av/çevre tepkisini, Mert kapasite/oksijen kararlarını kaydeder. En az iki oyuncu birlikte dener; üçünüz sonuçları tek kısa kayıtta değerlendirirsiniz.
+- Kontrol veya geri bildirim eksikliği varsa P3'e kamera/ekonomi eklemeden önce P2'de kısa düzeltme ve yeniden deneme yapılır. En çok iki kısa turdan sonra hâlâ sorun varsa tasarım birlikte yeniden değerlendirilir.
+
+His katmanı sınırlıdır: basit animasyon/tepki, ses ve ışık ayarı yeterlidir; nihai sanat, kapsamlı animasyon sistemi, yeni tür veya ücretli varlık şart değildir. Görsel beğeni ile kontrol/karar sorunları ayrı not edilir. CI, ilk balığın ve bu testin önüne alınmaz.
 
 Birleştirmeyi koordine eden: Mert.
 Kapalı kapsam: satış, para, geliştirme, kamera ödülü ve ikinci canlı türü. CI için yeni bir framework yazılmaz.
@@ -102,9 +112,9 @@ Kapalı kapsam: satış, para, geliştirme, kamera ödülü ve ikinci canlı tü
 
 | Görev | Sorumlu | Yapacağı iş |
 |---|---|---|
-| P3-A | Mehmet | Kamera açma/kayıt kontrolü ve kadraj göstergesini yapar; kuşanılan tüpün oksijen etkisini uygular. Kayıt yükledikten sonra ekipman etkisinin doğru dönmesini test eder. |
-| P3-B | Utku | Kameranın canlı/olay tanımasını, görüş/mesafe/süre kontrolünü, çekim kalitesini ve bir basit özel olayı yapar. Tekrar çekim/ödül çoğaltma testlerine destek olur. |
-| P3-C | Mert | Av satışı, çekimden gelir, ortak para, tek dükkân altyapısı, tek tüp yükseltmesi ve kampanya kaydetme/yüklemeyi yapar. |
+| P3-A | Mehmet | Kamera açma/kayıt kontrolü, kadraj ve kayıt başladı/bitti geri bildirimini yapar; tüpün oksijen etkisini uygular. Kayıt yükledikten sonra ekipman etkisinin doğru dönmesini test eder. |
+| P3-B | Utku | Canlı/olay tanıma, görüş/mesafe/süre kontrolü, çekim kalitesi ve basit özel olayı yapar; geçerli hedef bilgisini kamera UI'ına verir ve olayın temel görsel/ses işaretini ekler. Tekrar ödül testlerine destek olur. |
+| P3-C | Mert | Av satışı, görüntü geliri, ortak para, dükkân, tüp yükseltmesi ve kaydetme/yüklemeyi yapar. Satış/alışveriş/ödül sonuçlarını anlaşılır basit geri bildirimle gösterir. |
 
 Bağlantı: Mehmet çekim isteği üretir → Utku geçerli kayıt/kaliteyi verir → Mert güvenli dönmüş kayda para öder. Mert alınmış ekipmanı bildirir → Mehmet dalgıca etkisini uygular. Mert'in kayıt/ekonomi test yükünü Mehmet ve Utku somut test görevleriyle paylaşır.
 
@@ -115,11 +125,12 @@ Teknik bitiş:
 - [ ] Yeni tüp doğru oyuncuya doğru kapasiteyi veriyor; tekrar bildirim bonusu katlamıyor.
 - [ ] Yeniden açılışta son tamamlanmış kayıt geri geliyor; av/para/ekipman çoğalmıyor.
 - [ ] Solo ve dört oyuncuda tam döngü doğrulandı.
+- [ ] P2 his katmanı korunuyor; kayıt, satış ve yükseltme sonuçları test oyuncusuna açıkça bildiriliyor. Nihai cila bu fazın şartı değil.
 
 P4 öncesi oyun testi:
 - Üçünüz 20–30 dakikalık ortak deneme yaparsınız; mümkünse ekip dışından birkaç kişi de oynar.
 - Mehmet yüzme/nişan/kamera kullanımındaki sürtünmeyi; Utku keşif/av davranışlarını; Mert gelir/yükseltme temposunu gözlemler.
-- Şunları kısa notlarla değerlendirirsiniz: tekrar dalma isteği, oksijenle geri dönme kararı, kamera-av tercihi ve birlikte oynamanın faydası.
+- P2 sorularını kısaca yeniden kontrol edip asıl şu sorulara bakarsınız: kamera avlanmadan farklı ve değerli bir seçenek mi; kazanç/yükseltme tekrar dalma isteği yaratıyor mu; birlikte oynamanın faydası hissediliyor mu?
 - Teknik testin geçmesi tek başına P4'ü açmaz. Üçünüz çekirdek döngünün ilerlemeye değer olduğuna karar verirsiniz.
 - Sonuç zayıfsa P3'te en çok iki kısa düzeltme turu planlanır; hâlâ çözülmüyorsa kapsam/tasarım birlikte yeniden değerlendirilir. Sonsuz rötuş veya yeni bölgeyle sorunu örtme yok.
 
@@ -191,7 +202,7 @@ Kapalı kapsam: mağaza yayını, ücretli servis satın alma, public oyun yayı
 
 Üç kişinin teslimi → faz dalında birleştirme → ortak test → tek kısa kapanış kaydı → ana dala PR → birleşmiş build kontrolü → sıradaki faz.
 
-Ayrı imza matrisleri yoktur; test sonucu, commit/build ve Mehmet/Utku/Mert'in gerçek tamam kaydı yeterlidir. Başkasının tamamını yazamazsınız. Test başarısızsa veya bir kişinin işi eksikse sonraki faz kapalıdır.
+Ayrı imza matrisleri yoktur; test sonucu, commit/build ve Mehmet/Utku/Mert'in gerçek tamam kaydı yeterlidir. P2'de erken kontrol/av/oksijen-çanta testi, P3'te kamera/tam döngü testi de yapılır. Başkasının tamamını yazamazsınız. Test başarısızsa veya bir kişinin işi eksikse sonraki faz kapalıdır.
 
 ## Teknik referanslar
 

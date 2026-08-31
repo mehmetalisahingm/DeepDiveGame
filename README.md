@@ -7,10 +7,37 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 ## Şu anki durum
 
 - Bu depo şu anda planlama belgelerini içerir; çalışan oyun henüz oluşturulmadı.
-- Sıradaki çalışma **P0 — Ortak temel ve kararlar**. Unity/oyun uygulaması henüz başlamadı; depo paylaşımı için başlangıç kurulumu yapıldı.
+- Aktif çalışma **P0 — Ortak temel ve kararlar (ACIK)**. Görev kayıtları açıldı; Unity/oyun uygulaması ve çalışan build henüz yok.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
-- Plan 1.1: sade P0, P3 sonunda oynanış değerlendirmesi ve ilk sürümde tek dalış bölgesi.
+- Plan 1.2: sade P0; P2'de erken hareket/av testi, P3'te kamera/tam döngü testi; test öncesi temel his katmanı ve ilk sürümde tek dalış bölgesi.
+
+## Şimdi kim ne yapacak? — P0
+
+| Kişi | Bu aşamadaki görevi | GitHub görev kaydı |
+|---|---|---|
+| **Mehmet (A)** | Unity/URP projesi, sürüm kilidi, basit sahne, ilk Windows build ve repo erişimleri | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
+| **Utku (B)** | .gitignore/.meta, klasör ve sahne sahipliği, ilk Unity dosyalarının kontrolü | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
+| **Mert (C)** | Ekip hesap/saat/donanım bilgileri, kısa karar görüşmesi, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
+
+**İlk iş:** Üçünüz de [Mert'in ekip kaydına](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) GitHub hesabınızı, haftalık yaklaşık saatinizi ve temel donanımınızı yazın. Utku/Mert'in kullanıcı adları henüz bilinmiyor; hesap atamaları bu bilgi gelince yapılacak.
+
+Herkes aynı sürümle projeyi açacak, kendi deneme branch'ine pushlayacak ve ortak build'i çalıştıracak. PR, engel ve test sonucunu kendi görev kaydınıza yazın; bitmeyen işi tamamlandı göstermeyin. P0 bitmeden P1'e geçilmez.
+
+## Sonraki fazlarda kim ne yapacak?
+
+Bu tablo özet; kesin teslimler ve kabul koşulları [faz planında](docs/plan/PHASES.md). P1–P6 şu anda kapalıdır.
+
+| Faz | Mehmet | Utku | Mert |
+|---|---|---|---|
+| P1 | Oda/bağlantı, oyuncu, yürüme/yüzme senkronizasyonu | Tek sualtı test alanı, giriş/çıkış, çarpışmalar | Oda/hazır ekranı, dalış geçişi, temel branch koruması |
+| P2 | Oksijen, zıpkın, yüzme/nişan ayarı, vuruş ve nefes geri bildirimi | Bir balık, vurulma tepkisi, temel sis/ışık; av oynanabilir olduktan sonra CI | Çanta/kapasite, av toplama/dönüş, UI geri bildirimi, kısa oynama testi |
+| P3 | Kamera/kayıt geri bildirimi, tüp etkisi, kayıt sonrası ekipman testi | Çekim hedefi/kalitesi, özel olay ve temel işaretleri, tekrar ödül testi | Satış, görüntü geliri, para, yükseltme, kayıt ve işlem geri bildirimi |
+| P4 | Palet/çanta yükseltmesi, avcı hasarı, ekipman iyileştirmeleri | Aynı bölgeyi ve toplam beş canlı türünü tamamlamak | Üç hizmet noktası, üç görev, jurnal/ilerleme |
+| P5 | Ağ/oyuncu/ekipman hataları ve performans | AI/çarpışma/grafik hataları ve performans | Kayıt/ekonomi/UI hataları ve denge |
+| P6 | Temiz teslim build'i ve sürüm kaydı | Bağımsız paket testi, oyuncu rehberi ve atıflar | Kayıt/çevrimiçi kabulü ve bilinen sorunlar |
+
+P2'de kontrol/av ve oksijen-çanta kararlarını, P3'te kamera/gelir/tekrar dalma isteğini değerlendirirsiniz. Basit ses, vuruş tepkisi, sis/ışık ve UI işaretleri bu testlerden **önce** yapılır; nihai cila P4/P5'te tamamlanır.
 
 ## Çalışmaya başlama sırası
 

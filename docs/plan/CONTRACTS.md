@@ -9,7 +9,7 @@ Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'd
 | Alan | Sahip | Sınır |
 |---|---|---|
 | Oyuncu kontrolü ve ekipman kullanımı | Mehmet | Giriş, yürüme/yüzme, zıpkın/kamera kullanım isteği, oksijen/sağlık, kuşanılan ekipmanın etkisi |
-| Mehmetğ bağlantısı | Mehmet | Bağlan/ayrıl, oyuncu oluşumu, iletişim/transport, ağ sahne yükleme mekanizması |
+| Ağ bağlantısı | Mehmet | Bağlan/ayrıl, oyuncu oluşumu, iletişim/transport, ağ sahne yükleme mekanizması |
 | Oturum aşamaları | Mert | Hazırlık/dalış/dönüş/sonuç durumu, hazır oyuncular ve geçiş koşulları; gerçek yüklemeyi Mehmet'in ağ servisi yürütür |
 | Canlılar ve dünya | Utku | Tür tanımları, oluşma, AI, vurulma/ölüm, av nesnesi ve çevre içerikleri |
 | Çekim değerlendirme | Utku | Hedef görünürlüğü, mesafe, kayıt süresi, kalite ve dalış içi tekrar kuralı |
@@ -25,16 +25,16 @@ Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'd
 
 - Alan modülleri ortak sözleşmelere bağımlıdır; birbirlerinin iç sınıflarını veya sahne nesnelerini arayarak iş yapmaz.
 - `Composition`, gerçek uygulamaları başlangıçta birbirine bağlar. Küçük ve açık bir bileşim noktası yeterlidir; özel bir framework yazılmaz.
-- Static tür/eşya tanımları Unity varlıklarıyla tutulabilir. Mehmetğda ve kayıtta sabit tanım kimliği taşınır; ScriptableObject nesnesi kalıcı oyuncu verisi gibi kullanılmaz.
+- Static tür/eşya tanımları Unity varlıklarıyla tutulabilir. Ağda ve kayıtta sabit tanım kimliği taşınır; ScriptableObject nesnesi kalıcı oyuncu verisi gibi kullanılmaz.
 - Çalışan durum, test sağlayıcısı ve kalıcı kayıt birbirinden ayrılır. Test sağlayıcıları teslim build'inin gerçek oyun yolunda aktif bırakılamaz.
-- P1 için gereken modül sınırları P0'da belirlenir; sonraki bağlantılar ilgili fazdan önce netleşir. Utkuütün modüllerin içi P0'da yazılmaz; ortak isimler tek taraflı değiştirilmez.
+- P1 için gereken modül sınırları P0'da belirlenir; sonraki bağlantılar ilgili fazdan önce netleşir. Bütün modüllerin içi P0'da yazılmaz; ortak isimler tek taraflı değiştirilmez.
 
 ## Ortak veri sözlüğü
 
 | Veri | Asgari alanlar ve kural | Üretici → tüketici | İlk gerçek kullanım |
 |---|---|---|---|
 | PlayerId | Oturum oyuncu kimliği; ağ bağlantı kimliğiyle eşleştirme. Kalıcı kampanya sahibiyle karıştırılmaz | Mehmet → tümü | P1 |
-| SessionState | Mehmetşama, sessionId, isteğe bağlı diveId, regionId ve revision | Mert → Mehmet/Utku/UI | P1 |
+| SessionState | Aşama, sessionId, isteğe bağlı diveId, regionId ve revision | Mert → Mehmet/Utku/UI | P1 |
 | DiveId | Her dalış için tekil kimlik; sonraki dalışta değişir | Mert → tümü | P2 |
 | SpeciesDefinition | Sabit speciesId, sınıf, davranış parametreleri, ağırlık aralığı | Utku → Mehmet/Mert | P2 |
 | ItemDefinition | Sabit itemId, kategori, kapasite/fiyatla ilgili temel tanımlar | Mert; Utku tür eşlemesini inceler → tümü | P2 |
@@ -52,7 +52,7 @@ Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'd
 
 - Mesafe metre, süre saniye, ağırlık gram olarak tanımlanır. UI isterse kilogram gösterir.
 - Para tam sayı oyun kredisi olarak tutulur; ekonomi hesabında kayan noktalı para kullanılmaz.
-- Mehmetğ zamanı için kritik süreler ev sahibinin zamanından doğrulanır; istemcinin gönderdiği kayıt süresi doğrudan kabul edilmez.
+- Ağ zamanı için kritik süreler ev sahibinin zamanından doğrulanır; istemcinin gönderdiği kayıt süresi doğrudan kabul edilmez.
 - Statik tanım kimlikleri yeniden adlandırılınca eski kaydın davranışı planlanır; görüntülenen isim kimlik yerine kullanılmaz.
 - Av/eşya/çekim örnekleri tekil kimlik taşır. Oturum içi ağ nesnesi kimliği tek başına kalıcı eşya kimliği değildir.
 - Her değiştirici istek requestId taşır; ev sahibi aynı isteği ikinci kez yeni işlem olarak uygulamaz.
@@ -105,7 +105,7 @@ Kalite eşikleri ve fiyat katsayıları Utku/Mert'in ortak veri tablosunda tutul
 
 En az şu nedenler ayrıştırılmalıdır: `WrongPhase`, `InvalidTarget`, `OutOfRange`, `NotVisible`, `InventoryFull`, `AlreadyClaimed`, `AlreadyProcessed`, `InsufficientFunds`, `PlayerInactive`, `SaveFailed`, `SessionClosed`.
 
-Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişikliği yapmadan anlaşılır UI geri bildirimi üretmelidir. Mehmetğ tekrarı gibi AlreadyProcessed sonucu varsa daha önceki sonuç döndürülebilir.
+Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişikliği yapmadan anlaşılır UI geri bildirimi üretmelidir. Ağ tekrarı gibi AlreadyProcessed sonucu varsa daha önceki sonuç döndürülebilir.
 
 ## Sözleşme değişikliği
 

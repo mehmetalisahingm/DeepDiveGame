@@ -17,4 +17,4 @@
 - [ ] En az bir başka kişinin incelemesi var.
 - [ ] STATUS ve ilgili plan/sözleşme kayıtları tutarlı.
 
-Faz kapanışında ekle: kısa kapanış kaydı, Mehmet/Utku/Mert'in gerçek tamam mesajları ve birleşmiş build'i kontrol edecek kişi. P3'te oynanış değerlendirmesi de gerekir.
+Faz kapanışında ekle: kısa kapanış kaydı, Mehmet/Utku/Mert'in gerçek tamam mesajları ve birleşmiş build'i kontrol edecek kişi. P2/P3'te temel his katmanı ve faza ait oynanış değerlendirmesi de gerekir.

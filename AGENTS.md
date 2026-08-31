@@ -16,7 +16,8 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 - Sadece açık fazın verilen görevini uygula. Kullanıcının plan düzenleme isteği, oyun geliştirmesine veya sonraki faza geçmeye izin vermez.
 - P0 hafiftir: ortak sürüm, proje, dosya düzeni, ekip/erişim ve örnek build. Branch koruması P1'de, CI P2'de ele alınır.
 - Gelecek faz sözleşmeleri taslak olabilir; ihtiyaç duyulan fazdan önce kesinleşir. Bütün geleceğin API'sini P0'da uygulama.
-- İlk oynanabilir sürüm tek dalış bölgesidir. P3 oynanış değerlendirmesi yapılmadan P4'e geçme; ikinci bölge ekleme.
+- İlk oynanabilir sürüm tek dalış bölgesidir. P2'de kontrol/av/oksijen-çanta testi, P3'te kamera ve tam döngü testi yapılmadan sonraki faza geçme; ikinci bölge ekleme.
+- P2/P3 testinden önce plandaki temel hareket, vuruş, nefes, UI ve sualtı ışık/sis geri bildirimini sağla. Nihai cila veya kapsamlı animasyon sistemi ekleme; his katmanını P4'e erteleme.
 - Erken bitirirsen mevcut fazın testini/incelemesini veya kaydedilmiş destek görevini al.
 - Kullanıcının açık yeni talimatı planı değiştirebilir; ilgili belgeleri tutarlı güncelle. Sessiz kapsam büyütme yapma.
 
@@ -33,7 +34,7 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 
 Üç kişinin işleri birleşir, faz testleri geçer ve tek kısa kapanış kaydında commit/build, sonuçlar ve üçünün gerçek tamamı bulunur. Ayrı imza matrisi gerekmez. Faz main'e birleştirilip ilgili davranış doğrulandıktan sonra STATUS güncellenir ve sonraki faz açılır.
 
-P3'te çekirdek döngünün oynanış değerlendirmesi de şarttır. Bir kişinin işi eksik veya test başarısızsa fazı açma. Gerekli gerçek ekip onayını otomatik üretme; kanıtlar zaten yeterliyse gereksiz kullanıcı teyidi isteme.
+P2 ve P3'te kendi kapsamlarının oynanış değerlendirmesi de şarttır. Bir kişinin işi eksik veya test başarısızsa fazı açma. Gerekli gerçek ekip onayını otomatik üretme; kanıtlar zaten yeterliyse gereksiz kullanıcı teyidi isteme.
 
 ## Yetki
 
