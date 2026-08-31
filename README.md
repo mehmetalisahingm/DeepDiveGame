@@ -16,6 +16,8 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 
 **Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. Depo kökünü Unity Hub'a ekle; `Assets/P0/Scenes/P0Example.unity` sahnesini aç. [Kısa kurulum ve tek komutla Windows build](docs/SETUP.md). Build alındı ve Direct3D 11 başlangıcı logda doğrulandı; görsel kontrol ile diğer iki bilgisayarın testi henüz tamamlanmadı.
 
+**İnceleme ve indirme:** [Mehmet'in P0-A PR'ı](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4) · [Ekip için yayınlanmamış Windows test paketi](https://github.com/mehmetalisahingm/DeepDiveGame/releases/tag/untagged-7da6b5907df23077c77e). Paket için write davetini kabul edip kendi hesabınızla giriş yapın. Kaynakları Git üzerinden, yalnızca çalıştırılacak build'i ZIP üzerinden paylaşın.
+
 ## Şimdi kim ne yapacak? — P0
 
 | Kişi | Bu aşamadaki görevi | GitHub görev kaydı |

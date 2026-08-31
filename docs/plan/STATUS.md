@@ -30,8 +30,8 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 | Yerel kod araçları | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diğer bilgisayarlar doğrulanmadı |
 | Git ve varlık düzeni | İlk .gitignore, Force Text ve Visible Meta Files ayarları Mehmet'in P0-A önkoşulu olarak önerildi; Utku incelemesi bekleniyor. Klasör/sahne sahipliği ve büyük varlıktan önce LFS P0-B'de |
 | Repo ana dalı | main; ilk plan paylaşıldı |
-| Ekip erişim testi | Mehmet iki hesaba write daveti gönderdi; davet kabulü bekleniyor. Mert koordine eder; üç kişinin kendi branch'ine push/pull testi henüz yapılmadı |
-| Örnek build | Mehmet üretti: `Builds/P0-Windows/DeepDiveGame-P0.exe`. [Kurulum/build rehberi](../SETUP.md). Görsel kontrol tamamlanmadı; Utku ve Mert aynı build'i kendi bilgisayarlarında çalıştıracak |
+| Ekip erişim testi | Mehmet kendi P0 branch'ini pushladı; başkasının birleşmiş değişikliğini alma açık. Utku/Mert write davetleri henüz kabul edilmedi; gerçek erişim testleri bekliyor. Mert koordine eder |
+| Örnek build | `P0-A-9596244`, kaynak `9596244`; [yayınlanmamış Windows ZIP](https://github.com/mehmetalisahingm/DeepDiveGame/releases/tag/untagged-7da6b5907df23077c77e), [kurulum/build rehberi](../SETUP.md). İki yerel derleme başarılı; görsel kontrol ve Utku/Mert'in aynı build'i çalıştırması bekliyor |
 | Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
 | Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
 | Performans ortamı | P4 sonunda ölçümden önce sabitlenecek; öneri 1080p/60 FPS |
@@ -55,7 +55,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 
 | Görev | Sahip | Durum | Kanıt / kalan iş |
 |---|---|---|---|
-| P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1): proje, sürüm, sahne, Windows build ve Mert'e ihtiyaç listesi hazır. Utku incelemesi, görsel/ekip testleri, başkasının birleşmiş değişikliğini alma ve gerçek ortak kararlar bekliyor |
+| P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4): proje, sürüm, sahne, Windows build, branch push ve Mert'e ihtiyaç listesi hazır. Utku incelemesi, görsel/ekip testleri, başkasının birleşmiş değişikliğini alma ve gerçek ortak kararlar bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap biliniyor, davet kabulü ve dosya düzeni bekliyor |
 | P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); görsel/ses kaynak planı, saat/donanım, karar kaydı ve erişim testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |

@@ -32,6 +32,8 @@ Unity farklı klasördeyse `-UnityEditor 'D:\...\Editor\Unity.exe'` ekleyin. Kom
 
 Çıktı: `Builds/P0-Windows/DeepDiveGame-P0.exe`. Başka bilgisayara **P0-Windows klasörünün tamamını** gönderin; yalnızca EXE yeterli değildir. Açıldığında aynı küp/zemin görünmeli, pembe materyal veya hata olmamalı. Pencereyi X ya da Alt+F4 ile kapatın.
 
+**Ortak test paketi:** [P0-A-9596244 Windows ZIP ve SHA-256](https://github.com/mehmetalisahingm/DeepDiveGame/releases/tag/untagged-7da6b5907df23077c77e). Bu yayınlanmamış taslağı yazma davetini kabul etmiş ekip üyeleri kendi GitHub hesaplarıyla görür; yayınlamayın. ZIP'i ayrı bir klasöre tamamen çıkarın. Kaynak commit `9596244`, inceleme [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4). Build iki kez alındı; görsel kontrol ve üç bilgisayar testi henüz tamamlanmadı.
+
 Her kişi kendi GitHub görevine kullanılan build kimliğini ve kendi bilgisayarındaki sonucu yazar. Mehmet'in bilgisayarındaki kontrol diğer iki kişinin testi yerine geçmez.
 
 ## Dosya sınırı
