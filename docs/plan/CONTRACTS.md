@@ -6,7 +6,7 @@ Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'd
 
 ## Sistem sahipliği
 
-Bu tablo uygulama sahipliğidir; görsel/ses üretim yöntemi, tasarımda son söz veya insan netcode inceleyicisini kendiliğinden belirlemez. Bunlar [P0 toplantısında](P0_MEETING.md) seçilir. Ağ inceleyicisi atanması, alan sahiplerinin kendi co-op uygulama ve test sorumluluğunu devretmez.
+Bu tablo uygulama sahipliğidir. Kullanıcı atamasıyla görsel/ses üretimi, kaynak seçimi ve tutarlılık Mert'te; ortak tasarımda son karar ve birincil insan netcode incelemesi Mehmet'tedir. [Ortak sorumluluk kaydı](P0_MEETING.md) sınırları açıklar. Mert görsel/ses kaynaklarını sağlar; alan sahibi kendi koduna/sahnesine bağlar. Ağ inceleyicisi atanması, alan sahiplerinin kendi co-op uygulama ve test sorumluluğunu devretmez; API değişiklikleri etkilenen kişilerle koordine edilir.
 
 | Alan | Sahip | Sınır |
 |---|---|---|

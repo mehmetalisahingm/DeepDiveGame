@@ -1,6 +1,6 @@
 # Mehmet, Utku ve Mert — faz planı
 
-Plan sürümü: 1.3 — 31 Ağustos 2026. İsimli görevler, hafif P0 ve ekip kararları, P2/P3 oynama testleri ve temel his katmanı.
+Plan sürümü: 1.4 — 31 Ağustos 2026. Görsel/ses sorumlusu Mert; diğer ortak sorumluluklar Mehmet'te. Hafif P0, P2/P3 oynama testleri ve temel his katmanı korunur.
 
 Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md), bağlantılar [CONTRACTS.md](CONTRACTS.md), birleştirme düzeni [WORKFLOW.md](WORKFLOW.md) içindedir.
 
@@ -13,6 +13,8 @@ Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md)
 | Mert | C | Kasaba, oturum ekranları, envanter, ekonomi, ilerleme ve kayıt |
 
 Bu bir başlangıç atamasıdır; deneyim seviyeleri ve haftalık saatler henüz bilinmiyor. Herkes kendi alanının kodunu, gerekli arayüzünü ve co-op testini birlikte teslim eder. Bütün ağ kodu Mehmet'e, bütün görsel üretim Utku'ya veya bütün test Mert'e bırakılmaz.
+
+Kullanıcının son ataması: **Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığın sahibidir. Mehmet takvim/kapasite, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesinin sahibidir.** Ayrıntılı sınırlar [P0_MEETING](P0_MEETING.md) içindedir. Bu ortak sorumluluklar mevcut geliştirme işlerini devretmez: herkes Mert'in sağladığı görsel/sesi kendi sistemine bağlar ve test eder. Mert'in üretim yükü de dengelenir; her varlığı sıfırdan kendisinin yapması şart değildir.
 
 İş yükü küçük alt görevlerle ve gerçek çalışma süresiyle dengelenir. Erken bitiren kişi aynı fazın incelemesini/testini veya kayıtlı bir destek işini alır. Hiç kimse tek başına sonraki faza geçmez.
 
@@ -42,13 +44,13 @@ Amaç: kısa kurulum, çalışan örnek build ve üç kişinin değişiklik payl
 
 | Görev | Sorumlu | Yapacağı iş |
 |---|---|---|
-| P0-A | Mehmet | Unity/URP projesini açar; tam editör/paket sürümünü sabitler; kamera, ışık ve basit nesneli sahneyi hazırlar; Windows build alır. Repo sahibi olarak Utku/Mert için gerekli erişimleri sağlar. |
+| P0-A | Mehmet | Unity/URP projesini açar; tam editör/paket sürümünü sabitler; kamera, ışık ve basit nesneli sahneyi hazırlar; Windows build alır. Repo erişimlerini sağlar; ortak kararları, kapasite/bütçe/hedef ve netcode yedek/öğrenme planını takip eder. |
 | P0-B | Utku | Unity .gitignore, görünür .meta ve metin serileştirme ayarlarını düzenler; oyuncu/dünya/kasaba klasör ve sahne sahipliğini belirler; Mehmet'in ilk Unity commit'ini gereksiz dosya/referans açısından kontrol eder. |
-| P0-C | Mert | Üç kişinin GitHub hesabı, haftalık saatleri ve temel donanımını kaydeder; D01–D11 ve P0_MEETING içindeki T01–T07 görüşmesini ve erişim testini koordine eder; gerçek kararları kısa kayda işler; temiz klondan projeyi açıp kısa kurulum rehberini doğrular. |
+| P0-C | Mert | Üç kişinin hesap/saat/donanım bilgilerini toplar; Mehmet'in takip ettiği D01–D11 ve T01–T07 kararlarını kaydeder. Görsel/ses için kısa ihtiyaç ve kaynak/üretim planı hazırlar; erişim testini koordine eder; temiz klondan projeyi açıp kurulum rehberini doğrular. |
 
 Birlikte: herkes kendi deneme branch'ine küçük bir değişiklik pushlar; başkasının birleşmiş değişikliğini alır. Mert'in görevi erişimi koordine etmektir; yönetici izni gerektiren işlemi Mehmet yapar.
 
-Toplantı hazırlığı da paylaşılır: Mehmet ekipman/HUD, Utku sualtı/canlı/VFX, Mert kasaba/UI için görsel ve ses ihtiyaçlarını getirir; herkes kapasitesini ve ağ deneyimini belirtir. Üretim, bütçe, tasarım ve netcode sorumluları toplantıda seçilir; kod sahipliği uzmanlık veya harcama yetkisi sayılmaz.
+Toplantı hazırlığı da paylaşılır: Mehmet ekipman/HUD, Utku sualtı/canlı/VFX ihtiyaçlarını Mert'e verir; Mert bunları kasaba/UI ihtiyaçlarıyla birleştirir. Herkes kapasitesini ve ağ deneyimini belirtir. Sorumlular kullanıcı tarafından atandı; kaynak yöntemi, saat, bütçe tutarı ve netcode yedeği hâlâ açık. Atama uzmanlık kanıtı, satın alma veya faz kapanışı değildir.
 
 Bitiş koşulları:
 - [ ] Üç kişi aynı sürümle ortak projeyi açıyor.
@@ -77,7 +79,7 @@ Bitiş koşulları:
 - [ ] Oyuncular birbirini görüyor, hareket ediyor ve aynı dalış alanına geçiyor.
 - [ ] Dalışta yeni katılım reddediliyor; katılımcı/ev sahibi ayrılması kontrollü sonuçlanıyor.
 - [ ] Özellik PR'ları bir başka kişinin incelemesinden geçiyor; basit branch koruması doğrulandı veya erişim engeli ve uygulanacak manuel kural açıkça kaydedildi.
-- [ ] T06'da seçilen kişi gerçek projede host yetkisi/sahiplik/kopma akışını ve loglarla hata izlemeyi gösterdi; yedeği kontrolü tekrarladı. Sonuç aynı faz kaydında; P0'da uzmanlık varsayılmadı.
+- [ ] Mehmet gerçek projede host yetkisi/sahiplik/kopma akışını ve loglarla hata izlemeyi gösterdi; T06'da belirlenecek yedeği kontrolü tekrarladı. Sonuç aynı faz kaydında; P0'da uzmanlık varsayılmadı.
 
 Birleştirmeyi koordine eden: Utku.
 Kapalı kapsam: oksijen tüketimi, avlanma, satış, kamera puanı ve ayrıntılı harita.

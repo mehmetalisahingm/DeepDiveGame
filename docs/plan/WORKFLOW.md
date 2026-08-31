@@ -6,7 +6,7 @@ Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazı
 
 - Kapsam ve teslim: [PHASES.md](PHASES.md).
 - Güncel faz ve kişi görevi: [STATUS.md](STATUS.md).
-- P0 ekip/üretim/bütçe/tasarım kararları: [toplantı gündemi ve kayıt](P0_MEETING.md); Mert koordine eder, ekip karar verir.
+- P0 ekip/üretim/bütçe/tasarım kararları: [toplantı gündemi ve kayıt](P0_MEETING.md); Mehmet takip eder, Mert kayıt desteği ve görsel/ses sorumluluğunu üstlenir.
 - Sistem bağlantıları: [CONTRACTS.md](CONTRACTS.md).
 - Kapanış: tek kısa [faz kaydı](../templates/PHASE_REPORT.md).
 - Ortak kod: [GitHub deposu](https://github.com/mehmetalisahingm/DeepDiveGame); proje ZIP'leri birleştirilmez.
@@ -37,9 +37,11 @@ P0 için build/erişim kontrolü yeterlidir. P1'den itibaren birleşen oyun davr
 
 Mehmet oyuncu/ekipman, Utku sualtı/canlı, Mert kasaba/ekonomi UI dosyalarının sahibidir. Herkesin ayrı test sahnesi olabilir ama proje ortaktır.
 
+Mert tüm alanların görsel/ses kaynak seçimi, üretim planı, lisans/atıf listesi ve tutarlılık kontrolünden sorumludur. Her alan sahibi bu kaynakları kendi sistemine bağlar ve test eder; Mert'in sahipliği başkasının sahnesini koordinasyonsuz değiştirme izni değildir. Mehmet genel takvim/kapasite ve bütçe/servis takibini yürütür; faz birleştirme koordinatörlerinin dönüşümü korunur.
+
 Ana sahne, input haritası, paket listesi, katman ve render ayarları birlikte koordine edilir. Aynı ana sahne/prefab üzerinde aynı anda çalışılmaz; ayrı parçalar birleştirilir. Dosya taşıma ve silmede .meta eşleşmesi korunur.
 
-P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya nihai grafik varlık seçimi P0'ı bekletmez; kaynak yöntemi ve üretim sorumluluğu P0 toplantısında belirlenir. Dış varlık ilk kez eklenmeden kaynak/lisans/atıf ve public repoda ham dosya paylaşım izni kontrol edilir; izin belirsizse eklenmez.
+P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya nihai grafik varlık seçimi P0'ı bekletmez; Mert kaynak/üretim yöntemini P0'da netleştirir. Dış varlık ilk kez eklenmeden Mert kaynak/lisans/atıf ve public repoda ham dosya paylaşım iznini kontrol eder; Utku Git/varlık düzenine eklenmesini inceler. İzin belirsizse varlık eklenmez.
 
 ## Araçları kademeli ekleme
 
@@ -67,7 +69,7 @@ Haftalık saatler ve alt iş süreleriyle yükü kontrol edin. Erken bitiren, sa
 
 Yeni özellik, ikinci bölge, faz sırası değişikliği veya zorunlu kabulün kaldırılması sessizce yapılamaz. Kullanıcının açık kararından sonra ilgili plan ve durum belgeleri birlikte güncellenir. Rutin uygulama tercihleri ve faz içi yardım için yeni bir tören gerekmez.
 
-Sistemler arası tasarım anlaşmazlığı için P0 toplantısında kabul edilen T05 yöntemi kullanılır; henüz yöntem kabul edilmediyse koordinatörün tek taraflı son söz hakkı yoktur. Oyun davranışı üzerindeki uzlaşma, ücretli harcama veya kapsam değişikliği yetkisi değildir.
+Kullanıcı atamasıyla sistemler arası tasarım anlaşmazlığında, etkilenen kişilerin görüşü ve deneme sonucu alındıktan sonra mevcut kapsam içinde son karar Mehmet'tedir. Mert görsel/ses üretim tercihlerini yürütür. Mehmet'in son söz yetkisi başkasının tamamını veya testini üretmez; ücretli harcama, kapsam değişikliği ve faz geçişinin mevcut kuralları korunur.
 
 Geçici yokluk ve kalıcı ayrılma kuralı T02'de kaydedilir. Üye ayrıldığında başkası onun adına tamam yazmaz; ekip/kapsam ve faz kapısı açıkça yeniden kararlaştırılmadan sonraki faza geçilmez. Kod, açık işler, kaynak listesi ve hesap erişimi devir ihtiyacı birlikte ele alınır.
 

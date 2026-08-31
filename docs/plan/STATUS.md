@@ -1,6 +1,6 @@
 # Güncel durum ve görev takibi
 
-Plan 1.3 — 31 Ağustos 2026. İsimli dağılım, sade P0, ekip toplantısı gündemi, P2/P3 oynama testleri ve tek bölgelik ilk sürüm. Yeni toplantı önerileri henüz ekip kararı değildir.
+Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sorumlulukları Mehmet'e atadı. Sade P0, P2/P3 oynama testleri ve tek bölgelik ilk sürüm korunur; atama işin veya toplantının tamamlanması değildir.
 
 ## Mevcut sınır
 
@@ -10,7 +10,7 @@ Plan 1.3 — 31 Ağustos 2026. İsimli dağılım, sade P0, ekip toplantısı g�
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
 - Ekip erişimleri henüz doğrulanmadı. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi, faz testi veya ekip kapanış kaydı yok.
-- P0 ekip toplantısı yapılmadı; görsel/ses üretimi, kapasite/ayrılma, ürün hedefi, bütçe, tasarım yetkisi, netcode sorumlusu/yedeği ve D06 farkındalığı henüz kaydedilmedi.
+- Ortak sorumlular atandı; P0 ekip toplantısı tamamlanmadı. Kaynak/üretim yöntemi, saatler, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık.
 
 ## Ekip
 
@@ -54,9 +54,9 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 
 | Görev | Sahip | Durum | Kanıt / kalan iş |
 |---|---|---|---|
-| P0-A | Mehmet | BEKLIYOR | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1); uygulama/build bekliyor |
+| P0-A | Mehmet | BEKLIYOR | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1); uygulama/build ve ortak karar takibi bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap ve dosya düzeni bekliyor |
-| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); saat/donanım, D01–D11 ve T01–T07 görüşmesi, ekip erişim testi bekliyor |
+| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); görsel/ses kaynak planı, saat/donanım, karar kaydı ve erişim testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
@@ -100,7 +100,7 @@ Kararların ayrıntısı PHASES içindedir. İsimli plan yazılması, ekip gör�
 
 ## P0 ekip kararları
 
-[Toplantı gündemi ve tek karar tablosu](P0_MEETING.md) T01–T07'nin kaynağıdır. Mert görüşmeyi koordine eder, üç kişi karar verir. Tüm başlıklar GORUSULMEDI; atanmış sanat/ses veya netcode uzmanı, kabul edilmiş bütçe/gelir paylaşımı, ticari hedef ya da teslim tarihi yok. Mehmet'in bağlantı sahipliği, ağ uzmanlığı kanıtı değildir. Bu belge güncellemesi bir ekip onayı veya oyun testi sayılmaz.
+[Toplantı gündemi ve tek karar tablosu](P0_MEETING.md) T01–T07'nin kaynağıdır. Kullanıcı atamasıyla görsel/ses üretimi ve tutarlılık Mert'te; takvim/kapasite, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesi Mehmet'tedir. Mehmet kararları takip eder, Mert kayda destek olur. Netcode yedeği, bütçe/gelir paylaşımı, ticari hedef ve teslim tarihi belirlenmedi. Atamalar uzmanlık kanıtı veya üç kişinin tamamı değildir; oyun testi yapılmadı.
 
 ## Faz kapanışı
 
@@ -122,3 +122,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Görüşülen sadeleştirme isimli görev planına işlendi: hafif P0, P1 koruma, P2 CI, P3 oynanış kontrolü ve tek bölgelik ilk sürüm; hiçbir oyun fazı tamamlanmadı |
 | 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hesap/saat bilgileri uydurulmadı, hiçbir oyun testi tamamlandı sayılmadı |
 | 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, kapasite/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |
+| 2026-08-31 | Plan 1.4: kullanıcının ortak sorumlulukları üstlenme ve görsel/sesi Mert'e verme talimatı işlendi. Diğer geliştirme işleri, gerçek testler ve üç kişilik faz kapısı korundu; uzmanlık, harcama veya tamam kaydı üretilmedi |

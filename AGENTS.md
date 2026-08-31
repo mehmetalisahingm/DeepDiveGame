@@ -7,6 +7,7 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 - Mehmet (A): oyuncu, dalış, ekipman kullanımı ve temel oturum bağlantısı.
 - Utku (B): sualtı, canlılar, avlanma ve çekim hedefini değerlendirme.
 - Mert (C): kasaba, oturum ekranı, envanter, ekonomi, ilerleme ve kayıt.
+- Kullanıcı atamasıyla Mert ayrıca görsel/ses üretimi, kaynak seçimi ve tutarlılıktan sorumludur. Mehmet takvim/kapasite, devam/ayrılma planı, ürün hedefi, mevcut kapsamda tasarımın son kararı, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Mevcut geliştirme işleri ve faz koordinatörü dönüşümü korunur; netcode yedeği henüz seçilmedi.
 - Herkes kendi sisteminin co-op davranışını ve testini de teslim eder. Bütün multiplayer işi Mehmet'e devredilemez.
 - GitHub hesabı, deneyim, kapasite veya donanım bilinmiyorsa uydurulmaz.
 

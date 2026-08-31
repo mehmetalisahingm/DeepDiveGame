@@ -10,19 +10,21 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 - Aktif çalışma **P0 — Ortak temel ve kararlar (ACIK)**. Görev kayıtları açıldı; Unity/oyun uygulaması ve çalışan build henüz yok.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
-- Plan 1.3: sade P0 ve ekip kararları; P2'de erken hareket/av testi, P3'te kamera/tam döngü testi; test öncesi temel his katmanı ve ilk sürümde tek dalış bölgesi.
+- Plan 1.4: görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te. Sade P0, P2/P3 oynama testleri, temel his katmanı ve tek bölge kapsamı korunur.
+
+**Ortak sorumluluklar:** Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığı yönetir. Mehmet takvim/kapasite, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Utku'nun ve Mert'in mevcut geliştirme işleri korunur; herkes kendi sisteminin entegrasyonunu ve co-op testini yapar.
 
 ## Şimdi kim ne yapacak? — P0
 
 | Kişi | Bu aşamadaki görevi | GitHub görev kaydı |
 |---|---|---|
-| **Mehmet (A)** | Unity/URP projesi, sürüm kilidi, basit sahne, ilk Windows build ve repo erişimleri | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
+| **Mehmet (A)** | Unity/URP projesi, sürüm, sahne/build, erişimler; ortak karar takibi ve netcode yedek/öğrenme planı | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
 | **Utku (B)** | .gitignore/.meta, klasör ve sahne sahipliği, ilk Unity dosyalarının kontrolü | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
-| **Mert (C)** | Ekip hesap/saat/donanım bilgileri, kısa karar görüşmesi, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
+| **Mert (C)** | Görsel/ses ihtiyaç ve kaynak planı; ekip bilgileri, karar kaydı desteği, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
 
 **İlk iş:** Üçünüz de [Mert'in ekip kaydına](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) GitHub hesabınızı, haftalık yaklaşık saatinizi ve temel donanımınızı yazın. Utku/Mert'in kullanıcı adları henüz bilinmiyor; hesap atamaları bu bilgi gelince yapılacak.
 
-**Oyun kodundan önce:** [P0 toplantı gündemini](docs/plan/P0_MEETING.md) birlikte görüşün: görsel/ses üretimi, zaman ve ayrılma ihtimali, ürün hedefi, bütçe, tasarımda karar yöntemi, insan netcode sorumlusu/yedeği. Mert kaydeder; kararları üçünüz verirsiniz. Öneriler henüz onaylanmadı; süre, bütçe ve uzmanlık varsayılmadı. Proje/sürüm/erişim hazırlığı bu sırada sürebilir.
+**Oyun kodundan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) açık ayrıntıları görüşün: kaynak yöntemi, gerçek saatler, devam/ayrılma planı, ürün hedefi, bütçe ve netcode yedeği. Sorumlular kullanıcı tarafından atandı; Mehmet takip eder, Mert kayda destek olur. Atama süre/harcama taahhüdü, uzmanlık kanıtı veya fazın tamamlanması değildir. Proje/sürüm/erişim hazırlığı sürebilir.
 
 **D06 sınırı:** Kayıt sahibi host yoksa aynı kampanyaya devam edilemez. Başka host ayrı kampanya açabilir; ilerleme otomatik taşınmaz. V1'e bulut kayıt veya host devri eklenmedi.
 
