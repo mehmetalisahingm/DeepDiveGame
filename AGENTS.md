@@ -1,60 +1,40 @@
 # DeepDiveGame çalışma talimatları
 
-## Önce mevcut fazı öğren
+Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili CONTRACTS.md bölümü ve WORKFLOW.md okunur.
 
-Her görevden önce şu dosyaları oku:
+## Ekip
 
-1. `docs/plan/STATUS.md`
-2. `docs/plan/PHASES.md` içindeki mevcut faz
-3. Değiştireceğin sistemin `docs/plan/CONTRACTS.md` kaydı
-4. `docs/plan/WORKFLOW.md`
+- Mehmet (A): oyuncu, dalış, ekipman kullanımı ve temel oturum bağlantısı.
+- Utku (B): sualtı, canlılar, avlanma ve çekim hedefini değerlendirme.
+- Mert (C): kasaba, oturum ekranı, envanter, ekonomi, ilerleme ve kayıt.
+- Herkes kendi sisteminin co-op davranışını ve testini de teslim eder. Bütün multiplayer işi Mehmet'e devredilemez.
+- GitHub hesabı, deneyim, kapasite veya donanım bilinmiyorsa uydurulmaz.
 
-Henüz oyun projesi yoksa varmış gibi davranma. Bu planın ilk oluşturulması yalnızca belge çalışmasıdır; motor kurulumu veya oyun geliştirmesi yapılmış sayılmaz.
+## Kapsam
 
-## Faz ve kapsam sınırı
+- PLAN_HAZIR, P0 planının hazır olduğunu ve Unity/oyun uygulamasının başlamadığını belirtir.
+- Sadece açık fazın verilen görevini uygula. Kullanıcının plan düzenleme isteği, oyun geliştirmesine veya sonraki faza geçmeye izin vermez.
+- P0 hafiftir: ortak sürüm, proje, dosya düzeni, ekip/erişim ve örnek build. Branch koruması P1'de, CI P2'de ele alınır.
+- Gelecek faz sözleşmeleri taslak olabilir; ihtiyaç duyulan fazdan önce kesinleşir. Bütün geleceğin API'sini P0'da uygulama.
+- İlk oynanabilir sürüm tek dalış bölgesidir. P3 oynanış değerlendirmesi yapılmadan P4'e geçme; ikinci bölge ekleme.
+- Erken bitirirsen mevcut fazın testini/incelemesini veya kaydedilmiş destek görevini al.
+- Kullanıcının açık yeni talimatı planı değiştirebilir; ilgili belgeleri tutarlı güncelle. Sessiz kapsam büyütme yapma.
 
-- Sadece STATUS dosyasında çalışmaya açık olan fazdaki görevleri uygula.
-- `PLAN_HAZIR` durumu, P0 planının hazır olduğunu ama P0 uygulamasının başlamadığını belirtir. Bir uygulama görevi verildiğinde P0 çalışmasına başlanabilir; gelecekteki fazlar açılmış sayılmaz.
-- Bir sonraki fazın kodunu, sahnesini, içeriğini veya paketini "hazır olsun" diye ekleme.
-- Gelecek fazlar için sözleşme tanımlamak serbesttir; bunları oyun davranışı olarak erken uygulamak yasaktır.
-- Kullanılmayan genel altyapı, kapsam dışı sistem ve talep edilmemiş refactor ekleme.
-- Aktif fazdaki görevin erken biterse mevcut fazı test et, incele veya görev devri yapılarak başka bir sahibine destek ol.
-- Eski bir fazın hatası bulunursa mevcut fazda kayıtlı bir düzeltme görevi aç; hatayı saklama ve gerekli regresyonu çalıştır.
-- Kullanıcının açık yeni talimatı bu belgeleri değiştirebilir. Böyle bir durumda ilgili plan, durum ve karar kayıtlarını tutarlı biçimde güncelle; sessizce yeni kapsam ekleme.
+## Sahiplik ve teslim
 
-## Sahiplik ve ortak dosyalar
+- Başka kişinin dosyasında veya ortak sahne/sözleşmede değişiklik gerekiyorsa etkilenen kişiyle koordinasyon kur.
+- Unity .meta dosyalarını varlıklarıyla birlikte koru; sırları ve üretilen önbellekleri depoya ekleme.
+- Test sağlayıcılarını teslimin gerçek oyun yolunda aktif bırakma.
+- Test etmeden PASS veya başka kişi adına tamam kaydı oluşturma.
+- Yerel/tek oyuncu testi, fazın istediği internet ve ayrı bilgisayar testinin yerine geçmez.
+- Bir fazın yalnızca kendi görevin bitince tamamlandığını söyleme.
 
-- A: oyuncu, dalış, ekipman kullanımı ve temel oturum bağlantısı.
-- B: sualtı, canlılar, avlanma ve görüntü hedefinin değerlendirilmesi.
-- C: kasaba, envanter, ekonomi, ilerleme ve kalıcı kayıt.
-- Her kişi kendi sisteminin ağ senkronizasyonu, arayüzü ve testiyle birlikte teslim eder. Bütün multiplayer işi A'ya devredilemez.
-- Başka kişinin sahip olduğu dosyada çalışma gerekiyorsa mevcut görev üzerinden koordinasyon kur ve sahiplik değişimini STATUS dosyasına kaydet.
-- Ortak sözleşme, proje ayarı veya ana sahne değişikliğini tek taraflı yapma. Etkilenen kişilere incelet.
-- Unity `.meta` dosyalarını ait oldukları varlıklarla birlikte taşı ve sürüm kontrolünde tut. Üretilen önbellekleri veya kimlik bilgilerini depoya ekleme.
+## Hafif faz kapısı
 
-## Teslim ve kanıt
+Üç kişinin işleri birleşir, faz testleri geçer ve tek kısa kapanış kaydında commit/build, sonuçlar ve üçünün gerçek tamamı bulunur. Ayrı imza matrisi gerekmez. Faz main'e birleştirilip ilgili davranış doğrulandıktan sonra STATUS güncellenir ve sonraki faz açılır.
 
-- Her özellik ilgili Pn-A/B/C görev kimliğine bağlanmalı.
-- Tek oyuncuda çalışması co-op teslimi değildir. Fazın istediği sayıda oyuncu ve ayrı süreç/bilgisayar koşullarını doğrula.
-- Derlenmedi, çalıştırılmadı veya çevrimiçi test edilmediyse bunu açıkça yaz.
-- Test etmeden PASS, imza olmadan ONAY veya başka kişi adına tamamlandı kaydı oluşturma.
-- Uzak repo ve koruma kuralları kurulmadıysa uygulanıyormuş gibi bildirme.
-- Fazın yalnızca bir kişinin işi bitince tamamlandığını ilan etme.
+P3'te çekirdek döngünün oynanış değerlendirmesi de şarttır. Bir kişinin işi eksik veya test başarısızsa fazı açma. Gerekli gerçek ekip onayını otomatik üretme; kanıtlar zaten yeterliyse gereksiz kullanıcı teyidi isteme.
 
-## Faz geçişi
+## Yetki
 
-Sonraki faz ancak şu koşullarla açılabilir:
-
-1. A, B, C görevleri doğrulandı.
-2. Geçerli fazın birleştirme dalında ortak kabul testleri geçti.
-3. Faz raporunda üç gerçek katılımcının kapanış onayı var.
-4. Fazın ana dala PR'ı birleşti; birleşmiş ana dal commit'i üzerinde gerekli kontroller geçti.
-5. STATUS dosyası rapor ve commit bağlantısıyla güncellendi.
-
-Fazı açmak için bu koşulları atlama. Kanıt yeterliyse ayrıca gereksiz kullanıcı teyidi isteme; gerekli ekip onayını otomatik üretemezsin.
-
-## Bu depo için otomatik yetki olmayan işlemler
-
-Planlama isteğini motor kurulumu, paket satın alma, bulut servis ücretini kabul etme veya oyunu yayınlama yetkisi sayma. Yayınlama P6 sonrasındaki ayrı karardır.
-
-Alt ajan kullanımı kendiliğinden yetkili değildir; kullanıcının veya uygulanabilir bir talimatın açık isteği gerekir.
+Planlama talebini motor kurulumu, ücretli servis/varlık satın alma veya oyunu yayınlama yetkisi sayma. P6 sonrası yayın ayrı karardır. Alt ajan kullanımı için açık kullanıcı veya uygulanabilir talimat gerekir.

@@ -9,7 +9,8 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 - Bu depo şu anda planlama belgelerini içerir; çalışan oyun henüz oluşturulmadı.
 - Sıradaki çalışma **P0 — Ortak temel ve kararlar**. Unity/oyun uygulaması henüz başlamadı; depo paylaşımı için başlangıç kurulumu yapıldı.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
-- Kişi isimleri henüz bilinmediği için sorumlular **A, B, C** olarak gösterilir.
+- Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
+- Plan 1.1: sade P0, P3 sonunda oynanış değerlendirmesi ve ilk sürümde tek dalış bölgesi.
 
 ## Çalışmaya başlama sırası
 
@@ -17,7 +18,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 2. [Faz planı](docs/plan/PHASES.md): Kapsam, kişi başına teslim ve kabul koşulları okunur.
 3. [Ortak sözleşmeler](docs/plan/CONTRACTS.md): Sistemler bu bağlantılara göre geliştirilir.
 4. [Birlikte çalışma kuralları](docs/plan/WORKFLOW.md): Branch, inceleme, birleştirme ve bekleme kuralları uygulanır.
-5. [Faz kapanış şablonu](docs/templates/PHASE_REPORT.md): Faz sonunda test kanıtı ve üç kişinin onayı kaydedilir.
+5. [Kısa faz kapanış kaydı](docs/templates/PHASE_REPORT.md): Test sonucu ve üçünüzün tamam mesajı tek yerde tutulur; ayrı imza matrisi yoktur.
 
 AI yardımcıları ayrıca [AGENTS.md](AGENTS.md) kurallarını izler.
 
@@ -42,6 +43,6 @@ Herkes depoyu okuyup klonlayabilir. Aynı depoya branch göndererek çalışacak
 
 ## Temel kural
 
-**A, B ve C aynı fazda çalışır. Erken bitiren sonraki faza geçmez; mevcut fazın testine, incelemesine veya geciken görevine destek olur.**
+**Mehmet, Utku ve Mert aynı fazda çalışır. Erken bitiren sonraki faza geçmez; mevcut fazın testine, incelemesine veya geciken görevine destek olur.**
 
-Belgelerdeki kurallar henüz GitHub tarafından teknik olarak uygulanmıyor. Public uzak depo oluşturuldu; ekip erişimleri, branch korumaları ve otomatik kontroller P0'da tamamlanacak. Plan dosyalarının paylaşılması P0'ın tamamlandığı anlamına gelmez. Public depoya sır, erişim anahtarı veya özel ekip bilgisi eklenmez.
+Belgelerdeki kurallar henüz GitHub tarafından teknik olarak uygulanmıyor. Public uzak depo oluşturuldu; ekip erişimleri P0'da, basit branch koruması P1'de, otomatik build P2'de ele alınacak. Plan dosyalarının paylaşılması P0'ın tamamlandığı anlamına gelmez. Public depoya sır, erişim anahtarı veya özel ekip bilgisi eklenmez.

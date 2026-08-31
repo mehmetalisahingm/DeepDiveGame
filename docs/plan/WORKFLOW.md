@@ -1,125 +1,73 @@
-# Aynı fazda çalışma ve birleştirme düzeni
+# Birlikte çalışma düzeni
 
-Bu kurallar üç kişilik ekip içindir. Otomatik araçlar kapsam dışı oyun davranışını her zaman anlayamaz; branch koruması kadar sahiplik, inceleme ve test gerekir.
+Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazın incelemesine, testine veya devredilen alt işine destek olur.
 
-## Tek gerçek durum kaydı
+## Nereden bakacağız?
 
-- Kapsam ve kabul koşulları: `PHASES.md`.
-- Aktif faz, görev sahibi, engel ve kanıt: `STATUS.md`.
-- Sistem bağlantıları: `CONTRACTS.md`.
-- Gerçek faz kapanış kanıtı: `docs/reports/Pn-REPORT.md`.
-- Çalışan kodun kaynağı: ortak Git deposu; ZIP, sohbet eki veya Drive klasörüyle proje birleştirme yapılmaz.
+- Kapsam ve teslim: [PHASES.md](PHASES.md).
+- Güncel faz ve kişi görevi: [STATUS.md](STATUS.md).
+- Sistem bağlantıları: [CONTRACTS.md](CONTRACTS.md).
+- Kapanış: tek kısa [faz kaydı](../templates/PHASE_REPORT.md).
+- Ortak kod: [GitHub deposu](https://github.com/mehmetalisahingm/DeepDiveGame); proje ZIP'leri birleştirilmez.
 
-## Faz ve görev durumları
+## Branch ve inceleme
 
-Faz: `KILITLI → ACIK → ENTEGRASYON → DOGRULAMA → TAMAMLANDI`.
+- main, ortak doğrulanmış sürümdür; başlangıç plan commit'i oyun fazını tamamlamaz.
+- Mevcut faz dalı örneği: codex/p0-integration.
+- Küçük özellik dalları o faz dalından açılır: codex/p2-mehmet-oxygen, codex/p2-utku-fish, codex/p2-mert-inventory.
+- Özellik PR'ı aynı faz dalına, faz kapanış PR'ı main'e gider.
+- Ayrı kişi branch'lerinde haftalarca birikim yapılmaz; küçük birleşmeler yapılır.
+- En az bir başka kişi değişikliği inceler: Mehmet'in işini Utku, Utku'nun işini Mert, Mert'in işini Mehmet.
+- Birleştirmeyi P0/P3/P6'da Mehmet, P1/P4'te Utku, P2/P5'te Mert koordine eder. Koordinatör herkesin kodunu yazmaz.
 
-İlk durum istisnası: P0 için `PLAN_HAZIR`; uygulama başladığında ACIK olur. Aynı anda en fazla bir faz ACIK/ENTEGRASYON/DOGRULAMA olabilir.
+Plan belgelerinin güncellenmesi oyun fazının kapanışı değildir. Kullanıcı talebine dayanan plan değişikliği ayrı dokümantasyon branch'inde hazırlanır; oyun testleri veya diğer kişilerin işi yapılmış sayılmaz.
 
-Görev: `BEKLIYOR → CALISILIYOR → INCELEME → BIRLESTI → DOGRULANDI`.
+## Günlük kısa kontrol
 
-- "Kod bitti" INCELEME anlamına gelir; ortak oyunda çalıştığı doğrulanmadan DOGRULANDI olmaz.
-- BIRLESTI, mevcut faz dalına birleştiğini belirtir; ana dal teslimi değildir.
-- Engeller ayrıca yazılır; bekleyen kişi gelecekteki faza geçmez.
-- Bir kapı testi bozulursa faz uygun önceki aktif duruma geri alınır, test düzeltilir. Başarısız sonuç üzerinden faz açılmaz.
+1. Aktif fazdaki kendi görevini ve bağımlılığını kontrol et.
+2. Güncel faz dalını al; ortak sözleşme değişiyorsa etkilenen kişiyle anlaş.
+3. Küçük işi yapıp test et; diğer sistem hazır değilse sözleşmeye uyan örnek veri kullan.
+4. PR'a ne değiştiğini, hangi testin geçtiğini ve yapılmayan testi yaz.
+5. Birleştirip build'i kontrol et. Engel varsa o gün görünür hâle getir.
 
-## Git modeli
+P0 için build/erişim kontrolü yeterlidir. P1'den itibaren birleşen oyun davranışı en az iki oyuncuyla denenir; faz kapanışında o fazın 1/2/4 oyuncu kontrolleri ayrıca yapılır.
 
-İlk incelemede yerel depo commitsiz `master` dalındaydı. Kullanıcının açık paylaşım isteği üzerine `main` başlangıç dalı ve [public uzak depo](https://github.com/mehmetalisahingm/DeepDiveGame) oluşturuldu. Ekip erişimleri, koruma kuralları ve build altyapısı P0'da tamamlanır.
+## Ortak dosyalar
 
-- Ana dal: `main` — yalnızca tamamlanmış, doğrulanmış fazlar.
-- Faz dalı: `codex/p0-integration`, sonra `codex/p1-integration` vb.
-- Özellik dalı örneği: `codex/p2-a-oxygen`, `codex/p2-b-fish`, `codex/p2-c-inventory`.
-- Dal kişinin adına aylarca açık kalmaz; tek küçük işi taşır ve birleşince kapatılır.
-- Her özellik dalı mevcut faz dalından açılır. Özellik PR'ının hedefi aynı fazın integration dalıdır.
-- Faz sonunda integration → main PR'ı açılır.
+Mehmet oyuncu/ekipman, Utku sualtı/canlı, Mert kasaba/ekonomi UI dosyalarının sahibidir. Herkesin ayrı test sahnesi olabilir ama proje ortaktır.
 
-İlk commitsiz depo için P0 başlangıç istisnası: plan ve minimum izlenen iskelet ana dala başlangıç commit'i olarak alınabilir; P0 tamamlandı etiketi konmaz. Ardından P0 çalışması normal faz dalından yürür.
+Ana sahne, input haritası, paket listesi, katman ve render ayarları birlikte koordine edilir. Aynı ana sahne/prefab üzerinde aynı anda çalışılmaz; ayrı parçalar birleştirilir. Dosya taşıma ve silmede .meta eşleşmesi korunur.
 
-## Günlük döngü
+P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya grafik varlık seçimi P0'ı bekletmez.
 
-1. STATUS'tan aktif fazı, görevini, sahip olduğun dosyaları ve bağımlılıkları kontrol et.
-2. Güncel faz dalını al; ortak sözleşmeyi değiştirmeden önce etkilenen kişiye bildir.
-3. Küçük işi uygula; bağımlı sistem bitmediyse sözleşmeye uyan test sağlayıcısını kullan.
-4. Kendi modülünü test et; PR'a görev kimliği, test sonucu ve değişen bağlantıları yaz.
-5. Diğer kişi incelesin. Varsayılan dönüşüm A'nın PR'ını B, B'ninkini C, C'ninkini A inceler.
-6. Faz dalına küçük birleşmeler yap; gün sonunda faz build'inin durumu ve engelleri kaydet.
-7. Oyun özellikleri olan fazlarda en az iki oyuncuyla kısa ortak deneme yap; fazın tam 1/2/4 oyuncu matrisi kapanışta ayrıca çalışır.
+## Araçları kademeli ekleme
 
-Yeni geliştirme, o kişinin inceleme/test işlerini tamamlamasının yerine geçmez. Faz sonuna kadar hiç birleştirmeden beklemek yasaktır; büyük çakışmalar küçük günlük birleşmelerle azaltılır.
+| Zaman | Sorumlu | İş |
+|---|---|---|
+| P0 | Utku; erişimde Mehmet/Mert | İzlenecek dosyalar, ortak sürümler, herkesin kendi branch'ine pushlayabilmesi |
+| P1 | Mert; yönetici işlemlerinde Mehmet | main/faz dallarında basit PR incelemesi ve force-push koruması |
+| P2 | Utku; hesap/lisans işleminde Mehmet | Mevcut tekrarlanabilir build komutunu otomatik kontrole bağlama |
 
-## Erken bitiren ve geciken kişi
+Koruma kurulana kadar da küçük PR ve bir başka kişinin incelemesi kuralı geçerlidir. Erişim/lisans engeli varsa neden, sorumlu ve kullanılan manuel kontrol yazılır; yapılmayan otomasyon PASS gösterilmez. İstisna tek kısa ekip kaydıyla kabul edilir; sahte başarılı kontrol veya gizli bypass yoktur.
 
-- Erken bitiren: kendi teslimini belgeleyip peer review ve ortak test alır.
-- Ardından geciken kişinin belirli bir alt görevini, aynı dosyada çakışma yaratmadan devralır. Devreden/devralan ve dosya kapsamı STATUS'a yazılır.
-- Ana sorumlu ilgili sistemin sözleşmesini ve kabulünü takip etmeyi sürdürür.
-- Gecikme görünür olduğunda aynı çalışma gününde engel yazılır; sorun faz kapanışına saklanmaz.
-- Yetişmediği için zorunlu test veya özellik silinmez. İş bölümü/takvim revize edilir; kapsam azaltma gerekiyorsa açık değişiklik kaydı ve ürün sahibi kararı gerekir.
-- Eşitlik aynı sayıda commit değil, benzer toplam emek ve ortak teslim sorumluluğudur.
+## Fazı kapatma
 
-## Sahne ve varlık çakışmalarını önleme
+1. Mehmet, Utku ve Mert'in zorunlu işleri faz dalında birleşir.
+2. PHASES içindeki kabul koşulları ve ilgili eski davranışlar birlikte denenir.
+3. Tek kısa kayda commit/build, sonuç, açık kusurlar ve üçünüzün gerçek tamam mesajı eklenir. Ayrı imza matrisi veya her özellik için üç inceleme gerekmez.
+4. Faz PR'ı main'e birleşir; birleşmiş build açılır ve ilgili davranış kontrol edilir. Çakışma davranışı değiştirdiyse ilgili test yeniden yapılır.
+5. STATUS güncellenir; ancak sonra sıradaki tek faz açılır.
 
-- A oyuncu/ekipman prefablarını, B sualtı/canlı prefablarını, C kasaba/ekonomi UI'ını düzenler.
-- Her kişi kendi küçük test sahnesine sahiptir; bunlar aynı ortak projededir.
-- Ana başlangıç sahnesi, ortak sahne listesi, katmanlar, input haritası, paket listesi ve render ayarı ortak dosyalardır; değişiklikler sıraya alınır.
-- Ortak ana prefab/sahne üzerinde eşzamanlı düzenleme yapılmaz; parçalar prefab/ayrı sahneler olarak birleştirilir.
-- Unity'de görünür `.meta` ve metin serileştirme ayarları P0'da doğrulanır; Smart Merge yardımcıdır, çakışmayı otomatik olarak doğru çözdüğü varsayılmaz.
-- Model, ses ve büyük kaynak dokuları gibi uygun ikili dosyalar için Git LFS kullanılır; metin C# dosyaları LFS'ye alınmaz.
-- Birleştirilemeyen varlıklarda dosya kilidi veya yazılı tek düzenleyici kuralı uygulanır.
-- Dosya taşıma/silmede `.meta` eşleşmesi korunur. Çakışma çözümü sonrasında sahne ve referanslar editörde kontrol edilir.
+P3'te teknik testlere ek olarak oynanış değerlendirmesi gerekir. Faz açıkken bir kişi gelecekteki faza ait kod, sahne veya içerik ekleyemez. Başkasının onayı veya testi uydurulamaz.
 
-## Koruma ve otomatik kontroller
+## İş yükü ve değişiklik
 
-P0'da gerçek uzak repo üzerinde uygulanacak düzen:
+Haftalık saatler ve alt iş süreleriyle yükü kontrol edin. Erken bitiren, sahibinden devraldığı belirli alt işi yapabilir; hangi dosyayı değiştireceği kısa kayda yazılır. Eski fazdan gelen hata mevcut fazda bir düzeltme görevi olur ve ilgili regresyon tekrar denenir.
 
-- main'e doğrudan push ve force push kapatılır.
-- Özellik PR'ı için en az bir başka kişinin incelemesi ve proje build kontrolü gerekir.
-- Fazı main'e taşıyan PR'ın yazarı entegratördür; diğer iki kişinin incelemesi ve faz raporunda üçünün onayı gerekir.
-- İmza, gerçek kişi/hesap, tarih ve incelenen commit ile ilişkilendirilir; boş kutu veya şablon metni imza sayılmaz.
-- Paket/editör sürümü, kayıp referanslar ve mevcut anlamlı testler kontrol edilir. CI başlatıldı demek CI geçti demek değildir.
-- Ortak sözleşme veya proje ayarı değişikliği etkilenen kişilere ayrıca inceletilir.
-- Faz etiketi veya PR başlığı tek başına kapsam uygunluğunu kanıtlamaz; inceleyen değişikliklerin açık faza ait olduğunu kontrol eder.
+Yeni özellik, ikinci bölge, faz sırası değişikliği veya zorunlu kabulün kaldırılması sessizce yapılamaz. Kullanıcının açık kararından sonra ilgili plan ve durum belgeleri birlikte güncellenir. Rutin uygulama tercihleri ve faz içi yardım için yeni bir tören gerekmez.
 
-GitHub planı veya Unity build lisansı bir korumayı engellerse üç kişinin onayıyla uygulanabilir manuel kontrol tanımlanır ve STATUS'ta açıkça belirtilir. Gizli bypass, sahte başarılı kontrol veya yapıldığı iddia edilen koruma olmaz.
+## AI yardımcısına başlangıç mesajı
 
-## Faz kapanış kapısı
+Rol adı ve görev kimliği size ait olanlarla değiştirilir:
 
-1. A/B/C görevleri DOGRULANDI durumunda; alt görevlerde açık zorunlu iş yok.
-2. Entegratör bütün parçaların mevcut faz dalında olduğunu ve build'in çalıştığını doğrular.
-3. PHASES dosyasındaki faz kabul listesi ve ilgili eski faz regresyonları çalıştırılır.
-4. [Faz raporu şablonu](../templates/PHASE_REPORT.md) gerçek sonuçlarla doldurulur.
-5. Üç kişi aday commit üzerinde kapanış onayı verir; kod değişirse etkilenen test/onay yenilenir.
-6. Faz PR'ı main'e birleşir. Birleşmiş commit'te build ve gerekli ortak testler tekrar doğrulanır. Çakışma çözümü oyun davranışını değiştirmişse ilgili tam kabul testleri yeniden çalıştırılır.
-7. Rapor, main commit'i ve doğrulama kanıtı STATUS'a eklenir; faz TAMAMLANDI yapılır.
-8. Ancak bundan sonra sıradaki tek faz ACIK yapılır, kişi paketleri tahminlenir ve yeni integration dalı oluşturulur.
-
-Üç kişinin onayı olmadan faz açılmaz. Yalnızca kullanıcının açıkça değiştirdiği çalışma kuralı bu düzeni değiştirebilir; asistan başka kişiler adına onay veremez.
-
-## Geçmiş fazdaki hata
-
-Yeni fazdayken önceki bir özelliğin bozulması keşfedilirse aktif fazda `Pn-FIX-01` gibi bir görev kaydedilir. Hatanın ilgili eski kabul testi tekrar çalıştırılır. Geçmiş rapor sessizce yeniden yazılmaz; ek düzeltme ve kanıt bağlantısı verilir. Aktif fazı ilerletmek için hatayı sonraki faza gizlice atmak yasaktır.
-
-## Plan değişikliği
-
-- İşin teknik çözümünü iyileştirmek veya faz içindeki yükü dağıtmak, kapsam ve sözleşme korunuyorsa rutin ekip kararıdır.
-- Yeni özellik, yeni bölge/tür, faz sırası değişimi, kabul testinin kaldırılması veya görsel hedef büyümesi bir kapsam değişikliğidir.
-- Kapsam değişikliğine önce amaç, maliyet, etkilenen fazlar, ertelenecek işler ve karar sahibi yazılır. Kullanıcının açık onayı alınmadan uygulanmaz.
-- Gerçek onay sonrası PHASES, CONTRACTS ve STATUS birlikte güncellenir. Değişiklik geriye dönük başarı kanıtı oluşturmaz.
-
-## Test sonucu dili
-
-`PASS`: ilgili test belirtilen build/commit ve ortamda gerçekten geçti.
-
-`FAIL`: çalıştırıldı ve beklenen sonuç oluşmadı.
-
-`CALISTIRILMADI`: kanıt yok. PASS yerine kullanılamaz.
-
-`UYGULANMAZ`: yalnızca test bu faza ait değilse; zorunlu kabulü atlamak için kullanılamaz.
-
-Yerel çoklu editör/süreç testleri yararlıdır; fazın istediği internet ve ayrı bilgisayar doğrulamasının yerine geçmez.
-
-## AI yardımcısına verilecek görev başlangıcı
-
-Her kişi aynı deponun güncel planını kullanır. Aşağıdaki mesajdaki rol ve görev kimliği gerçekten kendisine atanmış olanlarla değiştirilir:
-
-> Ben bu projede A rolündeyim. Önce AGENTS.md, docs/plan/STATUS.md ve aktif fazın planını oku. Yalnızca bana atanmış açık faz görevini, CONTRACTS.md ve WORKFLOW.md sınırları içinde uygula. Gelecek faza geçme; başka kişinin görevini veya ortak sözleşmeyi koordinasyonsuz değiştirme. Teslimde değişen dosyaları, çalıştırılan testleri, çalıştırılmayan kontrolleri ve kalan engelleri yaz. Fazı diğer kişiler adına tamamlandı veya onaylandı işaretleme.
+> Ben Mehmet'im; görev kodum A. AGENTS.md, STATUS.md ve aktif fazdaki görevimi oku. Yalnızca bana atanmış mevcut faz işini CONTRACTS ve WORKFLOW sınırlarında yap. Başka faza geçme, başkasının dosyasını koordinasyonsuz değiştirme. Gerçek testleri, yapılmayan kontrolleri ve kalan engelleri açıkça yaz. Başkaları adına tamam veya onay kaydı oluşturma.

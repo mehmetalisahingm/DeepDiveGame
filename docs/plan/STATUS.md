@@ -1,127 +1,117 @@
 # Güncel durum ve görev takibi
 
-Son güncelleme: 31 Ağustos 2026 — ilk plan ve kullanıcının istediği public depo başlangıcı.
+Plan 1.1 — 31 Ağustos 2026. İsimli dağılım, sade P0 ve tek bölgelik ilk sürüm.
 
 ## Mevcut sınır
 
-- **Sıradaki/planlanan faz: P0**
-- **Durum: PLAN_HAZIR**
-- **Unity/oyun uygulaması başladı mı? Hayır. Repo paylaşımının başlangıç kurulumu yapıldı.**
-- **Çalışan oyun/build var mı? Hayır.**
-- **P1–P6: KILITLI.**
-- **Uzak depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame), public.**
-- **Ekip erişimleri, branch koruması ve CI: henüz kurulmadı/doğrulanmadı.**
-- Tamamlanmış faz, onaylı oyun testi veya ekip kapanış imzası yok.
+- Sıradaki faz: P0. Durum: PLAN_HAZIR.
+- Unity/oyun uygulaması başlamadı; çalışan oyun/build yok.
+- P1–P6 KILITLI. İsim atamak veya belge değiştirmek faz açmaz.
+- Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
+- Ekip erişimleri henüz doğrulanmadı. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
+- Tamamlanmış oyun görevi, faz testi veya ekip kapanış kaydı yok.
 
-P0 oyun/proje uygulamasına ilişkin bir görev verildiğinde P0 ACIK yapılır. Kullanıcının açık isteğiyle public depo ve ilk plan paylaşımı hazırlandı; bu başlangıç adımı hiçbir oyun görevini veya P0 kapanışını tamamlanmış saymaz.
+## Ekip
 
-## Ekip ve ortam
-
-| Rol | Gerçek kişi | GitHub hesabı | Haftalık kapasite | Bilgisayar/işletim sistemi |
+| Rol | Kişi | GitHub hesabı | Haftalık saat | Temel bilgisayar özellikleri |
 |---|---|---|---|---|
-| A | Atanmadı | Atanmadı | Ölçülmedi | Kaydedilmedi |
-| B | Atanmadı | Atanmadı | Ölçülmedi | Kaydedilmedi |
-| C | Atanmadı | Atanmadı | Ölçülmedi | Kaydedilmedi |
+| A | Mehmet | mehmetalisahingm | Henüz verilmedi | Henüz verilmedi |
+| B | Utku | Henüz verilmedi | Henüz verilmedi | Henüz verilmedi |
+| C | Mert | Henüz verilmedi | Henüz verilmedi | Henüz verilmedi |
 
-| Ayar | Durum |
+İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; deneyimler bilinmediğinden uzmanlık iddiası değildir. Mert bilgileri toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya özel cihaz adı, seri numarası veya gereksiz kişisel bilgi yazılmaz.
+
+## Ortam ve araçlar
+
+| Konu | Durum / sorumlu |
 |---|---|
-| Unity | 6.3 LTS önerildi; kesin yama P0'da seçilecek |
-| URP/NGO/Transport/MPS sürümleri | P0'da birlikte doğrulanıp kilitlenecek |
-| Uzak repo ve ana dal | [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame), public; main |
-| Unity servis projesi ve yetkileri | Oluşturulmadı/doğrulanmadı |
-| Referans performans bilgisayarı | Seçilmedi |
-| Referans çözünürlük/kalite/kare süresi | Öneri: 1080p, belirlenecek kalite, 60 FPS / 16,7 ms hedef; P0'da kesinleşecek |
-| Otomatik build ve PR kontrolleri | Kurulmadı |
-| Manuel kontrol istisnası | Yok; ihtiyaç oluşursa gerekçe ve üç gerçek onay kaydedilecek |
+| Unity/URP | 6.3 LTS önerildi; kesin yama ve gereken paketler P0'da Mehmet tarafından doğrulanacak |
+| Git ve varlık düzeni | P0 Utku; büyük ikili varlıktan önce uygun LFS |
+| Repo ana dalı | main; ilk plan paylaşıldı |
+| Ekip erişim testi | P0 Mert koordine eder, Mehmet yetki verir; üç kişi kendi branch'ine pushlayacak |
+| Örnek build | P0 Mehmet üretir; üç kişi kendi bilgisayarında çalıştırır |
+| Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
+| Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
+| Performans ortamı | P4 sonunda ölçümden önce sabitlenecek; öneri 1080p/60 FPS |
+| Manuel araç istisnası | Henüz yok; gerçek engel varsa neden/sorumlu/kontrol kısa kayda yazılır |
 
 ## Faz durumu
 
-| Faz | Durum | Entegratör | Rapor / ana dal commit'i |
+| Faz | Durum | Birleştirme koordinatörü | Kapanış kaydı / main commit |
 |---|---|---|---|
-| P0 | PLAN_HAZIR | A | Yok |
-| P1 | KILITLI | B | Yok |
-| P2 | KILITLI | C | Yok |
-| P3 | KILITLI | A | Yok |
-| P4 | KILITLI | B | Yok |
-| P5 | KILITLI | C | Yok |
-| P6 | KILITLI | A | Yok |
+| P0 | PLAN_HAZIR | Mehmet | Yok |
+| P1 | KILITLI | Utku | Yok |
+| P2 | KILITLI | Mert | Yok |
+| P3 | KILITLI | Mehmet | Yok |
+| P4 | KILITLI | Utku | Yok |
+| P5 | KILITLI | Mert | Yok |
+| P6 | KILITLI | Mehmet | Yok |
 
-## Ana iş paketleri
+## Kişi görevleri
 
-Paket ayrıntıları ve kabul koşulları [PHASES.md](PHASES.md) içindedir. Kapalı fazın BEKLIYOR görevi alınamaz. Her faz açılırken paketler küçük alt işlere bölünür; kişi adı, tahmin ve dosya sahipliği eklenir.
+Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi alınamaz.
 
-| Görev | Sahip | Durum | Tahmin / harcanan süre | PR / test kanıtı |
-|---|---|---|---|---|
-| P0-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P0-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P0-C | C | BEKLIYOR | Belirlenmedi | Uzak repo başlangıcı yapıldı; ekip erişimleri, CI ve kalan teslimler bekliyor |
-| P1-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P1-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P1-C | C | BEKLIYOR | Belirlenmedi | Yok |
-| P2-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P2-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P2-C | C | BEKLIYOR | Belirlenmedi | Yok |
-| P3-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P3-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P3-C | C | BEKLIYOR | Belirlenmedi | Yok |
-| P4-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P4-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P4-C | C | BEKLIYOR | Belirlenmedi | Yok |
-| P5-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P5-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P5-C | C | BEKLIYOR | Belirlenmedi | Yok |
-| P6-A | A | BEKLIYOR | Belirlenmedi | Yok |
-| P6-B | B | BEKLIYOR | Belirlenmedi | Yok |
-| P6-C | C | BEKLIYOR | Belirlenmedi | Yok |
+| Görev | Sahip | Durum | Kanıt / kalan iş |
+|---|---|---|---|
+| P0-A | Mehmet | BEKLIYOR | Yok |
+| P0-B | Utku | BEKLIYOR | Yok |
+| P0-C | Mert | BEKLIYOR | İsimler atandı; hesap/saat/donanım ve ekip erişim testi bekliyor |
+| P1-A | Mehmet | BEKLIYOR | Yok |
+| P1-B | Utku | BEKLIYOR | Yok |
+| P1-C | Mert | BEKLIYOR | Yok |
+| P2-A | Mehmet | BEKLIYOR | Yok |
+| P2-B | Utku | BEKLIYOR | Yok |
+| P2-C | Mert | BEKLIYOR | Yok |
+| P3-A | Mehmet | BEKLIYOR | Yok |
+| P3-B | Utku | BEKLIYOR | Yok |
+| P3-C | Mert | BEKLIYOR | Yok |
+| P4-A | Mehmet | BEKLIYOR | Yok |
+| P4-B | Utku | BEKLIYOR | Yok |
+| P4-C | Mert | BEKLIYOR | Yok |
+| P5-A | Mehmet | BEKLIYOR | Yok |
+| P5-B | Utku | BEKLIYOR | Yok |
+| P5-C | Mert | BEKLIYOR | Yok |
+| P6-A | Mehmet | BEKLIYOR | Yok |
+| P6-B | Utku | BEKLIYOR | Yok |
+| P6-C | Mert | BEKLIYOR | Yok |
 
-## Alt işler ve destek devirleri
+## Alt iş ve destek devri
 
-Henüz görev devri yapılmadı. İlk alt görevler P0 uygulaması açıldığında doldurulur.
+Henüz yok. Bir iş devredilirse görev, uygulayan, sistem sahibi ve değişecek dosyalar kısa bir satırla kaydedilir. Her faz açılırken gerçek kapasiteye göre alt iş süreleri tahminlenir.
 
-| Alt görev | Üst paket | Uygulayan | Sistem sahibi / inceleyen | Dosya kapsamı | Tahmin | Durum |
-|---|---|---|---|---|---|---|
-| — | — | — | — | — | — | — |
+## D01–D11 kısa karar kaydı
 
-## Tasarım kararları
+Kararların ayrıntısı PHASES içindedir. İsimli plan yazılması, ekip görüşmesinin yapıldığı anlamına gelmez.
 
-Ayrıntılar PHASES içindeki D01–D11 tablosundadır. Bunlar uygulama öncesi ortak çalışma varsayımlarıdır; üç kişinin bunları kabul ettiği henüz kaydedilmemiştir.
-
-| Karar | Durum | Nihai karar / üç kişinin değerlendirme kaydı |
+| Karar | Plan durumu | Ekip kaydı |
 |---|---|---|
-| D01 | ONERI | Yok |
-| D02 | ONERI | Yok |
-| D03 | ONERI | Yok |
-| D04 | ONERI | Yok |
-| D05 | ONERI | Yok |
-| D06 | ONERI | Yok |
-| D07 | ONERI | Yok |
-| D08 | ONERI | Yok |
-| D09 | ONERI | Yok |
-| D10 | ONERI | Yok |
-| D11 | ONERI | Yok |
+| D01 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D02 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D03 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D04 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D05 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D06 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D07 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D08 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D09 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D10 | Tek bölgelik ilk sürüm plan kapsamı | Ekip görüşmesi henüz yapılmadı |
+| D11 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
 
-## Engeller ve açık kararlar
+## Faz kapanışı
 
-- P0 uygulaması henüz başlatılmadı; üç kişinin gerçek kimliği ve çalışma kapasitesi kaydedilmedi.
-- Kesin motor/paket uyumu ve internet üzerinden bağlantı henüz test edilmedi.
-- İkinci/üçüncü dükkânın detayları kaynak konseptte yok; önerilen hizmet rolleri P0'da kesinleştirilecek.
-- CONTRACTS sonundaki ayrıntılar P0 kapanmadan kesinleşmeli.
+Tek kısa kayıtta şu bilgiler yeterlidir:
+- Üç kişinin işi birleşti mi?
+- O fazın kabul testleri hangi build/commit'te geçti; yapılmayan test var mı?
+- Mehmet, Utku ve Mert'in gerçek tamam mesajları nerede?
+- main'e birleşmiş build kontrol edildi mi?
+- P3 ise oynanış değerlendirmesinde devam mı, düzeltme mi kararı verildi?
 
-## Sonraki fazı açma kontrolü
+Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz kendiliğinden açılmaz.
 
-- [ ] A paketi DOGRULANDI.
-- [ ] B paketi DOGRULANDI.
-- [ ] C paketi DOGRULANDI.
-- [ ] Faz raporundaki zorunlu kabul ve regresyon testleri PASS.
-- [ ] Üç gerçek kişinin aday commit'e bağlı kapanış onayı var.
-- [ ] Faz PR'ı ana dala birleşti.
-- [ ] Birleşmiş ana dal commit'i doğrulandı ve rapor bağlantısı eklendi.
+## Değişiklik kaydı
 
-Bu kutular yeni aktif faz için yeniden açılır; önceki kanıt faz raporunda korunur.
-
-## Plan değişikliği kaydı
-
-| Tarih | Değişiklik | Gerekçe / karar |
-|---|---|---|
-| 2026-08-31 | Plan 1.0 oluşturuldu | Kullanıcının üç kişinin aynı fazda kalması ve faz sonunda birleştirme isteği |
-| 2026-08-31 | Public uzak depo ve main başlangıcı | Kullanıcının açık repo oluşturma/push talebi; faz kapsamı ve kapanış koşulları değiştirilmedi |
+| Tarih | Değişiklik |
+|---|---|
+| 2026-08-31 | Plan 1.0 ve public repo başlangıcı oluşturuldu |
+| 2026-08-31 | Kullanıcının verdiği isimlerle Mehmet=A, Utku=B, Mert=C başlangıç dağılımı yapıldı |
+| 2026-08-31 | Görüşülen sadeleştirme isimli görev planına işlendi: hafif P0, P1 koruma, P2 CI, P3 oynanış kontrolü ve tek bölgelik ilk sürüm; hiçbir oyun fazı tamamlanmadı |
