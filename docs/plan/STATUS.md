@@ -31,7 +31,7 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 | Git ve varlık düzeni | İlk .gitignore, Force Text ve Visible Meta Files ayarları Mehmet'in P0-A önkoşulu olarak önerildi; Utku incelemesi bekleniyor. Klasör/sahne sahipliği ve büyük varlıktan önce LFS P0-B'de |
 | Repo ana dalı | main; ilk plan paylaşıldı |
 | Ekip erişim testi | Mehmet kendi P0 branch'ini pushladı; başkasının birleşmiş değişikliğini alma açık. Utku/Mert write davetleri henüz kabul edilmedi; gerçek erişim testleri bekliyor. Mert koordine eder |
-| Örnek build | `P0-A-9596244`, kaynak `9596244`; [yayınlanmamış Windows ZIP](https://github.com/mehmetalisahingm/DeepDiveGame/releases/tag/untagged-7da6b5907df23077c77e), [kurulum/build rehberi](../SETUP.md). İki yerel derleme ve Mehmet'in bilgisayarında Codex görsel kontrolü başarılı; Utku/Mert'in aynı build'i çalıştırması bekliyor |
+| Örnek build | `P0-A-9596244`, kaynak `9596244`; [yayınlanmamış Windows ZIP](https://github.com/mehmetalisahingm/DeepDiveGame/releases), [kurulum/build rehberi](../SETUP.md). İki yerel derleme ve Mehmet'in bilgisayarında Codex görsel kontrolü başarılı; Utku/Mert'in aynı build'i çalıştırması bekliyor |
 | Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
 | Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
 | Performans ortamı | P4 sonunda ölçümden önce sabitlenecek; öneri 1080p/60 FPS |
