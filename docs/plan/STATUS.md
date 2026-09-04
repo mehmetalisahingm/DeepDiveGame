@@ -8,7 +8,7 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 - `codex/p0-mehmet-foundation` dalında URP kamera/ışık/küp örneği ve Windows build komutu hazır. Windows x64/Mono build alındı; Mehmet'in bilgisayarında Codex ile [görsel kontrol geçti](../evidence/P0-A-9596244-visual-check.md). Diğer bilgisayarların testleri bekliyor; bu değişiklikler henüz faz dalına veya main'e birleşmedi.
 - P1–P6 KILITLI. P0'ın açılması sonraki fazlara geçiş veya herhangi bir görevin tamamlanması değildir.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
-- Utkuuzun14 ve MertKAYAR hesaplarına yazma (write) daveti gönderildi; kabul ve gerçek push/pull testi bekleniyor. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
+- MertKAYAR write davetini kabul etti; gerçek push/pull testi bekleniyor. Utkuuzun14 daveti hâlâ bekliyor. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi veya ekip kapanış kaydı yok. Mehmet'in yerel build/dosya kontrolleri P0 kapanışı değildir.
 - Ortak sorumlular atandı; P0 ekip toplantısı tamamlanmadı. Kaynak/üretim yöntemi, saatler, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık.
 
@@ -30,7 +30,7 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 | Yerel kod araçları | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diğer bilgisayarlar doğrulanmadı |
 | Git ve varlık düzeni | İlk .gitignore, Force Text ve Visible Meta Files ayarları Mehmet'in P0-A önkoşulu olarak önerildi; Utku incelemesi bekleniyor. Klasör/sahne sahipliği ve büyük varlıktan önce LFS P0-B'de |
 | Repo ana dalı | main; ilk plan paylaşıldı |
-| Ekip erişim testi | Mehmet kendi P0 branch'ini pushladı; başkasının birleşmiş değişikliğini alma açık. Utku/Mert write davetleri henüz kabul edilmedi; gerçek erişim testleri bekliyor. Mert koordine eder |
+| Ekip erişim testi | Mehmet kendi P0 branch'ini pushladı. Mert'in write erişimi aktif; kendi branch push/pull testi bekliyor. Utku'nun davet kabulü bekleniyor. Mert koordine eder |
 | Örnek build | `P0-A-9596244`, kaynak `9596244`; [yayınlanmamış Windows ZIP](https://github.com/mehmetalisahingm/DeepDiveGame/releases), [kurulum/build rehberi](../SETUP.md). İki yerel derleme ve Mehmet'in bilgisayarında Codex görsel kontrolü başarılı; Utku/Mert'in aynı build'i çalıştırması bekliyor |
 | Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
 | Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
@@ -57,7 +57,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 |---|---|---|---|
 | P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4): proje, sürüm, sahne, Windows build, yerel görsel kontrol, branch push ve Mert'e ihtiyaç listesi hazır. Utku incelemesi, diğer bilgisayarların testleri, başkasının birleşmiş değişikliğini alma ve gerçek ortak kararlar bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap biliniyor, davet kabulü ve dosya düzeni bekliyor |
-| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); görsel/ses kaynak planı, saat/donanım, karar kaydı ve erişim testi bekliyor |
+| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); write erişimi aktif. Görsel/ses kaynak planı, saat/donanım, karar kaydı, temiz klon ve gerçek push/pull testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
@@ -128,3 +128,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Kullanıcının verdiği Utkuuzun14 ve MertKAYAR hesaplarına write davetleri gönderildi ve GitHub API üzerinden doğrulandı; davet kabulü veya gerçek push/pull testi tamamlandı sayılmadı |
 | 2026-08-31 | Mehmet'in P0-A isteğiyle ortak URP projesi, sabit sürümler, örnek sahne ve tekrarlanabilir Windows build hazırlandı. Yerel derleme ve .meta/önbellek kontrolleri yapıldı. Görsel kontrol Esc sonrası ekran aracında sürdürülemedi; yapılmış sayılmadı. Utku incelemesi, diğer bilgisayarlar ve gerçek ekip kararları açık; P0 kapanmadı |
 | 2026-08-31 | Kullanıcının yeni görsel kontrol isteğinde ekran bağlantısı yenilendi. Gerçek P0 Windows penceresinde küp, zemin, ışık/gölge ve arka plan doğrulandı; ekran görüntüsü kanıtı kaydedildi. Önceki görsel test engeli kapandı. Diğer kişilerin testi/onayı üretilmedi; P0 açık kaldı |
+| 2026-09-04 | MertKAYAR'ın depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #3 Mert'e atandı. Gerçek branch push/pull ve temiz klon testleri henüz yapılmadı |

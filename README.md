@@ -26,7 +26,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 | **Utku (B)** | .gitignore/.meta, klasör ve sahne sahipliği, ilk Unity dosyalarının kontrolü | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
 | **Mert (C)** | Görsel/ses ihtiyaç ve kaynak planı; ekip bilgileri, karar kaydı desteği, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
 
-**İlk iş:** Utku (**Utkuuzun14**) ve Mert (**MertKAYAR**), gönderilen [yazma erişimi davetini](https://github.com/mehmetalisahingm/DeepDiveGame/invitations) kendi hesaplarıyla kabul etsin. Üçünüz de [Mert'in ekip kaydına](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) haftalık yaklaşık saatinizi ve temel donanımınızı yazın. Davet gönderildi; kabul ve gerçek push/pull testi henüz doğrulanmadı.
+**İlk iş:** Mert'in (**MertKAYAR**) write erişimi aktif; kendi branch push/pull testi bekliyor. Utku (**Utkuuzun14**) [yazma erişimi davetini](https://github.com/mehmetalisahingm/DeepDiveGame/invitations) kabul etsin. Üçünüz de [Mert'in ekip kaydına](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) haftalık yaklaşık saatinizi ve temel donanımınızı yazın.
 
 **Oyun kodundan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) açık ayrıntıları görüşün: kaynak yöntemi, gerçek saatler, devam/ayrılma planı, ürün hedefi, bütçe ve netcode yedeği. Sorumlular kullanıcı tarafından atandı; Mehmet takip eder, Mert kayda destek olur. Atama süre/harcama taahhüdü, uzmanlık kanıtı veya fazın tamamlanması değildir. Proje/sürüm/erişim hazırlığı sürebilir.
 
