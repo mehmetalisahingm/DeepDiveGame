@@ -14,13 +14,13 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 
 ## Ekip
 
-| Rol | Kişi | GitHub hesabı | Haftalık saat | Temel bilgisayar özellikleri |
-|---|---|---|---|---|
-| A | Mehmet | mehmetalisahingm | Henüz verilmedi | Yerelde doğrulandı: i5-12450H, 16 GB RAM, NVIDIA GTX 1650 / Intel UHD |
-| B | Utku | Utkuuzun14 | Henüz verilmedi | Henüz verilmedi |
-| C | Mert | MertKAYAR | Henüz verilmedi | Intel Core i5, RTX 4050, 16 GB RAM, Windows 11 |
+| Rol | Kişi | GitHub hesabı | Haftalık çalışma kapasitesi |
+|---|---|---|---|
+| A | Mehmet | mehmetalisahingm | Henüz verilmedi |
+| B | Utku | Utkuuzun14 | Henüz verilmedi |
+| C | Mert | MertKAYAR | Henüz verilmedi |
 
-İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır. Mert kendi Unity/C#, ağ kodu ve görsel/ses deneyimini "deneyim yok" olarak bildirdi; bu uzmanlık iddiası değildir. Mert bilgileri toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya özel cihaz adı, seri numarası veya gereksiz kişisel bilgi yazılmaz.
+İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; uzmanlık iddiası değildir. Mert çalışma kapasitesini toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya gereksiz kişisel bilgi yazılmaz.
 
 ## Ortam ve araçlar
 
@@ -57,7 +57,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 |---|---|---|---|
 | P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4): proje, sürüm, sahne, Windows build, yerel görsel kontrol, branch push ve Mert'e ihtiyaç listesi hazır. Utku incelemesi, diğer bilgisayarların testleri, başkasının birleşmiş değişikliğini alma ve gerçek ortak kararlar bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); write erişimi aktif ve görev Utku'ya atandı. Gerçek push/pull testi, dosya düzeni ve PR #4 incelemesi bekliyor |
-| P0-C | Mert | DEVAM | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); write erişimi aktif. Mert kendi donanım ve deneyim bilgisini verdi; haftalık saatini boş bıraktı. Diğer ekip bilgileri, görsel/ses kaynak planı, karar kaydı, temiz klon, build ve gerçek push/pull testi bekliyor. Eksikler nedeniyle erken kapatılan görev yeniden açıldı |
+| P0-C | Mert | DEVAM | [Görev #3 / ekip kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); write erişimi aktif. Haftalık çalışma kapasitesi, görsel/ses kaynak planı, karar kaydı, temiz klon, build ve gerçek push/pull testi bekliyor. Eksikler nedeniyle erken kapatılan görev yeniden açıldı |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
@@ -130,4 +130,5 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Kullanıcının yeni görsel kontrol isteğinde ekran bağlantısı yenilendi. Gerçek P0 Windows penceresinde küp, zemin, ışık/gölge ve arka plan doğrulandı; ekran görüntüsü kanıtı kaydedildi. Önceki görsel test engeli kapandı. Diğer kişilerin testi/onayı üretilmedi; P0 açık kaldı |
 | 2026-09-04 | MertKAYAR'ın depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #3 Mert'e atandı. Gerçek branch push/pull ve temiz klon testleri henüz yapılmadı |
 | 2026-09-04 | Utkuuzun14 hesabının depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #2 Utku'ya atandı. Gerçek branch push/pull ve P0-B testleri henüz yapılmadı |
-| 2026-09-04 | Mert kendi donanım ve deneyim bilgisini görev #3'e yazdı; haftalık saat boş kaldı ve diğer P0-C teslimleri için branch/commit/PR/test kanıtı oluşmadı. Erken kapatılan görev yeniden açıldı |
+| 2026-09-04 | Mert'in erken kapattığı görev #3, P0-C teslimleri için branch/commit/PR/test kanıtı oluşmadığından yeniden açıldı |
+| 2026-09-04 | Kullanıcı kararıyla kişisel bilgisayar özelliklerini toplama işi P0'dan çıkarıldı; mevcut donanım ayrıntıları repo ve görev kayıtlarından kaldırıldı |

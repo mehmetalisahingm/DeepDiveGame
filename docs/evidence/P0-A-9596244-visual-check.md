@@ -1,6 +1,6 @@
 # P0 Windows görsel kontrolü
 
-31 Ağustos 2026 — Mehmet'in bilgisayarında Codex ile gerçek Windows build penceresi kontrol edildi. Build: `P0-A-9596244`, kaynak: `9596244`. Unity 6000.3.23f1, URP 17.3.0, Windows x64/Mono, GTX 1650 / Direct3D 11.
+31 Ağustos 2026 — Mehmet'in bilgisayarında Codex ile gerçek Windows build penceresi kontrol edildi. Build: `P0-A-9596244`, kaynak: `9596244`. Unity 6000.3.23f1, URP 17.3.0, Windows x64/Mono.
 
 **Sonuç: geçti.** Koyu mavi arka plan, düz zemin ve turkuaz küp görünüyor. Küp yüzlerinde ışık farkı ve zeminde gölge mevcut; pembe materyal, boş ekran veya görünür bozuk çizim yok. Alt+F4 ile normal kapanış ve test penceresinin kapanması da doğrulandı.
 

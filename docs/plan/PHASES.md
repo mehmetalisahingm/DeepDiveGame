@@ -46,7 +46,7 @@ Amaç: kısa kurulum, çalışan örnek build ve üç kişinin değişiklik payl
 |---|---|---|
 | P0-A | Mehmet | Unity/URP projesini açar; tam editör/paket sürümünü sabitler; kamera, ışık ve basit nesneli sahneyi hazırlar; Windows build alır. Repo erişimlerini sağlar; ortak kararları, kapasite/bütçe/hedef ve netcode yedek/öğrenme planını takip eder. |
 | P0-B | Utku | Unity .gitignore, görünür .meta ve metin serileştirme ayarlarını düzenler; oyuncu/dünya/kasaba klasör ve sahne sahipliğini belirler; Mehmet'in ilk Unity commit'ini gereksiz dosya/referans açısından kontrol eder. |
-| P0-C | Mert | Üç kişinin hesap/saat/donanım bilgilerini toplar; Mehmet'in takip ettiği D01–D11 ve T01–T07 kararlarını kaydeder. Görsel/ses için kısa ihtiyaç ve kaynak/üretim planı hazırlar; erişim testini koordine eder; temiz klondan projeyi açıp kurulum rehberini doğrular. |
+| P0-C | Mert | Üç kişinin haftalık çalışma kapasitesini toplar; Mehmet'in takip ettiği D01–D11 ve T01–T07 kararlarını kaydeder. Görsel/ses için kısa ihtiyaç ve kaynak/üretim planı hazırlar; erişim testini koordine eder; temiz klondan projeyi açıp kurulum rehberini doğrular. |
 
 Birlikte: herkes kendi deneme branch'ine küçük bir değişiklik pushlar; başkasının birleşmiş değişikliğini alır. Mert'in görevi erişimi koordine etmektir; yönetici izni gerektiren işlemi Mehmet yapar.
 
