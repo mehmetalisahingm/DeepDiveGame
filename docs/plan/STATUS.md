@@ -10,17 +10,17 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
 - MertKAYAR ve Utkuuzun14 write davetlerini kabul etti; ikisinin de gerçek push/pull testi bekleniyor. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi veya ekip kapanış kaydı yok. Mehmet'in yerel build/dosya kontrolleri P0 kapanışı değildir.
-- Ortak sorumlular atandı; P0 ekip toplantısı tamamlanmadı. Kaynak/üretim yöntemi, saatler, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık.
+- Ortak sorumlular atandı; P0 ekip toplantısı tamamlanmadı. Kaynak/üretim yöntemi, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık.
 
 ## Ekip
 
-| Rol | Kişi | GitHub hesabı | Haftalık çalışma kapasitesi |
-|---|---|---|---|
-| A | Mehmet | mehmetalisahingm | Henüz verilmedi |
-| B | Utku | Utkuuzun14 | Henüz verilmedi |
-| C | Mert | MertKAYAR | Henüz verilmedi |
+| Rol | Kişi | GitHub hesabı |
+|---|---|---|
+| A | Mehmet | mehmetalisahingm |
+| B | Utku | Utkuuzun14 |
+| C | Mert | MertKAYAR |
 
-İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; uzmanlık iddiası değildir. Mert çalışma kapasitesini toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya gereksiz kişisel bilgi yazılmaz.
+İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; uzmanlık iddiası değildir. Repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya gereksiz kişisel bilgi yazılmaz.
 
 ## Ortam ve araçlar
 
@@ -57,7 +57,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 |---|---|---|---|
 | P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4): proje, sürüm, sahne, Windows build, yerel görsel kontrol, branch push ve Mert'e ihtiyaç listesi hazır. Utku incelemesi, diğer bilgisayarların testleri, başkasının birleşmiş değişikliğini alma ve gerçek ortak kararlar bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); write erişimi aktif ve görev Utku'ya atandı. Gerçek push/pull testi, dosya düzeni ve PR #4 incelemesi bekliyor |
-| P0-C | Mert | DEVAM | [Görev #3 / ekip kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); write erişimi aktif. Haftalık çalışma kapasitesi, görsel/ses kaynak planı, karar kaydı, temiz klon, build ve gerçek push/pull testi bekliyor. Eksikler nedeniyle erken kapatılan görev yeniden açıldı |
+| P0-C | Mert | DEVAM | [Görev #3](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); write erişimi aktif. Görsel/ses kaynak planı, karar kaydı, temiz klon, build ve gerçek push/pull testi bekliyor. Eksikler nedeniyle erken kapatılan görev yeniden açıldı |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
@@ -79,7 +79,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 
 ## Alt iş ve destek devri
 
-P0-A için Mehmet asgari `.gitignore`, görünür `.meta` ve metin serileştirme ayarlarını önerdi; [P0-B koordinasyon kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2#issuecomment-5483065421) açıldı. Utku sahipliği/incelemesi korunur, P0-B tamamlandı sayılmaz. [Mehmet'in oyuncu görsel/ses ihtiyaçları](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3#issuecomment-5483112818) Mert'in kaydına eklendi. Gerçek kapasite bilinmediği için süre tahmini yapılmadı.
+P0-A için Mehmet asgari `.gitignore`, görünür `.meta` ve metin serileştirme ayarlarını önerdi; [P0-B koordinasyon kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2#issuecomment-5483065421) açıldı. Utku sahipliği/incelemesi korunur, P0-B tamamlandı sayılmaz. [Mehmet'in oyuncu görsel/ses ihtiyaçları](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3#issuecomment-5483112818) Mert'in kaydına eklendi.
 
 ## D01–D11 kısa karar kaydı
 
@@ -101,7 +101,7 @@ Kararların ayrıntısı PHASES içindedir. İsimli plan yazılması, ekip gör�
 
 ## P0 ekip kararları
 
-[Toplantı gündemi ve tek karar tablosu](P0_MEETING.md) T01–T07'nin kaynağıdır. Kullanıcı atamasıyla görsel/ses üretimi ve tutarlılık Mert'te; takvim/kapasite, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesi Mehmet'tedir. Mehmet kararları takip eder, Mert kayda destek olur. Netcode yedeği, bütçe/gelir paylaşımı, ticari hedef ve teslim tarihi belirlenmedi. Atamalar uzmanlık kanıtı veya üç kişinin tamamı değildir; oyun testi yapılmadı.
+[Toplantı gündemi ve tek karar tablosu](P0_MEETING.md) T01–T07'nin kaynağıdır. Kullanıcı atamasıyla görsel/ses üretimi ve tutarlılık Mert'te; takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesi Mehmet'tedir. Mehmet kararları takip eder, Mert kayda destek olur. Netcode yedeği, bütçe/gelir paylaşımı, ticari hedef ve teslim tarihi belirlenmedi. Atamalar uzmanlık kanıtı veya üç kişinin tamamı değildir; oyun testi yapılmadı.
 
 ## Faz kapanışı
 
@@ -121,8 +121,8 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-08-31 | Plan 1.0 ve public repo başlangıcı oluşturuldu |
 | 2026-08-31 | Kullanıcının verdiği isimlerle Mehmet=A, Utku=B, Mert=C başlangıç dağılımı yapıldı |
 | 2026-08-31 | Görüşülen sadeleştirme isimli görev planına işlendi: hafif P0, P1 koruma, P2 CI, P3 oynanış kontrolü ve tek bölgelik ilk sürüm; hiçbir oyun fazı tamamlanmadı |
-| 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hesap/saat bilgileri uydurulmadı, hiçbir oyun testi tamamlandı sayılmadı |
-| 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, kapasite/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |
+| 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hiçbir oyun testi tamamlandı sayılmadı |
+| 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, devam/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |
 | 2026-08-31 | Plan 1.4: kullanıcının ortak sorumlulukları üstlenme ve görsel/sesi Mert'e verme talimatı işlendi. Diğer geliştirme işleri, gerçek testler ve üç kişilik faz kapısı korundu; uzmanlık, harcama veya tamam kaydı üretilmedi |
 | 2026-08-31 | Kullanıcının indirme/kurulum isteğiyle Mehmet'in bilgisayarına Unity 6000.3.23f1, Windows IL2CPP desteği ve VS Code Unity/C# eklentileri kuruldu. Unity sürümü, imzası ve Windows modül dosyaları doğrulandı; eski Unity korundu. Proje, lisansla proje açılışı ve build testi yapılmadı; P0 kapanmadı |
 | 2026-08-31 | Kullanıcının verdiği Utkuuzun14 ve MertKAYAR hesaplarına write davetleri gönderildi ve GitHub API üzerinden doğrulandı; davet kabulü veya gerçek push/pull testi tamamlandı sayılmadı |
@@ -131,4 +131,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-09-04 | MertKAYAR'ın depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #3 Mert'e atandı. Gerçek branch push/pull ve temiz klon testleri henüz yapılmadı |
 | 2026-09-04 | Utkuuzun14 hesabının depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #2 Utku'ya atandı. Gerçek branch push/pull ve P0-B testleri henüz yapılmadı |
 | 2026-09-04 | Mert'in erken kapattığı görev #3, P0-C teslimleri için branch/commit/PR/test kanıtı oluşmadığından yeniden açıldı |
-| 2026-09-04 | Kullanıcı kararıyla kişisel bilgisayar özelliklerini toplama işi P0'dan çıkarıldı; mevcut donanım ayrıntıları repo ve görev kayıtlarından kaldırıldı |
+| 2026-09-04 | P0-C görevi kullanıcı kararıyla kişisel bilgi toplamadan yalnızca proje teslimlerine odaklanacak şekilde sadeleştirildi |

@@ -12,9 +12,9 @@ Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md)
 | Utku | B | Sualtı bölgesi, canlılar, avlanma ve kamera hedefinin değerlendirilmesi |
 | Mert | C | Kasaba, oturum ekranları, envanter, ekonomi, ilerleme ve kayıt |
 
-Bu bir başlangıç atamasıdır; deneyim seviyeleri ve haftalık saatler henüz bilinmiyor. Herkes kendi alanının kodunu, gerekli arayüzünü ve co-op testini birlikte teslim eder. Bütün ağ kodu Mehmet'e, bütün görsel üretim Utku'ya veya bütün test Mert'e bırakılmaz.
+Bu bir başlangıç atamasıdır; deneyim seviyeleri henüz bilinmiyor. Herkes kendi alanının kodunu, gerekli arayüzünü ve co-op testini birlikte teslim eder. Bütün ağ kodu Mehmet'e, bütün görsel üretim Utku'ya veya bütün test Mert'e bırakılmaz.
 
-Kullanıcının son ataması: **Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığın sahibidir. Mehmet takvim/kapasite, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesinin sahibidir.** Ayrıntılı sınırlar [P0_MEETING](P0_MEETING.md) içindedir. Bu ortak sorumluluklar mevcut geliştirme işlerini devretmez: herkes Mert'in sağladığı görsel/sesi kendi sistemine bağlar ve test eder. Mert'in üretim yükü de dengelenir; her varlığı sıfırdan kendisinin yapması şart değildir.
+Kullanıcının son ataması: **Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığın sahibidir. Mehmet takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesinin sahibidir.** Ayrıntılı sınırlar [P0_MEETING](P0_MEETING.md) içindedir. Bu ortak sorumluluklar mevcut geliştirme işlerini devretmez: herkes Mert'in sağladığı görsel/sesi kendi sistemine bağlar ve test eder. Mert'in üretim yükü de dengelenir; her varlığı sıfırdan kendisinin yapması şart değildir.
 
 İş yükü küçük alt görevlerle ve gerçek çalışma süresiyle dengelenir. Erken bitiren kişi aynı fazın incelemesini/testini veya kayıtlı bir destek işini alır. Hiç kimse tek başına sonraki faza geçmez.
 
@@ -22,7 +22,7 @@ Kullanıcının son ataması: **Mert görsel/ses üretimi, kaynak seçimi ve tut
 
 Çekirdek oyun: küçük kasabada hazırlan → dalışa git → avla ve kaydet → oksijen bitmeden dön → gelir elde et → ekipman geliştir → tekrar dal.
 
-P0'da aşağıdaki çalışma kararları ve [kısa toplantı gündemi](P0_MEETING.md) toplam 45–60 dakikalık görüşmede ele alınır. Görsel/ses üretimi, kapasite/ayrılma, ürün hedefi, bütçe, tasarım yetkisi ve insan netcode sorumluluğu oyun kodundan önce konuşulur; öneriler ekip kararı sayılmaz. Teknik ayrıntılar ihtiyaç duyulan fazdan önce netleşir; P0'da tüm geleceğin API tasarımı yapılmaz. Kaynak konsept yalnızca dalış ekipmanları dükkânını adlandırıyor; diğer hizmetlerin adları varsayımdır.
+P0'da aşağıdaki çalışma kararları ve [kısa toplantı gündemi](P0_MEETING.md) toplam 45–60 dakikalık görüşmede ele alınır. Görsel/ses üretimi, devam/ayrılma, ürün hedefi, bütçe, tasarım yetkisi ve insan netcode sorumluluğu oyun kodundan önce konuşulur; öneriler ekip kararı sayılmaz. Teknik ayrıntılar ihtiyaç duyulan fazdan önce netleşir; P0'da tüm geleceğin API tasarımı yapılmaz. Kaynak konsept yalnızca dalış ekipmanları dükkânını adlandırıyor; diğer hizmetlerin adları varsayımdır.
 
 | Kimlik | Başlangıç kararı | Sınır |
 |---|---|---|
@@ -44,20 +44,20 @@ Amaç: kısa kurulum, çalışan örnek build ve üç kişinin değişiklik payl
 
 | Görev | Sorumlu | Yapacağı iş |
 |---|---|---|
-| P0-A | Mehmet | Unity/URP projesini açar; tam editör/paket sürümünü sabitler; kamera, ışık ve basit nesneli sahneyi hazırlar; Windows build alır. Repo erişimlerini sağlar; ortak kararları, kapasite/bütçe/hedef ve netcode yedek/öğrenme planını takip eder. |
+| P0-A | Mehmet | Unity/URP projesini açar; tam editör/paket sürümünü sabitler; kamera, ışık ve basit nesneli sahneyi hazırlar; Windows build alır. Repo erişimlerini sağlar; ortak kararları, bütçe/hedef ve netcode yedek/öğrenme planını takip eder. |
 | P0-B | Utku | Unity .gitignore, görünür .meta ve metin serileştirme ayarlarını düzenler; oyuncu/dünya/kasaba klasör ve sahne sahipliğini belirler; Mehmet'in ilk Unity commit'ini gereksiz dosya/referans açısından kontrol eder. |
-| P0-C | Mert | Üç kişinin haftalık çalışma kapasitesini toplar; Mehmet'in takip ettiği D01–D11 ve T01–T07 kararlarını kaydeder. Görsel/ses için kısa ihtiyaç ve kaynak/üretim planı hazırlar; erişim testini koordine eder; temiz klondan projeyi açıp kurulum rehberini doğrular. |
+| P0-C | Mert | Mehmet'in takip ettiği D01–D11 ve T01–T07 kararlarını kaydeder. Görsel/ses için kısa ihtiyaç ve kaynak/üretim planı hazırlar; erişim testini koordine eder; temiz klondan projeyi açıp kurulum rehberini doğrular. |
 
 Birlikte: herkes kendi deneme branch'ine küçük bir değişiklik pushlar; başkasının birleşmiş değişikliğini alır. Mert'in görevi erişimi koordine etmektir; yönetici izni gerektiren işlemi Mehmet yapar.
 
-Toplantı hazırlığı da paylaşılır: Mehmet ekipman/HUD, Utku sualtı/canlı/VFX ihtiyaçlarını Mert'e verir; Mert bunları kasaba/UI ihtiyaçlarıyla birleştirir. Herkes kapasitesini ve ağ deneyimini belirtir. Sorumlular kullanıcı tarafından atandı; kaynak yöntemi, saat, bütçe tutarı ve netcode yedeği hâlâ açık. Atama uzmanlık kanıtı, satın alma veya faz kapanışı değildir.
+Toplantı hazırlığı da paylaşılır: Mehmet ekipman/HUD, Utku sualtı/canlı/VFX ihtiyaçlarını Mert'e verir; Mert bunları kasaba/UI ihtiyaçlarıyla birleştirir. Herkes ağ deneyimini belirtir. Sorumlular kullanıcı tarafından atandı; kaynak yöntemi, bütçe tutarı ve netcode yedeği hâlâ açık. Atama uzmanlık kanıtı, satın alma veya faz kapanışı değildir.
 
 Bitiş koşulları:
 - [ ] Üç kişi aynı sürümle ortak projeyi açıyor.
 - [ ] Üç kişi kendi branch'ine pushlayıp birleşmiş değişikliği alabiliyor.
 - [ ] Mehmet'in ürettiği örnek Windows build'i üç bilgisayarda çalışıyor; üç ayrı build üretmek şart değil.
 - [ ] .gitignore/.meta düzeni doğru; gerekli sürümler ve kısa kurulum adımları kayıtlı.
-- [ ] Kişiler/kapasiteler, D01–D11 başlangıç kararları ve P1 bağlantı tipleri kısa biçimde kaydedildi.
+- [ ] D01–D11 başlangıç kararları ve P1 bağlantı tipleri kısa biçimde kaydedildi.
 - [ ] P0_MEETING içindeki T01–T07 için uygulanabilir çalışma kararları kaydedildi; ertelenen seçimlerin geçici sınırı, sorumlusu ve takip noktası belli. İnsan netcode sorumlusu/yedeği ve D06 sınırı açık.
 
 Birleştirmeyi koordine eden: Mehmet.

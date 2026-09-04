@@ -12,7 +12,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
 - Plan 1.4: görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te. Sade P0, P2/P3 oynama testleri, temel his katmanı ve tek bölge kapsamı korunur.
 
-**Ortak sorumluluklar:** Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığı yönetir. Mehmet takvim/kapasite, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Utku'nun ve Mert'in mevcut geliştirme işleri korunur; herkes kendi sisteminin entegrasyonunu ve co-op testini yapar.
+**Ortak sorumluluklar:** Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığı yönetir. Mehmet takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Utku'nun ve Mert'in mevcut geliştirme işleri korunur; herkes kendi sisteminin entegrasyonunu ve co-op testini yapar.
 
 **Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. Depo kökünü Unity Hub'a ekle; `Assets/P0/Scenes/P0Example.unity` sahnesini aç. [Kısa kurulum ve tek komutla Windows build](docs/SETUP.md). Build ve Mehmet'in bilgisayarında Codex ile [görsel kontrol](docs/evidence/P0-A-9596244-visual-check.md) başarılı; diğer iki bilgisayarın testi bekliyor.
 
@@ -24,11 +24,11 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 |---|---|---|
 | **Mehmet (A)** | Unity/URP projesi, sürüm, sahne/build, erişimler; ortak karar takibi ve netcode yedek/öğrenme planı | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
 | **Utku (B)** | .gitignore/.meta, klasör ve sahne sahipliği, ilk Unity dosyalarının kontrolü | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
-| **Mert (C)** | Görsel/ses ihtiyaç ve kaynak planı; ekip bilgileri, karar kaydı desteği, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
+| **Mert (C)** | Görsel/ses ihtiyaç ve kaynak planı; karar kaydı desteği, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
 
-**İlk iş:** Mert'in (**MertKAYAR**) ve Utku'nun (**Utkuuzun14**) write erişimi aktif; ikisinin de kendi branch'inde gerçek push/pull testi bekliyor. Üçünüz de [Mert'in ekip kaydına](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) haftalık yaklaşık çalışma kapasitenizi yazın.
+**İlk iş:** Mert'in (**MertKAYAR**) ve Utku'nun (**Utkuuzun14**) write erişimi aktif; ikisinin de kendi branch'inde gerçek push/pull testi bekliyor.
 
-**Oyun kodundan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) açık ayrıntıları görüşün: kaynak yöntemi, gerçek saatler, devam/ayrılma planı, ürün hedefi, bütçe ve netcode yedeği. Sorumlular kullanıcı tarafından atandı; Mehmet takip eder, Mert kayda destek olur. Atama süre/harcama taahhüdü, uzmanlık kanıtı veya fazın tamamlanması değildir. Proje/sürüm/erişim hazırlığı sürebilir.
+**Oyun kodundan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) açık ayrıntıları görüşün: kaynak yöntemi, devam/ayrılma planı, ürün hedefi, bütçe ve netcode yedeği. Sorumlular kullanıcı tarafından atandı; Mehmet takip eder, Mert kayda destek olur. Atama süre/harcama taahhüdü, uzmanlık kanıtı veya fazın tamamlanması değildir. Proje/sürüm/erişim hazırlığı sürebilir.
 
 **D06 sınırı:** Kayıt sahibi host yoksa aynı kampanyaya devam edilemez. Başka host ayrı kampanya açabilir; ilerleme otomatik taşınmaz. V1'e bulut kayıt veya host devri eklenmedi.
 
