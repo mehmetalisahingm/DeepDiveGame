@@ -14,13 +14,13 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 
 ## Ekip
 
-| Rol | Kişi | GitHub hesabı | Haftalık saat | Temel bilgisayar özellikleri |
-|---|---|---|---|---|
-| A | Mehmet | mehmetalisahingm | Henüz verilmedi | Henüz verilmedi |
-| B | Utku | Utkuuzun14 | Henüz verilmedi | Henüz verilmedi |
-| C | Mert | MertKAYAR | Henüz verilmedi | Henüz verilmedi |
+| Rol | Kişi | GitHub hesabı | Haftalık çalışma kapasitesi |
+|---|---|---|---|
+| A | Mehmet | mehmetalisahingm | Henüz verilmedi |
+| B | Utku | Utkuuzun14 | Henüz verilmedi |
+| C | Mert | MertKAYAR | Henüz verilmedi |
 
-İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; deneyimler bilinmediğinden uzmanlık iddiası değildir. Mert bilgileri toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya özel cihaz adı, seri numarası veya gereksiz kişisel bilgi yazılmaz.
+İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; deneyimler bilinmediğinden uzmanlık iddiası değildir. Mert çalışma kapasitesini toplar; repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya gereksiz kişisel bilgi yazılmaz.
 
 ## Ortam ve araçlar
 
@@ -57,7 +57,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 |---|---|---|---|
 | P0-A | Mehmet | BEKLIYOR | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1); uygulama/build ve ortak karar takibi bekliyor |
 | P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); hesap biliniyor, davet kabulü ve dosya düzeni bekliyor |
-| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip bilgileri](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); görsel/ses kaynak planı, saat/donanım, karar kaydı ve erişim testi bekliyor |
+| P0-C | Mert | BEKLIYOR | [Görev #3 / ekip kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); görsel/ses kaynak planı, çalışma kapasitesi, karar kaydı ve erişim testi bekliyor |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
 | P1-C | Mert | BEKLIYOR | Yok |
