@@ -37,7 +37,7 @@ P0 için build/erişim kontrolü yeterlidir. P1'den itibaren birleşen oyun davr
 
 Mehmet oyuncu/ekipman, Utku sualtı/canlı, Mert kasaba/ekonomi UI dosyalarının sahibidir. Herkesin ayrı test sahnesi olabilir ama proje ortaktır.
 
-Mert tüm alanların görsel/ses kaynak seçimi, üretim planı, lisans/atıf listesi ve tutarlılık kontrolünden sorumludur. Her alan sahibi bu kaynakları kendi sistemine bağlar ve test eder; Mert'in sahipliği başkasının sahnesini koordinasyonsuz değiştirme izni değildir. Mehmet genel takvim/kapasite ve bütçe/servis takibini yürütür; faz birleştirme koordinatörlerinin dönüşümü korunur.
+Mert tüm alanların görsel/ses kaynak seçimi, üretim planı, lisans/atıf listesi ve tutarlılık kontrolünden sorumludur. Her alan sahibi bu kaynakları kendi sistemine bağlar ve test eder; Mert'in sahipliği başkasının sahnesini koordinasyonsuz değiştirme izni değildir. Mehmet genel takvim ve bütçe/servis takibini yürütür; faz birleştirme koordinatörlerinin dönüşümü korunur.
 
 Ana sahne, input haritası, paket listesi, katman ve render ayarları birlikte koordine edilir. Aynı ana sahne/prefab üzerinde aynı anda çalışılmaz; ayrı parçalar birleştirilir. Dosya taşıma ve silmede .meta eşleşmesi korunur.
 
@@ -65,7 +65,7 @@ P2'de temel his katmanıyla hareket/av/oksijen-çanta, P3'te kamera/tam döngü/
 
 ## İş yükü ve değişiklik
 
-Haftalık saatler ve alt iş süreleriyle yükü kontrol edin. Erken bitiren, sahibinden devraldığı belirli alt işi yapabilir; hangi dosyayı değiştireceği kısa kayda yazılır. Eski fazdan gelen hata mevcut fazda bir düzeltme görevi olur ve ilgili regresyon tekrar denenir.
+İşleri küçük alt görevlere bölerek yükü kontrol edin. Erken bitiren, sahibinden devraldığı belirli alt işi yapabilir; hangi dosyayı değiştireceği kısa kayda yazılır. Eski fazdan gelen hata mevcut fazda bir düzeltme görevi olur ve ilgili regresyon tekrar denenir.
 
 Yeni özellik, ikinci bölge, faz sırası değişikliği veya zorunlu kabulün kaldırılması sessizce yapılamaz. Kullanıcının açık kararından sonra ilgili plan ve durum belgeleri birlikte güncellenir. Rutin uygulama tercihleri ve faz içi yardım için yeni bir tören gerekmez.
 

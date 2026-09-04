@@ -7,16 +7,16 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 - Mehmet (A): oyuncu, dalış, ekipman kullanımı ve temel oturum bağlantısı.
 - Utku (B): sualtı, canlılar, avlanma ve çekim hedefini değerlendirme.
 - Mert (C): kasaba, oturum ekranı, envanter, ekonomi, ilerleme ve kayıt.
-- Kullanıcı atamasıyla Mert ayrıca görsel/ses üretimi, kaynak seçimi ve tutarlılıktan sorumludur. Mehmet takvim/kapasite, devam/ayrılma planı, ürün hedefi, mevcut kapsamda tasarımın son kararı, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Mevcut geliştirme işleri ve faz koordinatörü dönüşümü korunur; netcode yedeği henüz seçilmedi.
+- Kullanıcı atamasıyla Mert ayrıca görsel/ses üretimi, kaynak seçimi ve tutarlılıktan sorumludur. Mehmet takvim, devam/ayrılma planı, ürün hedefi, mevcut kapsamda tasarımın son kararı, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Mevcut geliştirme işleri ve faz koordinatörü dönüşümü korunur; netcode yedeği henüz seçilmedi.
 - Herkes kendi sisteminin co-op davranışını ve testini de teslim eder. Bütün multiplayer işi Mehmet'e devredilemez.
-- GitHub hesabı, deneyim veya kapasite bilinmiyorsa uydurulmaz.
+- GitHub hesabı veya deneyim bilinmiyorsa uydurulmaz.
 
 ## Kapsam
 
 - PLAN_HAZIR, P0 planının hazır olduğunu ve Unity/oyun uygulamasının başlamadığını belirtir.
 - Sadece açık fazın verilen görevini uygula. Kullanıcının plan düzenleme isteği, oyun geliştirmesine veya sonraki faza geçmeye izin vermez.
 - P0 hafiftir: ortak sürüm, proje, dosya düzeni, ekip/erişim ve örnek build. Branch koruması P1'de, CI P2'de ele alınır.
-- P0 toplantısında docs/plan/P0_MEETING.md gündemi de ele alınır. Üretim, kapasite/ayrılma, hedef, bütçe, tasarım yetkisi ve netcode sorumluluğu önerilerini ekip kararı veya uzmanlık kanıtı sayma; gerçek kararları uydurma. Kayıt sahibi host olmadan aynı kampanyaya devam edilemeyeceği D06 sınırını koru.
+- P0 toplantısında docs/plan/P0_MEETING.md gündemi de ele alınır. Üretim, devam/ayrılma, hedef, bütçe, tasarım yetkisi ve netcode sorumluluğu önerilerini ekip kararı veya uzmanlık kanıtı sayma; gerçek kararları uydurma. Kayıt sahibi host olmadan aynı kampanyaya devam edilemeyeceği D06 sınırını koru.
 - Gelecek faz sözleşmeleri taslak olabilir; ihtiyaç duyulan fazdan önce kesinleşir. Bütün geleceğin API'sini P0'da uygulama.
 - İlk oynanabilir sürüm tek dalış bölgesidir. P2'de kontrol/av/oksijen-çanta testi, P3'te kamera ve tam döngü testi yapılmadan sonraki faza geçme; ikinci bölge ekleme.
 - P2/P3 testinden önce plandaki temel hareket, vuruş, nefes, UI ve sualtı ışık/sis geri bildirimini sağla. Nihai cila veya kapsamlı animasyon sistemi ekleme; his katmanını P4'e erteleme.
