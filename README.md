@@ -7,7 +7,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 ## Şu anki durum
 
 - Bu dalda ortak Unity/URP projesi ve kamera/ışık/küp içeren P0 örneği hazır; oyun mekanikleri henüz yok.
-- Aktif çalışma **P0 — Ortak temel (ACIK)**. Mehmet Windows build aldı; Unity temeli ve Utku'nun Git düzeni faz dalında birleşti. P0 main aktarımı PR #8 üzerinden yapılıyor; Utku ve Mert'in indirme/açma/build sonucu bekleniyor.
+- Aktif çalışma **P0 — Ortak temel (ACIK)**. Mehmet Windows build aldı; Unity temeli ve Utku'nun Git düzeni [PR #8](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8) ile main'e birleşti. Utku ve Mert'in indirme/açma/build sonucu bekleniyor.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
 - Plan 1.5: P0 ortak projeyi indirip açma ve örnek build'i çalıştırma düzeyine sadeleştirildi. Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
