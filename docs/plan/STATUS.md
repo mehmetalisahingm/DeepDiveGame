@@ -8,7 +8,7 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 - `codex/p0-mehmet-foundation` dalında URP kamera/ışık/küp örneği ve Windows build komutu hazır. Windows x64/Mono build alındı; Mehmet'in bilgisayarında Codex ile [görsel kontrol geçti](../evidence/P0-A-9596244-visual-check.md). Diğer bilgisayarların testleri bekliyor; bu değişiklikler henüz faz dalına veya main'e birleşmedi.
 - P1–P6 KILITLI. P0'ın açılması sonraki fazlara geçiş veya herhangi bir görevin tamamlanması değildir.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
-- MertKAYAR ve Utkuuzun14 write davetlerini kabul etti; ikisinin de gerçek push/pull testi bekleniyor. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
+- MertKAYAR ve Utkuuzun14 write davetlerini kabul etti. Utku'nun kendi branch'ine push atabildiği ve değişikliğinin faz dalına birleştiği PR #7 ile doğrulandı; Mert'in gerçek push/pull testi bekleniyor. Branch koruması P1, CI P2 görevidir; kurulu oldukları iddia edilmez.
 - Tamamlanmış oyun görevi veya ekip kapanış kaydı yok. Mehmet'in yerel build/dosya kontrolleri P0 kapanışı değildir.
 - Ortak sorumlular atandı; P0 ekip toplantısı tamamlanmadı. Kaynak/üretim yöntemi, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık.
 
@@ -28,9 +28,9 @@ Plan 1.4 — 31 Ağustos 2026. Kullanıcı görsel/sesi Mert'e, diğer ortak sor
 |---|---|
 | Unity/URP | Ortak proje depo kökünde; Unity 6000.3.23f1, URP 17.3.0, Visual Studio Editor 2.0.26 sabitlendi. Manifest ve paket kilidi kaynakta. Windows IL2CPP desteği kurulu; P0 örneği daha kısa derleme için Mono kullanıyor |
 | Yerel kod araçları | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diğer bilgisayarlar doğrulanmadı |
-| Git ve varlık düzeni | İlk .gitignore, Force Text ve Visible Meta Files ayarları Mehmet'in P0-A önkoşulu olarak önerildi; Utku incelemesi bekleniyor. Klasör/sahne sahipliği ve büyük varlıktan önce LFS P0-B'de |
+| Git ve varlık düzeni | Unity `.gitignore` ve `.gitattributes` kuralları Utku'nun [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7) değişikliğiyle faz dalına birleşti; LFS, Unity Smart Merge ve yerel/gizli dosya ignore kontrolleri geçti. Visible Meta Files, Force Text, klasör/sahne sahipliği ve PR #4 incelemesi P0-B'de açık |
 | Repo ana dalı | main; ilk plan paylaşıldı |
-| Ekip erişim testi | Mehmet kendi P0 branch'ini pushladı. Mert ve Utku'nun write erişimi aktif; kendi branch push/pull testleri bekliyor. Mert koordine eder |
+| Ekip erişim testi | Mehmet kendi P0 branch'ini pushladı ve Utku'nun faz dalına birleşmiş değişikliğini aldı. Utku'nun branch push ve merge testi PR #7 ile doğrulandı. Mert'in gerçek branch push/pull testi bekliyor; Mert koordine eder |
 | Örnek build | `P0-A-9596244`, kaynak `9596244`; [yayınlanmamış Windows ZIP](https://github.com/mehmetalisahingm/DeepDiveGame/releases), [kurulum/build rehberi](../SETUP.md). İki yerel derleme ve Mehmet'in bilgisayarında Codex görsel kontrolü başarılı; Utku/Mert'in aynı build'i çalıştırması bekliyor |
 | Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
 | Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
@@ -55,8 +55,8 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 
 | Görev | Sahip | Durum | Kanıt / kalan iş |
 |---|---|---|---|
-| P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4): proje, sürüm, sahne, Windows build, yerel görsel kontrol, branch push ve Mert'e ihtiyaç listesi hazır. Utku incelemesi, diğer bilgisayarların testleri, başkasının birleşmiş değişikliğini alma ve gerçek ortak kararlar bekliyor |
-| P0-B | Utku | BEKLIYOR | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2); write erişimi aktif ve görev Utku'ya atandı. Gerçek push/pull testi, dosya düzeni ve PR #4 incelemesi bekliyor |
+| P0-A | Mehmet | DEVAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4): proje, sürüm, sahne, Windows build, yerel görsel kontrol, branch push, Mert'e ihtiyaç listesi ve Utku'nun faz dalına birleşmiş değişikliğini alma hazır. Utku incelemesi, diğer bilgisayarların testleri ve gerçek ortak kararlar bekliyor |
+| P0-B | Utku | DEVAM | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2), [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7): branch push ile `.gitignore`/`.gitattributes` teslimi faz dalına birleşti; LFS, Smart Merge ve ignore kontrolleri geçti. Visible Meta Files, Force Text, klasör/sahne sahipliği, PR #4 incelemesi, projeyi açma ve birleşmiş değişikliği çekme testi bekliyor |
 | P0-C | Mert | DEVAM | [Görev #3](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3); write erişimi aktif. Görsel/ses kaynak planı, karar kaydı, temiz klon, build ve gerçek push/pull testi bekliyor. Eksikler nedeniyle erken kapatılan görev yeniden açıldı |
 | P1-A | Mehmet | BEKLIYOR | Yok |
 | P1-B | Utku | BEKLIYOR | Yok |
@@ -79,7 +79,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 
 ## Alt iş ve destek devri
 
-P0-A için Mehmet asgari `.gitignore`, görünür `.meta` ve metin serileştirme ayarlarını önerdi; [P0-B koordinasyon kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2#issuecomment-5483065421) açıldı. Utku sahipliği/incelemesi korunur, P0-B tamamlandı sayılmaz. [Mehmet'in oyuncu görsel/ses ihtiyaçları](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3#issuecomment-5483112818) Mert'in kaydına eklendi.
+P0-A için Mehmet asgari `.gitignore`, görünür `.meta` ve metin serileştirme ayarlarını önerdi; [P0-B koordinasyon kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2#issuecomment-5483065421) açıldı. Utku'nun `.gitignore` ve `.gitattributes` teslimi PR #7 ile faz dalına birleşti; diğer P0-B işleri açık olduğu için görev tamamlandı sayılmaz. [Mehmet'in oyuncu görsel/ses ihtiyaçları](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3#issuecomment-5483112818) Mert'in kaydına eklendi.
 
 ## D01–D11 kısa karar kaydı
 
@@ -132,3 +132,4 @@ Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz k
 | 2026-09-04 | Utkuuzun14 hesabının depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #2 Utku'ya atandı. Gerçek branch push/pull ve P0-B testleri henüz yapılmadı |
 | 2026-09-04 | Mert'in erken kapattığı görev #3, P0-C teslimleri için branch/commit/PR/test kanıtı oluşmadığından yeniden açıldı |
 | 2026-09-04 | P0-C görevi kullanıcı kararıyla kişisel bilgi toplamadan yalnızca proje teslimlerine odaklanacak şekilde sadeleştirildi |
+| 2026-09-06 | Utku'nun PR #7 değişikliği P0 faz dalına birleşti. Unity `.gitignore`, LFS ve Smart Merge kuralları doğrulandı; Mehmet birleşmiş değişikliği kendi branch'ine aldı. Visible Meta Files, Force Text, sahiplik, PR #4 incelemesi ve ekip testleri açık olduğundan P0-B ve P0 tamamlanmadı |
