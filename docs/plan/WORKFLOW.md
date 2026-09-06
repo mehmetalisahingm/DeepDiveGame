@@ -18,7 +18,7 @@ Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazı
 - Küçük özellik dalları o faz dalından açılır: codex/p2-mehmet-oxygen, codex/p2-utku-fish, codex/p2-mert-inventory.
 - Özellik PR'ı aynı faz dalına, faz kapanış PR'ı main'e gider.
 - Ayrı kişi branch'lerinde haftalarca birikim yapılmaz; küçük birleşmeler yapılır.
-- En az bir başka kişi değişikliği inceler: Mehmet'in işini Utku, Utku'nun işini Mert, Mert'in işini Mehmet.
+- P0'da karşılıklı PR incelemesi zorunlu değildir; ortak proje ve build'in üç kişide açılması yeterlidir. P1'den itibaren en az bir başka kişi değişikliği inceler: Mehmet'in işini Utku, Utku'nun işini Mert, Mert'in işini Mehmet.
 - Birleştirmeyi P0/P3/P6'da Mehmet, P1/P4'te Utku, P2/P5'te Mert koordine eder. Koordinatör herkesin kodunu yazmaz.
 
 Plan belgelerinin güncellenmesi oyun fazının kapanışı değildir. Kullanıcı talebine dayanan plan değişikliği ayrı dokümantasyon branch'inde hazırlanır; oyun testleri veya diğer kişilerin işi yapılmış sayılmaz.
@@ -41,21 +41,21 @@ Mert tüm alanların görsel/ses kaynak seçimi, üretim planı, lisans/atıf li
 
 Ana sahne, input haritası, paket listesi, katman ve render ayarları birlikte koordine edilir. Aynı ana sahne/prefab üzerinde aynı anda çalışılmaz; ayrı parçalar birleştirilir. Dosya taşıma ve silmede .meta eşleşmesi korunur.
 
-P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya nihai grafik varlık seçimi P0'ı bekletmez; Mert kaynak/üretim yöntemini P0'da netleştirir. Dış varlık ilk kez eklenmeden Mert kaynak/lisans/atıf ve public repoda ham dosya paylaşım iznini kontrol eder; Utku Git/varlık düzenine eklenmesini inceler. İzin belirsizse varlık eklenmez.
+P0'da .gitignore, görünür .meta ve metin serileştirme kurulur. Smart Merge yardımcıdır; sonucu editörde kontrol edilir. Git LFS uygun büyük ikili varlıklar ilk kez eklenmeden önce kurulur. CI veya nihai grafik varlık seçimi P0'ı bekletmez. Mert kaynak/üretim yöntemini ilk dış varlık eklenmeden önce netleştirir; lisans/atıf ve public repoda ham dosya paylaşım iznini kontrol eder. İzin belirsizse varlık eklenmez.
 
 ## Araçları kademeli ekleme
 
 | Zaman | Sorumlu | İş |
 |---|---|---|
-| P0 | Utku; erişimde Mehmet/Mert | İzlenecek dosyalar, ortak sürümler, herkesin kendi branch'ine pushlayabilmesi |
+| P0 | Utku; erişimde Mehmet/Mert | İzlenecek dosyalar, ortak sürüm ve üç kişinin güncel projeyi indirip açabilmesi |
 | P1 | Mert; yönetici işlemlerinde Mehmet | main/faz dallarında basit PR incelemesi ve force-push koruması |
 | P2 | Utku; hesap/lisans işleminde Mehmet | Mevcut tekrarlanabilir build komutunu otomatik kontrole bağlama |
 
-Koruma kurulana kadar da küçük PR ve bir başka kişinin incelemesi kuralı geçerlidir. Erişim/lisans engeli varsa neden, sorumlu ve kullanılan manuel kontrol yazılır; yapılmayan otomasyon PASS gösterilmez. İstisna tek kısa ekip kaydıyla kabul edilir; sahte başarılı kontrol veya gizli bypass yoktur.
+P1'den itibaren koruma kurulana kadar küçük PR ve bir başka kişinin incelemesi kuralı geçerlidir. P0'da kullanıcı kararıyla inceleme aranmaz. Erişim/lisans engeli varsa neden, sorumlu ve kullanılan manuel kontrol yazılır; yapılmayan otomasyon PASS gösterilmez.
 
 ## Fazı kapatma
 
-1. Mehmet, Utku ve Mert'in zorunlu işleri faz dalında birleşir.
+1. P0'da ortak temel main'e birleşir; üç kişi güncel projeyi indirip açar ve ortak build'i çalıştırır. P1'den itibaren Mehmet, Utku ve Mert'in zorunlu işleri faz dalında birleşir.
 2. PHASES içindeki kabul koşulları ve ilgili eski davranışlar birlikte denenir.
 3. Tek kısa kayda commit/build, sonuç, açık kusurlar ve üçünüzün gerçek tamam mesajı eklenir. Ayrı imza matrisi veya her özellik için üç inceleme gerekmez.
 4. Faz PR'ı main'e birleşir; birleşmiş build açılır ve ilgili davranış kontrol edilir. Çakışma davranışı değiştirdiyse ilgili test yeniden yapılır.
