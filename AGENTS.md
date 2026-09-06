@@ -15,8 +15,8 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 
 - PLAN_HAZIR, P0 planının hazır olduğunu ve Unity/oyun uygulamasının başlamadığını belirtir.
 - Sadece açık fazın verilen görevini uygula. Kullanıcının plan düzenleme isteği, oyun geliştirmesine veya sonraki faza geçmeye izin vermez.
-- P0 hafiftir: ortak sürüm, proje, dosya düzeni, ekip/erişim ve örnek build. Branch koruması P1'de, CI P2'de ele alınır.
-- P0 toplantısında docs/plan/P0_MEETING.md gündemi de ele alınır. Üretim, devam/ayrılma, hedef, bütçe, tasarım yetkisi ve netcode sorumluluğu önerilerini ekip kararı veya uzmanlık kanıtı sayma; gerçek kararları uydurma. Kayıt sahibi host olmadan aynı kampanyaya devam edilemeyeceği D06 sınırını koru.
+- P0 hafiftir: ortak sürüm ve proje main'e gelir; Mehmet, Utku ve Mert güncel depoyu indirip aynı Unity sürümünde açar ve ortak örnek Windows build'ini çalıştırır. P0'da karşılıklı PR incelemesi veya herkesin deneme branch'i pushlaması kapanış şartı değildir. Branch koruması P1'de, CI P2'de ele alınır.
+- docs/plan/P0_MEETING.md gündemi referanstır; P0 kapanışını bekletmez. Üretim, devam/ayrılma, hedef, bütçe, tasarım yetkisi ve netcode sorumluluğundaki açık kararlar ilgili özelliğe başlamadan ele alınır; gerçek kararları uydurma. Kayıt sahibi host olmadan aynı kampanyaya devam edilemeyeceği D06 sınırını koru.
 - Gelecek faz sözleşmeleri taslak olabilir; ihtiyaç duyulan fazdan önce kesinleşir. Bütün geleceğin API'sini P0'da uygulama.
 - İlk oynanabilir sürüm tek dalış bölgesidir. P2'de kontrol/av/oksijen-çanta testi, P3'te kamera ve tam döngü testi yapılmadan sonraki faza geçme; ikinci bölge ekleme.
 - P2/P3 testinden önce plandaki temel hareket, vuruş, nefes, UI ve sualtı ışık/sis geri bildirimini sağla. Nihai cila veya kapsamlı animasyon sistemi ekleme; his katmanını P4'e erteleme.
@@ -34,7 +34,7 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 
 ## Hafif faz kapısı
 
-Üç kişinin işleri birleşir, faz testleri geçer ve tek kısa kapanış kaydında commit/build, sonuçlar ve üçünün gerçek tamamı bulunur. Ayrı imza matrisi gerekmez. Faz main'e birleştirilip ilgili davranış doğrulandıktan sonra STATUS güncellenir ve sonraki faz açılır.
+P0 istisnası: ortak temel main'e birleşir; üç kişi depoyu indirip projeyi aynı Unity sürümünde açtığını ve ortak Windows build'ini çalıştırdığını bildirince kısa kapanış kaydı yazılır. P1 ve sonrasında üç kişinin işleri birleşir, faz testleri geçer ve tek kısa kapanış kaydında commit/build, sonuçlar ve üçünün gerçek tamamı bulunur. Ayrı imza matrisi gerekmez. Faz main'e birleştirilip ilgili davranış doğrulandıktan sonra STATUS güncellenir ve sonraki faz açılır.
 
 P2 ve P3'te kendi kapsamlarının oynanış değerlendirmesi de şarttır. Bir kişinin işi eksik veya test başarısızsa fazı açma. Gerekli gerçek ekip onayını otomatik üretme; kanıtlar zaten yeterliyse gereksiz kullanıcı teyidi isteme.
 

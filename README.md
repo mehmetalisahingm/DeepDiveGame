@@ -6,29 +6,33 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 
 ## Şu anki durum
 
-- Bu depo şu anda planlama belgelerini içerir; çalışan oyun henüz oluşturulmadı.
-- Aktif çalışma **P0 — Ortak temel ve kararlar (ACIK)**. Görev kayıtları açıldı; Unity/oyun uygulaması ve çalışan build henüz yok.
+- Bu dalda ortak Unity/URP projesi ve kamera/ışık/küp içeren P0 örneği hazır; oyun mekanikleri henüz yok.
+- Aktif çalışma **P0 — Ortak temel (ACIK)**. Mehmet Windows build aldı; Unity temeli ve Utku'nun Git düzeni faz dalında birleşti. P0 main aktarımı PR #8 üzerinden yapılıyor; Utku ve Mert'in indirme/açma/build sonucu bekleniyor.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
-- Plan 1.4: görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te. Sade P0, P2/P3 oynama testleri, temel his katmanı ve tek bölge kapsamı korunur.
+- Plan 1.5: P0 ortak projeyi indirip açma ve örnek build'i çalıştırma düzeyine sadeleştirildi. Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
 
 **Ortak sorumluluklar:** Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığı yönetir. Mehmet takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Utku'nun ve Mert'in mevcut geliştirme işleri korunur; herkes kendi sisteminin entegrasyonunu ve co-op testini yapar.
+
+**Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. Depo kökünü Unity Hub'a ekle; `Assets/P0/Scenes/P0Example.unity` sahnesini aç. [Kısa kurulum ve tek komutla Windows build](docs/SETUP.md). Build ve Mehmet'in bilgisayarında Codex ile [görsel kontrol](docs/evidence/P0-A-9596244-visual-check.md) başarılı; diğer iki bilgisayarın testi bekliyor.
+
+**İndirme ve P0 testi:** [P0 main aktarımı](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8) · [Ekip için yayınlanmamış Windows test paketi](https://github.com/mehmetalisahingm/DeepDiveGame/releases). Kaynakları Git üzerinden, yalnızca çalıştırılacak build'i ZIP üzerinden paylaşın.
 
 ## Şimdi kim ne yapacak? — P0
 
 | Kişi | Bu aşamadaki görevi | GitHub görev kaydı |
 |---|---|---|
-| **Mehmet (A)** | Unity/URP projesi, sürüm, sahne/build, erişimler; ortak karar takibi ve netcode yedek/öğrenme planı | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
-| **Utku (B)** | .gitignore/.meta, klasör ve sahne sahipliği, ilk Unity dosyalarının kontrolü | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
-| **Mert (C)** | Görsel/ses ihtiyaç ve kaynak planı; karar kaydı desteği, temiz klondan kurulum ve erişim testi | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
+| **Mehmet (A)** | Ortak Unity temelini main'e alır; üç kişinin sonuçlarından P0 kapanışını yapar | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
+| **Utku (B)** | Güncel main'i indirir, Unity `6000.3.23f1` ile açar ve ortak build'i çalıştırır | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
+| **Mert (C)** | Güncel main'i temiz klonlar, Unity `6000.3.23f1` ile açar ve ortak build'i çalıştırır | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
 
-**İlk iş:** Utku (**Utkuuzun14**) ve Mert (**MertKAYAR**), gönderilen [yazma erişimi davetini](https://github.com/mehmetalisahingm/DeepDiveGame/invitations) kendi hesaplarıyla kabul etsin. Davet gönderildi; kabul ve gerçek push/pull testi henüz doğrulanmadı.
+**İlk iş:** Mert'in (**MertKAYAR**) ve Utku'nun (**Utkuuzun14**) write erişimi aktif. PR #8 main'e birleşince ikisi de güncel depoyu indirip projeyi ve build'i açacak.
 
-**Oyun kodundan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) açık ayrıntıları görüşün: kaynak yöntemi, devam/ayrılma planı, ürün hedefi, bütçe ve netcode yedeği. Sorumlular kullanıcı tarafından atandı; Mehmet takip eder, Mert kayda destek olur. Atama süre/harcama taahhüdü, uzmanlık kanıtı veya fazın tamamlanması değildir. Proje/sürüm/erişim hazırlığı sürebilir.
+**Sonraki işler başlamadan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) kaynak yöntemi, hedef, bütçe ve netcode yedeği gibi açık kararlar ilgili özellikten önce ele alınır. Bu gündem P0 kapanışını bekletmez.
 
 **D06 sınırı:** Kayıt sahibi host yoksa aynı kampanyaya devam edilemez. Başka host ayrı kampanya açabilir; ilerleme otomatik taşınmaz. V1'e bulut kayıt veya host devri eklenmedi.
 
-Herkes aynı sürümle projeyi açacak, kendi deneme branch'ine pushlayacak ve ortak build'i çalıştıracak. PR, engel ve test sonucunu kendi görev kaydınıza yazın; bitmeyen işi tamamlandı göstermeyin. P0 bitmeden P1'e geçilmez.
+P0'da karşılıklı PR incelemesi veya herkesin deneme branch'i pushlaması gerekmiyor. Üç kişi aynı sürümle projeyi açıp ortak build'i çalıştırdığını kendi görev kaydına yazınca P0 kapanır. P0 bitmeden P1'e geçilmez.
 
 ## Sonraki fazlarda kim ne yapacak?
 
