@@ -24,6 +24,7 @@
 
 # Visual Studio önbellek klasörü
 .vs/
+/.vscode/
 
 # Gradle önbellek klasörü
 .gradle/
@@ -34,6 +35,7 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -74,3 +76,8 @@ crashlytics-build.properties
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Yerel ortam dosyaları ve sırlar
+.env
+.env.*
+!.env.example
