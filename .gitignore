@@ -1,19 +1,45 @@
-# Unity generated files (P0 proposal; Utku reviews before merge).
+# ================================================================
+# DeepDiveGame — .gitignore
+# Unity projesi için. GitHub resmi Unity şablonu temel alınmıştır.
+# En güncel hali: https://github.com/github/gitignore/blob/main/Unity.gitignore
+# ================================================================
+
+# Unity'nin otomatik ürettiği klasörler (repoya GİRMEMELİ) ---------
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
-/[Ll]ogs/
-/[Uu]ser[Ss]ettings/
 /[Bb]uild/
 /[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# MemoryCaptures çok büyük olabilir ve hassas veri içerebilir
 /[Mm]emoryCaptures/
+
+# Kayıtlar (recordings) çok büyük olabilir
 /[Rr]ecordings/
-/.vs/
+
+# Rider eklentisinin otomatik ürettiği dosyalar
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# Visual Studio önbellek klasörü
+.vs/
 /.vscode/
+
+# Gradle önbellek klasörü
+.gradle/
+
+# Otomatik üretilen çözüm/proje dosyaları
+ExportedObj/
+.consulo/
 *.csproj
+*.unityproj
 *.sln
 *.slnx
+*.suo
+*.tmp
 *.user
+*.userprefs
 *.pidb
 *.booproj
 *.svd
@@ -21,10 +47,37 @@
 *.mdb
 *.opendb
 *.VC.db
+
+# Unity'nin ürettiği meta dosyaları (yalnızca bu özel olanlar hariç tutulur)
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Çökme (crash) raporu dosyası
 sysinfo.txt
+
+# Build çıktıları
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics tarafından üretilen dosya
 crashlytics-build.properties
+
+# Paketlenmiş Addressables
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+
+# Otomatik üretilen Android StreamingAssets
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# İşletim sistemi çöp dosyaları
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Yerel ortam dosyaları ve sırlar
 .env
 .env.*
 !.env.example

@@ -1,0 +1,119 @@
+# ================================================================
+# DeepDiveGame — .gitattributes
+# Unity + Git LFS yapılandırması
+#
+# Mantık:
+#   1) Unity'nin metin (YAML) dosyaları (.unity, .prefab, .meta ...)
+#      LFS'e KOYULMAZ — metin kalır ki diff/merge yapılabilsin.
+#   2) Büyük ikili varlıklar (model, texture, ses, video ...) LFS'e gider.
+#   3) Sahne/prefab gibi birleşmesi zor dosyalar için Smart Merge
+#      (unityyamlmerge) tanımlanır.
+#
+# ÖNEMLİ: unityyamlmerge'in çalışması için herkesin kendi bilgisayarında
+# Unity Smart Merge aracını git'e bir kere tanıtması gerekir (P0 işi).
+# Tanıtılmazsa git sessizce normal birleştirmeye döner, hata vermez.
+# ================================================================
+
+# --- Otomatik satır sonu normalizasyonu (varsayılan) ---
+* text=auto
+
+# ================================================================
+# Unity METİN (YAML) dosyaları — LFS'e koyma, metin olarak kalsın
+# ================================================================
+*.cs                 text diff=csharp
+*.cginc              text
+*.shader             text
+*.hlsl               text
+*.compute            text
+*.mat                text merge=unityyamlmerge eol=lf
+*.anim               text merge=unityyamlmerge eol=lf
+*.controller         text merge=unityyamlmerge eol=lf
+*.overrideController text merge=unityyamlmerge eol=lf
+*.asset              text merge=unityyamlmerge eol=lf
+*.prefab             text merge=unityyamlmerge eol=lf
+*.unity              text merge=unityyamlmerge eol=lf
+*.meta               text merge=unityyamlmerge eol=lf
+*.physicMaterial     text merge=unityyamlmerge eol=lf
+*.physicsMaterial2D  text merge=unityyamlmerge eol=lf
+*.playable           text merge=unityyamlmerge eol=lf
+*.mask               text merge=unityyamlmerge eol=lf
+*.brush              text merge=unityyamlmerge eol=lf
+*.flare              text merge=unityyamlmerge eol=lf
+*.fontsettings       text merge=unityyamlmerge eol=lf
+*.guiskin            text merge=unityyamlmerge eol=lf
+*.giparams           text merge=unityyamlmerge eol=lf
+*.renderTexture      text merge=unityyamlmerge eol=lf
+*.spriteatlas        text merge=unityyamlmerge eol=lf
+*.terrainlayer       text merge=unityyamlmerge eol=lf
+*.mixer              text merge=unityyamlmerge eol=lf
+
+# UI Toolkit ve diğer metin biçimleri
+*.uxml   text
+*.uss    text
+*.json   text
+*.txt    text
+*.md     text
+*.xml    text
+*.yml    text
+*.yaml   text
+
+# ================================================================
+# Git LFS — büyük İKİLİ varlıklar
+# ================================================================
+
+# --- 3D modeller ---
+*.fbx    filter=lfs diff=lfs merge=lfs -text
+*.FBX    filter=lfs diff=lfs merge=lfs -text
+*.obj    filter=lfs diff=lfs merge=lfs -text
+*.blend  filter=lfs diff=lfs merge=lfs -text
+*.blend1 filter=lfs diff=lfs merge=lfs -text
+*.dae    filter=lfs diff=lfs merge=lfs -text
+*.3ds    filter=lfs diff=lfs merge=lfs -text
+*.max    filter=lfs diff=lfs merge=lfs -text
+*.c4d    filter=lfs diff=lfs merge=lfs -text
+*.ma     filter=lfs diff=lfs merge=lfs -text
+*.mb     filter=lfs diff=lfs merge=lfs -text
+
+# --- Görseller / texture ---
+*.png    filter=lfs diff=lfs merge=lfs -text
+*.jpg    filter=lfs diff=lfs merge=lfs -text
+*.jpeg   filter=lfs diff=lfs merge=lfs -text
+*.gif    filter=lfs diff=lfs merge=lfs -text
+*.bmp    filter=lfs diff=lfs merge=lfs -text
+*.tga    filter=lfs diff=lfs merge=lfs -text
+*.tif    filter=lfs diff=lfs merge=lfs -text
+*.tiff   filter=lfs diff=lfs merge=lfs -text
+*.psd    filter=lfs diff=lfs merge=lfs -text
+*.exr    filter=lfs diff=lfs merge=lfs -text
+*.hdr    filter=lfs diff=lfs merge=lfs -text
+*.pict   filter=lfs diff=lfs merge=lfs -text
+
+# --- Ses ---
+*.wav    filter=lfs diff=lfs merge=lfs -text
+*.mp3    filter=lfs diff=lfs merge=lfs -text
+*.ogg    filter=lfs diff=lfs merge=lfs -text
+*.aif    filter=lfs diff=lfs merge=lfs -text
+*.aiff   filter=lfs diff=lfs merge=lfs -text
+*.flac   filter=lfs diff=lfs merge=lfs -text
+
+# --- Video ---
+*.mp4    filter=lfs diff=lfs merge=lfs -text
+*.mov    filter=lfs diff=lfs merge=lfs -text
+*.webm   filter=lfs diff=lfs merge=lfs -text
+*.avi    filter=lfs diff=lfs merge=lfs -text
+
+# --- Fontlar ---
+*.ttf    filter=lfs diff=lfs merge=lfs -text
+*.otf    filter=lfs diff=lfs merge=lfs -text
+
+# --- Derlenmiş kütüphaneler / arşivler ---
+*.dll    filter=lfs diff=lfs merge=lfs -text
+*.so     filter=lfs diff=lfs merge=lfs -text
+*.dylib  filter=lfs diff=lfs merge=lfs -text
+*.a      filter=lfs diff=lfs merge=lfs -text
+*.aar    filter=lfs diff=lfs merge=lfs -text
+*.bundle filter=lfs diff=lfs merge=lfs -text
+*.unitypackage filter=lfs diff=lfs merge=lfs -text
+*.zip    filter=lfs diff=lfs merge=lfs -text
+*.7z     filter=lfs diff=lfs merge=lfs -text
+*.rar    filter=lfs diff=lfs merge=lfs -text
