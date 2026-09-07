@@ -7,7 +7,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 ## Şu anki durum
 
 - Bu dalda ortak Unity/URP projesi ve kamera/ışık/küp içeren P0 örneği hazır; oyun mekanikleri henüz yok.
-- Aktif çalışma **P0 — Ortak temel (ACIK)**. Mehmet Windows build aldı; Unity temeli ve Utku'nun Git düzeni [PR #8](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8) ile main'e birleşti. Utku ve Mert'in indirme/açma/build sonucu bekleniyor.
+- Aktif çalışma **P0 — Ortak temel (ACIK)**. Unity temeli, Utku'nun Git düzeni ve Mert'in görsel/ses kaynak planı main'e birleşti. Mehmet ve Mert projeyi açıp Windows build'ini çalıştırdı; yalnızca Utku'nun sonucu bekleniyor.
 - P1–P6 kapalıdır. Bir fazın üç kişi tarafından tamamlanıp birleştirilmesi ve doğrulanması bitmeden sonraki faz başlamaz.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
 - Plan 1.5: P0 ortak projeyi indirip açma ve örnek build'i çalıştırma düzeyine sadeleştirildi. Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
@@ -24,7 +24,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 |---|---|---|
 | **Mehmet (A)** | Ortak Unity temelini main'e alır; üç kişinin sonuçlarından P0 kapanışını yapar | [P0-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1) |
 | **Utku (B)** | Güncel main'i indirir, Unity `6000.3.23f1` ile açar ve ortak build'i çalıştırır | [P0-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2) |
-| **Mert (C)** | Güncel main'i temiz klonlar, Unity `6000.3.23f1` ile açar ve ortak build'i çalıştırır | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
+| **Mert (C)** | Tamam: güncel main'i açtı, Windows build'ini çalıştırdı ve [görsel/ses kaynak planını](docs/plan/ASSET_PLAN.md) teslim etti | [P0-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3) |
 
 **İlk iş:** Mert'in (**MertKAYAR**) ve Utku'nun (**Utkuuzun14**) write erişimi aktif. PR #8 main'e birleşince ikisi de güncel depoyu indirip projeyi ve build'i açacak.
 
