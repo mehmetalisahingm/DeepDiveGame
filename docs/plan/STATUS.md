@@ -4,7 +4,7 @@ Plan 1.6 — 8 Eylül 2026. P0 üç ayrı kurulumda tamamlandı; aktif faz P1'di
 
 ## Mevcut sınır
 
-- Aktif faz: P1. Durum: ACIK. Oda/bağlantı, senkron oyuncu, hazırlık/sualtı test alanı ve hazır olma/oturum durumu görevleri açıldı; henüz uygulanmadı.
+- Aktif faz: P1. Durum: ACIK. Mehmet'in bağlantı/oyuncu uygulaması [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16) içinde yerel testlerden geçti; henüz faz dalına birleşmedi. Utku/Mert teslimleri ve ayrı bilgisayarlarda internet kabulü bekliyor.
 - P0 KAPALI: Mehmet, Utku ve Mert ortak projeyi Unity `6000.3.23f1` ile açtı ve Windows build'ini çalıştırdı. [Kapanış kaydı](../reports/P0-REPORT.md).
 - P2–P6 KILITLI. P1'in açılması görevlerin tamamlandığı anlamına gelmez.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
@@ -58,7 +58,7 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 | P0-A | Mehmet | TAMAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4), [PR #8](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8): ortak temel ve Windows build teslim edildi |
 | P0-B | Utku | TAMAM | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2), [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7): Git düzeni birleşti; Unity açılışı ve Windows build testi geçti |
 | P0-C | Mert | TAMAM | [Görev #3](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3), [PR #10](https://github.com/mehmetalisahingm/DeepDiveGame/pull/10): güncel main'i aldı, Unity `6000.3.23f1` ile açtı, gerçek Windows build aldı ve çalıştırdı; görsel/ses kaynak planı main'e birleşti |
-| P1-A | Mehmet | DEVAM | [Görev #12](https://github.com/mehmetalisahingm/DeepDiveGame/issues/12): oda/bağlantı, oyuncu oluşumu, hareket senkronizasyonu ve ağ sahne yükleme |
+| P1-A | Mehmet | DEVAM | [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16): oda/katıl/ayrıl, oyuncu oluşumu, host yetkili yürüme/yüzme ve ağ sahne yükleme yazıldı. Windows build, 7 test ve yerel 1/4 oyunculu kontroller geçti. Utku incelemesi, Mert/Utku entegrasyonu ve internet testi bekliyor. [Çalıştırma](../P1_NETWORK.md) |
 | P1-B | Utku | DEVAM | [Görev #13](https://github.com/mehmetalisahingm/DeepDiveGame/issues/13): hazırlık alanı, tek sualtı test alanı, çarpışmalar ve P1 birleştirme koordinasyonu |
 | P1-C | Mert | DEVAM | [Görev #14](https://github.com/mehmetalisahingm/DeepDiveGame/issues/14): oda/hazır ekranı, `SessionState` geçişleri ve basit branch koruması |
 | P2-A | Mehmet | BEKLIYOR | Yok |

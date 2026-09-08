@@ -1,7 +1,10 @@
 # P1-A — Mehmet'in bağlantı teslimi
 
-Durum: `codex/p1-mehmet-network` dalında uygulama ve test sürüyor. Hedef
+Durum: `codex/p1-mehmet-network` dalında uygulama, Windows build ve yerel testler tamamlandı. Hedef
 `codex/p1-integration`; bu kayıt faz kapanışı veya diğer iki kişinin onayı değildir.
+
+[Çalıştırma ve API rehberi](../P1_NETWORK.md). Ayrı bilgisayarlarda internet,
+Utku incelemesi ve Mert/Utku'nun gerçek sistemleriyle birleşme bekliyor.
 
 ## D03/D08 uygulama sınırı
 

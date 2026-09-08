@@ -1,0 +1,6 @@
+{
+  "name": "DeepDive.P1.Tests",
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "Unity.Netcode.Runtime"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}
