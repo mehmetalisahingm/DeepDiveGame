@@ -53,10 +53,10 @@ Birlikte: ortak temel main'e birleşir. Mehmet, Utku ve Mert güncel depoyu indi
 P0_MEETING gündemi referans olarak korunur; P0 kapanışını bekletmez. Kaynak yöntemi, bütçe ve netcode yedeği gibi açık kararlar ilgili özelliğe başlamadan netleştirilir. Atama uzmanlık kanıtı veya satın alma izni değildir.
 
 Bitiş koşulları:
-- [ ] Ortak Unity temeli main'e birleşti.
-- [ ] Üç kişi güncel depoyu indirip Unity `6000.3.23f1` ile açtı.
-- [ ] Mehmet'in ürettiği örnek Windows build'i üç kişi de çalıştırdı; üç ayrı build üretmek şart değil.
-- [ ] `.gitignore`/`.meta` düzeni, gerekli sürüm ve kısa kurulum adımları depoda kayıtlı.
+- [x] Ortak Unity temeli main'e birleşti.
+- [x] Üç kişi güncel depoyu indirip Unity `6000.3.23f1` ile açtı.
+- [x] Mehmet'in ürettiği örnek Windows build'i üç kişi de çalıştırdı; üç ayrı build üretmek şart değil.
+- [x] `.gitignore`/`.meta` düzeni, gerekli sürüm ve kısa kurulum adımları depoda kayıtlı.
 
 Birleştirmeyi koordine eden: Mehmet.
 Kapalı kapsam: gerçek co-op, balık AI, oksijen, ekonomi ve oyun özellikleri. Branch koruması P1'e, otomatik build P2'ye planlanır. Büyük ikili varlık henüz yoksa LFS kurulumu ilk böyle varlık eklenmeden önce yapılır.
