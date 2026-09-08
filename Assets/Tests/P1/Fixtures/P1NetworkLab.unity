@@ -359,7 +359,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b2915086d3c2af34e8a0fcb28c39c734, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.P1.Lab::DeepDive.P1.Lab.NetworkSmokeDriver
 --- !u!114 &295139634
 MonoBehaviour:
@@ -371,7 +371,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ccc08fdd3d6e01d418a33ea99c41fd6c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.P1.Lab::DeepDive.P1.Lab.NetworkLabConsole
   OfflineCamera: {fileID: 1338495402}
 --- !u!114 &295139635
@@ -384,7 +384,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d8663cabf7182c47aa736ae7b53ad45, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.NetworkSession
   offlineScene: P1NetworkLab
 --- !u!114 &295139636
@@ -397,7 +397,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 593a2fe42fa9d37498c96f9a383b6521, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkManager
   NetworkManagerExpanded: 0
   NetworkConfig:
@@ -410,7 +410,7 @@ MonoBehaviour:
     TickRate: 30
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 1
-    ConnectionData: 
+    ConnectionData:
     EnableTimeResync: 0
     TimeResyncInterval: 30
     EnsureNetworkVariableLengthSafety: 0
@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Transports.UTP.UnityTransport
   m_ProtocolType: 0
   m_UseWebSockets: 0
@@ -453,7 +453,7 @@ MonoBehaviour:
   ConnectionData:
     Address: 127.0.0.1
     Port: 7777
-    ServerListenAddress: 
+    ServerListenAddress:
   DebugSimulator:
     PacketDelayMS: 0
     PacketJitterMS: 0
@@ -501,7 +501,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
   Slot: 1
 --- !u!4 &445575677
@@ -546,7 +546,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
   Slot: 3
 --- !u!4 &580489304
@@ -591,7 +591,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
   Slot: 2
 --- !u!4 &813322303
@@ -840,7 +840,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
   Slot: 0
 --- !u!4 &1798648220
