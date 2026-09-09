@@ -4,6 +4,11 @@ Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Burad
 
 Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'da yalnızca P1 için gereken kimlik/oturum bağlantıları kesinleşir. Av/çanta ayrıntıları P2 öncesinde, çekim/ekonomi/kayıt ayrıntıları P3 öncesinde netleşir. İleriki fazın taslağı o özelliği erken uygulama izni vermez.
 
+P1-A uygulama/bağlantı önerisi: [P1_A_INTEGRATION](P1_A_INTEGRATION.md) ve
+[API/çalıştırma rehberi](../P1_NETWORK.md), [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16).
+`PlayerId` ve `INetworkSession` bu PR'da yazıldı; etkilenen kişilerce incelenip
+birleşmeden ortak sözleşmenin kesinleştiği söylenmez. `SessionState` Mert'in alanıdır.
+
 ## Sistem sahipliği
 
 Bu tablo uygulama sahipliğidir. Kullanıcı atamasıyla görsel/ses üretimi, kaynak seçimi ve tutarlılık Mert'te; ortak tasarımda son karar ve birincil insan netcode incelemesi Mehmet'tedir. [Ortak sorumluluk kaydı](P0_MEETING.md) sınırları açıklar. Mert görsel/ses kaynaklarını sağlar; alan sahibi kendi koduna/sahnesine bağlar. Ağ inceleyicisi atanması, alan sahiplerinin kendi co-op uygulama ve test sorumluluğunu devretmez; API değişiklikleri etkilenen kişilerle koordine edilir.

@@ -1,0 +1,130 @@
+{
+  "sourceCommit": "2c31d72219740f58a051baeac46edafcd56b1f7d",
+  "unity": "6000.3.23f1",
+  "netcode": "2.7.0",
+  "transport": "2.6.0",
+  "testScope": "One computer, independent Windows game processes over loopback. No internet acceptance.",
+  "editMode": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7
+  },
+  "solo": {
+    "mode": "solo",
+    "passed": true,
+    "connected": true,
+    "roster": true,
+    "walk": true,
+    "swim": true,
+    "returned": true,
+    "stopped": true,
+    "cameras": true,
+    "reason": "",
+    "maxPlayers": 1,
+    "errors": []
+  },
+  "multiplayer": [
+    {
+      "process": "host",
+      "result": {
+        "mode": "host",
+        "passed": true,
+        "connected": true,
+        "roster": true,
+        "walk": true,
+        "swim": true,
+        "returned": true,
+        "stopped": true,
+        "cameras": true,
+        "reason": "",
+        "maxPlayers": 4,
+        "errors": []
+      }
+    },
+    {
+      "process": "client1",
+      "result": {
+        "mode": "client",
+        "passed": true,
+        "connected": true,
+        "roster": true,
+        "walk": true,
+        "swim": true,
+        "returned": true,
+        "stopped": true,
+        "cameras": true,
+        "reason": "Disconnected due to host shutting down.",
+        "maxPlayers": 4,
+        "errors": []
+      }
+    },
+    {
+      "process": "client2",
+      "result": {
+        "mode": "client",
+        "passed": true,
+        "connected": true,
+        "roster": true,
+        "walk": true,
+        "swim": true,
+        "returned": true,
+        "stopped": true,
+        "cameras": true,
+        "reason": "Disconnected due to host shutting down.",
+        "maxPlayers": 4,
+        "errors": []
+      }
+    },
+    {
+      "process": "client3",
+      "result": {
+        "mode": "client",
+        "passed": true,
+        "connected": true,
+        "roster": true,
+        "walk": true,
+        "swim": true,
+        "returned": true,
+        "stopped": true,
+        "cameras": true,
+        "reason": "Disconnected due to host shutting down.",
+        "maxPlayers": 4,
+        "errors": []
+      }
+    },
+    {
+      "process": "fifth",
+      "result": {
+        "mode": "reject",
+        "passed": true,
+        "connected": false,
+        "roster": false,
+        "walk": false,
+        "swim": false,
+        "returned": false,
+        "stopped": false,
+        "cameras": false,
+        "reason": "RoomFull",
+        "maxPlayers": 0,
+        "errors": []
+      }
+    },
+    {
+      "process": "late-dive",
+      "result": {
+        "mode": "reject",
+        "passed": true,
+        "connected": false,
+        "roster": false,
+        "walk": false,
+        "swim": false,
+        "returned": false,
+        "stopped": false,
+        "cameras": false,
+        "reason": "WrongPhase",
+        "maxPlayers": 0,
+        "errors": []
+      }
+    }
+  ]
+}
