@@ -1,6 +1,6 @@
 {
   "name": "DeepDive.P1.Lab",
   "rootNamespace": "DeepDive.P1.Lab",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "Unity.Netcode.Runtime"],
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.Session", "DeepDive.Composition", "Unity.Netcode.Runtime", "Unity.Collections", "UnityEngine.UI"],
   "defineConstraints": ["UNITY_EDITOR || DEVELOPMENT_BUILD"]
 }

@@ -14,7 +14,7 @@ namespace DeepDive.Network
     [RequireComponent(typeof(NetworkManager), typeof(UnityTransport))]
     public sealed class NetworkSession : MonoBehaviour, INetworkSession
     {
-        public const string Protocol = "DeepDive-P1-1";
+        public const string Protocol = "DeepDive-P1-2";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;

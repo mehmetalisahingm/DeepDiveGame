@@ -6,6 +6,9 @@ namespace DeepDive.Session
         Ok,
         WrongPhase,
         PlayerInactive,
-        AlreadyProcessed
+        AlreadyProcessed,
+        NotHost,
+        SceneLoadFailed,
+        RoomFull
     }
 }

@@ -5,6 +5,7 @@
     "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.transport": "2.6.0",
     "com.unity.modules.audio": "1.0.0",
-    "com.unity.modules.physics": "1.0.0"
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.imageconversion": "1.0.0"
   }
 }

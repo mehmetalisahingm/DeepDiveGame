@@ -1,5 +1,5 @@
 using System;
-using DeepDive.Core;
+using DeepDive.Core.Contracts;
 using DeepDive.Session;
 using DeepDive.Session.UI;
 using UnityEditor;
@@ -46,8 +46,8 @@ namespace DeepDive.Editor
             try
             {
                 var session = go.AddComponent<SessionManager>();
-                var playerA = new PlayerId("A");
-                var playerB = new PlayerId("B");
+                var playerA = new PlayerId(0);
+                var playerB = new PlayerId(1);
 
                 session.Initialize("check-session", "check-region");
                 Require(session.State.Phase == SessionPhase.Lobby, "Initialize should start in Lobby");

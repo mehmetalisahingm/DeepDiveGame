@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 103605874}
   - component: {fileID: 103605873}
+  - component: {fileID: 103605875}
   m_Layer: 0
   m_Name: DiveExit
   m_TagString: Untagged
@@ -172,6 +173,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &103605875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103605872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8b62b12ea011e94c9d785e52fa50238, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.SessionPortal
+  RequiredPhase: 2
 --- !u!1 &252762603
 GameObject:
   m_ObjectHideFlags: 0
@@ -293,6 +307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 456863113}
+  - component: {fileID: 456863114}
   m_Layer: 0
   m_Name: Spawn_3
   m_TagString: Untagged
@@ -315,6 +330,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &456863114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 456863112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
+  Slot: 3
 --- !u!1 &1007613396
 GameObject:
   m_ObjectHideFlags: 0
@@ -327,6 +355,7 @@ GameObject:
   - component: {fileID: 1007613399}
   - component: {fileID: 1007613398}
   - component: {fileID: 1007613397}
+  - component: {fileID: 1007613401}
   m_Layer: 0
   m_Name: SwimVolume
   m_TagString: Untagged
@@ -427,6 +456,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1007613401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007613396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fe028d9c1634d4439d91415f741f6d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.SwimVolume
 --- !u!1 &1124487857
 GameObject:
   m_ObjectHideFlags: 0
@@ -548,6 +589,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1393972003}
+  - component: {fileID: 1393972004}
   m_Layer: 0
   m_Name: Spawn_2
   m_TagString: Untagged
@@ -570,6 +612,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1393972004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1393972002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
+  Slot: 2
 --- !u!1 &1488168561
 GameObject:
   m_ObjectHideFlags: 0
@@ -789,6 +844,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1971055235}
+  - component: {fileID: 1971055236}
   m_Layer: 0
   m_Name: Spawn_1
   m_TagString: Untagged
@@ -811,6 +867,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1971055236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1971055234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
+  Slot: 1
 --- !u!1 &1978234798
 GameObject:
   m_ObjectHideFlags: 0
@@ -948,7 +1017,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1984748839}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1984748841
 Camera:
   m_ObjectHideFlags: 0
@@ -956,7 +1025,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1984748839}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -1136,6 +1205,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2049789247}
+  - component: {fileID: 2049789248}
   m_Layer: 0
   m_Name: Spawn_0
   m_TagString: Untagged
@@ -1158,6 +1228,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2049789248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2049789246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8450ae2e472817a4f8447daf3d38cb4a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.PlayerSpawnPoint
+  Slot: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

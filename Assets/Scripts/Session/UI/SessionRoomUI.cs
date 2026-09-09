@@ -1,23 +1,21 @@
 using System.Text;
-using DeepDive.Core;
+using DeepDive.Core.Contracts;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace DeepDive.Session.UI
 {
-    // Room/player list and ready screen for issue P1-C (#14). Builds a minimal uGUI layout at
-    // runtime (no hand-authored prefab/scene UI hierarchy) and drives it from SessionManager.
-    // Standalone/local-player demo only: this is the solo test harness described in the task,
-    // not the final in-game HUD. The "Dalisa basla / Dalisi bitir / Donusu tamamla" buttons let
-    // one person walk the full Lobby -> Prep -> Dive -> Return -> Lobby cycle without a network.
+    // Mert's room UI uses the real connection/command bridge. No synthetic player is joined.
     [RequireComponent(typeof(SessionManager))]
     public class SessionRoomUI : MonoBehaviour
     {
-        [SerializeField] private string localPlayerId = "local-mert";
+        public ISessionControls Controls { get; set; }
 
         private SessionManager _session;
-        private PlayerId _localPlayer;
+        private InputField _address, _port;
+        private Button _hostButton, _joinButton, _leaveButton;
+        private GameObject _canvas;
 
         private Text _phaseLabel;
         private Text _rosterLabel;
@@ -31,7 +29,6 @@ namespace DeepDive.Session.UI
         private void Awake()
         {
             _session = GetComponent<SessionManager>();
-            _localPlayer = new PlayerId(localPlayerId);
         }
 
         private void Start()
@@ -41,11 +38,11 @@ namespace DeepDive.Session.UI
             _session.OnSessionStateChanged += RefreshPhase;
             _session.OnRosterChanged += RefreshRoster;
 
-            _session.Initialize(sessionId: "solo-test", regionId: "P1Session");
-            _session.Join(_localPlayer);
+            if (Controls != null) Controls.Changed += RefreshConnection;
 
             RefreshPhase(_session.State);
             RefreshRoster(_session.Roster);
+            RefreshConnection();
         }
 
         private void OnDestroy()
@@ -54,19 +51,52 @@ namespace DeepDive.Session.UI
                 return;
             _session.OnSessionStateChanged -= RefreshPhase;
             _session.OnRosterChanged -= RefreshRoster;
+            if (Controls != null) Controls.Changed -= RefreshConnection;
         }
 
         private void OnToggleReady()
         {
-            var currentlyReady = _session.Roster.TryGetValue(_localPlayer, out var ready) && ready;
-            var result = _session.SetReady(_localPlayer, !currentlyReady);
-            SetStatus($"SetReady -> {result}");
+            Controls?.ToggleReady();
         }
 
-        private void OnBeginPrep() => SetStatus($"BeginPrep -> {_session.BeginPrep()}");
-        private void OnBeginDive() => SetStatus($"BeginDive -> {_session.BeginDive(diveId: "solo-dive-1")}");
-        private void OnBeginReturn() => SetStatus($"BeginReturn -> {_session.BeginReturn()}");
-        private void OnCompleteReturn() => SetStatus($"CompleteReturn -> {_session.CompleteReturn()}");
+        private void OnBeginPrep() => Controls?.AdvancePhase();
+        private void OnBeginDive() => Controls?.AdvancePhase();
+        private void OnBeginReturn() => Controls?.AdvancePhase();
+        private void OnCompleteReturn() => Controls?.AdvancePhase();
+
+        private void Connect(bool host)
+        {
+            if (Controls == null) { SetStatus("Ag baglantisi kurulmamıs."); return; }
+            if (!ushort.TryParse(_port.text, out var port) || port == 0)
+            { SetStatus("Port 1-65535 olmali."); return; }
+            if (host) Controls.CreateRoom(port); else Controls.JoinRoom(_address.text.Trim(), port);
+            RefreshConnection();
+        }
+
+        private void RefreshConnection()
+        {
+            var connection = Controls?.Connection;
+            var offline = connection != null && connection.Status == ConnectionStatus.Offline;
+            SetInteractable(_hostButton, offline); SetInteractable(_joinButton, offline);
+            SetInteractable(_leaveButton, connection != null && !offline);
+            if (_address != null) _address.interactable = offline;
+            if (_port != null) _port.interactable = offline;
+            if (_address != null) _address.gameObject.SetActive(offline);
+            if (_port != null) _port.gameObject.SetActive(offline);
+            if (_hostButton != null) _hostButton.gameObject.SetActive(offline);
+            if (_joinButton != null) _joinButton.gameObject.SetActive(offline);
+            if (_leaveButton != null) _leaveButton.gameObject.SetActive(!offline && connection != null);
+            if (_statusLabel != null)
+                _statusLabel.text = connection == null ? "Ag baglantisi yok; PrepArea sahnesini acin." :
+                    $"{connection.Status}  {connection.LastError}\n{Controls.LastAction}";
+            RefreshPhase(_session.State);
+        }
+
+        private void Update()
+        {
+            // F1 captures the game; Esc releases it and shows the room controls again.
+            if (_canvas != null) _canvas.SetActive(Cursor.lockState != CursorLockMode.Locked);
+        }
 
         private void SetStatus(string message)
         {
@@ -80,12 +110,22 @@ namespace DeepDive.Session.UI
             if (_phaseLabel != null)
                 _phaseLabel.text = $"Asama: {state.Phase}  (session={state.SessionId} rev={state.Revision})";
 
+            var connection = Controls?.Connection;
+            var connected = connection != null && connection.Status == ConnectionStatus.Connected && !connection.IsSceneLoading;
+            var host = connected && connection.IsHost;
             var lobby = state.Phase == SessionPhase.Lobby;
-            SetInteractable(_readyButton, lobby);
-            SetInteractable(_beginPrepButton, lobby);
-            SetInteractable(_beginDiveButton, state.Phase == SessionPhase.Prep);
-            SetInteractable(_beginReturnButton, state.Phase == SessionPhase.Dive);
-            SetInteractable(_completeReturnButton, state.Phase == SessionPhase.Return);
+            var allReady = _session.Roster.Count > 0;
+            foreach (var ready in _session.Roster.Values) allReady &= ready;
+            SetInteractable(_readyButton, connected && lobby);
+            SetInteractable(_beginPrepButton, host && lobby && allReady);
+            SetInteractable(_beginDiveButton, host && state.Phase == SessionPhase.Prep);
+            SetInteractable(_beginReturnButton, host && state.Phase == SessionPhase.Dive);
+            SetInteractable(_completeReturnButton, host && state.Phase == SessionPhase.Return);
+            Show(_readyButton, connected && lobby);
+            Show(_beginPrepButton, host && lobby);
+            Show(_beginDiveButton, host && state.Phase == SessionPhase.Prep);
+            Show(_beginReturnButton, host && state.Phase == SessionPhase.Dive);
+            Show(_completeReturnButton, host && state.Phase == SessionPhase.Return);
         }
 
         private void RefreshRoster(System.Collections.Generic.IReadOnlyDictionary<PlayerId, bool> roster)
@@ -97,6 +137,7 @@ namespace DeepDive.Session.UI
             foreach (var entry in roster)
                 sb.AppendLine($"  {entry.Key} - {(entry.Value ? "Hazir" : "Hazir degil")}");
             _rosterLabel.text = sb.ToString();
+            RefreshPhase(_session.State);
         }
 
         private static void SetInteractable(Button button, bool interactable)
@@ -110,11 +151,14 @@ namespace DeepDive.Session.UI
             if (EventSystem.current == null)
             {
                 var esGo = new GameObject("EventSystem");
+                esGo.transform.SetParent(transform, false);
                 esGo.AddComponent<EventSystem>();
                 esGo.AddComponent<StandaloneInputModule>();
             }
 
             var canvasGo = new GameObject("P1SessionCanvas");
+            _canvas = canvasGo;
+            canvasGo.transform.SetParent(transform, false);
             var canvas = canvasGo.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             var scaler = canvasGo.AddComponent<CanvasScaler>();
@@ -143,6 +187,11 @@ namespace DeepDive.Session.UI
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             _phaseLabel = AddLabel(panel.transform, "PhaseLabel", "Asama: -");
+            _address = AddInput(panel.transform, "HostAddress", "127.0.0.1");
+            _port = AddInput(panel.transform, "Port", "7777");
+            _hostButton = AddButton(panel.transform, "HostButton", "Oda olustur / Solo", () => Connect(true));
+            _joinButton = AddButton(panel.transform, "JoinButton", "IP ile katil", () => Connect(false));
+            _leaveButton = AddButton(panel.transform, "LeaveButton", "Odadan ayril", () => Controls?.LeaveRoom());
             _rosterLabel = AddLabel(panel.transform, "RosterLabel", "Oyuncular:");
             _readyButton = AddButton(panel.transform, "ReadyButton", "Hazir / Hazir degil", OnToggleReady);
             _beginPrepButton = AddButton(panel.transform, "BeginPrepButton", "Hazirliga basla (Lobby->Prep)", OnBeginPrep);
@@ -150,6 +199,25 @@ namespace DeepDive.Session.UI
             _beginReturnButton = AddButton(panel.transform, "BeginReturnButton", "Donusu basla (Dive->Return)", OnBeginReturn);
             _completeReturnButton = AddButton(panel.transform, "CompleteReturnButton", "Odaya don (Return->Lobby)", OnCompleteReturn);
             _statusLabel = AddLabel(panel.transform, "StatusLabel", string.Empty);
+            AddLabel(panel.transform, "ControlsLabel", "F1: oyna | Esc: menu\nWASD: hareket | Fare: bakis\nSpace / Ctrl: yuzme yukari / asagi\nE: host giris/cikis noktasini kullanir");
+        }
+
+        private static void Show(Button button, bool visible)
+        { if (button != null) button.gameObject.SetActive(visible); }
+
+        private static InputField AddInput(Transform parent, string name, string value)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(InputField));
+            go.transform.SetParent(parent, false);
+            go.GetComponent<Image>().color = new Color(0.1f, 0.17f, 0.22f);
+            var field = go.GetComponent<InputField>();
+            var label = AddLabel(go.transform, "Text", "");
+            var rect = label.rectTransform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(8, 4); rect.offsetMax = new Vector2(-8, -4);
+            field.textComponent = label; field.text = value; field.characterLimit = 45;
+            go.AddComponent<LayoutElement>().minHeight = 34;
+            return field;
         }
 
         private static Text AddLabel(Transform parent, string name, string text)

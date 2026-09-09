@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using DeepDive.Core;
+using DeepDive.Core.Contracts;
 using UnityEngine;
 
 namespace DeepDive.Session
@@ -10,9 +10,7 @@ namespace DeepDive.Session
     // Mehmet'in ag servisi yurutur"). This class is the authority for the state it holds; it does
     // not decide connection admission (max 4 players etc. is Mehmet's P1-A, "Ag baglantisi").
     //
-    // Runs standalone with no bridge assigned so it can be exercised solo, before Mehmet's
-    // network scene-loading service (P1-A, issue #12) exists. Assign Bridge once that service
-    // is ready so real transitions also request the networked scene load.
+    // A null bridge is for isolated state-machine tests only. The game always assigns one.
     public class SessionManager : MonoBehaviour
     {
         public ISessionNetworkBridge Bridge;
@@ -36,8 +34,12 @@ namespace DeepDive.Session
 
         public SessionActionResult Join(PlayerId player)
         {
+            if (Bridge != null && !Bridge.IsAuthority) return SessionActionResult.NotHost;
             if (_ready.ContainsKey(player))
                 return SessionActionResult.AlreadyProcessed;
+
+            if (_state.Phase != SessionPhase.Lobby) return SessionActionResult.WrongPhase;
+            if (_ready.Count >= 4) return SessionActionResult.RoomFull;
 
             _ready[player] = false;
             RaiseRosterChanged();
@@ -46,6 +48,7 @@ namespace DeepDive.Session
 
         public SessionActionResult Leave(PlayerId player)
         {
+            if (Bridge != null && !Bridge.IsAuthority) return SessionActionResult.NotHost;
             if (!_ready.Remove(player))
                 return SessionActionResult.PlayerInactive;
 
@@ -55,6 +58,7 @@ namespace DeepDive.Session
 
         public SessionActionResult SetReady(PlayerId player, bool ready)
         {
+            if (Bridge != null && !Bridge.IsAuthority) return SessionActionResult.NotHost;
             if (_state.Phase != SessionPhase.Lobby)
                 return SessionActionResult.WrongPhase;
             if (!_ready.ContainsKey(player))
@@ -78,9 +82,9 @@ namespace DeepDive.Session
                     return SessionActionResult.PlayerInactive;
             }
 
-            _state.Phase = SessionPhase.Prep;
-            Advance();
-            return SessionActionResult.Ok;
+            var next = _state;
+            next.Phase = SessionPhase.Prep;
+            return Advance(next);
         }
 
         // Prep -> Dive.
@@ -89,10 +93,10 @@ namespace DeepDive.Session
             if (_state.Phase != SessionPhase.Prep)
                 return SessionActionResult.WrongPhase;
 
-            _state.Phase = SessionPhase.Dive;
-            _state.DiveId = diveId;
-            Advance();
-            return SessionActionResult.Ok;
+            var next = _state;
+            next.Phase = SessionPhase.Dive;
+            next.DiveId = diveId;
+            return Advance(next);
         }
 
         // Dive -> Return.
@@ -101,9 +105,9 @@ namespace DeepDive.Session
             if (_state.Phase != SessionPhase.Dive)
                 return SessionActionResult.WrongPhase;
 
-            _state.Phase = SessionPhase.Return;
-            Advance();
-            return SessionActionResult.Ok;
+            var next = _state;
+            next.Phase = SessionPhase.Return;
+            return Advance(next);
         }
 
         // Return -> Lobby. Clears DiveId and resets ready flags for the next round.
@@ -112,12 +116,14 @@ namespace DeepDive.Session
             if (_state.Phase != SessionPhase.Return)
                 return SessionActionResult.WrongPhase;
 
-            _state.Phase = SessionPhase.Lobby;
-            _state.DiveId = string.Empty;
+            var next = _state;
+            next.Phase = SessionPhase.Lobby;
+            next.DiveId = string.Empty;
+            var result = Advance(next);
+            if (result != SessionActionResult.Ok) return result;
             foreach (var player in new List<PlayerId>(_ready.Keys))
                 _ready[player] = false;
 
-            Advance();
             RaiseRosterChanged();
             return SessionActionResult.Ok;
         }
@@ -133,11 +139,24 @@ namespace DeepDive.Session
             OnSessionStateChanged?.Invoke(_state);
         }
 
-        private void Advance()
+        public void ApplyRemoteSnapshot(SessionState state, IReadOnlyDictionary<PlayerId, bool> roster)
         {
-            _state.Revision++;
+            if (Bridge != null && Bridge.IsAuthority) return;
+            if (state.Revision < _state.Revision || roster.Count > 4) return;
+            _ready.Clear();
+            foreach (var pair in roster) _ready.Add(pair.Key, pair.Value);
+            ApplyRemoteState(state);
+            RaiseRosterChanged();
+        }
+
+        private SessionActionResult Advance(SessionState next)
+        {
+            if (Bridge != null && !Bridge.IsAuthority) return SessionActionResult.NotHost;
+            next.Revision++;
+            if (Bridge != null && !Bridge.RequestSceneLoad(next)) return SessionActionResult.SceneLoadFailed;
+            _state = next;
             RaiseStateChanged();
-            Bridge?.RequestSceneLoad(_state);
+            return SessionActionResult.Ok;
         }
 
         private void RaiseStateChanged() => OnSessionStateChanged?.Invoke(_state);
