@@ -4,10 +4,16 @@ Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Burad
 
 Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'da yalnızca P1 için gereken kimlik/oturum bağlantıları kesinleşir. Av/çanta ayrıntıları P2 öncesinde, çekim/ekonomi/kayıt ayrıntıları P3 öncesinde netleşir. İleriki fazın taslağı o özelliği erken uygulama izni vermez.
 
-P1-A uygulama/bağlantı önerisi: [P1_A_INTEGRATION](P1_A_INTEGRATION.md) ve
-[API/çalıştırma rehberi](../P1_NETWORK.md), [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16).
-`PlayerId` ve `INetworkSession` bu PR'da yazıldı; etkilenen kişilerce incelenip
-birleşmeden ortak sözleşmenin kesinleştiği söylenmez. `SessionState` Mert'in alanıdır.
+P1 uygulamaları ortak akışa bağlandı: [entegrasyon kaydı](../reports/P1-INTEGRATION-REPORT.md),
+[çalıştırma](../P1_PLAY.md). `Core.Contracts.PlayerId.Value` oturumluk ulong bağlantı
+kimliğidir; host için 0 geçerlidir. Mert'in geçici string kimliği kullanılmaz.
+`SessionState` ve hazır bilgisi Mert'in `DeepDive.Session` modülündedir.
+`ISessionNetworkBridge.RequestSceneLoad` kabul/red döndürür; reddedilen yükleme
+aşama/revision değiştirmez. `Composition.SessionNetworkAdapter` gerçek ağ listesini,
+hazır isteklerini ve sahne yüklemesini bağlar. İstemci kimliği ağ bağlantısından
+alınır; aşama değişimini sadece host yapar. Yeni katılım yalnız Lobby'de ve sahne
+yüklenmiyorken kabul edilir. UI `ISessionControls` kullanır; test oyuncusu üretmez.
+Bu uygulama kaydı, diğer kişilerin incelemesi veya faz kabulü yerine geçmez.
 
 ## Sistem sahipliği
 

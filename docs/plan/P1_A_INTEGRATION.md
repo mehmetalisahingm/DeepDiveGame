@@ -3,8 +3,10 @@
 Durum: `codex/p1-mehmet-network` dalında uygulama, Windows build ve yerel testler tamamlandı. Hedef
 `codex/p1-integration`; bu kayıt faz kapanışı veya diğer iki kişinin onayı değildir.
 
-[Çalıştırma ve API rehberi](../P1_NETWORK.md). Ayrı bilgisayarlarda internet,
-Utku incelemesi ve Mert/Utku'nun gerçek sistemleriyle birleşme bekliyor.
+9 Eylül güncellemesi: Mert/Utku'nun gerçek sistemleriyle bağlantı kuruldu;
+[ortak çalışma rehberi](../P1_PLAY.md) ve [entegrasyon raporu](../reports/P1-INTEGRATION-REPORT.md).
+İnternet/ekip incelemesi hâlâ bekliyor. Aşağıdaki maddeler ilk P1-A tesliminin sınırıdır;
+güncel ortak bağlantı CONTRACTS ve entegrasyon raporunda kayıtlıdır.
 
 ## D03/D08 uygulama sınırı
 

@@ -1,66 +1,66 @@
-# Güncel durum ve görev takibi
+# GÃ¼ncel durum ve gÃ¶rev takibi
 
-Plan 1.6 — 8 Eylül 2026. P0 üç ayrı kurulumda tamamlandı; aktif faz P1'dir. Görsel/ses Mert'te, diğer ortak sorumluluklar Mehmet'tedir.
+Plan 1.6 â€” 8 EylÃ¼l 2026. P0 Ã¼Ã§ ayrÄ± kurulumda tamamlandÄ±; aktif faz P1'dir. GÃ¶rsel/ses Mert'te, diÄŸer ortak sorumluluklar Mehmet'tedir.
 
-## Mevcut sınır
+## Mevcut sÄ±nÄ±r
 
-- Aktif faz: P1. Durum: ACIK. Mehmet'in bağlantı/oyuncu uygulaması [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16) içinde yerel testlerden geçti; henüz faz dalına birleşmedi. Utku/Mert teslimleri ve ayrı bilgisayarlarda internet kabulü bekliyor.
-- P0 KAPALI: Mehmet, Utku ve Mert ortak projeyi Unity `6000.3.23f1` ile açtı ve Windows build'ini çalıştırdı. [Kapanış kaydı](../reports/P0-REPORT.md).
-- P2–P6 KILITLI. P1'in açılması görevlerin tamamlandığı anlamına gelmez.
+- Aktif faz: P1. Durum: ACIK. PR #16/#17/#18 ortak akışa bağlandı. Windows build, 12 otomatik test ve gerçek sahnelerde yerel 1/2/4 oyuncu testleri geçti. İnternet, ekip incelemesi/tamamı ve diğer açık faz koşulları bekliyor. [Çalıştırma](../P1_PLAY.md), [kanıt/kalanlar](../reports/P1-INTEGRATION-REPORT.md).
+- P0 KAPALI: Mehmet, Utku ve Mert ortak projeyi Unity `6000.3.23f1` ile aÃ§tÄ± ve Windows build'ini Ã§alÄ±ÅŸtÄ±rdÄ±. [KapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md).
+- P2â€“P6 KILITLI. P1'in aÃ§Ä±lmasÄ± gÃ¶revlerin tamamlandÄ±ÄŸÄ± anlamÄ±na gelmez.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
-- MertKAYAR ve Utkuuzun14 write davetlerini kabul etti. Utku'nun PR #7 ve Mert'in PR #10 değişikliği main'e birleşti; üç kişinin P0 kurulum/build testi geçti.
-- P0 kapanış kaydı var; henüz oynanış veya multiplayer kabulü yok. P1 testleri ayrıca yapılacak.
-- Ortak sorumlular atandı. Kaynak/üretim yöntemi, devam/ayrılma ayrıntıları, ürün hedefi, bütçe tutarı/paylaşımı, netcode yedeği ve D06 ekip farkındalığı hâlâ açık; kullanıcı kararıyla bunlar P0 kapanışını bekletmez ve ilgili işe başlamadan ele alınır.
+- MertKAYAR ve Utkuuzun14 write davetlerini kabul etti. Utku'nun PR #7 ve Mert'in PR #10 deÄŸiÅŸikliÄŸi main'e birleÅŸti; Ã¼Ã§ kiÅŸinin P0 kurulum/build testi geÃ§ti.
+- P0 kapanÄ±ÅŸ kaydÄ± var; henÃ¼z oynanÄ±ÅŸ veya multiplayer kabulÃ¼ yok. P1 testleri ayrÄ±ca yapÄ±lacak.
+- Ortak sorumlular atandÄ±. Kaynak/Ã¼retim yÃ¶ntemi, devam/ayrÄ±lma ayrÄ±ntÄ±larÄ±, Ã¼rÃ¼n hedefi, bÃ¼tÃ§e tutarÄ±/paylaÅŸÄ±mÄ±, netcode yedeÄŸi ve D06 ekip farkÄ±ndalÄ±ÄŸÄ± hÃ¢lÃ¢ aÃ§Ä±k; kullanÄ±cÄ± kararÄ±yla bunlar P0 kapanÄ±ÅŸÄ±nÄ± bekletmez ve ilgili iÅŸe baÅŸlamadan ele alÄ±nÄ±r.
 
 ## Ekip
 
-| Rol | Kişi | GitHub hesabı |
+| Rol | KiÅŸi | GitHub hesabÄ± |
 |---|---|---|
 | A | Mehmet | mehmetalisahingm |
 | B | Utku | Utkuuzun14 |
 | C | Mert | MertKAYAR |
 
-İsimler kullanıcıdan alındı. Rol eşleştirmesi başlangıç atamasıdır; uzmanlık iddiası değildir. Repo erişimi için yönetici işlemlerini Mehmet yapar. Public depoya gereksiz kişisel bilgi yazılmaz.
+Ä°simler kullanÄ±cÄ±dan alÄ±ndÄ±. Rol eÅŸleÅŸtirmesi baÅŸlangÄ±Ã§ atamasÄ±dÄ±r; uzmanlÄ±k iddiasÄ± deÄŸildir. Repo eriÅŸimi iÃ§in yÃ¶netici iÅŸlemlerini Mehmet yapar. Public depoya gereksiz kiÅŸisel bilgi yazÄ±lmaz.
 
-## Ortam ve araçlar
+## Ortam ve araÃ§lar
 
 | Konu | Durum / sorumlu |
 |---|---|
-| Unity/URP | Ortak proje depo kökünde; Unity 6000.3.23f1, URP 17.3.0, Visual Studio Editor 2.0.26 sabitlendi. Manifest ve paket kilidi kaynakta. Windows IL2CPP desteği kurulu; P0 örneği daha kısa derleme için Mono kullanıyor |
-| Yerel kod araçları | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diğer bilgisayarlar doğrulanmadı |
-| Git ve varlık düzeni | Unity `.gitignore` ve `.gitattributes` kuralları Utku'nun [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7) değişikliğiyle faz dalına birleşti; LFS ve Smart Merge kontrolleri geçti. Projede Visible Meta Files ve Force Text kayıtlı; alan sahipliği CONTRACTS/WORKFLOW içinde belli. P0 incelemesi aranmaz |
-| Repo ana dalı | main; ilk plan paylaşıldı |
-| Ekip erişim testi | Üç hesabın erişimi aktif; Mehmet, Utku ve Mert güncel ortak projeyi aldı ve açtı |
-| Örnek build | `P0-A-9596244`, kaynak `9596244`; [kurulum/build rehberi](../SETUP.md). Mehmet, Utku ve Mert'in Windows build kontrolleri başarılı |
-| Basit branch koruması | P1 Mert, yönetici işlemlerinde Mehmet; kurulmadı |
-| Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadı |
-| Performans ortamı | P4 sonunda ölçümden önce sabitlenecek; öneri 1080p/60 FPS |
-| Manuel araç istisnası | Henüz yok; gerçek engel varsa neden/sorumlu/kontrol kısa kayda yazılır |
+| Unity/URP | Ortak proje depo kÃ¶kÃ¼nde; Unity 6000.3.23f1, URP 17.3.0, Visual Studio Editor 2.0.26 sabitlendi. Manifest ve paket kilidi kaynakta. Windows IL2CPP desteÄŸi kurulu; P0 Ã¶rneÄŸi daha kÄ±sa derleme iÃ§in Mono kullanÄ±yor |
+| Yerel kod araÃ§larÄ± | Mehmet'te VS Code Unity 1.3.1, C# 2.140.9 ve C# Dev Kit 3.20.199 kuruldu. Unity Hub 3.17.2, Git 2.50.1 ve Git LFS 3.7.0 zaten kurulu; diÄŸer bilgisayarlar doÄŸrulanmadÄ± |
+| Git ve varlÄ±k dÃ¼zeni | Unity `.gitignore` ve `.gitattributes` kurallarÄ± Utku'nun [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7) deÄŸiÅŸikliÄŸiyle faz dalÄ±na birleÅŸti; LFS ve Smart Merge kontrolleri geÃ§ti. Projede Visible Meta Files ve Force Text kayÄ±tlÄ±; alan sahipliÄŸi CONTRACTS/WORKFLOW iÃ§inde belli. P0 incelemesi aranmaz |
+| Repo ana dalÄ± | main; ilk plan paylaÅŸÄ±ldÄ± |
+| Ekip eriÅŸim testi | ÃœÃ§ hesabÄ±n eriÅŸimi aktif; Mehmet, Utku ve Mert gÃ¼ncel ortak projeyi aldÄ± ve aÃ§tÄ± |
+| Ã–rnek build | `P0-A-9596244`, kaynak `9596244`; [kurulum/build rehberi](../SETUP.md). Mehmet, Utku ve Mert'in Windows build kontrolleri baÅŸarÄ±lÄ± |
+| Basit branch korumasÄ± | P1 Mert, yÃ¶netici iÅŸlemlerinde Mehmet; kurulmadÄ± |
+| Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadÄ± |
+| Performans ortamÄ± | P4 sonunda Ã¶lÃ§Ã¼mden Ã¶nce sabitlenecek; Ã¶neri 1080p/60 FPS |
+| Manuel araÃ§ istisnasÄ± | HenÃ¼z yok; gerÃ§ek engel varsa neden/sorumlu/kontrol kÄ±sa kayda yazÄ±lÄ±r |
 
 ## Faz durumu
 
-| Faz | Durum | Birleştirme koordinatörü | Kapanış kaydı / main commit |
+| Faz | Durum | BirleÅŸtirme koordinatÃ¶rÃ¼ | KapanÄ±ÅŸ kaydÄ± / main commit |
 |---|---|---|---|
-| P0 | KAPALI | Mehmet | [P0 kapanış kaydı](../reports/P0-REPORT.md); doğrulanan temel `14e34f1` |
-| P1 | ACIK | Utku | [Görevler #12–#14](https://github.com/mehmetalisahingm/DeepDiveGame/issues?q=is%3Aissue+is%3Aopen+P1) açıldı; kapanış yok |
+| P0 | KAPALI | Mehmet | [P0 kapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md); doÄŸrulanan temel `14e34f1` |
+| P1 | ACIK | Utku | [GÃ¶revler #12â€“#14](https://github.com/mehmetalisahingm/DeepDiveGame/issues?q=is%3Aissue+is%3Aopen+P1) aÃ§Ä±ldÄ±; kapanÄ±ÅŸ yok |
 | P2 | KILITLI | Mert | Yok |
 | P3 | KILITLI | Mehmet | Yok |
 | P4 | KILITLI | Utku | Yok |
 | P5 | KILITLI | Mert | Yok |
 | P6 | KILITLI | Mehmet | Yok |
 
-## Kişi görevleri
+## KiÅŸi gÃ¶revleri
 
-Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi alınamaz.
+AyrÄ±ntÄ±lar [PHASES.md](PHASES.md) iÃ§indedir. Gelecek fazÄ±n BEKLIYOR gÃ¶revi alÄ±namaz.
 
-| Görev | Sahip | Durum | Kanıt / kalan iş |
+| GÃ¶rev | Sahip | Durum | KanÄ±t / kalan iÅŸ |
 |---|---|---|---|
-| P0-A | Mehmet | TAMAM | [Görev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4), [PR #8](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8): ortak temel ve Windows build teslim edildi |
-| P0-B | Utku | TAMAM | [Görev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2), [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7): Git düzeni birleşti; Unity açılışı ve Windows build testi geçti |
-| P0-C | Mert | TAMAM | [Görev #3](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3), [PR #10](https://github.com/mehmetalisahingm/DeepDiveGame/pull/10): güncel main'i aldı, Unity `6000.3.23f1` ile açtı, gerçek Windows build aldı ve çalıştırdı; görsel/ses kaynak planı main'e birleşti |
-| P1-A | Mehmet | DEVAM | [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16): oda/katıl/ayrıl, oyuncu oluşumu, host yetkili yürüme/yüzme ve ağ sahne yükleme yazıldı. Windows build, 7 test ve yerel 1/4 oyunculu kontroller geçti. Utku incelemesi, Mert/Utku entegrasyonu ve internet testi bekliyor. [Çalıştırma](../P1_NETWORK.md) |
-| P1-B | Utku | DEVAM | [Görev #13](https://github.com/mehmetalisahingm/DeepDiveGame/issues/13): hazırlık alanı, tek sualtı test alanı, çarpışmalar ve P1 birleştirme koordinasyonu |
-| P1-C | Mert | DEVAM | [Görev #14](https://github.com/mehmetalisahingm/DeepDiveGame/issues/14): oda/hazır ekranı, `SessionState` geçişleri ve basit branch koruması |
+| P0-A | Mehmet | TAMAM | [GÃ¶rev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4), [PR #8](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8): ortak temel ve Windows build teslim edildi |
+| P0-B | Utku | TAMAM | [GÃ¶rev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2), [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7): Git dÃ¼zeni birleÅŸti; Unity aÃ§Ä±lÄ±ÅŸÄ± ve Windows build testi geÃ§ti |
+| P0-C | Mert | TAMAM | [GÃ¶rev #3](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3), [PR #10](https://github.com/mehmetalisahingm/DeepDiveGame/pull/10): gÃ¼ncel main'i aldÄ±, Unity `6000.3.23f1` ile aÃ§tÄ±, gerÃ§ek Windows build aldÄ± ve Ã§alÄ±ÅŸtÄ±rdÄ±; gÃ¶rsel/ses kaynak planÄ± main'e birleÅŸti |
+| P1-A | Mehmet | DEVAM | PR #16: ağ/oyuncu kodu Mert ve Utku teslimleriyle bağlandı; yerel solo/2/4 oyuncu, kopma/yeniden katılma ve sahne geçişi geçti. İnternet ve ekip kabulü açık. [Ortak rapor](../reports/P1-INTEGRATION-REPORT.md) |
+| P1-B | Utku | DEVAM | PR #18: hazırlık ve tek sualtı sahnesi bağlandı; spawn, su hacmi ve çarpışmalar yerel 1/2/4 oyuncuda doğrulandı. Kontroller Mehmet/Codex entegrasyon çalışmasıdır; Utku adına tamam kaydı değildir. |
+| P1-C | Mert | DEVAM | PR #17: gerçek oda/hazır ekranı, ağdan hazır listesi ve host aşama geçişleri bağlandı; yerel testler geçti. Branch koruması, internet ve ekip kabulü açık. |
 | P2-A | Mehmet | BEKLIYOR | Yok |
 | P2-B | Utku | BEKLIYOR | Yok |
 | P2-C | Mert | BEKLIYOR | Yok |
@@ -77,64 +77,64 @@ Ayrıntılar [PHASES.md](PHASES.md) içindedir. Gelecek fazın BEKLIYOR görevi 
 | P6-B | Utku | BEKLIYOR | Yok |
 | P6-C | Mert | BEKLIYOR | Yok |
 
-## Alt iş ve destek devri
+## Alt iÅŸ ve destek devri
 
-P0-A için Mehmet asgari `.gitignore`, görünür `.meta` ve metin serileştirme ayarlarını önerdi; [P0-B koordinasyon kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2#issuecomment-5483065421) açıldı. Utku'nun `.gitignore` ve `.gitattributes` teslimi PR #7 ile faz dalına birleşti; diğer P0-B işleri açık olduğu için görev tamamlandı sayılmaz. [Mehmet'in oyuncu görsel/ses ihtiyaçları](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3#issuecomment-5483112818) Mert'in kaydına eklendi.
+P0-A iÃ§in Mehmet asgari `.gitignore`, gÃ¶rÃ¼nÃ¼r `.meta` ve metin serileÅŸtirme ayarlarÄ±nÄ± Ã¶nerdi; [P0-B koordinasyon kaydÄ±](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2#issuecomment-5483065421) aÃ§Ä±ldÄ±. Utku'nun `.gitignore` ve `.gitattributes` teslimi PR #7 ile faz dalÄ±na birleÅŸti; diÄŸer P0-B iÅŸleri aÃ§Ä±k olduÄŸu iÃ§in gÃ¶rev tamamlandÄ± sayÄ±lmaz. [Mehmet'in oyuncu gÃ¶rsel/ses ihtiyaÃ§larÄ±](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3#issuecomment-5483112818) Mert'in kaydÄ±na eklendi.
 
-## D01–D11 kısa karar kaydı
+## D01â€“D11 kÄ±sa karar kaydÄ±
 
-Kararların ayrıntısı PHASES içindedir. İsimli plan yazılması, ekip görüşmesinin yapıldığı anlamına gelmez.
+KararlarÄ±n ayrÄ±ntÄ±sÄ± PHASES iÃ§indedir. Ä°simli plan yazÄ±lmasÄ±, ekip gÃ¶rÃ¼ÅŸmesinin yapÄ±ldÄ±ÄŸÄ± anlamÄ±na gelmez.
 
-| Karar | Plan durumu | Ekip kaydı |
+| Karar | Plan durumu | Ekip kaydÄ± |
 |---|---|---|
-| D01 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D02 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D03 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D04 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D05 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D06 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D07 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D08 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D09 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
-| D10 | Tek bölgelik ilk sürüm plan kapsamı | Ekip görüşmesi henüz yapılmadı |
-| D11 | Başlangıç varsayımı | Ekip görüşmesi henüz yapılmadı |
+| D01 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D02 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D03 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D04 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D05 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D06 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D07 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D08 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D09 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D10 | Tek bÃ¶lgelik ilk sÃ¼rÃ¼m plan kapsamÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
+| D11 | BaÅŸlangÄ±Ã§ varsayÄ±mÄ± | Ekip gÃ¶rÃ¼ÅŸmesi henÃ¼z yapÄ±lmadÄ± |
 
-## P0 ekip kararları
+## P0 ekip kararlarÄ±
 
-[Toplantı gündemi ve tek karar tablosu](P0_MEETING.md) T01–T07'nin referansıdır. Kullanıcı atamasıyla görsel/ses üretimi ve tutarlılık Mert'te; takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesi Mehmet'tedir. Açık kararlar ilgili özelliğe başlamadan ele alınır; P0 kapanışını bekletmez. Atamalar uzmanlık kanıtı veya harcama izni değildir.
+[ToplantÄ± gÃ¼ndemi ve tek karar tablosu](P0_MEETING.md) T01â€“T07'nin referansÄ±dÄ±r. KullanÄ±cÄ± atamasÄ±yla gÃ¶rsel/ses Ã¼retimi ve tutarlÄ±lÄ±k Mert'te; takvim, devam/ayrÄ±lma planÄ±, Ã¼rÃ¼n hedefi, tasarÄ±mda son karar, bÃ¼tÃ§e/servis takibi ve birincil netcode incelemesi Mehmet'tedir. AÃ§Ä±k kararlar ilgili Ã¶zelliÄŸe baÅŸlamadan ele alÄ±nÄ±r; P0 kapanÄ±ÅŸÄ±nÄ± bekletmez. Atamalar uzmanlÄ±k kanÄ±tÄ± veya harcama izni deÄŸildir.
 
-## Faz kapanışı
+## Faz kapanÄ±ÅŸÄ±
 
-Tek kısa kayıtta şu bilgiler yeterlidir:
-- Üç kişinin işi birleşti mi?
-- O fazın kabul testleri hangi build/commit'te geçti; yapılmayan test var mı?
-- Mehmet, Utku ve Mert'in gerçek tamam mesajları nerede?
-- main'e birleşmiş build kontrol edildi mi?
-- P2/P3 ise temel his katmanıyla oynanış testinde devam mı, düzeltme mi kararı verildi?
+Tek kÄ±sa kayÄ±tta ÅŸu bilgiler yeterlidir:
+- ÃœÃ§ kiÅŸinin iÅŸi birleÅŸti mi?
+- O fazÄ±n kabul testleri hangi build/commit'te geÃ§ti; yapÄ±lmayan test var mÄ±?
+- Mehmet, Utku ve Mert'in gerÃ§ek tamam mesajlarÄ± nerede?
+- main'e birleÅŸmiÅŸ build kontrol edildi mi?
+- P2/P3 ise temel his katmanÄ±yla oynanÄ±ÅŸ testinde devam mÄ±, dÃ¼zeltme mi kararÄ± verildi?
 
-Kayıt yoksa tamamlandı işaretlenmez. Ayrı imza matrisi yoktur; sonraki faz kendiliğinden açılmaz.
+KayÄ±t yoksa tamamlandÄ± iÅŸaretlenmez. AyrÄ± imza matrisi yoktur; sonraki faz kendiliÄŸinden aÃ§Ä±lmaz.
 
-## Değişiklik kaydı
+## DeÄŸiÅŸiklik kaydÄ±
 
-| Tarih | Değişiklik |
+| Tarih | DeÄŸiÅŸiklik |
 |---|---|
-| 2026-08-31 | Plan 1.0 ve public repo başlangıcı oluşturuldu |
-| 2026-08-31 | Kullanıcının verdiği isimlerle Mehmet=A, Utku=B, Mert=C başlangıç dağılımı yapıldı |
-| 2026-08-31 | Görüşülen sadeleştirme isimli görev planına işlendi: hafif P0, P1 koruma, P2 CI, P3 oynanış kontrolü ve tek bölgelik ilk sürüm; hiçbir oyun fazı tamamlanmadı |
-| 2026-08-31 | Kullanıcı revizyonu onayladı; P2 erken oynama testi ve P2/P3 temel his katmanı eklendi. P0 görevleri #1–#3 açıldı; hiçbir oyun testi tamamlandı sayılmadı |
-| 2026-08-31 | Plan 1.3: kullanıcı gündemi P0_MEETING'e eklendi; üretim, devam/ayrılma, hedef, bütçe, tasarım, insan netcode sorumluluğu ve host kayıt sınırı görünür oldu. Ekip kararları açık bırakıldı; faz ilerletilmedi |
-| 2026-08-31 | Plan 1.4: kullanıcının ortak sorumlulukları üstlenme ve görsel/sesi Mert'e verme talimatı işlendi. Diğer geliştirme işleri, gerçek testler ve üç kişilik faz kapısı korundu; uzmanlık, harcama veya tamam kaydı üretilmedi |
-| 2026-08-31 | Kullanıcının indirme/kurulum isteğiyle Mehmet'in bilgisayarına Unity 6000.3.23f1, Windows IL2CPP desteği ve VS Code Unity/C# eklentileri kuruldu. Unity sürümü, imzası ve Windows modül dosyaları doğrulandı; eski Unity korundu. Proje, lisansla proje açılışı ve build testi yapılmadı; P0 kapanmadı |
-| 2026-08-31 | Kullanıcının verdiği Utkuuzun14 ve MertKAYAR hesaplarına write davetleri gönderildi ve GitHub API üzerinden doğrulandı; davet kabulü veya gerçek push/pull testi tamamlandı sayılmadı |
-| 2026-08-31 | Mehmet'in P0-A isteğiyle ortak URP projesi, sabit sürümler, örnek sahne ve tekrarlanabilir Windows build hazırlandı. Yerel derleme ve .meta/önbellek kontrolleri yapıldı. Görsel kontrol Esc sonrası ekran aracında sürdürülemedi; yapılmış sayılmadı. Utku incelemesi, diğer bilgisayarlar ve gerçek ekip kararları açık; P0 kapanmadı |
-| 2026-08-31 | Kullanıcının yeni görsel kontrol isteğinde ekran bağlantısı yenilendi. Gerçek P0 Windows penceresinde küp, zemin, ışık/gölge ve arka plan doğrulandı; ekran görüntüsü kanıtı kaydedildi. Önceki görsel test engeli kapandı. Diğer kişilerin testi/onayı üretilmedi; P0 açık kaldı |
-| 2026-09-04 | MertKAYAR'ın depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #3 Mert'e atandı. Gerçek branch push/pull ve temiz klon testleri henüz yapılmadı |
-| 2026-09-04 | Utkuuzun14 hesabının depo write erişiminin aktif olduğu GitHub üzerinden doğrulandı; görev #2 Utku'ya atandı. Gerçek branch push/pull ve P0-B testleri henüz yapılmadı |
-| 2026-09-04 | Mert'in erken kapattığı görev #3, P0-C teslimleri için branch/commit/PR/test kanıtı oluşmadığından yeniden açıldı |
-| 2026-09-04 | P0-C görevi kullanıcı kararıyla kişisel bilgi toplamadan yalnızca proje teslimlerine odaklanacak şekilde sadeleştirildi |
-| 2026-09-06 | Utku'nun PR #7 değişikliği P0 faz dalına birleşti. Unity `.gitignore`, LFS ve Smart Merge kuralları doğrulandı; Mehmet birleşmiş değişikliği kendi branch'ine aldı. Visible Meta Files, Force Text, sahiplik, PR #4 incelemesi ve ekip testleri açık olduğundan P0-B ve P0 tamamlanmadı |
-| 2026-09-06 | Kullanıcı kararıyla P0 karşılıklı inceleme ve ayrı deneme branch'i şartlarından arındırıldı. Ortak temel main'e birleşip Mehmet, Utku ve Mert güncel projeyi aynı Unity sürümünde açar ve ortak Windows build'ini çalıştırırsa P0 kapanacak |
-| 2026-09-06 | Mehmet'in PR #4 değişikliği faz dalına birleşti ve P0 main aktarımı için PR #8 açıldı. Mevcut JPG kanıtı yeni LFS kuralına uygun pointer olarak düzeltildi; P0 arkadaşların indirme/açma/build sonucu gelene kadar açık |
-| 2026-09-06 | PR #8 main'e birleşti (`169b245`). P0'ın kalan tek kapısı Utku ve Mert'in güncel main'i indirip Unity'de açması ve ortak Windows build'ini çalıştırmasıdır |
-| 2026-09-07 | Mert güncel main `d46faff` üzerinde Unity açılışı ve Windows build çalıştırma sonucunu görev #3'e kaydetti. Görsel/ses kaynak planı PR #10 ile main'e birleşti (`2f9c267`); P0 yalnızca Utku'nun sonucunu bekliyor |
-| 2026-09-08 | Utku main `14e34f1` üzerinde Unity açılışı, sahne ve Windows build çalıştırma sonucunu görev #2'ye kaydetti. Üç kişinin P0 kanıtı tamamlandı; P0 kapatıldı, P1 açıldı ve görevler #12–#14 oluşturuldu |
+| 2026-08-31 | Plan 1.0 ve public repo baÅŸlangÄ±cÄ± oluÅŸturuldu |
+| 2026-08-31 | KullanÄ±cÄ±nÄ±n verdiÄŸi isimlerle Mehmet=A, Utku=B, Mert=C baÅŸlangÄ±Ã§ daÄŸÄ±lÄ±mÄ± yapÄ±ldÄ± |
+| 2026-08-31 | GÃ¶rÃ¼ÅŸÃ¼len sadeleÅŸtirme isimli gÃ¶rev planÄ±na iÅŸlendi: hafif P0, P1 koruma, P2 CI, P3 oynanÄ±ÅŸ kontrolÃ¼ ve tek bÃ¶lgelik ilk sÃ¼rÃ¼m; hiÃ§bir oyun fazÄ± tamamlanmadÄ± |
+| 2026-08-31 | KullanÄ±cÄ± revizyonu onayladÄ±; P2 erken oynama testi ve P2/P3 temel his katmanÄ± eklendi. P0 gÃ¶revleri #1â€“#3 aÃ§Ä±ldÄ±; hiÃ§bir oyun testi tamamlandÄ± sayÄ±lmadÄ± |
+| 2026-08-31 | Plan 1.3: kullanÄ±cÄ± gÃ¼ndemi P0_MEETING'e eklendi; Ã¼retim, devam/ayrÄ±lma, hedef, bÃ¼tÃ§e, tasarÄ±m, insan netcode sorumluluÄŸu ve host kayÄ±t sÄ±nÄ±rÄ± gÃ¶rÃ¼nÃ¼r oldu. Ekip kararlarÄ± aÃ§Ä±k bÄ±rakÄ±ldÄ±; faz ilerletilmedi |
+| 2026-08-31 | Plan 1.4: kullanÄ±cÄ±nÄ±n ortak sorumluluklarÄ± Ã¼stlenme ve gÃ¶rsel/sesi Mert'e verme talimatÄ± iÅŸlendi. DiÄŸer geliÅŸtirme iÅŸleri, gerÃ§ek testler ve Ã¼Ã§ kiÅŸilik faz kapÄ±sÄ± korundu; uzmanlÄ±k, harcama veya tamam kaydÄ± Ã¼retilmedi |
+| 2026-08-31 | KullanÄ±cÄ±nÄ±n indirme/kurulum isteÄŸiyle Mehmet'in bilgisayarÄ±na Unity 6000.3.23f1, Windows IL2CPP desteÄŸi ve VS Code Unity/C# eklentileri kuruldu. Unity sÃ¼rÃ¼mÃ¼, imzasÄ± ve Windows modÃ¼l dosyalarÄ± doÄŸrulandÄ±; eski Unity korundu. Proje, lisansla proje aÃ§Ä±lÄ±ÅŸÄ± ve build testi yapÄ±lmadÄ±; P0 kapanmadÄ± |
+| 2026-08-31 | KullanÄ±cÄ±nÄ±n verdiÄŸi Utkuuzun14 ve MertKAYAR hesaplarÄ±na write davetleri gÃ¶nderildi ve GitHub API Ã¼zerinden doÄŸrulandÄ±; davet kabulÃ¼ veya gerÃ§ek push/pull testi tamamlandÄ± sayÄ±lmadÄ± |
+| 2026-08-31 | Mehmet'in P0-A isteÄŸiyle ortak URP projesi, sabit sÃ¼rÃ¼mler, Ã¶rnek sahne ve tekrarlanabilir Windows build hazÄ±rlandÄ±. Yerel derleme ve .meta/Ã¶nbellek kontrolleri yapÄ±ldÄ±. GÃ¶rsel kontrol Esc sonrasÄ± ekran aracÄ±nda sÃ¼rdÃ¼rÃ¼lemedi; yapÄ±lmÄ±ÅŸ sayÄ±lmadÄ±. Utku incelemesi, diÄŸer bilgisayarlar ve gerÃ§ek ekip kararlarÄ± aÃ§Ä±k; P0 kapanmadÄ± |
+| 2026-08-31 | KullanÄ±cÄ±nÄ±n yeni gÃ¶rsel kontrol isteÄŸinde ekran baÄŸlantÄ±sÄ± yenilendi. GerÃ§ek P0 Windows penceresinde kÃ¼p, zemin, Ä±ÅŸÄ±k/gÃ¶lge ve arka plan doÄŸrulandÄ±; ekran gÃ¶rÃ¼ntÃ¼sÃ¼ kanÄ±tÄ± kaydedildi. Ã–nceki gÃ¶rsel test engeli kapandÄ±. DiÄŸer kiÅŸilerin testi/onayÄ± Ã¼retilmedi; P0 aÃ§Ä±k kaldÄ± |
+| 2026-09-04 | MertKAYAR'Ä±n depo write eriÅŸiminin aktif olduÄŸu GitHub Ã¼zerinden doÄŸrulandÄ±; gÃ¶rev #3 Mert'e atandÄ±. GerÃ§ek branch push/pull ve temiz klon testleri henÃ¼z yapÄ±lmadÄ± |
+| 2026-09-04 | Utkuuzun14 hesabÄ±nÄ±n depo write eriÅŸiminin aktif olduÄŸu GitHub Ã¼zerinden doÄŸrulandÄ±; gÃ¶rev #2 Utku'ya atandÄ±. GerÃ§ek branch push/pull ve P0-B testleri henÃ¼z yapÄ±lmadÄ± |
+| 2026-09-04 | Mert'in erken kapattÄ±ÄŸÄ± gÃ¶rev #3, P0-C teslimleri iÃ§in branch/commit/PR/test kanÄ±tÄ± oluÅŸmadÄ±ÄŸÄ±ndan yeniden aÃ§Ä±ldÄ± |
+| 2026-09-04 | P0-C gÃ¶revi kullanÄ±cÄ± kararÄ±yla kiÅŸisel bilgi toplamadan yalnÄ±zca proje teslimlerine odaklanacak ÅŸekilde sadeleÅŸtirildi |
+| 2026-09-06 | Utku'nun PR #7 deÄŸiÅŸikliÄŸi P0 faz dalÄ±na birleÅŸti. Unity `.gitignore`, LFS ve Smart Merge kurallarÄ± doÄŸrulandÄ±; Mehmet birleÅŸmiÅŸ deÄŸiÅŸikliÄŸi kendi branch'ine aldÄ±. Visible Meta Files, Force Text, sahiplik, PR #4 incelemesi ve ekip testleri aÃ§Ä±k olduÄŸundan P0-B ve P0 tamamlanmadÄ± |
+| 2026-09-06 | KullanÄ±cÄ± kararÄ±yla P0 karÅŸÄ±lÄ±klÄ± inceleme ve ayrÄ± deneme branch'i ÅŸartlarÄ±ndan arÄ±ndÄ±rÄ±ldÄ±. Ortak temel main'e birleÅŸip Mehmet, Utku ve Mert gÃ¼ncel projeyi aynÄ± Unity sÃ¼rÃ¼mÃ¼nde aÃ§ar ve ortak Windows build'ini Ã§alÄ±ÅŸtÄ±rÄ±rsa P0 kapanacak |
+| 2026-09-06 | Mehmet'in PR #4 deÄŸiÅŸikliÄŸi faz dalÄ±na birleÅŸti ve P0 main aktarÄ±mÄ± iÃ§in PR #8 aÃ§Ä±ldÄ±. Mevcut JPG kanÄ±tÄ± yeni LFS kuralÄ±na uygun pointer olarak dÃ¼zeltildi; P0 arkadaÅŸlarÄ±n indirme/aÃ§ma/build sonucu gelene kadar aÃ§Ä±k |
+| 2026-09-06 | PR #8 main'e birleÅŸti (`169b245`). P0'Ä±n kalan tek kapÄ±sÄ± Utku ve Mert'in gÃ¼ncel main'i indirip Unity'de aÃ§masÄ± ve ortak Windows build'ini Ã§alÄ±ÅŸtÄ±rmasÄ±dÄ±r |
+| 2026-09-07 | Mert gÃ¼ncel main `d46faff` Ã¼zerinde Unity aÃ§Ä±lÄ±ÅŸÄ± ve Windows build Ã§alÄ±ÅŸtÄ±rma sonucunu gÃ¶rev #3'e kaydetti. GÃ¶rsel/ses kaynak planÄ± PR #10 ile main'e birleÅŸti (`2f9c267`); P0 yalnÄ±zca Utku'nun sonucunu bekliyor |
+| 2026-09-08 | Utku main `14e34f1` Ã¼zerinde Unity aÃ§Ä±lÄ±ÅŸÄ±, sahne ve Windows build Ã§alÄ±ÅŸtÄ±rma sonucunu gÃ¶rev #2'ye kaydetti. ÃœÃ§ kiÅŸinin P0 kanÄ±tÄ± tamamlandÄ±; P0 kapatÄ±ldÄ±, P1 aÃ§Ä±ldÄ± ve gÃ¶revler #12â€“#14 oluÅŸturuldu |

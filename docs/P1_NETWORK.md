@@ -1,5 +1,8 @@
 # P1-A bağlantı ve oyuncu
 
+Bu belge ayrı P1-A laboratuvarının teknik referansıdır. Üç kişinin birleşmiş
+oyununu çalıştırmak için [P1 ortak build rehberini](P1_PLAY.md) kullanın.
+
 Kaynak: `codex/p1-mehmet-network`, [PR #16](https://github.com/mehmetalisahingm/DeepDiveGame/pull/16).
 Unity `6000.3.23f1`, NGO `2.7.0`, Unity Transport `2.6.0`.
 
@@ -15,8 +18,9 @@ Bu ekran ve iki boş test sahnesi yalnız P1-A ağ doğrulaması içindir. Mert'
 oyuncu/hazır ekranı ve Utku'nun gerçek test bölgesi ayrı görevlerdir.
 
 Unity'de `Assets/Tests/P1/Fixtures/P1NetworkLab.unity` açılıp Play ile hareket
-denenebilir. Ağ sahne geçişini Windows test build'inde deneyin; Editor'ün ortak
-build listesi P0 sahnesinde tutulmuştur. İki test sahnesi Windows komutunda açıkça verilir.
+denenebilir. Laboratuvar sahne geçişini kendi Windows test build'inde deneyin;
+Editor'ün ortak build listesi artık gerçek `PrepArea` / `DiveTestArea` sahnelerini
+kullanır. İki laboratuvar sahnesi Windows test komutunda açıkça verilir.
 
 Windows build ve test komutları, Unity Editor bu projeyi açmıyorken depo kökünde:
 

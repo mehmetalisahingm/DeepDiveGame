@@ -6,15 +6,15 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 
 ## Şu anki durum
 
-- Bu dalda ortak Unity/URP projesi ve kamera/ışık/küp içeren P0 örneği hazır; oyun mekanikleri henüz yok.
+- Bu dalda üç kişinin P1 kodu ortak akışa bağlandı: oda/hazır ekranı, ağ oyuncuları, yürüme/yüzme ve hazırlık → dalış → dönüş. [Birlikte çalıştır](docs/P1_PLAY.md).
 - **P0 tamamlandı:** Unity temeli üç ayrı kurulumda açıldı ve Windows build'i çalıştı. [Kapanış kaydı](docs/reports/P0-REPORT.md).
 - Aktif çalışma **P1 — Bağlan, görün, hareket et (AÇIK)**. P2–P6 kapalıdır.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
-- Plan 1.6: P0 kapandı, P1 görevleri açıldı. Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
+- Plan 1.7: P1 yerel entegrasyonu hazır; gerçek internet/ekip kabulü bekliyor. Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
 
 **Ortak sorumluluklar:** Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığı yönetir. Mehmet takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Utku'nun ve Mert'in mevcut geliştirme işleri korunur; herkes kendi sisteminin entegrasyonunu ve co-op testini yapar.
 
-**Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. Depo kökünü Unity Hub'a ekle; `Assets/P0/Scenes/P0Example.unity` sahnesini aç. [Kurulum ve Windows build rehberi](docs/SETUP.md). P0 kontrolü üç kişide başarılıdır.
+**Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. `codex/p1-integration` dalını al, depo kökünü Unity Hub'a ekle; `Assets/DeepDive/World/Scenes/PrepArea.unity` sahnesini aç. [P1 çalıştırma ve Windows build rehberi](docs/P1_PLAY.md). `main`, faz kapanana kadar P0 temelidir.
 
 **İndirme ve P0 testi:** [P0 main aktarımı](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8) · [Ekip için yayınlanmamış Windows test paketi](https://github.com/mehmetalisahingm/DeepDiveGame/releases). Kaynakları Git üzerinden, yalnızca çalıştırılacak build'i ZIP üzerinden paylaşın.
 
@@ -26,7 +26,7 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 | **Utku (B)** | Hazırlık alanı, tek sualtı test bölgesi, çarpışmalar ve P1 birleştirme koordinasyonu | [P1-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/13) |
 | **Mert (C)** | Oda/oyuncu listesi, hazır olma ekranı, oturum durumları ve basit branch koruması | [P1-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/14) |
 
-**İlk iş:** Herkes `codex/p1-integration` dalından kendi küçük özellik dalını açar. Mehmet ve Mert `PlayerId`/`SessionState` bağlantısını netleştirir; Utku faz birleşmelerini koordine eder.
+**Şimdi:** Üç kişi güncel `codex/p1-integration` dalını alıp aynı build'i kullanır. Yerel otomatik testler internet testi yerine geçmez; birlikte iki bilgisayarda 2/4 oyuncu kabulünü yapın. [Entegrasyon ve kalan koşullar](docs/reports/P1-INTEGRATION-REPORT.md).
 
 **Sonraki işler başlamadan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) kaynak yöntemi, hedef, bütçe ve netcode yedeği gibi açık kararlar ilgili özellikten önce ele alınır. Bu gündem P0 kapanışını bekletmez.
 
