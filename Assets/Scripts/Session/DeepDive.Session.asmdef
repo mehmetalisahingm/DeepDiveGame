@@ -1,0 +1,4 @@
+{
+  "name": "DeepDive.Session",
+  "references": ["DeepDive.Core.Contracts", "UnityEngine.UI"]
+}

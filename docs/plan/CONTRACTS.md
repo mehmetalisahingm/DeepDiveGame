@@ -4,6 +4,17 @@ Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Burad
 
 Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'da yalnızca P1 için gereken kimlik/oturum bağlantıları kesinleşir. Av/çanta ayrıntıları P2 öncesinde, çekim/ekonomi/kayıt ayrıntıları P3 öncesinde netleşir. İleriki fazın taslağı o özelliği erken uygulama izni vermez.
 
+P1 uygulamaları ortak akışa bağlandı: [entegrasyon kaydı](../reports/P1-INTEGRATION-REPORT.md),
+[çalıştırma](../P1_PLAY.md). `Core.Contracts.PlayerId.Value` oturumluk ulong bağlantı
+kimliğidir; host için 0 geçerlidir. Mert'in geçici string kimliği kullanılmaz.
+`SessionState` ve hazır bilgisi Mert'in `DeepDive.Session` modülündedir.
+`ISessionNetworkBridge.RequestSceneLoad` kabul/red döndürür; reddedilen yükleme
+aşama/revision değiştirmez. `Composition.SessionNetworkAdapter` gerçek ağ listesini,
+hazır isteklerini ve sahne yüklemesini bağlar. İstemci kimliği ağ bağlantısından
+alınır; aşama değişimini sadece host yapar. Yeni katılım yalnız Lobby'de ve sahne
+yüklenmiyorken kabul edilir. UI `ISessionControls` kullanır; test oyuncusu üretmez.
+Bu uygulama kaydı, diğer kişilerin incelemesi veya faz kabulü yerine geçmez.
+
 ## Sistem sahipliği
 
 Bu tablo uygulama sahipliğidir. Kullanıcı atamasıyla görsel/ses üretimi, kaynak seçimi ve tutarlılık Mert'te; ortak tasarımda son karar ve birincil insan netcode incelemesi Mehmet'tedir. [Ortak sorumluluk kaydı](P0_MEETING.md) sınırları açıklar. Mert görsel/ses kaynaklarını sağlar; alan sahibi kendi koduna/sahnesine bağlar. Ağ inceleyicisi atanması, alan sahiplerinin kendi co-op uygulama ve test sorumluluğunu devretmez; API değişiklikleri etkilenen kişilerle koordine edilir.

@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.Network",
+  "rootNamespace": "DeepDive.Network",
+  "references": ["DeepDive.Core.Contracts", "Unity.Netcode.Runtime", "Unity.Networking.Transport"]
+}
