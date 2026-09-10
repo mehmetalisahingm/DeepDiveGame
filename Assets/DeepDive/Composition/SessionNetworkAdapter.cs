@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DeepDive.Core.Contracts;
+using DeepDive.Inventory;
 using DeepDive.Network;
 using DeepDive.Session;
 using DeepDive.Session.UI;
@@ -32,6 +33,7 @@ namespace DeepDive.Composition
         private bool hadConnection, dirty;
         private double nextSnapshot;
         private string resetDiveId = "";
+        private DiveInventoryBinding diveInventory;
 
         private void Awake()
         {
@@ -43,6 +45,7 @@ namespace DeepDive.Composition
             Session.Bridge = this;
             GetComponent<SessionRoomUI>().Controls = this;
             Session.Initialize("", DiveScene);
+            EnsureDiveBinding();
             Session.OnSessionStateChanged += StateChanged;
             Session.OnRosterChanged += RosterChanged;
             network.Changed += ConnectionChanged;
@@ -64,6 +67,31 @@ namespace DeepDive.Composition
             return network.Join(address, port);
         }
         public void LeaveRoom() => network.Leave();
+
+        private void OnEnable() => EnsureDiveBinding();
+        private void OnDisable()
+        {
+            diveInventory?.Dispose();
+            diveInventory = null;
+        }
+
+        private void EnsureDiveBinding()
+        {
+            if (Session == null || diveInventory != null) return;
+            var inventory = GetComponent<InventoryManager>() ?? gameObject.AddComponent<InventoryManager>();
+            diveInventory = new DiveInventoryBinding(Session, inventory,
+                () => isActiveAndEnabled && IsAuthority && network.Status == ConnectionStatus.Connected,
+                CanClaimCatch);
+        }
+
+        private bool CanClaimCatch(PlayerId player)
+        {
+            if (manager == null || network.IsSceneLoading ||
+                !manager.ConnectedClients.TryGetValue(player.Value, out var client) || client.PlayerObject == null)
+                return false;
+            var diver = client.PlayerObject.GetComponent<NetworkPlayer>();
+            return diver != null && diver.IsSpawned && !diver.Passive.Value;
+        }
 
         private void ResetSession()
         {
@@ -166,6 +194,7 @@ namespace DeepDive.Composition
                 foreach (var id in ids)
                     if (!Session.Roster.ContainsKey(id)) Session.Join(id);
             }
+            diveInventory?.Refresh();
             dirty = true;
             Changed?.Invoke();
         }
@@ -254,6 +283,7 @@ namespace DeepDive.Composition
         }
         private void OnDestroy()
         {
+            diveInventory?.Dispose();
             UnregisterMessages();
             if (network == null) return;
             network.Changed -= ConnectionChanged; network.SceneLoaded -= Loaded;
