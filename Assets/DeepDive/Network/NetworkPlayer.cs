@@ -176,7 +176,7 @@ namespace DeepDive.Network
             transform.rotation = Quaternion.Euler(0, frame.Yaw, 0);
             Swimming.Value = SwimVolume.Contains(transform.position + Vector3.up * 0.9f);
 
-            vitals.Tick(Time.fixedDeltaTime, Swimming.Value);
+            vitals.Tick(Time.fixedDeltaTime, session.DiveActive && Swimming.Value);
             PublishVitals();
 
             var move = Passive.Value ? Vector3.zero : frame.Move;
@@ -202,14 +202,14 @@ namespace DeepDive.Network
                 PublishAction(requestId, result);
                 return;
             }
-            if (Passive.Value || !Swimming.Value)
+            if (session == null || !session.DiveActive || Passive.Value || !Swimming.Value)
             {
                 PublishAction(requestId, PlayerActionResult.InvalidState);
                 return;
             }
 
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
-            var origin = transform.position + Vector3.up * 1.35f;
+            var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, harpoonRange), ~0, QueryTriggerInteraction.Ignore))
             {
@@ -235,14 +235,14 @@ namespace DeepDive.Network
                 PublishAction(requestId, result);
                 return;
             }
-            if (Passive.Value)
+            if (session == null || !session.DiveActive || Passive.Value)
             {
                 PublishAction(requestId, PlayerActionResult.InvalidState);
                 return;
             }
 
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
-            var origin = transform.position + Vector3.up * 1.35f;
+            var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Ignore))
             {
