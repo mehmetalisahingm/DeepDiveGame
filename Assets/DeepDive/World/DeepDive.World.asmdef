@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.World",
+  "rootNamespace": "DeepDive.World",
+  "references": ["DeepDive.Core.Contracts", "Unity.Netcode.Runtime"]
+}
