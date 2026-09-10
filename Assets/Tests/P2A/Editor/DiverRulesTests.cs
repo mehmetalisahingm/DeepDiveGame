@@ -72,5 +72,29 @@ namespace DeepDive.P2A.Tests
             Assert.AreEqual(85f, buffer.Read(1d).Pitch);
             Assert.AreEqual(Vector3.zero, buffer.Read(2d).Move);
         }
+
+        [Test]
+        public void AcceptedHarpoonResolvesToHitFeedback()
+        {
+            var feedback = ActionFeedbackRules.Resolve(PlayerActionKind.Harpoon, PlayerActionResult.Accepted);
+            Assert.AreEqual(PlayerFeedbackCue.HarpoonHit, feedback.Cue);
+            Assert.AreEqual("HIT", feedback.Message);
+        }
+
+        [Test]
+        public void AcceptedPickupResolvesToCatchSecuredFeedback()
+        {
+            var feedback = ActionFeedbackRules.Resolve(PlayerActionKind.Pickup, PlayerActionResult.Accepted);
+            Assert.AreEqual(PlayerFeedbackCue.PickupAccepted, feedback.Cue);
+            Assert.AreEqual("CATCH SECURED", feedback.Message);
+        }
+
+        [Test]
+        public void InventoryFullFeedbackIsSharedAcrossPickupFailures()
+        {
+            var feedback = ActionFeedbackRules.Resolve(PlayerActionKind.Pickup, PlayerActionResult.InventoryFull);
+            Assert.AreEqual(PlayerFeedbackCue.BagFull, feedback.Cue);
+            Assert.AreEqual("BAG FULL", feedback.Message);
+        }
     }
 }
