@@ -213,6 +213,8 @@ namespace DeepDive.Network
         public void SetDiveActiveServer(bool active)
         {
             if (!IsHost) return;
+            if (DiveActive && !active)
+                ResetPlayersForDiveServer();
             DiveActive = active;
         }
 
