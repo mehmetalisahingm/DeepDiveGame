@@ -31,6 +31,7 @@ namespace DeepDive.Composition
         private uint requestSequence, snapshotSequence, receivedSnapshot;
         private bool hadConnection, dirty;
         private double nextSnapshot;
+        private string resetDiveId = "";
 
         private void Awake()
         {
@@ -67,6 +68,7 @@ namespace DeepDive.Composition
         private void ResetSession()
         {
             requests.Clear(); requestSequence = snapshotSequence = receivedSnapshot = 0;
+            resetDiveId = "";
             LastAction = "";
             Session.Initialize("", DiveScene);
         }
@@ -229,6 +231,15 @@ namespace DeepDive.Composition
         private void StateChanged(SessionState state)
         {
             dirty = true;
+            if (IsAuthority && state.Phase == SessionPhase.Dive && !string.IsNullOrEmpty(state.DiveId) && state.DiveId != resetDiveId)
+            {
+                resetDiveId = state.DiveId;
+                network.ResetPlayersForDiveServer();
+            }
+            else if (state.Phase != SessionPhase.Dive)
+            {
+                resetDiveId = "";
+            }
             Debug.Log($"P1_SESSION_STATE phase={state.Phase} revision={state.Revision}");
         }
         private void RosterChanged(IReadOnlyDictionary<PlayerId, bool> roster) => dirty = true;
