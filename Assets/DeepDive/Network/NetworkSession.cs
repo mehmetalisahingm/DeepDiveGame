@@ -255,6 +255,15 @@ namespace DeepDive.Network
             Changed?.Invoke();
         }
 
+        // Called by composition when SessionManager opens a new DiveId. Player objects survive
+        // scene loads, so resetting here prevents oxygen/health/action state leaking between dives.
+        public void ResetPlayersForDiveServer()
+        {
+            if (!IsHost) return;
+            foreach (var player in players.Values)
+                player.ResetForDiveServer();
+        }
+
         internal void Register(NetworkPlayer player)
         { players[player.OwnerClientId] = player; Changed?.Invoke(); }
         internal void Unregister(NetworkPlayer player)
