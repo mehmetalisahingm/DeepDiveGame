@@ -8,8 +8,14 @@ namespace DeepDive.Network
         public uint Sequence;
         public Vector3 Move;
         public float Yaw;
+        public float Pitch;
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        { serializer.SerializeValue(ref Sequence); serializer.SerializeValue(ref Move); serializer.SerializeValue(ref Yaw); }
+        {
+            serializer.SerializeValue(ref Sequence);
+            serializer.SerializeValue(ref Move);
+            serializer.SerializeValue(ref Yaw);
+            serializer.SerializeValue(ref Pitch);
+        }
     }
 
     public sealed class ServerInputBuffer
@@ -21,10 +27,12 @@ namespace DeepDive.Network
 
         public bool Accept(PlayerInputFrame frame, double now)
         {
-            if (!Finite(frame.Move.x) || !Finite(frame.Move.y) || !Finite(frame.Move.z) || !Finite(frame.Yaw)) return false;
+            if (!Finite(frame.Move.x) || !Finite(frame.Move.y) || !Finite(frame.Move.z) ||
+                !Finite(frame.Yaw) || !Finite(frame.Pitch)) return false;
             if (received && unchecked((int)(frame.Sequence - sequence)) <= 0) return false;
             frame.Move = Vector3.ClampMagnitude(frame.Move, 1f);
             frame.Yaw = Mathf.Repeat(frame.Yaw, 360f);
+            frame.Pitch = Mathf.Clamp(frame.Pitch, -85f, 85f);
             received = true; sequence = frame.Sequence; receivedAt = now; current = frame;
             return true;
         }
