@@ -79,6 +79,8 @@ Oyuncu kendi girdisini, kamerasını ve yerel görsel/ses geri bildirimini yöne
 
 ### Av alma
 
+P2 #26 uygulaması: Composition içindeki `DiveInventoryBinding`, World'ün `IDiveContext` ve `ICatchClaimSink` arayüzlerini uygular. Host/Dive durumunda bağlanır; dalış/oturum kapanınca ve bileşen devre dışı kalınca kendi bağlarını kaldırır. `SessionNetworkAdapter` aynı nesnede tek `InventoryManager` kullanır. Sonuç eşlemesi: Ok → Accepted; InventoryFull → InventoryFull; WrongPhase/PlayerInactive → InvalidState; InvalidTarget/AlreadyClaimed → InvalidTarget; bilinmeyen → Rejected. [Doğrulama ve kalanlar](../reports/P2-COMPOSITION.md).
+
 1. Mehmet, playerId/requestId/av kimliği ile toplama isteği gönderir.
 2. Ev sahibi oyuncunun canlılığını, dalışını, mesafesini ve avın alınabilirliğini denetler.
 3. Utku'nun av kaydı ile Mert'in çanta kapasitesi birlikte doğrulanır.

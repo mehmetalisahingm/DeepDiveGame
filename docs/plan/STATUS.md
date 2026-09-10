@@ -61,7 +61,7 @@ AyrÄ±ntÄ±lar [PHASES.md](PHASES.md) iÃ§indedir. Gelecek fazÄ±n BEKLIYOR 
 | P1-A | Mehmet | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
 | P1-B | Utku | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
 | P1-C | Mert | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
-| P2-A | Mehmet | ENTEGRASYON_BEKLIYOR | PR #25 birleşti; [doğrulanan sonuçlar ve eksikler](../reports/P2-AC-MERGE.md) |
+| P2-A | Mehmet | PR_HAZIR | #26 Composition bağlantısı eklendi; 86 test, build ve yerel iki oyuncu regresyonu geçti. Birleştirme/gerçek avlanma kabulü bekliyor. [Kayıt](../reports/P2-COMPOSITION.md) |
 | P2-B | Utku | HAZIR | [Tek balık, avlanma, sis/ışık ve CI](https://github.com/mehmetalisahingm/DeepDiveGame/issues/21) |
 | P2-C | Mert | ENTEGRASYON_BEKLIYOR | PR #24 birleşti; [doğrulanan sonuçlar ve eksikler](../reports/P2-AC-MERGE.md) |
 | P3-A | Mehmet | BEKLIYOR | Yok |
