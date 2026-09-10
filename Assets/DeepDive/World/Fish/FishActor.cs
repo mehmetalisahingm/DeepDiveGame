@@ -12,9 +12,10 @@ namespace DeepDive.World
     // TryApplyHarpoonHit directly (NetworkPlayer.FindTarget<IHarpoonTarget>), which is why no
     // target id travels in HarpoonHit: the resolved component is the target.
     //
-    // Skeleton slice: no swimming/flee AI, no catch object spawn and no despawn yet. Death
-    // produces the CaptureResult and raises Died; consuming it is the next slice.
-    [RequireComponent(typeof(NetworkObject))]
+    // Death hands the fish over to the CatchObject on the same NetworkObject, which builds the
+    // capture with its own id and takes over as the pickup target. Swimming/flee AI is the
+    // remaining P2-B slice.
+    [RequireComponent(typeof(NetworkObject), typeof(CatchObject))]
     public sealed class FishActor : NetworkBehaviour, IHarpoonTarget
     {
         [SerializeField] private SpeciesDefinition species;
@@ -81,19 +82,25 @@ namespace DeepDive.World
 
         private void Die(PlayerId killer)
         {
-            // The catch object does not exist yet, so the fish's own network object id stands in
-            // for catchObjectId. It becomes the spawned catch's id in the next slice.
-            if (!CaptureBuilder.TryCreate(DiveContext.Source, species.SpeciesId, weightGrams,
-                    NetworkObjectId, out var capture))
+            var catchObject = GetComponent<CatchObject>();
+            if (catchObject == null)
             {
-                // Killed outside a live dive: nothing Mert's bag could accept, so no capture is
-                // invented. The fish is still dead; it just leaves nothing to pick up.
+                Debug.LogError($"P2_FISH_DEAD_NO_CATCH object={name} reason=CatchObject is missing", this);
+                return;
+            }
+
+            // The capture is built by the catch object so CatchObjectId is the id of the thing a
+            // diver can actually pick up. Fails when no dive is live: nothing Mert's bag could
+            // accept, so no capture is invented. The fish is still dead, it just leaves nothing.
+            if (!catchObject.TryBecomeCatch(species.SpeciesId, weightGrams, out var capture))
+            {
                 Debug.LogWarning($"P2_FISH_DEAD_NO_DIVE object={name} species={species.SpeciesId} killer={killer}", this);
                 return;
             }
 
             Debug.Log($"P2_FISH_DEAD capture={capture.CaptureId} dive={capture.DiveId} " +
-                      $"species={capture.SpeciesId} grams={capture.WeightGrams} killer={killer}");
+                      $"species={capture.SpeciesId} grams={capture.WeightGrams} " +
+                      $"catchObject={capture.CatchObjectId} killer={killer}");
             Died?.Invoke(this, capture);
         }
     }
