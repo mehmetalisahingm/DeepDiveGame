@@ -43,7 +43,7 @@ Plan 1.8 — 10 Eylül 2026. Aktif faz P2; koordinatör Mert.
 |---|---|---|---|
 | P0 | KAPALI | Mehmet | [P0 kapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md); doÄŸrulanan temel `14e34f1` |
 | P1 | KAPALI (kullanıcı kararı) | Utku | [Kapanış / devredilen kontroller](../reports/P1-REPORT.md) |
-| P2 | ACIK | Mert | Görevler #20, #21, #22; uygulama başlamadı |
+| P2 | ACIK | Mert | A/C kodu birleşti; 27 test ve yerel iki oyuncu regresyonu geçti. [Kayıt](../reports/P2-AC-MERGE.md); av/çanta entegrasyonu bekliyor |
 | P3 | KILITLI | Mehmet | Yok |
 | P4 | KILITLI | Utku | Yok |
 | P5 | KILITLI | Mert | Yok |
@@ -61,9 +61,9 @@ AyrÄ±ntÄ±lar [PHASES.md](PHASES.md) iÃ§indedir. Gelecek fazÄ±n BEKLIYOR 
 | P1-A | Mehmet | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
 | P1-B | Utku | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
 | P1-C | Mert | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
-| P2-A | Mehmet | HAZIR | [Oksijen, zıpkın, kontroller](https://github.com/mehmetalisahingm/DeepDiveGame/issues/20) |
+| P2-A | Mehmet | ENTEGRASYON_BEKLIYOR | PR #25 birleşti; [doğrulanan sonuçlar ve eksikler](../reports/P2-AC-MERGE.md) |
 | P2-B | Utku | HAZIR | [Tek balık, avlanma, sis/ışık ve CI](https://github.com/mehmetalisahingm/DeepDiveGame/issues/21) |
-| P2-C | Mert | HAZIR | [Çanta, dönüş, UI ve birleştirme](https://github.com/mehmetalisahingm/DeepDiveGame/issues/22) |
+| P2-C | Mert | ENTEGRASYON_BEKLIYOR | PR #24 birleşti; [doğrulanan sonuçlar ve eksikler](../reports/P2-AC-MERGE.md) |
 | P3-A | Mehmet | BEKLIYOR | Yok |
 | P3-B | Utku | BEKLIYOR | Yok |
 | P3-C | Mert | BEKLIYOR | Yok |
