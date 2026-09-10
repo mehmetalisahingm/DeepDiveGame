@@ -231,6 +231,8 @@ namespace DeepDive.Composition
         private void StateChanged(SessionState state)
         {
             dirty = true;
+            if (IsAuthority)
+                network.SetDiveActiveServer(state.Phase == SessionPhase.Dive);
             if (IsAuthority && state.Phase == SessionPhase.Dive && !string.IsNullOrEmpty(state.DiveId) && state.DiveId != resetDiveId)
             {
                 resetDiveId = state.DiveId;
