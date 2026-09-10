@@ -4,7 +4,7 @@ Plan 1.6 â€” 8 EylÃ¼l 2026. P0 Ã¼Ã§ ayrÄ± kurulumda tamamlandÄ±; 
 
 ## Mevcut sÄ±nÄ±r
 
-- Aktif faz: P1. Durum: ACIK. PR #16/#17/#18 ortak akışa bağlandı. Windows build, 12 otomatik test ve gerçek sahnelerde yerel 1/2/4 oyuncu testleri geçti. İnternet, ekip incelemesi/tamamı ve diğer açık faz koşulları bekliyor. [Çalıştırma](../P1_PLAY.md), [kanıt/kalanlar](../reports/P1-INTEGRATION-REPORT.md).
+- Aktif faz: P1. Durum: ACIK. PR #16/#17/#18 ortak akışa bağlandı. Windows build, 12 otomatik test ve gerçek sahnelerde yerel 1/2/4 oyuncu testleri geçti. 10 Eylül: farklı evlerden bağlantı ve diğer oyuncuyu görme testi kullanıcı bildirimiyle tamamlandı. [İnternet bağlantı kaydı](../reports/P1-INTERNET-CONNECTION.md). Kalan internet senaryoları ve ekip/faz kabulü açık. [Çalıştırma](../P1_PLAY.md), [yerel kanıt](../evidence/P1-integrated-local-results.json).
 - P0 KAPALI: Mehmet, Utku ve Mert ortak projeyi Unity `6000.3.23f1` ile aÃ§tÄ± ve Windows build'ini Ã§alÄ±ÅŸtÄ±rdÄ±. [KapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md).
 - P2â€“P6 KILITLI. P1'in aÃ§Ä±lmasÄ± gÃ¶revlerin tamamlandÄ±ÄŸÄ± anlamÄ±na gelmez.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
