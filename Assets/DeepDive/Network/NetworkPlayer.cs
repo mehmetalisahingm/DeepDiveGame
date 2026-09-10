@@ -23,7 +23,15 @@ namespace DeepDive.Network
         [SerializeField] private float harpoonCooldown = 0.65f;
         [SerializeField] private float pickupRange = 2.5f;
         [SerializeField] private float pickupCooldown = 0.2f;
+
+        [Header("P2 Feedback")]
+        [Tooltip("Optional pre-wired low oxygen source. If omitted, lowOxygenClip gets a local runtime source for the owner.")]
         [SerializeField] private AudioSource lowOxygenLoop;
+        [SerializeField] private AudioSource feedbackAudioSource;
+        [SerializeField] private AudioClip lowOxygenClip;
+        [SerializeField] private AudioClip harpoonShotClip;
+        [SerializeField] private AudioClip hitConfirmClip;
+        [SerializeField] private AudioClip pickupConfirmClip;
 
         [Header("View")]
         [SerializeField] private Camera viewCamera;
@@ -35,6 +43,7 @@ namespace DeepDive.Network
         public readonly NetworkVariable<bool> Passive = new NetworkVariable<bool>();
         public readonly NetworkVariable<ulong> LastActionRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<int> LastActionResult = new NetworkVariable<int>();
+        public readonly NetworkVariable<byte> LastActionKind = new NetworkVariable<byte>();
 
         public bool ReadKeyboard { get; set; } = true;
 
@@ -49,7 +58,9 @@ namespace DeepDive.Network
         private ulong actionSequence;
         private ulong observedActionRequestId;
         private float actionMessageUntil;
+        private float shotFeedbackUntil;
         private string actionMessage = "";
+        private PlayerFeedbackCue actionCue;
         private float yaw;
         private float pitch;
         private float gravityVelocity;
@@ -71,6 +82,7 @@ namespace DeepDive.Network
                 PublishVitals();
                 LastActionRequestId.Value = 0;
                 LastActionResult.Value = (int)PlayerActionResult.Accepted;
+                LastActionKind.Value = 0;
             }
 
             if (viewCamera != null)
@@ -79,11 +91,15 @@ namespace DeepDive.Network
                 var listener = viewCamera.GetComponent<AudioListener>();
                 if (listener != null) listener.enabled = IsOwner;
             }
+
+            EnsureFeedbackAudio();
             if (lowOxygenLoop != null)
             {
                 lowOxygenLoop.loop = true;
+                lowOxygenLoop.playOnAwake = false;
                 if (!IsOwner && lowOxygenLoop.isPlaying) lowOxygenLoop.Stop();
             }
+
             if (bodyRenderer != null)
             {
                 bodyMaterial = bodyRenderer.material;
@@ -146,6 +162,8 @@ namespace DeepDive.Network
         public void SubmitHarpoonLocal()
         {
             if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
+            shotFeedbackUntil = Time.unscaledTime + 0.14f;
+            PlayOneShot(harpoonShotClip);
             var requestId = ++actionSequence;
             if (IsServer) HandleHarpoon(requestId);
             else HarpoonRpc(requestId);
@@ -195,16 +213,17 @@ namespace DeepDive.Network
         private void HandleHarpoon(ulong requestId)
         {
             if (!IsServer) return;
-            var result = actionGate.TryAccept(requestId, PlayerActionKind.Harpoon,
+            var kind = PlayerActionKind.Harpoon;
+            var result = actionGate.TryAccept(requestId, kind,
                 Time.realtimeSinceStartupAsDouble, harpoonCooldown);
             if (result != PlayerActionResult.Accepted)
             {
-                PublishAction(requestId, result);
+                PublishAction(requestId, kind, result);
                 return;
             }
             if (session == null || !session.DiveActive || Passive.Value || !Swimming.Value)
             {
-                PublishAction(requestId, PlayerActionResult.InvalidState);
+                PublishAction(requestId, kind, PlayerActionResult.InvalidState);
                 return;
             }
 
@@ -213,7 +232,7 @@ namespace DeepDive.Network
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, harpoonRange), ~0, QueryTriggerInteraction.Ignore))
             {
-                PublishAction(requestId, PlayerActionResult.InvalidTarget);
+                PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
             }
 
@@ -221,23 +240,24 @@ namespace DeepDive.Network
             result = target == null
                 ? PlayerActionResult.InvalidTarget
                 : target.TryApplyHarpoonHit(new HarpoonHit(new PlayerId(OwnerClientId), requestId, Mathf.Max(0f, harpoonDamage)));
-            PublishAction(requestId, result);
+            PublishAction(requestId, kind, result);
             Debug.DrawRay(origin, direction * hit.distance, result == PlayerActionResult.Accepted ? Color.green : Color.yellow, 0.4f);
         }
 
         private void HandlePickup(ulong requestId)
         {
             if (!IsServer) return;
-            var result = actionGate.TryAccept(requestId, PlayerActionKind.Pickup,
+            var kind = PlayerActionKind.Pickup;
+            var result = actionGate.TryAccept(requestId, kind,
                 Time.realtimeSinceStartupAsDouble, pickupCooldown);
             if (result != PlayerActionResult.Accepted)
             {
-                PublishAction(requestId, result);
+                PublishAction(requestId, kind, result);
                 return;
             }
             if (session == null || !session.DiveActive || Passive.Value)
             {
-                PublishAction(requestId, PlayerActionResult.InvalidState);
+                PublishAction(requestId, kind, PlayerActionResult.InvalidState);
                 return;
             }
 
@@ -246,13 +266,13 @@ namespace DeepDive.Network
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Ignore))
             {
-                PublishAction(requestId, PlayerActionResult.InvalidTarget);
+                PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
             }
 
             var target = FindTarget<ICatchPickupTarget>(hit.collider);
             result = target == null ? PlayerActionResult.InvalidTarget : target.TryPickup(new PlayerId(OwnerClientId), requestId);
-            PublishAction(requestId, result);
+            PublishAction(requestId, kind, result);
         }
 
         private static T FindTarget<T>(Collider collider) where T : class
@@ -264,16 +284,18 @@ namespace DeepDive.Network
             return null;
         }
 
-        private void PublishAction(ulong requestId, PlayerActionResult result)
+        private void PublishAction(ulong requestId, PlayerActionKind kind, PlayerActionResult result)
         {
             if (requestId < LastActionRequestId.Value) return;
+            // Request id is written last so owner-side observation sees the matching kind/result.
+            LastActionKind.Value = (byte)kind;
             LastActionResult.Value = (int)result;
             LastActionRequestId.Value = requestId;
         }
 
         public bool ApplyDamageServer(float amount)
         {
-            if (!IsServer || vitals == null) return false;
+            if (!IsServer || vitals == null || session == null || !session.DiveActive) return false;
             var changed = vitals.ApplyDamage(amount);
             PublishVitals();
             return changed;
@@ -296,9 +318,48 @@ namespace DeepDive.Network
             if (Passive.Value) input.ClearMotion();
         }
 
+        private void EnsureFeedbackAudio()
+        {
+            if (!IsOwner) return;
+
+            if (feedbackAudioSource == null)
+            {
+                feedbackAudioSource = gameObject.AddComponent<AudioSource>();
+                feedbackAudioSource.playOnAwake = false;
+                feedbackAudioSource.loop = false;
+                feedbackAudioSource.spatialBlend = 0f;
+            }
+
+            if (lowOxygenLoop == null && lowOxygenClip != null)
+            {
+                lowOxygenLoop = gameObject.AddComponent<AudioSource>();
+                lowOxygenLoop.playOnAwake = false;
+                lowOxygenLoop.loop = true;
+                lowOxygenLoop.spatialBlend = 0f;
+                lowOxygenLoop.clip = lowOxygenClip;
+            }
+            else if (lowOxygenLoop != null && lowOxygenLoop.clip == null && lowOxygenClip != null)
+            {
+                lowOxygenLoop.clip = lowOxygenClip;
+            }
+        }
+
+        private void PlayOneShot(AudioClip clip)
+        {
+            if (!IsOwner || clip == null) return;
+            EnsureFeedbackAudio();
+            if (feedbackAudioSource != null) feedbackAudioSource.PlayOneShot(clip);
+        }
+
         private void UpdateLowOxygenFeedback()
         {
-            if (!IsOwner || lowOxygenLoop == null || lowOxygenLoop.clip == null) return;
+            if (!IsOwner) return;
+            if (lowOxygenLoop == null || lowOxygenLoop.clip == null)
+            {
+                EnsureFeedbackAudio();
+                if (lowOxygenLoop == null || lowOxygenLoop.clip == null) return;
+            }
+
             var warning = !Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= Mathf.Max(1f, maxOxygen) * lowOxygenFraction;
             if (warning && !lowOxygenLoop.isPlaying) lowOxygenLoop.Play();
             else if (!warning && lowOxygenLoop.isPlaying) lowOxygenLoop.Stop();
@@ -308,8 +369,15 @@ namespace DeepDive.Network
         {
             if (LastActionRequestId.Value == 0 || LastActionRequestId.Value == observedActionRequestId) return;
             observedActionRequestId = LastActionRequestId.Value;
-            actionMessage = ((PlayerActionResult)LastActionResult.Value).ToString();
-            actionMessageUntil = Time.unscaledTime + 0.9f;
+
+            var feedback = ActionFeedbackRules.Resolve((PlayerActionKind)LastActionKind.Value,
+                (PlayerActionResult)LastActionResult.Value);
+            actionCue = feedback.Cue;
+            actionMessage = feedback.Message;
+            actionMessageUntil = Time.unscaledTime + feedback.DurationSeconds;
+
+            if (feedback.Cue == PlayerFeedbackCue.HarpoonHit) PlayOneShot(hitConfirmClip);
+            else if (feedback.Cue == PlayerFeedbackCue.PickupAccepted) PlayOneShot(pickupConfirmClip);
         }
 
         private void OnGUI()
@@ -319,14 +387,24 @@ namespace DeepDive.Network
             var healthRatio = Mathf.Clamp01(Health.Value / Mathf.Max(1f, maxHealth));
             GUI.Box(new Rect(20, 20, 230, 24), $"O2 {Oxygen.Value:0}/{maxOxygen:0} ({oxygenRatio * 100f:0}%)");
             GUI.Box(new Rect(20, 48, 230, 24), $"HEALTH {Health.Value:0}/{maxHealth:0} ({healthRatio * 100f:0}%)");
-            GUI.Label(new Rect(Screen.width * 0.5f - 8, Screen.height * 0.5f - 12, 30, 30), "+");
+
+            var centerX = Screen.width * 0.5f;
+            var centerY = Screen.height * 0.5f;
+            GUI.Label(new Rect(centerX - 8, centerY - 12, 30, 30), "+");
+            if (Time.unscaledTime < shotFeedbackUntil)
+            {
+                GUI.Label(new Rect(centerX - 28, centerY - 12, 24, 24), "<");
+                GUI.Label(new Rect(centerX + 12, centerY - 12, 24, 24), ">");
+            }
+            if (Time.unscaledTime < actionMessageUntil && actionCue == PlayerFeedbackCue.HarpoonHit)
+                GUI.Label(new Rect(centerX - 8, centerY - 12, 30, 30), "X");
 
             if (!Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= Mathf.Max(1f, maxOxygen) * lowOxygenFraction)
                 GUI.Box(new Rect(20, 78, 230, 28), "LOW OXYGEN - RETURN");
             if (Passive.Value)
-                GUI.Box(new Rect(Screen.width * 0.5f - 150, Screen.height * 0.5f + 45, 300, 40), "PASSIVE - DIVE ENDED FOR YOU");
-            if (Time.unscaledTime < actionMessageUntil)
-                GUI.Box(new Rect(Screen.width * 0.5f - 90, Screen.height * 0.5f + 90, 180, 28), actionMessage);
+                GUI.Box(new Rect(centerX - 150, centerY + 45, 300, 40), "PASSIVE - DIVE ENDED FOR YOU");
+            if (Time.unscaledTime < actionMessageUntil && !string.IsNullOrEmpty(actionMessage))
+                GUI.Box(new Rect(centerX - 90, centerY + 90, 180, 28), actionMessage);
         }
 
         private void LateUpdate()
@@ -352,6 +430,7 @@ namespace DeepDive.Network
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 if (lowOxygenLoop != null && lowOxygenLoop.isPlaying) lowOxygenLoop.Stop();
+                if (feedbackAudioSource != null && feedbackAudioSource.isPlaying) feedbackAudioSource.Stop();
             }
             if (bodyMaterial != null) Destroy(bodyMaterial);
         }
