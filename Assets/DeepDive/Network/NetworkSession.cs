@@ -36,6 +36,7 @@ namespace DeepDive.Network
         public string LastError { get; private set; } = "";
         public bool IsHost => manager != null && manager.IsHost;
         public bool IsSceneLoading { get; private set; }
+        public bool DiveActive { get; private set; }
         public PlayerId? LocalPlayerId => manager != null && manager.IsConnectedClient ? new PlayerId(manager.LocalClientId) : (PlayerId?)null;
         public IReadOnlyList<PlayerId> Players => players.Keys.OrderBy(id => id).Select(id => new PlayerId(id)).ToArray();
         public event Action Changed;
@@ -65,7 +66,7 @@ namespace DeepDive.Network
         {
             if (Status != ConnectionStatus.Offline || returningOffline || manager.IsListening || manager.ShutdownInProgress) return false;
             admission.Clear(); players.Clear(); pendingConnections.Clear(); completedLoads.Clear();
-            LastError = ""; manualLeave = false; joinAllowed = true; IsSceneLoading = false;
+            LastError = ""; manualLeave = false; joinAllowed = true; IsSceneLoading = false; DiveActive = false;
             activeRequest = 0; activeScene = null;
             Status = status; connectDeadline = Time.realtimeSinceStartupAsDouble + 12;
             Changed?.Invoke();
@@ -183,7 +184,7 @@ namespace DeepDive.Network
         {
             UnsubscribeScenes();
             admission.Clear(); pendingConnections.Clear(); players.Clear();
-            completedLoads.Clear(); activeRequest = 0; activeScene = null; IsSceneLoading = false;
+            completedLoads.Clear(); activeRequest = 0; activeScene = null; IsSceneLoading = false; DiveActive = false;
             joinAllowed = false; Status = ConnectionStatus.Offline;
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
             if (!string.IsNullOrEmpty(offlineScene) && SceneManager.GetActiveScene().name != offlineScene && !returningOffline)
@@ -206,6 +207,13 @@ namespace DeepDive.Network
         {
             if (!IsHost || IsSceneLoading) return false;
             joinAllowed = allowed; Changed?.Invoke(); return true;
+        }
+
+        // Composition owns SessionPhase; NetworkPlayer only consumes this host-side gate.
+        public void SetDiveActiveServer(bool active)
+        {
+            if (!IsHost) return;
+            DiveActive = active;
         }
 
         public bool TryLoadScene(string sceneName, ulong requestId)
