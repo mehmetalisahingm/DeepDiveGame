@@ -33,6 +33,30 @@ namespace DeepDive.World
         }
     }
 
+    // Behaviour parameters the swim rules read. Distances are metres and speeds metres/second
+    // (docs/plan/CONTRACTS.md: "Mesafe metre, sure saniye"). Invalid inspector values fall back
+    // instead of producing a motionless or teleporting fish.
+    public readonly struct SwimTuning
+    {
+        public readonly float SwimSpeed;
+        public readonly float FleeSpeed;
+        public readonly float FleeRadius;
+        public readonly float WanderRadius;
+
+        public SwimTuning(float swimSpeed, float fleeSpeed, float fleeRadius, float wanderRadius)
+        {
+            SwimSpeed = Positive(swimSpeed, 1.5f);
+            FleeSpeed = Positive(fleeSpeed, 3.5f);
+            FleeRadius = Finite(fleeRadius) && fleeRadius > 0f ? fleeRadius : 0f;
+            WanderRadius = Positive(wanderRadius, 1f);
+        }
+
+        private static float Positive(float value, float fallback) =>
+            Finite(value) && value > 0f ? value : fallback;
+
+        private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+    }
+
     // docs/plan/CONTRACTS.md ortak veri sozlugu: "SpeciesDefinition | Sabit speciesId, sinif,
     // davranis parametreleri, agirlik araligi | Utku -> Mehmet/Mert | P2".
     //
@@ -52,7 +76,7 @@ namespace DeepDive.World
         [SerializeField] private WeightRange weight = new WeightRange(400, 1200);
 
         [Header("Behaviour")]
-        // Declared now so the shape is agreed; the AI step (next P2-B slice) is what reads them.
+        // Read through Swim by FishMotion.
         [SerializeField] private float swimSpeed = 1.5f;
         [SerializeField] private float fleeSpeed = 3.5f;
         [SerializeField] private float fleeRadius = 6f;
@@ -63,10 +87,7 @@ namespace DeepDive.World
         public SpeciesClass Class => speciesClass;
         public float MaxHealth => maxHealth;
         public WeightRange Weight => weight;
-        public float SwimSpeed => swimSpeed;
-        public float FleeSpeed => fleeSpeed;
-        public float FleeRadius => fleeRadius;
-        public float WanderRadius => wanderRadius;
+        public SwimTuning Swim => new SwimTuning(swimSpeed, fleeSpeed, fleeRadius, wanderRadius);
 
         public bool IsValid(out string error)
         {
