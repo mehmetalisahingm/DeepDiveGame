@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 namespace DeepDive.World
@@ -13,17 +15,26 @@ namespace DeepDive.World
     // target id travels in HarpoonHit: the resolved component is the target.
     //
     // Death hands the fish over to the CatchObject on the same NetworkObject, which builds the
-    // capture with its own id and takes over as the pickup target. Swimming/flee AI is the
-    // remaining P2-B slice.
-    [RequireComponent(typeof(NetworkObject), typeof(CatchObject))]
+    // capture with its own id and takes over as the pickup target.
+    //
+    // Swimming runs on the host only and moves the transform; NetworkTransform replicates the
+    // result, so a client never runs the AI and never decides where a fish is.
+    [RequireComponent(typeof(NetworkObject), typeof(NetworkTransform), typeof(CatchObject))]
     public sealed class FishActor : NetworkBehaviour, IHarpoonTarget
     {
         [SerializeField] private SpeciesDefinition species;
+        [Tooltip("Which colliders may count as a diver. Divers are recognised by their CharacterController.")]
+        [SerializeField] private LayerMask threatLayers = ~0;
 
         // Replicated for client-side hit feedback later; the host is the only writer.
         private readonly NetworkVariable<float> health = new NetworkVariable<float>();
 
+        private readonly List<Vector3> threats = new List<Vector3>();
+        private readonly Collider[] threatBuffer = new Collider[16];
+
         private FishHealth state;
+        private FishMotion motion;
+        private SwimTuning tuning;
         private int weightGrams;
 
         // Host-side notification. Raised once, only when a valid capture could be produced.
@@ -47,10 +58,52 @@ namespace DeepDive.World
                 Debug.LogError($"P2_FISH_INVALID object={name} reason={error}", this);
                 return;
             }
+            var random = new System.Random();
             state = new FishHealth(species.MaxHealth);
             // Rolled once at spawn so the weight does not depend on when the fish dies.
-            weightGrams = species.RollWeightGrams(new System.Random());
+            weightGrams = species.RollWeightGrams(random);
+            tuning = species.Swim;
+            // Where the fish was placed is the home it wanders around.
+            motion = new FishMotion(tuning, transform.position, random);
             health.Value = state.Health;
+        }
+
+        // Host-only. A dead fish is a catch lying on the ground, so it stops swimming the
+        // moment it dies and simply stays where it fell.
+        private void FixedUpdate()
+        {
+            if (!IsSpawned || !IsServer || motion == null || state == null || state.IsDead) return;
+
+            GatherThreats();
+            var position = transform.position;
+            var next = motion.Step(position, threats, Time.fixedDeltaTime, SwimVolumeBounds.Instance);
+            if (next == position) return;
+
+            var heading = next - position;
+            transform.position = next;
+            // Only yaw/pitch toward travel when there is a horizontal component; a straight
+            // vertical heading has no usable look rotation against world up.
+            var flat = new Vector3(heading.x, 0f, heading.z);
+            if (flat.sqrMagnitude > 0.0001f)
+                transform.rotation = Quaternion.LookRotation(heading.normalized, Vector3.up);
+        }
+
+        // Divers are found by their CharacterController rather than by Mehmet's NetworkPlayer
+        // type, so World does not reach into another module's gameplay classes to see them.
+        private void GatherThreats()
+        {
+            threats.Clear();
+            if (tuning.FleeRadius <= 0f) return;
+            var count = Physics.OverlapSphereNonAlloc(transform.position, tuning.FleeRadius,
+                threatBuffer, threatLayers, QueryTriggerInteraction.Ignore);
+            for (var i = 0; i < count; i++)
+            {
+                var hit = threatBuffer[i];
+                if (hit == null) continue;
+                var diver = hit.GetComponentInParent<CharacterController>();
+                if (diver == null) continue;
+                threats.Add(diver.transform.position);
+            }
         }
 
         public PlayerActionResult TryApplyHarpoonHit(HarpoonHit hit)
