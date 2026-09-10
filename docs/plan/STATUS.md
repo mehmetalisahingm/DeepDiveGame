@@ -1,15 +1,15 @@
 # GÃ¼ncel durum ve gÃ¶rev takibi
 
-Plan 1.6 â€” 8 EylÃ¼l 2026. P0 Ã¼Ã§ ayrÄ± kurulumda tamamlandÄ±; aktif faz P1'dir. GÃ¶rsel/ses Mert'te, diÄŸer ortak sorumluluklar Mehmet'tedir.
+Plan 1.8 — 10 Eylül 2026. Aktif faz P2; koordinatör Mert.
 
 ## Mevcut sÄ±nÄ±r
 
-- Aktif faz: P1. Durum: ACIK. PR #16/#17/#18 ortak akışa bağlandı. Windows build, 12 otomatik test ve gerçek sahnelerde yerel 1/2/4 oyuncu testleri geçti. 10 Eylül: farklı evlerden bağlantı ve diğer oyuncuyu görme testi kullanıcı bildirimiyle tamamlandı. [İnternet bağlantı kaydı](../reports/P1-INTERNET-CONNECTION.md). Kalan internet senaryoları ve ekip/faz kabulü açık. [Çalıştırma](../P1_PLAY.md), [yerel kanıt](../evidence/P1-integrated-local-results.json).
+- Aktif faz: P2. Durum: ACIK. P1 kullanıcı kararıyla kapandı; doğrulanmamış kontroller devredildi. [Kapanış ve açık kontroller](../reports/P1-REPORT.md). Ortak dal: `codex/p2-integration`.
 - P0 KAPALI: Mehmet, Utku ve Mert ortak projeyi Unity `6000.3.23f1` ile aÃ§tÄ± ve Windows build'ini Ã§alÄ±ÅŸtÄ±rdÄ±. [KapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md).
-- P2â€“P6 KILITLI. P1'in aÃ§Ä±lmasÄ± gÃ¶revlerin tamamlandÄ±ÄŸÄ± anlamÄ±na gelmez.
+- P3–P6 KILITLI. Yalnızca P2 görevleri alınır.
 - Public depo: [mehmetalisahingm/DeepDiveGame](https://github.com/mehmetalisahingm/DeepDiveGame).
 - MertKAYAR ve Utkuuzun14 write davetlerini kabul etti. Utku'nun PR #7 ve Mert'in PR #10 deÄŸiÅŸikliÄŸi main'e birleÅŸti; Ã¼Ã§ kiÅŸinin P0 kurulum/build testi geÃ§ti.
-- P0 kapanÄ±ÅŸ kaydÄ± var; henÃ¼z oynanÄ±ÅŸ veya multiplayer kabulÃ¼ yok. P1 testleri ayrÄ±ca yapÄ±lacak.
+- P1 yerel testleri ve kullanıcı bildirimli internet bağlantısı tamamlandı; kalan kontroller kapanış kaydındadır.
 - Ortak sorumlular atandÄ±. Kaynak/Ã¼retim yÃ¶ntemi, devam/ayrÄ±lma ayrÄ±ntÄ±larÄ±, Ã¼rÃ¼n hedefi, bÃ¼tÃ§e tutarÄ±/paylaÅŸÄ±mÄ±, netcode yedeÄŸi ve D06 ekip farkÄ±ndalÄ±ÄŸÄ± hÃ¢lÃ¢ aÃ§Ä±k; kullanÄ±cÄ± kararÄ±yla bunlar P0 kapanÄ±ÅŸÄ±nÄ± bekletmez ve ilgili iÅŸe baÅŸlamadan ele alÄ±nÄ±r.
 
 ## Ekip
@@ -42,8 +42,8 @@ Plan 1.6 â€” 8 EylÃ¼l 2026. P0 Ã¼Ã§ ayrÄ± kurulumda tamamlandÄ±; 
 | Faz | Durum | BirleÅŸtirme koordinatÃ¶rÃ¼ | KapanÄ±ÅŸ kaydÄ± / main commit |
 |---|---|---|---|
 | P0 | KAPALI | Mehmet | [P0 kapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md); doÄŸrulanan temel `14e34f1` |
-| P1 | ACIK | Utku | [GÃ¶revler #12â€“#14](https://github.com/mehmetalisahingm/DeepDiveGame/issues?q=is%3Aissue+is%3Aopen+P1) aÃ§Ä±ldÄ±; kapanÄ±ÅŸ yok |
-| P2 | KILITLI | Mert | Yok |
+| P1 | KAPALI (kullanıcı kararı) | Utku | [Kapanış / devredilen kontroller](../reports/P1-REPORT.md) |
+| P2 | ACIK | Mert | Görevler #20, #21, #22; uygulama başlamadı |
 | P3 | KILITLI | Mehmet | Yok |
 | P4 | KILITLI | Utku | Yok |
 | P5 | KILITLI | Mert | Yok |
@@ -58,12 +58,12 @@ AyrÄ±ntÄ±lar [PHASES.md](PHASES.md) iÃ§indedir. Gelecek fazÄ±n BEKLIYOR 
 | P0-A | Mehmet | TAMAM | [GÃ¶rev #1](https://github.com/mehmetalisahingm/DeepDiveGame/issues/1), [PR #4](https://github.com/mehmetalisahingm/DeepDiveGame/pull/4), [PR #8](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8): ortak temel ve Windows build teslim edildi |
 | P0-B | Utku | TAMAM | [GÃ¶rev #2](https://github.com/mehmetalisahingm/DeepDiveGame/issues/2), [PR #7](https://github.com/mehmetalisahingm/DeepDiveGame/pull/7): Git dÃ¼zeni birleÅŸti; Unity aÃ§Ä±lÄ±ÅŸÄ± ve Windows build testi geÃ§ti |
 | P0-C | Mert | TAMAM | [GÃ¶rev #3](https://github.com/mehmetalisahingm/DeepDiveGame/issues/3), [PR #10](https://github.com/mehmetalisahingm/DeepDiveGame/pull/10): gÃ¼ncel main'i aldÄ±, Unity `6000.3.23f1` ile aÃ§tÄ±, gerÃ§ek Windows build aldÄ± ve Ã§alÄ±ÅŸtÄ±rdÄ±; gÃ¶rsel/ses kaynak planÄ± main'e birleÅŸti |
-| P1-A | Mehmet | DEVAM | PR #16: ağ/oyuncu kodu Mert ve Utku teslimleriyle bağlandı; yerel solo/2/4 oyuncu, kopma/yeniden katılma ve sahne geçişi geçti. İnternet ve ekip kabulü açık. [Ortak rapor](../reports/P1-INTEGRATION-REPORT.md) |
-| P1-B | Utku | DEVAM | PR #18: hazırlık ve tek sualtı sahnesi bağlandı; spawn, su hacmi ve çarpışmalar yerel 1/2/4 oyuncuda doğrulandı. Kontroller Mehmet/Codex entegrasyon çalışmasıdır; Utku adına tamam kaydı değildir. |
-| P1-C | Mert | DEVAM | PR #17: gerçek oda/hazır ekranı, ağdan hazır listesi ve host aşama geçişleri bağlandı; yerel testler geçti. Branch koruması, internet ve ekip kabulü açık. |
-| P2-A | Mehmet | BEKLIYOR | Yok |
-| P2-B | Utku | BEKLIYOR | Yok |
-| P2-C | Mert | BEKLIYOR | Yok |
+| P1-A | Mehmet | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
+| P1-B | Utku | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
+| P1-C | Mert | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
+| P2-A | Mehmet | HAZIR | [Oksijen, zıpkın, kontroller](https://github.com/mehmetalisahingm/DeepDiveGame/issues/20) |
+| P2-B | Utku | HAZIR | [Tek balık, avlanma, sis/ışık ve CI](https://github.com/mehmetalisahingm/DeepDiveGame/issues/21) |
+| P2-C | Mert | HAZIR | [Çanta, dönüş, UI ve birleştirme](https://github.com/mehmetalisahingm/DeepDiveGame/issues/22) |
 | P3-A | Mehmet | BEKLIYOR | Yok |
 | P3-B | Utku | BEKLIYOR | Yok |
 | P3-C | Mert | BEKLIYOR | Yok |

@@ -1,5 +1,7 @@
 # Mehmet, Utku ve Mert — faz planı
 
+> 10 Eylül 2026: P1 kullanıcı kararıyla kapandı, P2 açıldı. Doğrulanmamış testler geçmiş sayılmadı; [kapanış ve devredilen kontroller](../reports/P1-REPORT.md). Sonraki fazların kabul şartları korunur.
+
 Plan sürümü: 1.5 — 6 Eylül 2026. Görsel/ses sorumlusu Mert; diğer ortak sorumluluklar Mehmet'te. P0 ortak projeyi indirip açma ve örnek build'i çalıştırma düzeyine sadeleştirildi; P2/P3 oynama testleri ve temel his katmanı korunur.
 
 Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md), bağlantılar [CONTRACTS.md](CONTRACTS.md), birleştirme düzeni [WORKFLOW.md](WORKFLOW.md) içindedir.

@@ -8,35 +8,35 @@ Ana döngü: kasabada hazırlan → dalışa git → keşfet, avla ve kaydet →
 
 - Bu dalda üç kişinin P1 kodu ortak akışa bağlandı: oda/hazır ekranı, ağ oyuncuları, yürüme/yüzme ve hazırlık → dalış → dönüş. [Birlikte çalıştır](docs/P1_PLAY.md).
 - **P0 tamamlandı:** Unity temeli üç ayrı kurulumda açıldı ve Windows build'i çalıştı. [Kapanış kaydı](docs/reports/P0-REPORT.md).
-- Aktif çalışma **P1 — Bağlan, görün, hareket et (AÇIK)**. P2–P6 kapalıdır.
+- Aktif çalışma **P2 — Avla, taşı, geri dön (AÇIK)**. P3–P6 kapalıdır.
 - Başlangıç görev dağılımı: **Mehmet (A)** oyuncu/dalış, **Utku (B)** sualtı/canlılar, **Mert (C)** kasaba/ekonomi.
-- Plan 1.7: P1 yerel entegrasyonu hazır; gerçek internet/ekip kabulü bekliyor. Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
+- Plan 1.8: P1 kullanıcı kararıyla kapandı; [doğrulanan sonuçlar ve devredilen kontroller](docs/reports/P1-REPORT.md). Görsel/ses Mert'te; diğer ortak sorumluluklar Mehmet'te.
 
 **Ortak sorumluluklar:** Mert görsel/ses üretimi, kaynak seçimi ve tutarlılığı yönetir. Mehmet takvim, devam/ayrılma planı, ürün hedefi, tasarımda son karar, bütçe/servis takibi ve birincil netcode incelemesini üstlenir. Utku'nun ve Mert'in mevcut geliştirme işleri korunur; herkes kendi sisteminin entegrasyonunu ve co-op testini yapar.
 
-**Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. `codex/p1-integration` dalını al, depo kökünü Unity Hub'a ekle; `Assets/DeepDive/World/Scenes/PrepArea.unity` sahnesini aç. [P1 çalıştırma ve Windows build rehberi](docs/P1_PLAY.md). `main`, faz kapanana kadar P0 temelidir.
+**Projeyi aç:** Unity **6000.3.23f1**, URP **17.3.0**. `codex/p2-integration` dalını al, depo kökünü Unity Hub'a ekle; `Assets/DeepDive/World/Scenes/PrepArea.unity` sahnesini aç. [P1 çalıştırma ve Windows build rehberi](docs/P1_PLAY.md). `main`, birleşmiş P1 temelini içerir.
 
 **İndirme ve P0 testi:** [P0 main aktarımı](https://github.com/mehmetalisahingm/DeepDiveGame/pull/8) · [Ekip için yayınlanmamış Windows test paketi](https://github.com/mehmetalisahingm/DeepDiveGame/releases). Kaynakları Git üzerinden, yalnızca çalıştırılacak build'i ZIP üzerinden paylaşın.
 
-## Şimdi kim ne yapacak? — P1
+## Şimdi kim ne yapacak? — P2
 
-| Kişi | Bu aşamadaki görevi | GitHub görev kaydı |
+| Kişi | Görev | GitHub |
 |---|---|---|
-| **Mehmet (A)** | Oda/bağlantı, oyuncu oluşumu, yürüme/yüzme ve hareket senkronizasyonu | [P1-A: Mehmet](https://github.com/mehmetalisahingm/DeepDiveGame/issues/12) |
-| **Utku (B)** | Hazırlık alanı, tek sualtı test bölgesi, çarpışmalar ve P1 birleştirme koordinasyonu | [P1-B: Utku](https://github.com/mehmetalisahingm/DeepDiveGame/issues/13) |
-| **Mert (C)** | Oda/oyuncu listesi, hazır olma ekranı, oturum durumları ve basit branch koruması | [P1-C: Mert](https://github.com/mehmetalisahingm/DeepDiveGame/issues/14) |
+| Mehmet | Oksijen, zıpkın, yüzme/nişan, vuruş ve nefes geri bildirimi | [#20](https://github.com/mehmetalisahingm/DeepDiveGame/issues/20) |
+| Utku | Tek balık, avlanma, sualtı sis/ışık; av döngüsünden sonra CI | [#21](https://github.com/mehmetalisahingm/DeepDiveGame/issues/21) |
+| Mert | Çanta, güvenli dönüş, dalış özeti/UI; P2 birleştirme ve oynama testi | [#22](https://github.com/mehmetalisahingm/DeepDiveGame/issues/22) |
 
-**Şimdi:** Üç kişi güncel `codex/p1-integration` dalını alıp aynı build'i kullanır. Yerel otomatik testler internet testi yerine geçmez; birlikte iki bilgisayarda 2/4 oyuncu kabulünü yapın. [Entegrasyon ve kalan koşullar](docs/reports/P1-INTEGRATION-REPORT.md).
+**Şimdi:** `codex/p2-integration` dalını alın; önce av/vuruş/çanta bağlantısını birlikte netleştirin, sonra kendi özellik dalınızda görev alın. P2 kodu henüz başlamadı.
 
 **Sonraki işler başlamadan önce:** [P0 toplantı gündemindeki](docs/plan/P0_MEETING.md) kaynak yöntemi, hedef, bütçe ve netcode yedeği gibi açık kararlar ilgili özellikten önce ele alınır. Bu gündem P0 kapanışını bekletmez.
 
 **D06 sınırı:** Kayıt sahibi host yoksa aynı kampanyaya devam edilemez. Başka host ayrı kampanya açabilir; ilerleme otomatik taşınmaz. V1'e bulut kayıt veya host devri eklenmedi.
 
-P1'de özellik PR'ları `codex/p1-integration` dalına gider. Solo ve gerçek internet üzerinden çok bilgisayarlı testler geçmeden P1 kapanmaz.
+P2 özellik PR'ları `codex/p2-integration` dalına gider. P2 kabulü ve kısa oynama testi geçmeden P3 açılmaz.
 
 ## Sonraki fazlarda kim ne yapacak?
 
-Bu tablo özet; kesin teslimler ve kabul koşulları [faz planında](docs/plan/PHASES.md). P2–P6 şu anda kapalıdır.
+Bu tablo özet; kesin teslimler ve kabul koşulları [faz planında](docs/plan/PHASES.md). P2 açıktır; P3–P6 kapalıdır.
 
 | Faz | Mehmet | Utku | Mert |
 |---|---|---|---|

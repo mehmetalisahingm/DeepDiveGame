@@ -1,5 +1,7 @@
 # Ortak sistem sözleşmeleri
 
+> 10 Eylül 2026: P1 kullanıcı kararıyla kapandı, P2 açıldı. Doğrulanmamış testler geçmiş sayılmadı; [kapanış ve devredilen kontroller](../reports/P1-REPORT.md). Sonraki fazların kabul şartları korunur.
+
 Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Buradaki tip isimleri uygulanmış sınıflar veya mevcut dosyalar değildir. Görev kodları: A=Mehmet, B=Utku, C=Mert.
 
 Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'da yalnızca P1 için gereken kimlik/oturum bağlantıları kesinleşir. Av/çanta ayrıntıları P2 öncesinde, çekim/ekonomi/kayıt ayrıntıları P3 öncesinde netleşir. İleriki fazın taslağı o özelliği erken uygulama izni vermez.
@@ -138,3 +140,5 @@ Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişi
 | P4 başlamadan | Aynı bölgedeki görev/ekipman/keşif ilerlemesi ve içerik verileri |
 
 Bağlantının iki tarafını yazacak kişiler kısa bir görüşmede alanları ve örnek sonucu netleştirir. Ayrı imza matrisi gerekmez; değişiklik bu belgeye ve ilgili göreve yazılır. Hiç kimse diğer tarafın beklediği veri tipini sessizce değiştirmez.
+
+P2 başlangıcı: Mehmet, Utku ve Mert av/vuruş/çanta istek ve sonuçlarını bağımlı koddan önce netleştirir. Bu açılış kaydı sözleşme uzlaşısı değildir.

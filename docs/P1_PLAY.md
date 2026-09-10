@@ -1,16 +1,16 @@
 # P1 ortak build
 
 Mehmet'in ağ/oyuncu kodu, Mert'in oda ve oturum ekranı, Utku'nun `PrepArea` ve
-`DiveTestArea` sahneleri aynı oyun akışına bağlandı. Aktif faz hâlâ P1; P2 açılmadı.
+`DiveTestArea` sahneleri aynı oyun akışına bağlandı. P1 kapandı; aktif faz P2. [Kapanış ve kalan kontroller](reports/P1-REPORT.md).
 
 ## Güncel projeyi al
 
-GitHub'da `codex/p1-integration` dalını kullanın. `main`, P1 kapanana kadar P0 temelidir.
+GitHub'da `codex/p2-integration` dalını kullanın. `main` birleşmiş P1 temelidir.
 Yerel değişikliklerinizi koruyarak:
 
 ```powershell
 git fetch origin
-git switch codex/p1-integration
+git switch codex/p2-integration
 git pull --ff-only
 ```
 

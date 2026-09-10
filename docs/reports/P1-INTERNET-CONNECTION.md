@@ -8,4 +8,4 @@
 Bu kayıt tüm P1 kabulünün yerine geçmez. Görsel tek başına dört oyunculu internet
 testini, ortak dalış/dönüşü veya ayrılma/yeniden katılmayı kanıtlamaz. Bu senaryolar
 için mevcut otomatik yerel kanıtlar korunur; internet sonucu ayrıca bildirilmedi.
-Diğer ekip üyeleri adına onay verilmedi; P2 açılmadı.
+Diğer ekip üyeleri adına onay verilmedi. Ardından kullanıcının açık talimatıyla P2 açıldı; [kapanış ve devredilen kontroller](P1-REPORT.md).
