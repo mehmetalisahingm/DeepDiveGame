@@ -1,0 +1,6 @@
+{
+  "name": "DeepDive.P2.Tests",
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Session", "DeepDive.Inventory"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}
