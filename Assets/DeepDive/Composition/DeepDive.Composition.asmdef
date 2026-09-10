@@ -1,0 +1,4 @@
+{
+  "name": "DeepDive.Composition",
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.Session", "Unity.Netcode.Runtime", "Unity.Collections"]
+}

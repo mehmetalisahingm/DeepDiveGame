@@ -1,5 +1,7 @@
 # Birlikte çalışma düzeni
 
+> 10 Eylül 2026: P1 kullanıcı kararıyla kapandı, P2 açıldı. Doğrulanmamış testler geçmiş sayılmadı; [kapanış ve devredilen kontroller](../reports/P1-REPORT.md). Sonraki fazların kabul şartları korunur.
+
 Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazın incelemesine, testine veya devredilen alt işine destek olur.
 
 ## Nereden bakacağız?
