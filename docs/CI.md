@@ -6,6 +6,8 @@
 
 GitHub deposunda Unity CI secret'ları bulunmuyor. Bu yüzden ilk lisans kontrolü açık hata verir; Unity çalıştırılmadan yeşil test/build sonucu üretmez. Sorumlu Mehmet; Utku'nun CI işi kullanıcı talimatıyla bu çalışmada devralındı. CI dosyasının varlığı başarılı bulut build'i değildir.
 
+Gerçek GitHub denemesi: [run 34611444144](https://github.com/mehmetalisahingm/DeepDiveGame/actions/runs/34611444144), kaynak `66d541f`. Lisans ön kontrolünde `Unity CI licensing is not configured` hatasıyla durdu; Unity test/build adımları çalışmadı.
+
 Mehmet, uygun Unity CI lisansını seçip GitHub Actions repository secrets bölümüne `UNITY_EMAIL`, `UNITY_PASSWORD` ve lisans türüne göre `UNITY_LICENSE` veya `UNITY_SERIAL` eklemeli. Şifre/lisans sohbet mesajına, kaynak dosyasına veya rapora yazılmaz. Yerel Hub oturumunun GitHub runner'da geçerli olduğu varsayılmaz; ücretli lisans satın alınmadı.
 
 Resmî uygulama belgeleri: [GameCI activation](https://game.ci/docs/github/activation/) ve [custom build method](https://game.ci/docs/github/builder/#buildmethod). Bulut sürüm/imaj ve lisans uyumluluğu, bilgiler sağlandıktan sonra gerçek çalıştırmada doğrulanır.
