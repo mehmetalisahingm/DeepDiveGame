@@ -1,0 +1,66 @@
+{
+  "date": "2026-09-11",
+  "runtime_source_commit": "fe87135cddf8b05a587d46c87ef59911ab04fde3",
+  "editmode_source_commit": "580a0e5100002bd4fcda1a07949f138bae8246ce",
+  "editmode": {
+    "passed": 99,
+    "failed": 0
+  },
+  "runtime": [
+    {
+      "mode": "host",
+      "reason": "",
+      "passed": true,
+      "connected": true,
+      "roster": true,
+      "ready": true,
+      "prep": true,
+      "dive": true,
+      "returned": true,
+      "readyReset": true,
+      "walk": true,
+      "swim": true,
+      "collisions": true,
+      "cameras": true,
+      "stopped": true,
+      "clientRejoined": false,
+      "fishMoved": true,
+      "catchObserved": true,
+      "catchDespawned": true,
+      "inventoryAdded": true,
+      "maxPlayers": 2,
+      "errors": []
+    },
+    {
+      "mode": "rejoin",
+      "reason": "Disconnected due to host shutting down.",
+      "passed": true,
+      "connected": true,
+      "roster": true,
+      "ready": true,
+      "prep": true,
+      "dive": true,
+      "returned": true,
+      "readyReset": true,
+      "walk": true,
+      "swim": true,
+      "collisions": true,
+      "cameras": true,
+      "stopped": true,
+      "clientRejoined": true,
+      "fishMoved": true,
+      "catchObserved": true,
+      "catchDespawned": true,
+      "inventoryAdded": false,
+      "maxPlayers": 2,
+      "errors": []
+    }
+  ],
+  "internet_tested": false,
+  "safe_return_inventory_tested": false,
+  "notes": [
+    "Runtime source adds only the opt-in hunt test driver after the EditMode run.",
+    "Host inventoryAdded confirms the remote player bag; client inventory UI/snapshot is not implemented here.",
+    "Return/readyReset fields describe session scene flow, not preservation of caught items."
+  ]
+}
