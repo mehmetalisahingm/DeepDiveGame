@@ -33,7 +33,7 @@ namespace DeepDive.Inventory
 
         private SessionManager _session;
         private readonly Dictionary<PlayerId, PlayerBag> _bags = new Dictionary<PlayerId, PlayerBag>();
-        private readonly HashSet<string> _claimedCaptureIds = new HashSet<string>();
+        private readonly Dictionary<string, CaptureResult> _captures = new Dictionary<string, CaptureResult>();
         private string _trackedDiveId = string.Empty;
         private SessionPhase _previousPhase = SessionPhase.Lobby;
         private bool _subscribed;
@@ -46,6 +46,12 @@ namespace DeepDive.Inventory
             _bags.TryGetValue(player, out var bag)
                 ? (bag.WeightGrams, bag.Items.Count, bag.SafelyReturned)
                 : (0, 0, false);
+
+        // For anything (e.g. EconomyManager pricing a sale) that needs the full capture a
+        // DiveSummary preserved/lost id refers to, without DiveSummary itself carrying full
+        // objects (docs/plan/CONTRACTS.md keeps DiveSummary to "kimlikleri" - ids - only).
+        public bool TryGetCapture(string captureId, out CaptureResult capture) =>
+            _captures.TryGetValue(captureId, out capture);
 
         // Resolved lazily instead of in Awake(): AddComponent does not guarantee Awake has run
         // by the time a caller (e.g. an EditMode test right after AddComponent) uses this.
@@ -93,10 +99,10 @@ namespace DeepDive.Inventory
             if (Session.State.Phase != SessionPhase.Dive) return InventoryActionResult.WrongPhase;
             if (!_bags.TryGetValue(player, out var bag)) return InventoryActionResult.PlayerInactive;
             if (capture.DiveId != Session.State.DiveId) return InventoryActionResult.InvalidTarget;
-            if (_claimedCaptureIds.Contains(capture.CaptureId)) return InventoryActionResult.AlreadyClaimed;
+            if (_captures.ContainsKey(capture.CaptureId)) return InventoryActionResult.AlreadyClaimed;
             if (bag.WeightGrams + capture.WeightGrams > CapacityGrams) return InventoryActionResult.InventoryFull;
 
-            _claimedCaptureIds.Add(capture.CaptureId);
+            _captures[capture.CaptureId] = capture;
             bag.Items.Add(capture);
             bag.WeightGrams += capture.WeightGrams;
             OnBagChanged?.Invoke(player);
@@ -137,7 +143,7 @@ namespace DeepDive.Inventory
                 // New dive: clear claim tracking and every bag (CONTRACTS: eski diveId'ye ait
                 // av/islem istegi yeniden kullanilamaz).
                 _trackedDiveId = state.DiveId;
-                _claimedCaptureIds.Clear();
+                _captures.Clear();
                 foreach (var player in new List<PlayerId>(_bags.Keys))
                     ResetBag(player);
             }
