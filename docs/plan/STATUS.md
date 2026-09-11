@@ -33,7 +33,7 @@ Plan 1.8 — 10 Eylül 2026. Aktif faz P2; koordinatör Mert.
 | Ekip eriÅŸim testi | ÃœÃ§ hesabÄ±n eriÅŸimi aktif; Mehmet, Utku ve Mert gÃ¼ncel ortak projeyi aldÄ± ve aÃ§tÄ± |
 | Ã–rnek build | `P0-A-9596244`, kaynak `9596244`; [kurulum/build rehberi](../SETUP.md). Mehmet, Utku ve Mert'in Windows build kontrolleri baÅŸarÄ±lÄ± |
 | Basit branch korumasÄ± | P1 Mert, yÃ¶netici iÅŸlemlerinde Mehmet; kurulmadÄ± |
-| Otomatik build | P2 Utku, hesap/lisansta Mehmet; kurulmadÄ± |
+| Otomatik build | CI dosyası hazır; GitHub Unity lisans secretları yok. Mehmet takip eder; [gerçek engel ve yerel yöntem](../CI.md). Bulut build PASS değil |
 | Performans ortamÄ± | P4 sonunda Ã¶lÃ§Ã¼mden Ã¶nce sabitlenecek; Ã¶neri 1080p/60 FPS |
 | Manuel araÃ§ istisnasÄ± | HenÃ¼z yok; gerÃ§ek engel varsa neden/sorumlu/kontrol kÄ±sa kayda yazÄ±lÄ±r |
 
@@ -43,7 +43,7 @@ Plan 1.8 — 10 Eylül 2026. Aktif faz P2; koordinatör Mert.
 |---|---|---|---|
 | P0 | KAPALI | Mehmet | [P0 kapanÄ±ÅŸ kaydÄ±](../reports/P0-REPORT.md); doÄŸrulanan temel `14e34f1` |
 | P1 | KAPALI (kullanıcı kararı) | Utku | [Kapanış / devredilen kontroller](../reports/P1-REPORT.md) |
-| P2 | ACIK | Mert | A/C kodu birleşti; 27 test ve yerel iki oyuncu regresyonu geçti. [Kayıt](../reports/P2-AC-MERGE.md); av/çanta entegrasyonu bekliyor |
+| P2 | ACIK | Mert | #28/#30 birleşti; 99 test, Windows build ve yerel iki oyunculu gerçek av testi geçti. [Kalanlar](../reports/P2-GAMEPLAY-VALIDATION.md) |
 | P3 | KILITLI | Mehmet | Yok |
 | P4 | KILITLI | Utku | Yok |
 | P5 | KILITLI | Mert | Yok |
@@ -61,8 +61,8 @@ AyrÄ±ntÄ±lar [PHASES.md](PHASES.md) iÃ§indedir. Gelecek fazÄ±n BEKLIYOR 
 | P1-A | Mehmet | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
 | P1-B | Utku | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
 | P1-C | Mert | TESLIM | Kod birleşti; kullanıcı kararıyla faz kapandı. [Eksik kontroller](../reports/P1-REPORT.md) |
-| P2-A | Mehmet | PR_HAZIR | #26 Composition bağlantısı eklendi; 86 test, build ve yerel iki oyuncu regresyonu geçti. Birleştirme/gerçek avlanma kabulü bekliyor. [Kayıt](../reports/P2-COMPOSITION.md) |
-| P2-B | Utku | HAZIR | [Tek balık, avlanma, sis/ışık ve CI](https://github.com/mehmetalisahingm/DeepDiveGame/issues/21) |
+| P2-A | Mehmet | KABUL_BEKLIYOR | #25/#27/#28 birleşti; oyuncu/Composition/ses-vuruş kodu ve iki oyunculu av testi geçti. İnsan oynama ve faz kabulü bekliyor |
+| P2-B | Utku | KABUL_BEKLIYOR | Balık, sahne ve sis/ışık #27/#30 içinde birleşti. Kullanıcı talimatıyla son doğrulama/CI Mehmet tarafında yapıldı; [CI lisans engeli](../CI.md), oynama/faz kabulü açık |
 | P2-C | Mert | ENTEGRASYON_BEKLIYOR | PR #24 birleşti; [doğrulanan sonuçlar ve eksikler](../reports/P2-AC-MERGE.md) |
 | P3-A | Mehmet | BEKLIYOR | Yok |
 | P3-B | Utku | BEKLIYOR | Yok |
