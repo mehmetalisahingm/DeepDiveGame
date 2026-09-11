@@ -133,6 +133,27 @@ namespace DeepDive.P2.Tests
         }
 
         [Test]
+        public void SnapshotForReflectsWeightItemCountAndSafeReturn()
+        {
+            EnterDive("dive-1");
+            Assert.AreEqual((0, 0, false), inventory.SnapshotFor(alice));
+
+            inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
+            Assert.AreEqual((500, 1, false), inventory.SnapshotFor(alice));
+
+            inventory.TryMarkSafeReturn(alice);
+            Assert.AreEqual((500, 1, true), inventory.SnapshotFor(alice));
+        }
+
+        [Test]
+        public void SnapshotForUnknownPlayerIsEmptyNotAnError()
+        {
+            EnterDive("dive-1");
+            var stranger = new PlayerId(99);
+            Assert.AreEqual((0, 0, false), inventory.SnapshotFor(stranger));
+        }
+
+        [Test]
         public void NextDiveClearsClaimTrackingSoAnOldCaptureIdCanBeReusedByANewDive()
         {
             EnterDive("dive-1");

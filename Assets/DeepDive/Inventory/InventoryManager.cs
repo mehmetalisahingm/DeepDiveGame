@@ -40,6 +40,13 @@ namespace DeepDive.Inventory
 
         public IReadOnlyDictionary<PlayerId, PlayerBag> Bags => _bags;
 
+        // Pure projection of one player's bag, for anything (e.g. InventoryPlayerSync) that
+        // needs to mirror it without depending on PlayerBag's mutable internals.
+        public (int WeightGrams, int ItemCount, bool SafelyReturned) SnapshotFor(PlayerId player) =>
+            _bags.TryGetValue(player, out var bag)
+                ? (bag.WeightGrams, bag.Items.Count, bag.SafelyReturned)
+                : (0, 0, false);
+
         // Resolved lazily instead of in Awake(): AddComponent does not guarantee Awake has run
         // by the time a caller (e.g. an EditMode test right after AddComponent) uses this.
         private SessionManager Session

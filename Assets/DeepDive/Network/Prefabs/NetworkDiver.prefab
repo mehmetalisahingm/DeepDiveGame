@@ -195,6 +195,7 @@ GameObject:
   - component: {fileID: 3187043033222342228}
   - component: {fileID: 2788291009167033125}
   - component: {fileID: 2460269665000610671}
+  - component: {fileID: 8000000000000001}
   m_Layer: 0
   m_Name: NetworkDiver
   m_TagString: Untagged
@@ -347,3 +348,15 @@ MonoBehaviour:
   pickupConfirmClip: {fileID: 8300000, guid: 3f2da3884d5fc114a8ce4ee924470a7b, type: 3}
   viewCamera: {fileID: 5724339563318520668}
   bodyRenderer: {fileID: 6275167805087895636}
+--- !u!114 &8000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4155578288451651720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b68c040f0548bb14d89e8dc2f799beb3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DeepDive.Inventory::DeepDive.Inventory.InventoryPlayerSync
