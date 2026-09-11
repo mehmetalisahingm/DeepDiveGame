@@ -1,14 +1,33 @@
-# P2 oyuncu ve balık teslimi — 11 Eylül 2026
+# P2 kapanış ve oynanış doğrulaması — 11 Eylül 2026
 
-Kullanıcı, Utku'nun kalan P2 işlerini bu çalışmada devralmamızı istedi. Mehmet #28 ve Utku #30 test edilip P2 dalına birleşti. Mert'in envanter/UI/dönüş işleri ve P2 koordinatörlüğü korunur.
+Durum: **KAPALI — kullanıcı faz kabulüyle**.
 
-- Birleşik #28/#30 üzerinde **99/99 EditMode PASS**.
-- Gerçek Windows build başarılı. Oyun kaynağı: `fe87135cddf8b05a587d46c87ef59911ab04fde3`.
-- Opt-in av testi iki gerçek süreçte başarılı: misafir oyuncu mevcut girdi/RPC yoluyla sahnedeki hareketli balığı vurdu/öldürdü/topladı; host üzerindeki çantasına tek av eklendi; av her iki tarafta despawn oldu. Balık veya av test sağlayıcısıyla değiştirilmedi.
-- Bağlantı, yürüme/yüzme, sahne dönüşü, ready reset ve yeniden katılma regresyonu geçti. Bu farklı bilgisayar/internet testi değildir.
-- Kaynak: [yerel test özeti](../evidence/P2-gameplay-local-results.json). EditMode koşusundan sonra yalnız isteğe bağlı runtime av testi eklendi ve yeni build üzerinde çalıştırıldı; kanıtta iki kaynak commit ayrı tutulur.
-- Ses assetleri oyuncu prefabına bağlı; headless test sesin insanlarca duyulmasını veya kontrol hissini değerlendirmez.
+P2 kod teslimleri `main` üzerinde birleşti. Doğrulanan oyun kodu commit'i `7ebdc4ae6ce4188758eddfb7bce9ea321031efa8`.
 
-CI dosyası eklendi; GitHub'da Unity secret'ları yok. Eksik lisans kontrolü build çalıştırmadan hata verir. Otomatik Unity build PASS değildir; [engel, sorumlu ve yerel yöntem](../CI.md) kayıtlıdır. Actions kodu sabit commit'lerden kullanılır; kişisel runner/ücretli lisans kurulmadı, oyun yayımlanmadı.
+## Doğrulananlar
 
-P2 kapanışı için Mert'in istemci çanta/UI ve güvenli dönüş bağlantısı; gerçek 1/2/4 oyunculu dolu çanta, av yarışı, oksijen/pasiflik ve ardışık iki dalış; en az iki oyuncuyla 10–15 dakikalık oynama değerlendirmesi ve üç kişinin gerçek sonuç kaydı hâlâ gerekir. P1'den devreden kontroller kapanışta ayrıca ele alınır. P2 açık, P3 kilitli.
+- GitHub Actions `Unity P2 tests and Windows build` koşusu #8, attempt 2, aynı `main` commit'i üzerinde tamamen PASS oldu.
+- EditMode test adımı PASS.
+- Mevcut Windows build yöntemi PASS; proje Windows build üretebildi.
+- Kullanıcı manuel olarak oyunun açıldığını ve balığın vurulup/yakalanabildiğini doğruladı.
+- Önceki gerçek iki-süreç testinde misafir oyuncu mevcut input/RPC yolu ile hareketli balığı vurdu, öldürdü ve topladı; host tarafındaki çantaya tek av eklendi ve av iki tarafta despawn oldu.
+- Envanter testleri aynı `captureId`'nin iki oyuncuya birden yazılmasını engelliyor; dolu çantada reddedilen av claim edilmeden kalıyor; güvenli dönüş, kayıp/güvenli av ayrımı, lobiye dönüşte çanta temizliği ve yeni dalışta eski claim durumunun sıfırlanması test ediliyor.
+- Dalgıç kuralları oksijen tüketimi, sıfır oksijende pasif durum, hasar/pasiflik sıfırlaması, request replay/rate gate ve temel pickup/harpoon geri bildirimlerini kapsıyor.
+- `SafeReturnZone` için sınır/ölçek geometrisi EditMode testleriyle doğrulanıyor.
+
+## Kabul notu
+
+`docs/plan/PHASES.md` P2 için ayrıca final head üzerinde 1/2/4 oyunculu kabul ve en az iki kişinin 10–15 dakikalık insan oynama testini ister. Final head için ayrı bir 4 oyunculu insan oturumu ve 10–15 dakikalık ortak his testi kayıtlı değildir. Kullanıcı mevcut manuel oynanış, önceki iki-süreç çalışma testi, birleşik EditMode PASS ve Windows build PASS kanıtlarını yeterli kabul ederek P2'yi kapatma kararı verdi. Bu eksik deneyim doğrulaması gizlenmez; P3 başlangıcındaki ilk ortak smoke/playtest'te tekrar kontrol edilir.
+
+## Kalite kontrol — bloklamayan teknik borç
+
+- `SafeReturnZone.Update()` her karede sahne araması ve oyuncu taraması yapıyor. Dört oyunculuk P2 için bloklayıcı görülmedi; ileride component caching veya trigger tabanlı akışla sadeleştirilebilir.
+- `InventoryPlayerSync` NetworkVariable'larında owner-only okuma izni açıkça tanımlı değil. Çanta verisi hassas değil ve owner UI yalnız kendi objesinde çiziliyor; yine de kapsülleme P3/P5'te sıkılaştırılabilir.
+- Çanta göstergesi prototip `OnGUI` ile çiziliyor. Nihai UI/cila işi değildir; sonraki fazlarda kalıcı UI sistemine taşınabilir.
+- `InventoryPlayerSync` için doğrudan canlı guest-replication odaklı ayrı bir test görünmüyor; mevcut birleşik CI ve önceki co-op çalışma kanıtına ek olarak P3 ilk ortak testinde guest çanta göstergesi özellikle kontrol edilir.
+
+Bu maddeler P2 çekirdek sözleşmesini bozan blocker olarak değerlendirilmedi; performans/cila ve test sertleştirmesi olarak sonraki fazlara taşındı.
+
+## Sonuç
+
+P2'nin çekirdek hedefi — avla, taşı, güvenli dönüş için gerekli oyuncu/av/çanta sözleşmelerinin birleşmesi — tamamlandı. CI ve Windows build yeşil. P2 kapatıldı; P3 çalışması açılabilir.
