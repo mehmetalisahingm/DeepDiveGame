@@ -1,0 +1,6 @@
+{
+  "name": "DeepDive.World.Editor",
+  "rootNamespace": "DeepDive.World.Editor",
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.World", "Unity.Netcode.Runtime"],
+  "includePlatforms": ["Editor"]
+}
