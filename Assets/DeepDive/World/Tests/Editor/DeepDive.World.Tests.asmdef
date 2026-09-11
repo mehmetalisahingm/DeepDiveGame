@@ -1,6 +1,6 @@
 {
   "name": "DeepDive.World.Tests",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.World"],
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.World", "Unity.Netcode.Runtime"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"]
 }
