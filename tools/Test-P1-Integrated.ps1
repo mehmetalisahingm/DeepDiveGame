@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture)
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt)
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe'
@@ -16,6 +16,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
             '-p1-screenshot', ('"{0}"' -f (Join-Path $p1Run 'room.png')))
     } else { $p1Args += '-nographics' }
     if ($Reason) { $p1Args += @('-p1-reason', $Reason) }
+    if ($Hunt) { $p1Args += @('-p2-hunt', '1') }
     $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -WindowStyle Hidden -PassThru
     $p1Processes.Add([pscustomobject]@{Name=$Name; Process=$p1Process; Report=$p1Report})
 }
@@ -37,7 +38,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $p1Deadline = (Get-Date).AddSeconds(60)
+    $p1Deadline = (Get-Date).AddSeconds($(if ($Hunt) { 90 } else { 60 }))
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
     $p1Failures = @()
     foreach ($p1Entry in $p1Processes) {

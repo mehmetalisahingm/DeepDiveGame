@@ -1,0 +1,59 @@
+name: Unity P2 tests and Windows build
+
+on:
+  push:
+    branches: [main, 'codex/p2-*', 'p2/*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unity-p2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Require Unity CI credentials
+        shell: bash
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
+            echo '::error::Unity CI licensing is not configured. See docs/CI.md. No Unity test/build has run.'
+            echo 'Unity build BLOCKED: missing Unity credentials/license. Use the documented local build; this run is not PASS.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: EditMode tests
+        id: tests
+        uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          testMode: EditMode
+          artifactsPath: Logs/CI-Tests
+          githubToken: ''
+      - name: Existing Windows build method
+        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          targetPlatform: StandaloneWindows64
+          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildWindows
+          versioning: None
+      - name: Test reports
+        if: always() && steps.tests.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unity-test-results-${{ github.sha }}
+          path: Logs/CI-Tests/**/*.xml
+          if-no-files-found: ignore
+          retention-days: 7
