@@ -1,5 +1,5 @@
 {
   "name": "DeepDive.Inventory",
   "rootNamespace": "DeepDive.Inventory",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Session", "UnityEngine.UI"]
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Session", "UnityEngine.UI", "Unity.Netcode.Runtime"]
 }
