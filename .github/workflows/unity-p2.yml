@@ -1,15 +1,15 @@
-name: Unity P2 tests and Windows build
+name: Unity tests and Windows build
 
 on:
   push:
-    branches: [main, 'codex/p2-*', 'p2/*']
+    branches: [main, 'codex/p2-*', 'p2/*', 'codex/p3-*', 'p3/*']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: unity-p2-${{ github.ref }}
+  group: unity-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
