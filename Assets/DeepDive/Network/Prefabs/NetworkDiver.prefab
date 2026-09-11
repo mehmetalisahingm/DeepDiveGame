@@ -330,5 +330,20 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   walkSpeed: 4
   swimSpeed: 3
+  maxOxygen: 120
+  oxygenDrainPerSecond: 1
+  lowOxygenFraction: 0.2
+  maxHealth: 100
+  harpoonRange: 22
+  harpoonDamage: 1
+  harpoonCooldown: 0.65
+  pickupRange: 2.5
+  pickupCooldown: 0.2
+  lowOxygenLoop: {fileID: 0}
+  feedbackAudioSource: {fileID: 0}
+  lowOxygenClip: {fileID: 8300000, guid: cba6aedfcafd3c647bef5f0d57c3efa2, type: 3}
+  harpoonShotClip: {fileID: 8300000, guid: d671fa39d1fe26d4798db9bb3c522811, type: 3}
+  hitConfirmClip: {fileID: 8300000, guid: a8404cf77d94c754ea2af2d784e62364, type: 3}
+  pickupConfirmClip: {fileID: 8300000, guid: 3f2da3884d5fc114a8ce4ee924470a7b, type: 3}
   viewCamera: {fileID: 5724339563318520668}
   bodyRenderer: {fileID: 6275167805087895636}
