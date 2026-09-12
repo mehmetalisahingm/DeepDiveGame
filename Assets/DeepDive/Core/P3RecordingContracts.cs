@@ -2,13 +2,20 @@ using System;
 
 namespace DeepDive.Core.Contracts
 {
-    // P3 camera transport contract. Mehmet produces the intent on the owner, the host
-    // reconstructs the authoritative session/player context, and Utku's evaluator decides
-    // whether the recording is actually valid. No client-provided quality/duration is trusted.
+    // Network transport still distinguishes start/stop, but RecordingCandidate itself is the
+    // host-resolved recording context: it never carries client-owned duration or a raw target id.
     public enum RecordingCommand : byte
     {
         Start = 1,
         Stop = 2
+    }
+
+    // P3-B owns the concrete implementation (RecordingSubject). Composition resolves this
+    // component from the authoritative target NetworkObject before the candidate reaches the
+    // recording rule layer. Keeping the target as a component contract prevents target identity
+    // from becoming a client-trusted scalar.
+    public interface IRecordingTarget
+    {
     }
 
     public readonly struct RecordingCandidate
@@ -16,27 +23,25 @@ namespace DeepDive.Core.Contracts
         public readonly ulong RequestId;
         public readonly string DiveId;
         public readonly PlayerId PlayerId;
-        public readonly bool HasTarget;
-        public readonly ulong TargetNetworkObjectId;
-        public readonly RecordingCommand Command;
+        public readonly IRecordingTarget Target;
 
-        public RecordingCandidate(ulong requestId, string diveId, PlayerId playerId,
-            bool hasTarget, ulong targetNetworkObjectId, RecordingCommand command)
+        public RecordingCandidate(ulong requestId, string diveId, PlayerId playerId, IRecordingTarget target)
         {
             RequestId = requestId;
             DiveId = diveId ?? string.Empty;
             PlayerId = playerId;
-            HasTarget = hasTarget;
-            TargetNetworkObjectId = targetNetworkObjectId;
-            Command = command;
+            Target = target;
         }
     }
 
-    // Implemented by P3-B. This boundary deliberately carries only intent + target identity;
-    // visibility, distance, timing, framing and quality stay host-authoritative in Utku's area.
+    // Temporary Composition seam until P3-B's concrete RecordingSession is wired. Start/Stop are
+    // deliberately separate: the host owns elapsed time, and Stop must reuse the target locked at
+    // Start instead of performing a second raycast. When P3-B's richer stop result is connected,
+    // Composition must inspect its IsPayable flag before forwarding anything to economy.
     public interface IRecordingEvaluationSink
     {
-        PlayerActionResult TrySubmit(RecordingCandidate candidate);
+        PlayerActionResult TryStart(RecordingCandidate candidate);
+        PlayerActionResult TryStop(RecordingCandidate candidate);
     }
 
     public static class RecordingEvaluation
@@ -53,13 +58,15 @@ namespace DeepDive.Core.Contracts
             if (ReferenceEquals(Sink, sink)) Sink = null;
         }
 
-        public static PlayerActionResult TrySubmit(RecordingCandidate candidate) =>
-            Sink == null ? PlayerActionResult.InvalidState : Sink.TrySubmit(candidate);
+        public static PlayerActionResult TryStart(RecordingCandidate candidate) =>
+            Sink == null ? PlayerActionResult.InvalidState : Sink.TryStart(candidate);
+
+        public static PlayerActionResult TryStop(RecordingCandidate candidate) =>
+            Sink == null ? PlayerActionResult.InvalidState : Sink.TryStop(candidate);
     }
 
-    // Pure gate used by the network bridge and EditMode tests. requestId is consumed per
-    // player by the bridge; this helper only decides whether the requested state transition is
-    // structurally valid before the P3-B evaluator sees it.
+    // Pure transport gate. requestId is consumed per player by the bridge; this helper only
+    // validates request ordering/state before the host resolves IRecordingTarget and calls P3-B.
     public static class RecordingRequestRules
     {
         public static PlayerActionResult Validate(ulong requestId, ulong lastRequestId,

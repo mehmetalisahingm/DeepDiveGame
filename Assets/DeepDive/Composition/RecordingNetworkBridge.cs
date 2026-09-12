@@ -9,10 +9,10 @@ using UnityEngine.SceneManagement;
 
 namespace DeepDive.Composition
 {
-    // P3-A transport + owner UI for camera recording intent. It is installed on the existing
-    // SessionNetworkAdapter root at runtime so NetworkDiver.prefab does not gain another
-    // NetworkBehaviour. The host owns request ordering and forwards accepted-shaped intent to
-    // P3-B through IRecordingEvaluationSink.
+    // P3-A transport + owner UI for camera recording intent. The client may send only the
+    // NetworkObject id it is aiming at; the host resolves the concrete IRecordingTarget before
+    // the request reaches P3-B. Start locks that target for the whole recording and Stop never
+    // performs a second raycast.
     [DisallowMultipleComponent]
     public sealed class RecordingNetworkBridge : MonoBehaviour
     {
@@ -20,11 +20,24 @@ namespace DeepDive.Composition
         public const string ResultMessage = "deepdive/p3/recording-result-v1";
         private const float TargetRange = 35f;
 
+        private readonly struct ActiveRecordingTarget
+        {
+            public readonly ulong NetworkObjectId;
+            public readonly IRecordingTarget Target;
+
+            public ActiveRecordingTarget(ulong networkObjectId, IRecordingTarget target)
+            {
+                NetworkObjectId = networkObjectId;
+                Target = target;
+            }
+        }
+
         private SessionNetworkAdapter adapter;
         private NetworkManager manager;
         private CustomMessagingManager messages;
         private readonly Dictionary<ulong, ulong> lastRequestByPlayer = new Dictionary<ulong, ulong>();
-        private readonly Dictionary<ulong, ulong> activeTargetByPlayer = new Dictionary<ulong, ulong>();
+        private readonly Dictionary<ulong, ActiveRecordingTarget> activeTargetByPlayer =
+            new Dictionary<ulong, ActiveRecordingTarget>();
 
         private ulong localRequestSequence;
         private ulong localLastAppliedRequest;
@@ -133,17 +146,41 @@ namespace DeepDive.Composition
             if (camera == null) return false;
             var ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             if (!Physics.Raycast(ray, out var hit, TargetRange, ~0, QueryTriggerInteraction.Ignore)) return false;
-            var target = hit.collider.GetComponentInParent<NetworkObject>();
-            if (target == null || !target.IsSpawned || target == player.NetworkObject) return false;
-            targetId = target.NetworkObjectId;
+            var networkObject = hit.collider.GetComponentInParent<NetworkObject>();
+            if (networkObject == null || !networkObject.IsSpawned || networkObject == player.NetworkObject)
+                return false;
+            if (!TryResolveRecordingTarget(networkObject, out _)) return false;
+            targetId = networkObject.NetworkObjectId;
             return true;
+        }
+
+        private static bool TryResolveRecordingTarget(NetworkObject networkObject, out IRecordingTarget target)
+        {
+            target = null;
+            if (networkObject == null) return false;
+            var behaviours = networkObject.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var behaviour in behaviours)
+            {
+                if (behaviour is IRecordingTarget recordingTarget && IsUsableTarget(recordingTarget))
+                {
+                    target = recordingTarget;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool IsUsableTarget(IRecordingTarget target)
+        {
+            if (target == null) return false;
+            return !(target is Object unityObject) || unityObject != null;
         }
 
         private void SubmitLocal(NetworkPlayer player)
         {
             var command = localRecording ? RecordingCommand.Stop : RecordingCommand.Start;
             var hasTarget = localRecording;
-            var targetId = localRecordingTarget;
+            var targetId = 0UL;
             if (command == RecordingCommand.Start)
                 hasTarget = TryAimTarget(player, out targetId);
 
@@ -206,29 +243,47 @@ namespace DeepDive.Composition
                 }
             }
 
+            IRecordingTarget recordingTarget = null;
+            var lockedNetworkObjectId = 0UL;
             if (result == PlayerActionResult.Accepted && command == RecordingCommand.Start)
             {
-                if (!hasTarget || !manager.SpawnManager.SpawnedObjects.TryGetValue(targetId, out var target) ||
-                    target == null || !target.IsSpawned || (player != null && target == player.NetworkObject))
+                if (!hasTarget || !manager.SpawnManager.SpawnedObjects.TryGetValue(targetId, out var targetObject) ||
+                    targetObject == null || !targetObject.IsSpawned ||
+                    (player != null && targetObject == player.NetworkObject) ||
+                    !TryResolveRecordingTarget(targetObject, out recordingTarget))
+                {
                     result = PlayerActionResult.InvalidTarget;
+                }
+                else
+                {
+                    lockedNetworkObjectId = targetId;
+                }
             }
             else if (result == PlayerActionResult.Accepted && command == RecordingCommand.Stop)
             {
-                targetId = activeTargetByPlayer[sender];
-                hasTarget = true;
+                if (!activeTargetByPlayer.TryGetValue(sender, out var locked) || !IsUsableTarget(locked.Target))
+                    result = PlayerActionResult.InvalidTarget;
+                else
+                {
+                    recordingTarget = locked.Target;
+                    lockedNetworkObjectId = locked.NetworkObjectId;
+                }
             }
 
             if (result == PlayerActionResult.Accepted)
             {
-                var candidate = new RecordingCandidate(requestId, state.DiveId, new PlayerId(sender),
-                    hasTarget, targetId, command);
-                result = RecordingEvaluation.TrySubmit(candidate);
+                var candidate = new RecordingCandidate(requestId, state.DiveId, new PlayerId(sender), recordingTarget);
+                result = command == RecordingCommand.Start
+                    ? RecordingEvaluation.TryStart(candidate)
+                    : RecordingEvaluation.TryStop(candidate);
             }
 
             if (result == PlayerActionResult.Accepted)
             {
-                if (command == RecordingCommand.Start) activeTargetByPlayer[sender] = targetId;
-                else activeTargetByPlayer.Remove(sender);
+                if (command == RecordingCommand.Start)
+                    activeTargetByPlayer[sender] = new ActiveRecordingTarget(lockedNetworkObjectId, recordingTarget);
+                else
+                    activeTargetByPlayer.Remove(sender);
             }
 
             SendResult(sender, requestId, command, result);
@@ -236,7 +291,8 @@ namespace DeepDive.Composition
 
         private void SendResult(ulong receiver, ulong requestId, RecordingCommand command, PlayerActionResult result)
         {
-            var active = activeTargetByPlayer.TryGetValue(receiver, out var targetId);
+            var active = activeTargetByPlayer.TryGetValue(receiver, out var locked);
+            var targetId = active ? locked.NetworkObjectId : 0UL;
             if (receiver == manager.LocalClientId)
             {
                 ApplyLocalResult(requestId, command, result, active, targetId);
