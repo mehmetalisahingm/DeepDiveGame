@@ -53,11 +53,11 @@ namespace DeepDive.World.Tests
             Assert.IsTrue(session.IsRecording(Alice));
 
             Film(session, Alice, 5f, 0.8f);
-            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var evaluation));
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var take));
             Assert.IsFalse(session.IsRecording(Alice));
-            Assert.AreEqual(Subject, evaluation.SubjectId);
-            Assert.AreEqual("dive-1", evaluation.DiveId);
-            Assert.AreEqual(Alice, evaluation.PlayerId);
+            Assert.AreEqual(Subject, take.SubjectId);
+            Assert.AreEqual("dive-1", take.DiveId);
+            Assert.AreEqual(Alice, take.PlayerId);
         }
 
         // The contract this whole two-call split exists for: the caller says "start" and "stop",
@@ -71,8 +71,8 @@ namespace DeepDive.World.Tests
 
             for (var i = 0; i < 12; i++) session.Tick(Alice, 0.25f, Good(0.8f));
 
-            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var evaluation));
-            Assert.AreEqual(3f, evaluation.ValidSeconds, 0.0001f, "12 host ticks of 0.25s is 3 seconds");
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var take));
+            Assert.AreEqual(3f, take.ValidSeconds, 0.0001f, "12 host ticks of 0.25s is 3 seconds");
         }
 
         [Test]
@@ -82,10 +82,10 @@ namespace DeepDive.World.Tests
             var dive = ActiveDive();
             session.TryStart(dive, Alice, 1);
 
-            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var evaluation));
-            Assert.AreEqual(0f, evaluation.ValidSeconds);
-            Assert.AreEqual(RecordingQuality.NoPayout, evaluation.Quality);
-            Assert.IsFalse(evaluation.IsPayable, "a tap of the record button is not a recording");
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var take));
+            Assert.AreEqual(0f, take.ValidSeconds);
+            Assert.AreEqual(RecordingQuality.NoPayout, take.Quality);
+            Assert.IsFalse(take.IsPayable, "a tap of the record button is not a recording");
         }
 
         [Test]
@@ -97,9 +97,9 @@ namespace DeepDive.World.Tests
 
             for (var i = 0; i < 20; i++) session.Tick(Alice, 0.5f, Blocked());
 
-            session.TryStop(dive, Alice, 2, out var evaluation);
-            Assert.AreEqual(0f, evaluation.ValidSeconds, "ten seconds behind a rock is not ten seconds of footage");
-            Assert.IsFalse(evaluation.IsPayable);
+            session.TryStop(dive, Alice, 2, out var take);
+            Assert.AreEqual(0f, take.ValidSeconds, "ten seconds behind a rock is not ten seconds of footage");
+            Assert.IsFalse(take.IsPayable);
         }
 
         [Test]
@@ -112,8 +112,8 @@ namespace DeepDive.World.Tests
             for (var i = 0; i < 8; i++) session.Tick(Alice, 0.5f, Good(0.8f)); // 4s filmed
             for (var i = 0; i < 8; i++) session.Tick(Alice, 0.5f, Blocked());  // 4s wasted
 
-            session.TryStop(dive, Alice, 2, out var evaluation);
-            Assert.AreEqual(4f, evaluation.ValidSeconds, 0.0001f);
+            session.TryStop(dive, Alice, 2, out var take);
+            Assert.AreEqual(4f, take.ValidSeconds, 0.0001f);
         }
 
         [Test]
@@ -126,9 +126,9 @@ namespace DeepDive.World.Tests
             session.Tick(Alice, 1f, Good(1f));
             session.Tick(Alice, 3f, Good(0f));
 
-            session.TryStop(dive, Alice, 2, out var evaluation);
-            Assert.AreEqual(4f, evaluation.ValidSeconds, 0.0001f);
-            Assert.AreEqual(0.25f, evaluation.Score01, 0.0001f, "one good second in four is a quarter");
+            session.TryStop(dive, Alice, 2, out var take);
+            Assert.AreEqual(4f, take.ValidSeconds, 0.0001f);
+            Assert.AreEqual(0.25f, take.Score01, 0.0001f, "one good second in four is a quarter");
         }
 
         [Test]
@@ -139,10 +139,10 @@ namespace DeepDive.World.Tests
             session.TryStart(dive, Alice, 1);
             Film(session, Alice, 4f, 0.8f);
 
-            session.TryStop(dive, Alice, 2, out var evaluation);
+            session.TryStop(dive, Alice, 2, out var take);
             // 0.8 clears Gold's score but 4s does not clear its 6s, so Silver it is.
-            Assert.AreEqual(2, evaluation.Quality);
-            Assert.IsTrue(evaluation.IsPayable);
+            Assert.AreEqual(2, take.Quality);
+            Assert.IsTrue(take.IsPayable);
         }
 
         [Test]
@@ -157,8 +157,8 @@ namespace DeepDive.World.Tests
             session.Tick(Alice, -5f, Good(1f));
             session.Tick(Alice, 0f, Good(1f));
 
-            session.TryStop(dive, Alice, 2, out var evaluation);
-            Assert.AreEqual(0f, evaluation.ValidSeconds);
+            session.TryStop(dive, Alice, 2, out var take);
+            Assert.AreEqual(0f, take.ValidSeconds);
         }
 
         [Test]
@@ -244,8 +244,8 @@ namespace DeepDive.World.Tests
             var session = Session();
 
             Assert.AreEqual(PlayerActionResult.InvalidState,
-                session.TryStop(ActiveDive(), Alice, 1, out var evaluation));
-            Assert.IsFalse(evaluation.IsPayable);
+                session.TryStop(ActiveDive(), Alice, 1, out var take));
+            Assert.IsFalse(take.IsPayable);
         }
 
         [Test]
@@ -257,8 +257,8 @@ namespace DeepDive.World.Tests
             Film(session, Alice, 8f, 0.9f);
 
             dive.CurrentDiveId = "dive-2";
-            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStop(dive, Alice, 2, out var evaluation));
-            Assert.IsFalse(evaluation.IsPayable, "last dive's footage must not be cashed in on this one");
+            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStop(dive, Alice, 2, out var take));
+            Assert.IsFalse(take.IsPayable, "last dive's footage must not be cashed in on this one");
             Assert.IsFalse(session.IsRecording(Alice), "the void take is dropped, not left open");
         }
 
@@ -271,8 +271,8 @@ namespace DeepDive.World.Tests
             Film(session, Alice, 8f, 0.9f);
 
             dive.IsDiveActive = false;
-            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStop(dive, Alice, 2, out var evaluation));
-            Assert.IsFalse(evaluation.IsPayable);
+            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStop(dive, Alice, 2, out var take));
+            Assert.IsFalse(take.IsPayable);
         }
 
         [Test]
@@ -285,8 +285,8 @@ namespace DeepDive.World.Tests
 
             session.Abort(Alice);
             Assert.IsFalse(session.IsRecording(Alice));
-            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStop(dive, Alice, 2, out var evaluation));
-            Assert.IsFalse(evaluation.IsPayable, "a fish that died mid-shot pays nothing");
+            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStop(dive, Alice, 2, out var take));
+            Assert.IsFalse(take.IsPayable, "a fish that died mid-shot pays nothing");
         }
 
         [Test]

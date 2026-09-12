@@ -30,9 +30,9 @@ namespace DeepDive.World.Tests
             }
         }
 
-        private static RecordingEvaluation Take(PlayerId player, string subject, int quality,
+        private static RecordingTake Take(PlayerId player, string subject, int quality,
             float validSeconds = 5f, float score01 = 0.6f, string diveId = Dive) =>
-            new RecordingEvaluation(diveId, player, subject, quality, validSeconds, score01);
+            new RecordingTake(diveId, player, subject, quality, validSeconds, score01);
 
         private static IReadOnlyCollection<PlayerId> Surfaced(params PlayerId[] players) => players;
 

@@ -14,11 +14,12 @@ namespace DeepDive.World
     //     If the best cameraman drowned, the next best one who made it out is paid instead.
     //
     // Payment happens at settlement and never before, which is what "odeme guvenli donusten
-    // sonra" means: an evaluation registered mid-dive is a claim, not a credit.
+    // sonra" means: a take registered mid-dive is a claim, not a credit. Register only ever sees
+    // payable takes - the caller checks RecordingTake.IsPayable first.
     public sealed class RecordingLedger
     {
-        private readonly Dictionary<(ulong Player, string Subject), RecordingEvaluation> best =
-            new Dictionary<(ulong, string), RecordingEvaluation>();
+        private readonly Dictionary<(ulong Player, string Subject), RecordingTake> best =
+            new Dictionary<(ulong, string), RecordingTake>();
 
         // A settled dive is closed. EconomyManager already guards against a DiveSummary being
         // delivered twice ("a retried event delivery"); this is the same guard on the side that
@@ -29,20 +30,20 @@ namespace DeepDive.World
 
         // Rejects rather than stores anything unpayable: a Quality 0 take is a real outcome but
         // there is nothing to award, and keeping it would only complicate the settlement sort.
-        public bool Register(RecordingEvaluation evaluation)
+        public bool Register(RecordingTake take)
         {
             if (IsSettled) return false;
-            if (!evaluation.IsPayable) return false;
+            if (!take.IsPayable) return false;
 
-            var key = (evaluation.PlayerId.Value, evaluation.SubjectId);
-            if (best.TryGetValue(key, out var current) && Compare(evaluation, current) <= 0) return false;
+            var key = (take.PlayerId.Value, take.SubjectId);
+            if (best.TryGetValue(key, out var current) && Compare(take, current) <= 0) return false;
 
-            best[key] = evaluation;
+            best[key] = take;
             return true;
         }
 
-        public bool TryGetBest(PlayerId player, string subjectId, out RecordingEvaluation evaluation) =>
-            best.TryGetValue((player.Value, subjectId ?? ""), out evaluation);
+        public bool TryGetBest(PlayerId player, string subjectId, out RecordingTake take) =>
+            best.TryGetValue((player.Value, subjectId ?? ""), out take);
 
         // Called once the dive is over and Mert's DiveSummary says who surfaced. Returns the
         // recordings that were actually paid, so the caller can log or show them.
@@ -106,7 +107,7 @@ namespace DeepDive.World
         // Better means: higher tier first, then the better-looking shot, then the longer one.
         // The player id breaks the remaining ties so two identical takes settle the same way on
         // every host instead of following dictionary order. Positive when left is better.
-        public static int Compare(RecordingEvaluation left, RecordingEvaluation right)
+        public static int Compare(RecordingTake left, RecordingTake right)
         {
             if (left.Quality != right.Quality) return left.Quality.CompareTo(right.Quality);
 
@@ -127,15 +128,15 @@ namespace DeepDive.World
         // Entries stamped with another dive id are dropped: a take that outlived its dive must
         // never be cashed in against the current one.
         private List<string> SubjectsInOrder(string diveId,
-            out Dictionary<string, List<RecordingEvaluation>> bySubject)
+            out Dictionary<string, List<RecordingTake>> bySubject)
         {
-            bySubject = new Dictionary<string, List<RecordingEvaluation>>(StringComparer.Ordinal);
+            bySubject = new Dictionary<string, List<RecordingTake>>(StringComparer.Ordinal);
             foreach (var entry in best.Values)
             {
                 if (!string.Equals(entry.DiveId, diveId, StringComparison.Ordinal)) continue;
                 if (!bySubject.TryGetValue(entry.SubjectId, out var list))
                 {
-                    list = new List<RecordingEvaluation>();
+                    list = new List<RecordingTake>();
                     bySubject[entry.SubjectId] = list;
                 }
                 list.Add(entry);
