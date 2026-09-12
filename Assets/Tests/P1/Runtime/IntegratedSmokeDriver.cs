@@ -65,6 +65,9 @@ namespace DeepDive.P1.Lab
             adapter = FindFirstObjectByType<SessionNetworkAdapter>();
             if (adapter == null) { result.errors.Add("No integrated adapter in real scene"); Finish(); yield break; }
             GameObject.Find("Port").GetComponent<InputField>().text = port.ToString();
+            if (Arg("-p1-protocol").Length > 0)
+                Unity.Netcode.NetworkManager.Singleton.NetworkConfig.ConnectionData =
+                    System.Text.Encoding.UTF8.GetBytes(Arg("-p1-protocol"));
             GameObject.Find(host ? "HostButton" : "JoinButton").GetComponent<Button>().onClick.Invoke();
             var started = Time.realtimeSinceStartup;
             bool prepSent = false, diveSent = false, returnSent = false, lobbySent = false, leaveSent = false;

@@ -6,7 +6,7 @@ if (-not (Test-Path -LiteralPath $p1Build)) { throw 'Build-P1.ps1 -ConnectScenes
 $p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
 New-Item -ItemType Directory -Path $p1Run | Out-Null
 $p1Processes = [System.Collections.Generic.List[object]]::new()
-function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') {
+function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '', [string]$Protocol = '') {
     $p1Report = Join-Path $p1Run ($Name + '.json')
     $p1Log = Join-Path $p1Run ($Name + '.log')
     $p1Args = @('-batchmode', '-p1-integrated', $Mode, '-p1-count', $Players,
@@ -16,6 +16,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
             '-p1-screenshot', ('"{0}"' -f (Join-Path $p1Run 'room.png')))
     } else { $p1Args += '-nographics' }
     if ($Reason) { $p1Args += @('-p1-reason', $Reason) }
+    if ($Protocol) { $p1Args += @('-p1-protocol', $Protocol) }
     if ($Hunt) { $p1Args += @('-p2-hunt', '1') }
     $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -WindowStyle Hidden -PassThru
     $p1Processes.Add([pscustomobject]@{Name=$Name; Process=$p1Process; Report=$p1Report})
@@ -31,6 +32,7 @@ function Wait-P1Marker([string]$Marker, [int]$Seconds) {
 try {
     Start-P1Integrated 'host' 'host'
     Start-Sleep -Seconds 2
+    Start-P1Integrated 'old-client' 'reject' 'ProtocolMismatch' 'DeepDive-P1-2'
     for ($i = 1; $i -lt $Players; $i++) { Start-P1Integrated "client$i" $(if ($i -eq 1) {'rejoin'} else {'client'}) }
     if ($Players -eq 4) {
         Wait-P1Marker 'P1_INTEGRATED_LOBBY_READY' 25

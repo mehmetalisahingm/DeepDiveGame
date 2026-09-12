@@ -14,7 +14,9 @@ namespace DeepDive.Network
     [RequireComponent(typeof(NetworkManager), typeof(UnityTransport))]
     public sealed class NetworkSession : MonoBehaviour, INetworkSession
     {
-        public const string Protocol = "DeepDive-P1-2";
+        // Bump when scene NetworkObjects or NetworkBehaviour layouts change. P1/P2
+        // builds previously shared a token despite incompatible fish/player layouts.
+        public const string Protocol = "DeepDive-P3-1";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;
@@ -41,6 +43,14 @@ namespace DeepDive.Network
         public IReadOnlyList<PlayerId> Players => players.Keys.OrderBy(id => id).Select(id => new PlayerId(id)).ToArray();
         public event Action Changed;
         public event Action<SceneLoadResult> SceneLoaded;
+
+        private void OnGUI()
+        {
+            GUI.Box(new Rect(Screen.width - 260, Screen.height - 34, 250, 24), Protocol);
+            if (LastError == "ProtocolMismatch")
+                GUI.Box(new Rect(20, Screen.height - 68, 570, 28),
+                    "SURUM FARKLI: Host ve katilan ayni guncel oyun klasorunu kullanmali.");
+        }
 
         private void Awake()
         {
