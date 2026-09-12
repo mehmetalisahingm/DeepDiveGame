@@ -5,7 +5,12 @@ namespace DeepDive.World
 {
     // What one finished take was worth. Not a RecordingResult yet: a result is only minted at
     // settlement, once the dive is over and we know who actually surfaced (RecordingLedger).
-    public readonly struct RecordingEvaluation
+    //
+    // Named "take" rather than "evaluation" on purpose: DeepDive.Core.Contracts already has a
+    // static RecordingEvaluation (P3-A's Composition seam), and DeepDive.Composition references
+    // both assemblies, so the shorter name there would be ambiguous the moment a file imports
+    // both namespaces.
+    public readonly struct RecordingTake
     {
         public readonly string DiveId;
         public readonly PlayerId PlayerId;
@@ -14,7 +19,7 @@ namespace DeepDive.World
         public readonly float ValidSeconds;
         public readonly float Score01;
 
-        public RecordingEvaluation(string diveId, PlayerId playerId, string subjectId, int quality,
+        public RecordingTake(string diveId, PlayerId playerId, string subjectId, int quality,
             float validSeconds, float score01)
         {
             DiveId = diveId;
@@ -43,9 +48,10 @@ namespace DeepDive.World
     // "Sonuc doguran ... degisikliklerini ev sahibi dogrular".
     public sealed class RecordingSession
     {
-        // One player's open take. Score is time-weighted so a long steady shot beats a long
-        // shot that was only briefly well framed.
-        private sealed class Take
+        // One player's in-progress take, as opposed to the finished RecordingTake handed back by
+        // TryStop. Score is time-weighted so a long steady shot beats a long shot that was only
+        // briefly well framed.
+        private sealed class OpenTake
         {
             public string DiveId;
             public float ValidSeconds;
@@ -60,7 +66,7 @@ namespace DeepDive.World
         private readonly Dictionary<(ulong Player, ulong Request), PlayerActionResult> handled =
             new Dictionary<(ulong, ulong), PlayerActionResult>();
 
-        private readonly Dictionary<ulong, Take> open = new Dictionary<ulong, Take>();
+        private readonly Dictionary<ulong, OpenTake> open = new Dictionary<ulong, OpenTake>();
         private readonly IReadOnlyList<QualityTier> tiers;
 
         public RecordingSession(string subjectId, IReadOnlyList<QualityTier> tiers)
@@ -79,10 +85,10 @@ namespace DeepDive.World
 
         // Host-side progress read, for HUD feedback later. Zero for a player with no open take.
         public float ValidSecondsFor(PlayerId player) =>
-            open.TryGetValue(player.Value, out var take) ? take.ValidSeconds : 0f;
+            open.TryGetValue(player.Value, out var openTake) ? openTake.ValidSeconds : 0f;
 
         public float Score01For(PlayerId player) =>
-            open.TryGetValue(player.Value, out var take) ? take.Score01 : 0f;
+            open.TryGetValue(player.Value, out var openTake) ? openTake.Score01 : 0f;
 
         // Accepted opens a take stamped with the live dive id. Nothing about the shot is judged
         // here: a player may start filming a badly framed subject, they just bank no time.
@@ -104,7 +110,7 @@ namespace DeepDive.World
             if (open.ContainsKey(player.Value))
                 return Remember(player, requestId, PlayerActionResult.InvalidState);
 
-            open[player.Value] = new Take { DiveId = diveId };
+            open[player.Value] = new OpenTake { DiveId = diveId };
             return Remember(player, requestId, PlayerActionResult.Accepted);
         }
 
@@ -112,23 +118,25 @@ namespace DeepDive.World
         // add to the duration, so time spent swimming away or staring at a rock is not paid for.
         public void Tick(PlayerId player, float deltaTime, RecordingSample sample)
         {
-            if (!open.TryGetValue(player.Value, out var take)) return;
+            if (!open.TryGetValue(player.Value, out var openTake)) return;
             if (float.IsNaN(deltaTime) || float.IsInfinity(deltaTime) || deltaTime <= 0f) return;
             if (!sample.IsValid) return;
 
-            take.ValidSeconds += deltaTime;
-            take.WeightedScore += sample.Score01 * deltaTime;
+            openTake.ValidSeconds += deltaTime;
+            openTake.WeightedScore += sample.Score01 * deltaTime;
         }
 
-        // Accepted means the stop was processed, not that money was earned: the evaluation may
-        // carry Quality 0. The caller reads IsPayable to decide whether the ledger hears about it.
+        // Accepted means the stop was processed, not that money was earned: the take may carry
+        // Quality 0, and a replayed requestId returns the earlier result with an empty take.
+        // Either way the caller MUST check RecordingTake.IsPayable before letting the ledger or
+        // the economy see it - that check is the second half of the double-payment guard.
         public PlayerActionResult TryStop(IDiveContext dive, PlayerId player, ulong requestId,
-            out RecordingEvaluation evaluation)
+            out RecordingTake take)
         {
-            evaluation = default;
+            take = default;
             if (handled.TryGetValue((player.Value, requestId), out var earlier)) return earlier;
 
-            if (!open.TryGetValue(player.Value, out var take))
+            if (!open.TryGetValue(player.Value, out var openTake))
                 return Remember(player, requestId, PlayerActionResult.InvalidState);
 
             // A take that outlived its dive is void. Dropping it here is what stops a recording
@@ -136,12 +144,12 @@ namespace DeepDive.World
             // eski diveId'ye ait ... istek yeniden kullanilamaz").
             var liveDiveId = dive != null && dive.IsDiveActive ? dive.CurrentDiveId : "";
             open.Remove(player.Value);
-            if (string.IsNullOrWhiteSpace(liveDiveId) || liveDiveId != take.DiveId)
+            if (string.IsNullOrWhiteSpace(liveDiveId) || liveDiveId != openTake.DiveId)
                 return Remember(player, requestId, PlayerActionResult.InvalidState);
 
-            var quality = RecordingQuality.Evaluate(tiers, take.Score01, take.ValidSeconds);
-            evaluation = new RecordingEvaluation(take.DiveId, player, SubjectId, quality,
-                take.ValidSeconds, take.Score01);
+            var quality = RecordingQuality.Evaluate(tiers, openTake.Score01, openTake.ValidSeconds);
+            take = new RecordingTake(openTake.DiveId, player, SubjectId, quality,
+                openTake.ValidSeconds, openTake.Score01);
             return Remember(player, requestId, PlayerActionResult.Accepted);
         }
 
