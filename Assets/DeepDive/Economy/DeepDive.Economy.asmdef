@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.Economy",
+  "rootNamespace": "DeepDive.Economy",
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Inventory"]
+}
