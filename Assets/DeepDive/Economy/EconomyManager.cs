@@ -32,7 +32,12 @@ namespace DeepDive.Economy
         private readonly Dictionary<string, EquipmentDefinition> _catalog = new Dictionary<string, EquipmentDefinition>();
         private readonly Dictionary<PlayerId, HashSet<string>> _loadout = new Dictionary<PlayerId, HashSet<string>>();
         private readonly HashSet<string> _soldCaptureIds = new HashSet<string>();
-        private readonly Dictionary<ulong, TransactionResult> _processedRequests = new Dictionary<ulong, TransactionResult>();
+        // Keyed by (player, requestId), not requestId alone: requestId is generated per-player,
+        // so two different players can legitimately produce the same value (Mehmet's review on
+        // #37) - keying on requestId alone would let one player's purchase replay another's
+        // stale result instead of being processed.
+        private readonly Dictionary<(PlayerId, ulong), TransactionResult> _processedRequests =
+            new Dictionary<(PlayerId, ulong), TransactionResult>();
         private bool _subscribed;
 
         // Resolved lazily instead of in Awake(): AddComponent does not guarantee Awake has run
@@ -123,7 +128,8 @@ namespace DeepDive.Economy
         public TransactionResult TryPurchase(PlayerId player, string equipmentId, ulong requestId)
         {
             EnsureSubscribed();
-            if (_processedRequests.TryGetValue(requestId, out var replayed)) return replayed;
+            var requestKey = (player, requestId);
+            if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
 
             TransactionResult result;
             if (!_catalog.TryGetValue(equipmentId, out var definition))
@@ -145,7 +151,7 @@ namespace DeepDive.Economy
                 result = TransactionResult.Ok(requestId, Revision);
             }
 
-            _processedRequests[requestId] = result;
+            _processedRequests[requestKey] = result;
             if (result.Accepted)
             {
                 OnBalanceChanged?.Invoke();

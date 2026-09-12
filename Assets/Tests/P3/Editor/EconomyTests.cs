@@ -154,6 +154,31 @@ namespace DeepDive.P3.Tests
         }
 
         [Test]
+        public void TwoDifferentPlayersReusingTheSameRequestIdAreProcessedIndependently()
+        {
+            EnterDive("dive-1");
+            inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
+            inventory.TryAddCatch(bob, Capture("c2", "dive-1", 500));
+            inventory.TryMarkSafeReturn(alice);
+            inventory.TryMarkSafeReturn(bob);
+            session.BeginReturn(); // two fish-1 captures sold: balance 100
+
+            economy.AddToCatalog(new EquipmentDefinition("tube-1", "tube", 1, 30));
+            // requestId is generated per-player, so both legitimately start at 1 (Mehmet's
+            // review on #37) - keying replay tracking on requestId alone would let bob's
+            // purchase silently replay alice's stale result instead of being charged.
+            var aliceResult = economy.TryPurchase(alice, "tube-1", requestId: 1);
+            var bobResult = economy.TryPurchase(bob, "tube-1", requestId: 1);
+
+            Assert.IsTrue(aliceResult.Accepted);
+            Assert.IsTrue(bobResult.Accepted);
+            Assert.AreNotEqual(aliceResult.Revision, bobResult.Revision);
+            Assert.AreEqual(40, economy.SharedBalance);
+            CollectionAssert.Contains(economy.LoadoutFor(alice), "tube-1");
+            CollectionAssert.Contains(economy.LoadoutFor(bob), "tube-1");
+        }
+
+        [Test]
         public void PurchasingTheSameEquipmentTwiceWithANewRequestIdIsRejectedAsAlreadyProcessed()
         {
             EnterDive("dive-1");
