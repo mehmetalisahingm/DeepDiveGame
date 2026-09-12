@@ -39,6 +39,7 @@ namespace DeepDive.Network
 
         public readonly NetworkVariable<bool> Swimming = new NetworkVariable<bool>();
         public readonly NetworkVariable<float> Oxygen = new NetworkVariable<float>();
+        public readonly NetworkVariable<float> OxygenCapacity = new NetworkVariable<float>();
         public readonly NetworkVariable<float> Health = new NetworkVariable<float>();
         public readonly NetworkVariable<bool> Passive = new NetworkVariable<bool>();
         public readonly NetworkVariable<ulong> LastActionRequestId = new NetworkVariable<ulong>();
@@ -293,6 +294,21 @@ namespace DeepDive.Network
             LastActionRequestId.Value = requestId;
         }
 
+        // Mert owns purchase/loadout state; Mehmet owns the diver stat effect. This method is
+        // host-only, player-scoped and recomputes from the serialized base so duplicate loadout
+        // delivery or save/load restoration can never stack the oxygen bonus.
+        public bool ApplyLoadoutServer(LoadoutState loadout, EquipmentDefinition[] equippedDefinitions)
+        {
+            if (!IsServer || vitals == null || loadout.PlayerId.Value != OwnerClientId) return false;
+            if (session != null && session.DiveActive) return false;
+
+            var resolved = DiverEquipmentRules.ResolveMaxOxygen(maxOxygen, new PlayerId(OwnerClientId),
+                loadout, equippedDefinitions);
+            var changed = vitals.SetMaxOxygen(resolved, refill: true);
+            PublishVitals();
+            return changed;
+        }
+
         public bool ApplyDamageServer(float amount)
         {
             if (!IsServer || vitals == null || session == null || !session.DiveActive) return false;
@@ -313,6 +329,7 @@ namespace DeepDive.Network
         {
             if (!IsServer || vitals == null) return;
             Oxygen.Value = vitals.Oxygen;
+            OxygenCapacity.Value = vitals.MaxOxygen;
             Health.Value = vitals.Health;
             Passive.Value = vitals.Passive;
             if (Passive.Value) input.ClearMotion();
@@ -360,7 +377,8 @@ namespace DeepDive.Network
                 if (lowOxygenLoop == null || lowOxygenLoop.clip == null) return;
             }
 
-            var warning = !Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= Mathf.Max(1f, maxOxygen) * lowOxygenFraction;
+            var capacity = OxygenCapacity.Value > 0f ? OxygenCapacity.Value : Mathf.Max(1f, maxOxygen);
+            var warning = !Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= capacity * lowOxygenFraction;
             if (warning && !lowOxygenLoop.isPlaying) lowOxygenLoop.Play();
             else if (!warning && lowOxygenLoop.isPlaying) lowOxygenLoop.Stop();
         }
@@ -383,9 +401,10 @@ namespace DeepDive.Network
         private void OnGUI()
         {
             if (!IsSpawned || !IsOwner) return;
-            var oxygenRatio = Mathf.Clamp01(Oxygen.Value / Mathf.Max(1f, maxOxygen));
+            var capacity = OxygenCapacity.Value > 0f ? OxygenCapacity.Value : Mathf.Max(1f, maxOxygen);
+            var oxygenRatio = Mathf.Clamp01(Oxygen.Value / capacity);
             var healthRatio = Mathf.Clamp01(Health.Value / Mathf.Max(1f, maxHealth));
-            GUI.Box(new Rect(20, 20, 230, 24), $"O2 {Oxygen.Value:0}/{maxOxygen:0} ({oxygenRatio * 100f:0}%)");
+            GUI.Box(new Rect(20, 20, 230, 24), $"O2 {Oxygen.Value:0}/{capacity:0} ({oxygenRatio * 100f:0}%)");
             GUI.Box(new Rect(20, 48, 230, 24), $"HEALTH {Health.Value:0}/{maxHealth:0} ({healthRatio * 100f:0}%)");
 
             var centerX = Screen.width * 0.5f;
@@ -399,7 +418,7 @@ namespace DeepDive.Network
             if (Time.unscaledTime < actionMessageUntil && actionCue == PlayerFeedbackCue.HarpoonHit)
                 GUI.Label(new Rect(centerX - 8, centerY - 12, 30, 30), "X");
 
-            if (!Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= Mathf.Max(1f, maxOxygen) * lowOxygenFraction)
+            if (!Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= capacity * lowOxygenFraction)
                 GUI.Box(new Rect(20, 78, 230, 28), "LOW OXYGEN - RETURN");
             if (Passive.Value)
                 GUI.Box(new Rect(centerX - 150, centerY + 45, 300, 40), "PASSIVE - DIVE ENDED FOR YOU");
