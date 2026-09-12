@@ -88,6 +88,11 @@ namespace DeepDive.Economy
             _catalog[definition.EquipmentId] = definition;
         }
 
+        // Read-only catalog access for Composition. Equipment ownership/economy remains here;
+        // the diver module consumes definitions only to recompute player stats.
+        public bool TryGetEquipmentDefinition(string equipmentId, out EquipmentDefinition definition) =>
+            _catalog.TryGetValue(equipmentId, out definition);
+
         public IReadOnlyList<string> LoadoutFor(PlayerId player) =>
             _loadout.TryGetValue(player, out var set) ? new List<string>(set) : Array.Empty<string>();
 
