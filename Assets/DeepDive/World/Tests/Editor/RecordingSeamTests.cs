@@ -152,4 +152,43 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(RecordingSampleRejection.OffFrame, turnedAway.Rejection);
         }
     }
+
+    // What a subject is filmed as decides who gets paid for it, so the fallback rule is pulled
+    // out of the component and tested on its own rather than only through a spawned fish.
+    public class RecordingSubjectIdTests
+    {
+        [Test]
+        public void AnExplicitIdWins()
+        {
+            // How a scripted event gets filmed without a FishActor of its own.
+            Assert.AreEqual("kelp_bloom", RecordingSubject.ResolveSubjectId("kelp_bloom", "sea_bass"));
+        }
+
+        [Test]
+        public void WithoutAnExplicitIdTheSpeciesIsUsed()
+        {
+            Assert.AreEqual("sea_bass", RecordingSubject.ResolveSubjectId("", "sea_bass"));
+            Assert.AreEqual("sea_bass", RecordingSubject.ResolveSubjectId(null, "sea_bass"));
+            Assert.AreEqual("sea_bass", RecordingSubject.ResolveSubjectId("   ", "sea_bass"));
+        }
+
+        // An id with stray whitespace would key the ledger and Mert's price lookup differently
+        // from the same id typed cleanly, so both sides are trimmed.
+        [Test]
+        public void SurroundingWhitespaceIsTrimmedFromEitherSource()
+        {
+            Assert.AreEqual("kelp_bloom", RecordingSubject.ResolveSubjectId("  kelp_bloom \n", null));
+            Assert.AreEqual("sea_bass", RecordingSubject.ResolveSubjectId(null, " sea_bass "));
+        }
+
+        // Empty is the misconfigured case: RecordingSession refuses to open a take on it and
+        // RecordingTake.IsPayable is false, so nothing unidentifiable can reach the economy.
+        [Test]
+        public void WithNeitherSourceTheSubjectIsUnidentifiable()
+        {
+            Assert.AreEqual("", RecordingSubject.ResolveSubjectId(null, null));
+            Assert.AreEqual("", RecordingSubject.ResolveSubjectId("", ""));
+            Assert.AreEqual("", RecordingSubject.ResolveSubjectId("  ", "  "));
+        }
+    }
 }

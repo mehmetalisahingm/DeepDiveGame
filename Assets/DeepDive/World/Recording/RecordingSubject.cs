@@ -72,6 +72,11 @@ namespace DeepDive.World
 
         public string SubjectId => resolvedSubjectId;
 
+        // What SubjectId will become once the host spawns this subject. Readable in the editor
+        // too, so DiveTestAreaRecordingSetup can log the id it just wired and the scene test can
+        // assert it without a live NetworkManager.
+        public string ExpectedSubjectId => ResolveSubjectId(subjectId, SpeciesIdOnThisObject());
+
         // Host-side reads for HUD feedback later, and for the tests that drive a spawned subject.
         public int OpenTakeCount => session == null ? 0 : session.OpenTakeCount;
 
@@ -99,7 +104,7 @@ namespace DeepDive.World
                 return;
             }
 
-            resolvedSubjectId = ResolveSubjectId();
+            resolvedSubjectId = ExpectedSubjectId;
             if (string.IsNullOrWhiteSpace(resolvedSubjectId))
             {
                 Debug.LogError($"P3_SUBJECT_INVALID object={name} reason=subjectId is empty", this);
@@ -122,14 +127,23 @@ namespace DeepDive.World
         }
 
         // The payout rule is per species, not per animal, so the id is the species id: two fish
-        // of the same kind are the same subject. Explicit inspector value wins, so a scripted
-        // event can be filmed without a FishActor.
-        private string ResolveSubjectId()
+        // of the same kind are the same subject. The explicit inspector value wins, which is how
+        // a scripted event gets filmed without a FishActor of its own.
+        //
+        // Static and taking plain strings so the rule is testable on its own: what a subject is
+        // filmed as decides who gets paid for it, and that is too important to be reachable only
+        // through a spawned NetworkObject. Empty means misconfigured, and TryStartTake refuses.
+        public static string ResolveSubjectId(string explicitId, string speciesId)
         {
-            if (!string.IsNullOrWhiteSpace(subjectId)) return subjectId.Trim();
+            if (!string.IsNullOrWhiteSpace(explicitId)) return explicitId.Trim();
+            return string.IsNullOrWhiteSpace(speciesId) ? "" : speciesId.Trim();
+        }
+
+        private string SpeciesIdOnThisObject()
+        {
             var fish = GetComponent<FishActor>();
             var species = fish == null ? null : fish.Species;
-            return species == null ? "" : species.SpeciesId;
+            return species == null ? null : species.SpeciesId;
         }
 
         public PlayerActionResult TryStartTake(PlayerId player, ulong requestId)
