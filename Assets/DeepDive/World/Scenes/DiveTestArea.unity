@@ -197,7 +197,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e7d33f1d915446419b14ede5d70f70f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.SafeReturnZone
 --- !u!1 &125103896
 GameObject:
@@ -415,6 +415,7 @@ GameObject:
   - component: {fileID: 311340449}
   - component: {fileID: 311340448}
   - component: {fileID: 311340447}
+  - component: {fileID: 311340451}
   m_Layer: 0
   m_Name: Fish_SeaBass
   m_TagString: Untagged
@@ -563,6 +564,26 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &311340451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 311340444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b99442eda19b2d4eb47ac81e4264a88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepDive.World::DeepDive.World.RecordingSubject
+  ShowTopMostFoldoutHeaderGroup: 1
+  subjectId: 
+  quality: {fileID: 11400000, guid: ebed57129c4e4cd48920ef205c40beb0, type: 2}
+  subjectRadiusMetres: 0.55
+  framingAnchor: {fileID: 0}
+  occluderLayers:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!1 &456863112
 GameObject:
   m_ObjectHideFlags: 0
