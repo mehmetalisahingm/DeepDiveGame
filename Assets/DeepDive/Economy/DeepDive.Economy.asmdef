@@ -1,5 +1,5 @@
 {
   "name": "DeepDive.Economy",
   "rootNamespace": "DeepDive.Economy",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Inventory"]
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Inventory", "Unity.Netcode.Runtime", "Unity.Collections"]
 }
