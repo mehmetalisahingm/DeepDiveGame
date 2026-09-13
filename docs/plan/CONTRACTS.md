@@ -55,8 +55,8 @@ Bu tablo uygulama sahipliğidir. Kullanıcı atamasıyla görsel/ses üretimi, k
 | ItemDefinition | Sabit itemId, kategori, kapasite/fiyatla ilgili temel tanımlar | Mert; Utku tür eşlemesini inceler → tümü | P2 |
 | CaptureResult | captureId, diveId, speciesId, ağırlık, varsa kalite, av nesnesi kimliği | Utku → Mert | P2 |
 | InventoryState | playerId, itemInstanceId listesi, mevcut ağırlık, kapasite, revision | Mert → Mehmet/UI | P2 |
-| RecordingCandidate | requestId, diveId, playerId, hedef kimliği, başlat/bitir bilgisi | Mehmet → Utku | P3 |
-| RecordingResult | recordingId, diveId, playerId, tür/olay kimliği, kalite, geçerli süre | Utku → Mert/Mehmet | P3 |
+| RecordingCandidate | requestId, diveId, playerId, hostun çözdüğü IRecordingTarget bileşeni; Start/Stop ayrı metot, istemci süresi yok | Mehmet → Utku | P3 |
+| RecordingResult | recordingId, diveId, playerId, tür/olay kimliği, kalite kademesi (0 ödülsüz, 1–4 Bronze/Silver/Gold/Platinum), hostun ölçtüğü geçerli süre | Utku → Mert/Mehmet | P3 |
 | EquipmentDefinition | equipmentId, yuva, seviye, etkiler; para/alış fiyatının sahibi Mert | Mert → Mehmet | P3 |
 | LoadoutState | playerId, takılı equipmentInstanceId değerleri ve revision | Mert → Mehmet | P3 |
 | DiveSummary | Güvenli dönenler, korunan av/çekim kimlikleri, kayıplar ve kontrol noktası kimliği | Mert → Mehmet/Utku/UI | P2; parasal alanlar P3 |
@@ -95,10 +95,17 @@ Utku'nun av tüketme işlemi, Mert eklemeyi kabul etmeden çalıştırılamaz. B
 2. Utku ev sahibinde kayıt aralığı, görüş hattı, hedefin etkinliği, mesafe ve kadraj koşullarını denetler.
 3. Kalite, doğrulanmış örneklerden hesaplanır. İstemcinin "kalite=100" veya "süre=60" beyanı ödül kaynağı değildir.
 4. İlk sürüm önerisi: aynı dalışta aynı tür/olay için ekip çapında yalnızca en iyi geçerli kayıt ödüle aday kalır; farklı oyuncuların aynı hedefi kaydetmesi çoğaltma yaratmaz.
-5. Mert yalnızca güvenli dönmüş uygun kayıtları ödeme adayına dönüştürür. Kayıt sahibinin başarısızlığı durumunda sonraki en iyi güvenli kayıt seçimi veya ödülsüz kalma kuralı P3 işlerine başlamadan kesinleştirilir.
+5. Oyuncu/tür-olay başına en iyi kayıt saklanır. En iyi kaydın sahibi güvenli dönemezse sonraki en iyi güvenli kayıt seçilir. Dalış/tür-olay başına yalnız tek kayıt ödüllendirilir.
 6. Bir kayıt ödendiğinde yeniden değerlendirme isteği ikinci ödeme oluşturmaz.
 
 Kalite eşikleri ve fiyat katsayıları Utku/Mert'in ortak veri tablosunda tutulur. Utku kaliteyi, Mert krediyi belirler.
+
+13 Eylül 2026 Composition bağlantısı:
+- `RecordingWorldBinding`, hostta `RecordingEvaluation.Bind(RecordingDirector)` ve oyuncu bazında `RecorderViews` adaptörlerini kurar. Misafirin bakışı hostun doğruladığı input yaw/pitch değerlerinden gelir; hostta kapalı olan misafir kamerasının dönüşü kullanılmaz.
+- `DiveContext` sahibi mevcut `DiveInventoryBinding` olarak kalır. Dalış bitince kamera/evaluation bağlantıları bırakılır; yeni dalış yeni Director kullanır. Stop, Start'ta kilitlenen hedefi kullanır.
+- `IsPayable` ve tekrar kayıt koruması Director içindedir; Composition Stop sırasında para ödemez. `InventoryManager.OnDiveSummaryReady` geldiğinde `Director.SettleDive(summary)` ödeme hattına iletilir.
+- **Ödeme backend'i henüz eksik:** mevcut `EconomyManager.PriceFor` yalnız av fiyatıdır; çekim fiyatı/ödeme API'si değildir. Mert'in gerçek, tekrar ödemeyen kayıt API'si hazır olunca `RecordingWorldBinding.SetPaymentHandler(Func<RecordingResult, PlayerActionResult>)` ile bağlanır. Yalnız gerçek kredi işlemi `Accepted` döndürür. Sayısal fiyatlar Mert'in sorumluluğundadır.
+- Ödeme handler'ı yokken `RecordingClaim` bilinçli olarak unbound kalır; sonuçlar sıfır krediyle ödenmiş sayılmaz. Dalış özetiyle bekletilen kayıtlar aynı oturumda handler sonradan bağlanınca işlenebilir, aktif sonraki dalışa karışmaz. Oturum kapanınca temizlenir; kalıcı kayıt henüz bu bağlantının kapsamında değildir.
 
 ### Satın alma ve ekipman etkisi
 

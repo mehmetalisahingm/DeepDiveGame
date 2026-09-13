@@ -47,6 +47,17 @@ namespace DeepDive.Composition
         private string localStatus = string.Empty;
         private float localStatusUntil;
 
+        public bool IsRecordingLocal => localRecording;
+
+        // Same owner intent used by keyboard input and opt-in multiplayer smoke tests.
+        public void ToggleRecordingLocal()
+        {
+            var player = LocalPlayer();
+            if (player == null || adapter.Session.State.Phase != SessionPhase.Dive) return;
+            cameraMode = true;
+            SubmitLocal(player);
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
         {
@@ -75,11 +86,19 @@ namespace DeepDive.Composition
             {
                 cameraMode = false;
                 localRecording = false;
+                localRecordingTarget = 0;
+                localRequestSequence = localLastAppliedRequest = 0;
+                lastRequestByPlayer.Clear();
+                activeTargetByPlayer.Clear();
                 return;
             }
 
-            if (adapter.IsAuthority && adapter.Session.State.Phase != SessionPhase.Dive)
+            if (adapter.Session.State.Phase != SessionPhase.Dive)
+            {
+                cameraMode = localRecording = false;
+                localRecordingTarget = 0;
                 activeTargetByPlayer.Clear();
+            }
 
             var player = LocalPlayer();
             if (player == null) return;
@@ -96,7 +115,7 @@ namespace DeepDive.Composition
             }
 
             if (Application.isFocused && cameraMode && Input.GetKeyDown(KeyCode.R))
-                SubmitLocal(player);
+                ToggleRecordingLocal();
         }
 
         private void EnsureMessaging()
@@ -204,7 +223,8 @@ namespace DeepDive.Composition
 
         private void RequestReceived(ulong sender, FastBufferReader reader)
         {
-            if (!adapter.IsAuthority || reader.Length > 64) return;
+            // NGO's named-message reader still includes its already-consumed name hash.
+            if (!adapter.IsAuthority || reader.Length > 64 || !reader.TryBeginRead(18)) return;
             reader.ReadValueSafe(out ulong requestId);
             reader.ReadValueSafe(out byte commandByte);
             reader.ReadValueSafe(out bool hasTarget);
@@ -285,6 +305,9 @@ namespace DeepDive.Composition
                 else
                     activeTargetByPlayer.Remove(sender);
             }
+            else if (command == RecordingCommand.Stop &&
+                (result == PlayerActionResult.InvalidTarget || result == PlayerActionResult.InvalidState))
+                activeTargetByPlayer.Remove(sender); // a destroyed target must not lock REC forever
 
             SendResult(sender, requestId, command, result);
         }
@@ -311,7 +334,7 @@ namespace DeepDive.Composition
 
         private void ResultReceived(ulong sender, FastBufferReader reader)
         {
-            if (adapter.IsAuthority || sender != NetworkManager.ServerClientId || reader.Length > 64) return;
+            if (adapter.IsAuthority || sender != NetworkManager.ServerClientId || reader.Length > 64 || !reader.TryBeginRead(22)) return;
             reader.ReadValueSafe(out ulong requestId);
             reader.ReadValueSafe(out byte commandByte);
             reader.ReadValueSafe(out int resultInt);

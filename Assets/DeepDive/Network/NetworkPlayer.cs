@@ -67,6 +67,18 @@ namespace DeepDive.Network
         private float gravityVelocity;
         private double nextInputTime;
 
+        public Vector3 RecordingEyePosition => viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
+        public float RecordingFieldOfView => viewCamera != null ? viewCamera.fieldOfView : 60f;
+        public Vector3 RecordingForwardServer
+        {
+            get
+            {
+                if (!IsServer) return Vector3.zero;
+                var frame = input.Read(Time.realtimeSinceStartupAsDouble);
+                return Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
+            }
+        }
+
         public override void OnNetworkSpawn()
         {
             controller = GetComponent<CharacterController>();
@@ -155,6 +167,8 @@ namespace DeepDive.Network
         public void SubmitLocalInput(Vector3 move, float lookYaw, float lookPitch)
         {
             if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
+            yaw = lookYaw;
+            pitch = lookPitch;
             var frame = new PlayerInputFrame { Sequence = ++sequence, Move = move, Yaw = lookYaw, Pitch = lookPitch };
             if (IsServer) input.Accept(frame, Time.realtimeSinceStartupAsDouble);
             else MoveRpc(frame);
