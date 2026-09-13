@@ -36,9 +36,16 @@ Plan 1.8 — 13 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Meh
 
 | Görev | Sahip | Durum | GitHub |
 |---|---|---|---|
-| P3-A | Mehmet | Kamera/tüp birleşti (#38); World bağlantısı incelemeye hazır, gerçek kayıt ödeme API'si bekleniyor | [#34 — Kamera kaydı, kadraj ve tüp etkisi](https://github.com/mehmetalisahingm/DeepDiveGame/issues/34) |
+| P3-A | Mehmet | Kamera/kadraj/tüp (#38) ve World bağlantısı (#41) birleşti; ödeme bağlantısı ve diskten yükleme sonrası tüp testi P3-C API'lerini bekliyor | [#34 — Kamera kaydı, kadraj ve tüp etkisi](https://github.com/mehmetalisahingm/DeepDiveGame/issues/34) |
 | P3-B | Utku | Çekim değerlendirmesi ve sahne bağlantısı birleşti (#40); özel olay açık | [#35 — Kayıt kalitesi, hedef tanıma ve özel olay](https://github.com/mehmetalisahingm/DeepDiveGame/issues/35) |
-| P3-C | Mert | AÇIK | [#36 — Satış, ortak para, dükkân ve kayıt](https://github.com/mehmetalisahingm/DeepDiveGame/issues/36) |
+| P3-C | Mert | Ekonomi çekirdeği (#37) ve para/alışveriş sonucu göstergesi (#39) entegre; kayıt ödemesi/fiyatlar, gerçek alışveriş isteği/UI ve save/load açık | [#36 — Satış, ortak para, dükkân ve kayıt](https://github.com/mehmetalisahingm/DeepDiveGame/issues/36) |
+
+### Sıradaki somut işler
+
+- Mehmet'in bağımsız kamera, kadraj, kayıt kontrolü, host kamera adaptörü ve tüp etkisi kodu hazır. Bağlantı: `RecordingWorldBinding.SetPaymentHandler(Func<RecordingResult, PlayerActionResult>)`; Mert'in gerçek kayıt ödeme metodu olmadan sahte ödeme/fiyat eklenmez.
+- Mert kayıt ödeme API'sini ve kalite 1–4 fiyatlarını teslim edince Mehmet bu metodu bağlayıp gerçek kredi artışını doğrular. Mert save/load teslim edince Mehmet yeniden açılan oyunda tüp etkisini ve doğru oyuncuyu doğrular. Bu iki kontrol henüz tamamlanmış sayılmaz; #34 açık kalır.
+- Utku özel olayı ve temel işaretini tamamlar. Mert gerçek alışveriş akışını ve kalıcı kaydı tamamlar. Üç kişi ardından tam döngü/ortak oynama testini yapar; P4 açılmaz.
+- Entegrasyon ve yerel test kaydı: [P3-A-INTEGRATION.md](../reports/P3-A-INTEGRATION.md). Yeni prefab düzeni `DeepDive-P3-3` gerektirir; test eden herkes aynı güncel build'i kullanır.
 
 ## P3 hedefi
 

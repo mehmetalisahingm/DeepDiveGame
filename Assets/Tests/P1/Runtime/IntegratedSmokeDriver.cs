@@ -25,8 +25,10 @@ namespace DeepDive.P1.Lab
             public bool passed, connected, roster, ready, prep, dive, returned, readyReset;
             public bool walk, swim, collisions, cameras, stopped, clientRejoined;
             public bool fishMoved, catchObserved, catchDespawned, inventoryAdded;
+            public bool huntShooter, inventoryReplicated;
             public bool recordingStarted, recordingStopped, recordingClaimed, recordingViews, recordingPending;
             public bool recordingViewActive, recordingSafe;
+            public bool recordingRoleResolved, recordingRecorder;
             public float recordingValidSeconds;
             public int recordingQuality;
             public int maxPlayers;
@@ -145,8 +147,12 @@ namespace DeepDive.P1.Lab
             result.passed = result.connected && result.roster && result.ready && result.prep && result.dive && result.returned &&
                 result.readyReset && result.walk && result.swim && result.collisions && result.cameras && result.stopped &&
                 (!rejoin || result.clientRejoined) && result.errors.Count == 0;
-            if (Hunt) result.passed &= result.fishMoved && result.catchObserved && result.catchDespawned && (!host || result.inventoryAdded);
-            if (Record) result.passed &= result.recordingStarted && result.recordingStopped &&
+            if (Hunt) result.passed &= result.fishMoved && result.catchObserved && result.catchDespawned &&
+                (!host || result.inventoryAdded) && (!result.huntShooter || result.inventoryReplicated);
+            // This scenario assigns ONE guest to record. Bystanders still must pass every
+            // roster/movement/scene assertion, but must not be required to send recording input.
+            if (Record) result.passed &= result.recordingRoleResolved &&
+                (!(host || result.recordingRecorder) || (result.recordingStarted && result.recordingStopped)) &&
                 (!host || (result.recordingClaimed && result.recordingViews && result.recordingPending && result.recordingSafe));
             Finish();
         }
@@ -196,6 +202,8 @@ namespace DeepDive.P1.Lab
             var subject = FindFirstObjectByType<RecordingSubject>();
             if (subject == null || !subject.IsSpawned) return;
             var recorder = players.Length == 1 ? local.OwnerClientId : players.Where(p => p.OwnerClientId != 0).Min(p => p.OwnerClientId);
+            result.recordingRoleResolved = true;
+            result.recordingRecorder = local.OwnerClientId == recorder;
             var world = adapter.GetComponent<RecordingWorldBinding>();
             if (adapter.IsAuthority)
             {
@@ -238,6 +246,12 @@ namespace DeepDive.P1.Lab
         {
             // Real owner inputs/RPCs, live fish AI and real inventory; no injected catch.
             var shooter = players.Length == 1 ? local.OwnerClientId : players.Where(p => p.OwnerClientId != 0).Min(p => p.OwnerClientId);
+            result.huntShooter = local.OwnerClientId == shooter;
+            if (result.huntShooter)
+            {
+                var bagSync = local.GetComponent<InventoryPlayerSync>();
+                result.inventoryReplicated |= bagSync != null && bagSync.BagItemCount.Value == 1 && bagSync.BagWeightGrams.Value > 0;
+            }
             if (adapter.IsAuthority && adapter.GetComponent<InventoryManager>().Bags.TryGetValue(new PlayerId(shooter), out var bag))
                 result.inventoryAdded |= bag.Items.Count == 1;
             var fish = FindFirstObjectByType<FishActor>();

@@ -2,7 +2,7 @@ param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Captur
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe'
-if (-not (Test-Path -LiteralPath $p1Build)) { throw 'Build-P1.ps1 -ConnectScenes calistirin.' }
+if (-not (Test-Path -LiteralPath $p1Build)) { throw 'Build-P1.ps1 -Integrated calistirin.' }
 $p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
 New-Item -ItemType Directory -Path $p1Run | Out-Null
 $p1Processes = [System.Collections.Generic.List[object]]::new()
