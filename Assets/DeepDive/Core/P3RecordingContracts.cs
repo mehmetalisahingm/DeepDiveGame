@@ -34,10 +34,10 @@ namespace DeepDive.Core.Contracts
         }
     }
 
-    // Temporary Composition seam until P3-B's concrete RecordingSession is wired. Start/Stop are
+    // Composition seam for P3-B's RecordingDirector. Start/Stop are
     // deliberately separate: the host owns elapsed time, and Stop must reuse the target locked at
-    // Start instead of performing a second raycast. When P3-B's richer stop result is connected,
-    // Composition must inspect its IsPayable flag before forwarding anything to economy.
+    // Start instead of performing a second raycast. Director owns the IsPayable check and
+    // only settles the resulting ledger after DiveSummary; Composition must not pay on Stop.
     public interface IRecordingEvaluationSink
     {
         PlayerActionResult TryStart(RecordingCandidate candidate);

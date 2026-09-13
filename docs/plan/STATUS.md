@@ -1,6 +1,6 @@
 # Güncel durum ve görev takibi
 
-Plan 1.8 — 11 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Mehmet**.
+Plan 1.8 — 13 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Mehmet**.
 
 ## Mevcut sınır
 
@@ -36,8 +36,8 @@ Plan 1.8 — 11 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Meh
 
 | Görev | Sahip | Durum | GitHub |
 |---|---|---|---|
-| P3-A | Mehmet | AÇIK | [#34 — Kamera kaydı, kadraj ve tüp etkisi](https://github.com/mehmetalisahingm/DeepDiveGame/issues/34) |
-| P3-B | Utku | AÇIK | [#35 — Kayıt kalitesi, hedef tanıma ve özel olay](https://github.com/mehmetalisahingm/DeepDiveGame/issues/35) |
+| P3-A | Mehmet | Kamera/tüp birleşti (#38); World bağlantısı incelemeye hazır, gerçek kayıt ödeme API'si bekleniyor | [#34 — Kamera kaydı, kadraj ve tüp etkisi](https://github.com/mehmetalisahingm/DeepDiveGame/issues/34) |
+| P3-B | Utku | Çekim değerlendirmesi ve sahne bağlantısı birleşti (#40); özel olay açık | [#35 — Kayıt kalitesi, hedef tanıma ve özel olay](https://github.com/mehmetalisahingm/DeepDiveGame/issues/35) |
 | P3-C | Mert | AÇIK | [#36 — Satış, ortak para, dükkân ve kayıt](https://github.com/mehmetalisahingm/DeepDiveGame/issues/36) |
 
 ## P3 hedefi
