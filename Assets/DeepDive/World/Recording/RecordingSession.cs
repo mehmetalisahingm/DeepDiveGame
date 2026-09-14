@@ -68,11 +68,17 @@ namespace DeepDive.World
 
         private readonly Dictionary<ulong, OpenTake> open = new Dictionary<ulong, OpenTake>();
         private readonly IReadOnlyList<QualityTier> tiers;
+        private readonly IRecordingWindow window;
 
-        public RecordingSession(string subjectId, IReadOnlyList<QualityTier> tiers)
+        // A null window means the subject is always filmable, which is every fish: only a
+        // special event is filmable for part of a dive. Passing the window in rather than
+        // asking some registry for it keeps the whole rule testable with a one-line fake.
+        public RecordingSession(string subjectId, IReadOnlyList<QualityTier> tiers,
+            IRecordingWindow window = null)
         {
             SubjectId = subjectId;
             this.tiers = tiers;
+            this.window = window;
         }
 
         // The species/event id that ends up in RecordingResult.SubjectId, so two fish of the
@@ -82,6 +88,11 @@ namespace DeepDive.World
         public int OpenTakeCount => open.Count;
 
         public bool IsRecording(PlayerId player) => open.ContainsKey(player.Value);
+
+        // A subject with no window is always filmable; one with a window is filmable only while
+        // it says so. Read live rather than cached: the window closes on the host's clock while
+        // takes are open, and this is what both TryStart and Tick consult at that moment.
+        private bool IsWindowShut => window != null && !window.IsOpen;
 
         // Host-side progress read, for HUD feedback later. Zero for a player with no open take.
         public float ValidSecondsFor(PlayerId player) =>
@@ -110,6 +121,13 @@ namespace DeepDive.World
             if (open.ContainsKey(player.Value))
                 return Remember(player, requestId, PlayerActionResult.InvalidState);
 
+            // The subject is not filmable at this moment - the event has not started, or it is
+            // already over. InvalidTarget rather than InvalidState because it is the thing being
+            // aimed at that is unavailable, not the request. Not remembered, for the same reason
+            // the missing-dive refusal above is not: the condition is temporary, and the diver
+            // who pressed record a second too early must succeed once the window opens.
+            if (IsWindowShut) return PlayerActionResult.InvalidTarget;
+
             open[player.Value] = new OpenTake { DiveId = diveId };
             return Remember(player, requestId, PlayerActionResult.Accepted);
         }
@@ -119,6 +137,14 @@ namespace DeepDive.World
         public void Tick(PlayerId player, float deltaTime, RecordingSample sample)
         {
             if (!open.TryGetValue(player.Value, out var openTake)) return;
+
+            // Mehmet, 14 September 2026: when the event's window closes, "kazanilmis gecerli sure
+            // KORUNUR, yeni sure eklenmez". So this returns instead of aborting - the take stays
+            // open with every second it already earned, and stopping it later still grades those
+            // seconds. Dropping the take here would be the other door, and it is the wrong one:
+            // a diver who filmed eight good seconds has earned them.
+            if (IsWindowShut) return;
+
             if (float.IsNaN(deltaTime) || float.IsInfinity(deltaTime) || deltaTime <= 0f) return;
             if (!sample.IsValid) return;
 

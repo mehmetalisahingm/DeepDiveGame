@@ -4,6 +4,8 @@ Plan 1.8 — 13 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Meh
 
 ## Mevcut sınır
 
+14 Eylül ara teslim: özel olay Adım 6 ve #44 ekonomi entegrasyonu ayrı çalışma dalında; son EditMode **356/356 PASS**. Ortak dala merge ve P3 kapanışı değildir. Güncel yapılan/kalan listesi: [P3-WIP-HANDOFF.md](../reports/P3-WIP-HANDOFF.md). Aşağıdaki PR tablosu ortak dalda daha önce birleşen durumu gösterir.
+
 - P0 kapalı.
 - P1 kullanıcı kararıyla kapalı.
 - P2 kullanıcı faz kabulüyle kapalı. Kapanış kaydı: [`P2-GAMEPLAY-VALIDATION.md`](../reports/P2-GAMEPLAY-VALIDATION.md).

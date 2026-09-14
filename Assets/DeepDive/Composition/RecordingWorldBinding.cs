@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
+using DeepDive.Economy;
 using DeepDive.Inventory;
 using DeepDive.Network;
 using DeepDive.World;
@@ -16,6 +17,7 @@ namespace DeepDive.Composition
         private SessionNetworkAdapter adapter;
         private NetworkManager manager;
         private InventoryManager inventory;
+        private EconomyManager economy;
         private RecordingDiveBinding binding;
         private readonly Dictionary<PlayerId, NetworkRecorderView> views = new Dictionary<PlayerId, NetworkRecorderView>();
         public RecordingDiveBinding Binding => binding;
@@ -39,18 +41,27 @@ namespace DeepDive.Composition
             adapter = GetComponent<SessionNetworkAdapter>();
             manager = GetComponent<NetworkManager>();
             inventory = GetComponent<InventoryManager>();
+            economy = GetComponent<EconomyManager>();
             if (adapter == null || manager == null || inventory == null) return;
             binding = new RecordingDiveBinding(adapter.Session, inventory,
                 () => isActiveAndEnabled && adapter.IsAuthority && manager.IsListening);
-            // DiveContext remains owned by the existing DiveInventoryBinding.
+            BindPayment();
         }
 
         public void SetPaymentHandler(Func<RecordingResult, PlayerActionResult> handler) =>
             binding?.SetPaymentHandler(handler);
 
+        private void BindPayment()
+        {
+            if (binding == null) return;
+            if (economy == null) economy = GetComponent<EconomyManager>();
+            binding.SetPaymentHandler(economy != null ? economy.TryRewardRecording : null);
+        }
+
         private void Update()
         {
             if (binding == null) return;
+            BindPayment();
             binding.Refresh();
             if (!binding.IsActive) { views.Clear(); return; }
             var live = new HashSet<PlayerId>();
@@ -86,8 +97,6 @@ namespace DeepDive.Composition
         public bool IsActive => Player != null && Player.IsSpawned && Player.IsServer && !Player.Passive.Value &&
             Player.Swimming.Value && activeDive() &&
             inventory.Bags.TryGetValue(new PlayerId(Player.OwnerClientId), out var bag) && !bag.SafelyReturned;
-        // The remote player's Unity Camera is disabled on the host; its Transform.rotation
-        // therefore is NOT the remote look. Read the server-validated yaw/pitch instead.
         public Vector3 EyePosition => Player.RecordingEyePosition;
         public Vector3 EyeForward => Player.RecordingForwardServer;
         public float VerticalFieldOfViewDegrees => Player.RecordingFieldOfView;

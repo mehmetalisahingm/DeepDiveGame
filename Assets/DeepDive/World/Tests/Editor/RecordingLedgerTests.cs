@@ -208,6 +208,12 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(0, paid.Count);
             Assert.AreEqual(1, economy.Calls, "a refusal is Mert's decision, not the runner-up's turn");
             Assert.AreEqual(Bob, economy.Claims[0].PlayerId);
+            Assert.IsFalse(ledger.IsSettled, "Missing price/save failure must not consume the recording");
+            var originalId = economy.Claims[0].RecordingId;
+            economy.Answer = PlayerActionResult.Accepted;
+            Assert.AreEqual(1, ledger.Settle(economy, Dive, Surfaced(Alice, Bob)).Count);
+            Assert.AreEqual(originalId, economy.Claims[1].RecordingId, "Retries keep the same payment ID");
+            Assert.IsTrue(ledger.IsSettled);
         }
 
         [Test]

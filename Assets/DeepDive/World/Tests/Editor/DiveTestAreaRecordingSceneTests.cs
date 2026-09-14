@@ -56,7 +56,8 @@ namespace DeepDive.World.Tests
         private RecordingSubject SingleSubject()
         {
             var subjects = FindAll<RecordingSubject>(scene);
-            Assert.AreEqual(1, subjects.Count, "DiveTestArea must hold exactly one RecordingSubject");
+            subjects.RemoveAll(subject => subject.GetComponent<FishActor>() == null);
+            Assert.AreEqual(1, subjects.Count, "DiveTestArea must hold exactly one fish RecordingSubject");
             return subjects[0];
         }
 

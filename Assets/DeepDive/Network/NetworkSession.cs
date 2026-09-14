@@ -18,7 +18,7 @@ namespace DeepDive.Network
         // Older P2 builds used DeepDive-P1-2, which allowed different scene/prefab layouts to
         // connect and then fail during NGO in-scene NetworkObject synchronization.
         // P3-3 adds EconomyPlayerSync to NetworkDiver; P3-2 has a different behaviour layout.
-        public const string Protocol = "DeepDive-P3-3";
+        public const string Protocol = "DeepDive-P3-4";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;

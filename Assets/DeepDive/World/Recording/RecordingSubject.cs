@@ -112,7 +112,14 @@ namespace DeepDive.World
             }
 
             tuning = quality.Framing;
-            session = new RecordingSession(resolvedSubjectId, quality.Tiers);
+
+            // A subject that is only filmable part of the time carries its window on the same
+            // object - SpecialEventRunner. A fish has none, so this is null and the session
+            // treats the subject as always filmable. Same idiom as reading the species off a
+            // FishActor beside us: what this object is made of decides how it behaves, and no
+            // wiring step can be forgotten.
+            session = new RecordingSession(resolvedSubjectId, quality.Tiers,
+                GetComponent<IRecordingWindow>());
         }
 
         // A despawned subject cannot be filmed any further, and there is no half-recording to

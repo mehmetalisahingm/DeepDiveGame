@@ -25,6 +25,8 @@ namespace DeepDive.World
         // delivered twice ("a retried event delivery"); this is the same guard on the side that
         // decides who to pay, so a repeat cannot pay a second time.
         public bool IsSettled { get; private set; }
+        private readonly Dictionary<string, RecordingResult> pendingResults = new Dictionary<string, RecordingResult>();
+        private readonly HashSet<string> paidSubjects = new HashSet<string>();
 
         public int Count => best.Count;
 
@@ -69,8 +71,10 @@ namespace DeepDive.World
             }
 
             var paid = new List<RecordingResult>();
+            var retryRequired = false;
             foreach (var subject in SubjectsInOrder(diveId, out var bySubject))
             {
+                if (paidSubjects.Contains(subject)) continue;
                 var candidates = bySubject[subject];
                 candidates.Sort((left, right) => Compare(right, left)); // best first
 
@@ -81,9 +85,16 @@ namespace DeepDive.World
                     // rule; their take is simply lost with the rest of their dive.
                     if (!safe.Contains(candidate.PlayerId.Value)) continue;
 
-                    var result = new RecordingResult(NewRecordingId(), diveId, candidate.PlayerId,
-                        candidate.SubjectId, candidate.Quality, candidate.ValidSeconds);
-                    if (sink.TryClaim(result) == PlayerActionResult.Accepted) paid.Add(result);
+                    if (!pendingResults.TryGetValue(subject, out var result))
+                        pendingResults[subject] = result = new RecordingResult(NewRecordingId(), diveId, candidate.PlayerId,
+                            candidate.SubjectId, candidate.Quality, candidate.ValidSeconds);
+                    var answer = sink.TryClaim(result);
+                    if (answer == PlayerActionResult.Accepted || answer == PlayerActionResult.DuplicateRequest)
+                    {
+                        paidSubjects.Add(subject);
+                        if (answer == PlayerActionResult.Accepted) paid.Add(result);
+                    }
+                    else retryRequired = true;
 
                     // One payment per subject per dive, whether the economy took it or refused
                     // it. A refusal is Mert's decision about this dive, not a reason to hand the
@@ -92,7 +103,7 @@ namespace DeepDive.World
                 }
             }
 
-            IsSettled = true;
+            IsSettled = !retryRequired;
             return paid;
         }
 
@@ -101,6 +112,8 @@ namespace DeepDive.World
         public void Reset()
         {
             best.Clear();
+            pendingResults.Clear();
+            paidSubjects.Clear();
             IsSettled = false;
         }
 
