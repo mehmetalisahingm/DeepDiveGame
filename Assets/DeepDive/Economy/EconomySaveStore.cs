@@ -83,7 +83,6 @@ namespace DeepDive.Economy
                 var json = JsonUtility.ToJson(economy.ExportSaveData(campaignId, checkpointId), true);
                 File.WriteAllText(temp, json);
 
-                // Verify the temporary file before replacing the last completed checkpoint.
                 var verified = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(temp));
                 if (verified == null || verified.SchemaVersion != EconomySaveData.CurrentSchemaVersion)
                     throw new InvalidDataException("save verification failed");
@@ -118,7 +117,6 @@ namespace DeepDive.Economy
             if (TryLoadPath(SavePath)) return true;
             if (File.Exists(BackupPath) && TryLoadPath(BackupPath)) return true;
 
-            // No save is a valid first launch; only report an error when a candidate existed.
             if (!File.Exists(SavePath) && !File.Exists(BackupPath))
             {
                 LastError = "";
@@ -133,9 +131,14 @@ namespace DeepDive.Economy
             try
             {
                 var data = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(path));
-                if (data == null || !economy.TryRestore(data)) return Fail("invalid or unsupported save");
+                if (data == null) return Fail("invalid save json");
 
                 restoring = true;
+                if (!economy.TryRestore(data))
+                {
+                    restoring = false;
+                    return Fail("invalid or unsupported save");
+                }
                 campaignId = string.IsNullOrWhiteSpace(data.CampaignId) ? campaignId : data.CampaignId;
                 checkpointId = data.CheckpointId ?? "";
                 restoring = false;
