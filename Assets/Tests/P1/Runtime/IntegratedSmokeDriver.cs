@@ -9,6 +9,7 @@ using DeepDive.Network;
 using DeepDive.Session;
 using DeepDive.World;
 using DeepDive.Inventory;
+using DeepDive.Economy;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -25,6 +26,13 @@ namespace DeepDive.P1.Lab
             public bool passed, connected, roster, ready, prep, dive, returned, readyReset;
             public bool walk, swim, collisions, cameras, stopped, clientRejoined;
             public bool fishMoved, catchObserved, catchDespawned, inventoryAdded;
+            public bool huntShooter, inventoryReplicated;
+            public bool recordingStarted, recordingStopped, recordingClaimed, recordingViews, recordingPending;
+            public bool recordingViewActive, recordingSafe;
+            public bool recordingRoleResolved, recordingRecorder;
+            public bool recordingPaid, eventOpened, eventClosed, tubePurchased, saveLoaded;
+            public float recordingValidSeconds;
+            public int recordingQuality;
             public int maxPlayers;
             public List<string> errors = new List<string>();
         }
@@ -36,6 +44,10 @@ namespace DeepDive.P1.Lab
         private float nextAction;
         private Vector3? firstFishPosition;
         private bool Hunt => Arg("-p2-hunt") == "1";
+        private bool Event => Arg("-p3-event") == "1";
+        private bool Record => Arg("-p3-record") == "1" || Event;
+        private bool purchaseSent;
+        private float recordingStartTime;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -70,7 +82,7 @@ namespace DeepDive.P1.Lab
             bool prepSent = false, diveSent = false, returnSent = false, lobbySent = false, leaveSent = false;
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             var leaveAt = 0f;
-            var duration = Hunt ? 58f : 46f;
+            var duration = Event ? 106f : Hunt || Record ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -118,9 +130,25 @@ namespace DeepDive.P1.Lab
                 if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep)
                 { diveSent = true; GameObject.Find("BeginDiveButton").GetComponent<Button>().onClick.Invoke(); }
                 result.dive |= state.Phase == SessionPhase.Dive && SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene;
-                if (host && elapsed > (Hunt ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (Record && host && state.Phase == SessionPhase.Return)
+                    result.recordingPending |= adapter.GetComponent<RecordingWorldBinding>().Binding.PendingDiveCount == 1;
+                if (host && Event && state.Phase == SessionPhase.Return)
+                {
+                    var economy = adapter.GetComponent<EconomyManager>();
+                    var local = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsOwner && p.IsSpawned);
+                    if (local != null && economy.SharedBalance >= 100 && !purchaseSent)
+                    { purchaseSent = true; local.GetComponent<EconomyPlayerSync>().RequestPurchase("tube-1"); }
+                    if (local != null && local.OxygenCapacity.Value >= 150 && economy.LoadoutFor(new PlayerId(0)).Contains("tube-1"))
+                    {
+                        result.tubePurchased = true;
+                        if (!result.saveLoaded) result.saveLoaded = adapter.GetComponent<EconomySaveStore>().LoadNow();
+                    }
+                }
+                if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
+                    result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
+                if (host && elapsed > (Event ? 92 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Event ? 96 : Hunt || Record ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -128,7 +156,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Event ? 102 : Hunt || Record ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -137,7 +165,14 @@ namespace DeepDive.P1.Lab
             result.passed = result.connected && result.roster && result.ready && result.prep && result.dive && result.returned &&
                 result.readyReset && result.walk && result.swim && result.collisions && result.cameras && result.stopped &&
                 (!rejoin || result.clientRejoined) && result.errors.Count == 0;
-            if (Hunt) result.passed &= result.fishMoved && result.catchObserved && result.catchDespawned && (!host || result.inventoryAdded);
+            if (Hunt) result.passed &= result.fishMoved && result.catchObserved && result.catchDespawned &&
+                (!host || result.inventoryAdded) && (!result.huntShooter || result.inventoryReplicated);
+            // This scenario assigns ONE guest to record. Bystanders still must pass every
+            // roster/movement/scene assertion, but must not be required to send recording input.
+            if (Record) result.passed &= result.recordingRoleResolved &&
+                (!(host || result.recordingRecorder) || (result.recordingStarted && result.recordingStopped)) &&
+                (!host || (result.recordingClaimed && result.recordingViews && result.recordingPaid && result.recordingSafe));
+            if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             Finish();
         }
 
@@ -158,9 +193,12 @@ namespace DeepDive.P1.Lab
             {
                 nextInput = Time.realtimeSinceStartupAsDouble + 1.0 / 30;
                 var move = scene == SessionNetworkAdapter.DiveScene ?
-                    (elapsed > 1 && elapsed < 2.5f ? Vector3.up : Vector3.zero) :
+                    // A long upward probe reaches the y=6 surface-return zone and permanently
+                    // marks the diver safe before the hunt/recording test even starts.
+                    (elapsed > 1 && elapsed < 1.6f ? Vector3.up : Vector3.zero) :
                     (elapsed > 1 && elapsed < 5 ? Vector3.forward : Vector3.zero);
                 if (Hunt && scene == SessionNetworkAdapter.DiveScene && elapsed > 3) ProbeHunt(local, players);
+                else if (Record && scene == SessionNetworkAdapter.DiveScene && elapsed > 3) ProbeRecording(local, players);
                 else local.SubmitLocalInput(move, 0);
             }
             foreach (var player in players)
@@ -178,10 +216,68 @@ namespace DeepDive.P1.Lab
                     p.GetComponentInChildren<Camera>(true).enabled == p.IsOwner && p.GetComponentInChildren<AudioListener>(true).enabled == p.IsOwner);
         }
 
+        private void ProbeRecording(NetworkPlayer local, NetworkPlayer[] players)
+        {
+            var subject = FindObjectsByType<RecordingSubject>(FindObjectsSortMode.None)
+                .FirstOrDefault(x => Event ? x.GetComponent<SpecialEventRunner>() != null : x.GetComponent<FishActor>() != null);
+            if (subject == null || !subject.IsSpawned) return;
+            if (Event)
+            {
+                var active = subject.GetComponent<SpecialEventRunner>().Active.Value;
+                result.eventOpened |= active;
+                result.eventClosed |= result.eventOpened && !active;
+            }
+            var recorder = players.Length == 1 ? local.OwnerClientId : players.Where(p => p.OwnerClientId != 0).Min(p => p.OwnerClientId);
+            result.recordingRoleResolved = true;
+            result.recordingRecorder = local.OwnerClientId == recorder;
+            var world = adapter.GetComponent<RecordingWorldBinding>();
+            if (adapter.IsAuthority)
+            {
+                result.recordingViews |= RecorderViews.Count == players.Length;
+                result.recordingStarted |= subject.OpenTakeCount > 0;
+                result.recordingClaimed |= world.Binding.Director.ClaimCount == 1;
+                result.recordingStopped |= result.recordingClaimed && subject.OpenTakeCount == 0;
+                result.recordingViewActive |= RecorderViews.TryGetActive(new PlayerId(recorder), out _);
+                result.recordingValidSeconds = Mathf.Max(result.recordingValidSeconds, subject.ValidSecondsFor(new PlayerId(recorder)));
+                if (adapter.GetComponent<InventoryManager>().Bags.TryGetValue(new PlayerId(recorder), out var recordingBag))
+                    result.recordingSafe |= recordingBag.SafelyReturned;
+                if (world.Binding.Director.TryGetBestClaim(new PlayerId(recorder), subject.SubjectId, out var take))
+                    result.recordingQuality = take.Quality;
+            }
+            if (local.OwnerClientId != recorder) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var delta = subject.transform.position - local.RecordingEyePosition;
+            var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
+            var pitch = -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg;
+            // After the take finishes, actually swim to the surface exit. Do not inject a
+            // safe-return flag: SafeReturnZone must mark the remote diver through real movement.
+            var move = result.recordingStopped ? Vector3.up :
+                delta.magnitude > 6f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * delta.normalized : Vector3.zero;
+            local.SubmitLocalInput(move, yaw, pitch);
+            var bridge = adapter.GetComponent<RecordingNetworkBridge>();
+            if (bridge.IsRecordingLocal)
+            {
+                result.recordingStarted = true;
+                if (recordingStartTime == 0) recordingStartTime = Time.realtimeSinceStartup;
+            }
+            else if (recordingStartTime > 0) result.recordingStopped = true;
+            if (result.recordingStopped || Time.realtimeSinceStartup < nextAction) return;
+            if (!bridge.IsRecordingLocal || Time.realtimeSinceStartup - recordingStartTime > 8f)
+            {
+                nextAction = Time.realtimeSinceStartup + .75f;
+                bridge.ToggleRecordingLocal();
+            }
+        }
+
         private void ProbeHunt(NetworkPlayer local, NetworkPlayer[] players)
         {
             // Real owner inputs/RPCs, live fish AI and real inventory; no injected catch.
             var shooter = players.Length == 1 ? local.OwnerClientId : players.Where(p => p.OwnerClientId != 0).Min(p => p.OwnerClientId);
+            result.huntShooter = local.OwnerClientId == shooter;
+            if (result.huntShooter)
+            {
+                var bagSync = local.GetComponent<InventoryPlayerSync>();
+                result.inventoryReplicated |= bagSync != null && bagSync.BagItemCount.Value == 1 && bagSync.BagWeightGrams.Value > 0;
+            }
             if (adapter.IsAuthority && adapter.GetComponent<InventoryManager>().Bags.TryGetValue(new PlayerId(shooter), out var bag))
                 result.inventoryAdded |= bag.Items.Count == 1;
             var fish = FindFirstObjectByType<FishActor>();

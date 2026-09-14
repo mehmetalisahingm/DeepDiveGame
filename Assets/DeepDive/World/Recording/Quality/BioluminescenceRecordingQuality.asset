@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29240f788343b19d359e98e18e42742a, type: 3}
+  m_Name: BioluminescenceRecordingQuality
+  m_EditorClassIdentifier: DeepDive.World::DeepDive.World.RecordingQualityTable
+  minDistanceMetres: 3
+  maxDistanceMetres: 16
+  maxOffAxisDegrees: 22
+  minFrameFill: 0.08
+  idealFrameFill: 0.45
+  centeringWeight: 0.4
+  tiers:
+  - name: Bronze
+    minScore01: 0.25
+    minValidSeconds: 2
+  - name: Silver
+    minScore01: 0.45
+    minValidSeconds: 4
+  - name: Gold
+    minScore01: 0.6
+    minValidSeconds: 6
+  - name: Platinum
+    minScore01: 0.8
+    minValidSeconds: 8

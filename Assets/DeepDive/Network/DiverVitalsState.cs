@@ -5,7 +5,7 @@ namespace DeepDive.Network
     // Pure rules object so oxygen/health authority can be tested without a live NGO session.
     public sealed class DiverVitalsState
     {
-        public float MaxOxygen { get; }
+        public float MaxOxygen { get; private set; }
         public float MaxHealth { get; }
         public float OxygenDrainPerSecond { get; }
         public float LowOxygenFraction { get; }
@@ -21,6 +21,18 @@ namespace DeepDive.Network
             OxygenDrainPerSecond = Positive(oxygenDrainPerSecond, 1f);
             LowOxygenFraction = Clamp(lowOxygenFraction, 0.05f, 0.9f);
             Reset();
+        }
+
+        // Equipment is applied outside an active dive. Recomputing from the base/loadout value
+        // instead of adding deltas makes duplicate loadout notifications idempotent.
+        public bool SetMaxOxygen(float maxOxygen, bool refill)
+        {
+            var next = Positive(maxOxygen, MaxOxygen);
+            if (Math.Abs(next - MaxOxygen) <= 0.001f) return false;
+            MaxOxygen = next;
+            if (refill) Oxygen = MaxOxygen;
+            else Oxygen = Math.Min(Oxygen, MaxOxygen);
+            return true;
         }
 
         public void Reset()

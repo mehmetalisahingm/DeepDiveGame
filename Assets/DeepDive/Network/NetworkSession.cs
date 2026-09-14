@@ -14,7 +14,11 @@ namespace DeepDive.Network
     [RequireComponent(typeof(NetworkManager), typeof(UnityTransport))]
     public sealed class NetworkSession : MonoBehaviour, INetworkSession
     {
-        public const string Protocol = "DeepDive-P1-2";
+        // Keep this compatibility token in lock-step with network/scene contract changes.
+        // Older P2 builds used DeepDive-P1-2, which allowed different scene/prefab layouts to
+        // connect and then fail during NGO in-scene NetworkObject synchronization.
+        // P3-3 adds EconomyPlayerSync to NetworkDiver; P3-2 has a different behaviour layout.
+        public const string Protocol = "DeepDive-P3-4";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;
