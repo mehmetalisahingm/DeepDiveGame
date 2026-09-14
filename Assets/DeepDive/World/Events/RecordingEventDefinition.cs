@@ -43,7 +43,7 @@ namespace DeepDive.World
         [Tooltip("Played once when the event begins. Empty means no sound.")]
         [SerializeField] private AudioClip startClip;
 
-        [Tooltip("Blue/turquoise glow colour driven by the presenter's light and particles.")]
+        [Tooltip("Blue/turquoise colour for the presenter's light. The particles keep their own authored colours.")]
         [SerializeField] private Color signalColor = new Color(0.25f, 0.85f, 0.95f, 1f);
 
         // The species/event id half of RecordingResult. Trimmed so a stray space in the
