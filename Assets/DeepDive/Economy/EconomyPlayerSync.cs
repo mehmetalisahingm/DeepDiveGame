@@ -20,21 +20,27 @@ namespace DeepDive.Economy
         private float _statusUntil;
         private bool _shopOpen;
 
-        public override void OnNetworkSpawn()
+        public override void OnNetworkSpawn() => EnsureEconomy();
+
+        public override void OnNetworkDespawn()
         {
-            if (!IsServer) return;
+            if (_economy != null) _economy.OnBalanceChanged -= Refresh;
+            _economy = null;
+        }
+
+        private void EnsureEconomy()
+        {
+            if (!IsServer || _economy != null) return;
             _economy = FindFirstObjectByType<EconomyManager>();
             if (_economy == null) return;
             _economy.OnBalanceChanged += Refresh;
             Refresh();
         }
 
-        public override void OnNetworkDespawn()
+        private void Refresh()
         {
-            if (_economy != null) _economy.OnBalanceChanged -= Refresh;
+            if (IsServer && _economy != null) SharedBalance.Value = _economy.SharedBalance;
         }
-
-        private void Refresh() => SharedBalance.Value = _economy.SharedBalance;
 
         public void PublishPurchaseResult(TransactionResult result)
         {
@@ -61,6 +67,7 @@ namespace DeepDive.Economy
 
         private void Update()
         {
+            EnsureEconomy();
             if (!IsSpawned || !IsOwner) return;
 
             if (Input.GetKeyDown(KeyCode.B)) _shopOpen = !_shopOpen;
@@ -76,6 +83,8 @@ namespace DeepDive.Economy
             "InsufficientFunds" => "YETERSIZ PARA",
             "AlreadyProcessed" => "ZATEN SAHIPSIN",
             "WrongPhase" => "DALISTA ALISVERIS YOK",
+            "PlayerInactive" => "OYUNCU AKTIF DEGIL",
+            "InvalidState" => "DUKKAN HAZIR DEGIL",
             "InvalidTarget" => "GECERSIZ URUN",
             "SaveFailed" => "KAYIT HATASI",
             _ => string.IsNullOrWhiteSpace(reason) ? "ISLEM REDDEDILDI" : reason
