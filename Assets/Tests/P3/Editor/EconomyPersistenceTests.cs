@@ -92,5 +92,31 @@ namespace DeepDive.P3.Tests
             Assert.AreEqual("InsufficientFunds", rejected.ReasonCode);
             Assert.AreEqual(100, economy.SharedBalance);
         }
+
+        [Test]
+        public void RecordingRewardRollsBackWhenPersistenceFails()
+        {
+            economy.SetPersistenceHandler(() => false);
+            Assert.AreEqual(PlayerActionResult.Rejected, economy.TryRewardRecording(Recording("rec-save-fail", 4)));
+            Assert.AreEqual(0, economy.SharedBalance);
+
+            economy.SetPersistenceHandler(null);
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(Recording("rec-save-fail", 4)));
+            Assert.AreEqual(200, economy.SharedBalance);
+        }
+
+        [Test]
+        public void PurchaseReturnsSaveFailedAndRollsBackWhenPersistenceFails()
+        {
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(Recording("rec-buy-funds", 4)));
+            economy.SetPersistenceHandler(() => false);
+
+            var result = economy.TryPurchase(alice, "tube-1", 7);
+
+            Assert.IsFalse(result.Accepted);
+            Assert.AreEqual("SaveFailed", result.ReasonCode);
+            Assert.AreEqual(200, economy.SharedBalance);
+            CollectionAssert.DoesNotContain(economy.LoadoutFor(alice), "tube-1");
+        }
     }
 }
