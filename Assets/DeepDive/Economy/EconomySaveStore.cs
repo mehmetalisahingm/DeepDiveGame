@@ -31,40 +31,42 @@ namespace DeepDive.Economy
             economy = GetComponent<EconomyManager>();
             inventory = GetComponent<InventoryManager>();
             LoadNow();
+            economy?.SetPersistenceHandler(SaveNow);
             Subscribe();
         }
 
-        private void OnEnable() => Subscribe();
-        private void OnDisable() => Unsubscribe();
+        private void OnEnable()
+        {
+            if (economy == null) economy = GetComponent<EconomyManager>();
+            economy?.SetPersistenceHandler(SaveNow);
+            Subscribe();
+        }
+
+        private void OnDisable()
+        {
+            economy?.ClearPersistenceHandler(SaveNow);
+            Unsubscribe();
+        }
 
         private void Subscribe()
         {
-            if (subscribed || economy == null || inventory == null) return;
-            economy.OnBalanceChanged += Changed;
-            economy.OnLoadoutChanged += LoadoutChanged;
+            if (subscribed || inventory == null) return;
             inventory.OnDiveSummaryReady += SummaryReady;
             subscribed = true;
         }
 
         private void Unsubscribe()
         {
-            if (!subscribed) return;
-            economy.OnBalanceChanged -= Changed;
-            economy.OnLoadoutChanged -= LoadoutChanged;
+            if (!subscribed || inventory == null) return;
             inventory.OnDiveSummaryReady -= SummaryReady;
             subscribed = false;
         }
 
-        private void Changed()
-        {
-            if (!restoring) SaveNow();
-        }
-
-        private void LoadoutChanged(PlayerId player) => Changed();
-
         private void SummaryReady(DiveSummary summary)
         {
             checkpointId = summary.CheckpointId ?? "";
+            // EconomyManager may already have persisted the sale atomically. Write once more so
+            // a zero-value dive still advances the last completed checkpoint.
             if (!restoring) SaveNow();
         }
 
@@ -80,7 +82,10 @@ namespace DeepDive.Economy
                 var directory = Path.GetDirectoryName(path);
                 if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
 
-                var json = JsonUtility.ToJson(economy.ExportSaveData(campaignId, checkpointId), true);
+                var effectiveCheckpoint = string.IsNullOrWhiteSpace(economy.LastCheckpointId)
+                    ? checkpointId
+                    : economy.LastCheckpointId;
+                var json = JsonUtility.ToJson(economy.ExportSaveData(campaignId, effectiveCheckpoint), true);
                 File.WriteAllText(temp, json);
 
                 var verified = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(temp));
@@ -99,6 +104,7 @@ namespace DeepDive.Economy
                 }
                 else File.Move(temp, path);
 
+                checkpointId = effectiveCheckpoint ?? "";
                 LastError = "";
                 return true;
             }
