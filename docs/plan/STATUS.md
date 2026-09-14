@@ -1,18 +1,18 @@
 # Güncel durum ve görev takibi
 
-Plan 1.8 — 13 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Mehmet**.
+Plan 1.9 — 14 Eylül 2026. **P3 kullanıcı kabulüyle kapalı; aktif faz P4.** P4 birleştirme koordinatörü plan gereği **Utku**.
 
 ## Mevcut sınır
 
-14 Eylül ara teslim: özel olay Adım 6 ve #44 ekonomi entegrasyonu ayrı çalışma dalında; son EditMode **356/356 PASS**. Ortak dala merge ve P3 kapanışı değildir. Güncel yapılan/kalan listesi: [P3-WIP-HANDOFF.md](../reports/P3-WIP-HANDOFF.md). Aşağıdaki PR tablosu ortak dalda daha önce birleşen durumu gösterir.
-
 - P0 kapalı.
 - P1 kullanıcı kararıyla kapalı.
-- P2 kullanıcı faz kabulüyle kapalı. Kapanış kaydı: [`P2-GAMEPLAY-VALIDATION.md`](../reports/P2-GAMEPLAY-VALIDATION.md).
-- **P3 AÇIK.** Ortak dal: `codex/p3-integration`.
-- P4–P6 kilitli. P3 kapanmadan bu fazların özellik işleri alınmaz.
+- P2 kullanıcı faz kabulüyle kapalı.
+- **P3 KAPALI (kullanıcı kabulü).** Kapanış kaydı: [`P3-REPORT.md`](../reports/P3-REPORT.md).
+- **P4 AÇIK.** İlk devir/polish işi: [#46 — su yüzeyi ve su dışı oksijen davranışı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/46).
+- P5–P6 kilitli.
 - Unity sürümü: `6000.3.23f1`.
-- P3 açılış kaydı: [`P3-KICKOFF.md`](../reports/P3-KICKOFF.md).
+
+P3 kapanışında başka kişi review'ı kullanıcı kararıyla kapı olmaktan çıkarıldı; böyle bir onay varmış gibi kayıt tutulmadı. Ayrı bilgisayar/internet 20–30 dakikalık ekip testi yapılmış sayılmıyor.
 
 ## Ekip
 
@@ -29,52 +29,23 @@ Plan 1.8 — 13 Eylül 2026. Aktif faz **P3**; birleştirme koordinatörü **Meh
 | P0 | KAPALI | Mehmet | [`P0-REPORT.md`](../reports/P0-REPORT.md) |
 | P1 | KAPALI (kullanıcı kararı) | Utku | [`P1-REPORT.md`](../reports/P1-REPORT.md) |
 | P2 | KAPALI (kullanıcı kabulü) | Mert | [`P2-GAMEPLAY-VALIDATION.md`](../reports/P2-GAMEPLAY-VALIDATION.md) |
-| P3 | **AÇIK** | **Mehmet** | [`P3-KICKOFF.md`](../reports/P3-KICKOFF.md) |
-| P4 | KİLİTLİ | Utku | Yok |
+| P3 | **KAPALI (kullanıcı kabulü)** | Mehmet | [`P3-REPORT.md`](../reports/P3-REPORT.md) |
+| P4 | **AÇIK** | **Utku** | #46 ile ilk polish/devir işi açık |
 | P5 | KİLİTLİ | Mert | Yok |
 | P6 | KİLİTLİ | Mehmet | Yok |
 
-## Aktif P3 görevleri
+## P3 kapanış özeti
 
-| Görev | Sahip | Durum | GitHub |
-|---|---|---|---|
-| P3-A | Mehmet | Kamera/kadraj/tüp (#38) ve World bağlantısı (#41) birleşti; ödeme bağlantısı ve diskten yükleme sonrası tüp testi P3-C API'lerini bekliyor | [#34 — Kamera kaydı, kadraj ve tüp etkisi](https://github.com/mehmetalisahingm/DeepDiveGame/issues/34) |
-| P3-B | Utku | Çekim değerlendirmesi ve sahne bağlantısı birleşti (#40); özel olay açık | [#35 — Kayıt kalitesi, hedef tanıma ve özel olay](https://github.com/mehmetalisahingm/DeepDiveGame/issues/35) |
-| P3-C | Mert | Ekonomi çekirdeği (#37) ve para/alışveriş sonucu göstergesi (#39) entegre; kayıt ödemesi/fiyatlar, gerçek alışveriş isteği/UI ve save/load açık | [#36 — Satış, ortak para, dükkân ve kayıt](https://github.com/mehmetalisahingm/DeepDiveGame/issues/36) |
+Final özellik head'i `b2572e9bb48d35a1a75b53a172332df8f7af0f07` için GitHub Actions SUCCESS, EditMode **357/357 PASS** ve Windows build SUCCESS kaydedildi. Yerel runtime smoke: 1 oyuncu Event PASS, 4 oyuncu Event PASS, 2 oyuncu Hunt PASS, 2 oyuncu Record PASS. #45 `codex/p3-integration` dalına merge edildi ve #34/#35/#36 tamamlandı olarak kapatıldı.
 
-### Sıradaki somut işler
+Mehmet gerçek build'de biyolüminesans özel olayını gördü; güvenli dönüşün ve av gelirinin ortak bakiyeye yatmasının çalıştığını doğruladı ve P3'ü kabul etti.
 
-- Mehmet'in bağımsız kamera, kadraj, kayıt kontrolü, host kamera adaptörü ve tüp etkisi kodu hazır. Bağlantı: `RecordingWorldBinding.SetPaymentHandler(Func<RecordingResult, PlayerActionResult>)`; Mert'in gerçek kayıt ödeme metodu olmadan sahte ödeme/fiyat eklenmez.
-- Mert kayıt ödeme API'sini ve kalite 1–4 fiyatlarını teslim edince Mehmet bu metodu bağlayıp gerçek kredi artışını doğrular. Mert save/load teslim edince Mehmet yeniden açılan oyunda tüp etkisini ve doğru oyuncuyu doğrular. Bu iki kontrol henüz tamamlanmış sayılmaz; #34 açık kalır.
-- Utku özel olayı ve temel işaretini tamamlar. Mert gerçek alışveriş akışını ve kalıcı kaydı tamamlar. Üç kişi ardından tam döngü/ortak oynama testini yapar; P4 açılmaz.
-- Entegrasyon ve yerel test kaydı: [P3-A-INTEGRATION.md](../reports/P3-A-INTEGRATION.md). Yeni prefab düzeni `DeepDive-P3-3` gerektirir; test eden herkes aynı güncel build'i kullanır.
+## P4 başlangıç notu
 
-## P3 hedefi
+P3 manuel kabulünde görünür bir su yüzeyi olmadığı ve oksijenin dalış boyunca sürekli azaldığı görüldü. Yukarı çıkış SafeReturn akışını doğru tetikliyor. Su yüzeyi, su altı/su dışı ayrımı ve oksijen davranışı P4/polish için #46'ya devredildi.
 
-Tek bölgede şu tam döngü çalışmalıdır:
-
-**Hazırlan → avla → kaydet → dön → sat/değerlendir → tüp geliştir → tekrar dal.**
-
-P3 kapanışında ayrıca şunlar doğrulanır:
-
-- Aynı av/kayıt/istek iki kez para üretmez.
-- Eşzamanlı alışveriş parayı eksiye düşürmez.
-- Görüş dışındaki veya engel arkasındaki hedef geçerli kayıt üretmez.
-- Tüp yükseltmesi doğru oyuncuya doğru kapasiteyi verir.
-- Yeniden açılışta son tamamlanmış kayıt geri gelir; av/para/ekipman çoğalmaz.
-- Solo ve dört oyuncuda tam döngü doğrulanır.
-- P2 his katmanı korunur; kayıt, satış ve yükseltme sonuçları oyuncuya açıkça bildirilir.
-
-Final sanat/cila P3 şartı değildir. Gerçek video, ikinci dalış bölgesi, bulut kayıt ve geniş içerik üretimi P3 kapsamı dışındadır.
-
-## P2'den devreden smoke kontrolü
-
-P2 kullanıcı kabulüyle kapatıldı; final head üzerinde ayrı kayıtlı dört oyunculu insan oturumu ve 10–15 dakikalık ortak his testi bulunmuyordu. P3'ün ilk ortak smoke/playtest'inde en az iki oyuncuyla temel av/dönüş akışı ve guest oyuncunun kendi çanta göstergesinin canlı güncellenmesi tekrar kontrol edilir.
+P4'ün ayrıntılı kapsamı için [`PHASES.md`](PHASES.md) esas alınır; P5 işi P4 kapanmadan alınmaz.
 
 ## CI
 
-Unity CI artık `main`, `codex/p2-*`, `p2/*`, `codex/p3-*` ve `p3/*` push'larını kapsar. EditMode testleri ve mevcut Windows build yöntemi çalıştırılır. Yapılmayan veya başarısız koşu PASS sayılmaz.
-
-## Faz kapanış kuralı
-
-Üç teslim P3 ortak dalında birleşir, kabul testleri ve kısa ortak oynama testi kayda alınır, ardından P3 main'e aktarılır. P4 kendiliğinden açılmaz; ayrıca faz açılış kararı verilir.
+Unity CI `main`, `codex/p2-*`, `p2/*`, `codex/p3-*` ve `p3/*` push'larını kapsar. P4 dal adları açıldığında workflow kapsamı ayrıca doğrulanmalıdır; yapılmayan veya başarısız koşu PASS sayılmaz.
