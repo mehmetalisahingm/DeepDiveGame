@@ -19,10 +19,15 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> NextTubePrice = new NetworkVariable<int>();
         public readonly NetworkVariable<FixedString64Bytes> NextTubeId = new NetworkVariable<FixedString64Bytes>();
         public readonly NetworkVariable<bool> ShopOpen = new NetworkVariable<bool>();
+        public readonly NetworkVariable<int> LastCreditDelta = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> CreditEventRevision = new NetworkVariable<int>();
 
         private EconomyManager _economy;
         private ulong _observedRequestId;
         private ulong _localRequestSequence;
+        private int _observedCreditRevision;
+        private int _lastServerBalance;
+        private bool _serverBalanceInitialized;
         private string _statusMessage = "";
         private float _statusUntil;
 
@@ -53,7 +58,16 @@ namespace DeepDive.Economy
         private void Refresh()
         {
             if (_economy == null || !IsServer) return;
-            SharedBalance.Value = _economy.SharedBalance;
+
+            var current = _economy.SharedBalance;
+            if (_serverBalanceInitialized && current > _lastServerBalance)
+            {
+                LastCreditDelta.Value = current - _lastServerBalance;
+                CreditEventRevision.Value++;
+            }
+            _lastServerBalance = current;
+            _serverBalanceInitialized = true;
+            SharedBalance.Value = current;
             RefreshUpgrade();
         }
 
@@ -120,6 +134,16 @@ namespace DeepDive.Economy
 
             if (!IsSpawned || !IsOwner) return;
             if (ShopOpen.Value && Input.GetKeyDown(KeyCode.U)) RequestNextTubeUpgradeLocal();
+
+            if (CreditEventRevision.Value != 0 && CreditEventRevision.Value != _observedCreditRevision)
+            {
+                _observedCreditRevision = CreditEventRevision.Value;
+                if (LastCreditDelta.Value > 0)
+                {
+                    _statusMessage = $"GELIR +{LastCreditDelta.Value} KREDI";
+                    _statusUntil = Time.unscaledTime + 2f;
+                }
+            }
 
             if (LastRequestId.Value == 0 || LastRequestId.Value == _observedRequestId) return;
             _observedRequestId = LastRequestId.Value;
