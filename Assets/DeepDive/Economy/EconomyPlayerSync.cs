@@ -5,16 +5,6 @@ using UnityEngine;
 
 namespace DeepDive.Economy
 {
-    // Basic UI feedback for sale/shop results (docs/plan/CONTRACTS.md "Alan arayuzleri | ...
-    // Mert envanter/dukkan/oturum ekrani", and issue #36's "Satis, alisveris ve odul
-    // sonuclarini anlasilir temel UI geri bildirimiyle goster"). EconomyManager only exists on
-    // the host; this mirrors the shared balance onto a NetworkVariable the same way
-    // InventoryPlayerSync mirrors bag state, so every client sees the live crew-wide total
-    // regardless of who is host.
-    //
-    // PublishPurchaseResult exists as the interface for whoever wires the real client purchase
-    // request (no shop-request UI/transport exists yet - this only demonstrates and tests the
-    // feedback path itself, driven directly from EconomyManager.TryPurchase's return value).
     [RequireComponent(typeof(NetworkObject))]
     public sealed class EconomyPlayerSync : NetworkBehaviour
     {
@@ -25,8 +15,10 @@ namespace DeepDive.Economy
 
         private EconomyManager _economy;
         private ulong _observedRequestId;
+        private ulong _localRequestId;
         private string _statusMessage = "";
         private float _statusUntil;
+        private bool _shopOpen;
 
         public override void OnNetworkSpawn()
         {
@@ -44,9 +36,6 @@ namespace DeepDive.Economy
 
         private void Refresh() => SharedBalance.Value = _economy.SharedBalance;
 
-        // Called by host-side composition right after EconomyManager.TryPurchase, so the
-        // requesting player's own client sees the outcome (mirrors NetworkPlayer.PublishAction).
-        // Ignores a stale/out-of-order replay just like PublishAction does.
         public void PublishPurchaseResult(TransactionResult result)
         {
             if (!IsServer || result.RequestId < LastRequestId.Value) return;
@@ -55,21 +44,58 @@ namespace DeepDive.Economy
             LastRequestId.Value = result.RequestId;
         }
 
+        public void RequestPurchase(string equipmentId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(equipmentId)) return;
+            var id = ++_localRequestId;
+            RequestPurchaseServerRpc(new FixedString32Bytes(equipmentId), id);
+        }
+
+        [ServerRpc(RequireOwnership = true)]
+        private void RequestPurchaseServerRpc(FixedString32Bytes equipmentId, ulong requestId, ServerRpcParams rpc = default)
+        {
+            if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
+            var result = EconomyPurchaseAuthority.TryPurchase(new PlayerId(OwnerClientId), equipmentId.ToString(), requestId);
+            PublishPurchaseResult(result);
+        }
+
         private void Update()
         {
             if (!IsSpawned || !IsOwner) return;
+
+            if (Input.GetKeyDown(KeyCode.B)) _shopOpen = !_shopOpen;
+
             if (LastRequestId.Value == 0 || LastRequestId.Value == _observedRequestId) return;
             _observedRequestId = LastRequestId.Value;
-            _statusMessage = LastAccepted.Value ? "SATIN ALINDI" : LastReasonCode.Value.ToString();
-            _statusUntil = Time.unscaledTime + 1.5f;
+            _statusMessage = LastAccepted.Value ? "SATIN ALINDI" : FriendlyReason(LastReasonCode.Value.ToString());
+            _statusUntil = Time.unscaledTime + 2f;
         }
+
+        private static string FriendlyReason(string reason) => reason switch
+        {
+            "InsufficientFunds" => "YETERSIZ PARA",
+            "AlreadyProcessed" => "ZATEN SAHIPSIN",
+            "WrongPhase" => "DALISTA ALISVERIS YOK",
+            "InvalidTarget" => "GECERSIZ URUN",
+            "SaveFailed" => "KAYIT HATASI",
+            _ => string.IsNullOrWhiteSpace(reason) ? "ISLEM REDDEDILDI" : reason
+        };
 
         private void OnGUI()
         {
             if (!IsSpawned || !IsOwner) return;
             GUI.Box(new Rect(20, 166, 230, 24), $"PARA: {SharedBalance.Value}");
+            GUI.Box(new Rect(20, 194, 230, 24), "B: DUKKAN");
+
             if (Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusMessage))
-                GUI.Box(new Rect(20, 194, 230, 24), _statusMessage);
+                GUI.Box(new Rect(20, 222, 230, 24), _statusMessage);
+
+            if (!_shopOpen) return;
+            GUI.Box(new Rect(270, 20, 250, 136), "DALIS EKIPMANI");
+            GUI.Label(new Rect(284, 50, 220, 20), "Tup I  | +30 sn | 100 kredi");
+            if (GUI.Button(new Rect(284, 72, 220, 28), "TUP I SATIN AL")) RequestPurchase("tube-1");
+            GUI.Label(new Rect(284, 104, 220, 20), "Tup II | +60 sn | 250 kredi");
+            if (GUI.Button(new Rect(284, 126, 220, 28), "TUP II SATIN AL")) RequestPurchase("tube-2");
         }
     }
 }
