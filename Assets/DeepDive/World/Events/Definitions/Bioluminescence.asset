@@ -18,5 +18,5 @@ MonoBehaviour:
   windowSeconds: 20
   quality: {fileID: 11400000, guid: 17943aaed0916cc48b08425a2705baf0, type: 2}
   subjectRadiusMetres: 1.5
-  startClip: {fileID: 0}
+  startClip: {fileID: 8300000, guid: a8404cf77d94c754ea2af2d784e62364, type: 3}
   signalColor: {r: 0.25, g: 0.85, b: 0.95, a: 1}
