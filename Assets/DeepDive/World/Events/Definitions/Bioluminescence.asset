@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e768d2b9dbbc44f418ccaaf72e3aa961, type: 3}
+  m_Name: Bioluminescence
+  m_EditorClassIdentifier: DeepDive.World::DeepDive.World.RecordingEventDefinition
+  eventId: event_bioluminescence
+  displayName: "Biyol\xFCminesans"
+  triggerDelaySeconds: 45
+  windowSeconds: 20
+  quality: {fileID: 11400000, guid: 17943aaed0916cc48b08425a2705baf0, type: 2}
+  subjectRadiusMetres: 1.5
+  startClip: {fileID: 0}
+  signalColor: {r: 0.25, g: 0.85, b: 0.95, a: 1}

@@ -28,6 +28,16 @@ namespace DeepDive.World.Tests
 
         private static RecordingSession Session() => new RecordingSession(Subject, Ladder);
 
+        // A subject that is only filmable some of the time, like the special event. The fish
+        // subjects above pass no window at all and must stay unaffected by any of this.
+        private sealed class FakeWindow : IRecordingWindow
+        {
+            public bool IsOpen { get; set; } = true;
+        }
+
+        private static RecordingSession Session(IRecordingWindow window) =>
+            new RecordingSession(Subject, Ladder, window);
+
         // A frame the framing rules accepted, at the given score.
         private static RecordingSample Good(float score01) =>
             RecordingSample.Valid(score01, 5f, 0f, 0.3f);
@@ -337,6 +347,113 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(PlayerActionResult.Accepted, session.TryStart(secondDive, Alice, 1),
                 "the old dive's request id must not block the new dive");
             Assert.AreEqual(0f, session.ValidSecondsFor(Alice), "no footage may survive the reset");
+        }
+
+        // --- The event window (Mehmet, 14 September 2026) ---------------------------------
+
+        [Test]
+        public void AClosedWindowRefusesToStartARecording()
+        {
+            var window = new FakeWindow { IsOpen = false };
+            var session = Session(window);
+
+            Assert.AreEqual(PlayerActionResult.InvalidTarget, session.TryStart(ActiveDive(), Alice, 1),
+                "the plankton are not there to film");
+            Assert.IsFalse(session.IsRecording(Alice));
+            Assert.AreEqual(0, session.OpenTakeCount);
+        }
+
+        // The condition is temporary, so the refusal must not be remembered: a diver who pressed
+        // record a second too early has to succeed the moment the event appears.
+        [Test]
+        public void TheClosedWindowRefusalIsNotRememberedSoTheSameDiverCanFilmWhenItOpens()
+        {
+            var window = new FakeWindow { IsOpen = false };
+            var session = Session(window);
+            var dive = ActiveDive();
+            Assert.AreEqual(PlayerActionResult.InvalidTarget, session.TryStart(dive, Alice, 1));
+
+            window.IsOpen = true;
+
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStart(dive, Alice, 1),
+                "the same request must work once the window is open");
+            Assert.IsTrue(session.IsRecording(Alice));
+        }
+
+        [Test]
+        public void AnOpenWindowBehavesExactlyLikeASubjectWithNoWindow()
+        {
+            var session = Session(new FakeWindow { IsOpen = true });
+            var dive = ActiveDive();
+
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStart(dive, Alice, 1));
+            Film(session, Alice, 5f, 0.8f);
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var take));
+
+            Assert.AreEqual(5f, take.ValidSeconds, 0.0001f);
+            Assert.IsTrue(take.IsPayable);
+        }
+
+        // Mehmet's decision, and the reason this seam exists at all: closing the window freezes
+        // a running take, it does not throw it away. Eight good seconds stay eight good seconds.
+        [Test]
+        public void WhenTheWindowClosesMidTakeTheEarnedSecondsSurvive()
+        {
+            var window = new FakeWindow { IsOpen = true };
+            var session = Session(window);
+            var dive = ActiveDive();
+            session.TryStart(dive, Alice, 1);
+            Film(session, Alice, 6f, 0.8f);
+
+            window.IsOpen = false;
+
+            Assert.IsTrue(session.IsRecording(Alice), "the take is frozen, not dropped");
+            Assert.AreEqual(6f, session.ValidSecondsFor(Alice), 0.0001f,
+                "every second earned inside the window is kept");
+        }
+
+        [Test]
+        public void NoTimeIsBankedWhileTheWindowIsShutHoweverLongItIsTicked()
+        {
+            var window = new FakeWindow { IsOpen = true };
+            var session = Session(window);
+            session.TryStart(ActiveDive(), Alice, 1);
+            Film(session, Alice, 6f, 0.8f);
+
+            window.IsOpen = false;
+            Film(session, Alice, 30f, 1f);
+
+            Assert.AreEqual(6f, session.ValidSecondsFor(Alice), 0.0001f,
+                "a diver cannot keep filming an event that is over");
+        }
+
+        [Test]
+        public void ATakeStoppedAfterTheWindowClosedIsStillGradedAndPayable()
+        {
+            var window = new FakeWindow { IsOpen = true };
+            var session = Session(window);
+            var dive = ActiveDive();
+            session.TryStart(dive, Alice, 1);
+            Film(session, Alice, 6f, 0.8f);
+            window.IsOpen = false;
+
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStop(dive, Alice, 2, out var take));
+            Assert.AreEqual(6f, take.ValidSeconds, 0.0001f);
+            Assert.AreEqual(3, take.Quality, "0.8 held for 6s is Gold on this ladder");
+            Assert.IsTrue(take.IsPayable, "the shot was earned while the event was on screen");
+        }
+
+        [Test]
+        public void ASubjectWithNoWindowIsNeverGatedByOne()
+        {
+            var session = Session();
+            var dive = ActiveDive();
+
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStart(dive, Alice, 1));
+            Film(session, Alice, 5f, 0.8f);
+
+            Assert.AreEqual(5f, session.ValidSecondsFor(Alice), 0.0001f,
+                "a fish is filmable whenever the diver can see it");
         }
     }
 }

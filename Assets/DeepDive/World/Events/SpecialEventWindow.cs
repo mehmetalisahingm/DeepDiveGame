@@ -25,24 +25,19 @@ namespace DeepDive.World
     //      whether a trigger is allowed to take effect right now, which is the part that has
     //      to hold no matter which trigger is chosen.
     //
-    //   2. WHAT HAPPENS TO AN OPEN RECORDING when the window closes. Whether a take that was
-    //      running at the closing edge freezes with its earned seconds intact or is dropped
-    //      outright is Mehmet's call and is still open; this class owns no takes and says
-    //      nothing about them. It reports the state and the closing edge, and that is all.
-    //      RecordingSession keeps both doors open today: it has Abort for the drop, and simply
-    //      not ticking a take leaves it whole.
+    //   2. WHAT HAPPENS TO AN OPEN RECORDING when the window closes. Mehmet decided this on
+    //      14 September 2026, and it is the freeze door, not the drop door: the seconds already
+    //      earned survive, no further seconds accrue, no new take may start, and a take that was
+    //      running is still graded when it is stopped. This class still owns no takes and says
+    //      nothing about them - it only answers IRecordingWindow.IsOpen. The rule itself lives
+    //      in RecordingSession.TryStart and RecordingSession.Tick.
     //
     // The duration is measured here and nowhere else, the same way RecordingSession measures a
     // take: Tick is fed the host's own delta time, and there is no path by which a caller can
     // declare how long the event ran - docs/plan/CONTRACTS.md, "Sonuc doguran ... degisikliklerini
     // ev sahibi dogrular".
-    public sealed class SpecialEventWindow
+    public sealed class SpecialEventWindow : IRecordingWindow
     {
-        // A stand-in so this class and the tests have something to construct with. NOT the
-        // design number: how long the event stays open is Mehmet's decision, and once it is
-        // made the value moves into the event's definition asset and this constant goes away.
-        public const float PlaceholderDurationSeconds = 30f;
-
         private float elapsedSeconds;
 
         public SpecialEventWindow(float durationSeconds)
@@ -63,6 +58,11 @@ namespace DeepDive.World
         public SpecialEventState State { get; private set; } = SpecialEventState.Pending;
 
         public bool IsActive => State == SpecialEventState.Active;
+
+        // IRecordingWindow: the shutter may run exactly while the event is on screen. Pending
+        // and Finished both read as shut, which is what stops a diver filming a plankton cluster
+        // that has not appeared yet or has already faded.
+        public bool IsOpen => IsActive;
 
         // The dive the event was triggered in, stamped at TryBegin and kept through Finished.
         // The host-side shell compares it against the live dive id to notice a window that

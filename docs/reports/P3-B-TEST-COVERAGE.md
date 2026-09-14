@@ -6,22 +6,29 @@ bugün hangi testlerle zaten karşılandığını, hangi kısmının açık kald
 
 - Dilim / tarih: P3-B özel olay dilimi, envanter — 14 Eylül 2026
 - Sahip: Utku (B)
-- Kaynak commit: `7028973` (`p3/utku-recording`)
+- Kaynak: `p3/utku-recording`, `codex/p3-integration` (`8c93138`) üzerine rebase edildi
 - Ortam: Unity 6000.3.23f1, EditMode
-- Bu envanter yazılırken çalıştırılan tam EditMode koşusu: **257/257 PASS**
-  (`Unity.exe -runTests -batchmode -testPlatform EditMode`, 14 Eylül 2026). Önceki
-  239'un üstüne bu dilimde eklenen 18 `SpecialEventWindowTests` testi dahildir.
+- Son tam EditMode koşusu: **299/299 PASS**
+  (`Unity.exe -runTests -batchmode -testPlatform EditMode`, 14 Eylül 2026). Rebase tabanı
+  262 idi; özel olay dilimi 37 test ekledi (`SpecialEventWindowTests` 18,
+  `SpecialEventScheduleTests` 12, `RecordingEventDefinitionTests` 12,
+  `BioluminescenceEventAssetTests` 6, `RecordingSessionTests` 21→28).
 
 ## Özet
 
-| Mehmet'in senaryosu | Kural katmanı | Sahne katmanı | Uçtan uca / kredi |
-|---|---|---|---|
-| Engel arkası çekim | 4 test, geçiyor | 2 test, geçiyor | yok |
-| Tekrar ödül | 14 test, geçiyor | — | yok |
-| Güvenli dönmeyen kayıt sahibi | 14 test, geçiyor | — | yok |
+| Mehmet'in senaryosu | Kural katmanı | Sahne katmanı | Uçtan uca (gerçek oyun) | Kredi |
+|---|---|---|---|---|
+| Engel arkası çekim | 4 test, geçiyor | 2 test, geçiyor | yok | yok |
+| Tekrar ödül | 14 test, geçiyor | — | yok | yok |
+| Güvenli dönmeyen kayıt sahibi | 14 test, geçiyor | — | kısmi | yok |
 
 Üç senaryonun da **kural katmanı karşılığı yazılmış ve geçiyor**. Kalan iş, aşağıdaki
-"Kapsanmayan" bölümündeki dört maddedir; bunların ikisi başka kişilere bağlıdır.
+"Kapsanmayan" bölümündeki maddelerdir; bir kısmı başka kişilere bağlıdır.
+
+"Kısmi" şu demek: `tools/Test-P1-Integrated.ps1 -Record` (Mehmet, `-p3-record 1`) dört
+gerçek süreçle bir misafirin çekim isteğini ve yüzeye güvenli dönüşünü geçiriyor
+(PASS: `Logs/P1-integrated-20260913-231037-669-4`). Bu, kayıt yolunun uçtan uca çalıştığını
+gösterir; **boğulan kameraman → sıradaki güvenli kayıt** düşüşünü ayrıca doğrulamaz.
 
 ## 1. Engel arkası çekim
 
@@ -81,25 +88,28 @@ Taşıma katmanında ayrıca Mehmet'in `RecordingRequestRulesTests` dosyası var
 Composition seviyesinde Mehmet'in `RecordingDiveBindingTests` dosyası aynı zinciri
 `SessionManager` + `InventoryManager` ile kuruyor (`SummaryPaysNextBestSafeRecorderOnce_NotOnStop`,
 `MissingBackendRetainsOldSettlementWithoutPollutingNextDive`,
-`NonHostCannotBindEvaluationViewsOrPayment` dahil). **Henüz `codex/p3-integration`'da değil:**
-commit `7076906`, dal `codex/p3-recording-composition`.
+`NonHostCannotBindEvaluationViewsOrPayment` dahil). `7076906`, PR #41 ile
+`codex/p3-integration`'a girdi.
 
 ## Kapsanmayan
 
 1. **Kredi seviyesinde doğrulama yok.** Testler "ödenebilir `RecordingResult` üretildi"yi
    kanıtlıyor, "ortak kasaya kredi yazıldı"yı değil. Kayıt ödeme backend'i bağlı değil —
    `Assets/DeepDive/Economy/EconomyManager.cs:18`. Bağlanacağı yer hazır ve isimli:
-   `RecordingDiveBinding.SetPaymentHandler(Func<RecordingResult, PlayerActionResult>)`. **Mert'e bağlı.**
-2. **Uçtan uca çekim testi yok.** Av tarafında `tools/Test-P1-Integrated.ps1 -Hunt` iki gerçek
-   süreçle çalışıyor; kaydın karşılığı henüz yazılmadı. Bridge → Composition → Director yolunu
-   gerçek oyunda geçen bir test bu üç senaryoyu ayrıca doğrulardı. **Mehmet'in `7076906` merge'ünden sonra.**
+   `RecordingWorldBinding.SetPaymentHandler(Func<RecordingResult, PlayerActionResult>)`
+   (içeride `RecordingDiveBinding`'e deleg eder). **Mert'e bağlı.**
+2. **Uçtan uca test üç senaryoyu ayrı ayrı zorlamıyor.** `tools/Test-P1-Integrated.ps1 -Record`
+   kayıt yolunu gerçek oyunda geçiriyor ama engel arkası çekimi, tekrar ödül denemesini veya
+   boğulan kameraman düşüşünü senaryo olarak kurmuyor. Bu üçünün oyun içi karşılığı henüz yok.
 3. **Özel olaya özgü varyant yok.** Olay nesnesi henüz yok; olay tanımlandığında üç senaryonun
    olay hedefiyle tekrarı gerekir (özellikle "olay bitmişken/başlamamışken çekim").
-4. **Olay penceresi kuralı yeni eklendi,** ledger/ödeme zinciriyle henüz birleşmedi —
-   `SpecialEventWindow` + `SpecialEventWindowTests` bu dilimde yazıldı, bağlanması Adım 2+.
+4. **Olay henüz sahnede yok.** Kural katmanı ve tanım hazır — `SpecialEventWindow` +
+   `SpecialEventSchedule`, `RecordingSession`'a `IRecordingWindow` ile bağlı, `Bioluminescence`
+   tanım asset'i üretildi. Eksik olan NGO kabuğu, presenter ve sahne bağlantısı (Adım 4-6);
+   o gelene kadar olay uçtan uca oynanamaz.
 
 ## Bu envanterin kanıtlamadığı şey
 
 Bu not EditMode kural kapsamıdır. Gerçek oynanış, internet üzerinden çok oyunculu test veya
-ekonomi entegrasyonu yerine geçmez. Madde 4 "bitti" demek için 1. ve 2. maddeler gerekir ve
-ikisi de tek başıma kapatabileceğim işler değildir.
+ekonomi entegrasyonu yerine geçmez. Madde 4 "bitti" demek için yukarıdaki 1. ve 2. maddeler
+gerekir: 1 Mert'in ödeme API'sine bağlı, 2 bende.

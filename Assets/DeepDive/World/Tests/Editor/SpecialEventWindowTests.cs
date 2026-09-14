@@ -259,16 +259,20 @@ namespace DeepDive.World.Tests
             }
         }
 
-        // Guards the placeholder without freezing it as a decision: how long the event stays
-        // open is Mehmet's call, and when it lands the number moves to the event definition
-        // asset. All this asserts is that the stand-in is constructible, not that it is right.
+        // IRecordingWindow, the seam RecordingSession consults before opening a take and on
+        // every tick of an open one. Pending and Finished both read as shut, so a diver can
+        // film the plankton neither before they appear nor after they have faded.
         [Test]
-        public void ThePlaceholderDurationIsUsableButIsNotTheAgreedNumberYet()
+        public void IsOpenMirrorsTheActiveStateAndNothingElse()
         {
-            var window = Window(SpecialEventWindow.PlaceholderDurationSeconds);
+            var window = Window(1f);
+            Assert.IsFalse(window.IsOpen, "it has not appeared yet");
 
-            Assert.IsTrue(window.IsValid);
-            Assert.IsTrue(window.TryBegin(ActiveDive()));
+            window.TryBegin(ActiveDive());
+            Assert.IsTrue(window.IsOpen);
+
+            Run(window, 2f);
+            Assert.IsFalse(window.IsOpen, "it has faded");
         }
     }
 }
