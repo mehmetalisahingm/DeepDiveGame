@@ -8,11 +8,16 @@ bugün hangi testlerle zaten karşılandığını, hangi kısmının açık kald
 - Sahip: Utku (B)
 - Kaynak: `p3/utku-recording`, `codex/p3-integration` (`8c93138`) üzerine rebase edildi
 - Ortam: Unity 6000.3.23f1, EditMode
-- Son tam EditMode koşusu: **299/299 PASS**
+- Son tam EditMode koşusu: **315/315 PASS**
   (`Unity.exe -runTests -batchmode -testPlatform EditMode`, 14 Eylül 2026). Rebase tabanı
-  262 idi; özel olay dilimi 37 test ekledi (`SpecialEventWindowTests` 18,
-  `SpecialEventScheduleTests` 12, `RecordingEventDefinitionTests` 12,
-  `BioluminescenceEventAssetTests` 6, `RecordingSessionTests` 21→28).
+  262 idi; özel olay dilimi 53 test ekledi (`SpecialEventWindowTests` 18,
+  `SpecialEventScheduleTests` 12, `SpecialEventCycleTests` 16,
+  `RecordingEventDefinitionTests` 12, `BioluminescenceEventAssetTests` 6,
+  `RecordingSessionTests` 21→28).
+
+  **Kapsam dışı:** `SpecialEventRunner` (NGO kabuğu) EditMode'da doğrulanmıyor — depoda
+  NetworkManager başlatan veya `NetworkObject` spawn eden test altyapısı yok. Kabuğun
+  doğrulaması Adım 6 sahne testinde ve uçtan uca koşuda olacak.
 
 ## Özet
 
