@@ -17,11 +17,11 @@ Kullanıcı isteğiyle mevcut çalışma ara teslim olarak pushlandı. **P3 kapa
 - Son setup: `Logs/P3-event-setup-final.log`, `P3_EVENT_SETUP_IDEMPOTENT`.
 - Önceki koşuların setup/eksik definition hataları giderildi; önceki başarısız koşular PASS sayılmadı.
 - Disk testleri gerçek dosyadan host tüpünü/para/ödeme kimliklerini geri yükledi, misafir ekipmanını taşımadı, bozuk primary için backup'ı denedi.
-- Son Windows build sonucu ve gerçek oyunculu smoke bu ara teslimde henüz doğrulanmış sayılmaz.
+- Son Windows build: **PASS**, `Logs/P1-build.log`. Mevcut `Builds/P1-Integrated/DeepDiveGame-P1.exe` güncel. Gerçek oyunculu smoke henüz çalıştırılmadı.
 
 ## Sıradaki işler
 
-1. Windows build'i doğrula: `./tools/Build-P1.ps1 -Integrated`. **ConnectScenes veya P2 setup çalıştırma.**
+1. Windows build tamamlandı. Kod değişirse `./tools/Build-P1.ps1 -Integrated` ile yenile. **ConnectScenes veya P2 setup çalıştırma.**
 2. Tek kişi ve dört yerel oyuncu için `./tools/Test-P1-Integrated.ps1 -Players 1 -Port 28777 -Event` ve `-Players 4 -Port 29777 -Event`. Bu senaryo yaklaşık 106 saniyedir: gerçek olay penceresi, çekim, güvenli dönüş, gerçek kredi, host tüp satın alma ve disk yükleme. Başarısızsa düzelt; PASS uydurma.
 3. Av/çanta regresyonu: `./tools/Test-P1-Integrated.ps1 -Players 2 -Port 30777 -Hunt`; normal balık kaydı: `-Players 2 -Port 31777 -Record`.
 4. Gerçek oyun yeniden açılışı, aynı oturumdaki sonraki dalış ve solo/dört oyunculu birleşik **av + kayıt + satış + yükseltme + tekrar dalış** döngüsü henüz tam doğrulanmadı. Testler ayrı dilimlerdir; tam döngü geçti denmemeli.
