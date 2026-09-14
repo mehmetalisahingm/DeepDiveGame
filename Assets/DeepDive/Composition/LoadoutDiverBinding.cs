@@ -9,9 +9,6 @@ using UnityEngine.SceneManagement;
 
 namespace DeepDive.Composition
 {
-    // P3-A bridge: Mert owns loadout state, Mehmet owns the diver stat effect. The host resolves
-    // each player's equipped definitions and reapplies them from base values. A periodic replay
-    // also covers a restored save being available before that player's NetworkObject spawns.
     [DisallowMultipleComponent]
     public sealed class LoadoutDiverBinding : MonoBehaviour
     {
@@ -47,11 +44,16 @@ namespace DeepDive.Composition
             EnsureEconomy();
         }
 
-        private void OnEnable() => EnsureEconomy();
+        private void OnEnable()
+        {
+            EnsureEconomy();
+            BindPurchaseAuthority();
+        }
 
         private void Update()
         {
             EnsureEconomy();
+            BindPurchaseAuthority();
             if (economy == null || adapter == null || manager == null || !manager.IsListening || !adapter.IsAuthority)
                 return;
             if (adapter.Session.State.Phase == SessionPhase.Dive) return;
@@ -66,6 +68,9 @@ namespace DeepDive.Composition
             if (current == null && adapter != null)
                 current = gameObject.AddComponent<EconomyManager>();
 
+            if (current != null && GetComponent<EconomySaveStore>() == null)
+                gameObject.AddComponent<EconomySaveStore>();
+
             if (!ReferenceEquals(economy, current))
             {
                 Unsubscribe();
@@ -77,6 +82,24 @@ namespace DeepDive.Composition
                 economy.OnLoadoutChanged += LoadoutChanged;
                 subscribed = true;
             }
+        }
+
+        private void BindPurchaseAuthority()
+        {
+            if (economy != null && adapter != null && manager != null && manager.IsListening && adapter.IsAuthority)
+                EconomyPurchaseAuthority.Bind(HandlePurchase);
+            else EconomyPurchaseAuthority.Unbind(HandlePurchase);
+        }
+
+        private TransactionResult HandlePurchase(PlayerId player, string equipmentId, ulong requestId)
+        {
+            if (economy == null || adapter == null || manager == null || !manager.IsListening || !adapter.IsAuthority)
+                return TransactionResult.Reject(requestId, "InvalidState", economy != null ? economy.Revision : 0);
+            if (adapter.Session.State.Phase == SessionPhase.Dive)
+                return TransactionResult.Reject(requestId, "WrongPhase", economy.Revision);
+            if (!adapter.Session.Roster.ContainsKey(player) || !manager.ConnectedClients.ContainsKey(player.Value))
+                return TransactionResult.Reject(requestId, "PlayerInactive", economy.Revision);
+            return economy.TryPurchase(player, equipmentId, requestId);
         }
 
         private void LoadoutChanged(PlayerId player)
@@ -115,7 +138,16 @@ namespace DeepDive.Composition
             subscribed = false;
         }
 
-        private void OnDisable() => Unsubscribe();
-        private void OnDestroy() => Unsubscribe();
+        private void OnDisable()
+        {
+            EconomyPurchaseAuthority.Unbind(HandlePurchase);
+            Unsubscribe();
+        }
+
+        private void OnDestroy()
+        {
+            EconomyPurchaseAuthority.Unbind(HandlePurchase);
+            Unsubscribe();
+        }
     }
 }
