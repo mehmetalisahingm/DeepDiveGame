@@ -6,18 +6,6 @@ using UnityEngine;
 
 namespace DeepDive.Economy
 {
-    // Owns shared currency, capture sale, the shop and equipment loadout (docs/plan/
-    // CONTRACTS.md: "Ekonomi ve ilerleme | Mert" and "Kalici kayit | Mert"). Currency is a
-    // single crew-wide balance ("ortak para sistemi"), not per-player.
-    //
-    // Host-authoritative, same shape as InventoryManager: a pure state authority meant to be
-    // driven by real network requests once Mehmet's shop-request transport (P3) exists.
-    // Capture pricing hooks off InventoryManager.OnDiveSummaryReady directly (both modules are
-    // expected on the same session root, mirroring InventoryManager -> SessionManager).
-    //
-    // Recording payment (docs/plan/CONTRACTS.md RecordingResult, P3-B/#35) is intentionally not
-    // wired yet: Utku's real recording/target validation does not exist yet, so there is
-    // nothing genuine to price. Add it once #35 has a real RecordingResult producer.
     [RequireComponent(typeof(InventoryManager))]
     public class EconomyManager : MonoBehaviour
     {
@@ -29,20 +17,15 @@ namespace DeepDive.Economy
 
         private InventoryManager _inventory;
         private readonly Dictionary<string, int> _priceBySpeciesId = new Dictionary<string, int>();
+        private readonly Dictionary<int, int> _recordingRewardByQuality = new Dictionary<int, int>();
         private readonly Dictionary<string, EquipmentDefinition> _catalog = new Dictionary<string, EquipmentDefinition>();
         private readonly Dictionary<PlayerId, HashSet<string>> _loadout = new Dictionary<PlayerId, HashSet<string>>();
         private readonly HashSet<string> _soldCaptureIds = new HashSet<string>();
-        // Keyed by (player, requestId), not requestId alone: requestId is generated per-player,
-        // so two different players can legitimately produce the same value (Mehmet's review on
-        // #37) - keying on requestId alone would let one player's purchase replay another's
-        // stale result instead of being processed.
+        private readonly HashSet<string> _paidRecordingIds = new HashSet<string>();
         private readonly Dictionary<(PlayerId, ulong), TransactionResult> _processedRequests =
             new Dictionary<(PlayerId, ulong), TransactionResult>();
         private bool _subscribed;
 
-        // Resolved lazily instead of in Awake(): AddComponent does not guarantee Awake has run
-        // by the time a caller (e.g. an EditMode test right after AddComponent) uses this -
-        // same reasoning as InventoryManager.Session.
         private InventoryManager Inventory
         {
             get
@@ -53,7 +36,12 @@ namespace DeepDive.Economy
             }
         }
 
-        private void Awake() => EnsureSubscribed();
+        private void Awake()
+        {
+            ConfigureDefaults();
+            EnsureSubscribed();
+        }
+
         private void OnEnable() => EnsureSubscribed();
 
         private void OnDisable()
@@ -61,6 +49,19 @@ namespace DeepDive.Economy
             if (!_subscribed) return;
             _inventory.OnDiveSummaryReady -= HandleDiveSummary;
             _subscribed = false;
+        }
+
+        private void ConfigureDefaults()
+        {
+            // P3 v1 economy values. Utku owns quality; Mert owns the credit table.
+            _recordingRewardByQuality[1] = 25;   // Bronze
+            _recordingRewardByQuality[2] = 50;   // Silver
+            _recordingRewardByQuality[3] = 100;  // Gold
+            _recordingRewardByQuality[4] = 200;  // Platinum
+
+            // Simple tank shop required by #36. LoadoutDiverBinding applies the strongest tube.
+            _catalog["tube-1"] = new EquipmentDefinition("tube-1", "tube", 1, 100);
+            _catalog["tube-2"] = new EquipmentDefinition("tube-2", "tube", 2, 250);
         }
 
         private void EnsureSubscribed()
@@ -72,24 +73,29 @@ namespace DeepDive.Economy
             _subscribed = true;
         }
 
-        // Static price/catalog setup (e.g. from composition at startup, mirroring how
-        // SpeciesDefinition/ItemDefinition assets would be read). Zero clamps negative input.
-        // Also ensures subscription to InventoryManager as early as possible, since this is
-        // typically the first call made against a freshly added EconomyManager.
         public void SetPrice(string speciesId, int pricePerCapture)
         {
             EnsureSubscribed();
+            if (string.IsNullOrWhiteSpace(speciesId)) return;
             _priceBySpeciesId[speciesId] = Math.Max(0, pricePerCapture);
         }
+
+        public void SetRecordingReward(int quality, int credits)
+        {
+            if (quality < 1 || quality > 4) throw new ArgumentOutOfRangeException(nameof(quality));
+            _recordingRewardByQuality[quality] = Math.Max(0, credits);
+        }
+
+        public int RecordingRewardFor(int quality) =>
+            _recordingRewardByQuality.TryGetValue(quality, out var reward) ? reward : 0;
 
         public void AddToCatalog(EquipmentDefinition definition)
         {
             EnsureSubscribed();
+            if (string.IsNullOrWhiteSpace(definition.EquipmentId)) return;
             _catalog[definition.EquipmentId] = definition;
         }
 
-        // Read-only catalog access for Composition. Equipment ownership/economy remains here;
-        // the diver module consumes definitions only to recompute player stats.
         public bool TryGetEquipmentDefinition(string equipmentId, out EquipmentDefinition definition) =>
             _catalog.TryGetValue(equipmentId, out definition);
 
@@ -101,16 +107,12 @@ namespace DeepDive.Economy
 
         private void HandleDiveSummary(DiveSummary summary) => SellPreservedCatches(summary);
 
-        // Pays for every preserved capture not already sold. Safe to call more than once for
-        // the same DiveSummary (e.g. a retried event delivery): already-sold ids are skipped,
-        // so a dive's proceeds are never paid twice (CONTRACTS: "ayni av ... iki kez para
-        // uretmemeli").
         public int SellPreservedCatches(DiveSummary summary)
         {
             var earned = 0;
             foreach (var captureId in summary.PreservedCaptureIds)
             {
-                if (_soldCaptureIds.Contains(captureId)) continue;
+                if (string.IsNullOrWhiteSpace(captureId) || _soldCaptureIds.Contains(captureId)) continue;
                 if (!Inventory.TryGetCapture(captureId, out var capture)) continue;
                 _soldCaptureIds.Add(captureId);
                 earned += PriceFor(capture);
@@ -126,10 +128,27 @@ namespace DeepDive.Economy
         private int PriceFor(CaptureResult capture) =>
             _priceBySpeciesId.TryGetValue(capture.SpeciesId, out var price) ? price : 0;
 
-        // Host-side shop purchase. Balance debit and loadout grant are one logical step: either
-        // both happen or neither does (CONTRACTS: "Para dusme ve ekipman olusturma tek islem").
-        // requestId makes a retried/duplicate request return the original result instead of
-        // charging twice (CONTRACTS: "Ayni bildirimin tekrari bonusu tekrar eklemez").
+        // RecordingDiveBinding calls this only while settling a real DiveSummary. The World
+        // layer already chooses the single best safe recording per subject; this method owns
+        // money, validates the result shape and guarantees a RecordingId can never pay twice.
+        public PlayerActionResult TryRewardRecording(RecordingResult result)
+        {
+            if (string.IsNullOrWhiteSpace(result.RecordingId) || string.IsNullOrWhiteSpace(result.DiveId) ||
+                string.IsNullOrWhiteSpace(result.SubjectId) || result.ValidDurationSeconds <= 0f ||
+                result.Quality < 1 || result.Quality > 4)
+                return PlayerActionResult.InvalidTarget;
+
+            if (_paidRecordingIds.Contains(result.RecordingId)) return PlayerActionResult.DuplicateRequest;
+            if (!_recordingRewardByQuality.TryGetValue(result.Quality, out var reward) || reward <= 0)
+                return PlayerActionResult.Rejected;
+
+            _paidRecordingIds.Add(result.RecordingId);
+            SharedBalance += reward;
+            Revision++;
+            OnBalanceChanged?.Invoke();
+            return PlayerActionResult.Accepted;
+        }
+
         public TransactionResult TryPurchase(PlayerId player, string equipmentId, ulong requestId)
         {
             EnsureSubscribed();
@@ -137,7 +156,7 @@ namespace DeepDive.Economy
             if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
 
             TransactionResult result;
-            if (!_catalog.TryGetValue(equipmentId, out var definition))
+            if (string.IsNullOrWhiteSpace(equipmentId) || !_catalog.TryGetValue(equipmentId, out var definition))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
             else if (_loadout.TryGetValue(player, out var owned) && owned.Contains(equipmentId))
                 result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
@@ -163,6 +182,72 @@ namespace DeepDive.Economy
                 OnLoadoutChanged?.Invoke(player);
             }
             return result;
+        }
+
+        // Persistence intentionally exports completed economy facts, not session-scoped request
+        // ids. A new network session may legitimately start request ids from 1 again.
+        public EconomySaveData ExportSaveData(string campaignId, string checkpointId)
+        {
+            var data = new EconomySaveData
+            {
+                SchemaVersion = EconomySaveData.CurrentSchemaVersion,
+                CampaignId = campaignId ?? string.Empty,
+                CheckpointId = checkpointId ?? string.Empty,
+                SharedBalance = SharedBalance,
+                Revision = Revision,
+                SoldCaptureIds = new List<string>(_soldCaptureIds),
+                PaidRecordingIds = new List<string>(_paidRecordingIds)
+            };
+
+            foreach (var pair in _loadout)
+            {
+                data.Loadouts.Add(new EconomyLoadoutSave
+                {
+                    PlayerId = pair.Key.Value,
+                    EquipmentIds = new List<string>(pair.Value)
+                });
+            }
+            return data;
+        }
+
+        public bool TryRestore(EconomySaveData data)
+        {
+            if (data == null || data.SchemaVersion != EconomySaveData.CurrentSchemaVersion || data.SharedBalance < 0)
+                return false;
+
+            SharedBalance = data.SharedBalance;
+            Revision = Math.Max(0, data.Revision);
+            _soldCaptureIds.Clear();
+            _paidRecordingIds.Clear();
+            _loadout.Clear();
+            _processedRequests.Clear();
+
+            if (data.SoldCaptureIds != null)
+                foreach (var id in data.SoldCaptureIds)
+                    if (!string.IsNullOrWhiteSpace(id)) _soldCaptureIds.Add(id);
+            if (data.PaidRecordingIds != null)
+                foreach (var id in data.PaidRecordingIds)
+                    if (!string.IsNullOrWhiteSpace(id)) _paidRecordingIds.Add(id);
+            if (data.Loadouts != null)
+            {
+                foreach (var saved in data.Loadouts)
+                {
+                    var player = new PlayerId(saved.PlayerId);
+                    if (!_loadout.TryGetValue(player, out var set))
+                    {
+                        set = new HashSet<string>();
+                        _loadout[player] = set;
+                    }
+                    if (saved.EquipmentIds == null) continue;
+                    foreach (var equipmentId in saved.EquipmentIds)
+                        if (!string.IsNullOrWhiteSpace(equipmentId) && _catalog.ContainsKey(equipmentId))
+                            set.Add(equipmentId);
+                }
+            }
+
+            OnBalanceChanged?.Invoke();
+            foreach (var player in _loadout.Keys) OnLoadoutChanged?.Invoke(player);
+            return true;
         }
     }
 }
