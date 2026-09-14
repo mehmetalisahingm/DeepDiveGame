@@ -14,6 +14,7 @@ namespace DeepDive.Economy
 
         public int SharedBalance { get; private set; }
         public int Revision { get; private set; }
+        public string LastCheckpointId { get; private set; } = "";
 
         private InventoryManager _inventory;
         private readonly Dictionary<string, int> _priceBySpeciesId = new Dictionary<string, int>();
@@ -24,6 +25,7 @@ namespace DeepDive.Economy
         private readonly HashSet<string> _paidRecordingIds = new HashSet<string>();
         private readonly Dictionary<(PlayerId, ulong), TransactionResult> _processedRequests =
             new Dictionary<(PlayerId, ulong), TransactionResult>();
+        private Func<bool> _persist;
         private bool _subscribed;
 
         private InventoryManager Inventory
@@ -53,13 +55,12 @@ namespace DeepDive.Economy
 
         private void ConfigureDefaults()
         {
-            // P3 v1 economy values. Utku owns quality; Mert owns the credit table.
+            // P3 v1 values: Utku owns quality, Mert owns credits.
             _recordingRewardByQuality[1] = 25;   // Bronze
             _recordingRewardByQuality[2] = 50;   // Silver
             _recordingRewardByQuality[3] = 100;  // Gold
             _recordingRewardByQuality[4] = 200;  // Platinum
 
-            // Simple tank shop required by #36. LoadoutDiverBinding applies the strongest tube.
             _catalog["tube-1"] = new EquipmentDefinition("tube-1", "tube", 1, 100);
             _catalog["tube-2"] = new EquipmentDefinition("tube-2", "tube", 2, 250);
         }
@@ -72,6 +73,13 @@ namespace DeepDive.Economy
             _inventory.OnDiveSummaryReady += HandleDiveSummary;
             _subscribed = true;
         }
+
+        public void SetPersistenceHandler(Func<bool> persist) => _persist = persist;
+        public void ClearPersistenceHandler(Func<bool> persist)
+        {
+            if (_persist == persist) _persist = null;
+        }
+        private bool Persist() => _persist == null || _persist();
 
         public void SetPrice(string speciesId, int pricePerCapture)
         {
@@ -105,22 +113,39 @@ namespace DeepDive.Economy
         public LoadoutState LoadoutStateFor(PlayerId player) =>
             new LoadoutState(player, LoadoutFor(player), Revision);
 
-        private void HandleDiveSummary(DiveSummary summary) => SellPreservedCatches(summary);
+        private void HandleDiveSummary(DiveSummary summary)
+        {
+            LastCheckpointId = summary.CheckpointId ?? "";
+            SellPreservedCatches(summary);
+        }
 
         public int SellPreservedCatches(DiveSummary summary)
         {
             var earned = 0;
+            var addedIds = new List<string>();
             foreach (var captureId in summary.PreservedCaptureIds)
             {
                 if (string.IsNullOrWhiteSpace(captureId) || _soldCaptureIds.Contains(captureId)) continue;
                 if (!Inventory.TryGetCapture(captureId, out var capture)) continue;
                 _soldCaptureIds.Add(captureId);
+                addedIds.Add(captureId);
                 earned += PriceFor(capture);
             }
 
             if (earned <= 0) return 0;
+            var previousBalance = SharedBalance;
+            var previousRevision = Revision;
             SharedBalance += earned;
             Revision++;
+
+            if (!Persist())
+            {
+                SharedBalance = previousBalance;
+                Revision = previousRevision;
+                foreach (var id in addedIds) _soldCaptureIds.Remove(id);
+                return 0;
+            }
+
             OnBalanceChanged?.Invoke();
             return earned;
         }
@@ -128,9 +153,7 @@ namespace DeepDive.Economy
         private int PriceFor(CaptureResult capture) =>
             _priceBySpeciesId.TryGetValue(capture.SpeciesId, out var price) ? price : 0;
 
-        // RecordingDiveBinding calls this only while settling a real DiveSummary. The World
-        // layer already chooses the single best safe recording per subject; this method owns
-        // money, validates the result shape and guarantees a RecordingId can never pay twice.
+        // Called by RecordingDiveBinding while settling the real safe-return summary.
         public PlayerActionResult TryRewardRecording(RecordingResult result)
         {
             if (string.IsNullOrWhiteSpace(result.RecordingId) || string.IsNullOrWhiteSpace(result.DiveId) ||
@@ -142,9 +165,20 @@ namespace DeepDive.Economy
             if (!_recordingRewardByQuality.TryGetValue(result.Quality, out var reward) || reward <= 0)
                 return PlayerActionResult.Rejected;
 
+            var previousBalance = SharedBalance;
+            var previousRevision = Revision;
             _paidRecordingIds.Add(result.RecordingId);
             SharedBalance += reward;
             Revision++;
+
+            if (!Persist())
+            {
+                _paidRecordingIds.Remove(result.RecordingId);
+                SharedBalance = previousBalance;
+                Revision = previousRevision;
+                return PlayerActionResult.Rejected;
+            }
+
             OnBalanceChanged?.Invoke();
             return PlayerActionResult.Accepted;
         }
@@ -164,15 +198,28 @@ namespace DeepDive.Economy
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
             else
             {
+                var previousBalance = SharedBalance;
+                var previousRevision = Revision;
+                var createdSet = false;
                 SharedBalance -= definition.Price;
                 if (!_loadout.TryGetValue(player, out var set))
                 {
                     set = new HashSet<string>();
                     _loadout[player] = set;
+                    createdSet = true;
                 }
                 set.Add(equipmentId);
                 Revision++;
-                result = TransactionResult.Ok(requestId, Revision);
+
+                if (!Persist())
+                {
+                    set.Remove(equipmentId);
+                    if (createdSet && set.Count == 0) _loadout.Remove(player);
+                    SharedBalance = previousBalance;
+                    Revision = previousRevision;
+                    result = TransactionResult.Reject(requestId, "SaveFailed", Revision);
+                }
+                else result = TransactionResult.Ok(requestId, Revision);
             }
 
             _processedRequests[requestKey] = result;
@@ -184,15 +231,13 @@ namespace DeepDive.Economy
             return result;
         }
 
-        // Persistence intentionally exports completed economy facts, not session-scoped request
-        // ids. A new network session may legitimately start request ids from 1 again.
         public EconomySaveData ExportSaveData(string campaignId, string checkpointId)
         {
             var data = new EconomySaveData
             {
                 SchemaVersion = EconomySaveData.CurrentSchemaVersion,
                 CampaignId = campaignId ?? string.Empty,
-                CheckpointId = checkpointId ?? string.Empty,
+                CheckpointId = checkpointId ?? LastCheckpointId ?? string.Empty,
                 SharedBalance = SharedBalance,
                 Revision = Revision,
                 SoldCaptureIds = new List<string>(_soldCaptureIds),
@@ -217,6 +262,7 @@ namespace DeepDive.Economy
 
             SharedBalance = data.SharedBalance;
             Revision = Math.Max(0, data.Revision);
+            LastCheckpointId = data.CheckpointId ?? "";
             _soldCaptureIds.Clear();
             _paidRecordingIds.Clear();
             _loadout.Clear();
