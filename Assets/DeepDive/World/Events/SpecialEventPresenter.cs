@@ -19,15 +19,14 @@ namespace DeepDive.World
     // A plain MonoBehaviour on purpose: it sends nothing and owns no network state, so it takes
     // no NetworkBehaviour slot on the event's NetworkObject.
     //
-    // Every field may be empty. Mert delivers the particle, the light and the start clip later
-    // (the clip goes on the RecordingEventDefinition), and until then this runs silently. An
-    // empty field here is a decision, not a setup fault, so it is skipped without a log - unlike
-    // RecordingSubject's missing quality table, which is logged. Filling the fields in is the
-    // whole integration step; no code changes.
+    // Scene-authored presentation still wins. P3 ships a basic start cue on the definition asset;
+    // when the scene has no explicit AudioSource, this component creates a small 3D source on the
+    // event object at runtime. That keeps the current generated scene audible without overwriting
+    // a later Mert-authored source.
     [RequireComponent(typeof(SpecialEventRunner))]
     public sealed class SpecialEventPresenter : MonoBehaviour
     {
-        [Header("Signal (Mert fills these in; empty stays silent)")]
+        [Header("Signal (scene-authored references win; missing audio gets a P3 fallback source)")]
         [Tooltip("The plankton glow. Started and stopped only; its authored colours are kept.")]
         [SerializeField] private ParticleSystem glowParticles;
 
@@ -43,6 +42,20 @@ namespace DeepDive.World
         private void Awake()
         {
             runner = GetComponent<SpecialEventRunner>();
+            EnsureStartAudio();
+        }
+
+        private void EnsureStartAudio()
+        {
+            if (startAudio != null || runner == null || runner.Definition == null || runner.Definition.StartClip == null)
+                return;
+
+            startAudio = GetComponent<AudioSource>();
+            if (startAudio == null) startAudio = gameObject.AddComponent<AudioSource>();
+            startAudio.playOnAwake = false;
+            startAudio.loop = false;
+            startAudio.spatialBlend = 1f;
+            startAudio.dopplerLevel = 0f;
         }
 
         // After every Awake on the object, so a particle system or audio source saved with
