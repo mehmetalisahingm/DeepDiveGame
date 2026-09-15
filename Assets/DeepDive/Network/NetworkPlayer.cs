@@ -36,17 +36,26 @@ namespace DeepDive.Network
         [Header("View")]
         [SerializeField] private Camera viewCamera;
         [SerializeField] private Renderer bodyRenderer;
+        [SerializeField] private PlayerPresentationView presentationView;
 
         public readonly NetworkVariable<bool> Swimming = new NetworkVariable<bool>();
         public readonly NetworkVariable<float> Oxygen = new NetworkVariable<float>();
         public readonly NetworkVariable<float> OxygenCapacity = new NetworkVariable<float>();
         public readonly NetworkVariable<float> Health = new NetworkVariable<float>();
         public readonly NetworkVariable<bool> Passive = new NetworkVariable<bool>();
+        public readonly NetworkVariable<bool> Seated = new NetworkVariable<bool>();
+        public readonly NetworkVariable<byte> Locomotion = new NetworkVariable<byte>();
+        public readonly NetworkVariable<byte> HeldEquipment = new NetworkVariable<byte>();
+        public readonly NetworkVariable<bool> RecordingPresentation = new NetworkVariable<bool>();
         public readonly NetworkVariable<ulong> LastActionRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<int> LastActionResult = new NetworkVariable<int>();
         public readonly NetworkVariable<byte> LastActionKind = new NetworkVariable<byte>();
 
         public bool ReadKeyboard { get; set; } = true;
+        public LocomotionMode CurrentLocomotion => (LocomotionMode)Locomotion.Value;
+        public HeldEquipmentMode CurrentHeldEquipment => (HeldEquipmentMode)HeldEquipment.Value;
+        public PlayerPresentationState PresentationState =>
+            new PlayerPresentationState(CurrentLocomotion, CurrentHeldEquipment, RecordingPresentation.Value);
 
         private readonly ServerInputBuffer input = new ServerInputBuffer();
         private readonly ServerActionGate actionGate = new ServerActionGate();
@@ -66,6 +75,10 @@ namespace DeepDive.Network
         private float pitch;
         private float gravityVelocity;
         private double nextInputTime;
+        private EnvironmentLocomotion environmentLocomotion = EnvironmentLocomotion.Land;
+        private bool externalEnvironmentBound;
+        private HeldEquipmentMode requestedEquipment = HeldEquipmentMode.Harpoon;
+        private Vector3 lastPresentationPosition;
 
         public Vector3 RecordingEyePosition => viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
         public float RecordingFieldOfView => viewCamera != null ? viewCamera.fieldOfView : 60f;
@@ -88,11 +101,22 @@ namespace DeepDive.Network
             controller.enabled = IsServer;
             NetworkObject.DestroyWithScene = false;
             yaw = transform.eulerAngles.y;
+            lastPresentationPosition = transform.position;
+
+            if (presentationView == null) presentationView = GetComponent<PlayerPresentationView>();
+            if (presentationView == null) presentationView = gameObject.AddComponent<PlayerPresentationView>();
+            presentationView.BindFallback(bodyRenderer);
 
             if (IsServer)
             {
                 actionGate.Reset();
+                Seated.Value = false;
+                RecordingPresentation.Value = false;
+                environmentLocomotion = EnvironmentLocomotion.Land;
+                externalEnvironmentBound = false;
+                requestedEquipment = HeldEquipmentMode.Harpoon;
                 PublishVitals();
+                PublishPresentationServer();
                 LastActionRequestId.Value = 0;
                 LastActionResult.Value = (int)PlayerActionResult.Accepted;
                 LastActionKind.Value = 0;
@@ -124,7 +148,10 @@ namespace DeepDive.Network
 
         private void Update()
         {
-            if (!IsSpawned || !IsOwner) return;
+            if (!IsSpawned) return;
+            UpdatePresentationView();
+            if (!IsOwner) return;
+
             UpdateLowOxygenFeedback();
             ObserveActionFeedback();
             if (!ReadKeyboard) return;
@@ -137,7 +164,8 @@ namespace DeepDive.Network
                 pitch = Mathf.Clamp(pitch - Input.GetAxisRaw("Mouse Y") * 2f, -85f, 85f);
                 if (Application.isFocused && !Passive.Value)
                 {
-                    if (Input.GetMouseButtonDown(0)) SubmitHarpoonLocal();
+                    if (Input.GetMouseButtonDown(0) && CurrentHeldEquipment == HeldEquipmentMode.Harpoon)
+                        SubmitHarpoonLocal();
                     if (Input.GetKeyDown(KeyCode.E)) SubmitPickupLocal();
                 }
             }
@@ -176,7 +204,8 @@ namespace DeepDive.Network
 
         public void SubmitHarpoonLocal()
         {
-            if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
+            if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient ||
+                CurrentHeldEquipment != HeldEquipmentMode.Harpoon) return;
             shotFeedbackUntil = Time.unscaledTime + 0.14f;
             PlayOneShot(harpoonShotClip);
             var requestId = ++actionSequence;
@@ -192,6 +221,13 @@ namespace DeepDive.Network
             else PickupRpc(requestId);
         }
 
+        public void SetHeldEquipmentLocal(HeldEquipmentMode mode)
+        {
+            if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
+            if (IsServer) ApplyHeldEquipmentRequestServer(mode);
+            else SetHeldEquipmentRpc((byte)mode);
+        }
+
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner, Delivery = RpcDelivery.Unreliable)]
         private void MoveRpc(PlayerInputFrame frame) => input.Accept(frame, Time.realtimeSinceStartupAsDouble);
 
@@ -201,28 +237,119 @@ namespace DeepDive.Network
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
         private void PickupRpc(ulong requestId) => HandlePickup(requestId);
 
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        private void SetHeldEquipmentRpc(byte mode) => ApplyHeldEquipmentRequestServer((HeldEquipmentMode)mode);
+
         private void FixedUpdate()
         {
             if (!IsSpawned || !IsServer || session == null || session.IsSceneLoading) return;
             var now = Time.realtimeSinceStartupAsDouble;
             var frame = input.Read(now);
             transform.rotation = Quaternion.Euler(0, frame.Yaw, 0);
-            Swimming.Value = SwimVolume.Contains(transform.position + Vector3.up * 0.9f);
 
-            vitals.Tick(Time.fixedDeltaTime, session.DiveActive && Swimming.Value);
+            if (!externalEnvironmentBound)
+            {
+                // Compatibility fallback until Utku's P3.1 World classifier is bound by Composition.
+                // Once SetEnvironmentLocomotionServer is called, this legacy query stops being an authority.
+                environmentLocomotion = SwimVolume.Contains(transform.position + Vector3.up * 0.9f)
+                    ? EnvironmentLocomotion.Underwater
+                    : EnvironmentLocomotion.Land;
+            }
+
+            var locomotion = PlayerPresentationRules.ResolveLocomotion(environmentLocomotion, Seated.Value, Passive.Value);
+            Locomotion.Value = (byte)locomotion;
+            Swimming.Value = PlayerPresentationRules.IsSwimming(locomotion);
+            HeldEquipment.Value = (byte)PlayerPresentationRules.ResolveHeldEquipment(
+                session.DiveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value);
+
+            vitals.Tick(Time.fixedDeltaTime,
+                session.DiveActive && PlayerPresentationRules.DrainsOxygen(locomotion));
             PublishVitals();
 
-            var move = Passive.Value ? Vector3.zero : frame.Move;
-            if (!Swimming.Value) move.y = 0;
-            move = Quaternion.Euler(0, frame.Yaw, 0) * Vector3.ClampMagnitude(move, 1f);
-            var velocity = move * (Swimming.Value ? swimSpeed : walkSpeed);
-            if (Swimming.Value) gravityVelocity = 0;
-            else
+            var move = PlayerPresentationRules.FilterMoveInput(locomotion, frame.Move);
+            move = Quaternion.Euler(0, frame.Yaw, 0) * move;
+            var swimming = PlayerPresentationRules.IsSwimming(locomotion);
+            var velocity = move * (swimming ? swimSpeed : walkSpeed);
+            if (swimming)
+            {
+                gravityVelocity = 0;
+            }
+            else if (locomotion == LocomotionMode.Land)
             {
                 gravityVelocity = controller.isGrounded ? -2f : Mathf.Max(gravityVelocity - 9.81f * Time.fixedDeltaTime, -20f);
                 velocity.y = gravityVelocity;
             }
+            else
+            {
+                gravityVelocity = 0;
+                velocity = Vector3.zero;
+            }
             controller.Move(velocity * Time.fixedDeltaTime);
+        }
+
+        public void SetEnvironmentLocomotionServer(EnvironmentLocomotion mode)
+        {
+            if (!IsServer) return;
+            if (mode != EnvironmentLocomotion.Land && mode != EnvironmentLocomotion.Surface &&
+                mode != EnvironmentLocomotion.Underwater) return;
+            externalEnvironmentBound = true;
+            environmentLocomotion = mode;
+            PublishPresentationServer();
+        }
+
+        public void ReleaseEnvironmentLocomotionServer()
+        {
+            if (!IsServer) return;
+            externalEnvironmentBound = false;
+        }
+
+        public void SetSeatedServer(bool seated)
+        {
+            if (!IsServer) return;
+            Seated.Value = seated;
+            if (seated) input.ClearMotion();
+            PublishPresentationServer();
+        }
+
+        public void SetRecordingPresentationServer(bool active)
+        {
+            if (!IsServer) return;
+            RecordingPresentation.Value = active;
+            if (active) requestedEquipment = HeldEquipmentMode.Camera;
+            PublishPresentationServer();
+        }
+
+        private void ApplyHeldEquipmentRequestServer(HeldEquipmentMode mode)
+        {
+            if (!IsServer) return;
+            if (mode != HeldEquipmentMode.None && mode != HeldEquipmentMode.Harpoon && mode != HeldEquipmentMode.Camera)
+                return;
+            requestedEquipment = mode;
+            PublishPresentationServer();
+        }
+
+        private void PublishPresentationServer()
+        {
+            if (!IsServer) return;
+            var locomotion = PlayerPresentationRules.ResolveLocomotion(environmentLocomotion, Seated.Value, Passive.Value);
+            Locomotion.Value = (byte)locomotion;
+            Swimming.Value = PlayerPresentationRules.IsSwimming(locomotion);
+            var diveActive = session != null && session.DiveActive;
+            HeldEquipment.Value = (byte)PlayerPresentationRules.ResolveHeldEquipment(
+                diveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value);
+        }
+
+        private void UpdatePresentationView()
+        {
+            if (presentationView == null) return;
+            var delta = transform.position - lastPresentationPosition;
+            lastPresentationPosition = transform.position;
+            var planar = Vector3.ProjectOnPlane(delta, Vector3.up).magnitude;
+            var referenceSpeed = PlayerPresentationRules.IsSwimming(CurrentLocomotion) ? swimSpeed : walkSpeed;
+            var normalizedSpeed = Time.deltaTime > 0.0001f
+                ? Mathf.Clamp01(planar / Time.deltaTime / Mathf.Max(0.01f, referenceSpeed))
+                : 0f;
+            presentationView.Apply(IsOwner, PresentationState, normalizedSpeed);
         }
 
         private void HandleHarpoon(ulong requestId)
@@ -236,7 +363,8 @@ namespace DeepDive.Network
                 PublishAction(requestId, kind, result);
                 return;
             }
-            if (session == null || !session.DiveActive || Passive.Value || !Swimming.Value)
+            if (session == null || !PlayerPresentationRules.CanUseHarpoon(session.DiveActive, Passive.Value,
+                    CurrentLocomotion, CurrentHeldEquipment))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidState);
                 return;
@@ -336,7 +464,11 @@ namespace DeepDive.Network
             if (!IsServer || vitals == null) return;
             vitals.Reset();
             actionGate.Reset();
+            Seated.Value = false;
+            RecordingPresentation.Value = false;
+            requestedEquipment = HeldEquipmentMode.Harpoon;
             PublishVitals();
+            PublishPresentationServer();
         }
 
         private void PublishVitals()
@@ -347,6 +479,7 @@ namespace DeepDive.Network
             Health.Value = vitals.Health;
             Passive.Value = vitals.Passive;
             if (Passive.Value) input.ClearMotion();
+            PublishPresentationServer();
         }
 
         private void EnsureFeedbackAudio()
@@ -449,10 +582,12 @@ namespace DeepDive.Network
         public void Teleport(Pose pose)
         {
             if (!IsServer) return;
-            input.ClearMotion(); gravityVelocity = 0;
+            input.ClearMotion();
+            gravityVelocity = 0;
             controller.enabled = false;
             networkTransform.Teleport(pose.position, pose.rotation, Vector3.one);
             controller.enabled = true;
+            lastPresentationPosition = pose.position;
         }
 
         public override void OnNetworkDespawn()
