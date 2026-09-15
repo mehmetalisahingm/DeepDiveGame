@@ -1,6 +1,6 @@
 # DeepDiveGame çalışma talimatları
 
-Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili CONTRACTS.md bölümü ve WORKFLOW.md okunur.
+Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili CONTRACTS.md bölümü ve WORKFLOW.md okunur. Ev/gün/medya/harita/tekne/boss işinde WORLD_SYSTEMS.md'nin ilgili bölümü de okunur.
 
 ## Ekip
 
@@ -19,7 +19,11 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 - docs/plan/P0_MEETING.md gündemi referanstır; P0 kapanışını bekletmez. Üretim, devam/ayrılma, hedef, bütçe, tasarım yetkisi ve netcode sorumluluğundaki açık kararlar ilgili özelliğe başlamadan ele alınır; gerçek kararları uydurma. Kayıt sahibi host olmadan aynı kampanyaya devam edilemeyeceği D06 sınırını koru.
 - Gelecek faz sözleşmeleri taslak olabilir; ihtiyaç duyulan fazdan önce kesinleşir. Bütün geleceğin API'sini P0'da uygulama.
 - İlk oynanabilir sürüm tek dalış bölgesidir. P2'de kontrol/av/oksijen-çanta testi, P3'te kamera ve tam döngü testi yapılmadan sonraki faza geçme; ikinci bölge ekleme.
-- P2/P3 testinden önce plandaki temel hareket, vuruş, nefes, UI ve sualtı ışık/sis geri bildirimini sağla. Nihai cila veya kapsamlı animasyon sistemi ekleme; his katmanını P4'e erteleme.
+- Plan 3.0 (15 Eylül): P3 insan modeli/yürüme-yüzme/eller/ekipman, kıyı/üç NPC/çantayla satış, ilk sandal görevi ve canlı tekne haritasını teslim eder. Kamera ayrı satın alınır; kıyı avı kamera veya onarım istemez. Ayrıntı GAMEPLAY_LOOP.md ve ASSET_PLAN.md içindedir; temel sanatı P4'e erteleme.
+- P2/P3 testinden önce hareket, vuruş, nefes, UI ve sualtı ışık/sisini sağla. P3 sınırlı insan/ekipman animasyonu kapsam içidir; kapsamlı sinematik/karakter yaratma sistemi ekleme.
+- P4 sırası: P4.1 ev/gün/keşif; P4.2 gerçek klip/PC/oyun içi kanal; P4.3 ekipman/üç tekne; P4.4 tür/boss; P4.5 günlük çeşitlilik/ev-kasaba/roller; P4.6 tam kabul. P4 açılmadan veya önceki ara teslim kabul edilmeden sıradakini uygulama. İzlenebilir klip şartını puan/thumbnail ile tamamlanmış sayma.
+- Başlangıç sandalı üç erişilebilir parçayla onarılır; parçalar kıyıdan bulunabilir veya av geliriyle alınabilir. P4 motorlu ve araştırma teknesi satın alımını ekler; hepsi dört kişilik, denizde aynı anda bir aktif araçtır. Sabit rota korunur; serbest dümen/fizik ve ikinci ada kapsam dışıdır.
+- Güvenli dönüş otomatik ödeme değildir. P3 NPC teslimi, P4.2 alternatif PC kanal yayını vardır; aynı kayıt iki ticari yoldan ödenmez. Video oyun kamerası/ortam sesidir; gerçek sosyal medya yükleme veya mikrofon kaydı yoktur. D06 host kampanyası sınırı korunur.
 - Erken bitirirsen mevcut fazın testini/incelemesini veya kaydedilmiş destek görevini al.
 - Kullanıcının açık yeni talimatı planı değiştirebilir; ilgili belgeleri tutarlı güncelle. Sessiz kapsam büyütme yapma.
 
@@ -36,7 +40,7 @@ Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili 
 
 P0 istisnası: ortak temel main'e birleşir; üç kişi depoyu indirip projeyi aynı Unity sürümünde açtığını ve ortak Windows build'ini çalıştırdığını bildirince kısa kapanış kaydı yazılır. P1 ve sonrasında üç kişinin işleri birleşir, faz testleri geçer ve tek kısa kapanış kaydında commit/build, sonuçlar ve üçünün gerçek tamamı bulunur. Ayrı imza matrisi gerekmez. Faz main'e birleştirilip ilgili davranış doğrulandıktan sonra STATUS güncellenir ve sonraki faz açılır.
 
-P2 ve P3'te kendi kapsamlarının oynanış değerlendirmesi de şarttır. Bir kişinin işi eksik veya test başarısızsa fazı açma. Gerekli gerçek ekip onayını otomatik üretme; kanıtlar zaten yeterliyse gereksiz kullanıcı teyidi isteme.
+P2 ve P3'te kendi kapsamlarının oynanış değerlendirmesi de şarttır. P3'ün yeni insan/ekipman/kamera satın alma, kıyı/NPC/sandal/harita ve görsel kabulü geçmeden eski teknik kapanış adayını yeterli sayma. P3 main'e birleşip doğrulandıktan sonra P4 ayrıca açılır. P4.6'da balık/video/ev/gün/tekne/boss döngüsü art arda üç oyun günü ve gerçek ortak değerlendirmeyle kabul edilir. Eksik iş/test varsa ilerleme; başkasının tamamını üretme, mevcut kanıt yeterliyse gereksiz teyit isteme.
 
 ## Yetki
 

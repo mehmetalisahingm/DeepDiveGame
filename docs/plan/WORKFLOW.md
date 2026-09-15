@@ -1,12 +1,15 @@
 # Birlikte çalışma düzeni
 
-> 10 Eylül 2026: P1 kullanıcı kararıyla kapandı, P2 açıldı. Doğrulanmamış testler geçmiş sayılmadı; [kapanış ve devredilen kontroller](../reports/P1-REPORT.md). Sonraki fazların kabul şartları korunur.
+Plan 3.0 — 15 Eylül 2026. P3 açık, P4–P6 kilitli. Yeni plan kapsamı uygulama veya faz kapanışı değildir; önceki test/ekip onayları yeni özelliklere taşınmaz.
 
 Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazın incelemesine, testine veya devredilen alt işine destek olur.
 
 ## Nereden bakacağız?
 
 - Kapsam ve teslim: [PHASES.md](PHASES.md).
+- Fiziksel oyuncu döngüsü ve ara teslimler: [GAMEPLAY_LOOP.md](GAMEPLAY_LOOP.md).
+- Ev/gün/uyku, gerçek video/PC/kanal, harita, büyük tekne ve boss kuralları: [WORLD_SYSTEMS.md](WORLD_SYSTEMS.md).
+- İnsan/animasyon, ekipman, çevre, NPC ve ses kalitesi: [ASSET_PLAN.md](ASSET_PLAN.md).
 - Güncel faz ve kişi görevi: [STATUS.md](STATUS.md).
 - P0 ekip/üretim/bütçe/tasarım kararları: [toplantı gündemi ve kayıt](P0_MEETING.md); Mehmet takip eder, Mert kayıt desteği ve görsel/ses sorumluluğunu üstlenir.
 - Sistem bağlantıları: [CONTRACTS.md](CONTRACTS.md).
@@ -16,14 +19,28 @@ Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazı
 ## Branch ve inceleme
 
 - main, ortak doğrulanmış sürümdür; başlangıç plan commit'i oyun fazını tamamlamaz.
-- Mevcut faz dalı örneği: codex/p0-integration.
-- Küçük özellik dalları o faz dalından açılır: codex/p2-mehmet-oxygen, codex/p2-utku-fish, codex/p2-mert-inventory.
+- Mevcut ortak faz dalı: `codex/p3-integration`.
+- Küçük özellik dalları o faz dalından açılır; örnek isimler: `codex/p3-mehmet-avatar`, `codex/p3-utku-coast`, `codex/p3-mert-npc`. Bunlar oluşturulmuş dal iddiası değildir.
 - Özellik PR'ı aynı faz dalına, faz kapanış PR'ı main'e gider.
 - Ayrı kişi branch'lerinde haftalarca birikim yapılmaz; küçük birleşmeler yapılır.
 - P0'da karşılıklı PR incelemesi zorunlu değildir; ortak proje ve build'in üç kişide açılması yeterlidir. P1'den itibaren en az bir başka kişi değişikliği inceler: Mehmet'in işini Utku, Utku'nun işini Mert, Mert'in işini Mehmet.
 - Birleştirmeyi P0/P3/P6'da Mehmet, P1/P4'te Utku, P2/P5'te Mert koordine eder. Koordinatör herkesin kodunu yazmaz.
 
 Plan belgelerinin güncellenmesi oyun fazının kapanışı değildir. Kullanıcı talebine dayanan plan değişikliği ayrı dokümantasyon branch'inde hazırlanır; oyun testleri veya diğer kişilerin işi yapılmış sayılmaz.
+
+## Plan 3.0 entegrasyon sırası
+
+P3.0 mevcut teknik iş → P3.1 insan/elde ekipman → P3.2 kıyı/NPC/ilk görev/ayrı kamera → P3.3 sandal/canlı harita → P3.4 ortak kabul. Her alan sahibi aynı teslimdeki bağlantısını yapar; tek kişi sonraki faza başlamaz.
+
+Mert V01–V03 insan/animasyon/ekipman setini küçük paket olarak sağlar; Mehmet oyuncu prefabına bağlar, Utku su geçişini sınar. Sonraki paketlerde Mert kasaba/NPC ve onarım durumunu, Utku kıyı/rota parçasını, Mehmet etkileşim/koltuk/hareketi kendi dosyalarında yapar. Ortak sahne/prefab değişiminin sırası kısa görev kaydında belirtilir. Yeni sözleşmeler etkilenen kişilerce ilgili ara teslimden önce netleştirilir; bu plan onların inceleme/tamam kaydı değildir.
+
+P3.2'de eski otomatik ödeme yolu ile yeni NPC teslim yolu aynı anda aktif bırakılamaz. Şema göçü, bekleyen av/kayıt ve tek ödeme regresyonu aynı teslimde tamamlanır. P3.3'te tek sandal otoritesi, onarım/koltuk/rota ve kopma davranışı birlikte doğrulanır.
+
+P4 ayrıca açıldıktan sonra P4.1 ev/gün/keşif → P4.2 klip/PC/kanal → P4.3 ekipman/büyük tekneler → P4.4 tür/boss → P4.5 günlük dünya/gelişim/roller → P4.6 tam kabul. Önceki ara teslim kabul edilmeden sonraki özellik başlamaz; aynı teslimin bağımsız A/B/C işleri beraber hazırlanabilir. Alt ajan kullanımı ayrıca yetki ister.
+
+Medya P4.2'de önce hedef Windows build'inde gerçek kayıt/aktarım/oynatma denemesiyle doğrulanır. Teknik sorun çözülmeden PC'de stok video/puan kartını başarı diye sunmayın. Gün sonu, yayın hakları/ödeme ve klip dosyası ayrı durumlar olarak tek kampanya kaydına bağlanır; sonraki görevlerde sahte veriyle kapatılmaz.
+
+P4.3 tekne sahipliği/aktif gövde/envanter/harita, P4.4 boss/hasar/ödül, P4.5 uygun görev/hava/rol birlikte test edilir. Mert kaynakları küçük paketle sağlar; her kişi kendi sanat ve co-op bağlantısını teslim eder. Faz/ara teslim başına gerçek build/kanıt ve kısa sonuç yeterlidir; yeni imza matrisi yoktur.
 
 ## Günlük kısa kontrol
 
@@ -61,9 +78,9 @@ P1'den itibaren koruma kurulana kadar küçük PR ve bir başka kişinin incelem
 2. PHASES içindeki kabul koşulları ve ilgili eski davranışlar birlikte denenir.
 3. Tek kısa kayda commit/build, sonuç, açık kusurlar ve üçünüzün gerçek tamam mesajı eklenir. Ayrı imza matrisi veya her özellik için üç inceleme gerekmez.
 4. Faz PR'ı main'e birleşir; birleşmiş build açılır ve ilgili davranış kontrol edilir. Çakışma davranışı değiştirdiyse ilgili test yeniden yapılır.
-5. STATUS güncellenir; ancak sonra sıradaki tek faz açılır.
+5. STATUS güncellenir; ancak sonra sıradaki tek faz açılır. P3'ten P4'e ayrıca faz açılış kararı gerekir.
 
-P2'de temel his katmanıyla hareket/av/oksijen-çanta, P3'te kamera/tam döngü/tekrar dalma değerlendirmesi gerekir. Faz açıkken bir kişi gelecekteki faza ait kod, sahne veya içerik ekleyemez. Başkasının onayı veya testi uydurulamaz.
+P2'de temel his katmanıyla hareket/av/oksijen-çanta, P3'te insan hareketi/elde ekipman, kıyı/NPC/sandal, kamera/tam döngü/tekrar dalma ve ASSET_PLAN görsel değerlendirmesi gerekir. Gerçek build'deki kısa görüntü kaydı aynı test/commit raporuna bağlanır; sadece güzel ekran görüntüsü co-op testi yerine geçmez. Faz açıkken bir kişi gelecekteki faza ait kod, sahne veya içerik ekleyemez. Başkasının onayı veya testi uydurulamaz.
 
 ## İş yükü ve değişiklik
 

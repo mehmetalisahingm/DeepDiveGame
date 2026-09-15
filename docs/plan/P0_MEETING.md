@@ -1,5 +1,7 @@
 # P0 toplantısı — ekip, üretim ve devam kararı
 
+15 Eylül 2026 notu: Bu belge P0 gündemini ve henüz tamamlandığı bildirilmemiş kararları korur; güncel faz **P3** için [STATUS](STATUS.md) esas alınır. Plan 3.0'ın kıyı/insan/NPC/sandal, ev/gün/video/kanal/tekne/boss ve görsel teslimleri [PHASES](PHASES.md), [WORLD_SYSTEMS](WORLD_SYSTEMS.md) ve [ASSET_PLAN](ASSET_PLAN.md)'dadır. Toplantı, kaynak satın alımı veya ekip tamamı bu revizyonla gerçekleşmiş sayılmaz.
+
 Durum: SORUMLULAR_ATANDI, toplantı ayrıntıları açık. Kullanıcı 31 Ağustos 2026'da ortak sorumlulukları Mehmet'e, ardından görsel ve sesi Mert'e verdi. Bu atama toplantının yapıldığı, uzmanlığın doğrulandığı, işlerin bittiği veya harcamanın onaylandığı anlamına gelmez. Mehmet kararları takip eder; Mert mevcut P0-C görevi kapsamında kayıt desteği verir.
 
 ## Güncel ortak sorumluluklar
@@ -15,7 +17,7 @@ Durum: SORUMLULAR_ATANDI, toplantı ayrıntıları açık. Kullanıcı 31 Ağust
 
 Mevcut Mehmet/Utku/Mert geliştirme işleri ve dönüşümlü faz birleştirme koordinatörleri korunur. Mert görsel/ses üretimini yönetir; Mehmet oyuncuya, Utku dünyaya, Mert kasaba/UI'a entegrasyonu kendi dosyalarında yapar. Dosya sahipliği değişecekse devir açıkça kaydedilir. Destek işleri mevcut faz içinde bölünür.
 
-Amaç: oyun koduna başlamadan önce iş bölümü, hedef, bütçe ve devam planını netleştirmek. P0 proje/sürüm/erişim hazırlığı sürebilir; oyun geliştirme ve P1 hâlâ kapalıdır. D01–D11 ile bu gündemi toplam 45–60 dakikalık görüşmede ele alın; ayrı sunum veya imza matrisi hazırlamayın. Karar tablosundaki kısa sonuçlar yeterlidir.
+Gündemin ilk amacı oyun kodundan önce iş bölümü, hedef, bütçe ve devam planını netleştirmekti. P0 kapanışı geri alınmaz; açık kararlar ilgili özellik/harcamadan önce çözülür. Güncel D01–D20 kararları PHASES içindedir. Gündem için ayrı sunum veya imza matrisi gerekmez; kısa gerçek sonuç kaydı yeterlidir.
 
 ## Kim ne hazırlayacak?
 
@@ -43,7 +45,7 @@ Herkes kendi hedefini ve harcama sınırını belirtir. Kişisel mali bilgiler v
 
 Yukarıdaki sorumlu atamaları ve Mehmet'in tasarımda son söz yetkisi kullanıcı kararıdır. Aşağıdaki kaynak, devam, hedef ve bütçe seçenekleri bununla otomatik kabul edilmiş sayılmaz.
 
-**Görsel/ses:** Mert üretim/kaynak seçimi ve tutarlılıktan sorumludur. Mehmet ekipman/dalgıç, Utku canlı/sualtı ihtiyaçlarını Mert'e verir; Mert kasaba/UI ihtiyaçlarıyla birleştirir. P2/P3 için basit kendi üretiminiz veya uygun lisanslı geçici kaynaklar önerilir. Her kaleme kaynak/üretim yöntemi ve oyuna ekleyecek alan sahibi yazılır; ücretli paket seçimi veya kapsamlı Blender/ses öğrenimi P0'ı bekletmez. P2/P3 his katmanı Mert'in kaynak desteğiyle, mevcut faz görevlerindeki alan sahipleri tarafından oyuna bağlanır ve test edilir. P4'te mevcut içerik tamamlanır; yeni sanat kapsamı açılmaz.
+**Görsel/ses:** Mert üretim/kaynak seçimi ve tutarlılıktan sorumludur. Mehmet ekipman/dalgıç/tekne, Utku canlı/sualtı/boss ihtiyaçlarını Mert'e verir; Mert ev/kasaba/UI ile birleştirir. Plan 3.0 ilk paket P3.1 insan/animasyon/elde ekipman; ardından kıyı/NPC/sandal/harita gelir. P4 ev/PC, üç tekne, boss ve gün-gece için küçük paketler hâlinde ilerler; P4.6 ortak sanat kabulüdür. Her varlığın kaynak/üretim yöntemi ve alan entegratörü yazılır; ücretli paket veya her varlığı sıfırdan üretmek şart değildir. Kaynak/kabul ayrıntıları ASSET_PLAN içindedir; temel insan/sahne kalitesi P4'e ertelenmez.
 
 İlk dış kaynak eklenmeden kaynak bağlantısı, lisans, atıf, ekip kullanım hakkı ve public repoda ham dosya paylaşım izni kontrol edilir. Ücretsiz indirme veya satın alma tek başına bu izinlerin kanıtı değildir; pakete özgü şartlar incelenir. İzin doğrulanamıyorsa ham varlık repoya girmez, geçici kendi varlığınız kullanılır. P4'te liste tamamlanır; ilk kontrol P4'e bırakılmaz. [Unity Asset Store koşulları](https://unity.com/legal/as-terms).
 
@@ -67,11 +69,11 @@ Yukarıdaki sorumlu atamaları ve Mehmet'in tasarımda son söz yetkisi kullanı
 
 ## Tek kısa karar kaydı
 
-Mehmet açık kararları takip eder; Mert gerçek görüşme sonucunu kayda geçirir. Kullanıcı atamaları aşağıda kayıtlıdır; diğer seçimler ve üç kişinin gerçek tamamı uydurulmaz. Ayrı onay matrisi veya yedi yeni issue gerekmez. D01–D11 sonuçları mevcut [STATUS](STATUS.md) tablosunda kalır.
+Mehmet açık kararları takip eder; Mert gerçek görüşme sonucunu kayda geçirir. Kullanıcı atamaları aşağıda kayıtlıdır; diğer seçimler ve üç kişinin gerçek tamamı uydurulmaz. Ayrı onay matrisi veya yedi yeni issue gerekmez. Güncel D01–D20 kapsam kararları [PHASES](PHASES.md) tablosundadır.
 
 | Konu | Durum | Karar / sorumlu / takip zamanı / görüşme kaydı |
 |---|---|---|
-| T01 | SORUMLU_ATANDI | Kullanıcı: Mert. P0'da kaynak/üretim yöntemi ve alan sahiplerine teslim planı netleştirilecek |
+| T01 | SORUMLU_ATANDI | Kullanıcı: Mert. Plan 3.0'da fazlı teslim/kalite hedefi var; P3.1 insan seti ve P4 ev/PC/tekne/boss dâhil her paketin somut kaynağı/kullanım hakkı ilgili teslim öncesinde netleşecek |
 | T02 | SORUMLU_ATANDI | Kullanıcı: Mehmet. P0'da yokluk/ayrılma kuralı netleştirilecek |
 | T03 | SORUMLU_ATANDI | Kullanıcı: Mehmet. P0'da hedef ve yeniden değerlendirme noktası kaydedilecek |
 | T04 | SORUMLU_ATANDI | Kullanıcı: Mehmet. P0'da bütçe/ödeme/paylaşım netleştirilecek; servis açılmadan kullanım kontrolü doğrulanacak |
@@ -79,4 +81,4 @@ Mehmet açık kararları takip eder; Mert gerçek görüşme sonucunu kayda geç
 | T06 | SORUMLU_ATANDI | Kullanıcı: birincil Mehmet. P0'da yedek/öğrenme planı açık; P1'de gerçek inceleme gösterimi bekliyor |
 | T07 | SORUMLU_ATANDI | Takip Mehmet'te. P0'da D06 ekip farkındalığı ve test kampanyası host'u kaydedilecek |
 
-P0 kapanmadan her başlıkta uygulanabilir kısa çalışma kararı bulunur. Ücretli paket veya mağaza gibi ilerideki seçimler, bu arada geçerli sınır ve sorumlu/takip noktası yazılarak ertelenebilir. Örneğin "P3 testine kadar harcama yok; geçici kendi varlıklarımız; P3 sonrası ekipçe değerlendir" açık bir karar olabilir; boş bırakmak karar değildir. Ayrıntılı üretim, fiyat dengeleme ve gelecekteki özellikler P0'a çekilmez.
+P0 kapanışını bekletmeyen bu açık başlıklar ilgili özellik/harcamadan önce uygulanabilir kısa karara bağlanır. Ücretli paket veya yayın mağazası gibi ilerideki seçimler, geçerli sınır ve sorumlu/takip noktası yazılarak ertelenebilir. Örneğin "P3 için kendi ürettiğimiz/kullanımı doğrulanmış insan ve ekipman seti; harcama yok; P4 öncesi yeniden değerlendir" kaydedilebilecek bir karardır, alınmış karar değildir. Ayrıntılı üretim, fiyat dengeleme ve gelecekteki özellikler P0'a çekilmez.

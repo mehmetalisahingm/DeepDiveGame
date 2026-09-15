@@ -1,5 +1,7 @@
 # P3 açılış kaydı — 11 Eylül 2026
 
+> **15 Eylül kapsam notu:** Bu açılış kaydı ilk teknik kapsamın tarihçesidir. Güncel Plan 3.0 P3'e insan/animasyon/elde ekipman, kıyı/NPC/çantayla satış, ayrı kamera alımı, ilk sandal görevi ve canlı tekne haritası ekledi. P4 ev/gün/gerçek klip/PC/kanal/büyük tekne/boss kapsamıdır. Güncel kabul [PHASES](../plan/PHASES.md) ve [ASSET_PLAN](../plan/ASSET_PLAN.md)'tadır; aşağıdaki ilk kapsam tek başına kapanış ölçütü değildir.
+
 Durum: **P3 AÇIK**.
 
 P2 kullanıcı faz kabulüyle kapatıldı. Doğrulanan P2 oyun kodu commit'i `7ebdc4ae6ce4188758eddfb7bce9ea321031efa8`; EditMode ve Windows build GitHub Actions üzerinde PASS oldu. P2 kapanış kaydı `docs/reports/P2-GAMEPLAY-VALIDATION.md` içindedir.
