@@ -58,7 +58,12 @@ namespace DeepDive.Network
         {
             if (!diveActive || passive) return HeldEquipmentMode.None;
             if (recording) return HeldEquipmentMode.Camera;
-            return requested == HeldEquipmentMode.Camera ? HeldEquipmentMode.Camera : HeldEquipmentMode.Harpoon;
+            return requested switch
+            {
+                HeldEquipmentMode.Camera => HeldEquipmentMode.Camera,
+                HeldEquipmentMode.Harpoon => HeldEquipmentMode.Harpoon,
+                _ => HeldEquipmentMode.None
+            };
         }
 
         public static Vector3 FilterMoveInput(LocomotionMode locomotion, Vector3 input)
