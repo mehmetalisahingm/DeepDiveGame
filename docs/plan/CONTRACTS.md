@@ -1,10 +1,12 @@
 # Ortak sistem sözleşmeleri
 
-> 10 Eylül 2026: P1 kullanıcı kararıyla kapandı, P2 açıldı. Doğrulanmamış testler geçmiş sayılmadı; [kapanış ve devredilen kontroller](../reports/P1-REPORT.md). Sonraki fazların kabul şartları korunur.
+Plan 3.0 — 15 Eylül 2026. P3 açık, P4–P6 kilitli. İnsan/ekipman, NPC/çanta/sandal sözleşmelerine harita, ayrı kamera satın alma, ev/gün/uyku, medya/kanal, tekne sahipliği ve boss bağlantıları eklendi. Yeni bölümler **tasarımdır; uygulanmış API veya ekip uzlaşısı değildir**. İlgili ara teslimden önce etkilenen alan sahipleri netleştirir; davranış kaynağı [WORLD_SYSTEMS](WORLD_SYSTEMS.md)'tir.
 
 Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Buradaki tip isimleri uygulanmış sınıflar veya mevcut dosyalar değildir. Görev kodları: A=Mehmet, B=Utku, C=Mert.
 
 Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'da yalnızca P1 için gereken kimlik/oturum bağlantıları kesinleşir. Av/çanta ayrıntıları P2 öncesinde, çekim/ekonomi/kayıt ayrıntıları P3 öncesinde netleşir. İleriki fazın taslağı o özelliği erken uygulama izni vermez.
+
+Tarihli uygulama notları kendi gününün kanıtıdır. 14 Eylül ayrı çalışma dalının durumu [P3-WIP-HANDOFF](../reports/P3-WIP-HANDOFF.md)'ta; yeni kapsamın kabul koşulları [PHASES](PHASES.md) ve [GAMEPLAY_LOOP](GAMEPLAY_LOOP.md)'tadır. Özellikle mevcut dalış sonu ödeme hattı, P3.2'de NPC'ye teslim akışına dönüştürülecektir.
 
 P1 uygulamaları ortak akışa bağlandı: [entegrasyon kaydı](../reports/P1-INTEGRATION-REPORT.md),
 [çalıştırma](../P1_PLAY.md). `Core.Contracts.PlayerId.Value` oturumluk ulong bağlantı
@@ -23,13 +25,18 @@ Bu tablo uygulama sahipliğidir. Kullanıcı atamasıyla görsel/ses üretimi, k
 
 | Alan | Sahip | Sınır |
 |---|---|---|
-| Oyuncu kontrolü ve ekipman kullanımı | Mehmet | Giriş, yürüme/yüzme, zıpkın/kamera kullanım isteği, oksijen/sağlık, kuşanılan ekipmanın etkisi |
+| Oyuncu kontrolü ve ekipman kullanımı | Mehmet | Giriş, insan animasyonu/yerel eller/uzak gövde, yürüme/yüzme, zıpkın/kamera kullanımı, oksijen/sağlık, kuşanılan ekipmanın etki ve görünümü |
 | Ağ bağlantısı | Mehmet | Bağlan/ayrıl, oyuncu oluşumu, iletişim/transport, ağ sahne yükleme mekanizması |
 | Oturum aşamaları | Mert | Hazırlık/dalış/dönüş/sonuç durumu, hazır oyuncular ve geçiş koşulları; gerçek yüklemeyi Mehmet'in ağ servisi yürütür |
-| Canlılar ve dünya | Utku | Tür tanımları, oluşma, AI, vurulma/ölüm, av nesnesi ve çevre içerikleri |
+| Canlılar ve dünya | Utku | Tür tanımları, oluşma, AI, vurulma/ölüm, av nesnesi, kumsal/su geçişi, derinlik kesimleri ve sandal rotası/demirleme yerleşimi |
 | Çekim değerlendirme | Utku | Hedef görünürlüğü, mesafe, kayıt süresi, kalite ve dalış içi tekrar kuralı |
 | Çanta/depo ve ekipman sahipliği | Mert | Tekil eşya örnekleri, kapasite doğrulaması, depoya aktarım, ekipman satın alma ve tahsis |
-| Ekonomi ve ilerleme | Mert | Satış fiyatı, çekim ödemesi, para, geliştirmeler, görevler, bölge açılması |
+| Ekonomi ve ilerleme | Mert | Fiziksel NPC hizmetleri, satış fiyatı, çekim teslimi/ödemesi, para, geliştirmeler, onarım ve aynı bölgedeki rota açılması |
+| Sandal hareketi ve yolcu bağlantısı | Mehmet | Hostun doğruladığı koltuk/binme/inme ve rota üzerinde ağ hareketi; rota içeriği Utku'dan gelir |
+| Sandal ilerlemesi ve sefer koşulları | Mert | Parça/onarım/kayıt, rota açılma ve yolcu hazır kuralları; hareketi Mehmet'in servisi yürütür |
+| Gün/ev/kanal ve görevler | Mert | Ortak saat/uyku/kapanış, PC arşiv/yayın/gelir, ev/tekne sahipliği ve günlük görev kaydı |
+| Klip medyası | Mehmet | Kayıt cihazı bakışından görüntü/oyun sesi, medya aktarımı/bütünlüğü/oynatma; ekonomik sonuç Mert'te |
+| Keşif/ansiklopedi/boss | Utku | Keşif ve tür gözlemi, boss AI/evre/sonucu ve çekim kanıtı; UI/kalıcı ilerleme Mert, oyuncu hasarı Mehmet |
 | Kalıcı kayıt | Mert | Şema sürümü, tamamlanmış kontrol noktaları, bütünlük ve yedek |
 | Alan arayüzleri | İlgili alan sahibi | Mehmet dalgıç HUD'ı, Utku hedef/kalite geri bildirimi verisi, Mert envanter/dükkân/oturum ekranı |
 | Ortak veri ve bileşim | Mehmet/Utku/Mert incelemesi; entegratör koordinasyonu | Kimlikler, arayüzler, başlangıç bağlantıları ve ortak yapılandırma |
@@ -63,6 +70,30 @@ Bu tablo uygulama sahipliğidir. Kullanıcı atamasıyla görsel/ses üretimi, k
 | TransactionResult | requestId, kabul/red, reasonCode, etkilenen revision | İşlemin sahibi → isteği yapan/UI | P2 |
 | SaveSnapshot | schemaVersion, campaignId, checkpointId, ortak para/depo/ekipman/ilerleme ve tamamlanmış ödeme kimlikleri | Mert → disk/yedek | P3 |
 
+### Plan 3.0 ek veri taslakları
+
+Bu adlar kavramsal sözleşmelerdir; yeni sınıfların imzaları değildir. Mevcut tiplere alan eklemek yeterliyse ikinci bir veri sistemi yazılmaz.
+
+| Veri | Asgari alanlar / kural | Üretici → tüketici | Teslim |
+|---|---|---|---|
+| PlayerPresentationState | playerId, görünüm, locomotionMode, onaylı hız/yön, activeEquipmentInstanceId, kullanım/kayıt durumu, revision | Mehmet; loadout Mert → bütün istemciler | P3.1 |
+| EquipmentVisualDefinition | equipmentId/seviye, yerel el/uzak gövde modeli, tutuş/bağlantı pozu, efekt kimlikleri | Mert kaynak/katalog → Mehmet; çekim yeteneği Utku | P3.1; üst kameralar P4.3 |
+| ServicePointDefinition | Sabit serviceId, hizmet tipi, worldAnchor, etkileşim mesafesi, katalog | Mert → Mehmet etkileşim / ekonomi / UI | P3.2 |
+| PendingTurnInState | Tekil av/kayıt kimliği, kaynak DiveId, güvenli dönüş durumu, carryingPlayerId veya ortak emanet, paid/sold durumu, revision | Mert; aday kayıt Utku/Mehmet → UI/kayıt | P3.2 |
+| DiveParticipantState | DiveId, playerId, Active/Returned/Passive durumu; Returned oyuncu için ikinci dalış hakkı yaratılmaz | Mert; canlılık/konum Mehmet → tümü | P3.2 |
+| BoatRepairState | boatId, gerekli/tamamlanan parça kimlikleri, Broken/InProgress/Repaired, revision | Mert → Mehmet/Utku/UI/kayıt | P3.3 |
+| BoatTripState | boatId, tripId, routeId, Docked/Outbound/Anchored/Inbound, seat→player eşlemesi, sefer grubu, sefer sorumlusu, revision | Mert sefer koşulları; Mehmet hareket → tümü | P3.3 |
+| DiveRouteDefinition | routeId, departure/anchor kimlikleri, rota noktaları, gerekli tekne sınıfı, kesim/derinlik/dönüş süresi | Utku; açılma Mert → Mehmet/UI | Yakın P3.3; ileri P4.3 |
+| RecordingCapability | equipmentId/seviye, doğrulanmış menzil, düşük ışık yeteneği/ışık konisi | Mert katalog → Mehmet/Utku | P4.3 |
+| WorldMapState | regionId, onaylı oyuncu/aktif boatId konumları, iskele; keşfedilmiş hücre/yer/işaret ve revision | Mehmet konum, Utku keşif → Mert UI/kayıt | P3.3; keşif P4.1 |
+| CampaignDayState | campaignId/dayId, saat, Running/Closing/Summary/Morning, uyuyan/etkin oyuncular, hava tohumu, revision | Mert → herkes; oyuncu/su durumu Mehmet | P4.1 |
+| DaySummary | dayId, satılan av, gelir/gider, keşif/kayıp, yayın kuyruğu, ilerleme, kapanış kimliği | Mert; olay üreticileri A/B → UI/kayıt | P4.1; kanal P4.2 |
+| RecordingClipManifest | clipId/recordingId/dayId, kameracı, doğrulanmış konu/kalite, süre, içerik hash/boyut, medya hazır durumu, güvenli dönüş | Mehmet medya, Utku sonuç → Mert arşiv/yayın | P4.2 |
+| PublicationState | publicationId/clipId, NPC veya Kanal ticari hakkı, başlık/kapak, queuedDay/resultDay, izlenme/takipçi/gelir, settledId | Mert → PC/UI/kayıt | P4.2 |
+| VesselOwnershipState | ownedVesselInstanceId listesi, definitionId, activeBoatId, sandık eşya kimlikleri, revision | Mert → Mehmet hareket/Utku rota/UI | P4.3 |
+| SpeciesDiscoveryState | speciesId, görülme/çekim/av/araştırma kanıtları, açılmış bilgi, ödül kimlikleri | Utku → Mert ansiklopedi/kayıt | P4.1; içerik P4.4 |
+| BossEncounterState | encounterId, evre, host hedef/sağlık, araştırma/yenilgi, güvenli sonuç ve rewardId | Utku; hasar Mehmet → Mert ilerleme/kayıt | P4.4 |
+
 ## Birimler ve kimlik kuralları
 
 - Mesafe metre, süre saniye, ağırlık gram olarak tanımlanır. UI isterse kilogram gösterir.
@@ -91,16 +122,16 @@ Utku'nun av tüketme işlemi, Mert eklemeyi kabul etmeden çalıştırılamaz. B
 
 ### Çekim değerlendirme
 
-1. Mehmet kamera niyetini ve hedefi bildirir; gerçek video akışı göndermez.
+1. Mehmet değerlendirme isteğinde kamera niyetini ve hedefi bildirir; görüntü dosyası bu isteğin yerine geçmez. P3 değerlendirme hattıdır; P4.2 klip verisini ayrı medya/aktarım hattında taşır.
 2. Utku ev sahibinde kayıt aralığı, görüş hattı, hedefin etkinliği, mesafe ve kadraj koşullarını denetler.
 3. Kalite, doğrulanmış örneklerden hesaplanır. İstemcinin "kalite=100" veya "süre=60" beyanı ödül kaynağı değildir.
 4. İlk sürüm önerisi: aynı dalışta aynı tür/olay için ekip çapında yalnızca en iyi geçerli kayıt ödüle aday kalır; farklı oyuncuların aynı hedefi kaydetmesi çoğaltma yaratmaz.
 5. Oyuncu/tür-olay başına en iyi kayıt saklanır. En iyi kaydın sahibi güvenli dönemezse sonraki en iyi güvenli kayıt seçilir. Dalış/tür-olay başına yalnız tek kayıt ödüllendirilir.
 6. Bir kayıt ödendiğinde yeniden değerlendirme isteği ikinci ödeme oluşturmaz.
 
-Kalite eşikleri ve fiyat katsayıları Utku/Mert'in ortak veri tablosunda tutulur. Utku kaliteyi, Mert krediyi belirler.
+Kalite eşikleri ve fiyat katsayıları Utku/Mert'in ortak veri tablosunda tutulur. Utku kaliteyi, Mert krediyi belirler. P3.2'de güvenli kayıt NPC'ye teslimle ödenir; P4.2'de bunun alternatifi ev PC'sindeki kanal yayınıdır. Aynı dalış/konu için en iyi güvenli kayıt tek ticari hak kazanır; NPC ve kanal aynı hakkı iki kez ödeyemez. Diğer klipler arşivde izlenebilir. P4 kamera yetenekleri görüş/kadraj/süre ve tek ödeme denetimini atlayamaz.
 
-13 Eylül 2026 Composition bağlantısı:
+13 Eylül 2026 Composition bağlantısı (tarihsel uygulama; NPC teslimine dönüşüm aşağıda):
 - `RecordingWorldBinding`, hostta `RecordingEvaluation.Bind(RecordingDirector)` ve oyuncu bazında `RecorderViews` adaptörlerini kurar. Misafirin bakışı hostun doğruladığı input yaw/pitch değerlerinden gelir; hostta kapalı olan misafir kamerasının dönüşü kullanılmaz.
 - `DiveContext` sahibi mevcut `DiveInventoryBinding` olarak kalır. Dalış bitince kamera/evaluation bağlantıları bırakılır; yeni dalış yeni Director kullanır. Stop, Start'ta kilitlenen hedefi kullanır.
 - `IsPayable` ve tekrar kayıt koruması Director içindedir; Composition Stop sırasında para ödemez. `InventoryManager.OnDiveSummaryReady` geldiğinde `Director.SettleDive(summary)` ödeme hattına iletilir.
@@ -116,19 +147,119 @@ Kalite eşikleri ve fiyat katsayıları Utku/Mert'in ortak veri tablosunda tutul
 5. Mehmet yeni LoadoutState üzerinden özellikleri temel değerlerden yeniden hesaplar. Aynı bildirimin tekrarı bonusu tekrar eklemez.
 6. İlk sürümde satın alma/tahsis kasabada yapılır; dalış sırasında ekipman yükseltme yoktur.
 
+Plan 3.0: yeni kampanya ücretsiz kıyı av setiyle başlar; kamera ayrı satın alınır. Kamera fiziksel bir ekipman örneğidir, dört oyuncuya tek örnek eşzamanlı tahsis edilemez. Eski kayıttaki meşru kamera/ekipman geri alınmaz; yalnız yeni kampanya başlangıcı bu kurala uyar.
+
 ### Dalış sonu ve kalıcı kayıt
 
 - D06: kampanya kayıt sahibi host'un bilgisayarındadır. O host yokken diğerleri aynı kampanyayı sürdüremez; başka host'un açtığı ayrı kampanya öncekinin ilerlemesini otomatik almaz. Manuel kayıt aktarımı, bulut senkronu ve host devri v1 kapsamında değildir.
-- Güvenli dönüşte uygun geçici av/çekimler kampanyanın bekleyen satış/değerlendirme verisine aktarılır ve kontrol noktası yazılır.
+- Güvenli dönüşte uygun geçici av/çekimler kampanyanın bekleyen satış/değerlendirme verisine aday olur. Erken dönen oyuncunun verisi kilitlenir; bütün katılımcılar Returned/Passive olunca tek tamamlanmış dalış kontrol noktası yazılır. Kıyıya veya sandala çıkmak otomatik ödeme değildir.
 - Satış/satın alma/görev ödülü aynı kalıcı işlem güncellemesinde işlenir; yeniden açılışta yinelenen para üretmez.
 - Kayıt geçici dosyaya yazılır, doğrulanır ve güvenli şekilde önceki kaydın yerini alır; son sağlam yedek korunur.
 - Disk hatası başarı gibi gösterilmez. İşlem geri alınır veya yeniden denenebilir hatada bırakılır; kural P3 işlerine başlamadan seçilir.
 - Ev sahibi dalış sırasında giderse tamamlanmamış dalış geri yüklenmez; son tamamlanmış kontrol noktası kullanılır.
 - Bir sonraki dalışta eski diveId'ye ait sayaç, av, olay veya işlem isteği yeniden kullanılamaz.
 
+### İnsan ve elde ekipman sunumu — P3 taslak
+
+Üretim Mert, hareket/ekipman entegrasyonu Mehmet, su geçişi Utku ile koordine edilir.
+
+1. Hareket ve oyun sonucu mevcut host otoritesinde kalır. Görsel insan modeli onaylı hız/yön ile animasyon yapar; animasyonun kök hareketi ağ oyuncusunu ikinci kez hareket ettirmez.
+2. Yerel kamera yalnız sahibince kontrol edilir; yerel el/kol ve uzak tam vücut görünürlüğü ayrıdır. Diğer oyuncu kendi kamerasını veya birinci şahıs kollarını kontrol edemez.
+3. `LocomotionMode` en az kara, su üstü, sualtı, oturmuş ve pasif hâllerini ayırır. Etkin kamera/zıpkın modu tutuşla birlikte yayınlanır; her kemiği her kare ağdan göndermek şart değildir.
+4. Mert'in onaylı loadout'u equipmentId/seviyeyi belirler; Mehmet aynı veriden etki ve görünümü seçer. Satın almadan bir üst kamera/tüp görünümü veya etkisi elde edilemez. Gecikmiş revision eski modeli geri getiremez.
+5. Kuşanma/kullanma/saklama isteği oyuncu sahipliği, aşama ve durumla doğrulanır; görsel kayıt lambası doğrulanmış kayıt durumunu izler. Model/prefab referansı istemciden yetki olarak kabul edilmez.
+6. Yakınlık/koltuk/su durumunu oyun collider'ı belirler; görsel el veya yüzme klibi av alma/hasar/ışın denetimini değiştirmez.
+
+Kabul: iki oyuncu birbirini karada, su üstünde, sualtında ve kamera kullanımında izler; dört oyuncuda aynı ekipman/tutuş durumu görülür. Test sahnesi görüntüsü tek başına gerçek prefab entegrasyonu kanıtı değildir.
+
+### Fiziksel NPC, av satışı ve kayıt teslimi — P3 taslak
+
+Mert servis/ekonomi/envanter sahibi; Mehmet yaklaşma/etkileşim üreticisi; Utku/Mehmet kayıt adayı üreticileridir. P3.2 öncesi birlikte kesinleşir.
+
+1. İstek, `requestId`, `serviceId`, işlem türü ve seçilen tekil av/kayıt/ekipman kimliklerini taşır. Oyuncu kimliği hostta bağlantıdan alınır.
+2. Host doğru NPC'yi/hizmeti, gerçek oyuncu mesafesini, etkileşim erişimini, kasaba/satış aşamasını ve veri revision'ını doğrular. İstemci UI'ının açık olması izin değildir; sualtından veya yanlış dükkândan işlem yapılamaz.
+3. Güvenli dönüş avı **satılmamış** tutar. Çanta dünyadaki görsel temsil, envanter tek gerçek kaynaktır. Oyuncunun taşıdığı av ve ortak emanetteki av aynı kimliği iki yerde sahiplenemez; emanet teslimi kapasiteyi doğrular.
+4. Av satışı seçilen sahip olunan avları tüketme, doğru fiyatı bir kez ödeme, sold kimliğini yazma ve kalıcı kontrol noktasını güncelleme işlemidir. Kapasite/para UI'ı sadece onaylı sonuçtan sonra güncellenir.
+5. Kayıtta mevcut dalış/tür-olay başına en iyi güvenli sonuç kuralı korunur. NPC yalnız bekleyen ve ticari hakkı kullanılmamış adayı kabul eder; iki oyuncu aynı adayı teslim ederse bir kez ödeme olur. P4.2'de kanal kuyruğuna verilmiş aday NPC'ye tekrar satılamaz.
+6. **Mevcut ödeme hattındaki değişiklik:** `Director.SettleDive(summary)` / `RecordingWorldBinding` dalış sonunu adayı sabitlemek için kullanır. P3.2'de burada doğrudan kredi verilemez; NPC işlemi gerçek ödeme servisini çağırır. Otomatik av satışı yolu varsa aynı şekilde aday oluşturma ile değiştirilir. Eski doğrudan ödeme ile yeni NPC yolu aynı anda açık bırakılmaz.
+7. Disk hatasında ürün tüketilmiş/para kazanılmış başarı mesajı verilmez; tek işlem geri alınır veya aynı kimlikle yeniden denenebilir hata olarak tutulur. Tekrar deneme yeni av/kayıt kimliği yaratmaz.
+8. Satın alma ve tahsis aynı NPC doğrulamasından geçer. Ortak eşya aynı anda birden fazla dalgıca takılmaz. P3.1 kamera görünümü ile P3.2 satın alma sonucu aynı loadout üzerinden birleşir.
+
+Kabul: uzaktan istek, yanlış NPC, iki oyuncunun aynı av/kaydı satması, eski UI teklifi, disk hatası ve yeniden açma denenir. P3'te NPC'ye gitmeden doğrudan kredi hata sayılır; P4.2 kanal ödemesi yalnız doğrulanmış PC yayınının günlük sonucudur.
+
+### Sandal tamiri ve yolculuk — P3 taslak
+
+Mehmet hareket/koltuk, Utku rota/çevre, Mert onarım/envanter/sefer/kayıt sahibidir. Aynı sandal prefabı ve sahneye sırayla bağlanırlar; üç ayrı sandal otoritesi kurulmaz.
+
+1. Onarım ve seyahat ayrı durumlardır. Yeni kampanyada `BoatRepairState=Broken`; üç sabit parçanın her biri en çok bir kez katkı olur. Parça sahipliği/mesafesi/onarım noktası hostta doğrulanır; tüketim + katkı + kayıt atomiktir.
+2. Parçalar başlangıç kasabası/kumsalından ücretsiz bulunabilir veya balık geliriyle satın alınabilir. Eksik kalem yeniden edinilebilir; tüketilen kalem veya ücretsiz parça döngüsü satılıp para çoğaltamaz. Son parça `Repaired` yapar; P3 yakın rotasına yeterlidir.
+3. Onarım malzemesi ve kilitli sefer, normal av/ekipman sistemine ikinci otorite yaratmaz. Dünya parçaları tekil kimlikle envantere/onarım verisine bağlanır; genel crafting gerekmiyor.
+4. `BoatTripState` küresel `SessionState`'ten ayrıdır. Kıyıdan dalan oyuncular ile sandal seferine katılanlar aynı DiveId içinde olabilir. Kıyıdan her suya giriş veya sandal varışı yeni dalış başlatmaz.
+5. Host koltuğa yakınlık, tek oyuncu/koltuk, azami dört yolcu, hazır durumu, tamir ve rota kilidini doğrular. Sabit rota hareketini host yürütür; yolcular koltuk bağlantı noktalarına göre eşlenir. Hareket sırasında inme reddedilir.
+6. İlk binen oyuncu sefer sorumlusu olabilir; yalnız doğrulanmış yolcu rota seçer/başlatır. Yetki kopmada yaşayan yolcuya devredilir. Bu sadece sandal kontrolüdür, ağ host devri değildir.
+7. Demirleme noktasında sefer grubu korunur. Dönüş için etkin sefer dalgıçları tekrar binmiş olmalıdır; kıyıdan bağımsız dalan oyuncu yanlışlıkla bu gruba eklenmez. Pasif/kopan kişinin engeli temizlenir; diğer etkin dalgıç geride bırakılmaz.
+8. Boş sandalı geri çağırma/otomatik iskeleye döndürme ancak etkin sefer dalgıcı kalmadığında mümkündür. Tekrarlı çağrı ikinci sandal üretmez. İskelede bekleyen oyuncular boş araca yeniden erişebilir.
+9. Sandala çıkış nefes almayı sağlar fakat tüpü tamamen doldurmaz; kalıcı güvenli dönüş ve satış hakkı kıyı/iskele sınırından gelir. Herkes pasifse D07, host koparsa D06/D08 uygulanır.
+10. Son tamamlanmış kampanya kaydı tamir/menzil/açılmış rota durumunu tutar. Hareket hâlindeki sefer yeniden yüklenmez; kampanya açılınca sandal iskelede ve koltuklar boştur. Tamamlanmamış dalışın avı kayda taşınmaz.
+
+Kabul: solo üç parçayla onarım, iki kişinin aynı parçayı eklemesi, dört koltuk, gidiş/dönüş, seyahatte kopma, dalgıç suda iken geri dönüş reddi, boş sandal çağrısı ve tekrar açma. Yerel testten sonra en az iki bilgisayardaki dört süreçte denenir.
+
+### Bekleyen eşya, onarım ve kayıt uyumu — P3 taslak
+
+- Mevcut kayıt yalnız host loadout'unu koruyan uygulama sınırına sahiptir ([14 Eylül kaydı](../reports/P3-WIP-HANDOFF.md)). Plan 3.0, bütün bu ek verinin zaten kaydedildiği iddiası değildir.
+- Yeni şema; bekleyen av/kayıt, itemInstanceId başına tek taşıyıcı/emanet, ortak ekipman sahipliği, tamamlanmış onarım kalemleri, sandal seviyesi/rota açılımı ve consumed/paid/sold kimliklerini taşır. P4 alanları gerektiği fazda eklenir.
+- Guest bağlantı ID'si kalıcı oyuncu kimliği sayılmaz. Kopmada/yeniden açmada ona bağlı korunan av ve ortak ekipman kasaba emanetine serbest bırakılır; yeni bağlantı ID'sine kendiliğinden tahsis edilmez. Tekrar tahsis host onayından geçer. Host'un mevcut yükleme davranışı korunur.
+- Satılmayan taşınan av kapasite tüketir. Sonraki dalışa götürülürse aynı eşya aktif dalış riskine geçirilir; kasabada ikinci güvenli kopyası bırakılmaz. D07 kaybı tamamlanmış başarısız dalış kaydında işlenir. Host çökmesinde son tamamlanmış kontrol noktasına dönüş sınırı korunur.
+- Eski schemaVersion için kontrollü göç yapılır: para/ödenmiş kimlikler/ekipman korunur; bulunmayan onarım başlangıçta bozuk, yeni bekleyen listeler boş olur. Ödenmiş eski kayıtlar NPC'de tekrar aday olamaz. Bozuk dosya yeni kampanya gibi sessizce sıfırlanmaz.
+- Her şema değişikliğinde eski kayıt + yeni kayıt, başarısız yazma, host yeniden açma ve guest tahsis regresyonu gerekir. Gerçek API ve göç değişikliği ayrıca uygulanıp test edilmeden sözleşme tamamlandı yazılmaz.
+
+### Kamera, derinlik ve rota gelişimi — P4.3 taslak
+
+1. Mert equipmentId/seviye/fiyat/görünüm/yeteneği tek katalogda tanımlar. Mehmet kuşanma/elde model ve tüp/palet/çanta etkisini, Utku kamera menzil/düşük ışık doğrulamasını uygular.
+2. Kamera 1 menzil artışı, kamera 2 düşük ışık yeteneği verir. İstemci kendi ekipman seviyesini, ışık gücünü veya kaliteyi seçemez; host tahsis edilmiş ekipmandan çözer. Işık açısı/mesafesi/görüş denetimi diğer kayıt koşullarıyla birlikte çalışır.
+3. Utku aynı regionId altında kıyı/resif/derin kesim ve toplam üç deniz demirlemesi sağlar. Mert sandal/motorlu/araştırma teknesi sahipliğiyle rotayı açar; Mehmet aktif gövdeyle yolculuğu yürütür. İkinci bölge açılma sistemi kurulmaz.
+4. Rota ilerlemesi ve dalgıç kapasitesi ayrıdır. UI yaklaşık derinliği, rota kilidini ve önerilen ekipmanı gösterir; büyük kamera tek başına derinlik erişimi değildir. Denge metre/fiyatları [oyun akışındaki](GAMEPLAY_LOOP.md) taslaktan testle ayarlanır.
+
+### Harita ve kalıcı keşif — P3.3 / P4.1 taslak
+
+Mehmet onaylı oyuncu/aktif tekne konumunu, Utku dünya-harita dönüşümünü/keşif olayını, Mert UI ve kayıt katmanını sağlar. Host yalnız gerçekten erişilmiş hücre/yerleri açar; istemci tüm haritayı açılmış gönderemez. Tekne değişince ikon yeni activeBoatId'ye bağlanır. Oyuncu/tekne ikonları keşif örtüsünün arkasında navigasyon sağlar; gizli balık/boss konumunu yayınlamaz. Keşif/ansiklopedi ödülü sabit kimlikle bir kez verilir; harita tekrar açmak ödül değildir.
+
+### Gün sonu ve uyku işlemi — P4.1 taslak
+
+1. Mert tek CampaignDayState otoritesidir; istemciler host saatini gösterir. Uyku isteğini Mehmet gerçek oyuncu/yatak/yakınlık/etkin durumdan doğrulatır. Aynı yatağı iki oyuncu kullanamaz.
+2. En az bir etkin bağlı oyuncu ve hepsinin uyuması erken kapanış koşuludur. Kopan/pasif oyuncu kümeden çıkar; etkin oyuncu yokken gün üretilemez. 00:00 uykuya bakmadan Closing başlatır.
+3. Closing yeni ticaret/yayın/seyahat isteğini kilitler; hostça önceden kabul edilenler tamamlanır. Açık dalış sonuçları D07 ve güvenli alan kontrolüyle tek kez kapatılır. Güvenli av korunur; deniz/tekne/dış demirlemede kalan yük güvenli sayılmaz.
+4. DaySummary ve yeni sabah kanal sonuçları, nextDayId ve ödeme kimlikleri tek kalıcı işlemde yazılır. Yazma başarısızsa ertesi sabah başarı gibi açılmaz; aynı closeId ile tekrar denenir. Yeniden açma para/gün/sponsor ödülünü çoğaltmaz.
+5. Hava/olay tohumu aynı gün için sabittir. Host kopması son sağlam kontrol noktasına döner; istemcinin bilgisayar saati ödül veya gün ilerlemesi kaynağı değildir.
+
+### İzlenebilir medya ve kanal — P4.2 taslak
+
+Mehmet medya/oynatma, Utku hedef/kalite, Mert PC/arşiv/yayın/para/kayıt sahibidir. Encoding/kapsayıcı/paket seçimi teknik ön denemede netleşir; herhangi bir yöntem henüz doğrulanmış değildir.
+
+1. Yakalama sadece oyuncunun kuşandığı oyun kamerası ve oyun ortam sesidir. Başlangıç bütçesi WORLD_SYSTEMS'te verilidir; kare/süre/boyut/limitler deneme sonucu belirlenir. Oyun dışı dosya, masaüstü veya mikrofon girdisi yoktur.
+2. clipId ile recordingId ayrı ve bağlıdır. İstemcinin medya üretmesi doğrulanmış kalite/ödül hakkı vermez; hosttan gelen hedef/süre/kadraj sonucu ve güvenli dönüş gerekir. Boş kadraj veya ticari aday olmayan klip arşivde oynatılabilir, ödeme üretmez.
+3. Medya manifest'i beklenen byte boyutu/hash/süre ile tamamlanır; yarım aktarım hazır değildir. Bütünlük denetimi görsel hileye karşı tam güvence iddiası değildir; oyun arkadaş co-op host güven sınırını korur. Aktarım kayıt/oyun hareketini boğmayacak şekilde sınırlandırılır ve gerçek ağda ölçülür.
+4. PC kontrolü yakın oyuncuya verilir; diğerleri aynı aktif klip ve zaman konumunu izler. Kontrol sahibi ayrılınca kilit bırakılır. İstemcinin dosya yolu ödül veya arşiv yetkisi değildir; medya kampanya/clipId ile çözülür.
+5. Yayın, gerçek PC yakınlığı ve güvenli/tamamlanmış medya ile uygundur. Ticari hak anahtarı campaignId/diveId/subjectId için tek en iyi adaydır; NPC veya Kanal seçimi hak kullanımıyla aynı işlemde kaydolur. Metadata yeniden adlandırma yeni hak yaratmaz.
+6. Gün N'de onaylanmış publicationId sonucu N+1 sabahında bir kez ödenir. İzlenme/takipçi/gelir hostun sabitlenmiş kalite/yenilik/risk kurallarından gelir. İstemci veya video dosyası takipçi/para bildiremez.
+7. P3 eski puan kayıtları izlenebilir medya gibi gösterilmez; uygun eski kayıt NPC yolunda bir kez ödenebilir. Silinen klibin yayın/ödeme geçmişi kalır; dosyayı silip yeniden ekleme tekrar kazandıramaz. Favoriler sessizce silinmez, dolu disk/yazma hatası görünürdür.
+8. D06 korunur: kampanya ve ortak arşiv hostta kalır; başka host otomatik devralmaz. Yerel yeniden açma ve guest'e klip oynatma gerçek testtir; harici sosyal medyaya paylaşım bu API'nin işi değildir.
+
+### Tekne satın alma ve aktif araç — P4.3 taslak
+
+Mert limandaki fiyat/sahiplik/envanter/kayıt işlemini, Mehmet gövde/koltuk/hareketi, Utku rota uygunluğunu sağlar. Üç tanım (sandal/motorlu/araştırma) farklı gövde/kapasite/rota verisi taşır. Satın alma tekil vesselInstanceId üretir; eski araç silinmez. Aktif değişim sadece bütün oyuncular güvenli dönmüş, sefer yokken yapılır; sandık eşya aktarımı/koltuk temizleme/activeBoatId/kayıt atomiktir. Tekne sandığı denizde güvenli depo sayılmaz; batma veya araç satıp çoğaltma sistemi eklenmez.
+
+### Boss, görev ve araştırma — P4.4 / P4.5 taslak
+
+Utku hostta boss hedef/evre/sağlık ve tek encounterId; Mehmet hasar/oyuncu/ekipman; Mert görev/ödül/kayıt sahibidir. Araştırma ve av sonucu aynı ana görev ödülünü ikinci kez oluşturamaz. Boss sonucu güvenli dönüş checkpoint'ine bağlanır; tamamlanmamış dalışın sonucu host ayrılmasında geriye dönebilir. Normal avcı türü gerçek boss davranışının yerine geçmez; üç okunur saldırı/zayıf nokta ve solo–dört oyuncu kontrolü gerekir.
+
+Sponsor/sipariş, keşif/ödeme/rol/geliştirme olaylarını kimlikleriyle tüketir; erişilmeyen hedefi görev olarak üretmez. Rol bonusları loadout gibi temel değerden yeniden hesaplanır; ücretsiz rol değişimi bonus katlamaz. Gün/kanal/tekne/ansiklopedi/boss/ev için şema göçü, eski kaydı geri yükleme ve tekrarlı sonuç testi ilgili ara teslimin işidir.
+
 ## Ortak red sonuçları
 
 En az şu nedenler ayrıştırılmalıdır: `WrongPhase`, `InvalidTarget`, `OutOfRange`, `NotVisible`, `InventoryFull`, `AlreadyClaimed`, `AlreadyProcessed`, `InsufficientFunds`, `PlayerInactive`, `SaveFailed`, `SessionClosed`.
+
+Plan 3.0'da gerekirse `WrongService`, `BoatNotRepaired`, `SeatOccupied`, `TripInProgress`, `DiversStillOutside`, `RouteLocked`, `DayClosing`, `MediaNotReady`, `ArchiveFull`, `PublicationAlreadyQueued`, `RightsConsumed`, `VesselInUse` ayrıştırılır. İsimler uygulamadan önce netleşir; UI bekleme/red nedenini açıklar.
 
 Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişikliği yapmadan anlaşılır UI geri bildirimi üretmelidir. Ağ tekrarı gibi AlreadyProcessed sonucu varsa daha önceki sonuç döndürülebilir.
 
@@ -146,7 +277,13 @@ Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişi
 | P0 | Oyuncu kimliği, oturum aşaması, sahne geçişi ve P1'de gereken temel sınırlar |
 | P2 başlamadan | Av/toplama/çanta API'si, kapasite reddi, güvenli dönüş ve pasif/kopan oyuncunun avı |
 | P3 başlamadan | Çekim değerlendirmesi, tekrar ödül, ortak para, ekipman tahsisi, kayıt/yedek/disk hatası |
-| P4 başlamadan | Aynı bölgedeki görev/ekipman/keşif ilerlemesi ve içerik verileri |
+| P3.1 öncesi (revizyon) | İnsan sunum durumları, el/uzak gövde, rig ve ekipman model/poz eşlemesi — Mehmet/Mert, su durumunda Utku |
+| P3.2 öncesi (revizyon) | NPC mesafe/işlem, otomatik ödemeden teslim adayına dönüşüm, çanta/emanet ve şema göçü — üç alan sahibi |
+| P3.3 öncesi (revizyon) | Onarım parça otoritesi, sefer/koltuk/rota, erken dönüş/kopma — Mehmet/Utku/Mert |
+| P4.1 öncesi | DayState/DiveState ayrımı, uyku/00:00, güvenli yük, harita/keşif ve günlük kayıt işlemi |
+| P4.2 öncesi | Gerçek klip teknik ön denemesi, medya manifest/aktarım/oynatma, NPC veya kanal tek hak ve günlük ödeme |
+| P4.3 öncesi | Üç tekne sahipliği/aktif değişim/sandık, üst kamera yetenekleri ve rota/harita verisi |
+| P4.4/5 öncesi | Boss/araştırma/ödül, ansiklopedi kanıtları, uygun sipariş/sponsor ve rol/geliştirme verileri |
 
 Bağlantının iki tarafını yazacak kişiler kısa bir görüşmede alanları ve örnek sonucu netleştirir. Ayrı imza matrisi gerekmez; değişiklik bu belgeye ve ilgili göreve yazılır. Hiç kimse diğer tarafın beklediği veri tipini sessizce değiştirmez.
 

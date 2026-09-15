@@ -1,5 +1,7 @@
 # P3 devam kaydı — 14 Eylül 2026
 
+> **15 Eylül kapsam notu:** Aşağıdaki kod/test kaydı tarihsel olarak korunur. Güncel Plan 3.0 P3'te insan/ekipman/kıyı/NPC/sandal yanında ayrı kamera alımı, ilk görev ve canlı tekne haritasını ister; P4'te ev/gün/klip/kanal/büyük tekne/boss eklenir. Eski kapanış listesi tek başına P3'ü kapatmaz; güncel sıra [STATUS](../plan/STATUS.md) ve [PHASES](../plan/PHASES.md)'tadır. Yeni işler bu raporun PASS sonuçlarına dâhil değildir.
+
 Kullanıcı isteğiyle mevcut çalışma P3 kapanış adayına kadar ilerletildi. **P3 henüz kapanmadı; P4 açılmadı.** Kapanış için gerçek oyunculu smoke ve ayrı bilgisayar/internet oynama kanıtı hâlâ gereklidir.
 
 ## Yapılan
