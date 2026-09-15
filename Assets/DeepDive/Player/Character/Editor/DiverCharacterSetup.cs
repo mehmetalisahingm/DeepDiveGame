@@ -39,7 +39,7 @@ namespace DeepDive.Editor
             ConfigureAnimationOnly(AnimDir + "/Idle.fbx", baseAvatar);
             RenameAndLoop(AnimDir + "/Idle.fbx", "mixamo.com", "Dive_Idle", true);
 
-            var controller = BuildController(baseAvatar);
+            var controller = BuildController();
             var characterPrefab = BuildCharacterPrefab(baseAvatar, controller);
             BuildEquipmentProps();
 
@@ -84,54 +84,90 @@ namespace DeepDive.Editor
             importer.SaveAndReimport();
         }
 
-        private static AnimatorController BuildController(Avatar avatar)
+        [MenuItem("DeepDive/P3.1-C/Rebuild Locomotion Controller")]
+        public static void RebuildLocomotionController()
+        {
+            BuildController();
+            AssetDatabase.SaveAssets();
+            Debug.Log("P3_DIVER_LOCOMOTION_REBUILD_SUCCEEDED");
+        }
+
+        private static AnimatorController BuildController()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(ControllerPath)!);
-            var controller = AnimatorController.CreateAnimatorControllerAtPath(ControllerPath);
+            var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
+            if (controller == null)
+                controller = AnimatorController.CreateAnimatorControllerAtPath(ControllerPath);
+
+            // Rebuild in place so the prefab keeps its controller GUID on repeat setup runs.
+            controller.layers = System.Array.Empty<AnimatorControllerLayer>();
+            controller.parameters = System.Array.Empty<AnimatorControllerParameter>();
+            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(ControllerPath))
+                if (asset != controller) Object.DestroyImmediate(asset, true);
+
+            controller.AddLayer("Base Layer");
             controller.AddParameter("LocomotionMode", AnimatorControllerParameterType.Int);
+            controller.AddParameter("MoveSpeed", AnimatorControllerParameterType.Float);
 
             var sm = controller.layers[0].stateMachine;
-            var idle = sm.AddState("Land_Idle");
-            idle.motion = LoadClip(AnimDir + "/Idle.fbx", "Dive_Idle");
-            sm.defaultState = idle;
-
-            var walk = sm.AddState("Land_Walk");
-            walk.motion = LoadClip(AnimDir + "/Walk.fbx", "Dive_Walk");
+            var idleClip = LoadClip(AnimDir + "/Idle.fbx", "Dive_Idle");
+            var land = sm.AddState("Land_Locomotion");
+            land.motion = SpeedBlend(controller, "LandSpeed", idleClip,
+                LoadClip(AnimDir + "/Walk.fbx", "Dive_Walk"));
+            sm.defaultState = land;
 
             var surface = sm.AddState("Water_Surface");
-            surface.motion = LoadClip(AnimDir + "/SwimSurface.fbx", "Dive_SwimSurface");
-
-            var tread = sm.AddState("Water_Tread");
-            tread.motion = LoadClip(AnimDir + "/SwimIdle.fbx", "Dive_TreadWater");
+            surface.motion = SpeedBlend(controller, "SurfaceSpeed",
+                LoadClip(AnimDir + "/SwimIdle.fbx", "Dive_TreadWater"),
+                LoadClip(AnimDir + "/SwimSurface.fbx", "Dive_SwimSurface"));
 
             var underwater = sm.AddState("Water_Underwater");
             underwater.motion = LoadClip(BaseFbx, "Dive_SwimUnderwater");
 
-            // docs/plan/CONTRACTS.md LocomotionMode: kara(0)/su ustu(1)/sualti(2)/oturmus(3)/pasif(4).
-            // 0/1 land states pick Idle vs Walk by whether Walk clip is playing already; a real
-            // speed parameter is Mehmet's to add once this is wired to actual movement (this
-            // controller is a starting point, not the final blend logic).
-            AddDirectTransition(sm, idle, walk, "LocomotionMode", 0);
-            AddDirectTransition(sm, walk, idle, "LocomotionMode", 0);
-            AddDirectTransition(sm, idle, surface, "LocomotionMode", 1);
-            AddDirectTransition(sm, surface, tread, "LocomotionMode", 1);
-            AddDirectTransition(sm, idle, underwater, "LocomotionMode", 2);
-            AddDirectTransition(sm, surface, underwater, "LocomotionMode", 2);
-            AddDirectTransition(sm, underwater, surface, "LocomotionMode", 1);
-            AddDirectTransition(sm, underwater, idle, "LocomotionMode", 0);
-            AddDirectTransition(sm, tread, idle, "LocomotionMode", 0);
+            // Neutral holds until authored seated/passive poses arrive; never keep walking
+            // or swimming when the authoritative player state stops locomotion.
+            var seated = sm.AddState("Seated_Hold");
+            seated.motion = idleClip;
+            seated.speed = 0f;
+            var passive = sm.AddState("Passive_Hold");
+            passive.motion = idleClip;
+            passive.speed = 0f;
+
+            // One mode condition per destination makes every water/land change reachable,
+            // including a dive from treading water. Speed blending cannot retrigger states.
+            AddModeTransition(sm, land, 0);
+            AddModeTransition(sm, surface, 1);
+            AddModeTransition(sm, underwater, 2);
+            AddModeTransition(sm, seated, 3);
+            AddModeTransition(sm, passive, 4);
 
             EditorUtility.SetDirty(controller);
             return controller;
         }
 
-        private static void AddDirectTransition(AnimatorStateMachine sm, AnimatorState from, AnimatorState to,
-            string param, int value)
+        private static BlendTree SpeedBlend(AnimatorController controller, string name,
+            AnimationClip stationary, AnimationClip moving)
         {
-            var transition = from.AddTransition(to);
+            var blend = new BlendTree
+            {
+                name = name,
+                blendType = BlendTreeType.Simple1D,
+                blendParameter = "MoveSpeed",
+                useAutomaticThresholds = false
+            };
+            AssetDatabase.AddObjectToAsset(blend, controller);
+            blend.AddChild(stationary, 0f);
+            blend.AddChild(moving, 1f);
+            return blend;
+        }
+
+        private static void AddModeTransition(AnimatorStateMachine sm, AnimatorState to, int value)
+        {
+            var transition = sm.AddAnyStateTransition(to);
             transition.hasExitTime = false;
             transition.duration = 0.25f;
-            transition.AddCondition(AnimatorConditionMode.Equals, value, param);
+            transition.canTransitionToSelf = false;
+            transition.AddCondition(AnimatorConditionMode.Equals, value, "LocomotionMode");
         }
 
         private static AnimationClip LoadClip(string fbxPath, string clipName)
