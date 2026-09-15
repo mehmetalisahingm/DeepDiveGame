@@ -57,11 +57,13 @@ namespace DeepDive.P3A.Tests
         }
 
         [Test]
-        public void RecordingForcesCameraAndPassiveHidesEquipment()
+        public void RecordingForcesCameraPassiveHidesAndStowIsPreserved()
         {
             Assert.That(PlayerPresentationRules.ResolveHeldEquipment(true, false, HeldEquipmentMode.Harpoon, true),
                 Is.EqualTo(HeldEquipmentMode.Camera));
             Assert.That(PlayerPresentationRules.ResolveHeldEquipment(true, true, HeldEquipmentMode.Camera, true),
+                Is.EqualTo(HeldEquipmentMode.None));
+            Assert.That(PlayerPresentationRules.ResolveHeldEquipment(true, false, HeldEquipmentMode.None, false),
                 Is.EqualTo(HeldEquipmentMode.None));
         }
 
