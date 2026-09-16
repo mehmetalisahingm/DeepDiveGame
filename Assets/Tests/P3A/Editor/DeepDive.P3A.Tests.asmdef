@@ -1,6 +1,6 @@
 {
   "name": "DeepDive.P3A.Tests",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Network"],
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.World", "DeepDive.Composition"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"]
 }
