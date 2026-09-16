@@ -75,5 +75,16 @@ namespace DeepDive.P3A.Tests
             Assert.That(PlayerPresentationRules.CanUseHarpoon(true, false, LocomotionMode.Underwater,
                 HeldEquipmentMode.Harpoon), Is.True);
         }
+
+        [TestCase(LocomotionMode.Land, 0f, "Land_Idle")]
+        [TestCase(LocomotionMode.Land, 0.8f, "Land_Walk")]
+        [TestCase(LocomotionMode.Surface, 0f, "Water_Tread")]
+        [TestCase(LocomotionMode.Surface, 0.8f, "Water_Surface")]
+        [TestCase(LocomotionMode.Underwater, 0f, "Water_Underwater")]
+        [TestCase(LocomotionMode.Underwater, 0.8f, "Water_Underwater")]
+        public void AnimatorStateSeparatesIdleFromMovement(LocomotionMode mode, float speed, string expected)
+        {
+            Assert.That(PlayerPresentationRules.ResolveAnimatorStateName(mode, speed), Is.EqualTo(expected));
+        }
     }
 }
