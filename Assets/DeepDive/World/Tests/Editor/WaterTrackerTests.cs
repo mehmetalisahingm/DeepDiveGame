@@ -2,8 +2,6 @@ using DeepDive.Network;
 using DeepDive.World;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools.Constraints;
-using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace DeepDive.World.Tests
 {
@@ -191,11 +189,19 @@ namespace DeepDive.World.Tests
         {
             var tracker = Tracker();
             var probe = Diver(0, 2f);
-            tracker.Classify(probe);
 
-            // Block body, not an expression body: the constraint needs a TestDelegate and
-            // an expression lambda that returns a value binds to Func<T> instead.
-            Assert.That(() => { tracker.Classify(probe); }, Is.Not.AllocatingGCMemory());
+            // Warm both the classification path and the runtime allocation counter before
+            // taking the baseline. The old AllocatingGCMemory TestDelegate constraint was
+            // intermittently measuring its own delegate/constraint bookkeeping on CI.
+            for (var i = 0; i < 32; i++) tracker.Classify(probe);
+            _ = System.GC.GetAllocatedBytesForCurrentThread();
+
+            var before = System.GC.GetAllocatedBytesForCurrentThread();
+            for (var i = 0; i < 1024; i++) tracker.Classify(probe);
+            var after = System.GC.GetAllocatedBytesForCurrentThread();
+
+            Assert.AreEqual(before, after,
+                $"WaterTracker.Classify allocated {after - before} bytes across 1024 warmed calls.");
         }
 
         // A 1.8 m diver: base at the feet, head 1.8 m above them.
@@ -213,6 +219,8 @@ namespace DeepDive.World.Tests
         // boundary is simply below float resolution here, so the lock is placed where the
         // answer is unambiguous. 1.79 measures dTop = -0.0100002289 and 1.81 measures
         // dTop = +0.009999752, both four orders of magnitude clear of the noise.
+        [TestCase(0.00f, EnvironmentLocomotion.Surface)]
+        [TestCase(0.01f, EnvironmentLocomotion.Surface)]
         [TestCase(1.00f, EnvironmentLocomotion.Surface)]
         [TestCase(1.79f, EnvironmentLocomotion.Surface)]
         [TestCase(1.81f, EnvironmentLocomotion.Underwater)]
