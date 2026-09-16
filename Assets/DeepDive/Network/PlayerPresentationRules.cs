@@ -79,6 +79,18 @@ namespace DeepDive.Network
             return Vector3.ClampMagnitude(input, 1f);
         }
 
+        public static string ResolveAnimatorStateName(LocomotionMode locomotion, float normalizedSpeed)
+        {
+            var moving = normalizedSpeed > 0.05f;
+            return locomotion switch
+            {
+                LocomotionMode.Surface => moving ? "Water_Surface" : "Water_Tread",
+                LocomotionMode.Underwater => "Water_Underwater",
+                LocomotionMode.Land => moving ? "Land_Walk" : "Land_Idle",
+                _ => "Land_Idle"
+            };
+        }
+
         public static bool IsSwimming(LocomotionMode locomotion) =>
             locomotion == LocomotionMode.Surface || locomotion == LocomotionMode.Underwater;
 

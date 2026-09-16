@@ -75,5 +75,76 @@ namespace DeepDive.P3A.Tests
             Assert.That(PlayerPresentationRules.CanUseHarpoon(true, false, LocomotionMode.Underwater,
                 HeldEquipmentMode.Harpoon), Is.True);
         }
+
+        [TestCase(LocomotionMode.Land, 0f, "Land_Idle")]
+        [TestCase(LocomotionMode.Land, 0.8f, "Land_Walk")]
+        [TestCase(LocomotionMode.Surface, 0f, "Water_Tread")]
+        [TestCase(LocomotionMode.Surface, 0.8f, "Water_Surface")]
+        [TestCase(LocomotionMode.Underwater, 0f, "Water_Underwater")]
+        [TestCase(LocomotionMode.Underwater, 0.8f, "Water_Underwater")]
+        public void AnimatorStateSeparatesIdleFromMovement(LocomotionMode mode, float speed, string expected)
+        {
+            Assert.That(PlayerPresentationRules.ResolveAnimatorStateName(mode, speed), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void PresentationCatalogLoadsCommittedEquipmentAndToleratesLicensedRigBeingAbsent()
+        {
+            var catalog = Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
+
+            Assert.That(catalog, Is.Not.Null, "P3.1 presentation catalog must load from Resources.");
+            Assert.DoesNotThrow(() => { _ = catalog.ThirdPersonRigPrefab; },
+                "A fresh checkout must not expose a broken Unity MissingReference when Mixamo FBX files are absent.");
+            Assert.That(catalog.HarpoonPropPrefab, Is.Not.Null, "Merged HarpoonProp prefab reference is missing.");
+            Assert.That(catalog.CameraPropPrefab, Is.Not.Null, "Merged CameraProp prefab reference is missing.");
+        }
+
+        [Test]
+        public void CommittedPresentationAssetsAreInstantiableAndLicensedRigIsValidatedWhenAvailable()
+        {
+            var catalog = Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
+            Assert.That(catalog, Is.Not.Null);
+
+            GameObject rig = null;
+            GameObject harpoon = null;
+            GameObject camera = null;
+            try
+            {
+                var rigPrefab = catalog.ThirdPersonRigPrefab;
+                if (rigPrefab != null)
+                    rig = Object.Instantiate(rigPrefab);
+
+                harpoon = Object.Instantiate(catalog.HarpoonPropPrefab);
+                camera = Object.Instantiate(catalog.CameraPropPrefab);
+
+                Assert.That(FindDescendant(harpoon.transform, "GripPoint"), Is.Not.Null,
+                    "HarpoonProp GripPoint is missing.");
+                Assert.That(FindDescendant(camera.transform, "GripPoint"), Is.Not.Null,
+                    "CameraProp GripPoint is missing.");
+
+                if (rig == null) return; // Expected on CI/public checkout: Mixamo source FBX is intentionally omitted.
+
+                Assert.That(rig.GetComponentInChildren<Animator>(true), Is.Not.Null,
+                    "DiverCharacter must contain a usable Animator when the licensed source is installed.");
+                Assert.That(rig.GetComponentsInChildren<Renderer>(true).Length, Is.GreaterThan(0),
+                    "DiverCharacter must contain renderable human geometry when the licensed source is installed.");
+                Assert.That(FindDescendant(rig.transform, "Socket_RightHand_Equipment"), Is.Not.Null,
+                    "DiverCharacter right-hand equipment socket is missing.");
+            }
+            finally
+            {
+                if (rig != null) Object.DestroyImmediate(rig);
+                if (harpoon != null) Object.DestroyImmediate(harpoon);
+                if (camera != null) Object.DestroyImmediate(camera);
+            }
+        }
+
+        private static Transform FindDescendant(Transform root, string name)
+        {
+            if (root == null) return null;
+            foreach (var child in root.GetComponentsInChildren<Transform>(true))
+                if (child.name == name) return child;
+            return null;
+        }
     }
 }
