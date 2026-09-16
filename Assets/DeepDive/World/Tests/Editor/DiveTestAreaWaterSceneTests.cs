@@ -32,7 +32,23 @@ namespace DeepDive.World.Tests
         private const string RampName = "Shore_Ramp";
         private const float LedgeTopY = 8.4f;
         private const float RampAngleDegrees = 25f;
-        private const float RampBottomY = 6f;
+
+        // Foot of the ramp: the lowest surface a diver can stand on. Kept above the exit zone
+        // (see NoShoreWalkableSurfaceSitsInTheSafeReturnZone) and below the water line.
+        private const float RampBottomY = 7.2f;
+
+        // A depth in open water past the foot of the ramp, where a diver ends up by swimming
+        // or falling rather than walking.
+        private const float OpenWaterY = 5f;
+
+        // DiveExit's trigger, written out rather than read from Composition: the zone belongs
+        // to Mehmet and this assembly does not reference his, so the numbers are copied the way
+        // the rest of this file copies the scene's constants. SessionPortal tests the diver at
+        // position + up * 0.9, so that is the point the shore has to keep out of the box.
+        private const float ExitZoneMinY = 6f;
+        private const float ExitZoneMaxY = 8f;
+        private const float ExitZoneHalfXZ = 15f;
+        private const float ExitZoneProbeHeight = 0.9f;
 
         private static readonly Vector3 FishHome = new Vector3(0f, 4f, 8f);
         private const float FishWanderRadius = 6f;
@@ -222,7 +238,7 @@ namespace DeepDive.World.Tests
                     "the air beside the ledge should read as Land");
 
                 // ...and the fall from there ends in the water.
-                var landed = new Vector3(step.x, RampBottomY, step.z);
+                var landed = new Vector3(step.x, OpenWaterY, step.z);
                 Assert.AreEqual(EnvironmentLocomotion.Underwater, field.CreateTracker().Classify(Diver(landed)),
                     "falling off at " + step + " must end underwater");
             }
@@ -243,6 +259,41 @@ namespace DeepDive.World.Tests
                 // Scenery: a NetworkObject here would need a GlobalObjectIdHash and would drag
                 // the shore into the netcode surface for nothing.
                 Assert.IsNull(piece.GetComponent<NetworkObject>(), name + " must not be networked");
+            }
+        }
+
+        [Test]
+        public void NoShoreWalkableSurfaceSitsInTheSafeReturnZone()
+        {
+            // The shore must not hand the diver a place to stand inside the dive's exit volume.
+            // DiveExit belongs to Composition and is not touched here; its box is copied as
+            // plain numbers above, the same way this file copies every other scene constant.
+            var samples = new List<Vector3>();
+
+            // The ledge top: centre, edges and corners.
+            var ledge = Require(LedgeName);
+            var half = ledge.transform.localScale * 0.5f;
+            var centre = ledge.transform.position;
+            for (var sx = -1; sx <= 1; sx++)
+                for (var sz = -1; sz <= 1; sz++)
+                    samples.Add(new Vector3(centre.x + sx * half.x, LedgeTopY, centre.z + sz * half.z));
+
+            // The ramp's walkable face, end to end - the foot is the lowest of them and the
+            // one that made this a blocker.
+            var ramp = Require(RampName);
+            var top = ramp.transform.TransformPoint(new Vector3(0.5f, 0.5f, 0f));
+            var foot = ramp.transform.TransformPoint(new Vector3(-0.5f, 0.5f, 0f));
+            for (var i = 0; i <= 20; i++) samples.Add(Vector3.Lerp(top, foot, i / 20f));
+
+            foreach (var stand in samples)
+            {
+                var probe = stand + Vector3.up * ExitZoneProbeHeight;
+                var inside = Mathf.Abs(probe.x) <= ExitZoneHalfXZ
+                             && Mathf.Abs(probe.z) <= ExitZoneHalfXZ
+                             && probe.y >= ExitZoneMinY
+                             && probe.y <= ExitZoneMaxY;
+                Assert.IsFalse(inside,
+                    "standing at " + stand + " is tested at " + probe + ", inside the dive exit zone");
             }
         }
 
@@ -290,17 +341,30 @@ namespace DeepDive.World.Tests
             EnvironmentLocomotion.Land
         };
 
-        // Down the ramp and back up: the horizontal crossing, where the diver walks the shore
-        // line rather than dropping through it.
+        // Down the ramp, off its foot into open water, and back the same way: the horizontal
+        // crossing, where the diver walks the shore line rather than dropping through it.
+        //
+        // The ramp alone no longer reaches Underwater. Its foot stops at 7.2 so that a diver
+        // standing there is clear of the dive exit zone, which leaves the head well above the
+        // water line; the submerged leg is therefore a swim down from the foot into open water.
         private IEnumerable<Vector3> RampPath(float noise)
         {
             var ramp = Require(RampName);
             var top = ramp.transform.TransformPoint(new Vector3(0.5f, 0.5f, 0f));
-            var bottom = ramp.transform.TransformPoint(new Vector3(-0.5f, 0.5f, 0f));
+            var foot = ramp.transform.TransformPoint(new Vector3(-0.5f, 0.5f, 0f));
+            var deep = new Vector3(foot.x, OpenWaterY, foot.z);
 
-            const int steps = 60;
-            for (var i = 0; i <= steps; i++) yield return Jitter(Vector3.Lerp(top, bottom, i / (float)steps), i, noise);
-            for (var i = steps; i >= 0; i--) yield return Jitter(Vector3.Lerp(top, bottom, i / (float)steps), i, noise);
+            foreach (var step in Leg(top, foot, noise, 0)) yield return step;
+            foreach (var step in Leg(foot, deep, noise, 1)) yield return step;
+            foreach (var step in Leg(deep, foot, noise, 2)) yield return step;
+            foreach (var step in Leg(foot, top, noise, 3)) yield return step;
+        }
+
+        private static IEnumerable<Vector3> Leg(Vector3 from, Vector3 to, float noise, int phase)
+        {
+            const int steps = 40;
+            for (var i = 0; i <= steps; i++)
+                yield return Jitter(Vector3.Lerp(from, to, i / (float)steps), phase * (steps + 1) + i, noise);
         }
 
         // Off the side of the ledge and back up: the vertical crossing, where the diver falls
@@ -311,7 +375,7 @@ namespace DeepDive.World.Tests
             var x = ledge.transform.position.x + ledge.transform.localScale.x * 0.5f + 0.5f;
             var z = ledge.transform.position.z;
             var top = new Vector3(x, LedgeTopY, z);
-            var bottom = new Vector3(x, 5f, z);
+            var bottom = new Vector3(x, OpenWaterY, z);
 
             const int steps = 60;
             for (var i = 0; i <= steps; i++) yield return Jitter(Vector3.Lerp(top, bottom, i / (float)steps), i, noise);
