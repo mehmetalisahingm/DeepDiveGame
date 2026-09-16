@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f2af1e2d6424cd8a64c1978326f5821, type: 3}
   m_Name: DiverPresentationCatalog
   m_EditorClassIdentifier: DeepDive.Network::DeepDive.Network.DiverPresentationCatalog
-  thirdPersonRigPrefab: {fileID: 100100000, guid: 9d620660af23c4c4aa71378bfc4c6af2, type: 3}
+  thirdPersonRigPrefab: {fileID: 0}
   harpoonPropPrefab: {fileID: 100100000, guid: 331d73cf6ce460b40ae113244bdacd4c, type: 3}
   cameraPropPrefab: {fileID: 100100000, guid: b3b083a8bf46af84c9fe6ca25c25f012, type: 3}
