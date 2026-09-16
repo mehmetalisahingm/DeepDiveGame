@@ -31,6 +31,14 @@ namespace DeepDive.Composition
         private WaterField field;
         private int sceneHandle = int.MinValue;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void EnsureInstalled()
+        {
+            var networkManager = NetworkManager.Singleton ?? UnityEngine.Object.FindFirstObjectByType<NetworkManager>();
+            if (networkManager == null || networkManager.GetComponent<PlayerWaterLocomotionBinding>() != null) return;
+            networkManager.gameObject.AddComponent<PlayerWaterLocomotionBinding>();
+        }
+
         private void Awake()
         {
             manager = GetComponent<NetworkManager>();
