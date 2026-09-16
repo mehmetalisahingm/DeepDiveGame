@@ -86,5 +86,16 @@ namespace DeepDive.P3A.Tests
         {
             Assert.That(PlayerPresentationRules.ResolveAnimatorStateName(mode, speed), Is.EqualTo(expected));
         }
+
+        [Test]
+        public void PresentationCatalogResolvesMergedRigAndEquipmentPrefabs()
+        {
+            var catalog = Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
+
+            Assert.That(catalog, Is.Not.Null, "P3.1 presentation catalog must load from Resources.");
+            Assert.That(catalog.ThirdPersonRigPrefab, Is.Not.Null, "Merged DiverCharacter prefab reference is missing.");
+            Assert.That(catalog.HarpoonPropPrefab, Is.Not.Null, "Merged HarpoonProp prefab reference is missing.");
+            Assert.That(catalog.CameraPropPrefab, Is.Not.Null, "Merged CameraProp prefab reference is missing.");
+        }
     }
 }
