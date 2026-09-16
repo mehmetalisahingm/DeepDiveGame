@@ -97,5 +97,47 @@ namespace DeepDive.P3A.Tests
             Assert.That(catalog.HarpoonPropPrefab, Is.Not.Null, "Merged HarpoonProp prefab reference is missing.");
             Assert.That(catalog.CameraPropPrefab, Is.Not.Null, "Merged CameraProp prefab reference is missing.");
         }
+
+        [Test]
+        public void MergedDiverPresentationAssetsAreActuallyInstantiable()
+        {
+            var catalog = Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
+            Assert.That(catalog, Is.Not.Null);
+
+            GameObject rig = null;
+            GameObject harpoon = null;
+            GameObject camera = null;
+            try
+            {
+                rig = Object.Instantiate(catalog.ThirdPersonRigPrefab);
+                harpoon = Object.Instantiate(catalog.HarpoonPropPrefab);
+                camera = Object.Instantiate(catalog.CameraPropPrefab);
+
+                Assert.That(rig.GetComponentInChildren<Animator>(true), Is.Not.Null,
+                    "Merged DiverCharacter must contain a usable Animator on a fresh checkout.");
+                Assert.That(rig.GetComponentsInChildren<Renderer>(true).Length, Is.GreaterThan(0),
+                    "Merged DiverCharacter must contain renderable human geometry on a fresh checkout.");
+                Assert.That(FindDescendant(rig.transform, "Socket_RightHand_Equipment"), Is.Not.Null,
+                    "DiverCharacter right-hand equipment socket is missing.");
+                Assert.That(FindDescendant(harpoon.transform, "GripPoint"), Is.Not.Null,
+                    "HarpoonProp GripPoint is missing.");
+                Assert.That(FindDescendant(camera.transform, "GripPoint"), Is.Not.Null,
+                    "CameraProp GripPoint is missing.");
+            }
+            finally
+            {
+                if (rig != null) Object.DestroyImmediate(rig);
+                if (harpoon != null) Object.DestroyImmediate(harpoon);
+                if (camera != null) Object.DestroyImmediate(camera);
+            }
+        }
+
+        private static Transform FindDescendant(Transform root, string name)
+        {
+            if (root == null) return null;
+            foreach (var child in root.GetComponentsInChildren<Transform>(true))
+                if (child.name == name) return child;
+            return null;
+        }
     }
 }
