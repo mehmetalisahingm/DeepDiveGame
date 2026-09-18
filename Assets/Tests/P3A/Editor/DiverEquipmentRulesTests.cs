@@ -65,6 +65,21 @@ namespace DeepDive.P3A.Tests
         }
 
         [Test]
+        public void CameraSlotBelongsOnlyToMatchingPlayerAndOwnedDefinition()
+        {
+            var loadout = new LoadoutState(Alice, new[] { "camera-basic" }, 7);
+            var camera = new EquipmentDefinition("camera-basic", "camera", 1, 150);
+
+            Assert.IsTrue(DiverEquipmentRules.OwnsEquipmentSlot(Alice, loadout, new[] { camera }, "camera"));
+            Assert.IsFalse(DiverEquipmentRules.OwnsEquipmentSlot(Bob, loadout, new[] { camera }, "camera"));
+
+            var mismatchedDefinition = new EquipmentDefinition("camera-other", "camera", 1, 150);
+            Assert.IsFalse(DiverEquipmentRules.OwnsEquipmentSlot(Alice, loadout,
+                new[] { mismatchedDefinition }, "camera"),
+                "A camera definition not present in this player's loadout must not grant camera ownership.");
+        }
+
+        [Test]
         public void VitalsCapacityUpgradeRefillsOnceAndPersistsAcrossDiveReset()
         {
             var vitals = new DiverVitalsState(120f, 100f, 1f, 0.2f);

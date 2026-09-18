@@ -54,13 +54,17 @@ namespace DeepDive.Network
         }
 
         public static HeldEquipmentMode ResolveHeldEquipment(bool diveActive, bool passive,
-            HeldEquipmentMode requested, bool recording)
+            HeldEquipmentMode requested, bool recording) =>
+            ResolveHeldEquipment(diveActive, passive, requested, recording, cameraOwned: true);
+
+        public static HeldEquipmentMode ResolveHeldEquipment(bool diveActive, bool passive,
+            HeldEquipmentMode requested, bool recording, bool cameraOwned)
         {
             if (!diveActive || passive) return HeldEquipmentMode.None;
-            if (recording) return HeldEquipmentMode.Camera;
+            if (recording) return cameraOwned ? HeldEquipmentMode.Camera : HeldEquipmentMode.None;
             return requested switch
             {
-                HeldEquipmentMode.Camera => HeldEquipmentMode.Camera,
+                HeldEquipmentMode.Camera => cameraOwned ? HeldEquipmentMode.Camera : HeldEquipmentMode.None,
                 HeldEquipmentMode.Harpoon => HeldEquipmentMode.Harpoon,
                 _ => HeldEquipmentMode.None
             };

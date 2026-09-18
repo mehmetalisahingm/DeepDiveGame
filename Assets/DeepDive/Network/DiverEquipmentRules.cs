@@ -21,11 +21,37 @@ namespace DeepDive.Network
             for (var i = 0; i < equippedDefinitions.Count; i++)
             {
                 var definition = equippedDefinitions[i];
+                if (!ContainsEquipmentId(loadout.EquippedIds, definition.EquipmentId)) continue;
                 if (!string.Equals(definition.Slot, "tube", StringComparison.OrdinalIgnoreCase)) continue;
                 strongestTubeLevel = Math.Max(strongestTubeLevel, Math.Max(0, definition.Level));
             }
 
             return baseline + strongestTubeLevel * TubeOxygenSecondsPerLevel;
+        }
+
+        public static bool OwnsEquipmentSlot(PlayerId expectedPlayer, LoadoutState loadout,
+            IReadOnlyList<EquipmentDefinition> equippedDefinitions, string slot)
+        {
+            if (!loadout.PlayerId.Equals(expectedPlayer) || equippedDefinitions == null ||
+                string.IsNullOrWhiteSpace(slot))
+                return false;
+
+            for (var i = 0; i < equippedDefinitions.Count; i++)
+            {
+                var definition = equippedDefinitions[i];
+                if (!string.Equals(definition.Slot, slot, StringComparison.OrdinalIgnoreCase)) continue;
+                if (ContainsEquipmentId(loadout.EquippedIds, definition.EquipmentId)) return true;
+            }
+
+            return false;
+        }
+
+        private static bool ContainsEquipmentId(IReadOnlyList<string> equipmentIds, string equipmentId)
+        {
+            if (equipmentIds == null || string.IsNullOrWhiteSpace(equipmentId)) return false;
+            for (var i = 0; i < equipmentIds.Count; i++)
+                if (string.Equals(equipmentIds[i], equipmentId, StringComparison.Ordinal)) return true;
+            return false;
         }
 
         private static bool FinitePositive(float value) =>

@@ -24,6 +24,10 @@ namespace DeepDive.Network
         [SerializeField] private float pickupRange = 2.5f;
         [SerializeField] private float pickupCooldown = 0.2f;
 
+        [Header("P3 Town Interaction")]
+        [SerializeField] private float serviceInteractionRange = 3.25f;
+        [SerializeField] private float serviceInteractionCooldown = 0.2f;
+
         [Header("P2 Feedback")]
         [Tooltip("Optional pre-wired low oxygen source. If omitted, lowOxygenClip gets a local runtime source for the owner.")]
         [SerializeField] private AudioSource lowOxygenLoop;
@@ -77,6 +81,7 @@ namespace DeepDive.Network
         private double nextInputTime;
         private EnvironmentLocomotion environmentLocomotion = EnvironmentLocomotion.Land;
         private bool externalEnvironmentBound;
+        private bool cameraOwned;
         private HeldEquipmentMode requestedEquipment = HeldEquipmentMode.Harpoon;
         private Vector3 lastPresentationPosition;
 
@@ -114,6 +119,7 @@ namespace DeepDive.Network
                 RecordingPresentation.Value = false;
                 environmentLocomotion = EnvironmentLocomotion.Land;
                 externalEnvironmentBound = false;
+                cameraOwned = false;
                 requestedEquipment = HeldEquipmentMode.Harpoon;
                 PublishVitals();
                 PublishPresentationServer();
@@ -167,6 +173,9 @@ namespace DeepDive.Network
                     if (Input.GetMouseButtonDown(0) && CurrentHeldEquipment == HeldEquipmentMode.Harpoon)
                         SubmitHarpoonLocal();
                     if (Input.GetKeyDown(KeyCode.E)) SubmitPickupLocal();
+                    if (Input.GetKeyDown(KeyCode.F)) SubmitServiceInteractionLocal();
+                    if (Input.GetKeyDown(KeyCode.Alpha1)) SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
+                    if (Input.GetKeyDown(KeyCode.Alpha2)) SetHeldEquipmentLocal(HeldEquipmentMode.Camera);
                 }
             }
 
@@ -221,6 +230,14 @@ namespace DeepDive.Network
             else PickupRpc(requestId);
         }
 
+        public void SubmitServiceInteractionLocal()
+        {
+            if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
+            var requestId = ++actionSequence;
+            if (IsServer) HandleServiceInteraction(requestId);
+            else ServiceInteractionRpc(requestId);
+        }
+
         public void SetHeldEquipmentLocal(HeldEquipmentMode mode)
         {
             if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
@@ -236,6 +253,9 @@ namespace DeepDive.Network
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
         private void PickupRpc(ulong requestId) => HandlePickup(requestId);
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        private void ServiceInteractionRpc(ulong requestId) => HandleServiceInteraction(requestId);
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
         private void SetHeldEquipmentRpc(byte mode) => ApplyHeldEquipmentRequestServer((HeldEquipmentMode)mode);
@@ -260,7 +280,7 @@ namespace DeepDive.Network
             Locomotion.Value = (byte)locomotion;
             Swimming.Value = PlayerPresentationRules.IsSwimming(locomotion);
             HeldEquipment.Value = (byte)PlayerPresentationRules.ResolveHeldEquipment(
-                session.DiveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value);
+                session.DiveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value, cameraOwned);
 
             vitals.Tick(Time.fixedDeltaTime,
                 session.DiveActive && PlayerPresentationRules.DrainsOxygen(locomotion));
@@ -314,6 +334,15 @@ namespace DeepDive.Network
         public void SetRecordingPresentationServer(bool active)
         {
             if (!IsServer) return;
+            if (active && !cameraOwned)
+            {
+                RecordingPresentation.Value = false;
+                if (requestedEquipment == HeldEquipmentMode.Camera)
+                    requestedEquipment = HeldEquipmentMode.Harpoon;
+                PublishPresentationServer();
+                return;
+            }
+
             RecordingPresentation.Value = active;
             if (active) requestedEquipment = HeldEquipmentMode.Camera;
             PublishPresentationServer();
@@ -324,6 +353,7 @@ namespace DeepDive.Network
             if (!IsServer) return;
             if (mode != HeldEquipmentMode.None && mode != HeldEquipmentMode.Harpoon && mode != HeldEquipmentMode.Camera)
                 return;
+            if (mode == HeldEquipmentMode.Camera && !cameraOwned) return;
             requestedEquipment = mode;
             PublishPresentationServer();
         }
@@ -336,7 +366,7 @@ namespace DeepDive.Network
             Swimming.Value = PlayerPresentationRules.IsSwimming(locomotion);
             var diveActive = session != null && session.DiveActive;
             HeldEquipment.Value = (byte)PlayerPresentationRules.ResolveHeldEquipment(
-                diveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value);
+                diveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value, cameraOwned);
         }
 
         private void UpdatePresentationView()
@@ -418,6 +448,50 @@ namespace DeepDive.Network
             PublishAction(requestId, kind, result);
         }
 
+        private void HandleServiceInteraction(ulong requestId)
+        {
+            if (!IsServer) return;
+            var kind = PlayerActionKind.ServiceInteraction;
+            var result = actionGate.TryAccept(requestId, kind,
+                Time.realtimeSinceStartupAsDouble, serviceInteractionCooldown);
+            if (result != PlayerActionResult.Accepted)
+            {
+                PublishAction(requestId, kind, result);
+                return;
+            }
+
+            if (session == null || session.DiveActive || Passive.Value)
+            {
+                PublishAction(requestId, kind, PlayerActionResult.InvalidState);
+                return;
+            }
+
+            var frame = input.Read(Time.realtimeSinceStartupAsDouble);
+            var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
+            var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
+            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, serviceInteractionRange), ~0,
+                    QueryTriggerInteraction.Collide))
+            {
+                PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
+                return;
+            }
+
+            var target = hit.collider.GetComponentInParent<ServicePointAnchor>();
+            if (target == null)
+            {
+                PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
+                return;
+            }
+
+            var definition = target.Definition;
+            result = ServiceInteractionRules.Validate(definition, transform.position, target.WorldPosition,
+                hasClearLineOfSight: true);
+            if (result == PlayerActionResult.Accepted)
+                result = ServiceInteractionAuthority.TryInteract(new PlayerId(OwnerClientId), definition, requestId);
+
+            PublishAction(requestId, kind, result);
+        }
+
         private static T FindTarget<T>(Collider collider) where T : class
         {
             if (collider == null) return null;
@@ -444,11 +518,22 @@ namespace DeepDive.Network
             if (!IsServer || vitals == null || loadout.PlayerId.Value != OwnerClientId) return false;
             if (session != null && session.DiveActive) return false;
 
-            var resolved = DiverEquipmentRules.ResolveMaxOxygen(maxOxygen, new PlayerId(OwnerClientId),
-                loadout, equippedDefinitions);
+            var player = new PlayerId(OwnerClientId);
+            var resolved = DiverEquipmentRules.ResolveMaxOxygen(maxOxygen, player, loadout, equippedDefinitions);
+            var ownsCamera = DiverEquipmentRules.OwnsEquipmentSlot(player, loadout, equippedDefinitions, "camera");
+            var cameraOwnershipChanged = cameraOwned != ownsCamera;
+            cameraOwned = ownsCamera;
+
+            if (!cameraOwned)
+            {
+                RecordingPresentation.Value = false;
+                if (requestedEquipment == HeldEquipmentMode.Camera)
+                    requestedEquipment = HeldEquipmentMode.Harpoon;
+            }
+
             var changed = vitals.SetMaxOxygen(resolved, refill: true);
             PublishVitals();
-            return changed;
+            return changed || cameraOwnershipChanged;
         }
 
         public bool ApplyDamageServer(float amount)
