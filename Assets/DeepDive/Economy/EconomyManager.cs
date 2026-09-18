@@ -6,15 +6,45 @@ using UnityEngine;
 
 namespace DeepDive.Economy
 {
+    // Shared-money and progression authority (host only). P3.2: a safe return no longer pays. It
+    // queues a PendingTurnIn; money is produced only by an NPC interaction (TrySellCatches /
+    // TryTurnInRecordings), once per item id, atomically with the save.
     [RequireComponent(typeof(InventoryManager))]
     public class EconomyManager : MonoBehaviour
     {
+        public const string CameraBasicId = "camera-basic";
+
+        private const byte OpEquipment = 1;
+        private const byte OpSellCatches = 2;
+        private const byte OpTurnInRecordings = 3;
+        private const byte OpBoatPart = 4;
+
         public event Action OnBalanceChanged;
         public event Action<PlayerId> OnLoadoutChanged;
+        public event Action OnPendingChanged;
+        public event Action OnBoatRepairChanged;
 
         public int SharedBalance { get; private set; }
         public int Revision { get; private set; }
         public string LastCheckpointId { get; private set; } = "";
+        public int BoatPartPrice { get; private set; } = 120;
+
+        private sealed class PendingItem
+        {
+            public string ItemId;
+            public TurnInKind Kind;
+            public string DiveId;
+            public string SubjectId;
+            public int WeightGrams;
+            public int Quality;
+            public float ValidDurationSeconds;
+            public PlayerId Carrier;
+            public bool Shared;
+            public int Revision;
+
+            public PendingTurnInState ToState() => new PendingTurnInState(ItemId, Kind, DiveId, SubjectId,
+                WeightGrams, Quality, ValidDurationSeconds, Carrier, Shared, Revision);
+        }
 
         private InventoryManager _inventory;
         private readonly Dictionary<string, int> _priceBySpeciesId = new Dictionary<string, int>();
@@ -23,8 +53,12 @@ namespace DeepDive.Economy
         private readonly Dictionary<PlayerId, HashSet<string>> _loadout = new Dictionary<PlayerId, HashSet<string>>();
         private readonly HashSet<string> _soldCaptureIds = new HashSet<string>();
         private readonly HashSet<string> _paidRecordingIds = new HashSet<string>();
-        private readonly Dictionary<(PlayerId, ulong), TransactionResult> _processedRequests =
-            new Dictionary<(PlayerId, ulong), TransactionResult>();
+        private readonly List<PendingItem> _pending = new List<PendingItem>();
+        private readonly List<string> _boatParts = new List<string>();
+        private readonly Dictionary<(PlayerId, ulong, byte), TransactionResult> _processedRequests =
+            new Dictionary<(PlayerId, ulong, byte), TransactionResult>();
+        private readonly Dictionary<(PlayerId, ulong, byte), TurnInResult> _processedTurnIns =
+            new Dictionary<(PlayerId, ulong, byte), TurnInResult>();
         private Func<bool> _persist;
         private bool _subscribed;
         private bool _configured;
@@ -70,6 +104,8 @@ namespace DeepDive.Economy
 
             _catalog["tube-1"] = new EquipmentDefinition("tube-1", "tube", 1, 100);
             _catalog["tube-2"] = new EquipmentDefinition("tube-2", "tube", 2, 250);
+            // The basic camera is a separately bought item, not a free default.
+            _catalog[CameraBasicId] = new EquipmentDefinition(CameraBasicId, "camera", 1, 150);
         }
 
         private void EnsureSubscribed()
@@ -95,6 +131,8 @@ namespace DeepDive.Economy
             if (string.IsNullOrWhiteSpace(speciesId)) return;
             _priceBySpeciesId[speciesId] = Math.Max(0, pricePerCapture);
         }
+
+        public void SetBoatPartPrice(int price) => BoatPartPrice = Math.Max(0, price);
 
         public void SetRecordingReward(int quality, int credits)
         {
@@ -127,48 +165,91 @@ namespace DeepDive.Economy
         public LoadoutState LoadoutStateFor(PlayerId player) =>
             new LoadoutState(player, LoadoutFor(player), Revision);
 
+        // ---- Pending turn-ins -------------------------------------------------------------
+
+        public IReadOnlyList<PendingTurnInState> PendingTurnIns()
+        {
+            var list = new List<PendingTurnInState>(_pending.Count);
+            foreach (var item in _pending) list.Add(item.ToState());
+            return list;
+        }
+
+        public int PendingCountFor(PlayerId player, TurnInKind kind)
+        {
+            var count = 0;
+            foreach (var item in _pending)
+                if (item.Kind == kind && CanHandIn(item, player)) count++;
+            return count;
+        }
+
+        private static bool CanHandIn(PendingItem item, PlayerId player) =>
+            item.Shared || item.Carrier.Equals(player);
+
+        private PendingItem FindPending(TurnInKind kind, string itemId)
+        {
+            foreach (var item in _pending)
+                if (item.Kind == kind && string.Equals(item.ItemId, itemId, StringComparison.Ordinal)) return item;
+            return null;
+        }
+
         private void HandleDiveSummary(DiveSummary summary)
         {
             LastCheckpointId = summary.CheckpointId ?? "";
-            SellPreservedCatches(summary);
+            QueuePreservedCatches(summary);
         }
 
-        public int SellPreservedCatches(DiveSummary summary)
+        // Turns safely returned catches into unpaid pending items. Never credits money. Queued items
+        // stay in memory even if the disk write fails: a catch must not vanish because of an I/O error.
+        public int QueuePreservedCatches(DiveSummary summary)
         {
-            var earned = 0;
-            var addedIds = new List<string>();
+            if (summary.PreservedCaptureIds == null) return 0;
+            var queued = 0;
             foreach (var captureId in summary.PreservedCaptureIds)
             {
-                if (string.IsNullOrWhiteSpace(captureId) || _soldCaptureIds.Contains(captureId)) continue;
+                if (string.IsNullOrWhiteSpace(captureId) || _soldCaptureIds.Contains(captureId) ||
+                    FindPending(TurnInKind.Catch, captureId) != null) continue;
                 if (!Inventory.TryGetCapture(captureId, out var capture)) continue;
-                _soldCaptureIds.Add(captureId);
-                addedIds.Add(captureId);
-                earned += PriceFor(capture);
+                if (!_priceBySpeciesId.ContainsKey(capture.SpeciesId)) continue;
+
+                var carrier = FindCarrier(captureId, out var found);
+                _pending.Add(new PendingItem
+                {
+                    ItemId = captureId,
+                    Kind = TurnInKind.Catch,
+                    DiveId = string.IsNullOrEmpty(capture.DiveId) ? summary.DiveId : capture.DiveId,
+                    SubjectId = capture.SpeciesId,
+                    WeightGrams = capture.WeightGrams,
+                    Quality = capture.Quality ?? 0,
+                    Carrier = carrier,
+                    Shared = !found,
+                    Revision = Revision + 1
+                });
+                queued++;
             }
 
-            if (earned <= 0) return 0;
-            var previousBalance = SharedBalance;
-            var previousRevision = Revision;
-            SharedBalance += earned;
+            if (queued == 0) return 0;
             Revision++;
-
-            if (!Persist())
-            {
-                SharedBalance = previousBalance;
-                Revision = previousRevision;
-                foreach (var id in addedIds) _soldCaptureIds.Remove(id);
-                return 0;
-            }
-
-            OnBalanceChanged?.Invoke();
-            return earned;
+            Persist();
+            OnPendingChanged?.Invoke();
+            return queued;
         }
 
-        private int PriceFor(CaptureResult capture) =>
-            _priceBySpeciesId.TryGetValue(capture.SpeciesId, out var price) ? price : 0;
+        private PlayerId FindCarrier(string captureId, out bool found)
+        {
+            foreach (var pair in Inventory.Bags)
+                foreach (var item in pair.Value.Items)
+                    if (item.CaptureId == captureId)
+                    {
+                        found = true;
+                        return pair.Key;
+                    }
+            found = false;
+            return default;
+        }
 
-        // Called by RecordingDiveBinding while settling the real safe-return summary.
-        public PlayerActionResult TryRewardRecording(RecordingResult result)
+        // Called by RecordingDiveBinding while settling the real safe-return summary. It only creates
+        // the pending commercial right; the recording NPC pays it.
+        public PlayerActionResult TryQueueRecordingTurnIn(RecordingResult result)
         {
             ConfigureDefaults();
             if (string.IsNullOrWhiteSpace(result.RecordingId) || string.IsNullOrWhiteSpace(result.DiveId) ||
@@ -176,32 +257,106 @@ namespace DeepDive.Economy
                 result.Quality < 1 || result.Quality > 4)
                 return PlayerActionResult.InvalidTarget;
 
-            if (_paidRecordingIds.Contains(result.RecordingId)) return PlayerActionResult.DuplicateRequest;
+            if (_paidRecordingIds.Contains(result.RecordingId) ||
+                FindPending(TurnInKind.Recording, result.RecordingId) != null)
+                return PlayerActionResult.DuplicateRequest;
             if (!_subjectRewards.TryGetValue((result.SubjectId, result.Quality), out var reward) || reward <= 0)
                 return PlayerActionResult.Rejected;
 
-            var previousBalance = SharedBalance;
-            var previousRevision = Revision;
-            _paidRecordingIds.Add(result.RecordingId);
-            SharedBalance += reward;
-            Revision++;
-
-            if (!Persist())
+            _pending.Add(new PendingItem
             {
-                _paidRecordingIds.Remove(result.RecordingId);
-                SharedBalance = previousBalance;
-                Revision = previousRevision;
-                return PlayerActionResult.Rejected;
-            }
-
-            OnBalanceChanged?.Invoke();
+                ItemId = result.RecordingId,
+                Kind = TurnInKind.Recording,
+                DiveId = result.DiveId,
+                SubjectId = result.SubjectId,
+                Quality = result.Quality,
+                ValidDurationSeconds = result.ValidDurationSeconds,
+                Carrier = result.PlayerId,
+                Shared = false,
+                Revision = Revision + 1
+            });
+            Revision++;
+            Persist();
+            OnPendingChanged?.Invoke();
             return PlayerActionResult.Accepted;
         }
+
+        private int CatchPrice(PendingItem item) =>
+            _priceBySpeciesId.TryGetValue(item.SubjectId, out var price) ? price : 0;
+
+        private int RecordingPrice(PendingItem item) =>
+            _subjectRewards.TryGetValue((item.SubjectId, item.Quality), out var reward) ? reward : 0;
+
+        public TurnInResult TrySellCatches(PlayerId player, ulong requestId) =>
+            TrySettle(player, requestId, TurnInKind.Catch, OpSellCatches, CatchPrice, _soldCaptureIds);
+
+        public TurnInResult TryTurnInRecordings(PlayerId player, ulong requestId) =>
+            TrySettle(player, requestId, TurnInKind.Recording, OpTurnInRecordings, RecordingPrice, _paidRecordingIds);
+
+        // One atomic unit: remove the handed-in items, mark their ids paid, credit the money, write the
+        // save. Any failure restores every piece. A replayed request id returns the first result.
+        private TurnInResult TrySettle(PlayerId player, ulong requestId, TurnInKind kind, byte op,
+            Func<PendingItem, int> priceOf, HashSet<string> paidIds)
+        {
+            EnsureSubscribed();
+            var key = (player, requestId, op);
+            if (_processedTurnIns.TryGetValue(key, out var replayed)) return replayed;
+
+            var items = new List<PendingItem>();
+            var earned = 0;
+            foreach (var item in _pending)
+            {
+                if (item.Kind != kind || !CanHandIn(item, player)) continue;
+                var price = priceOf(item);
+                if (price <= 0) continue;
+                items.Add(item);
+                earned += price;
+            }
+
+            TurnInResult result;
+            if (items.Count == 0) result = TurnInResult.Reject(requestId, "NothingToTurnIn", Revision);
+            else
+            {
+                var previousBalance = SharedBalance;
+                var previousRevision = Revision;
+                var snapshot = new List<PendingItem>(_pending);
+                foreach (var item in items)
+                {
+                    _pending.Remove(item);
+                    paidIds.Add(item.ItemId);
+                }
+                SharedBalance += earned;
+                Revision++;
+
+                if (!Persist())
+                {
+                    _pending.Clear();
+                    _pending.AddRange(snapshot);
+                    foreach (var item in items) paidIds.Remove(item.ItemId);
+                    SharedBalance = previousBalance;
+                    Revision = previousRevision;
+                    // Not cached: the same request id may be retried once the disk recovers.
+                    return TurnInResult.Reject(requestId, "SaveFailed", Revision);
+                }
+
+                result = TurnInResult.Ok(requestId, earned, items.Count, Revision);
+            }
+
+            _processedTurnIns[key] = result;
+            if (result.Accepted)
+            {
+                OnBalanceChanged?.Invoke();
+                OnPendingChanged?.Invoke();
+            }
+            return result;
+        }
+
+        // ---- Equipment ---------------------------------------------------------------------
 
         public TransactionResult TryPurchase(PlayerId player, string equipmentId, ulong requestId)
         {
             EnsureSubscribed();
-            var requestKey = (player, requestId);
+            var requestKey = (player, requestId, OpEquipment);
             if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
 
             TransactionResult result;
@@ -246,6 +401,67 @@ namespace DeepDive.Economy
             return result;
         }
 
+        // ---- Boat repair -------------------------------------------------------------------
+
+        public BoatRepairState BoatRepair
+        {
+            get
+            {
+                var status = _boatParts.Count == 0 ? BoatRepairStatus.Broken
+                    : _boatParts.Count >= BoatRepairParts.All.Count ? BoatRepairStatus.Repaired
+                    : BoatRepairStatus.InProgress;
+                return new BoatRepairState(BoatRepairParts.BoatId, BoatRepairParts.All,
+                    new List<string>(_boatParts), status, Revision);
+            }
+        }
+
+        // Each fixed part contributes at most once. Found parts (Utku's free world parts, verified by the
+        // World/interaction layer) and bought parts advance the SAME progress; a contributed part is
+        // consumed into the boat and can never be sold, so a free part cannot mint money.
+        public TransactionResult TryContributeBoatPart(PlayerId player, string partId, BoatPartSource source,
+            ulong requestId)
+        {
+            EnsureSubscribed();
+            var requestKey = (player, requestId, OpBoatPart);
+            if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
+
+            TransactionResult result;
+            var cost = source == BoatPartSource.Purchased ? BoatPartPrice : 0;
+            if (!BoatRepairParts.IsPart(partId))
+                result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            else if (_boatParts.Contains(partId))
+                result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            else if (SharedBalance < cost)
+                result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
+            else
+            {
+                var previousBalance = SharedBalance;
+                var previousRevision = Revision;
+                _boatParts.Add(partId);
+                SharedBalance -= cost;
+                Revision++;
+
+                if (!Persist())
+                {
+                    _boatParts.Remove(partId);
+                    SharedBalance = previousBalance;
+                    Revision = previousRevision;
+                    return TransactionResult.Reject(requestId, "SaveFailed", Revision);
+                }
+                result = TransactionResult.Ok(requestId, Revision);
+            }
+
+            _processedRequests[requestKey] = result;
+            if (result.Accepted)
+            {
+                if (cost > 0) OnBalanceChanged?.Invoke();
+                OnBoatRepairChanged?.Invoke();
+            }
+            return result;
+        }
+
+        // ---- Save / load -------------------------------------------------------------------
+
         public EconomySaveData ExportSaveData(string campaignId, string checkpointId)
         {
             var data = new EconomySaveData
@@ -256,7 +472,8 @@ namespace DeepDive.Economy
                 SharedBalance = SharedBalance,
                 Revision = Revision,
                 SoldCaptureIds = new List<string>(_soldCaptureIds),
-                PaidRecordingIds = new List<string>(_paidRecordingIds)
+                PaidRecordingIds = new List<string>(_paidRecordingIds),
+                BoatPartIds = new List<string>(_boatParts)
             };
 
             foreach (var pair in _loadout)
@@ -267,13 +484,33 @@ namespace DeepDive.Economy
                     EquipmentIds = new List<string>(pair.Value)
                 });
             }
+
+            foreach (var item in _pending)
+            {
+                // Only the host has a persistent id (D06); anyone else's item becomes shared escrow.
+                var hostCarried = !item.Shared && item.Carrier.Value == 0;
+                data.PendingTurnIns.Add(new PendingTurnInSave
+                {
+                    ItemId = item.ItemId,
+                    Kind = (byte)item.Kind,
+                    SourceDiveId = item.DiveId,
+                    SubjectId = item.SubjectId,
+                    WeightGrams = item.WeightGrams,
+                    Quality = item.Quality,
+                    ValidDurationSeconds = item.ValidDurationSeconds,
+                    CarrierPlayerId = 0,
+                    SharedEscrow = !hostCarried,
+                    Revision = item.Revision
+                });
+            }
             return data;
         }
 
         public bool TryRestore(EconomySaveData data)
         {
             ConfigureDefaults();
-            if (data == null || data.SchemaVersion != EconomySaveData.CurrentSchemaVersion || data.SharedBalance < 0)
+            if (data == null || data.SchemaVersion < EconomySaveData.OldestSupportedSchemaVersion ||
+                data.SchemaVersion > EconomySaveData.CurrentSchemaVersion || data.SharedBalance < 0)
                 return false;
 
             SharedBalance = data.SharedBalance;
@@ -282,7 +519,10 @@ namespace DeepDive.Economy
             _soldCaptureIds.Clear();
             _paidRecordingIds.Clear();
             _loadout.Clear();
+            _pending.Clear();
+            _boatParts.Clear();
             _processedRequests.Clear();
+            _processedTurnIns.Clear();
 
             if (data.SoldCaptureIds != null)
                 foreach (var id in data.SoldCaptureIds)
@@ -307,9 +547,44 @@ namespace DeepDive.Economy
                 }
             }
 
+            RestorePending(data.PendingTurnIns);
+            if (data.BoatPartIds != null)
+                foreach (var partId in data.BoatPartIds)
+                    if (BoatRepairParts.IsPart(partId) && !_boatParts.Contains(partId)) _boatParts.Add(partId);
+
             OnBalanceChanged?.Invoke();
+            OnPendingChanged?.Invoke();
+            OnBoatRepairChanged?.Invoke();
             foreach (var player in _loadout.Keys) OnLoadoutChanged?.Invoke(player);
             return true;
+        }
+
+        private void RestorePending(List<PendingTurnInSave> saved)
+        {
+            if (saved == null) return;
+            foreach (var entry in saved)
+            {
+                if (entry == null || string.IsNullOrWhiteSpace(entry.ItemId)) continue;
+                var kind = (TurnInKind)entry.Kind;
+                if (kind != TurnInKind.Catch && kind != TurnInKind.Recording) continue;
+                // A paid id can never come back as pending, whatever an edited/old file says.
+                var paid = kind == TurnInKind.Catch ? _soldCaptureIds : _paidRecordingIds;
+                if (paid.Contains(entry.ItemId) || FindPending(kind, entry.ItemId) != null) continue;
+
+                _pending.Add(new PendingItem
+                {
+                    ItemId = entry.ItemId,
+                    Kind = kind,
+                    DiveId = entry.SourceDiveId ?? "",
+                    SubjectId = entry.SubjectId ?? "",
+                    WeightGrams = Math.Max(0, entry.WeightGrams),
+                    Quality = entry.Quality,
+                    ValidDurationSeconds = entry.ValidDurationSeconds,
+                    Carrier = new PlayerId(entry.CarrierPlayerId),
+                    Shared = entry.SharedEscrow,
+                    Revision = entry.Revision
+                });
+            }
         }
     }
 }

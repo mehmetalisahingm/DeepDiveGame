@@ -55,7 +55,7 @@ namespace DeepDive.Composition
         {
             if (binding == null) return;
             if (economy == null) economy = GetComponent<EconomyManager>();
-            binding.SetPaymentHandler(economy != null ? economy.TryRewardRecording : null);
+            binding.SetPaymentHandler(economy != null ? economy.TryQueueRecordingTurnIn : null);
         }
 
         private void Update()
