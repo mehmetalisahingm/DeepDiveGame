@@ -68,6 +68,17 @@ namespace DeepDive.P3A.Tests
         }
 
         [Test]
+        public void CameraCannotBePresentedUntilOwned()
+        {
+            Assert.That(PlayerPresentationRules.ResolveHeldEquipment(true, false,
+                HeldEquipmentMode.Camera, false, cameraOwned: false), Is.EqualTo(HeldEquipmentMode.None));
+            Assert.That(PlayerPresentationRules.ResolveHeldEquipment(true, false,
+                HeldEquipmentMode.Harpoon, true, cameraOwned: false), Is.EqualTo(HeldEquipmentMode.None));
+            Assert.That(PlayerPresentationRules.ResolveHeldEquipment(true, false,
+                HeldEquipmentMode.Camera, false, cameraOwned: true), Is.EqualTo(HeldEquipmentMode.Camera));
+        }
+
+        [Test]
         public void HarpoonCannotFireWhileCameraIsHeld()
         {
             Assert.That(PlayerPresentationRules.CanUseHarpoon(true, false, LocomotionMode.Underwater,
