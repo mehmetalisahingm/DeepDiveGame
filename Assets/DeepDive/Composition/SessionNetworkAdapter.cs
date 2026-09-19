@@ -155,10 +155,13 @@ namespace DeepDive.Composition
             Changed?.Invoke();
         }
 
+        public static string SceneForPhase(SessionPhase phase) =>
+            phase == SessionPhase.Lobby ? PrepScene : DiveScene;
+
         public bool RequestSceneLoad(SessionState next)
         {
             if (!IsAuthority || network.IsSceneLoading) return false;
-            var scene = next.Phase == SessionPhase.Dive ? DiveScene : PrepScene;
+            var scene = SceneForPhase(next.Phase);
             if (SceneManager.GetActiveScene().name == scene)
                 return network.SetJoinAllowed(next.Phase == SessionPhase.Lobby);
             return network.TryLoadScene(scene, (ulong)next.Revision);

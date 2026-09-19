@@ -43,6 +43,18 @@ namespace DeepDive.P1.Tests
             Assert.IsFalse(SessionCommand.TryRead(reader, out _, out _, out _, out _));
         }
 
+        [Test] public void P3WorldScenePersistsAcrossPrepDiveAndReturn()
+        {
+            Assert.AreEqual(SessionNetworkAdapter.PrepScene,
+                SessionNetworkAdapter.SceneForPhase(SessionPhase.Lobby));
+            Assert.AreEqual(SessionNetworkAdapter.DiveScene,
+                SessionNetworkAdapter.SceneForPhase(SessionPhase.Prep));
+            Assert.AreEqual(SessionNetworkAdapter.DiveScene,
+                SessionNetworkAdapter.SceneForPhase(SessionPhase.Dive));
+            Assert.AreEqual(SessionNetworkAdapter.DiveScene,
+                SessionNetworkAdapter.SceneForPhase(SessionPhase.Return));
+        }
+
         [Test] public void SceneLoadRejectionDoesNotConsumePhaseOrRevision()
         {
             session.SetReady(new PlayerId(0), true);
