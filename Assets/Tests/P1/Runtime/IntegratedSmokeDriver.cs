@@ -139,7 +139,7 @@ namespace DeepDive.P1.Lab
                 if (host && elapsed > 19 && !prepSent && allReady)
                 { prepSent = true; GameObject.Find("BeginPrepButton").GetComponent<Button>().onClick.Invoke(); }
                 result.prep |= state.Phase == SessionPhase.Prep && !connection.IsSceneLoading;
-                if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep)
+                if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep && !connection.IsSceneLoading)
                 { diveSent = true; GameObject.Find("BeginDiveButton").GetComponent<Button>().onClick.Invoke(); }
                 result.dive |= state.Phase == SessionPhase.Dive && SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene;
                 if (Record && host && state.Phase == SessionPhase.Return)
@@ -196,8 +196,12 @@ namespace DeepDive.P1.Lab
         private void Probe(int expected)
         {
             var scene = SceneManager.GetActiveScene().name;
-            if (observedScene != scene)
-            { observedScene = scene; sceneStarted = Time.realtimeSinceStartup; starts.Clear(); }
+            var phase = adapter.Session.State.Phase;
+            // Only Lobby lives in PrepArea; Prep, Dive and Return all run in DiveTestArea (SceneForPhase), so a
+            // scene change alone no longer marks the start of a stage. Key the stage on scene and phase.
+            var stage = scene + ":" + phase;
+            if (observedScene != stage)
+            { observedScene = stage; sceneStarted = Time.realtimeSinceStartup; starts.Clear(); }
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
             foreach (var player in players)
             {
@@ -214,9 +218,9 @@ namespace DeepDive.P1.Lab
                     // marks the diver safe before the hunt/recording test even starts.
                     (elapsed > 1 && elapsed < 1.6f ? Vector3.up : Vector3.zero) :
                     (elapsed > 1 && elapsed < 5 ? Vector3.forward : Vector3.zero);
-                if (Hunt && scene == SessionNetworkAdapter.DiveScene && elapsed > 3) ProbeHunt(local, players);
-                else if (Record && scene == SessionNetworkAdapter.DiveScene && elapsed > 3) ProbeRecording(local, players);
-                else if ((Town || Record) && scene == SessionNetworkAdapter.PrepScene && adapter.Session.State.Phase == SessionPhase.Return) ProbeTown(local);
+                if (Hunt && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHunt(local, players);
+                else if (Record && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeRecording(local, players);
+                else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
             }
             foreach (var player in players)

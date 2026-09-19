@@ -9,8 +9,9 @@ using UnityEngine.SceneManagement;
 
 namespace DeepDive.P3.Tests
 {
-    // Guards the P3.2-C town: three physical NPC service points in PrepArea, the scene the session loads for
-    // Lobby/Prep/Return (DiveTestArea is Dive only, where service interaction is refused). Produced by
+    // Guards the P3.2-C town: three physical NPC service points. TEMPORARILY in PrepArea: since PR #65 that scene
+    // only hosts the Lobby and Prep/Dive/Return run in DiveTestArea, so these move there once the #61 beach exists
+    // (this test, TownServiceSetup.ScenePath and the smoke driver change with them). Produced by
     // TownServiceSetup.Apply; if this fails, re-running that menu item is the repair. Expectations are written
     // out here, not imported from the setup script, so the guard cannot follow the script into a mistake.
     public class TownSceneTests
@@ -65,13 +66,12 @@ namespace DeepDive.P3.Tests
         }
 
         [Test]
-        public void ServicesLiveInThePhaseSceneThatAllowsThem()
+        public void ServicesStillSitInTheTemporaryPrepAreaPlacement()
         {
-            // Service interaction is refused while DiveActive, and Dive is the only phase that loads
-            // DiveTestArea. An NPC there could never be used.
-            var dive = SceneManager.GetSceneByPath("Assets/DeepDive/World/Scenes/DiveTestArea.unity");
-            if (dive.IsValid() && dive.isLoaded)
-                Assert.IsEmpty(dive.GetRootGameObjects().SelectMany(x => x.GetComponentsInChildren<ServicePointAnchor>(true)));
+            // Temporary: Prep/Dive/Return run in DiveTestArea since PR #65, so the final home of these NPCs is the
+            // #61 beach there. Service interaction is gated by phase (refused while DiveActive), not by scene, so the
+            // move needs no code change. Until then this pins where they are so the move is a deliberate edit of
+            // this file, TownServiceSetup.ScenePath and the smoke driver together.
             Assert.AreEqual("PrepArea", scene.name);
         }
 

@@ -23,9 +23,10 @@ namespace DeepDive.Town.Editor
 
         private const string ArtRoot = "Assets/DeepDive/Town/Art";
 
-        // The town is where the non-dive phases run: SessionNetworkAdapter loads PrepArea for Lobby, Prep and
-        // Return (and DiveTestArea only for Dive, where service interaction is refused). The three NPCs stand in
-        // a row along the west wall, facing the room. Moving TownServices is enough to relocate them; ids and
+        // TEMPORARY placement. Since PR #65 SessionNetworkAdapter.SceneForPhase loads PrepArea only for Lobby and
+        // DiveTestArea (the coast world) for Prep, Dive and Return, so these NPCs are unreachable after the lobby.
+        // They move to DiveTestArea once the #61 beach exists (its geometry decides where); ids and catalog stay.
+        // The three NPCs stand in a row along the west wall, facing the room. Moving TownServices is enough to relocate them; ids and
         // anchors do not change.
         public static readonly Vector3 RowStart = new Vector3(-4f, 0f, -2.4f);
         public static readonly Vector3 RowStep = new Vector3(0f, 0f, 2.4f);
