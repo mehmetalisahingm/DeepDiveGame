@@ -58,7 +58,7 @@ Aşağıdaki tablo önceki ortak dal kaydını gösterir. Ayrı dalın 14 Eylül
 |---|---|---|
 | P3.0 Mevcut olay/ödeme/save entegrasyonu | Mehmet koordinasyon; herkes kendi modülü | Ayrı dal ara teslimi var; son head build/test ve gerçek ortak akış yeniden doğrulanacak. Bu iş yeni kapsamı kapatmaz |
 | P3.1 İnsan, yürüme/yüzme, elde kamera/zıpkın | Mehmet entegrasyon; Mert insan/animasyon/ekipman seti; Utku su geçişi | **PLANLANDI** — iki oyuncu birbirini yürürken/yüzerken/çekim yaparken görecek |
-| P3.2 Kumsal, NPC, ilk görev ve ayrı kamera | Mert kasaba/NPC/ekonomi/kayıt; Utku kıyı; Mehmet etkileşim | **PLANLANDI** — çantayla satış, ayrı kamera alımı, ilk sandal görevi, parça bulma veya satın alma |
+| P3.2 Kumsal, NPC, ilk görev ve ayrı kamera | Mert kasaba/NPC/ekonomi/kayıt; Utku kıyı; Mehmet etkileşim | **DEVAM** — Mert kısmı (#62) PR'da: üç NPC, bekleyen teslim + NPC'de tek seferlik ödeme, ayrı kamera, sandal parça durumu, save v2; EditMode 491/491 ve gerçek iki süreçli smoke (`-Town`, `-Record`, `-Event`, temel) yerelde geçti. Utku kumsalı/parça yerleşimi (#61), Mehmet'in NetworkDiver/co-op kabulü ve ayrı bilgisayar/internet smoke'u açık; guest'in satın aldığı kamera yeniden açmada saklanmaz (D06) |
 | P3.3 Sandal, harita ve gidiş/dönüş | Mehmet hareket/koltuk/konum; Utku rota/koordinat; Mert onarım/harita UI/kayıt | **PLANLANDI** — üç parça, dört yolcu, yakın rota ve haritada canlı sandal/oyuncu/iskele |
 | P3.4 Teknik, görsel ve ortak oynama kabulü | Üç kişi; koordinasyon Mehmet, sanat tutarlılığı Mert | **BEKLİYOR** — yeni kapsam gerçek build'de ve ayrı bilgisayar/internette doğrulanacak |
 

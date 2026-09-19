@@ -47,13 +47,11 @@ namespace DeepDive.Composition
         private void OnEnable()
         {
             EnsureEconomy();
-            BindPurchaseAuthority();
         }
 
         private void Update()
         {
             EnsureEconomy();
-            BindPurchaseAuthority();
             if (economy == null || adapter == null || manager == null || !manager.IsListening || !adapter.IsAuthority)
                 return;
             if (adapter.Session.State.Phase == SessionPhase.Dive) return;
@@ -84,24 +82,6 @@ namespace DeepDive.Composition
                 economy.OnLoadoutChanged += LoadoutChanged;
                 subscribed = true;
             }
-        }
-
-        private void BindPurchaseAuthority()
-        {
-            if (economy != null && adapter != null && manager != null && manager.IsListening && adapter.IsAuthority)
-                EconomyPurchaseAuthority.Bind(HandlePurchase);
-            else EconomyPurchaseAuthority.Unbind(HandlePurchase);
-        }
-
-        private TransactionResult HandlePurchase(PlayerId player, string equipmentId, ulong requestId)
-        {
-            if (economy == null || adapter == null || manager == null || !manager.IsListening || !adapter.IsAuthority)
-                return TransactionResult.Reject(requestId, "InvalidState", economy != null ? economy.Revision : 0);
-            if (adapter.Session.State.Phase == SessionPhase.Dive)
-                return TransactionResult.Reject(requestId, "WrongPhase", economy.Revision);
-            if (!adapter.Session.Roster.ContainsKey(player) || !manager.ConnectedClients.ContainsKey(player.Value))
-                return TransactionResult.Reject(requestId, "PlayerInactive", economy.Revision);
-            return economy.TryPurchase(player, equipmentId, requestId);
         }
 
         private void LoadoutChanged(PlayerId player)
@@ -142,13 +122,11 @@ namespace DeepDive.Composition
 
         private void OnDisable()
         {
-            EconomyPurchaseAuthority.Unbind(HandlePurchase);
             Unsubscribe();
         }
 
         private void OnDestroy()
         {
-            EconomyPurchaseAuthority.Unbind(HandlePurchase);
             Unsubscribe();
         }
     }

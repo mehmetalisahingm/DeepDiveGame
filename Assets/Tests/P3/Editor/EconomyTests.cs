@@ -45,59 +45,96 @@ namespace DeepDive.P3.Tests
         private static CaptureResult Capture(string id, string diveId, int weightGrams, string speciesId = "fish-1") =>
             new CaptureResult(id, diveId, speciesId, weightGrams, catchObjectId: 1);
 
+        // A safe return only queues unpaid pending items; money comes from the fish buyer NPC.
+        private void SafeReturnAndSell(PlayerId player, string captureId, int weight = 500)
+        {
+            inventory.TryAddCatch(player, Capture(captureId, "dive-1", weight));
+            inventory.TryMarkSafeReturn(player);
+        }
+
         [Test]
-        public void SellingPreservedCatchesPaysSetPrice()
+        public void SafeReturnQueuesPendingCatchAndPaysNothing()
         {
             EnterDive("dive-1");
-            inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
-            inventory.TryMarkSafeReturn(alice);
+            SafeReturnAndSell(alice, "c1");
+            Assert.AreEqual(SessionActionResult.Ok, session.BeginReturn());
 
-            var summary = new DiveSummary("dive-1",
-                new[] { alice }, new[] { "c1" }, new string[0], "cp-1");
+            Assert.AreEqual(0, economy.SharedBalance, "diving must never pay automatically");
+            Assert.AreEqual(1, economy.PendingCountFor(alice, TurnInKind.Catch));
+            Assert.AreEqual(0, economy.PendingCountFor(bob, TurnInKind.Catch), "another diver cannot hand in alice's catch");
+        }
 
-            Assert.AreEqual(50, economy.SellPreservedCatches(summary));
+        [Test]
+        public void FishBuyerPaysSetPriceOnceForTheCarrier()
+        {
+            EnterDive("dive-1");
+            SafeReturnAndSell(alice, "c1");
+            session.BeginReturn();
+
+            var sale = economy.TrySellCatches(alice, requestId: 1);
+
+            Assert.IsTrue(sale.Accepted);
+            Assert.AreEqual(50, sale.Earned);
+            Assert.AreEqual(1, sale.ItemCount);
+            Assert.AreEqual(50, economy.SharedBalance);
+            Assert.AreEqual(0, economy.PendingCountFor(alice, TurnInKind.Catch));
+        }
+
+        [Test]
+        public void SellingAgainWithANewRequestDoesNotPayTwice()
+        {
+            EnterDive("dive-1");
+            SafeReturnAndSell(alice, "c1");
+            session.BeginReturn();
+
+            Assert.IsTrue(economy.TrySellCatches(alice, requestId: 1).Accepted);
+            var second = economy.TrySellCatches(alice, requestId: 2);
+
+            Assert.IsFalse(second.Accepted);
+            Assert.AreEqual("NothingToTurnIn", second.ReasonCode);
             Assert.AreEqual(50, economy.SharedBalance);
         }
 
         [Test]
-        public void SellingTheSameSummaryTwiceDoesNotPayTwice()
+        public void ReplayedSellRequestReturnsTheFirstResultWithoutPayingAgain()
         {
             EnterDive("dive-1");
-            inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
-            inventory.TryMarkSafeReturn(alice);
+            SafeReturnAndSell(alice, "c1");
+            session.BeginReturn();
 
-            var summary = new DiveSummary("dive-1",
-                new[] { alice }, new[] { "c1" }, new string[0], "cp-1");
+            var first = economy.TrySellCatches(alice, requestId: 5);
+            var replay = economy.TrySellCatches(alice, requestId: 5);
 
-            Assert.AreEqual(50, economy.SellPreservedCatches(summary));
-            Assert.AreEqual(0, economy.SellPreservedCatches(summary));
+            Assert.IsTrue(replay.Accepted);
+            Assert.AreEqual(first.Earned, replay.Earned);
+            Assert.AreEqual(first.Revision, replay.Revision);
             Assert.AreEqual(50, economy.SharedBalance);
         }
 
         [Test]
-        public void LostCaptureIdsAreNeverPaidEvenIfPassedIn()
+        public void LostCatchesNeverBecomePending()
         {
             EnterDive("dive-1");
             inventory.TryAddCatch(bob, Capture("c2", "dive-1", 300));
-            // bob never marks safe; c2 goes to lost per real FinalizeDive, but even if a caller
-            // mistakenly passed it as preserved, an untracked/never-added id pays nothing here
-            // because pricing always requires a real captured item.
-            var summary = new DiveSummary("dive-1", new PlayerId[0], new string[0], new[] { "c2" }, "cp-1");
-            Assert.AreEqual(0, economy.SellPreservedCatches(summary));
+            // bob never marks a safe return, so c2 is lost by the real FinalizeDive.
+            session.BeginReturn();
+
+            Assert.AreEqual(0, economy.PendingCountFor(bob, TurnInKind.Catch));
+            Assert.AreEqual(0, economy.TrySellCatches(bob, 1).Earned);
             Assert.AreEqual(0, economy.SharedBalance);
         }
 
         [Test]
-        public void RealDiveSummaryFromInventoryManagerPaysOnlySafeReturnedCatches()
+        public void OnlySafeReturnedCatchesAreQueued()
         {
             EnterDive("dive-1");
-            inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
-            inventory.TryAddCatch(bob, Capture("c2", "dive-1", 300));
-            inventory.TryMarkSafeReturn(alice); // bob never makes it out
+            SafeReturnAndSell(alice, "c1");
+            inventory.TryAddCatch(bob, Capture("c2", "dive-1", 300)); // bob never makes it out
 
             Assert.AreEqual(SessionActionResult.Ok, session.BeginReturn());
 
-            Assert.AreEqual(50, economy.SharedBalance);
+            Assert.AreEqual(1, economy.PendingTurnIns().Count);
+            Assert.AreEqual("c1", economy.PendingTurnIns()[0].ItemId);
         }
 
         [Test]
@@ -106,7 +143,8 @@ namespace DeepDive.P3.Tests
             EnterDive("dive-1");
             inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
             inventory.TryMarkSafeReturn(alice);
-            session.BeginReturn(); // funds the shared balance to 50
+            session.BeginReturn();
+            Assert.IsTrue(economy.TrySellCatches(alice, 900).Accepted); // funds the shared balance to 50
 
             economy.AddToCatalog(new EquipmentDefinition("tube-1", "tube", 1, 30));
             var result = economy.TryPurchase(alice, "tube-1", requestId: 1);
@@ -143,6 +181,7 @@ namespace DeepDive.P3.Tests
             inventory.TryAddCatch(alice, Capture("c1", "dive-1", 500));
             inventory.TryMarkSafeReturn(alice);
             session.BeginReturn();
+            economy.TrySellCatches(alice, 900);
 
             economy.AddToCatalog(new EquipmentDefinition("tube-1", "tube", 1, 30));
             var first = economy.TryPurchase(alice, "tube-1", requestId: 7);
@@ -161,7 +200,9 @@ namespace DeepDive.P3.Tests
             inventory.TryAddCatch(bob, Capture("c2", "dive-1", 500));
             inventory.TryMarkSafeReturn(alice);
             inventory.TryMarkSafeReturn(bob);
-            session.BeginReturn(); // two fish-1 captures sold: balance 100
+            session.BeginReturn();
+            economy.TrySellCatches(alice, 900);
+            economy.TrySellCatches(bob, 900); // two fish-1 captures sold: balance 100
 
             economy.AddToCatalog(new EquipmentDefinition("tube-1", "tube", 1, 30));
             // requestId is generated per-player, so both legitimately start at 1 (Mehmet's
@@ -184,7 +225,8 @@ namespace DeepDive.P3.Tests
             EnterDive("dive-1");
             inventory.TryAddCatch(alice, Capture("c1", "dive-1", 1000));
             inventory.TryMarkSafeReturn(alice);
-            session.BeginReturn(); // one fish-1 capture sold at the flat per-capture price: balance 50
+            session.BeginReturn();
+            economy.TrySellCatches(alice, 900); // one fish-1 capture sold at the flat per-capture price: balance 50
 
             economy.AddToCatalog(new EquipmentDefinition("tube-1", "tube", 1, 30));
             Assert.IsTrue(economy.TryPurchase(alice, "tube-1", requestId: 1).Accepted);
