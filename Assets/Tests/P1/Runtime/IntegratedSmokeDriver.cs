@@ -342,8 +342,12 @@ namespace DeepDive.P1.Lab
             if (toStand.magnitude > 0.35f)
             {
                 townSettleAt = 0;
-                var walkYaw = Mathf.Atan2(toStand.x, toStand.z) * Mathf.Rad2Deg;
-                local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * toStand.normalized, walkYaw, 0);
+                var heading = NextBeachWaypoint(local.transform.position, stand) - local.transform.position; heading.y = 0;
+                var walkYaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
+                var move = Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * heading.normalized;
+                // Still swimming below the wading depth: keep rising, the shelf can only be reached from the surface.
+                if (local.Swimming.Value && local.transform.position.y < 7.8f) move.y = 1f;
+                local.SubmitLocalInput(move, walkYaw, 0);
                 return false;
             }
             var toNpc = anchor.WorldPosition + Vector3.up - cam.transform.position;
@@ -352,6 +356,26 @@ namespace DeepDive.P1.Lab
             local.SubmitLocalInput(Vector3.zero, yaw, pitch);
             if (townSettleAt == 0) townSettleAt = Time.realtimeSinceStartup + 0.6f;   // let the aim reach the host
             return Time.realtimeSinceStartup >= townSettleAt;
+        }
+
+        // Prep, Dive and Return all run in DiveTestArea and the NPCs stand on the beach strip, a solid block that
+        // rises out of the pool. A diver coming back therefore cannot walk straight at an NPC: it heads for the
+        // lane of Utku's wade shelf, climbs onto the strip there, and only then walks along it. Waypoints are read
+        // from the scene objects, not typed, so they follow the beach if World moves it.
+        private Vector3 NextBeachWaypoint(Vector3 position, Vector3 stand)
+        {
+            var wade = GameObject.Find("Beach_Wade");
+            var platform = GameObject.Find("Beach_Platform");
+            var strip = platform != null ? platform.GetComponent<Collider>() : null;
+            if (wade == null || strip == null) return stand;
+            var northEdge = strip.bounds.max.z;
+            if (position.z > northEdge + 0.2f)
+            {
+                var lane = wade.transform.position.x;
+                // Aim past the strip's edge so the climb up the shelf is continuous.
+                return new Vector3(lane, position.y, northEdge - 0.6f);
+            }
+            return stand;
         }
 
         private void InteractEvery(NetworkPlayer local, float seconds)
@@ -389,7 +413,7 @@ namespace DeepDive.P1.Lab
                 {
                     townTraceAt = Time.realtimeSinceStartup + 2f;
                     var q = local.transform.position;
-                    result.townTrace.Add($"recorder={recorder} me={local.OwnerClientId} pos=({q.x:0.0},{q.z:0.0}) pendingRec={sync.PendingRecordings.Value} svc={sync.LastServiceRequestId.Value}/{sync.LastServiceAccepted.Value}/{sync.LastServiceReason.Value} act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} bal={sync.SharedBalance.Value}");
+                    result.townTrace.Add($"recorder={recorder} me={local.OwnerClientId} pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) sw={local.Swimming.Value} pendingRec={sync.PendingRecordings.Value} svc={sync.LastServiceRequestId.Value}/{sync.LastServiceAccepted.Value}/{sync.LastServiceReason.Value} act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} bal={sync.SharedBalance.Value}");
                 }
                 if (local.OwnerClientId == recorder)
                 {
@@ -412,7 +436,7 @@ namespace DeepDive.P1.Lab
             {
                 townTraceAt = Time.realtimeSinceStartup + 2f;
                 var p = local.transform.position;
-                result.townTrace.Add($"step={townStep} pos=({p.x:0.0},{p.z:0.0}) act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} shop={sync.ActiveServiceId.Value} bal={sync.SharedBalance.Value}");
+                result.townTrace.Add($"step={townStep} pos=({p.x:0.0},{p.y:0.0},{p.z:0.0}) sw={local.Swimming.Value} act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} shop={sync.ActiveServiceId.Value} bal={sync.SharedBalance.Value}");
             }
             switch (townStep)
             {
