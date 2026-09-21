@@ -35,6 +35,8 @@ namespace DeepDive.P1.Lab
             public bool townProgress, townHostChecks, townSaveRoundTrip;
             public int townBalance;
             public float returnToPendingSeconds, returnToTurnInSeconds;
+            public bool townLandingTeleported;
+            public string townLandingNote;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
             public int recordingQuality;
@@ -157,6 +159,7 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (host && (Town || Record)) HostLandDivers(state);
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
@@ -329,6 +332,33 @@ namespace DeepDive.P1.Lab
         // ---- P3.2 town: real owner inputs + RPCs against the PrepArea NPCs --------------------
         // Walks to the NPC, aims at it and only then lets the caller interact, so the host raycast,
         // range check and service handler all run for real (no injected result).
+        // TEST SHORTCUT, reported as such (townLandingTeleported): a diver cannot climb out of the water onto the beach
+        // yet. Surface mode drops upward input, so a swimmer's feet top out at surface minus body height (6.30) while the
+        // top of Utku's wade shelf begins at 7.21 (underside 6.80); both divers stop at the shelf foot (measured, see the
+        // town trace). The host therefore puts every diver where the shelf meets the strip once Return starts, exactly as
+        // a scene-load respawn would (NetworkPlayer.Teleport is the server API NetworkSession uses). From there the town
+        // steps are real: walking along the strip, aiming, the host raycast, range check, handler and economy. The
+        // water-to-beach exit stays UNVERIFIED by this smoke.
+        private bool landed;
+        private void HostLandDivers(SessionState state)
+        {
+            if (landed || state.Phase != SessionPhase.Return || adapter.Connection.IsSceneLoading ||
+                SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene) return;
+            var wade = GameObject.Find("Beach_Wade");
+            var platform = GameObject.Find("Beach_Platform");
+            var strip = platform != null ? platform.GetComponent<Collider>() : null;
+            if (wade == null || strip == null) { result.errors.Add("beach objects missing for the landing"); landed = true; return; }
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).OrderBy(p => p.OwnerClientId).ToArray();
+            for (var i = 0; i < players.Length; i++)
+            {
+                var at = new Vector3(wade.transform.position.x + 1.4f * i, strip.bounds.max.y + 0.05f, strip.bounds.max.z - 0.9f);
+                players[i].Teleport(new Pose(at, Quaternion.identity));
+            }
+            landed = true;
+            result.townLandingTeleported = true;
+            result.townLandingNote = "divers were placed at the wade shelf top by the host; the swim-to-land exit is not exercised";
+        }
+
         private bool GoToService(NetworkPlayer local, Camera cam, string serviceId)
         {
             var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None)
