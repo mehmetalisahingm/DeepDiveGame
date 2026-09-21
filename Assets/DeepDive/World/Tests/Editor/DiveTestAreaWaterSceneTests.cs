@@ -30,6 +30,10 @@ namespace DeepDive.World.Tests
         // would follow that script anywhere, including into a mistake.
         private const string LedgeName = "Shore_Ledge";
         private const string RampName = "Shore_Ramp";
+
+        // P3.2's south strip. Named here only because it changed what happens off the ledge's
+        // south edge; everything else in this file stays about P3.1's own geometry.
+        private const string BeachPlatformName = "Beach_Platform";
         private const float LedgeTopY = 8.4f;
         private const float RampAngleDegrees = 25f;
 
@@ -212,19 +216,37 @@ namespace DeepDive.World.Tests
         [Test]
         public void WalkingOffTheShoreLandsInWaterNotTheVoid()
         {
+            // This walked off all four edges of the ledge and asserted that each fall ended
+            // underwater. Two of the four are not falls at all, and each is now checked for
+            // what is actually under it.
+            //
+            // South is P3.2's doing: Beach_Platform occupies z -14.75..-11 with its top at the
+            // ledge's own height, so a step south lands on sand at the same level.
+            //
+            // West was wrong from the start, in P3.1, and had nothing to do with the beach:
+            // Shore_Ramp's walkable face runs west off this very edge, from x 7 down to x
+            // 4.4266, so the step lands on the ramp at y 8.1668 rather than in the sea.
+            //
+            // Both kept passing, because WaterField answers from geometry and never asks a
+            // collider whether there is ground in the way - the test would have gone on
+            // claiming a diver falls into water where they in fact stand on sand, and on the
+            // shore's own ramp. Neither sample is dropped and neither assertion is softened;
+            // each moves to the claim that is true where it stands, which is the stronger one,
+            // since a junction that drifted out of stepOffset or under the water line would
+            // now fail here.
+            //
+            // East and north are untouched: there really is open water off those two.
             var field = Field();
             var body = field.Bodies[0];
             var ledge = Require(LedgeName);
             var half = ledge.transform.localScale * 0.5f;
             var centre = ledge.transform.position;
 
-            // A step beyond each of the four edges, at the height of the ledge top.
+            // The two edges with nothing but water under them.
             var steps = new[]
             {
                 new Vector3(centre.x + half.x + 0.5f, LedgeTopY, centre.z),
-                new Vector3(centre.x - half.x - 0.5f, LedgeTopY, centre.z),
-                new Vector3(centre.x, LedgeTopY, centre.z + half.z + 0.5f),
-                new Vector3(centre.x, LedgeTopY, centre.z - half.z - 0.5f)
+                new Vector3(centre.x, LedgeTopY, centre.z + half.z + 0.5f)
             };
 
             foreach (var step in steps)
@@ -242,6 +264,58 @@ namespace DeepDive.World.Tests
                 Assert.AreEqual(EnvironmentLocomotion.Underwater, field.CreateTracker().Classify(Diver(landed)),
                     "falling off at " + step + " must end underwater");
             }
+
+            // The south edge: ground, at the same height, so the diver walks across instead of
+            // falling. Still not the void, which is what this test is named for.
+            var south = new Vector3(centre.x, LedgeTopY, centre.z - half.z - 0.5f);
+            var beach = Require(BeachPlatformName);
+            var beachTop = beach.transform.position.y + beach.transform.localScale.y * 0.5f;
+            var beachHalf = beach.transform.localScale * 0.5f;
+
+            // The original claim still holds and is still checked: this is inside the water
+            // footprint, so if the beach ever stopped covering it the diver would fall into
+            // water rather than into the gap behind the arena.
+            Assert.GreaterOrEqual(body.SignedInset(south.x, south.z), 0f,
+                "stepping off at " + south + " leaves the water footprint");
+
+            Assert.LessOrEqual(Mathf.Abs(south.x - beach.transform.position.x), beachHalf.x,
+                "the south step must land over the beach in x");
+            Assert.LessOrEqual(Mathf.Abs(south.z - beach.transform.position.z), beachHalf.z,
+                "the south step must land over the beach in z");
+            Assert.LessOrEqual(Mathf.Abs(beachTop - LedgeTopY), DiverController().stepOffset,
+                "the drop from the ledge onto the beach is taller than stepOffset");
+            Assert.AreEqual(EnvironmentLocomotion.Land, field.CreateTracker().Classify(Diver(
+                    new Vector3(south.x, beachTop, south.z))),
+                "standing on the beach south of the ledge must read as Land");
+
+            // The west edge: the ramp's walkable face, which starts at this edge. The two ends
+            // are read off the real transform, the same way TheShoreRampIsWalkable reads them,
+            // so this follows the ramp if its angle or its foot is ever retuned.
+            var west = new Vector3(centre.x - half.x - 0.5f, LedgeTopY, centre.z);
+            var ramp = Require(RampName);
+            var rampTop = ramp.transform.TransformPoint(new Vector3(0.5f, 0.5f, 0f));
+            var rampFoot = ramp.transform.TransformPoint(new Vector3(-0.5f, 0.5f, 0f));
+
+            // The original claim still holds and is still checked here too.
+            Assert.GreaterOrEqual(body.SignedInset(west.x, west.z), 0f,
+                "stepping off at " + west + " leaves the water footprint");
+
+            Assert.Greater(west.x, rampFoot.x, "the west step must land east of the ramp's foot");
+            Assert.Less(west.x, rampTop.x, "the west step must land west of the ramp's top");
+            Assert.LessOrEqual(Mathf.Abs(ramp.transform.InverseTransformPoint(west).z), 0.5f,
+                "the west step must land inside the ramp's width in z");
+
+            // The height of the face where the foot comes down, interpolated along it.
+            var rampSurfaceY = Mathf.Lerp(rampFoot.y, rampTop.y,
+                (west.x - rampFoot.x) / (rampTop.x - rampFoot.x));
+            Assert.LessOrEqual(Mathf.Abs(rampSurfaceY - LedgeTopY), DiverController().stepOffset,
+                "the drop from the ledge onto the ramp is taller than stepOffset");
+
+            // This stretch of the ramp is still above the water line; further down it becomes
+            // Surface, which is what the ramp round trip walks.
+            Assert.AreEqual(EnvironmentLocomotion.Land, field.CreateTracker().Classify(Diver(
+                    new Vector3(west.x, rampSurfaceY, west.z))),
+                "standing on the ramp west of the ledge must read as Land");
         }
 
         [Test]
