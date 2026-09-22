@@ -44,17 +44,17 @@ namespace DeepDive.World.Tests
         private const float PlatformTopY = 8.4f;
         private const float PlatformNorthZ = -11f;
 
-        private static readonly Vector3 WadeCenter = new Vector3(-6.5f, 7.60437f, -8.21882f);
-        private static readonly Vector3 WadeSize = new Vector3(6f, 0.4f, 5.7717f);
-        private const float WadeAngleDegrees = 12f;
+        private static readonly Vector3 WadeCenter = new Vector3(-6.5f, 6.618738f, -7.653313f);
+        private static readonly Vector3 WadeSize = new Vector3(6f, 0.4f, 7.5718446f);
+        private const float WadeAngleDegrees = 25f;
         private const float WadeMinX = -9.5f;
         private const float WadeMaxX = -3.5f;
         private const float WadeTopZ = -11f;
-        private const float WadeFootZ = -5.354445f;
-        private const float WadeFootY = 7.2f;
+        private const float WadeFootZ = -4.137578f;
+        private const float WadeFootY = 5.2f;
 
         private static readonly Vector3 HullPosition = new Vector3(-12f, 8.4f, -12.5f);
-        private static readonly Vector3 EnginePosition = new Vector3(-6.5f, 7.762326f, -8f);
+        private static readonly Vector3 EnginePosition = new Vector3(-6.5f, 7.0010767f, -8f);
         private static readonly Vector3 FuelTankPosition = new Vector3(12.5f, 8.4f, -12.5f);
         private static readonly Vector3 TownGatePosition = new Vector3(0f, 8.4f, -13.5f);
         private const float AnchorSize = 0.6f;
