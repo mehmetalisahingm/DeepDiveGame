@@ -278,8 +278,15 @@ namespace DeepDive.P1.Lab
             Vector3 move;
             if (result.recordingStopped)
             {
-                var toPad = SafeReturnPadTarget() - local.transform.position;
-                move = toPad.magnitude > 0.3f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * toPad.normalized : Vector3.zero;
+                // A first version aimed the full heading straight at the pad's fixed centre, the same mistake the
+                // beach wade had: the pad is mostly "up" from open water (dy far bigger than dx/dz), so once Surface
+                // mode zeroes the positive-y request the LEFTOVER heading is whatever tiny x/z the original unit
+                // vector had - which shrinks even further as the diver closes in, a real diver was measured
+                // asymptoting toward a dead stop short of the ledge. NextRampWaypoint paces this the same way
+                // NextBeachWaypoint paces the wade: a near target read off the real ramp/ledge colliders, never far
+                // enough ahead for its own dy to swamp dx/dz.
+                var toRamp = NextRampWaypoint(local.transform.position) - local.transform.position;
+                move = toRamp.magnitude > 0.3f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * toRamp.normalized : Vector3.zero;
             }
             else move = delta.magnitude > 6f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * delta.normalized : Vector3.zero;
             local.SubmitLocalInput(move, yaw, pitch);
@@ -298,15 +305,36 @@ namespace DeepDive.P1.Lab
             }
         }
 
-        // The dry return pad PR #70 narrowed SafeReturnZone to (DiveExit's own collider on Shore_Ledge, not the
-        // old whole-arena volume). Read from the scene rather than typed, the same reasoning as the beach
-        // waypoints: this is Composition's object and Mehmet's to retune.
-        private Vector3 SafeReturnPadTarget()
+        // PR #70's dry return pad sits on Shore_Ledge, reachable only by climbing the P3.1 ramp - the same kind of
+        // solid slope NextBeachWaypoint already knows how to pace a diver up, just descending along X here (the
+        // P3.1 shore) instead of Z (the P3.2 beach). A short step ahead, read off the real Shore_Ramp/Shore_Ledge
+        // colliders rather than DiveTestAreaWaterSetup's Editor-only formula, aimed a hair below the actual surface.
+        private Vector3 NextRampWaypoint(Vector3 position)
         {
-            var exit = GameObject.Find("DiveExit");
-            if (exit == null) return new Vector3(0f, 100f, 0f);   // unreachable on purpose: report the miss, don't fake a pass
-            var box = exit.GetComponent<Collider>();
-            return box != null ? box.bounds.center : exit.transform.position;
+            var ramp = GameObject.Find("Shore_Ramp");
+            var ledge = GameObject.Find("Shore_Ledge");
+            var rampCollider = ramp != null ? ramp.GetComponent<Collider>() : null;
+            var ledgeCollider = ledge != null ? ledge.GetComponent<Collider>() : null;
+            if (rampCollider == null || ledgeCollider == null)
+                return ledgeCollider != null ? ledgeCollider.bounds.center : position;
+
+            // The ledge's own west edge, not the ramp's foot: a diver starts east of the ramp's foot (open water
+            // reaches under the whole arena), so a check against the foot would be true immediately and skip
+            // the paced climb entirely - it has to be "am I already over the ledge" the way the wade's check is
+            // "am I already over the platform", using the near end of the solid ground, not the far one.
+            var ledgeWestEdge = ledgeCollider.bounds.min.x;
+            if (position.x >= ledgeWestEdge - 0.2f) return ledgeCollider.bounds.center;   // already over solid ground
+
+            var laneZ = ramp.transform.position.z;
+            var aheadX = Mathf.Min(position.x + 1.2f, ledgeWestEdge);
+            var probeOrigin = new Vector3(aheadX, rampCollider.bounds.max.y + 5f, laneZ);
+            float targetY;
+            if (Physics.Raycast(probeOrigin, Vector3.down, out var hit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
+                (hit.collider == rampCollider || hit.collider == ledgeCollider))
+                targetY = hit.point.y - 0.05f;
+            else
+                targetY = Mathf.Min(position.y, rampCollider.bounds.min.y - 0.3f);   // still short of the ramp: dive under it
+            return new Vector3(aheadX, targetY, laneZ);
         }
 
         private void ProbeHunt(NetworkPlayer local, NetworkPlayer[] players)
