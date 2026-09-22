@@ -35,6 +35,8 @@ namespace DeepDive.P1.Lab
             public bool townProgress, townHostChecks, townSaveRoundTrip;
             public int townBalance;
             public float returnToPendingSeconds, returnToTurnInSeconds;
+            public bool townLandingTeleported;
+            public string townLandingNote;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
             public int recordingQuality;
@@ -139,7 +141,7 @@ namespace DeepDive.P1.Lab
                 if (host && elapsed > 19 && !prepSent && allReady)
                 { prepSent = true; GameObject.Find("BeginPrepButton").GetComponent<Button>().onClick.Invoke(); }
                 result.prep |= state.Phase == SessionPhase.Prep && !connection.IsSceneLoading;
-                if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep)
+                if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep && !connection.IsSceneLoading)
                 { diveSent = true; GameObject.Find("BeginDiveButton").GetComponent<Button>().onClick.Invoke(); }
                 result.dive |= state.Phase == SessionPhase.Dive && SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene;
                 if (Record && host && state.Phase == SessionPhase.Return)
@@ -157,6 +159,7 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (host && (Town || Record)) HostLandDivers(state);
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
@@ -196,8 +199,12 @@ namespace DeepDive.P1.Lab
         private void Probe(int expected)
         {
             var scene = SceneManager.GetActiveScene().name;
-            if (observedScene != scene)
-            { observedScene = scene; sceneStarted = Time.realtimeSinceStartup; starts.Clear(); }
+            var phase = adapter.Session.State.Phase;
+            // Only Lobby lives in PrepArea; Prep, Dive and Return all run in DiveTestArea (SceneForPhase), so a
+            // scene change alone no longer marks the start of a stage. Key the stage on scene and phase.
+            var stage = scene + ":" + phase;
+            if (observedScene != stage)
+            { observedScene = stage; sceneStarted = Time.realtimeSinceStartup; starts.Clear(); }
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
             foreach (var player in players)
             {
@@ -214,9 +221,9 @@ namespace DeepDive.P1.Lab
                     // marks the diver safe before the hunt/recording test even starts.
                     (elapsed > 1 && elapsed < 1.6f ? Vector3.up : Vector3.zero) :
                     (elapsed > 1 && elapsed < 5 ? Vector3.forward : Vector3.zero);
-                if (Hunt && scene == SessionNetworkAdapter.DiveScene && elapsed > 3) ProbeHunt(local, players);
-                else if (Record && scene == SessionNetworkAdapter.DiveScene && elapsed > 3) ProbeRecording(local, players);
-                else if ((Town || Record) && scene == SessionNetworkAdapter.PrepScene && adapter.Session.State.Phase == SessionPhase.Return) ProbeTown(local);
+                if (Hunt && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHunt(local, players);
+                else if (Record && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeRecording(local, players);
+                else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
             }
             foreach (var player in players)
@@ -325,6 +332,33 @@ namespace DeepDive.P1.Lab
         // ---- P3.2 town: real owner inputs + RPCs against the PrepArea NPCs --------------------
         // Walks to the NPC, aims at it and only then lets the caller interact, so the host raycast,
         // range check and service handler all run for real (no injected result).
+        // TEST SHORTCUT, reported as such (townLandingTeleported): a diver cannot climb out of the water onto the beach
+        // yet. Surface mode drops upward input, so a swimmer's feet top out at surface minus body height (6.30) while the
+        // top of Utku's wade shelf begins at 7.21 (underside 6.80); both divers stop at the shelf foot (measured, see the
+        // town trace). The host therefore puts every diver where the shelf meets the strip once Return starts, exactly as
+        // a scene-load respawn would (NetworkPlayer.Teleport is the server API NetworkSession uses). From there the town
+        // steps are real: walking along the strip, aiming, the host raycast, range check, handler and economy. The
+        // water-to-beach exit stays UNVERIFIED by this smoke.
+        private bool landed;
+        private void HostLandDivers(SessionState state)
+        {
+            if (landed || state.Phase != SessionPhase.Return || adapter.Connection.IsSceneLoading ||
+                SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene) return;
+            var wade = GameObject.Find("Beach_Wade");
+            var platform = GameObject.Find("Beach_Platform");
+            var strip = platform != null ? platform.GetComponent<Collider>() : null;
+            if (wade == null || strip == null) { result.errors.Add("beach objects missing for the landing"); landed = true; return; }
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).OrderBy(p => p.OwnerClientId).ToArray();
+            for (var i = 0; i < players.Length; i++)
+            {
+                var at = new Vector3(wade.transform.position.x + 1.4f * i, strip.bounds.max.y + 0.05f, strip.bounds.max.z - 0.9f);
+                players[i].Teleport(new Pose(at, Quaternion.identity));
+            }
+            landed = true;
+            result.townLandingTeleported = true;
+            result.townLandingNote = "divers were placed at the wade shelf top by the host; the swim-to-land exit is not exercised";
+        }
+
         private bool GoToService(NetworkPlayer local, Camera cam, string serviceId)
         {
             var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None)
@@ -338,8 +372,12 @@ namespace DeepDive.P1.Lab
             if (toStand.magnitude > 0.35f)
             {
                 townSettleAt = 0;
-                var walkYaw = Mathf.Atan2(toStand.x, toStand.z) * Mathf.Rad2Deg;
-                local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * toStand.normalized, walkYaw, 0);
+                var heading = NextBeachWaypoint(local.transform.position, stand) - local.transform.position; heading.y = 0;
+                var walkYaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
+                var move = Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * heading.normalized;
+                // Still swimming below the wading depth: keep rising, the shelf can only be reached from the surface.
+                if (local.Swimming.Value && local.transform.position.y < 7.8f) move.y = 1f;
+                local.SubmitLocalInput(move, walkYaw, 0);
                 return false;
             }
             var toNpc = anchor.WorldPosition + Vector3.up - cam.transform.position;
@@ -348,6 +386,26 @@ namespace DeepDive.P1.Lab
             local.SubmitLocalInput(Vector3.zero, yaw, pitch);
             if (townSettleAt == 0) townSettleAt = Time.realtimeSinceStartup + 0.6f;   // let the aim reach the host
             return Time.realtimeSinceStartup >= townSettleAt;
+        }
+
+        // Prep, Dive and Return all run in DiveTestArea and the NPCs stand on the beach strip, a solid block that
+        // rises out of the pool. A diver coming back therefore cannot walk straight at an NPC: it heads for the
+        // lane of Utku's wade shelf, climbs onto the strip there, and only then walks along it. Waypoints are read
+        // from the scene objects, not typed, so they follow the beach if World moves it.
+        private Vector3 NextBeachWaypoint(Vector3 position, Vector3 stand)
+        {
+            var wade = GameObject.Find("Beach_Wade");
+            var platform = GameObject.Find("Beach_Platform");
+            var strip = platform != null ? platform.GetComponent<Collider>() : null;
+            if (wade == null || strip == null) return stand;
+            var northEdge = strip.bounds.max.z;
+            if (position.z > northEdge + 0.2f)
+            {
+                var lane = wade.transform.position.x;
+                // Aim past the strip's edge so the climb up the shelf is continuous.
+                return new Vector3(lane, position.y, northEdge - 0.6f);
+            }
+            return stand;
         }
 
         private void InteractEvery(NetworkPlayer local, float seconds)
@@ -385,7 +443,7 @@ namespace DeepDive.P1.Lab
                 {
                     townTraceAt = Time.realtimeSinceStartup + 2f;
                     var q = local.transform.position;
-                    result.townTrace.Add($"recorder={recorder} me={local.OwnerClientId} pos=({q.x:0.0},{q.z:0.0}) pendingRec={sync.PendingRecordings.Value} svc={sync.LastServiceRequestId.Value}/{sync.LastServiceAccepted.Value}/{sync.LastServiceReason.Value} act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} bal={sync.SharedBalance.Value}");
+                    result.townTrace.Add($"recorder={recorder} me={local.OwnerClientId} pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) sw={local.Swimming.Value} pendingRec={sync.PendingRecordings.Value} svc={sync.LastServiceRequestId.Value}/{sync.LastServiceAccepted.Value}/{sync.LastServiceReason.Value} act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} bal={sync.SharedBalance.Value}");
                 }
                 if (local.OwnerClientId == recorder)
                 {
@@ -408,7 +466,7 @@ namespace DeepDive.P1.Lab
             {
                 townTraceAt = Time.realtimeSinceStartup + 2f;
                 var p = local.transform.position;
-                result.townTrace.Add($"step={townStep} pos=({p.x:0.0},{p.z:0.0}) act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} shop={sync.ActiveServiceId.Value} bal={sync.SharedBalance.Value}");
+                result.townTrace.Add($"step={townStep} pos=({p.x:0.0},{p.y:0.0},{p.z:0.0}) sw={local.Swimming.Value} act={local.LastActionKind.Value}/{local.LastActionResult.Value}/{local.LastActionRequestId.Value} shop={sync.ActiveServiceId.Value} bal={sync.SharedBalance.Value}");
             }
             switch (townStep)
             {

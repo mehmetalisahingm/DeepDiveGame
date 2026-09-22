@@ -535,21 +535,17 @@ namespace DeepDive.World.Tests
         // --- The town gate ---------------------------------------------------------------------
 
         [Test]
-        public void TheTownGateIsABareMarkerAndThisSceneHoldsNoServiceAnchor()
+        public void TheTownGateIsABareMarker()
         {
             var gate = Require(TownGateName);
             Assert.AreEqual(TownGatePosition, gate.transform.position, "the town gate moved");
 
             // Nothing but a Transform. The gate documents where the town path is expected to
-            // meet the sand; it makes no claim about what will stand there.
+            // meet the sand; it makes no claim about what will stand there. The three NPC service
+            // points (P3.2-C) stand on the beach strip beside it since PR #65 made DiveTestArea the
+            // Prep/Dive/Return scene; TownSceneTests pins where and keeps them clear of the gate.
             Assert.AreEqual(1, gate.GetComponents<Component>().Length,
                 "the town gate must stay a bare transform");
-
-            // TownSceneTests asserts DiveTestArea holds no ServicePointAnchor, because service
-            // interaction is refused while the dive is active. Putting one on the beach would
-            // fail Mert's test, so the gate deliberately is not one.
-            Assert.IsEmpty(FindAll<ServicePointAnchor>(scene),
-                "the NPC service points belong to PrepArea, not to the dive scene");
         }
 
         // --- The depth band is not a second water authority ---------------------------------------
