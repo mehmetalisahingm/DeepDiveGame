@@ -24,7 +24,7 @@ namespace DeepDive.World
     // that scans this assembly's sources for the name; that is stated rather than dressed up
     // as a compiler guarantee.
     [DisallowMultipleComponent]
-    public sealed class BoatPartAnchor : MonoBehaviour
+    public sealed class BoatPartAnchor : MonoBehaviour, IBoatPartPickupTarget
     {
         [SerializeField] private string partId = "";
 

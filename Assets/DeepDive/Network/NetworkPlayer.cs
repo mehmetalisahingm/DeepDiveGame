@@ -437,14 +437,41 @@ namespace DeepDive.Network
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
             var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Ignore))
+            // BoatPartAnchor uses a trigger so the free repair parts do not block the beach.
+            // E-pickup therefore has to include triggers; catch colliders remain valid too.
+            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Collide))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
             }
 
-            var target = FindTarget<ICatchPickupTarget>(hit.collider);
-            result = target == null ? PlayerActionResult.InvalidTarget : target.TryPickup(new PlayerId(OwnerClientId), requestId);
+            var playerId = new PlayerId(OwnerClientId);
+            var catchTarget = FindTarget<ICatchPickupTarget>(hit.collider);
+            if (catchTarget != null)
+            {
+                result = catchTarget.TryPickup(playerId, requestId);
+            }
+            else
+            {
+                var boatPart = FindTarget<IBoatPartPickupTarget>(hit.collider);
+                if (boatPart == null || !BoatRepairParts.IsPart(boatPart.PartId))
+                {
+                    result = PlayerActionResult.InvalidTarget;
+                }
+                else
+                {
+                    var transaction = BoatPartClaim.TryClaimFound(playerId, boatPart.PartId, requestId);
+                    result = transaction.Accepted
+                        ? PlayerActionResult.Accepted
+                        : transaction.ReasonCode switch
+                        {
+                            "InvalidState" => PlayerActionResult.InvalidState,
+                            "InvalidTarget" => PlayerActionResult.InvalidTarget,
+                            _ => PlayerActionResult.Rejected
+                        };
+                }
+            }
+
             PublishAction(requestId, kind, result);
         }
 

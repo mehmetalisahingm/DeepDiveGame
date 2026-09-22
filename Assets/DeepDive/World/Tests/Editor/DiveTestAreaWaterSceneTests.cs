@@ -37,21 +37,19 @@ namespace DeepDive.World.Tests
         private const float LedgeTopY = 8.4f;
         private const float RampAngleDegrees = 25f;
 
-        // Foot of the ramp: the lowest surface a diver can stand on. Kept above the exit zone
-        // (see NoShoreWalkableSurfaceSitsInTheSafeReturnZone) and below the water line.
+        // Foot of the legacy P3.1 ramp. P3.2's return zone no longer constrains this height:
+        // the return pad is a small dry region on the ledge, not a whole-arena volume.
         private const float RampBottomY = 7.2f;
 
         // A depth in open water past the foot of the ramp, where a diver ends up by swimming
         // or falling rather than walking.
         private const float OpenWaterY = 5f;
 
-        // DiveExit's trigger, written out rather than read from Composition: the zone belongs
-        // to Mehmet and this assembly does not reference his, so the numbers are copied the way
-        // the rest of this file copies the scene's constants. SessionPortal tests the diver at
-        // position + up * 0.9, so that is the point the shore has to keep out of the box.
-        private const float ExitZoneMinY = 6f;
-        private const float ExitZoneMaxY = 8f;
-        private const float ExitZoneHalfXZ = 15f;
+        // DiveExit's trigger, written out rather than read from Composition. It is a reserved
+        // dry return pad inside Shore_Ledge. SessionPortal/SafeReturnZone test the diver at
+        // position + up * 0.9.
+        private static readonly Vector3 ExitCenter = new Vector3(9f, 9.3f, -9f);
+        private static readonly Vector3 ExitSize = new Vector3(3.5f, 2f, 3.5f);
         private const float ExitZoneProbeHeight = 0.9f;
 
         private static readonly Vector3 FishHome = new Vector3(0f, 4f, 8f);
@@ -337,37 +335,42 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void NoShoreWalkableSurfaceSitsInTheSafeReturnZone()
+        public void SafeReturnZoneIsAReservedDryPadOnTheLedgeAndStaysOffTheRamp()
         {
-            // The shore must not hand the diver a place to stand inside the dive's exit volume.
-            // DiveExit belongs to Composition and is not touched here; its box is copied as
-            // plain numbers above, the same way this file copies every other scene constant.
-            var samples = new List<Vector3>();
+            bool Inside(Vector3 stand)
+            {
+                var probe = stand + Vector3.up * ExitZoneProbeHeight;
+                var local = probe - ExitCenter;
+                var half = ExitSize * 0.5f;
+                return Mathf.Abs(local.x) <= half.x
+                       && Mathf.Abs(local.y) <= half.y
+                       && Mathf.Abs(local.z) <= half.z;
+            }
 
-            // The ledge top: centre, edges and corners.
             var ledge = Require(LedgeName);
-            var half = ledge.transform.localScale * 0.5f;
-            var centre = ledge.transform.position;
-            for (var sx = -1; sx <= 1; sx++)
-                for (var sz = -1; sz <= 1; sz++)
-                    samples.Add(new Vector3(centre.x + sx * half.x, LedgeTopY, centre.z + sz * half.z));
+            var ledgeHalf = ledge.transform.localScale * 0.5f;
+            var exitHalf = ExitSize * 0.5f;
 
-            // The ramp's walkable face, end to end - the foot is the lowest of them and the
-            // one that made this a blocker.
+            // The pad footprint stays inside the dry ledge with margin instead of covering the sea.
+            Assert.GreaterOrEqual(ExitCenter.x - exitHalf.x, ledge.transform.position.x - ledgeHalf.x);
+            Assert.LessOrEqual(ExitCenter.x + exitHalf.x, ledge.transform.position.x + ledgeHalf.x);
+            Assert.GreaterOrEqual(ExitCenter.z - exitHalf.z, ledge.transform.position.z - ledgeHalf.z);
+            Assert.LessOrEqual(ExitCenter.z + exitHalf.z, ledge.transform.position.z + ledgeHalf.z);
+            Assert.Greater(ExitCenter.y - exitHalf.y, Field().Bodies[0].SurfaceY,
+                "the return pad must start above the water line");
+
+            var ledgeStand = new Vector3(ExitCenter.x, LedgeTopY, ExitCenter.z);
+            Assert.IsTrue(Inside(ledgeStand), "standing at the return pad centre must count as safe return");
+
+            // The legacy ramp and its wet foot remain outside. #61 may extend a separate wade
+            // deeper without ever entering the return pad.
             var ramp = Require(RampName);
             var top = ramp.transform.TransformPoint(new Vector3(0.5f, 0.5f, 0f));
             var foot = ramp.transform.TransformPoint(new Vector3(-0.5f, 0.5f, 0f));
-            for (var i = 0; i <= 20; i++) samples.Add(Vector3.Lerp(top, foot, i / 20f));
-
-            foreach (var stand in samples)
+            for (var i = 0; i <= 20; i++)
             {
-                var probe = stand + Vector3.up * ExitZoneProbeHeight;
-                var inside = Mathf.Abs(probe.x) <= ExitZoneHalfXZ
-                             && Mathf.Abs(probe.z) <= ExitZoneHalfXZ
-                             && probe.y >= ExitZoneMinY
-                             && probe.y <= ExitZoneMaxY;
-                Assert.IsFalse(inside,
-                    "standing at " + stand + " is tested at " + probe + ", inside the dive exit zone");
+                var stand = Vector3.Lerp(top, foot, i / 20f);
+                Assert.IsFalse(Inside(stand), "ramp position " + stand + " entered the return pad");
             }
         }
 
