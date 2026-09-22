@@ -45,6 +45,19 @@ public class SafeReturnZoneTests
     }
 
     [Test]
+    public void NarrowLandSidePadAcceptsLedgeButRejectsTheWadeCorridor()
+    {
+        zoneGo.transform.position = new Vector3(9f, 9.3f, -9f);
+        box.size = new Vector3(3.5f, 2f, 3.5f);
+
+        var ledgeStandProbe = new Vector3(9f, 8.4f, -9f) + Vector3.up * 0.9f;
+        var wadeStandProbe = new Vector3(-6.5f, 7.2f, -5.35f) + Vector3.up * 0.9f;
+
+        Assert.IsTrue(SafeReturnZone.Contains(box, ledgeStandProbe));
+        Assert.IsFalse(SafeReturnZone.Contains(box, wadeStandProbe));
+    }
+
+    [Test]
     public void RespectsOffsetCenterAndTransformScale()
     {
         zoneGo.transform.localScale = new Vector3(2, 1, 1);
