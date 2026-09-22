@@ -99,6 +99,14 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(new Vector3(-6.5f, 7.76233f, -8f), anchor.WorldPosition);
         }
 
+        [Test]
+        public void AnchorExposesOnlyItsStableIdToThePickupLayer()
+        {
+            anchor.Configure(BoatRepairParts.Engine);
+            var pickup = (IBoatPartPickupTarget)anchor;
+            Assert.AreEqual(BoatRepairParts.Engine, pickup.PartId);
+        }
+
         // --- What it must not become ---------------------------------------------------------
 
         [Test]
