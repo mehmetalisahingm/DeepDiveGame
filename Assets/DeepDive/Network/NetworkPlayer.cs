@@ -437,23 +437,26 @@ namespace DeepDive.Network
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
             var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
-            // BoatPartAnchor uses a trigger so the free repair parts do not block the beach.
-            // E-pickup therefore has to include triggers; catch colliders remain valid too.
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Collide))
+            // BoatPartAnchor uses a trigger so E-pickup must include triggers. Resolve the full hit stack so
+            // ambient trigger volumes (notably SwimVolume) cannot consume the ray before a real pickup target,
+            // while non-trigger geometry still acts as a hard line-of-sight blocker.
+            var hits = Physics.RaycastAll(origin, direction, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Collide);
+            var pickupCollider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits);
+            if (pickupCollider == null)
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
             }
 
             var playerId = new PlayerId(OwnerClientId);
-            var catchTarget = FindTarget<ICatchPickupTarget>(hit.collider);
+            var catchTarget = FindTarget<ICatchPickupTarget>(pickupCollider);
             if (catchTarget != null)
             {
                 result = catchTarget.TryPickup(playerId, requestId);
             }
             else
             {
-                var boatPart = FindTarget<IBoatPartPickupTarget>(hit.collider);
+                var boatPart = FindTarget<IBoatPartPickupTarget>(pickupCollider);
                 if (boatPart == null || !BoatRepairParts.IsPart(boatPart.PartId))
                 {
                     result = PlayerActionResult.InvalidTarget;
