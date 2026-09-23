@@ -64,8 +64,6 @@ namespace DeepDive.Editor
             DiveTestAreaBeachSetup.Apply();
             foreach (var anchor in UnityEngine.Object.FindObjectsByType<BoatPartAnchor>(FindObjectsSortMode.None))
                 if (anchor.GetComponent<BoatPartPresentation>() == null) anchor.gameObject.AddComponent<BoatPartPresentation>();
-            for (var i = 0; i < 4; i++)
-                GameObject.Find("Spawn_" + i).transform.position = new Vector3(-7.8f + 1.1f * i, 8.45f, -12.8f);
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
             AssetDatabase.SaveAssets();
@@ -158,27 +156,5 @@ namespace DeepDive.Editor
             UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
         }
 
-        public static void InspectAndApplyCoast()
-        {
-            DiveTestAreaBeachSetup.Apply();
-            var importer = (ModelImporter)AssetImporter.GetAtPath(HumanSource);
-            importer.animationType = ModelImporterAnimationType.Human;
-            importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-            importer.importAnimation = true;
-            importer.SaveAndReimport();
-            var report = new StringBuilder();
-            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(HumanSource))
-                report.AppendLine(asset.GetType().Name + " " + asset.name);
-            var instance = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(HumanSource));
-            foreach (var t in instance.GetComponentsInChildren<Transform>(true))
-                report.AppendLine("Bone " + t.name + " position=" + t.position);
-            foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
-                report.AppendLine("Renderer " + renderer.name + " bounds=" + renderer.bounds + " materials=" +
-                    string.Join(",", renderer.sharedMaterials.Select(x => x != null ? x.name : "null")));
-            Directory.CreateDirectory("Logs");
-            File.WriteAllText("Logs/coastal-human-import.txt", report.ToString());
-            UnityEngine.Object.DestroyImmediate(instance);
-            Debug.Log("P3_REPAIR_COAST_READY");
-        }
     }
 }

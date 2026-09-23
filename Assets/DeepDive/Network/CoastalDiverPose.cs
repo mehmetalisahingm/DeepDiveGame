@@ -7,14 +7,12 @@ namespace DeepDive.Network
     {
         public bool FirstPerson;
         public Transform Model;
-        private Animator animator;
         private Transform leftArm, leftElbow, leftHand, rightArm, rightElbow, rightHand;
         private Transform leftLeg, leftKnee, leftFoot, rightLeg, rightKnee, rightFoot, head;
         private PlayerPresentationState state;
         private float speed, cycle;
         private void Awake()
         {
-            animator = GetComponentInChildren<Animator>();
             leftArm = Bone("UpperArm.L"); leftElbow = Bone("LowerArm.L"); leftHand = Bone("Hand.L");
             rightArm = Bone("UpperArm.R"); rightElbow = Bone("LowerArm.R"); rightHand = Bone("Hand.R");
             leftLeg = Bone("UpperLeg.L"); leftKnee = Bone("LowerLeg.L"); leftFoot = Bone("Foot.L");

@@ -247,7 +247,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 29.5, y: 3, z: 3.75}
+  m_Size: {x: 3.5, y: 2, z: 3.5}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &103605874
 Transform:
@@ -258,7 +258,7 @@ Transform:
   m_GameObject: {fileID: 103605872}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 9.4, z: -12.875}
+  m_LocalPosition: {x: 9, y: 9.3, z: -9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -302,7 +302,6 @@ GameObject:
   - component: {fileID: 121625921}
   - component: {fileID: 121625920}
   - component: {fileID: 121625919}
-  - component: {fileID: 121625924}
   m_Layer: 0
   m_Name: BoatPart_FuelTank
   m_TagString: Untagged
@@ -416,18 +415,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &121625924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 121625918}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b09d2b4a58ed90488e83d6b7790c9f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.BoatPartPresentation
 --- !u!1 &125103896
 GameObject:
   m_ObjectHideFlags: 0
@@ -1252,7 +1239,7 @@ Transform:
   m_GameObject: {fileID: 456863112}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.5, y: 8.45, z: -12.8}
+  m_LocalPosition: {x: 3, y: 1, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2312,8 +2299,8 @@ Transform:
   m_GameObject: {fileID: 907050491}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.21643962, w: 0.976296}
-  m_LocalPosition: {x: 5.7978196, y: 7.618738, z: -9}
-  m_LocalScale: {x: 2.8394413, y: 0.4, z: 4}
+  m_LocalPosition: {x: 3.653313, y: 6.618738, z: -9}
+  m_LocalScale: {x: 7.5718446, y: 0.4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -2331,7 +2318,6 @@ GameObject:
   - component: {fileID: 947142109}
   - component: {fileID: 947142108}
   - component: {fileID: 947142107}
-  - component: {fileID: 947142112}
   m_Layer: 0
   m_Name: BoatPart_Engine
   m_TagString: Untagged
@@ -2439,24 +2425,12 @@ Transform:
   m_GameObject: {fileID: 947142106}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.5, y: 7.76233, z: -8}
+  m_LocalPosition: {x: -6.5, y: 7.0010767, z: -8}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &947142112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 947142106}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b09d2b4a58ed90488e83d6b7790c9f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.BoatPartPresentation
 --- !u!1 &1007613396
 GameObject:
   m_ObjectHideFlags: 0
@@ -2840,7 +2814,6 @@ GameObject:
   - component: {fileID: 1265194784}
   - component: {fileID: 1265194783}
   - component: {fileID: 1265194782}
-  - component: {fileID: 1265194787}
   m_Layer: 0
   m_Name: BoatPart_Hull
   m_TagString: Untagged
@@ -2954,18 +2927,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1265194787
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1265194781}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b09d2b4a58ed90488e83d6b7790c9f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.BoatPartPresentation
 --- !u!1 &1374962522
 GameObject:
   m_ObjectHideFlags: 0
@@ -3037,7 +2998,7 @@ Transform:
   m_GameObject: {fileID: 1393972002}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.6000004, y: 8.45, z: -12.8}
+  m_LocalPosition: {x: -3, y: 1, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3208,9 +3169,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1448058058}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.104528464, y: 0, z: 0, w: 0.9945219}
-  m_LocalPosition: {x: -6.5, y: 6.9043703, z: -4.925565}
-  m_LocalScale: {x: 6, y: 0.4, z: 12.505306}
+  m_LocalRotation: {x: 0.21643962, y: 0, z: 0, w: 0.976296}
+  m_LocalPosition: {x: -6.5, y: 6.618738, z: -7.653313}
+  m_LocalScale: {x: 6, y: 0.4, z: 7.5718446}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -8401,7 +8362,7 @@ Transform:
   m_GameObject: {fileID: 1971055234}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.7000003, y: 8.45, z: -12.8}
+  m_LocalPosition: {x: 3, y: 1, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8814,7 +8775,7 @@ Transform:
   m_GameObject: {fileID: 2049789246}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.8, y: 8.45, z: -12.8}
+  m_LocalPosition: {x: -3, y: 1, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

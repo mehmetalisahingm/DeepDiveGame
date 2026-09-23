@@ -428,7 +428,7 @@ namespace DeepDive.Network
                 PublishAction(requestId, kind, result);
                 return;
             }
-            if (session == null || Passive.Value)
+            if (session == null || !session.DiveActive || Passive.Value)
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidState);
                 return;
@@ -437,24 +437,44 @@ namespace DeepDive.Network
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
             var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Ignore))
+            // BoatPartAnchor uses a trigger so E-pickup must include triggers. Resolve the full hit stack so
+            // ambient trigger volumes (notably SwimVolume) cannot consume the ray before a real pickup target,
+            // while non-trigger geometry still acts as a hard line-of-sight blocker.
+            var hits = Physics.RaycastAll(origin, direction, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Collide);
+            var pickupCollider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits);
+            if (pickupCollider == null)
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
             }
 
-            var part = FindTarget<IBoatPartPickup>(hit.collider);
-            if (part != null)
+            var playerId = new PlayerId(OwnerClientId);
+            var catchTarget = FindTarget<ICatchPickupTarget>(pickupCollider);
+            if (catchTarget != null)
             {
-                var claim = BoatPartClaim.TryClaimFound(new PlayerId(OwnerClientId), part.PartId, requestId);
-                result = claim.Accepted ? PlayerActionResult.Accepted : PlayerActionResult.InvalidTarget;
+                result = catchTarget.TryPickup(playerId, requestId);
             }
             else
             {
-                var target = FindTarget<ICatchPickupTarget>(hit.collider);
-                result = !session.DiveActive ? PlayerActionResult.InvalidState :
-                    target == null ? PlayerActionResult.InvalidTarget : target.TryPickup(new PlayerId(OwnerClientId), requestId);
+                var boatPart = FindTarget<IBoatPartPickupTarget>(pickupCollider);
+                if (boatPart == null || !BoatRepairParts.IsPart(boatPart.PartId))
+                {
+                    result = PlayerActionResult.InvalidTarget;
+                }
+                else
+                {
+                    var transaction = BoatPartClaim.TryClaimFound(playerId, boatPart.PartId, requestId);
+                    result = transaction.Accepted
+                        ? PlayerActionResult.Accepted
+                        : transaction.ReasonCode switch
+                        {
+                            "InvalidState" => PlayerActionResult.InvalidState,
+                            "InvalidTarget" => PlayerActionResult.InvalidTarget,
+                            _ => PlayerActionResult.Rejected
+                        };
+                }
             }
+
             PublishAction(requestId, kind, result);
         }
 

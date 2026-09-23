@@ -48,19 +48,26 @@ namespace DeepDive.World.Editor
         // it is dry land and stepping off it is a real crossing rather than a rounding error.
         public static float LedgeTopY => LedgeCenter.y + LedgeSize.y * 0.5f;
 
-        // The ramp runs west off the ledge and down to just under the surface. 25 degrees is
-        // inside the diver's slopeLimit of 45 with room to spare, and its top meets the ledge
-        // top exactly, so there is no lip for stepOffset (0.3) to have to climb.
+        // The ramp runs west off the ledge and down toward the sea bed. 25 degrees is inside
+        // the diver's slopeLimit of 45 with room to spare, and its top meets the ledge top
+        // exactly, so there is no lip for stepOffset (0.3) to have to climb.
         //
-        // It stops at 7.2 rather than carrying on down to the sea bed. The dive's exit volume
-        // (DiveExit, Composition's SessionPortal) spans y 6..8 across the whole arena and tests
-        // the diver at position + up * 0.9, so any walkable surface below y = 7.1 would put a
-        // diver standing on it inside the exit zone. The foot of the ramp is at 7.2, which puts
-        // that check at 8.1 - out of the zone by 0.1 m - while still being under the water line
-        // at y = 8, so stepping onto it reads as Surface. Below the foot is open water: the
-        // diver swims down from there rather than walking.
+        // 7.2 was its original foot, sized to stay clear of the OLD whole-arena DiveExit/
+        // SafeReturnZone (y 6..8 everywhere). PR #70 replaced that with a small dry pad on
+        // Shore_Ledge itself (Composition's SafeReturnZone), which this ramp's own foot cannot
+        // reach or overlap regardless of height - SafeReturnZoneIsAReservedDryPadOnTheLedgeAnd-
+        // StaysOffTheRamp checks that directly. So 7.2 no longer serves the purpose it was
+        // built for, and it created a different, worse problem: NetworkDiver's CharacterController
+        // is height 1.8, and PlayerPresentationRules blocks upward swim input once a diver
+        // classifies as Surface, which happens once their feet reach the water's surfaceY (8,
+        // SwimVolume's top) minus that height = 6.2. A ramp foot above 6.2 is a wall a
+        // swimming diver's feet cannot rise past to ever reach it - this ramp is the only way
+        // onto Shore_Ledge, so at 7.2 no diver could ever swim to a safe return at all (the same
+        // bug DiveTestAreaBeachSetup.WadeFootY had, found the same way: two real divers in a
+        // live 2-process smoke never reached the pad, stuck at y 6.3, see issue #62). 5.2 clears
+        // that ceiling by a full metre, the same margin the beach's wade shelf uses.
         public const float RampAngleDegrees = 25f;
-        public const float RampBottomY = 7.2f;
+        public const float RampBottomY = 5.2f;
         public const float RampThickness = 0.4f;
 
         [MenuItem("DeepDive/P3.1/Dive test area: water field and shore")]

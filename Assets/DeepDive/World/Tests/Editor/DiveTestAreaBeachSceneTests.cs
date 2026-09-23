@@ -44,17 +44,17 @@ namespace DeepDive.World.Tests
         private const float PlatformTopY = 8.4f;
         private const float PlatformNorthZ = -11f;
 
-        private static readonly Vector3 WadeCenter = new Vector3(-6.5f, 6.90437f, -4.925563f);
-        private static readonly Vector3 WadeSize = new Vector3(6f, 0.4f, 12.505309f);
-        private const float WadeAngleDegrees = 12f;
+        private static readonly Vector3 WadeCenter = new Vector3(-6.5f, 6.618738f, -7.653313f);
+        private static readonly Vector3 WadeSize = new Vector3(6f, 0.4f, 7.5718446f);
+        private const float WadeAngleDegrees = 25f;
         private const float WadeMinX = -9.5f;
         private const float WadeMaxX = -3.5f;
         private const float WadeTopZ = -11f;
-        private const float WadeFootZ = 1.232038f;
-        private const float WadeFootY = 5.8f;
+        private const float WadeFootZ = -4.137578f;
+        private const float WadeFootY = 5.2f;
 
         private static readonly Vector3 HullPosition = new Vector3(-12f, 8.4f, -12.5f);
-        private static readonly Vector3 EnginePosition = new Vector3(-6.5f, 7.762326f, -8f);
+        private static readonly Vector3 EnginePosition = new Vector3(-6.5f, 7.0010767f, -8f);
         private static readonly Vector3 FuelTankPosition = new Vector3(12.5f, 8.4f, -12.5f);
         private static readonly Vector3 TownGatePosition = new Vector3(0f, 8.4f, -13.5f);
         private const float AnchorSize = 0.6f;
@@ -68,11 +68,11 @@ namespace DeepDive.World.Tests
         // walking. Matches the P3.1 shore test's OpenWaterY.
         private const float OpenWaterY = 5f;
 
-        // DiveExit's trigger, copied as plain numbers: the zone belongs to Mehmet and this
-        // assembly does not reference his. SafeReturnZone tests the diver at position + up * 0.9.
-        private const float ExitZoneMinY = 6f;
-        private const float ExitZoneMaxY = 8f;
-        private const float ExitZoneHalfXZ = 15f;
+        // DiveExit is now a dedicated dry return pad on Shore_Ledge rather than a whole-arena
+        // y=6..8 volume. Copied as plain numbers because this assembly does not reference
+        // Composition. SafeReturnZone tests the diver at position + up * 0.9.
+        private static readonly Vector3 ExitCenter = new Vector3(9f, 9.3f, -9f);
+        private static readonly Vector3 ExitSize = new Vector3(3.5f, 2f, 3.5f);
         private const float ExitZoneProbeHeight = 0.9f;
 
         // The spawn ring, the event and the fish wander box the beach has to stay clear of.
@@ -88,7 +88,6 @@ namespace DeepDive.World.Tests
         private static readonly Vector3 LedgeSize = new Vector3(4f, 1f, 4f);
         private static readonly Vector3 SwimCenter = new Vector3(0f, 4f, 0f);
         private static readonly Vector3 SwimSize = new Vector3(30f, 8f, 30f);
-        private static readonly Vector3 ExitCenter = new Vector3(0f, 9.4f, -12.875f);
 
         private Scene scene;
         private Scene previousActive;
@@ -154,12 +153,14 @@ namespace DeepDive.World.Tests
         private static float WadeSurfaceYAt(float z) =>
             Mathf.Lerp(PlatformTopY, WadeFootY, Mathf.InverseLerp(WadeTopZ, WadeFootZ, z));
 
-        private bool InsideExitZone(Vector3 stand)
+        private static bool InsideExitZone(Vector3 stand)
         {
-            var box = Require("DiveExit").GetComponent<BoxCollider>();
-            var point = box.transform.InverseTransformPoint(stand + Vector3.up * 0.9f) - box.center;
-            var half = box.size * 0.5f;
-            return Mathf.Abs(point.x) <= half.x && Mathf.Abs(point.y) <= half.y && Mathf.Abs(point.z) <= half.z;
+            var probe = stand + Vector3.up * ExitZoneProbeHeight;
+            var local = probe - ExitCenter;
+            var half = ExitSize * 0.5f;
+            return Mathf.Abs(local.x) <= half.x
+                   && Mathf.Abs(local.y) <= half.y
+                   && Mathf.Abs(local.z) <= half.z;
         }
 
         // --- Geometry ------------------------------------------------------------------------
@@ -346,12 +347,29 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void SafeReturnIsOnTheDryBeachAndNeverOnTheOpenWaterSurface()
+        public void NoBeachWalkableSurfaceSitsInTheSafeReturnZone()
         {
-            Assert.IsTrue(InsideExitZone(new Vector3(0, 8.4f, -12.5f)));
-            Assert.IsFalse(InsideExitZone(new Vector3(0, 6.3f, 0)));
-            Assert.IsFalse(InsideExitZone(new Vector3(-6.5f, 6.3f, 0)));
-            Assert.IsFalse(InsideExitZone(new Vector3(-6.5f, WadeFootY, WadeFootZ)));
+            // The dedicated return pad lives on the separate east ledge. The beach/wade route
+            // must stay outside it so #61 can extend the wade deeper without false Returned.
+            var samples = new List<Vector3>();
+
+            var platform = Require(PlatformName);
+            var half = platform.transform.localScale * 0.5f;
+            var centre = platform.transform.position;
+            for (var sx = -1; sx <= 1; sx++)
+                for (var sz = -1; sz <= 1; sz++)
+                    samples.Add(new Vector3(centre.x + sx * half.x, PlatformTopY, centre.z + sz * half.z));
+
+            for (var i = 0; i <= 20; i++)
+            {
+                var z = Mathf.Lerp(WadeTopZ, WadeFootZ, i / 20f);
+                samples.Add(new Vector3(WadeCenter.x, WadeSurfaceYAt(z), z));
+            }
+
+            foreach (var stand in samples)
+                Assert.IsFalse(InsideExitZone(stand),
+                    "standing at " + stand + " is tested at " + (stand + Vector3.up * ExitZoneProbeHeight) +
+                    ", inside the dive exit zone");
         }
 
         // --- The measured x range --------------------------------------------------------------
@@ -490,10 +508,12 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void PartsDoNotCreateTheirOwnSafeReturnZones()
+        public void NoBoatPartSitsInTheSafeReturnZone()
         {
+            // Walking up to a part must not be worth money on its own.
             foreach (var anchor in Anchors())
-                Assert.IsFalse(anchor.GetComponents<MonoBehaviour>().Any(c => c.GetType().Name == "SafeReturnZone"));
+                Assert.IsFalse(InsideExitZone(anchor.WorldPosition),
+                    anchor.PartId + " stands inside the dive exit zone");
         }
 
         [Test]
@@ -665,14 +685,15 @@ namespace DeepDive.World.Tests
             var exit = Require("DiveExit");
             Assert.AreEqual(ExitCenter, exit.transform.position, "DiveExit moved");
             var exitBox = exit.GetComponent<BoxCollider>();
-            Assert.AreEqual(new Vector3(29.5f, 3f, 3.75f), exitBox.size, "DiveExit resized");
+            Assert.AreEqual(ExitSize, exitBox.size, "DiveExit resized");
             Assert.IsTrue(exitBox.isTrigger, "DiveExit must stay a trigger");
 
             foreach (var spawn in FindAll<PlayerSpawnPoint>(scene))
             {
                 var p = spawn.transform.position;
-                Assert.Greater(p.y, 8f, spawn.name + " starts on dry land");
-                Assert.IsTrue(InsideExitZone(p), spawn.name + " starts on the safe town strip");
+                Assert.AreEqual(SpawnRingExtent, Mathf.Abs(p.x), 0.001f, spawn.name + " x");
+                Assert.AreEqual(1f, p.y, 0.001f, spawn.name + " y");
+                Assert.AreEqual(SpawnRingExtent, Mathf.Abs(p.z), 0.001f, spawn.name + " z");
             }
         }
     }

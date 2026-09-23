@@ -38,4 +38,12 @@ namespace DeepDive.Core.Contracts
     {
         PlayerActionResult TryPickup(PlayerId playerId, ulong requestId);
     }
+
+    // World-side identity only for P3.2's free repair parts. The anchor exposes the stable
+    // part id, but it does not own progression or call the economy. NetworkPlayer validates
+    // the E-pickup ray on the host, then forwards the id through BoatPartClaim.
+    public interface IBoatPartPickupTarget
+    {
+        string PartId { get; }
+    }
 }
