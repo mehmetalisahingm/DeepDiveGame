@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.Trip",
+  "rootNamespace": "DeepDive.Trip",
+  "references": ["DeepDive.Core.Contracts", "Unity.Netcode.Runtime", "Unity.Collections"]
+}

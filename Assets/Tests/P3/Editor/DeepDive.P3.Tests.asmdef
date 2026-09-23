@@ -1,6 +1,6 @@
 {
   "name": "DeepDive.P3.Tests",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Session", "DeepDive.Inventory", "DeepDive.Economy", "DeepDive.Network"],
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Session", "DeepDive.Inventory", "DeepDive.Economy", "DeepDive.Network", "DeepDive.Trip"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"]
 }
