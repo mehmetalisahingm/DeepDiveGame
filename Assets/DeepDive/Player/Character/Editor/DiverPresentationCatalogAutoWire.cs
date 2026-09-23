@@ -8,7 +8,7 @@ namespace DeepDive.Editor
     {
         private const string CharacterRoot = "Assets/DeepDive/Player/Character";
         private const string HarpoonPrefab = CharacterRoot + "/Equipment/HarpoonProp.prefab";
-        private const string CameraPrefab = CharacterRoot + "/Equipment/CameraProp.prefab";
+        private const string CameraPrefab = CharacterRoot + "/CoastalCamera.prefab";
         private const string CatalogPath = "Assets/DeepDive/Network/Resources/DiverPresentationCatalog.asset";
 
         [InitializeOnLoadMethod]

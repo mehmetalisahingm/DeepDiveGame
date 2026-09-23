@@ -37,6 +37,7 @@ namespace DeepDive.P1.Lab
             public List<int> boatPartsSequence = new List<int>();
             public bool boatHullFound, boatEngineFound, boatFuelTankFound, boatDuplicateRejected, boatRepaired;
             public string boatStatusFinal;
+            public bool boatPartsHidden;
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
@@ -100,6 +101,7 @@ namespace DeepDive.P1.Lab
             var started = Time.realtimeSinceStartup;
             bool prepSent = false, diveSent = false, returnSent = false, lobbySent = false, leaveSent = false;
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
+            bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
             var duration = Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
@@ -109,6 +111,13 @@ namespace DeepDive.P1.Lab
                 var state = adapter.Session.State;
                 if (host && !screenshot && elapsed > 5 && Arg("-p1-screenshot").Length > 0)
                 { screenshot = true; CaptureRoom(); }
+                if (host && Arg("-p1-screenshot").Length > 0 && !connection.IsSceneLoading)
+                {
+                    if (!diveScreenshot && state.Phase == SessionPhase.Dive && elapsed > 28)
+                    { diveScreenshot = true; CaptureRoom("-dive"); }
+                    if (!shoreScreenshot && state.Phase == SessionPhase.Return && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 15)
+                    { shoreScreenshot = true; CaptureRoom("-shore"); }
+                }
                 if (reject)
                 {
                     if (connection.Status == ConnectionStatus.Offline && connection.LastError.Length > 0)
@@ -198,7 +207,7 @@ namespace DeepDive.P1.Lab
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
-            if (Boat) result.passed &= result.boatRepaired &&
+            if (Boat) result.passed &= result.boatRepaired && result.boatPartsHidden &&
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
@@ -403,6 +412,13 @@ namespace DeepDive.P1.Lab
             // guest can confirm Repaired from its own replicated state without any host-only access.
             var sync = local.GetComponent<EconomyPlayerSync>();
             if (sync != null && sync.BoatPartsDone.Value >= BoatRepairParts.All.Count) result.boatRepaired = true;
+            if (sync != null && sync.BoatPartsMask.Value == 7)
+            {
+                var anchors = FindObjectsByType<BoatPartAnchor>(FindObjectsSortMode.None);
+                result.boatPartsHidden |= anchors.Length == 3 && anchors.All(a =>
+                    a.GetComponentsInChildren<Renderer>().All(r => !r.enabled) &&
+                    a.GetComponentsInChildren<Collider>().All(c => !c.enabled));
+            }
             var partName = host ? boatStep == 0 || boatStep == 1 ? "BoatPart_Hull" : "BoatPart_FuelTank" : "BoatPart_Engine";
             var part = GameObject.Find(partName);
             var cam = local.GetComponentInChildren<Camera>(true);
@@ -436,7 +452,14 @@ namespace DeepDive.P1.Lab
                     else if (!host && !accepted) result.errors.Add($"boat engine claim rejected={local.LastActionResult.Value}");
                     break;
                 case 1:   // host only: the same hull again must be refused, not paid or progressed twice
-                    if (rejected) { result.boatDuplicateRejected = true; boatStep = 2; }
+                    // Collected parts now vanish, including their pickup collider. A second E ray therefore
+                    // returns InvalidTarget. Still require the committed hull bit and its disabled collider.
+                    var hull = GameObject.Find("BoatPart_Hull");
+                    var sync = local.GetComponent<EconomyPlayerSync>();
+                    var hiddenHull = local.LastActionResult.Value == (int)PlayerActionResult.InvalidTarget &&
+                        sync != null && (sync.BoatPartsMask.Value & 1) != 0 && hull != null &&
+                        hull.GetComponentsInChildren<Collider>().All(c => !c.enabled);
+                    if (rejected || hiddenHull) { result.boatDuplicateRejected = true; boatStep = 2; }
                     else result.errors.Add($"duplicate hull claim was not rejected, result={local.LastActionResult.Value}");
                     break;
                 case 2:   // host: fuel tank; guest: already done, idles here
@@ -766,7 +789,7 @@ namespace DeepDive.P1.Lab
             if (!result.townSaveRoundTrip) result.errors.Add("town save/load round trip failed: " + store.LastError);
         }
 
-        private void CaptureRoom()
+        private void CaptureRoom(string suffix = "")
         {
             // A hidden Windows player can skip presenting its backbuffer. Render explicitly
             // into a texture so the capture still contains the real camera and uGUI layout.
@@ -789,7 +812,10 @@ namespace DeepDive.P1.Lab
                 RenderPipeline.SubmitRenderRequest(camera, new RenderPipeline.StandardRequest { destination = target });
                 RenderTexture.active = target;
                 pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); pixels.Apply();
-                File.WriteAllBytes(Arg("-p1-screenshot"), pixels.EncodeToPNG());
+                var capturePath = Arg("-p1-screenshot");
+                if (suffix.Length > 0) capturePath = Path.Combine(Path.GetDirectoryName(capturePath),
+                    Path.GetFileNameWithoutExtension(capturePath) + suffix + ".png");
+                File.WriteAllBytes(capturePath, pixels.EncodeToPNG());
             }
             finally
             {

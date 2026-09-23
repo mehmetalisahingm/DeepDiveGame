@@ -1,5 +1,7 @@
 # Mixamo kaynak dosyalarını yerelde yeniden üretme (P3.1-C)
 
+> 23 Eylül 2026: Bu set artık isteğe bağlı tarihsel kaynaktır. Ortak build, kaynakları depoda bulunan CC0 `CoastalDiver` / `CoastalArms` setini kullanır. Oyunu açmak veya build almak için Mixamo indirmeniz gerekmez. Katalog özel Mixamo importuyla kendiliğinden değişmez. Kaynaklar: [CREDITS.md](CREDITS.md).
+
 `Assets/DeepDive/Player/Character/DiverBase.fbx` ve `Animations/{Walk,SwimSurface,SwimIdle,Idle}.fbx`
 repoya **commit edilmez** (bkz. `.gitignore`). Mixamo lisansı, karakter/animasyonların oyun
 içinde kullanımını serbest bırakıyor ama ham dosyaların tek başına (standalone) dağıtımını

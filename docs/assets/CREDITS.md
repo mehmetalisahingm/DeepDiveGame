@@ -1,5 +1,18 @@
 # Varlık kaynak kaydı
 
+## Ortak build karakteri — 23 Eylül 2026
+
+`CoastalDiver` ve `CoastalArms`, Quaternius **Ultimate Modular Characters / Humanoid Rig / Beach** modelinden üretildi. Kaynak: [resmî paket sayfası](https://quaternius.com/packs/ultimatemodularcharacters.html), buradan bağlı [resmî dosya klasörü](https://drive.google.com/drive/folders/1USAAquX2JJWuA2m6zol0KUkFe3UkZ8zX). Lisans **CC0 1.0**, atıf zorunlu değil; Quaternius'a teşekkürler. İndirme: 22 Eylül 2026.
+
+- `Source/CoastalHuman.fbx`: paketteki `Beach.fbx`, yeniden adlandırıldı.
+- `Source/CoastalAnimations.fbx`: paketteki `Animations.fbx`; Humanoid idle/walk klipleri kullanılır.
+- `Source/LICENSE-Quaternius.txt`: kaynak paket lisansı.
+- Yerel dönüşümler: URP materyalleri, kola ayrılmış mesh, ekipman soketi, hava tüpü ve kodla yüzme/tutuş pozu. Gerçek yüzme animasyon klibi değildir.
+
+Dosyalar `Assets/DeepDive/Player/Character/` altında kaynaklarıyla depodadır. Yeni checkout'ta özel hesap veya harici indirme gerekmez. Aşağıdaki Mixamo seti tarihsel/isteğe bağlıdır; ortak build kataloğunu değiştirmez.
+
+## Önceki kaynaklar
+
 [ASSET_PLAN.md](../plan/ASSET_PLAN.md)'deki kontrol listesine göre; her dış varlık eklenmeden önce burada kaydedilir. CC0/Mixkit gibi atıf gerektirmeyen lisanslarda bile kaynak/lisans/tarih kaydı tutulur.
 
 | Dosya | Kaynak | Lisans | Atıf gerekli mi | İndirme tarihi | Not |

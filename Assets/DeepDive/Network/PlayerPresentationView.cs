@@ -46,7 +46,7 @@ namespace DeepDive.Network
             EnsureInitialized();
 
             var showEquipment = state.Locomotion != LocomotionMode.Passive;
-            SetRendererGroup(firstPersonRenderers, isOwner && showEquipment, false);
+            SetRendererGroup(firstPersonRenderers, isOwner && showEquipment && state.HeldEquipment != HeldEquipmentMode.None, false);
             SetRendererGroup(thirdPersonRenderers, true, isOwner);
 
             var hasHumanRig = thirdPersonRenderers != null && thirdPersonRenderers.Length > 0;

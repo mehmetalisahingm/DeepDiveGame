@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
 using DeepDive.Network;
 using DeepDive.Composition;
@@ -56,14 +55,18 @@ namespace DeepDive.Editor
             }
             var body = BuildHuman(false, controller);
             var arms = BuildHuman(true, controller);
+            var cameraProp = BuildCamera();
             var catalog = new SerializedObject(AssetDatabase.LoadAssetAtPath<DiverPresentationCatalog>(
                 "Assets/DeepDive/Network/Resources/DiverPresentationCatalog.asset"));
             catalog.FindProperty("thirdPersonRigPrefab").objectReferenceValue = body;
             catalog.FindProperty("firstPersonArmsPrefab").objectReferenceValue = arms;
+            catalog.FindProperty("cameraPropPrefab").objectReferenceValue = cameraProp;
             catalog.ApplyModifiedPropertiesWithoutUndo();
             DiveTestAreaBeachSetup.Apply();
             foreach (var anchor in UnityEngine.Object.FindObjectsByType<BoatPartAnchor>(FindObjectsSortMode.None))
                 if (anchor.GetComponent<BoatPartPresentation>() == null) anchor.gameObject.AddComponent<BoatPartPresentation>();
+            if (UnityEngine.Object.FindFirstObjectByType<CoastalAtmosphere>() == null)
+                new GameObject("CoastalAtmosphere").AddComponent<CoastalAtmosphere>();
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
             EditorSceneManager.SaveOpenScenes();
             AssetDatabase.SaveAssets();
@@ -124,6 +127,7 @@ namespace DeepDive.Editor
                 var hand = model.GetComponentsInChildren<Transform>().First(t => t.name == "Hand.R");
                 var socket = new GameObject("Socket_RightHand_Equipment").transform;
                 socket.SetParent(hand, false); socket.rotation = Quaternion.identity;
+                socket.localScale = InverseScale(hand.lossyScale);
                 var spine = model.GetComponentsInChildren<Transform>().First(t => t.name == "Chest");
                 Part(spine, "AirTank", PrimitiveType.Capsule, new Vector3(0, 0, -0.22f), new Vector3(0.19f, 0.32f, 0.19f), HumanMaterial("Tank"));
             }
@@ -141,20 +145,42 @@ namespace DeepDive.Editor
                 name == "Eye" || name == "White" ? new Color(0.92f, 0.94f, 0.88f) :
                 name == "LightBrown" ? new Color(0.055f, 0.25f, 0.29f) :
                 name == "Tank" ? new Color(0.93f, 0.57f, 0.12f) :
+                name == "Screen" ? new Color(0.08f, 0.65f, 0.70f) :
+                name == "RecordingRed" ? new Color(1f, 0.05f, 0.02f) :
                 name == "Earrings" ? new Color(0.78f, 0.60f, 0.28f) : new Color(0.035f, 0.06f, 0.08f);
             material = new Material(Shader.Find("Universal Render Pipeline/Lit")) { color = color };
             material.SetColor("_BaseColor", color); material.SetFloat("_Smoothness", 0.25f);
             AssetDatabase.CreateAsset(material, path); return material;
+        }
+        private static GameObject BuildCamera()
+        {
+            var root = new GameObject("CoastalCamera");
+            Part(root.transform, "Housing", PrimitiveType.Cube, Vector3.zero, new Vector3(.26f, .16f, .14f), HumanMaterial("Hair"));
+            Part(root.transform, "RearScreen", PrimitiveType.Cube, new Vector3(0, 0, -.075f), new Vector3(.19f, .11f, .01f), HumanMaterial("Screen"));
+            foreach (var x in new[] { -.18f, .18f })
+            {
+                Part(root.transform, "Grip", PrimitiveType.Capsule, new Vector3(x, -.025f, 0), new Vector3(.035f, .07f, .035f), HumanMaterial("Tank"));
+                Part(root.transform, "GripBracket", PrimitiveType.Cube, new Vector3(x * .85f, -.07f, 0), new Vector3(.075f, .025f, .055f), HumanMaterial("Hair"));
+            }
+            Part(root.transform, "Lens", PrimitiveType.Cylinder, new Vector3(0, 0, .115f), new Vector3(.11f, .045f, .11f), HumanMaterial("Eye"));
+            root.transform.Find("Lens").localRotation = Quaternion.Euler(90, 0, 0);
+            Part(root.transform, "LensGlass", PrimitiveType.Cylinder, new Vector3(0, 0, .164f), new Vector3(.087f, .007f, .087f), HumanMaterial("Screen"));
+            root.transform.Find("LensGlass").localRotation = Quaternion.Euler(90, 0, 0);
+            Part(root.transform, "Shutter", PrimitiveType.Sphere, new Vector3(.08f, .09f, 0), new Vector3(.035f, .02f, .035f), HumanMaterial("RecordingRed"));
+            var grip = new GameObject("GripPoint").transform; grip.SetParent(root.transform, false); grip.localPosition = new Vector3(.18f, -.025f, 0);
+            var saved = PrefabUtility.SaveAsPrefabAsset(root, Root + "/CoastalCamera.prefab");
+            UnityEngine.Object.DestroyImmediate(root); return saved;
         }
         private static void Part(Transform parent, string name, PrimitiveType type, Vector3 position, Vector3 scale, Material material)
         {
             var go = GameObject.CreatePrimitive(type); go.name = name; go.transform.SetParent(parent, false);
             // Source bones have their own axes; position these authored props in model space.
             go.transform.position = parent.position + position;
-            go.transform.rotation = Quaternion.identity; go.transform.localScale = scale;
+            go.transform.rotation = Quaternion.identity; go.transform.localScale = Vector3.Scale(scale, InverseScale(parent.lossyScale));
             go.GetComponent<Renderer>().sharedMaterial = material;
             UnityEngine.Object.DestroyImmediate(go.GetComponent<Collider>());
         }
+        private static Vector3 InverseScale(Vector3 scale) => new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
 
     }
 }

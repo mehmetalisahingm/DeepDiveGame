@@ -9,6 +9,8 @@ namespace DeepDive.Network
         public Transform Model;
         private Transform leftArm, leftElbow, leftHand, rightArm, rightElbow, rightHand;
         private Transform leftLeg, leftKnee, leftFoot, rightLeg, rightKnee, rightFoot, head;
+        private Transform equipmentSocket, leftIndex, rightIndex;
+        private Transform[] fingerBones;
         private PlayerPresentationState state;
         private float speed, cycle;
         private void Awake()
@@ -18,6 +20,9 @@ namespace DeepDive.Network
             leftLeg = Bone("UpperLeg.L"); leftKnee = Bone("LowerLeg.L"); leftFoot = Bone("Foot.L");
             rightLeg = Bone("UpperLeg.R"); rightKnee = Bone("LowerLeg.R"); rightFoot = Bone("Foot.R");
             head = Bone("Head");
+            equipmentSocket = Bone("Socket_RightHand_Equipment");
+            leftIndex = Bone("Index2.L"); rightIndex = Bone("Index2.R");
+            fingerBones = GetComponentsInChildren<Transform>(true);
         }
         public void Present(PlayerPresentationState value, float normalizedSpeed)
         { state = value; speed = Mathf.Clamp01(normalizedSpeed); }
@@ -47,9 +52,25 @@ namespace DeepDive.Network
             if (FirstPerson || state.HeldEquipment != HeldEquipmentMode.None)
             {
                 var camera = state.HeldEquipment == HeldEquipmentMode.Camera;
-                var y = FirstPerson ? 1.46f : 1.24f;
+                var y = FirstPerson ? 1.39f : 1.16f;
                 Hold(rightArm, rightElbow, rightHand, new Vector3(camera ? 0.18f : 0.24f, y, 0.44f), 1);
                 Hold(leftArm, leftElbow, leftHand, new Vector3(camera ? -0.18f : -0.12f, y - (camera ? 0 : 0.10f), 0.43f), -1);
+                Aim(rightHand, rightIndex, camera ? Vector3.up : Vector3.forward);
+                Aim(leftHand, leftIndex, camera ? Vector3.up : Vector3.forward);
+                foreach (var finger in fingerBones)
+                {
+                    if (finger.childCount == 0 || !(finger.name.StartsWith("Index") || finger.name.StartsWith("Middle") ||
+                        finger.name.StartsWith("Ring") || finger.name.StartsWith("Pinky"))) continue;
+                    var curl = camera
+                        ? finger.name.Contains("2.") ? Vector3.forward : finger.name.Contains("3.") ? Vector3.down : Vector3.back
+                        : finger.name.Contains("2.") ? Vector3.down : finger.name.Contains("3.") ? Vector3.back : Vector3.up;
+                    Aim(finger, finger.GetChild(0), curl);
+                }
+                if (equipmentSocket != null)
+                {
+                    equipmentSocket.position = rightHand.position + Model.TransformDirection(new Vector3(0, .085f, .015f));
+                    equipmentSocket.rotation = Model.rotation;
+                }
             }
         }
 
