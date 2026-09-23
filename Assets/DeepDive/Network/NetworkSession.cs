@@ -18,7 +18,8 @@ namespace DeepDive.Network
         // Older P2 builds used DeepDive-P1-2, which allowed different scene/prefab layouts to
         // connect and then fail during NGO in-scene NetworkObject synchronization.
         // P3-5 adds replicated locomotion/equipment/recording presentation to NetworkPlayer.
-        public const string Protocol = "DeepDive-P3-5";
+        // P3-6 adds the per-part completion mask so collected repair parts disappear for everyone.
+        public const string Protocol = "DeepDive-P3-6";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;

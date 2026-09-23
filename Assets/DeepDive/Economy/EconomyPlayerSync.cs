@@ -17,6 +17,7 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> PendingCatches = new NetworkVariable<int>();
         public readonly NetworkVariable<int> PendingRecordings = new NetworkVariable<int>();
         public readonly NetworkVariable<int> BoatPartsDone = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> BoatPartsMask = new NetworkVariable<int>();
         public readonly NetworkVariable<FixedString32Bytes> ActiveServiceId = new NetworkVariable<FixedString32Bytes>();
         public readonly NetworkVariable<ulong> LastServiceRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<byte> LastServiceType = new NetworkVariable<byte>();
@@ -89,12 +90,13 @@ namespace DeepDive.Economy
             if (!ActiveServiceId.Value.Equals(value)) ActiveServiceId.Value = value;
         }
 
-        public void PublishTownProgress(int pendingCatches, int pendingRecordings, int boatPartsDone)
+        public void PublishTownProgress(int pendingCatches, int pendingRecordings, int boatPartsDone, int boatPartsMask = 0)
         {
             if (!IsServer) return;
             if (PendingCatches.Value != pendingCatches) PendingCatches.Value = pendingCatches;
             if (PendingRecordings.Value != pendingRecordings) PendingRecordings.Value = pendingRecordings;
             if (BoatPartsDone.Value != boatPartsDone) BoatPartsDone.Value = boatPartsDone;
+            if (BoatPartsMask.Value != boatPartsMask) BoatPartsMask.Value = boatPartsMask;
         }
 
         public void RequestPurchase(string itemId)

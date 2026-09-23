@@ -302,6 +302,7 @@ GameObject:
   - component: {fileID: 121625921}
   - component: {fileID: 121625920}
   - component: {fileID: 121625919}
+  - component: {fileID: 121625924}
   m_Layer: 0
   m_Name: BoatPart_FuelTank
   m_TagString: Untagged
@@ -415,6 +416,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &121625924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121625918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b09d2b4a58ed90488e83d6b7790c9f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.BoatPartPresentation
 --- !u!1 &125103896
 GameObject:
   m_ObjectHideFlags: 0
@@ -2318,6 +2331,7 @@ GameObject:
   - component: {fileID: 947142109}
   - component: {fileID: 947142108}
   - component: {fileID: 947142107}
+  - component: {fileID: 947142112}
   m_Layer: 0
   m_Name: BoatPart_Engine
   m_TagString: Untagged
@@ -2431,6 +2445,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &947142112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947142106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b09d2b4a58ed90488e83d6b7790c9f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.BoatPartPresentation
 --- !u!1 &1007613396
 GameObject:
   m_ObjectHideFlags: 0
@@ -2814,6 +2840,7 @@ GameObject:
   - component: {fileID: 1265194784}
   - component: {fileID: 1265194783}
   - component: {fileID: 1265194782}
+  - component: {fileID: 1265194787}
   m_Layer: 0
   m_Name: BoatPart_Hull
   m_TagString: Untagged
@@ -2927,6 +2954,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1265194787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1265194781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b09d2b4a58ed90488e83d6b7790c9f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.BoatPartPresentation
 --- !u!1 &1374962522
 GameObject:
   m_ObjectHideFlags: 0
@@ -8749,6 +8788,50 @@ MonoBehaviour:
   worldAnchor: anchor-shop-equipment
   interactionDistance: 3
   catalogId: catalog-equipment
+--- !u!1 &2031936919
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2031936921}
+  - component: {fileID: 2031936920}
+  m_Layer: 0
+  m_Name: CoastalAtmosphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2031936920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2031936919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f10087953922eb645b88a7542f9d7152, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DeepDive.Composition::DeepDive.Composition.CoastalAtmosphere
+--- !u!4 &2031936921
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2031936919}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2049789246
 GameObject:
   m_ObjectHideFlags: 0
@@ -8825,3 +8908,4 @@ SceneRoots:
   - {fileID: 305258820}
   - {fileID: 1374962524}
   - {fileID: 589457457}
+  - {fileID: 2031936921}

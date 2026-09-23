@@ -28,6 +28,7 @@ namespace DeepDive.Network
         private GameObject runtimeFirstPersonArms;
         private bool initialized;
         private int drivenAnimatorState;
+        private CoastalDiverPose bodyPose, armsPose;
 
         private static readonly int LocomotionParam = Animator.StringToHash("LocomotionMode");
         private static readonly int SpeedParam = Animator.StringToHash("MoveSpeed");
@@ -45,7 +46,7 @@ namespace DeepDive.Network
             EnsureInitialized();
 
             var showEquipment = state.Locomotion != LocomotionMode.Passive;
-            SetRendererGroup(firstPersonRenderers, isOwner && showEquipment, false);
+            SetRendererGroup(firstPersonRenderers, isOwner && showEquipment && state.HeldEquipment != HeldEquipmentMode.None, false);
             SetRendererGroup(thirdPersonRenderers, true, isOwner);
 
             var hasHumanRig = thirdPersonRenderers != null && thirdPersonRenderers.Length > 0;
@@ -62,6 +63,8 @@ namespace DeepDive.Network
             SetActive(thirdPersonCamera, !isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Camera);
 
             ApplyAnimator(state, normalizedSpeed);
+            bodyPose?.Present(state, normalizedSpeed);
+            armsPose?.Present(state, normalizedSpeed);
         }
 
         private void EnsureInitialized()
@@ -106,6 +109,7 @@ namespace DeepDive.Network
                 runtimeRig.transform.localPosition = Vector3.zero;
                 runtimeRig.transform.localRotation = Quaternion.identity;
                 runtimeRig.transform.localScale = Vector3.one;
+                bodyPose = runtimeRig.GetComponent<CoastalDiverPose>();
 
                 if (animator == null) animator = runtimeRig.GetComponentInChildren<Animator>(true);
                 if (thirdPersonRenderers == null || thirdPersonRenderers.Length == 0)
@@ -126,7 +130,16 @@ namespace DeepDive.Network
             if (firstPersonMount == null) return;
 
             if (buildFirstPersonArms && (firstPersonRenderers == null || firstPersonRenderers.Length == 0))
-                firstPersonRenderers = BuildFirstPersonArms(firstPersonMount);
+            {
+                if (presentationCatalog.FirstPersonArmsPrefab != null)
+                {
+                    runtimeFirstPersonArms = Instantiate(presentationCatalog.FirstPersonArmsPrefab, firstPersonMount, false);
+                    runtimeFirstPersonArms.transform.localPosition = new Vector3(0, -1.65f, 0);
+                    armsPose = runtimeFirstPersonArms.GetComponent<CoastalDiverPose>();
+                    firstPersonRenderers = runtimeFirstPersonArms.GetComponentsInChildren<Renderer>(true);
+                }
+                else firstPersonRenderers = BuildFirstPersonArms(firstPersonMount);
+            }
 
             if (firstPersonHarpoon == null && presentationCatalog.HarpoonPropPrefab != null)
             {

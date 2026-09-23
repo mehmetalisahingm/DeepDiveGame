@@ -3,16 +3,12 @@ using UnityEngine;
 
 namespace DeepDive.Editor
 {
-    // Mixamo source FBX files are intentionally not committed to the public repository.
-    // Keep the runtime catalog valid on a fresh checkout, then wire the human rig as soon
-    // as a developer imports the licensed source files locally.
+    // Keep the shared CC0 character and first-person arms bound on every checkout.
     public sealed class DiverPresentationCatalogAutoWire : AssetPostprocessor
     {
         private const string CharacterRoot = "Assets/DeepDive/Player/Character";
-        private const string BaseFbx = CharacterRoot + "/DiverBase.fbx";
-        private const string DiverPrefab = CharacterRoot + "/DiverCharacter.prefab";
         private const string HarpoonPrefab = CharacterRoot + "/Equipment/HarpoonProp.prefab";
-        private const string CameraPrefab = CharacterRoot + "/Equipment/CameraProp.prefab";
+        private const string CameraPrefab = CharacterRoot + "/CoastalCamera.prefab";
         private const string CatalogPath = "Assets/DeepDive/Network/Resources/DiverPresentationCatalog.asset";
 
         [InitializeOnLoadMethod]
@@ -45,9 +41,12 @@ namespace DeepDive.Editor
             if (catalog == null) return;
 
             var serialized = new SerializedObject(catalog);
-            var hasLicensedRigSource = AssetDatabase.LoadAssetAtPath<GameObject>(BaseFbx) != null;
+            // The shared build always uses the redistributable CC0 rig. A developer's
+            // optional Mixamo import must not silently change the shipped character.
             SetReference(serialized, "thirdPersonRigPrefab",
-                hasLicensedRigSource ? AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefab) : null);
+                AssetDatabase.LoadAssetAtPath<GameObject>(CharacterRoot + "/CoastalDiver.prefab"));
+            SetReference(serialized, "firstPersonArmsPrefab",
+                AssetDatabase.LoadAssetAtPath<GameObject>(CharacterRoot + "/CoastalArms.prefab"));
             SetReference(serialized, "harpoonPropPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(HarpoonPrefab));
             SetReference(serialized, "cameraPropPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(CameraPrefab));
 

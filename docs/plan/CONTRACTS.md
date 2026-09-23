@@ -172,6 +172,8 @@ Plan 3.0: yeni kampanya ücretsiz kıyı av setiyle başlar; kamera ayrı satın
 
 Kabul: iki oyuncu birbirini karada, su üstünde, sualtında ve kamera kullanımında izler; dört oyuncuda aynı ekipman/tutuş durumu görülür. Test sahnesi görüntüsü tek başına gerçek prefab entegrasyonu kanıtı değildir.
 
+**23 Eylül insan sunumu revizyonu:** ortak katalog artık depoda kaynakları bulunan CC0 `CoastalDiver` / `CoastalArms` / `CoastalCamera` kullanır. Özel Mixamo dosyaları ortak build bağımlılığı değildir. Humanoid idle/walk + yerel yüzme/tutuş pozu, host'un mevcut onaylı `PlayerPresentationState` verisinden sürülür. `EconomyPlayerSync.BoatPartsMask`, tamamlanan üç parçanın görünürlüğünü tüm istemcilere taşır; ekonomi ikinci bir otoriteye bölünmez. Ağ düzeni değiştiği için protokol `DeepDive-P3-6`. Ayrıntı ve kabul sınırları: [teslim kaydı](../reports/P3-HUMAN-VISUAL-REPAIR.md).
+
 ### Fiziksel NPC, av satışı ve kayıt teslimi — P3 taslak
 
 Mert servis/ekonomi/envanter sahibi; Mehmet yaklaşma/etkileşim üreticisi; Utku/Mehmet kayıt adayı üreticileridir. P3.2 öncesi birlikte kesinleşir.
