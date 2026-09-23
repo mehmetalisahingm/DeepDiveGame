@@ -438,8 +438,9 @@ namespace DeepDive.Network
             var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             // BoatPartAnchor uses a trigger so the free repair parts do not block the beach.
-            // E-pickup therefore has to include triggers; catch colliders remain valid too.
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Collide))
+            // Pickup raycasts therefore include triggers, but non-interaction triggers such as
+            // SwimVolume must be transparent while solid geometry still occludes the target.
+            if (!TryResolvePickupHit(origin, direction, Mathf.Max(0.1f, pickupRange), out var hit))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
@@ -517,6 +518,41 @@ namespace DeepDive.Network
                 result = ServiceInteractionAuthority.TryInteract(new PlayerId(OwnerClientId), definition, requestId);
 
             PublishAction(requestId, kind, result);
+        }
+
+        public static bool TryResolvePickupHit(Vector3 origin, Vector3 direction, float maxDistance, out RaycastHit resolvedHit)
+        {
+            var hits = Physics.RaycastAll(origin, direction, maxDistance, ~0, QueryTriggerInteraction.Collide);
+            if (hits == null || hits.Length == 0)
+            {
+                resolvedHit = default;
+                return false;
+            }
+
+            System.Array.Sort(hits, (left, right) => left.distance.CompareTo(right.distance));
+            foreach (var candidate in hits)
+            {
+                var collider = candidate.collider;
+                if (collider == null) continue;
+
+                if (FindTarget<ICatchPickupTarget>(collider) != null ||
+                    FindTarget<IBoatPartPickupTarget>(collider) != null)
+                {
+                    resolvedHit = candidate;
+                    return true;
+                }
+
+                // Volumes/markers are trigger-only environment metadata and must not absorb E.
+                // A real solid collider still blocks pickup so this cannot see through walls.
+                if (!collider.isTrigger)
+                {
+                    resolvedHit = candidate;
+                    return true;
+                }
+            }
+
+            resolvedHit = default;
+            return false;
         }
 
         private static T FindTarget<T>(Collider collider) where T : class
@@ -597,7 +633,6 @@ namespace DeepDive.Network
         private void EnsureFeedbackAudio()
         {
             if (!IsOwner) return;
-
             if (feedbackAudioSource == null)
             {
                 feedbackAudioSource = gameObject.AddComponent<AudioSource>();
