@@ -90,18 +90,32 @@ namespace DeepDive.World.Editor
         public const float WadeMinX = -9.5f;
         public const float WadeMaxX = -3.5f;
 
-        // Gentler than the P3.1 ramp's 25 degrees: this one is a beach to walk into, not a way
-        // down off a ledge. Well inside the diver's slopeLimit of 45 either way.
-        public const float WadeAngleDegrees = 12f;
+        // 25 degrees, the same as the P3.1 ramp's - steeper than the first cut (12) because the
+        // foot now has to reach much deeper (see WadeFootY) and a gentler angle would run the
+        // shelf into the special event's clearance box. Well inside the diver's slopeLimit of 45
+        // either way.
+        public const float WadeAngleDegrees = 25f;
         public const float WadeThickness = 0.4f;
 
-        // The lowest walkable surface on the whole beach, and it is the P3.1 constant rather
-        // than a new one. DiveExit's trigger spans y 6..8 across the arena and SafeReturnZone
-        // tests a diver at position + up * 0.9, so any standing surface below y = 7.1 would put
-        // a diver inside the exit zone and hand them a safe return for walking down a slope.
-        // 7.2 puts that probe at 8.1 - clear by 0.1 m - while still sitting under the water line
-        // at y = 8, so the foot reads as Surface and the diver is genuinely wading.
-        public static float WadeFootY => DiveTestAreaWaterSetup.RampBottomY;
+        // The lowest walkable surface on the whole beach. NOT the P3.1 ramp's RampBottomY (7.2)
+        // any more: that number kept the ramp's foot clear of the OLD whole-arena SafeReturnZone
+        // (y 6..8 everywhere), which PR #70 replaced with a small pad on Shore_Ledge the wade
+        // lane never reaches (x -9.5..-3.5 vs the pad's x 7.25..10.75) - so that constraint is
+        // gone here.
+        //
+        // What replaces it is the actual reason the beach was unreachable by swimming (#62):
+        // NetworkDiver's CharacterController is height 1.8, and PlayerPresentationRules blocks
+        // upward swim input once a diver classifies as Surface, which happens once their feet
+        // reach surfaceY - height = 8 - 1.8 = 6.2 (this scene's surfaceY, not the shallow band's
+        // rounded 8.1). A shelf whose foot sits above that height is a wall a Surface-classified
+        // diver's feet cannot rise past, and the earlier 7.2 foot was exactly such a wall - two
+        // real players stopped dead against it in a live smoke (issue #62). Diving is unrestricted
+        // (no upward block while Underwater), so a diver can swim in below any foot height that
+        // is itself reachable while still submerged; 5.2 clears the 6.2 ceiling by a full metre,
+        // so the shelf's edge is never above a diver who approaches from open water, and it is
+        // only from there that the CharacterController's ordinary slope-climb (slopeLimit 45,
+        // this slope 25) carries them up onto dry land.
+        public const float WadeFootY = 5.2f;
 
         public static float WadeDrop => PlatformTopY - WadeFootY;
         public static float WadeRun => WadeDrop / Mathf.Tan(WadeAngleDegrees * Mathf.Deg2Rad);

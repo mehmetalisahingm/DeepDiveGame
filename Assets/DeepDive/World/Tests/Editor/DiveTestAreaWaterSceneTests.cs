@@ -37,9 +37,12 @@ namespace DeepDive.World.Tests
         private const float LedgeTopY = 8.4f;
         private const float RampAngleDegrees = 25f;
 
-        // Foot of the legacy P3.1 ramp. P3.2's return zone no longer constrains this height:
-        // the return pad is a small dry region on the ledge, not a whole-arena volume.
-        private const float RampBottomY = 7.2f;
+        // Foot of the P3.1 ramp. Lowered from the original 7.2 (sized for the old whole-arena
+        // return zone) to 5.2: 7.2 sat above the highest a swimming diver's feet can rise to
+        // unassisted (surfaceY 8 minus the diver's CharacterController height 1.8 = 6.2), which
+        // made the ramp - the only way onto Shore_Ledge, and since PR #70 the only way to the
+        // real SafeReturnZone pad - unreachable by swimming at all.
+        private const float RampBottomY = 5.2f;
 
         // A depth in open water past the foot of the ramp, where a diver ends up by swimming
         // or falling rather than walking.
@@ -421,9 +424,14 @@ namespace DeepDive.World.Tests
         // Down the ramp, off its foot into open water, and back the same way: the horizontal
         // crossing, where the diver walks the shore line rather than dropping through it.
         //
-        // The ramp alone no longer reaches Underwater. Its foot stops at 7.2 so that a diver
-        // standing there is clear of the dive exit zone, which leaves the head well above the
-        // water line; the submerged leg is therefore a swim down from the foot into open water.
+        // The ramp reaches Underwater before its foot now (feet <= 6.2, partway down the slope,
+        // not just past it - see RampBottomY), which is exactly the point: a diver walking down
+        // stays classified correctly the whole way, rather than needing an unfilterable "swim
+        // up" once they are already below the ramp. That still collapses to the same five-state
+        // round trip: Classify does not care whether a position is reached by walking a slope
+        // or swimming open water, and Walk() only records a state when it changes, so crossing
+        // into Underwater on the ramp and staying Underwater into open water is one entry, not
+        // two.
         private IEnumerable<Vector3> RampPath(float noise)
         {
             var ramp = Require(RampName);

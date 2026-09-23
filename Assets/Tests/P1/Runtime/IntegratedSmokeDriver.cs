@@ -35,8 +35,6 @@ namespace DeepDive.P1.Lab
             public bool townProgress, townHostChecks, townSaveRoundTrip;
             public int townBalance;
             public float returnToPendingSeconds, returnToTurnInSeconds;
-            public bool townLandingTeleported;
-            public string townLandingNote;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
             public int recordingQuality;
@@ -159,7 +157,6 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
-                if (host && (Town || Record)) HostLandDivers(state);
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
@@ -273,10 +270,25 @@ namespace DeepDive.P1.Lab
             var delta = subject.transform.position - local.RecordingEyePosition;
             var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             var pitch = -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg;
-            // After the take finishes, actually swim to the surface exit. Do not inject a
-            // safe-return flag: SafeReturnZone must mark the remote diver through real movement.
-            var move = result.recordingStopped ? Vector3.up :
-                delta.magnitude > 6f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * delta.normalized : Vector3.zero;
+            // After the take finishes, actually swim to the exit. Do not inject a safe-return flag: SafeReturnZone
+            // must mark the remote diver through real movement. Since PR #70 that is a small pad on Shore_Ledge, not
+            // "up" from anywhere in the arena, so this aims at the pad's real collider (still in the yaw frame being
+            // submitted this call, which faces the subject for the shot, not the pad - SubmitLocalInput re-rotates
+            // move by that yaw, so the heading is pre-rotated by its inverse the same way GoToService does it).
+            Vector3 move;
+            if (result.recordingStopped)
+            {
+                // A first version aimed the full heading straight at the pad's fixed centre, the same mistake the
+                // beach wade had: the pad is mostly "up" from open water (dy far bigger than dx/dz), so once Surface
+                // mode zeroes the positive-y request the LEFTOVER heading is whatever tiny x/z the original unit
+                // vector had - which shrinks even further as the diver closes in, a real diver was measured
+                // asymptoting toward a dead stop short of the ledge. NextRampWaypoint paces this the same way
+                // NextBeachWaypoint paces the wade: a near target read off the real ramp/ledge colliders, never far
+                // enough ahead for its own dy to swamp dx/dz.
+                var toRamp = NextRampWaypoint(local.transform.position) - local.transform.position;
+                move = toRamp.magnitude > 0.3f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * toRamp.normalized : Vector3.zero;
+            }
+            else move = delta.magnitude > 6f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * delta.normalized : Vector3.zero;
             local.SubmitLocalInput(move, yaw, pitch);
             var bridge = adapter.GetComponent<RecordingNetworkBridge>();
             if (bridge.IsRecordingLocal)
@@ -291,6 +303,38 @@ namespace DeepDive.P1.Lab
                 nextAction = Time.realtimeSinceStartup + .75f;
                 bridge.ToggleRecordingLocal();
             }
+        }
+
+        // PR #70's dry return pad sits on Shore_Ledge, reachable only by climbing the P3.1 ramp - the same kind of
+        // solid slope NextBeachWaypoint already knows how to pace a diver up, just descending along X here (the
+        // P3.1 shore) instead of Z (the P3.2 beach). A short step ahead, read off the real Shore_Ramp/Shore_Ledge
+        // colliders rather than DiveTestAreaWaterSetup's Editor-only formula, aimed a hair below the actual surface.
+        private Vector3 NextRampWaypoint(Vector3 position)
+        {
+            var ramp = GameObject.Find("Shore_Ramp");
+            var ledge = GameObject.Find("Shore_Ledge");
+            var rampCollider = ramp != null ? ramp.GetComponent<Collider>() : null;
+            var ledgeCollider = ledge != null ? ledge.GetComponent<Collider>() : null;
+            if (rampCollider == null || ledgeCollider == null)
+                return ledgeCollider != null ? ledgeCollider.bounds.center : position;
+
+            // The ledge's own west edge, not the ramp's foot: a diver starts east of the ramp's foot (open water
+            // reaches under the whole arena), so a check against the foot would be true immediately and skip
+            // the paced climb entirely - it has to be "am I already over the ledge" the way the wade's check is
+            // "am I already over the platform", using the near end of the solid ground, not the far one.
+            var ledgeWestEdge = ledgeCollider.bounds.min.x;
+            if (position.x >= ledgeWestEdge - 0.2f) return ledgeCollider.bounds.center;   // already over solid ground
+
+            var laneZ = ramp.transform.position.z;
+            var aheadX = Mathf.Min(position.x + 1.2f, ledgeWestEdge);
+            var probeOrigin = new Vector3(aheadX, rampCollider.bounds.max.y + 5f, laneZ);
+            float targetY;
+            if (Physics.Raycast(probeOrigin, Vector3.down, out var hit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
+                (hit.collider == rampCollider || hit.collider == ledgeCollider))
+                targetY = hit.point.y - 0.05f;
+            else
+                targetY = Mathf.Min(position.y, rampCollider.bounds.min.y - 0.3f);   // still short of the ramp: dive under it
+            return new Vector3(aheadX, targetY, laneZ);
         }
 
         private void ProbeHunt(NetworkPlayer local, NetworkPlayer[] players)
@@ -332,32 +376,14 @@ namespace DeepDive.P1.Lab
         // ---- P3.2 town: real owner inputs + RPCs against the PrepArea NPCs --------------------
         // Walks to the NPC, aims at it and only then lets the caller interact, so the host raycast,
         // range check and service handler all run for real (no injected result).
-        // TEST SHORTCUT, reported as such (townLandingTeleported): a diver cannot climb out of the water onto the beach
-        // yet. Surface mode drops upward input, so a swimmer's feet top out at surface minus body height (6.30) while the
-        // top of Utku's wade shelf begins at 7.21 (underside 6.80); both divers stop at the shelf foot (measured, see the
-        // town trace). The host therefore puts every diver where the shelf meets the strip once Return starts, exactly as
-        // a scene-load respawn would (NetworkPlayer.Teleport is the server API NetworkSession uses). From there the town
-        // steps are real: walking along the strip, aiming, the host raycast, range check, handler and economy. The
-        // water-to-beach exit stays UNVERIFIED by this smoke.
-        private bool landed;
-        private void HostLandDivers(SessionState state)
-        {
-            if (landed || state.Phase != SessionPhase.Return || adapter.Connection.IsSceneLoading ||
-                SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene) return;
-            var wade = GameObject.Find("Beach_Wade");
-            var platform = GameObject.Find("Beach_Platform");
-            var strip = platform != null ? platform.GetComponent<Collider>() : null;
-            if (wade == null || strip == null) { result.errors.Add("beach objects missing for the landing"); landed = true; return; }
-            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).OrderBy(p => p.OwnerClientId).ToArray();
-            for (var i = 0; i < players.Length; i++)
-            {
-                var at = new Vector3(wade.transform.position.x + 1.4f * i, strip.bounds.max.y + 0.05f, strip.bounds.max.z - 0.9f);
-                players[i].Teleport(new Pose(at, Quaternion.identity));
-            }
-            landed = true;
-            result.townLandingTeleported = true;
-            result.townLandingNote = "divers were placed at the wade shelf top by the host; the swim-to-land exit is not exercised";
-        }
+        //
+        // Earlier versions of this smoke could not get a diver out of the water at all (Surface mode drops
+        // upward input, so a swimmer's feet topped out below the old wade shelf's foot) and stood in with a
+        // host-side NetworkPlayer.Teleport once Return started (result.townLandingTeleported, now removed).
+        // Utku's shelf foot is now low enough (WadeFootY = 5.2, DiveTestAreaBeachSetup) that a diver reaches
+        // it while still fully submerged, so the exit is a real, ordinary CharacterController slope climb -
+        // see NextBeachWaypoint below for how this drives that climb without racing ahead of it.
+
 
         private bool GoToService(NetworkPlayer local, Camera cam, string serviceId)
         {
@@ -372,11 +398,14 @@ namespace DeepDive.P1.Lab
             if (toStand.magnitude > 0.35f)
             {
                 townSettleAt = 0;
-                var heading = NextBeachWaypoint(local.transform.position, stand) - local.transform.position; heading.y = 0;
-                var walkYaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
+                var target = NextBeachWaypoint(local.transform.position, stand);
+                var heading = target - local.transform.position;
+                var flatHeading = heading; flatHeading.y = 0;
+                var walkYaw = Mathf.Atan2(flatHeading.x, flatHeading.z) * Mathf.Rad2Deg;
+                // The full 3D heading, not just the flat one: NextBeachWaypoint's target already carries the climb
+                // (see its comment), so a diver approaching a steep bit of the ramp gets a steeply-angled request
+                // instead of racing ahead horizontally and hitting the ramp's underside before it has risen enough.
                 var move = Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * heading.normalized;
-                // Still swimming below the wading depth: keep rising, the shelf can only be reached from the surface.
-                if (local.Swimming.Value && local.transform.position.y < 7.8f) move.y = 1f;
                 local.SubmitLocalInput(move, walkYaw, 0);
                 return false;
             }
@@ -392,20 +421,35 @@ namespace DeepDive.P1.Lab
         // rises out of the pool. A diver coming back therefore cannot walk straight at an NPC: it heads for the
         // lane of Utku's wade shelf, climbs onto the strip there, and only then walks along it. Waypoints are read
         // from the scene objects, not typed, so they follow the beach if World moves it.
+        // A first version of this aimed at a single fixed point past the shelf and let the diver swim there
+        // directly. That raced two real divers into the ramp's UNDERSIDE: heading z-first outpaces the y needed
+        // to be riding on top of the slope rather than swimming into the bottom of it, since the slope rises
+        // 3.2 m over its run and a diver approaching at speed can close the horizontal gap well before climbing
+        // that much. So this instead reads the ramp's actual surface with a raycast (not the setup script's
+        // formula - Editor-only code cannot ship into this Runtime assembly's standalone build) a short step
+        // ahead, and aims a hair below that surface. The result is a target that only ever asks the diver to be
+        // a little higher than they already need to be for their next step, so GoToService's 3D heading always
+        // carries close to the right amount of climb, whatever the ramp's angle happens to be tuned to.
         private Vector3 NextBeachWaypoint(Vector3 position, Vector3 stand)
         {
             var wade = GameObject.Find("Beach_Wade");
             var platform = GameObject.Find("Beach_Platform");
+            var wadeCollider = wade != null ? wade.GetComponent<Collider>() : null;
             var strip = platform != null ? platform.GetComponent<Collider>() : null;
-            if (wade == null || strip == null) return stand;
+            if (wadeCollider == null || strip == null) return stand;
             var northEdge = strip.bounds.max.z;
-            if (position.z > northEdge + 0.2f)
-            {
-                var lane = wade.transform.position.x;
-                // Aim past the strip's edge so the climb up the shelf is continuous.
-                return new Vector3(lane, position.y, northEdge - 0.6f);
-            }
-            return stand;
+            if (position.z <= northEdge + 0.2f) return stand;   // already on the platform: walk to the NPC
+
+            var lane = wade.transform.position.x;
+            var aheadZ = Mathf.Max(position.z - 1.2f, northEdge);
+            var probeOrigin = new Vector3(lane, wadeCollider.bounds.max.y + 5f, aheadZ);
+            float targetY;
+            if (Physics.Raycast(probeOrigin, Vector3.down, out var hit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
+                (hit.collider == wadeCollider || hit.collider == strip))
+                targetY = hit.point.y - 0.05f;                          // just under the real surface there
+            else
+                targetY = Mathf.Min(position.y, wadeCollider.bounds.min.y - 0.3f);   // still short of the shelf: dive under it
+            return new Vector3(lane, targetY, aheadZ);
         }
 
         private void InteractEvery(NetworkPlayer local, float seconds)
