@@ -21,37 +21,26 @@ namespace DeepDive.Network
     public static class BoatApprovedPositions
     {
         public static IBoatApprovedWorldPositionSource Source { get; private set; }
-
         public static void Bind(IBoatApprovedWorldPositionSource source) => Source = source;
-
         public static void Unbind(IBoatApprovedWorldPositionSource source)
         {
             if (ReferenceEquals(Source, source)) Source = null;
         }
     }
 
-    // Owner input never submits a seat id. The host resolves the nearest authored seat from the
-    // authoritative player position, then BoatTripManager remains the only occupancy/trip authority.
     public static class BoatNetworkAuthority
     {
         private static NetworkBoatController _controller;
-
         public static bool IsBound => _controller != null;
         public static void Bind(NetworkBoatController controller) => _controller = controller;
         public static void Unbind(NetworkBoatController controller)
         {
             if (_controller == controller) _controller = null;
         }
-
         public static TransactionResult TryBoardNearest(PlayerId player, ulong requestId) =>
-            _controller != null
-                ? _controller.TryBoardNearest(player, requestId)
-                : TransactionResult.Reject(requestId, "InvalidState", 0);
-
+            _controller != null ? _controller.TryBoardNearest(player, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
         public static TransactionResult TryDisembark(PlayerId player, ulong requestId) =>
-            _controller != null
-                ? _controller.TryDisembark(player, requestId)
-                : TransactionResult.Reject(requestId, "InvalidState", 0);
+            _controller != null ? _controller.TryDisembark(player, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
     }
 
     [DisallowMultipleComponent]
@@ -60,12 +49,10 @@ namespace DeepDive.Network
         [SerializeField] private string seatId = BoatTripIds.Seat0;
         [SerializeField] private Transform seatedPose;
         [SerializeField] private Transform disembarkPose;
-
         public string SeatId => seatId ?? string.Empty;
         public Transform SeatedPose => seatedPose != null ? seatedPose : transform;
         public Transform DisembarkPose => disembarkPose != null ? disembarkPose : transform;
         public Vector3 BoardingPosition => transform.position;
-
         public void Configure(string id, Transform seated, Transform disembark)
         {
             seatId = id ?? string.Empty;
@@ -89,9 +76,6 @@ namespace DeepDive.Network
         }
     }
 
-    // Mehmet/#75 movement authority. Mert owns BoatTripState, Utku owns the path points. This
-    // component only validates physical boarding, binds players to seats and advances the real boat
-    // along the supplied path on the host. No steering input exists.
     [RequireComponent(typeof(NetworkObject), typeof(NetworkTransform))]
     [DisallowMultipleComponent]
     public sealed class NetworkBoatController : NetworkBehaviour, IBoatApprovedWorldPositionSource
@@ -101,11 +85,9 @@ namespace DeepDive.Network
         [SerializeField, Min(1f)] private float turnDegreesPerSecond = 120f;
         [SerializeField, Min(0.02f)] private float waypointTolerance = 0.2f;
 
-        private readonly Dictionary<string, BoatSeatAnchor> _seats =
-            new Dictionary<string, BoatSeatAnchor>(StringComparer.Ordinal);
+        private readonly Dictionary<string, BoatSeatAnchor> _seats = new Dictionary<string, BoatSeatAnchor>(StringComparer.Ordinal);
         private readonly Dictionary<PlayerId, string> _boundSeats = new Dictionary<PlayerId, string>();
         private readonly List<Vector3> _path = new List<Vector3>();
-
         private IBoatRoutePathSource _routeSource;
         private BoatTripState _state;
         private int _appliedRevision = int.MinValue;
@@ -125,14 +107,14 @@ namespace DeepDive.Network
             if (!IsServer) return;
             BoatNetworkAuthority.Bind(this);
             BoatApprovedPositions.Bind(this);
-            BoatBoarding.BindPhysicalValidator(ValidateBoardTarget);
+            BoatBoardingPhysicalValidation.Bind(ValidateBoardTarget);
         }
 
         public override void OnNetworkDespawn()
         {
             if (IsServer)
             {
-                BoatBoarding.UnbindPhysicalValidator(ValidateBoardTarget);
+                BoatBoardingPhysicalValidation.Unbind(ValidateBoardTarget);
                 BoatApprovedPositions.Unbind(this);
                 BoatNetworkAuthority.Unbind(this);
                 ReleaseAllPlayers();
@@ -143,21 +125,18 @@ namespace DeepDive.Network
         public void SetRoutePathSource(IBoatRoutePathSource source)
         {
             _routeSource = source;
-            if (IsServer && IsMovingPhase(_state.Phase)) BeginRouteIfReady(force: true);
+            if (IsServer && IsMovingPhase(_state.Phase)) BeginRouteIfReady(true);
         }
 
         public void ApplyTripState(BoatTripState state)
         {
             if (!IsServer || !string.Equals(state.BoatId, BoatTripIds.BoatId, StringComparison.Ordinal)) return;
             if (state.Revision == _appliedRevision) return;
-
             var previousPhase = _state.Phase;
             _state = state;
             _appliedRevision = state.Revision;
             SyncSeatBindings(state);
-
-            if (IsMovingPhase(state.Phase) && state.Phase != previousPhase)
-                BeginRouteIfReady(force: true);
+            if (IsMovingPhase(state.Phase) && state.Phase != previousPhase) BeginRouteIfReady(true);
             else if (!IsMovingPhase(state.Phase))
             {
                 _routeActive = false;
@@ -170,9 +149,7 @@ namespace DeepDive.Network
         {
             if (!IsServer || requestId == 0) return TransactionResult.Reject(requestId, "InvalidState", _state.Revision);
             CacheSeats();
-            if (!TryGetPlayer(player, out var networkPlayer))
-                return TransactionResult.Reject(requestId, "InvalidTarget", _state.Revision);
-
+            if (!TryGetPlayer(player, out var networkPlayer)) return TransactionResult.Reject(requestId, "InvalidTarget", _state.Revision);
             BoatSeatAnchor best = null;
             var bestDistance = float.PositiveInfinity;
             foreach (var anchor in _seats.Values)
@@ -182,7 +159,6 @@ namespace DeepDive.Network
                 best = anchor;
                 bestDistance = distance;
             }
-
             if (best == null) return TransactionResult.Reject(requestId, "OutOfRange", _state.Revision);
             return BoatBoarding.TryBoard(player, BoatTripIds.BoatId, best.SeatId, requestId);
         }
@@ -206,10 +182,7 @@ namespace DeepDive.Network
         {
             if (!IsSpawned || !IsServer) return;
             KeepSeatedPlayersAttached();
-
-            if (IsMovingPhase(_state.Phase) && !_routeActive && !_arrivalPending)
-                BeginRouteIfReady(force: false);
-
+            if (IsMovingPhase(_state.Phase) && !_routeActive && !_arrivalPending) BeginRouteIfReady(false);
             if (_routeActive) AdvanceRoute(Time.fixedDeltaTime);
             else if (_arrivalPending && Time.unscaledTime >= _nextArrivalRetry) ReportArrival();
         }
@@ -218,20 +191,16 @@ namespace DeepDive.Network
         {
             if (!IsMovingPhase(_state.Phase) || _routeSource == null || string.IsNullOrEmpty(_state.RouteId)) return;
             if (!force && (_routeActive || _arrivalPending)) return;
-
             _path.Clear();
             if (!_routeSource.TryGetWorldPath(_state.RouteId, _path) || _path.Count < 2)
             {
                 _path.Clear();
                 return;
             }
-
             if (_state.Phase == BoatTripPhase.Inbound) _path.Reverse();
             _waypointIndex = 0;
-            while (_waypointIndex < _path.Count - 1 &&
-                   Vector3.Distance(transform.position, _path[_waypointIndex]) <= waypointTolerance)
+            while (_waypointIndex < _path.Count - 1 && Vector3.Distance(transform.position, _path[_waypointIndex]) <= waypointTolerance)
                 _waypointIndex++;
-
             _arrivalPhase = _state.Phase == BoatTripPhase.Outbound ? BoatTripPhase.Anchored : BoatTripPhase.Docked;
             _routeActive = true;
             _arrivalPending = false;
@@ -239,12 +208,7 @@ namespace DeepDive.Network
 
         private void AdvanceRoute(float deltaTime)
         {
-            if (_waypointIndex >= _path.Count)
-            {
-                ArmArrival();
-                return;
-            }
-
+            if (_waypointIndex >= _path.Count) { ArmArrival(); return; }
             var target = _path[_waypointIndex];
             var delta = target - transform.position;
             if (delta.sqrMagnitude <= waypointTolerance * waypointTolerance)
@@ -254,15 +218,12 @@ namespace DeepDive.Network
                 if (_waypointIndex >= _path.Count) ArmArrival();
                 return;
             }
-
-            var step = Mathf.Max(0f, moveSpeed) * Mathf.Max(0f, deltaTime);
-            transform.position = Vector3.MoveTowards(transform.position, target, step);
+            transform.position = Vector3.MoveTowards(transform.position, target, Mathf.Max(0f, moveSpeed) * Mathf.Max(0f, deltaTime));
             var planar = Vector3.ProjectOnPlane(delta, Vector3.up);
             if (planar.sqrMagnitude > 0.0001f)
             {
                 var desired = Quaternion.LookRotation(planar.normalized, Vector3.up);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, desired,
-                    Mathf.Max(0f, turnDegreesPerSecond) * Mathf.Max(0f, deltaTime));
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, desired, Mathf.Max(0f, turnDegreesPerSecond) * Mathf.Max(0f, deltaTime));
             }
         }
 
@@ -270,8 +231,7 @@ namespace DeepDive.Network
         {
             _routeActive = false;
             _arrivalPending = true;
-            if (_arrivalRequestId == 0) _arrivalRequestId = 1;
-            else _arrivalRequestId++;
+            _arrivalRequestId = _arrivalRequestId == 0 ? 1 : _arrivalRequestId + 1;
             _nextArrivalRetry = 0f;
             ReportArrival();
         }
@@ -280,11 +240,7 @@ namespace DeepDive.Network
         {
             if (!_arrivalPending) return;
             var result = BoatRouteProgress.ReportArrival(BoatTripIds.BoatId, _arrivalPhase, _arrivalRequestId);
-            if (result.Accepted)
-            {
-                _arrivalPending = false;
-                return;
-            }
+            if (result.Accepted) { _arrivalPending = false; return; }
             _nextArrivalRetry = Time.unscaledTime + 0.25f;
         }
 
@@ -303,8 +259,7 @@ namespace DeepDive.Network
         public bool HasValidSeatLayout()
         {
             CacheSeats();
-            var ids = new List<string>(_seats.Keys);
-            return BoatSeatLayoutRules.IsValid(ids);
+            return BoatSeatLayoutRules.IsValid(new List<string>(_seats.Keys));
         }
 
         private void SyncSeatBindings(BoatTripState state)
@@ -316,15 +271,11 @@ namespace DeepDive.Network
                 for (var i = 0; i < state.Seats.Count; i++)
                 {
                     var assignment = state.Seats[i];
-                    if (!_seats.ContainsKey(assignment.SeatId)) continue;
-                    next[assignment.Player] = assignment.SeatId;
+                    if (_seats.ContainsKey(assignment.SeatId)) next[assignment.Player] = assignment.SeatId;
                 }
             }
-
             var released = new List<PlayerId>();
-            foreach (var pair in _boundSeats)
-                if (!next.ContainsKey(pair.Key)) released.Add(pair.Key);
-
+            foreach (var pair in _boundSeats) if (!next.ContainsKey(pair.Key)) released.Add(pair.Key);
             for (var i = 0; i < released.Count; i++) ReleasePlayer(released[i]);
             foreach (var pair in next)
             {
@@ -368,8 +319,7 @@ namespace DeepDive.Network
         {
             player = null;
             var manager = NetworkManager != null ? NetworkManager : NetworkManager.Singleton;
-            if (manager == null || !manager.ConnectedClients.TryGetValue(playerId.Value, out var client) ||
-                client.PlayerObject == null) return false;
+            if (manager == null || !manager.ConnectedClients.TryGetValue(playerId.Value, out var client) || client.PlayerObject == null) return false;
             player = client.PlayerObject.GetComponent<NetworkPlayer>();
             return player != null;
         }
@@ -399,12 +349,10 @@ namespace DeepDive.Network
         private bool IsPartyMember(PlayerId player)
         {
             if (_state.Party == null) return false;
-            for (var i = 0; i < _state.Party.Count; i++)
-                if (_state.Party[i].Equals(player)) return true;
+            for (var i = 0; i < _state.Party.Count; i++) if (_state.Party[i].Equals(player)) return true;
             return false;
         }
 
-        private static bool IsMovingPhase(BoatTripPhase phase) =>
-            phase == BoatTripPhase.Outbound || phase == BoatTripPhase.Inbound;
+        private static bool IsMovingPhase(BoatTripPhase phase) => phase == BoatTripPhase.Outbound || phase == BoatTripPhase.Inbound;
     }
 }
