@@ -45,9 +45,10 @@ namespace DeepDive.Editor
             if (catalog == null) return;
 
             var serialized = new SerializedObject(catalog);
-            var hasLicensedRigSource = AssetDatabase.LoadAssetAtPath<GameObject>(BaseFbx) != null;
+            // The shared build always uses the redistributable CC0 rig. A developer's
+            // optional Mixamo import must not silently change the shipped character.
             SetReference(serialized, "thirdPersonRigPrefab",
-                hasLicensedRigSource ? AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefab) : null);
+                AssetDatabase.LoadAssetAtPath<GameObject>(CharacterRoot + "/CoastalDiver.prefab"));
             SetReference(serialized, "harpoonPropPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(HarpoonPrefab));
             SetReference(serialized, "cameraPropPrefab", AssetDatabase.LoadAssetAtPath<GameObject>(CameraPrefab));
 

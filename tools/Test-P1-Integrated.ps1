@@ -41,7 +41,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $p1Deadline = (Get-Date).AddSeconds($(if ($Town) { 105 } elseif ($Event) { 150 } elseif ($Hunt -or $Record) { 90 } else { 60 }))
+    $p1Deadline = (Get-Date).AddSeconds($(if ($Town) { 150 } elseif ($Event) { 190 } elseif ($Hunt -or $Record) { 135 } else { 110 }))
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
     $p1Failures = @()
     foreach ($p1Entry in $p1Processes) {

@@ -14,6 +14,8 @@ namespace DeepDive.Network
         // Unity keeps a managed wrapper for a prefab whose source asset disappeared. Returning
         // it directly lets callers pass a MissingReference to Instantiate. The implicit Unity
         // object check treats that state as null, which is exactly what the runtime fallback needs.
+        [SerializeField] private GameObject firstPersonArmsPrefab;
+        public GameObject FirstPersonArmsPrefab => ExistingOrNull(firstPersonArmsPrefab);
         public GameObject ThirdPersonRigPrefab => ExistingOrNull(thirdPersonRigPrefab);
         public GameObject HarpoonPropPrefab => ExistingOrNull(harpoonPropPrefab);
         public GameObject CameraPropPrefab => ExistingOrNull(cameraPropPrefab);

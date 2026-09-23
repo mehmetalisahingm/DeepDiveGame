@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using DeepDive.Inventory;
 using DeepDive.Network;
@@ -13,6 +14,8 @@ namespace DeepDive.Composition
     [RequireComponent(typeof(BoxCollider))]
     public sealed class SafeReturnZone : MonoBehaviour
     {
+        private readonly HashSet<ulong> enteredWater = new HashSet<ulong>();
+        private string trackedDive = "";
         // Pure and testable without a live NGO session, mirroring ActionFeedbackRules.Resolve.
         public static bool Contains(BoxCollider box, Vector3 worldPoint)
         {
@@ -25,6 +28,11 @@ namespace DeepDive.Composition
         {
             var session = FindFirstObjectByType<SessionNetworkAdapter>();
             if (session == null || !session.IsAuthority || session.Session.State.Phase != SessionPhase.Dive) return;
+            if (trackedDive != session.Session.State.DiveId)
+            {
+                trackedDive = session.Session.State.DiveId;
+                enteredWater.Clear();
+            }
             var inventory = session.GetComponent<InventoryManager>();
             if (inventory == null) return;
 
@@ -32,7 +40,10 @@ namespace DeepDive.Composition
             foreach (var player in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
             {
                 if (!player.IsSpawned || player.Passive.Value) continue;
-                if (Contains(box, player.transform.position + Vector3.up * 0.9f))
+                if (player.Swimming.Value) enteredWater.Add(player.OwnerClientId);
+                // Starting on the beach is not a completed dive. Surfacing offshore is not a return.
+                if (enteredWater.Contains(player.OwnerClientId) && player.CurrentLocomotion == LocomotionMode.Land &&
+                    Contains(box, player.transform.position + Vector3.up * 0.9f))
                     inventory.TryMarkSafeReturn(new PlayerId(player.OwnerClientId));
             }
         }

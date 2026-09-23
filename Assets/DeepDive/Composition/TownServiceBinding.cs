@@ -147,11 +147,15 @@ namespace DeepDive.Composition
         private void PublishProgress()
         {
             var boatParts = economy.BoatRepair.CompletedPartIds.Count;
+            var mask = 0;
+            foreach (var part in economy.BoatRepair.CompletedPartIds)
+                for (var i = 0; i < BoatRepairParts.All.Count; i++)
+                    if (part == BoatRepairParts.All[i]) mask |= 1 << i;
             foreach (var pair in manager.ConnectedClients)
             {
                 var player = new PlayerId(pair.Key);
                 SyncFor(player)?.PublishTownProgress(economy.PendingCountFor(player, TurnInKind.Catch),
-                    economy.PendingCountFor(player, TurnInKind.Recording), boatParts);
+                    economy.PendingCountFor(player, TurnInKind.Recording), boatParts, mask);
             }
         }
 

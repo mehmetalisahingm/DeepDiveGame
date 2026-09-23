@@ -125,6 +125,11 @@ namespace DeepDive.Core.Contracts
     // Seam for Utku's free world parts: the World/interaction layer validates that the part exists, is in
     // reach and unclaimed, then calls TryClaimFound. Composition binds the handler to the economy while it
     // is the host; unbound (client, no economy) means the part cannot be claimed.
+    public interface IBoatPartPickup
+    {
+        string PartId { get; }
+    }
+
     public static class BoatPartClaim
     {
         public static System.Func<PlayerId, string, ulong, TransactionResult> Handler { get; private set; }

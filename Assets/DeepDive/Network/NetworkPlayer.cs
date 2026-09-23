@@ -428,7 +428,7 @@ namespace DeepDive.Network
                 PublishAction(requestId, kind, result);
                 return;
             }
-            if (session == null || !session.DiveActive || Passive.Value)
+            if (session == null || Passive.Value)
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidState);
                 return;
@@ -443,8 +443,18 @@ namespace DeepDive.Network
                 return;
             }
 
-            var target = FindTarget<ICatchPickupTarget>(hit.collider);
-            result = target == null ? PlayerActionResult.InvalidTarget : target.TryPickup(new PlayerId(OwnerClientId), requestId);
+            var part = FindTarget<IBoatPartPickup>(hit.collider);
+            if (part != null)
+            {
+                var claim = BoatPartClaim.TryClaimFound(new PlayerId(OwnerClientId), part.PartId, requestId);
+                result = claim.Accepted ? PlayerActionResult.Accepted : PlayerActionResult.InvalidTarget;
+            }
+            else
+            {
+                var target = FindTarget<ICatchPickupTarget>(hit.collider);
+                result = !session.DiveActive ? PlayerActionResult.InvalidState :
+                    target == null ? PlayerActionResult.InvalidTarget : target.TryPickup(new PlayerId(OwnerClientId), requestId);
+            }
             PublishAction(requestId, kind, result);
         }
 

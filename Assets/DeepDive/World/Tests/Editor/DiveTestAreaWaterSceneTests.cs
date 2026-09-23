@@ -161,7 +161,7 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void EveryDiveSpawnIsSubmerged()
+        public void EveryGameplaySpawnIsOnDryLand()
         {
             var field = Field();
             var spawns = 0;
@@ -169,9 +169,9 @@ namespace DeepDive.World.Tests
             {
                 if (!root.name.StartsWith("Spawn_")) continue;
                 spawns++;
-                Assert.AreEqual(EnvironmentLocomotion.Underwater,
+                Assert.AreEqual(EnvironmentLocomotion.Land,
                     field.CreateTracker().Classify(Diver(root.transform.position)),
-                    root.name + " must start the dive underwater");
+                    root.name + " must start preparation on the beach");
             }
             Assert.AreEqual(4, spawns, "DiveTestArea must hold four spawn points");
         }

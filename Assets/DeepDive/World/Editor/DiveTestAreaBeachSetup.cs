@@ -101,7 +101,9 @@ namespace DeepDive.World.Editor
         // a diver inside the exit zone and hand them a safe return for walking down a slope.
         // 7.2 puts that probe at 8.1 - clear by 0.1 m - while still sitting under the water line
         // at y = 8, so the foot reads as Surface and the diver is genuinely wading.
-        public static float WadeFootY => DiveTestAreaWaterSetup.RampBottomY;
+        // A surfaced diver's feet stop at 6.3. The slope must extend below that height
+        // so CharacterController can swim onto it and walk up without a teleport.
+        public static float WadeFootY => 5.8f;
 
         public static float WadeDrop => PlatformTopY - WadeFootY;
         public static float WadeRun => WadeDrop / Mathf.Tan(WadeAngleDegrees * Mathf.Deg2Rad);
@@ -189,7 +191,12 @@ namespace DeepDive.World.Editor
 
             var bands = EnsureDepthBands(scene, surfaceY);
 
-            VerifyNoWalkableSurfaceInExitZone(exitBox);
+            // Only the dry town strip secures a returned bag. The old arena-wide surface
+            // trigger permanently sealed bags as soon as a diver came up for air.
+            exitBox.transform.position = new Vector3(0f, 9.4f, -12.875f);
+            exitBox.size = new Vector3(29.5f, 3f, 3.75f);
+            exitBox.center = Vector3.zero;
+            EditorUtility.SetDirty(exitBox);
             VerifyEveryFishStaysShallow(scene, bands);
             VerifyWaterAuthorityUntouched(field, swimBox);
 
