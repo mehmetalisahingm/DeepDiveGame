@@ -58,6 +58,37 @@ namespace DeepDive.World
         // keeps "the route is missing" and "the route is half-authored" separate failures.
         public bool IsUsable => !string.IsNullOrEmpty(routeId) && Waypoints.Count >= 2;
 
+        // Mehmet's frozen nominal for the near route: eight seconds out, eight back. They are the
+        // target the trip is written around, not a measurement of this path - his mover derives
+        // its own speed from the waypoints it walks. Seconds computed here from the route's length
+        // would be a second answer to "how fast does the boat go", which is his.
+        public const float NominalOutboundSeconds = 8f;
+        public const float NominalInboundSeconds = 8f;
+
+        // The bridge to Core (docs/plan/CONTRACTS.md "Sabit kimlikler"): Core keeps the stable
+        // anchor ids and the times, the geometry stays here, and the struct is constructed rather
+        // than altered - DiveRouteDefinition is Mert's file and is not edited from this side.
+        //
+        // The anchor ids are the near route's frozen pair rather than serialized fields. Fields
+        // would mean re-saving DiveTestArea to author what the contract already fixes; P4.3's
+        // second route is the phase that needs them per path, and it can add them then. It is
+        // also why an unknown or half-authored path is refused instead of described: a definition
+        // built from one would name a dock and an anchor that its own waypoints never visit.
+        public DiveRouteDefinition ToDefinition()
+        {
+            if (!IsContractRoute || !IsUsable)
+                throw new InvalidOperationException(
+                    $"P3_ROUTE_NO_DEFINITION object={name} routeId={routeId} waypoints={Waypoints.Count} " +
+                    "reason=only a usable near route has a definition");
+
+            return new DiveRouteDefinition(
+                routeId,
+                DiveRouteAnchors.Dock,
+                DiveRouteAnchors.AnchorPoint,
+                NominalOutboundSeconds,
+                NominalInboundSeconds);
+        }
+
         // Sibling order is route order. It is the order the hierarchy shows, so what an author
         // sees in the scene is what the boat does; the scene script names the children WP_0..WP_n
         // and the scene test pins those names, so a drag in the hierarchy cannot quietly reverse

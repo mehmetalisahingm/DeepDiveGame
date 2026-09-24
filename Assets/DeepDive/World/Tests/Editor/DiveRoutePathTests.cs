@@ -236,5 +236,67 @@ namespace DeepDive.World.Tests
             CollectionAssert.AreEquivalent(
                 new[] { "dock-town-1", "anchor-near-1" }, DiveRouteAnchors.All);
         }
+
+        [Test]
+        public void TheDefinitionCarriesTheFrozenRouteAndAnchorIds()
+        {
+            var path = NewRoute(BoatTripIds.NearRouteId,
+                new Vector3(9f, 8f, -0.4f),
+                new Vector3(9f, 8f, 3.5f),
+                new Vector3(9f, 8f, 8.5f));
+
+            var definition = path.ToDefinition();
+
+            // Both spellings, for the same reason the test above gives: the constant proves the
+            // bridge reads the contract, the literal proves the contract itself has not moved
+            // under Mert's trip state or Mehmet's mover.
+            Assert.AreEqual(BoatTripIds.NearRouteId, definition.RouteId, "the definition's route id");
+            Assert.AreEqual("route-near-1", definition.RouteId);
+            Assert.AreEqual(DiveRouteAnchors.Dock, definition.DepartureDockAnchor, "the departure anchor");
+            Assert.AreEqual("dock-town-1", definition.DepartureDockAnchor);
+            Assert.AreEqual(DiveRouteAnchors.AnchorPoint, definition.AnchorPointAnchor, "the anchorage");
+            Assert.AreEqual("anchor-near-1", definition.AnchorPointAnchor);
+
+            // Mehmet's frozen nominal, out and back.
+            Assert.AreEqual(8f, definition.OutboundSeconds, 0.001f, "the outbound leg's nominal time");
+            Assert.AreEqual(8f, definition.InboundSeconds, 0.001f, "the inbound leg's nominal time");
+        }
+
+        [Test]
+        public void TheDefinitionIsNominalAndDerivesNothingFromTheGeometry()
+        {
+            // A route four times as long must produce exactly the same numbers. The times are a
+            // target Mehmet froze, and his mover is the one that turns waypoints into a speed;
+            // seconds computed from the path's length here would be a second answer to that.
+            var near = NewRoute(BoatTripIds.NearRouteId,
+                new Vector3(9f, 8f, -0.4f), new Vector3(9f, 8f, 8.5f)).ToDefinition();
+            var far = NewRoute(BoatTripIds.NearRouteId,
+                new Vector3(9f, 8f, -0.4f), new Vector3(9f, 8f, 35.2f)).ToDefinition();
+
+            Assert.AreEqual(near.OutboundSeconds, far.OutboundSeconds, "the outbound time followed the geometry");
+            Assert.AreEqual(near.InboundSeconds, far.InboundSeconds, "the inbound time followed the geometry");
+            Assert.AreEqual(near.DepartureDockAnchor, far.DepartureDockAnchor);
+            Assert.AreEqual(near.AnchorPointAnchor, far.AnchorPointAnchor);
+        }
+
+        [Test]
+        public void NoDefinitionComesFromAnUnknownOrHalfAuthoredRoute()
+        {
+            // The definition names dock-town-1 and anchor-near-1. Handing those ids to a path that
+            // is not the near route, or that has no journey in it, would describe a trip between
+            // two anchors its own waypoints never visit.
+            foreach (var path in new[]
+                     {
+                         NewRoute("route-far-2", new Vector3(0f, 8f, 0f), new Vector3(0f, 8f, 5f)),
+                         NewRoute("", new Vector3(0f, 8f, 0f), new Vector3(0f, 8f, 5f)),
+                         NewRoute(BoatTripIds.NearRouteId, new Vector3(9f, 8f, -0.4f)),
+                         NewRoute(BoatTripIds.NearRouteId)
+                     })
+            {
+                var error = Assert.Throws<System.InvalidOperationException>(() => path.ToDefinition(),
+                    "routeId=" + path.RouteId + " waypoints=" + path.Waypoints.Count + " produced a definition");
+                StringAssert.Contains("P3_ROUTE_NO_DEFINITION", error.Message);
+            }
+        }
     }
 }
