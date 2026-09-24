@@ -5,13 +5,14 @@ using UnityEngine;
 
 namespace DeepDive.Trip
 {
-    // Per-player mirror of the shared BoatTripState, the same reasoning as EconomyPlayerSync:
-    // InventoryManager/BoatTripManager's state is host-only server state, so nothing replicates it
-    // to a guest without this. Presentation and input only - every rule lives in BoatTripManager,
-    // this class never decides whether a board/sail/return request is valid.
+    // Per-player network mirror of the shared BoatTripState. Trip rules remain in BoatTripManager;
+    // this class only carries owner input plus presentation data to guests.
     [RequireComponent(typeof(NetworkObject))]
     public sealed class BoatTripPlayerSync : NetworkBehaviour
     {
+        [Header("P3 Boat Presentation")]
+        [SerializeField] private Material boatMaterial;
+
         public readonly NetworkVariable<FixedString32Bytes> TripId = new NetworkVariable<FixedString32Bytes>();
         public readonly NetworkVariable<FixedString32Bytes> RouteId = new NetworkVariable<FixedString32Bytes>();
         public readonly NetworkVariable<byte> Phase = new NetworkVariable<byte>();
@@ -19,27 +20,77 @@ namespace DeepDive.Trip
         public readonly NetworkVariable<bool> AmOwner = new NetworkVariable<bool>();
         public readonly NetworkVariable<int> SeatedCount = new NetworkVariable<int>();
 
+        public readonly NetworkVariable<Vector3> BoatWorldPosition = new NetworkVariable<Vector3>();
+        public readonly NetworkVariable<float> BoatYaw = new NetworkVariable<float>();
+        public readonly NetworkVariable<bool> BoatVisible = new NetworkVariable<bool>();
+
         public readonly NetworkVariable<ulong> LastRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<bool> LastAccepted = new NetworkVariable<bool>();
         public readonly NetworkVariable<FixedString32Bytes> LastReasonCode = new NetworkVariable<FixedString32Bytes>();
 
-        private ulong _localRequestId;
+        private ulong localRequestId;
+        private GameObject boatVisual;
+        private Material runtimeBoatMaterial;
 
         public bool IsSeated => MySeatId.Value.Length > 0;
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            if (IsOwner) EnsureBoatVisual();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (boatVisual != null) Destroy(boatVisual);
+            if (runtimeBoatMaterial != null) Destroy(runtimeBoatMaterial);
+            boatVisual = null;
+            runtimeBoatMaterial = null;
+            base.OnNetworkDespawn();
+        }
+
+        private void Update()
+        {
+            if (!IsSpawned || !IsOwner) return;
+
+            EnsureBoatVisual();
+            UpdateBoatVisual();
+
+            if (Input.GetKeyDown(KeyCode.B)) RequestBoardNearestLocal();
+            if (Input.GetKeyDown(KeyCode.G)) RequestDisembarkLocal();
+            if (Input.GetKeyDown(KeyCode.O)) RequestStartRouteLocal(BoatTripIds.NearRouteId);
+            if (Input.GetKeyDown(KeyCode.R)) RequestReturnLocal();
+        }
 
         public void PublishTripState(BoatTripState state, PlayerId self)
         {
             if (!IsServer) return;
+
             TripId.Value = new FixedString32Bytes(state.TripId);
             RouteId.Value = new FixedString32Bytes(state.RouteId);
             Phase.Value = (byte)state.Phase;
-            SeatedCount.Value = state.Seats.Count;
+            SeatedCount.Value = state.Seats != null ? state.Seats.Count : 0;
             AmOwner.Value = state.HasOwner && state.Owner.Equals(self);
 
-            var seat = "";
-            foreach (var assignment in state.Seats)
-                if (assignment.Player.Equals(self)) { seat = assignment.SeatId; break; }
+            var seat = string.Empty;
+            if (state.Seats != null)
+            {
+                foreach (var assignment in state.Seats)
+                {
+                    if (!assignment.Player.Equals(self)) continue;
+                    seat = assignment.SeatId;
+                    break;
+                }
+            }
             MySeatId.Value = new FixedString32Bytes(seat);
+        }
+
+        public void PublishBoatPose(Vector3 position, Quaternion rotation, bool visible)
+        {
+            if (!IsServer) return;
+            BoatWorldPosition.Value = position;
+            BoatYaw.Value = rotation.eulerAngles.y;
+            BoatVisible.Value = visible;
         }
 
         public void PublishResult(TransactionResult result)
@@ -50,46 +101,46 @@ namespace DeepDive.Trip
             LastRequestId.Value = result.RequestId;
         }
 
-        // ---- Owner-submitted requests, mirroring NetworkPlayer.SubmitXLocal --------------------
+        // Compatibility entry point for any old caller that still passes a seat id. The client is
+        // no longer allowed to choose the authoritative seat; the host resolves the nearest free one.
+        public void RequestBoardLocal(string ignoredSeatId) => RequestBoardNearestLocal();
 
-        public void RequestBoardLocal(string seatId)
+        public void RequestBoardNearestLocal()
         {
             if (!IsSpawned || !IsOwner) return;
-            RequestBoardServerRpc(new FixedString32Bytes(seatId), ++_localRequestId);
+            RequestBoardServerRpc(++localRequestId);
         }
 
         public void RequestDisembarkLocal()
         {
             if (!IsSpawned || !IsOwner) return;
-            RequestDisembarkServerRpc(++_localRequestId);
+            RequestDisembarkServerRpc(++localRequestId);
         }
 
         public void RequestStartRouteLocal(string routeId)
         {
             if (!IsSpawned || !IsOwner) return;
-            RequestStartRouteServerRpc(new FixedString32Bytes(routeId), ++_localRequestId);
+            RequestStartRouteServerRpc(new FixedString32Bytes(routeId), ++localRequestId);
         }
 
         public void RequestReturnLocal()
         {
             if (!IsSpawned || !IsOwner) return;
-            RequestReturnServerRpc(++_localRequestId);
+            RequestReturnServerRpc(++localRequestId);
         }
 
         [ServerRpc(RequireOwnership = true)]
-        private void RequestBoardServerRpc(FixedString32Bytes seatId, ulong requestId, ServerRpcParams rpc = default)
+        private void RequestBoardServerRpc(ulong requestId, ServerRpcParams rpc = default)
         {
             if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
-            var result = BoatBoarding.TryBoard(new PlayerId(OwnerClientId), BoatTripIds.BoatId, seatId.ToString(), requestId);
-            PublishResult(result);
+            PublishResult(BoatBoardingPhysicalInteraction.TryBoardNearest(new PlayerId(OwnerClientId), requestId));
         }
 
         [ServerRpc(RequireOwnership = true)]
         private void RequestDisembarkServerRpc(ulong requestId, ServerRpcParams rpc = default)
         {
             if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
-            var result = BoatBoarding.TryDisembark(new PlayerId(OwnerClientId), requestId);
-            PublishResult(result);
+            PublishResult(BoatBoardingPhysicalInteraction.TryDisembark(new PlayerId(OwnerClientId), requestId));
         }
 
         [ServerRpc(RequireOwnership = true)]
@@ -97,7 +148,11 @@ namespace DeepDive.Trip
         {
             if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
             var manager = FindFirstObjectByType<BoatTripManager>();
-            if (manager == null) { PublishResult(TransactionResult.Reject(requestId, "InvalidState", 0)); return; }
+            if (manager == null)
+            {
+                PublishResult(TransactionResult.Reject(requestId, "InvalidState", 0));
+                return;
+            }
             PublishResult(manager.TryStartRoute(new PlayerId(OwnerClientId), routeId.ToString(), requestId));
         }
 
@@ -106,22 +161,69 @@ namespace DeepDive.Trip
         {
             if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
             var manager = FindFirstObjectByType<BoatTripManager>();
-            if (manager == null) { PublishResult(TransactionResult.Reject(requestId, "InvalidState", 0)); return; }
+            if (manager == null)
+            {
+                PublishResult(TransactionResult.Reject(requestId, "InvalidState", 0));
+                return;
+            }
             PublishResult(manager.TryRequestReturn(new PlayerId(OwnerClientId), requestId));
         }
 
-        // Placeholder-art HUD, the same spirit as EconomyPlayerSync's IMGUI: real UI (map screen,
-        // seat icons) is a later pass. Real seat *interaction* (walking up, aiming, pressing a key
-        // in range) is Mehmet's #75, not modelled here - these keys act on the nearest seat/route
-        // BoatTripBinding finds, standing in for it until his seam lands (see #66's seam-freeze
-        // comment: BoatBoarding is his to call once real proximity/interaction exists).
+        private void EnsureBoatVisual()
+        {
+            if (!IsOwner || boatVisual != null) return;
+
+            boatVisual = new GameObject("P3BoatVisual");
+            BuildVisualPart(boatVisual.transform, "Hull", Vector3.zero, new Vector3(2.4f, 0.6f, 5f));
+            BuildVisualPart(boatVisual.transform, "Bench_A", new Vector3(0f, 0.45f, -0.9f), new Vector3(2f, 0.15f, 0.4f));
+            BuildVisualPart(boatVisual.transform, "Bench_B", new Vector3(0f, 0.45f, 0.8f), new Vector3(2f, 0.15f, 0.4f));
+        }
+
+        private Material ResolveBoatMaterial()
+        {
+            if (boatMaterial != null) return boatMaterial;
+            if (runtimeBoatMaterial != null) return runtimeBoatMaterial;
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) return null;
+            runtimeBoatMaterial = new Material(shader) { name = "P3BoatRuntimeMaterial" };
+            return runtimeBoatMaterial;
+        }
+
+        private void BuildVisualPart(Transform root, string name, Vector3 localPosition, Vector3 localScale)
+        {
+            var part = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            part.name = name;
+            part.transform.SetParent(root, false);
+            part.transform.localPosition = localPosition;
+            part.transform.localRotation = Quaternion.identity;
+            part.transform.localScale = localScale;
+            var collider = part.GetComponent<Collider>();
+            if (collider != null) collider.enabled = false;
+            var renderer = part.GetComponent<Renderer>();
+            var material = ResolveBoatMaterial();
+            if (renderer != null && material != null) renderer.sharedMaterial = material;
+        }
+
+        private void UpdateBoatVisual()
+        {
+            if (boatVisual == null) return;
+            boatVisual.SetActive(BoatVisible.Value);
+            if (!BoatVisible.Value) return;
+            boatVisual.transform.SetPositionAndRotation(
+                BoatWorldPosition.Value,
+                Quaternion.Euler(0f, BoatYaw.Value, 0f));
+        }
+
         private void OnGUI()
         {
             if (!IsSpawned || !IsOwner) return;
             var phase = (BoatTripPhase)Phase.Value;
-            GUI.Box(new Rect(20, 306, 260, 24), $"SANDAL: {phase} ({SeatedCount.Value} koltuklu)");
-            if (IsSeated) GUI.Box(new Rect(20, 334, 260, 24), $"KOLTUK: {MySeatId.Value}" + (AmOwner.Value ? " (SEFER SORUMLUSU)" : ""));
-            GUI.Box(new Rect(20, 362, 260, 24), "B: bin / G: in / O: yakin rotaya cik / R: donus iste");
+            GUI.Box(new Rect(20, 306, 300, 24), $"SANDAL: {phase} ({SeatedCount.Value}/4)");
+            if (IsSeated)
+                GUI.Box(new Rect(20, 334, 300, 24), $"KOLTUK: {MySeatId.Value}" + (AmOwner.Value ? " (SEFER SORUMLUSU)" : string.Empty));
+            GUI.Box(new Rect(20, 362, 300, 24), "B: bin | G: in | O: rotaya cik | R: donus");
+            if (LastRequestId.Value > 0 && !LastAccepted.Value)
+                GUI.Box(new Rect(20, 390, 300, 24), $"SANDAL RED: {LastReasonCode.Value}");
         }
     }
 }
