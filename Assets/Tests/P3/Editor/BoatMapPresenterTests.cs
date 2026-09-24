@@ -34,7 +34,7 @@ namespace DeepDive.P3.Tests
         public void AnchoredShowsTheBoatAtTheAnchorWhenUtkusDataIsKnown()
         {
             var icons = BoatMapPresenter.BuildIcons(StateAt(BoatTripPhase.Anchored), Dock, Anchor, null);
-            Assert.AreEqual(2, icons.Count);
+            Assert.AreEqual(3, icons.Count, "dock, boat at the anchor, and the return marker");
             Assert.AreEqual(Anchor, (icons[1].MapX, icons[1].MapZ));
         }
 
@@ -65,6 +65,64 @@ namespace DeepDive.P3.Tests
             var icons = BoatMapPresenter.BuildIcons(StateAt(BoatTripPhase.Docked), Dock, Anchor, null);
             foreach (var icon in icons)
                 Assert.IsTrue(icon.IconId == BoatMapPresenter.DockIconId || icon.IconId == BoatTripIds.BoatId, icon.IconId);
+        }
+
+        private static readonly PlayerId Bob = new PlayerId(2);
+
+        private static (PlayerId Player, float X, float Z)[] Party() => new[]
+        {
+            (Alice, 0.5f, 0.5f), (Bob, 0.7f, 0.3f)
+        };
+
+        [Test]
+        public void ConnectedPartyAppearsAsOneIconPerPlayerAtTheirApprovedPosition()
+        {
+            var icons = BoatMapPresenter.BuildIcons(
+                BoatTripPhase.Docked, BoatTripIds.BoatId, Dock, Anchor, null, Party(), false);
+            Assert.AreEqual(4, icons.Count, "dock, boat, two players");
+            Assert.AreEqual(BoatMapPresenter.PlayerIconId(Alice), icons[2].IconId);
+            Assert.AreEqual((0.5f, 0.5f), (icons[2].MapX, icons[2].MapZ));
+            Assert.AreEqual(BoatMapPresenter.PlayerIconId(Bob), icons[3].IconId);
+        }
+
+        [Test]
+        public void AbsentPlayersAreNotDrawn()
+        {
+            var icons = BoatMapPresenter.BuildIcons(
+                BoatTripPhase.Docked, BoatTripIds.BoatId, Dock, Anchor, null,
+                new[] { (Alice, 0.5f, 0.5f) }, false);
+            Assert.AreEqual(3, icons.Count);
+        }
+
+        [Test]
+        public void ReturnMarkerAppearsOnlyWhileAnchoredAndNotAboard()
+        {
+            bool HasMarker(BoatTripPhase phase, bool aboard, (float X, float Z)? live = null)
+            {
+                foreach (var icon in BoatMapPresenter.BuildIcons(phase, BoatTripIds.BoatId, Dock, Anchor, live, null, aboard))
+                    if (icon.IconId == BoatMapPresenter.ReturnMarkerIconId) return true;
+                return false;
+            }
+
+            Assert.IsTrue(HasMarker(BoatTripPhase.Anchored, false));
+            Assert.IsFalse(HasMarker(BoatTripPhase.Anchored, true), "already aboard - nothing to swim back to");
+            Assert.IsFalse(HasMarker(BoatTripPhase.Docked, false), "the dock icon is the destination");
+            Assert.IsFalse(HasMarker(BoatTripPhase.Outbound, false, (0.4f, 0.6f)), "a fixed marker underway would point at where the boat was");
+            Assert.IsFalse(HasMarker(BoatTripPhase.Inbound, false, (0.4f, 0.6f)));
+        }
+
+        [Test]
+        public void ReturnMarkerSitsOnTheBoatAndIsAbsentWhenTheAnchorIsUnknown()
+        {
+            var icons = BoatMapPresenter.BuildIcons(
+                BoatTripPhase.Anchored, BoatTripIds.BoatId, Dock, Anchor, null, null, false);
+            var marker = icons[icons.Count - 1];
+            Assert.AreEqual(BoatMapPresenter.ReturnMarkerIconId, marker.IconId);
+            Assert.AreEqual(Anchor, (marker.MapX, marker.MapZ));
+
+            var noAnchor = BoatMapPresenter.BuildIcons(
+                BoatTripPhase.Anchored, BoatTripIds.BoatId, Dock, null, null, null, false);
+            Assert.AreEqual(1, noAnchor.Count, "no anchor data: no boat and no marker, never a guess");
         }
     }
 }

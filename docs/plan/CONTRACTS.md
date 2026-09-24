@@ -250,6 +250,15 @@ Bu bölüm taslak değil, kodda olanı yazar. Yukarıdaki P3.3-C notunun "Utku'n
 6. **Bilerek yapılmayanlar.** Map UI, ikon otoritesi ve kayıt katmanı Mert'te; koltuk/binme/hareket ve onaylı canlı konum Mehmet'te. Rota path'ini mover'a bağlayan Composition dikişi kurulmadı — Mehmet'in alanı, "final" gibi davranacak bir taklit yapılmadı.
 7. **Henüz test edilmedi.** Kanıtın tamamı EditMode'dur (628/628, 19'u üretilmiş sahneyi okuyan rota sahne testi). Gerçek iki süreçli/iki bilgisayarlı **binme → sefer → dönüş smoke'u yapılmadı**: dalgıç rig'i, Mehmet'in mover'ı ve ekip gerekiyor. #75 + #76 + #66 integration'da buluşunca yapılacak; o gün gelene kadar bu satır "doğrulandı" sayılmaz.
 
+### P3.3-C harita UI uygulama notu (#66, kalan kısım)
+
+Kod: `Assets/DeepDive/Trip/BoatMapPresenter.cs` (saf), `Assets/DeepDive/Composition/BoatMapView.cs` (IMGUI, `M`). Kanıt: `docs/reports/P3-3-TRIP-MAP-SMOKE.md`.
+
+1. **Simgeler.** `dock`, `boat-1`, `player-<clientId>` (yalnız bağlı, bölge içi oyuncular) ve `boat-return`. Başka hiçbir kimlik üretilmez (balık/boss/keşfedilmemiş yer yok).
+2. **Dönüş işareti.** Yalnız `Anchored` fazında ve yerel oyuncu sandalda değilken, sandalın onaylı konumunda. `Docked`'ta iskele simgesi zaten hedeftir; sefer hâlindeyken sabit işaret sandalın eski yerini gösterirdi.
+3. **Girdiler.** Faz + sandal pozu: `BoatTripPlayerSync` aynası (Mehmet); oyuncu konumu: host-otoriter `NetworkPlayer` transformu; dönüşüm: `DiveRegionField.TryWorldToMap` (Utku). Bölge dışı konum çizilmez (kenara sıkıştırılmaz); `Outbound/Inbound`'da yayımlanmış canlı poz yoksa sandal çizilmez.
+4. **Kayıt.** Yeni alan yok; sefer serialize edilmez, yeniden açılışta sandal iskelede ve koltuklar boş.
+
 ### Kamera, derinlik ve rota gelişimi — P4.3 taslak
 
 1. Mert equipmentId/seviye/fiyat/görünüm/yeteneği tek katalogda tanımlar. Mehmet kuşanma/elde model ve tüp/palet/çanta etkisini, Utku kamera menzil/düşük ışık doğrulamasını uygular.
