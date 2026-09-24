@@ -139,6 +139,13 @@ namespace DeepDive.Composition
         {
             if (!bound || boatController == null)
                 return TransactionResult.Reject(requestId, "InvalidState", tripManager != null ? tripManager.State.Revision : 0);
+
+            // Inbound finishes with the hull facing shore. Before a docked player steps out, reset
+            // the boat to the route's canonical outbound berth heading so the local stern offset
+            // resolves exactly to Utku's Dock_Town_Anchor rather than to the seaward side.
+            if (tripManager != null && tripManager.State.Phase == BoatTripPhase.Docked)
+                boatController.SetRoutePathSource(this);
+
             return boatController.TryDisembark(player, requestId);
         }
 
