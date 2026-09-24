@@ -1,4 +1,4 @@
-name: Unity tests and Windows build
+name: Unity tests, Windows build and P3 trip acceptance
 
 on:
   push:
@@ -27,7 +27,6 @@ jobs:
         run: |
           if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
             echo '::error::Unity CI licensing is not configured. See docs/CI.md. No Unity test/build has run.'
-            echo 'Unity build BLOCKED: missing Unity credentials/license. Use the documented local build; this run is not PASS.' >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -49,6 +48,13 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildWindows
           versioning: None
+      - name: Upload integrated Windows build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p1-integrated-windows-${{ github.sha }}
+          path: Builds/P1-Integrated
+          if-no-files-found: error
+          retention-days: 2
       - name: Test reports
         if: always() && steps.tests.outcome != 'skipped'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -56,4 +62,30 @@ jobs:
           name: unity-test-results-${{ github.sha }}
           path: Logs/CI-Tests/**/*.xml
           if-no-files-found: ignore
+          retention-days: 7
+
+  trip-smoke:
+    needs: unity
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: false
+          persist-credentials: false
+      - name: Download integrated Windows build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: p1-integrated-windows-${{ github.sha }}
+          path: Builds/P1-Integrated
+      - name: Real 2-process P3.3 trip/map smoke
+        shell: pwsh
+        run: ./tools/Test-P1-Integrated.ps1 -Players 2 -Trip
+      - name: Upload trip smoke evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p3-trip-smoke-${{ github.sha }}
+          path: Logs/P1-integrated-*
+          if-no-files-found: warn
           retention-days: 7
