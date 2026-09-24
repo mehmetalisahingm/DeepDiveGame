@@ -10,7 +10,7 @@ namespace DeepDive.World
     //
     // Pure on purpose: a readonly struct with no MonoBehaviour, no scene lookup, no logging and
     // no Unity object of its own, so the whole conversion is testable against plain numbers the
-    // way WaterBody is. The region's actual extents are scene data and belong to the DiveRegionMap
+    // way WaterBody is. The region's actual extents are scene data and belong to the DiveRegionField
     // component; this type is only the arithmetic and holds exactly the four numbers it needs.
     //
     // Y is not part of the transform. WorldToMap takes a Vector3 because callers hold world
