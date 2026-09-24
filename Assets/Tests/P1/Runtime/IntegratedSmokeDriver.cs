@@ -38,6 +38,8 @@ namespace DeepDive.P1.Lab
             public bool boatHullFound, boatEngineFound, boatFuelTankFound, boatDuplicateRejected, boatRepaired;
             public string boatStatusFinal;
             public bool boatPartsHidden;
+            public bool boatBoarded, boatOutbound, boatAnchored, boatDisembarked, boatReboarded;
+            public bool boatInbound, boatDocked, boatExited;
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
@@ -63,6 +65,11 @@ namespace DeepDive.P1.Lab
         private int boatStep;
         private float boatSettleAt, boatNext;
         private int boatSequenceLast = -1;
+        private float boatTripActionAt;
+        private bool boatAnchorDisembarkSent, boatReturnSent, boatDockDisembarkSent;
+        private bool boatReboardRequestSent;
+        private bool boatSawOutbound, boatSawInbound;
+        private ulong boatObservedRequest;
         private bool townAwaiting;
         private float townTraceAt;
         private bool townInjected, townSampledReturn, cameraSeeded;
@@ -103,7 +110,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = Boat ? 84f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -145,7 +152,10 @@ namespace DeepDive.P1.Lab
                     if (!host && !unauthorizedSent && state.Phase == SessionPhase.Lobby && elapsed > 4)
                     { unauthorizedSent = true; adapter.AdvancePhase(); }
                 }
-                if (rejoin && elapsed > 8 && !rejoinLeft)
+                // The boat trip uses the second process as a continuously connected passenger;
+                // reconnect cleanup remains covered by the base/rejoin smoke and must not interrupt
+                // the physical anchor roundtrip halfway through a seat handoff.
+                if (rejoin && !Boat && elapsed > 8 && !rejoinLeft)
                 { rejoinLeft = true; leaveAt = elapsed; adapter.LeaveRoom(); }
                 if (rejoinLeft && connection.Status == ConnectionStatus.Offline) sawOffline = true;
                 if (rejoinLeft && !reconnectSent && sawOffline && elapsed > leaveAt + 2)
@@ -173,14 +183,20 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (Boat && result.boatDocked && boatDockDisembarkSent)
+                    result.boatExited = true;
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                var boatTripManager = Boat ? adapter.GetComponent<DeepDive.Trip.BoatTripManager>() : null;
+                var boatTripReadyForSessionReturn = !Boat ||
+                    (result.boatExited && boatTripManager != null && boatTripManager.State.Seats.Count == 0);
+                if (host && elapsed > (Town ? 34 : Event ? 92 : Boat ? 62 : Hunt || Record ? 44 : 33) &&
+                    !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading && boatTripReadyForSessionReturn)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Town ? 64 : Event ? 104 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Town ? 64 : Event ? 104 : Boat ? 70 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -188,7 +204,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Town ? 68 : Event ? 108 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Town ? 68 : Event ? 108 : Boat ? 74 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -196,7 +212,7 @@ namespace DeepDive.P1.Lab
             result.reason = adapter.Connection.LastError;
             result.passed = result.connected && result.roster && result.ready && result.prep && result.dive && result.returned &&
                 result.readyReset && result.walk && result.swim && result.collisions && result.cameras && result.stopped &&
-                (!rejoin || result.clientRejoined) && result.errors.Count == 0;
+                (!rejoin || Boat || result.clientRejoined) && result.errors.Count == 0;
             if (Hunt) result.passed &= result.fishMoved && result.catchObserved && result.catchDespawned &&
                 (!host || result.inventoryAdded) && (!result.huntShooter || result.inventoryReplicated);
             // This scenario assigns ONE guest to record. Bystanders still must pass every
@@ -210,7 +226,9 @@ namespace DeepDive.P1.Lab
             if (Boat) result.passed &= result.boatRepaired && result.boatPartsHidden &&
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
-                (host || result.boatEngineFound);
+                (host || result.boatEngineFound) && result.boatBoarded && result.boatOutbound &&
+                result.boatAnchored && result.boatDisembarked && result.boatReboarded &&
+                result.boatInbound && result.boatDocked && result.boatExited;
             Finish();
         }
 
@@ -241,7 +259,11 @@ namespace DeepDive.P1.Lab
                     (elapsed > 1 && elapsed < 5 ? Vector3.forward : Vector3.zero);
                 if (Hunt && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHunt(local, players);
                 else if (Record && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeRecording(local, players);
-                else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
+                else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3)
+                {
+                    if (!result.boatRepaired) ProbeBoatParts(local);
+                    else ProbeBoatTrip(local);
+                }
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
             }
@@ -538,6 +560,150 @@ namespace DeepDive.P1.Lab
                 result.boatRepaired = true;
                 result.boatStatusFinal = state.Status.ToString();
             }
+        }
+
+        // ---- P3.3-C acceptance: the repaired boat is a real two-player trip, not just a repair
+        // fixture. Every action below goes through the owner BoatTripPlayerSync RPC. The driver
+        // never writes BoatTripManager state, seats, transforms or arrival phases; it only steers
+        // the same player input that a person would use and observes the replicated state.
+        private void ProbeBoatTrip(NetworkPlayer local)
+        {
+            var sync = local.GetComponent<DeepDive.Trip.BoatTripPlayerSync>();
+            if (sync == null || !sync.IsSpawned) return;
+
+            if (sync.LastRequestId.Value > boatObservedRequest)
+            {
+                boatObservedRequest = sync.LastRequestId.Value;
+                Debug.Log($"P3_BOAT_RESULT owner={local.OwnerClientId} request={sync.LastRequestId.Value} accepted={sync.LastAccepted.Value} reason={sync.LastReasonCode.Value}");
+                if (!sync.LastAccepted.Value && result.errors.Count < 15)
+                    result.errors.Add($"boat request {sync.LastRequestId.Value} rejected={sync.LastReasonCode.Value}");
+                if (sync.LastAccepted.Value && boatReboardRequestSent && result.boatDisembarked)
+                    result.boatReboarded = true;
+            }
+
+            if (!result.boatPartsHidden && sync.GetComponent<EconomyPlayerSync>().BoatPartsMask.Value == 7)
+            {
+                var anchors = FindObjectsByType<BoatPartAnchor>(FindObjectsSortMode.None);
+                result.boatPartsHidden |= anchors.Length == 3 && anchors.All(a =>
+                    a.GetComponentsInChildren<Renderer>().All(r => !r.enabled) &&
+                    a.GetComponentsInChildren<Collider>().All(c => !c.enabled));
+            }
+
+            var phase = (BoatTripPhase)sync.Phase.Value;
+            var route = FindObjectsByType<DiveRoutePath>(FindObjectsSortMode.None)
+                .FirstOrDefault(x => x.RouteId == BoatTripIds.NearRouteId);
+            if (route == null || route.Waypoints.Count < 2)
+            {
+                result.errors.Add("boat trip route-near-1 missing at runtime");
+                return;
+            }
+
+            if (phase == BoatTripPhase.Outbound) { result.boatOutbound = true; boatSawOutbound = true; }
+            if (phase == BoatTripPhase.Anchored) result.boatAnchored = true;
+            if (phase == BoatTripPhase.Inbound) { result.boatInbound = true; boatSawInbound = true; }
+            if (boatSawInbound && phase == BoatTripPhase.Docked) result.boatDocked = true;
+            if (phase == BoatTripPhase.Inbound && result.boatDisembarked && boatReboardRequestSent)
+                result.boatReboarded = true;
+
+            // The owner may receive the seat-clear update in the same network tick as the docked
+            // phase. Count that replicated empty seat as a completed local exit even if the driver
+            // never gets another frame to issue a redundant G request before session return.
+            if (phase == BoatTripPhase.Docked && result.boatDocked && !sync.IsSeated)
+            {
+                result.boatExited = true;
+                local.SubmitLocalInput(Vector3.zero, 0);
+                return;
+            }
+
+            if (phase == BoatTripPhase.Docked && !sync.IsSeated && !result.boatBoarded)
+            {
+                // The authored berth is the physical hull origin; the seat offsets are inside the
+                // 2.5 m boarding range. Approach it from the beach side so the request is a real
+                // proximity check, not a host teleport.
+                var berth = route.Waypoints[0] + new Vector3(0f, 0f, -1.1f);
+                if (!MoveBoatPlayerTo(local, berth)) return;
+                if (Time.realtimeSinceStartup >= boatTripActionAt)
+                {
+                    boatTripActionAt = Time.realtimeSinceStartup + 1.25f;
+                    sync.RequestBoardNearestLocal();
+                }
+                return;
+            }
+
+            if (sync.IsSeated)
+            {
+                result.boatBoarded = true;
+                if (phase == BoatTripPhase.Docked && adapter.IsAuthority && !boatSawOutbound &&
+                    sync.SeatedCount.Value >= 2 && Time.realtimeSinceStartup >= boatTripActionAt)
+                {
+                    boatTripActionAt = Time.realtimeSinceStartup + 1.25f;
+                    sync.RequestStartRouteLocal(BoatTripIds.NearRouteId);
+                    return;
+                }
+                if (phase == BoatTripPhase.Anchored && result.boatDisembarked)
+                    result.boatReboarded = true;
+                if (phase == BoatTripPhase.Anchored && !boatAnchorDisembarkSent)
+                {
+                    boatAnchorDisembarkSent = true;
+                    boatTripActionAt = Time.realtimeSinceStartup + 0.75f;
+                    sync.RequestDisembarkLocal();
+                    return;
+                }
+
+                // The trip owner is the host's first seated player. Once both real passengers are
+                // back aboard, the replicated owner (which may have transferred when the original
+                // owner disembarked at anchor) requests the inbound leg.
+                if (phase == BoatTripPhase.Anchored && result.boatDisembarked &&
+                    sync.AmOwner.Value && sync.SeatedCount.Value >= 2 && !boatReturnSent &&
+                    Time.realtimeSinceStartup >= boatTripActionAt)
+                {
+                    boatReturnSent = true;
+                    boatTripActionAt = Time.realtimeSinceStartup + 1.25f;
+                    sync.RequestReturnLocal();
+                    return;
+                }
+
+                if (phase == BoatTripPhase.Docked && !boatDockDisembarkSent && result.boatDocked)
+                {
+                    boatDockDisembarkSent = true;
+                    boatTripActionAt = Time.realtimeSinceStartup + 0.75f;
+                    sync.RequestDisembarkLocal();
+                    return;
+                }
+            }
+            else if (phase == BoatTripPhase.Anchored && result.boatAnchored)
+            {
+                result.boatDisembarked = true;
+                // The replicated pose and the trip phase can arrive in separate NGO packets. Use
+                // Utku's authored anchor point for the physical retry target so a guest never
+                // steers toward the NetworkVariable's initial zero before the pose packet lands.
+                var boatPosition = route.Waypoints[route.Waypoints.Count - 1] + new Vector3(2f, 0f, 0.5f);
+                if (!MoveBoatPlayerTo(local, boatPosition)) return;
+                if (Time.realtimeSinceStartup >= boatTripActionAt)
+                {
+                    boatReboardRequestSent = true;
+                    boatTripActionAt = Time.realtimeSinceStartup + 1.25f;
+                    sync.RequestBoardNearestLocal();
+                }
+                return;
+            }
+
+        }
+
+        private bool MoveBoatPlayerTo(NetworkPlayer local, Vector3 destination)
+        {
+            var delta = destination - local.transform.position;
+            delta.y = 0f;
+            if (delta.magnitude <= 0.55f)
+            {
+                local.SubmitLocalInput(Vector3.zero, Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg);
+                return true;
+            }
+
+            var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
+            var move = Quaternion.Inverse(Quaternion.Euler(0f, yaw, 0f)) * delta.normalized;
+            local.SubmitLocalInput(move, yaw, 0f);
+            return false;
         }
 
         // ---- P3.2 town: real owner inputs + RPCs against the PrepArea NPCs --------------------

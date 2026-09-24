@@ -171,10 +171,16 @@ namespace DeepDive.Network
                 var seatId = BoatSeatLayoutRules.SeatIds[i];
                 if (IsSeatOccupied(seatId)) continue;
                 var seatPosition = transform.TransformPoint(BoatSeatLayoutRules.LocalSeatOffsets[i]);
-                var distance = Vector3.Distance(networkPlayer.transform.position, seatPosition);
-                if (distance > boardingRange || distance >= bestDistance) continue;
+                var horizontalDistance = Vector2.Distance(
+                    new Vector2(networkPlayer.transform.position.x, networkPlayer.transform.position.z),
+                    new Vector2(seatPosition.x, seatPosition.z));
+                var verticalDistance = Mathf.Abs(networkPlayer.transform.position.y - seatPosition.y);
+                // At the anchorage a diver can be below the hull while still beside its boarding
+                // point. Treat horizontal reach and vertical water tolerance separately instead of
+                // making a valid near-surface swimmer fail a spherical distance check.
+                if (horizontalDistance > boardingRange || verticalDistance > boardingRange || horizontalDistance >= bestDistance) continue;
                 bestIndex = i;
-                bestDistance = distance;
+                bestDistance = horizontalDistance;
             }
 
             if (bestIndex < 0) return TransactionResult.Reject(requestId, "OutOfRange", state.Revision);

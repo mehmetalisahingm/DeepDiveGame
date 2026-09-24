@@ -1,15 +1,15 @@
 # P3.4 birleşik kabul — checklist, test senaryosu, kayıt formatı ve görsel/ses audit'i
 
-Durum: **hazırlık aşamasında**. #79'un kendi başlama kapısı kapalı: #75 (Mehmet, sandal seat/network movement), #76 (Utku, dock/anchor/route/world-map) ve #66 (Mert, trip/save/map UI — çekirdek katman PR #77 ile birleşti, Composition/prefab/gerçek sahne kısmı hâlâ #75/#76'yı bekliyor) integration'da buluşmadan tam uçtan uca doğrulama başlamaz. Bu doküman #79'un "beklerken yapılabilecekler" listesindeki üç maddeyi karşılar: birleşik acceptance checklist'i, test senaryosu ve kayıt formatı, artı bir ilk görsel/ses tutarlılık audit'i. P3.3 kodunu bypass edecek bir placeholder final çözüm olarak kurulmadı.
+Durum: **hazırlık aşamasında**. #75 (Mehmet), #76 (Utku) ve #66'nın Composition/prefab entegrasyonu `codex/p3-integration`'da birleşti; iki yerel süreçli gerçek sandal seferi geçti ([kayıt](../reports/P3-BOAT-RUNTIME-ACCEPTANCE.md)). Tam P3.4 kapısı hâlâ dört süreç, ayrı bilgisayar/internet, oyuncu-facing harita UI'sı ve ortak görsel/ses kabulünü bekler. Bu doküman birleşik acceptance checklist'i, test senaryosu ve kayıt formatını korur; P3.3 kodunu bypass eden placeholder kullanılmadı.
 
 ## Ön koşul
 
-Tam koşum, aşağıdakilerin hepsi `codex/p3-integration`'da birleştikten sonra başlar:
-1. #75 merge — gerçek koltuk/binme-inme/sabit rota hareketi.
-2. #76 merge — gerçek iskele/demirleme/rota/world↔map verisi.
-3. #66'nın kalanı — `BoatTripBinding` (Composition), `BoatTripPlayerSync`'in NetworkDiver prefab'ına bağlanması, gerçek (veya #76'nın sağladığı) dock/seat/route sahne nesneleri.
+Tam P3.4 koşumu, aşağıdaki entegrasyonlar `codex/p3-integration`'da birleştikten sonra başlar (iki süreçli sandal alt koşumu ayrıca geçti):
+1. #75 merge — gerçek koltuk/binme-inme/sabit rota hareketi. **Birleşti; iki süreçli smoke geçti.**
+2. #76 merge — gerçek iskele/demirleme/rota/world↔map verisi. **Birleşti; iki süreçli smoke geçti.**
+3. #66'nın kalan Composition/prefab bağlantısı — **birleşti;** `BoatTripPlayerSync` NetworkDiver prefab'ında ve gerçek dock/seat/route sahne nesneleri mevcut. Oyuncu-facing harita UI'sı hâlâ açık teslimdir.
 
-Bunlardan biri eksikken bu checklist'teki "sefer" adımları koşulamaz; yalnız NPC→satış→onarım zinciri (zaten #62/#71/#72/#74 ile doğrulanmış) ve kayıt/save-load (kısmen #77 ile doğrulanmış, bkz. aşağı) tekrar test edilebilir.
+İki süreçli sefer adımları artık koşulabilir ve yukarıdaki kayıtla doğrulandı. Dört süreç, ayrı bilgisayar/internet, harita UI'sı ve tam görsel/ses kabulü hâlâ kapanış öncesi test edilmelidir.
 
 ## Birleşik uçtan uca senaryo (tam kapı açıldığında koşulacak)
 
