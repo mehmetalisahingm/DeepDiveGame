@@ -151,8 +151,7 @@ namespace DeepDive.Network
                 routeActive = false;
                 arrivalPending = false;
                 path.Clear();
-                if (next.Phase == BoatTripPhase.Docked && previousPhase != BoatTripPhase.Inbound)
-                    SnapToDockRouteStart();
+                if (next.Phase == BoatTripPhase.Docked) SnapToDockRouteStart();
             }
         }
 
@@ -242,7 +241,8 @@ namespace DeepDive.Network
 
             var target = path[waypointIndex];
             var delta = target - transform.position;
-            if (delta.sqrMagnitude <= waypointTolerance * waypointTolerance)
+            var maxStep = legSpeed * Mathf.Max(0f, deltaTime);
+            if (delta.sqrMagnitude <= maxStep * maxStep)
             {
                 transform.position = target;
                 waypointIndex++;
@@ -250,7 +250,7 @@ namespace DeepDive.Network
                 return;
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, target, legSpeed * Mathf.Max(0f, deltaTime));
+            transform.position = Vector3.MoveTowards(transform.position, target, maxStep);
             var planar = Vector3.ProjectOnPlane(delta, Vector3.up);
             if (planar.sqrMagnitude > 0.0001f)
             {
