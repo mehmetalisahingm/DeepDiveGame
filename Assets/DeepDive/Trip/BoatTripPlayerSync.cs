@@ -10,6 +10,9 @@ namespace DeepDive.Trip
     [RequireComponent(typeof(NetworkObject))]
     public sealed class BoatTripPlayerSync : NetworkBehaviour
     {
+        [Header("P3 Boat Presentation")]
+        [SerializeField] private Material boatMaterial;
+
         public readonly NetworkVariable<FixedString32Bytes> TripId = new NetworkVariable<FixedString32Bytes>();
         public readonly NetworkVariable<FixedString32Bytes> RouteId = new NetworkVariable<FixedString32Bytes>();
         public readonly NetworkVariable<byte> Phase = new NetworkVariable<byte>();
@@ -173,7 +176,7 @@ namespace DeepDive.Trip
             BuildVisualPart(boatVisual.transform, "Bench_B", new Vector3(0f, 0.45f, 0.8f), new Vector3(2f, 0.15f, 0.4f));
         }
 
-        private static void BuildVisualPart(Transform root, string name, Vector3 localPosition, Vector3 localScale)
+        private void BuildVisualPart(Transform root, string name, Vector3 localPosition, Vector3 localScale)
         {
             var part = GameObject.CreatePrimitive(PrimitiveType.Cube);
             part.name = name;
@@ -183,6 +186,8 @@ namespace DeepDive.Trip
             part.transform.localScale = localScale;
             var collider = part.GetComponent<Collider>();
             if (collider != null) collider.enabled = false;
+            var renderer = part.GetComponent<Renderer>();
+            if (renderer != null && boatMaterial != null) renderer.sharedMaterial = boatMaterial;
         }
 
         private void UpdateBoatVisual()
