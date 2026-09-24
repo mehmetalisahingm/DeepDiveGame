@@ -36,8 +36,13 @@ namespace DeepDive.Composition
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             var session = FindFirstObjectByType<SessionNetworkAdapter>();
-            if (session != null && session.GetComponent<BoatTripNetworkBinding>() == null)
+            if (session == null) return;
+
+            var binding = session.GetComponent<BoatTripNetworkBinding>();
+            if (binding == null)
                 session.gameObject.AddComponent<BoatTripNetworkBinding>();
+            else
+                binding.RefreshWorldRoute();
         }
 
         private void Awake()
@@ -86,6 +91,13 @@ namespace DeepDive.Composition
             authorityObject.transform.SetParent(transform, false);
             boatController = authorityObject.AddComponent<NetworkBoatController>();
             boatController.Initialize(networkManager, this);
+        }
+
+        private void RefreshWorldRoute()
+        {
+            if (!IsHost || boatController == null) return;
+            boatController.SetRoutePathSource(this);
+            PublishStateAndPose();
         }
 
         private void Bind()
