@@ -30,6 +30,7 @@ namespace DeepDive.Trip
 
         private ulong localRequestId;
         private GameObject boatVisual;
+        private Material runtimeBoatMaterial;
 
         public bool IsSeated => MySeatId.Value.Length > 0;
 
@@ -42,7 +43,9 @@ namespace DeepDive.Trip
         public override void OnNetworkDespawn()
         {
             if (boatVisual != null) Destroy(boatVisual);
+            if (runtimeBoatMaterial != null) Destroy(runtimeBoatMaterial);
             boatVisual = null;
+            runtimeBoatMaterial = null;
             base.OnNetworkDespawn();
         }
 
@@ -171,9 +174,19 @@ namespace DeepDive.Trip
             if (!IsOwner || boatVisual != null) return;
 
             boatVisual = new GameObject("P3BoatVisual");
-            BuildVisualPart(boatVisual.transform, "Hull", new Vector3(0f, 0f, 0f), new Vector3(2.4f, 0.6f, 5f));
+            BuildVisualPart(boatVisual.transform, "Hull", Vector3.zero, new Vector3(2.4f, 0.6f, 5f));
             BuildVisualPart(boatVisual.transform, "Bench_A", new Vector3(0f, 0.45f, -0.9f), new Vector3(2f, 0.15f, 0.4f));
             BuildVisualPart(boatVisual.transform, "Bench_B", new Vector3(0f, 0.45f, 0.8f), new Vector3(2f, 0.15f, 0.4f));
+        }
+
+        private Material ResolveBoatMaterial()
+        {
+            if (boatMaterial != null) return boatMaterial;
+            if (runtimeBoatMaterial != null) return runtimeBoatMaterial;
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) return null;
+            runtimeBoatMaterial = new Material(shader) { name = "P3BoatRuntimeMaterial" };
+            return runtimeBoatMaterial;
         }
 
         private void BuildVisualPart(Transform root, string name, Vector3 localPosition, Vector3 localScale)
@@ -187,7 +200,8 @@ namespace DeepDive.Trip
             var collider = part.GetComponent<Collider>();
             if (collider != null) collider.enabled = false;
             var renderer = part.GetComponent<Renderer>();
-            if (renderer != null && boatMaterial != null) renderer.sharedMaterial = boatMaterial;
+            var material = ResolveBoatMaterial();
+            if (renderer != null && material != null) renderer.sharedMaterial = material;
         }
 
         private void UpdateBoatVisual()
