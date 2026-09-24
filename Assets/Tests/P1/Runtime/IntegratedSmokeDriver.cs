@@ -10,6 +10,7 @@ using DeepDive.Session;
 using DeepDive.World;
 using DeepDive.Inventory;
 using DeepDive.Economy;
+using DeepDive.Trip;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -38,6 +39,12 @@ namespace DeepDive.P1.Lab
             public bool boatHullFound, boatEngineFound, boatFuelTankFound, boatDuplicateRejected, boatRepaired;
             public string boatStatusFinal;
             public bool boatPartsHidden;
+            public List<string> tripPhases = new List<string>();
+            public string tripSeatId;
+            public bool tripBoarded, tripDuplicateBoardHeld, tripMapDockedAtDock, tripMapUnderwayMoved,
+                tripMapAnchoredAtAnchor, tripReturnMarkerSeen, tripReboarded, tripDockedEmpty, tripDone, tripSaveReload;
+            public int tripMapPlayersMax, tripUnderwayPositions;
+            public List<string> tripTrace = new List<string>();
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
@@ -56,7 +63,8 @@ namespace DeepDive.P1.Lab
         private bool Event => Arg("-p3-event") == "1";
         private bool Record => Arg("-p3-record") == "1" || Event;
         private bool Town => Arg("-p3-town") == "1";
-        private bool Boat => Arg("-p3-boat") == "1";
+        private bool Trip => Arg("-p3-trip") == "1";
+        private bool Boat => Arg("-p3-boat") == "1" || Trip;
         private bool purchaseSent;
         private int townStep, townBefore;
         private float townNext, townSettleAt;
@@ -103,7 +111,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -180,7 +188,7 @@ namespace DeepDive.P1.Lab
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
                 if (host && elapsed > (Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Town ? 64 : Event ? 104 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -188,7 +196,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Town ? 68 : Event ? 108 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -211,6 +219,11 @@ namespace DeepDive.P1.Lab
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
+            if (Trip) result.passed &= result.tripBoarded && result.tripDuplicateBoardHeld && result.tripMapDockedAtDock &&
+                result.tripMapUnderwayMoved && result.tripMapAnchoredAtAnchor && result.tripDockedEmpty && result.tripDone &&
+                result.tripMapPlayersMax >= expected &&
+                result.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
+                (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload);
             Finish();
         }
 
@@ -242,6 +255,7 @@ namespace DeepDive.P1.Lab
                 if (Hunt && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHunt(local, players);
                 else if (Record && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeRecording(local, players);
                 else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
+                else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
             }
@@ -524,6 +538,233 @@ namespace DeepDive.P1.Lab
         // Host-only, authoritative: samples the real EconomyManager.BoatRepair (not the replicated
         // BoatPartsDone NetworkVariable) so the recorded sequence is the source of truth itself, not a mirror
         // of it, and records the exact 0/1/2/3 progression rather than just a before/after snapshot.
+        // ---- P3.3 trip: real owner inputs + RPCs against the real dock, seats, route and map -----------
+        // Walks the beach to the dock, boards through BoatTripPlayerSync's owner RPCs (host resolves the seat), the
+        // trip owner starts the route, the non-owner steps off at the anchorage (return marker must show) and back on,
+        // the owner recalls, everybody steps off at the dock. Every process samples ITS OWN map (BoatMapView.LastIcons).
+        private int tripStep;
+        private float tripStepAt, tripNext, tripDisembarkedAt;
+        private bool tripDupSent, tripDropSeen, tripOnBeach;
+        private float tripHostLogAt, tripMarkerSeatedSince;
+        private bool tripMarkerErrored;
+        private string tripLastPhase, tripSeatBefore;
+        private readonly HashSet<string> tripUnderwaySeen = new HashSet<string>();
+        private readonly HashSet<string> tripPositionsSeen = new HashSet<string>();
+
+        private void TripStep(int step)
+        {
+            result.tripTrace.Add($"step {tripStep}->{step} t={Time.realtimeSinceStartup - sceneStarted:F1}");
+            tripStep = step; tripStepAt = Time.realtimeSinceStartup; tripNext = 0;
+        }
+
+        private static float MapDist(MapIcon a, (float X, float Z) b) =>
+            Mathf.Sqrt((a.MapX - b.X) * (a.MapX - b.X) + (a.MapZ - b.Z) * (a.MapZ - b.Z));
+
+        private void ProbeTrip(NetworkPlayer local, int expected)
+        {
+            var sync = local.GetComponent<BoatTripPlayerSync>();
+            if (sync == null || !sync.IsSpawned) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var phase = (BoatTripPhase)sync.Phase.Value;
+            var phaseName = phase.ToString();
+            if (sync.BoatVisible.Value && tripLastPhase != phaseName)
+            { tripLastPhase = phaseName; result.tripPhases.Add(phaseName); }
+            SampleTripMap(sync, phase);
+
+            var owner = sync.AmOwner.Value;
+            var now = Time.realtimeSinceStartup;
+            if (tripStepAt == 0) tripStepAt = now;
+            if (tripStep < 90 && now - tripStepAt > 32f)
+            {
+                result.errors.Add($"trip step {tripStep} timeout phase={phaseName} seated={sync.SeatedCount.Value} seat={sync.MySeatId.Value} last={sync.LastReasonCode.Value}");
+                TripStep(99);
+            }
+
+            if (adapter.IsAuthority && tripStep >= 3 && tripStep < 90 && now >= tripHostLogAt && result.tripTrace.Count < 90)
+            {
+                tripHostLogAt = now + 1.5f;
+                var seen = string.Join(" ", FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(q => q.IsSpawned)
+                    .Select(q => $"P{q.OwnerClientId}={q.transform.position} seated={q.Seated.Value}"));
+                result.tripTrace.Add($"hostview phase={phaseName} step={tripStep} {seen}");
+            }
+
+            switch (tripStep)
+            {
+                case 0:   // walk from the water onto the beach and along it to the dock
+                {
+                    var dock = FindObjectsByType<RouteAnchor>(FindObjectsSortMode.None).FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.Dock);
+                    if (dock == null || !sync.BoatVisible.Value) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+                    var stand = new Vector3(dock.BoardingPosition.x + (adapter.IsAuthority ? -0.4f : 0.4f), dock.BoardingPosition.y, -3.6f);   // deck end, as close to the stern as the deck goes
+                    var toStand = stand - local.transform.position; toStand.y = 0;
+                    if (now - tripNext > 1.5f) { tripNext = now; result.tripTrace.Add($"walk pos={local.transform.position} onBeach={tripOnBeach} platMaxZ={(GameObject.Find("Beach_Platform") != null ? GameObject.Find("Beach_Platform").GetComponent<Collider>().bounds.max.z : 0f)}"); }
+                    if (toStand.magnitude > 0.1f)
+                    {
+                        // NextBeachWaypoint answers "how do I climb out of the water" and, once on the platform, "walk to
+                        // the stand" - but it decides that from z alone, so it would pull a diver standing on the ledge
+                        // (north of the platform) back towards the wade lane. Latch once on dry sand and walk from there.
+                        var strip = GameObject.Find("Beach_Platform");
+                        var stripCollider = strip != null ? strip.GetComponent<Collider>() : null;
+                        if (!tripOnBeach && stripCollider != null && local.transform.position.z <= stripCollider.bounds.max.z + 0.2f &&
+                            local.transform.position.y >= stripCollider.bounds.max.y - 0.3f)   // on the dry top, not still wading
+                            tripOnBeach = true;
+                        Vector3 target;
+                        if (!tripOnBeach) target = NextBeachWaypoint(local.transform.position, stand);
+                        else if (local.transform.position.z < -10f && Mathf.Abs(local.transform.position.x - stand.x) > 1f)
+                            target = new Vector3(stand.x, local.transform.position.y, -12.6f);   // along the sand to the jetty lane
+                        else target = stand;
+                        var heading = target - local.transform.position;
+                        var flat = heading; flat.y = 0;
+                        var yaw = Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg;
+                        local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * heading.normalized, yaw, 0);
+                        return;
+                    }
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    TripStep(1);
+                    return;
+                }
+                case 1:   // board: the HOST resolves the seat, the client never picks one
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (sync.IsSeated)
+                    {
+                        result.tripBoarded = true; result.tripSeatId = sync.MySeatId.Value.ToString();
+                        TripStep(2); return;
+                    }
+                    if (now >= tripNext)
+                    {
+                        tripNext = now + 1.2f; sync.RequestBoardNearestLocal();
+                        if (result.tripTrace.Count < 40) result.tripTrace.Add($"board pos={local.transform.position} boat={sync.BoatWorldPosition.Value} yaw={sync.BoatYaw.Value:F0} last={sync.LastReasonCode.Value} seated={sync.SeatedCount.Value}");
+                    }
+                    return;
+                case 2:   // everyone aboard; a repeat board request must neither move the seat nor add a passenger
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (sync.SeatedCount.Value < expected) return;
+                    if (!tripDupSent)
+                    {
+                        tripDupSent = true; tripNext = now + 1.0f;
+                        tripSeatBefore = sync.MySeatId.Value.ToString();
+                        sync.RequestBoardNearestLocal();
+                        return;
+                    }
+                    if (now < tripNext) return;
+                    result.tripDuplicateBoardHeld = sync.IsSeated && sync.MySeatId.Value.ToString() == tripSeatBefore &&
+                        sync.SeatedCount.Value == expected;
+                    if (!result.tripDuplicateBoardHeld) result.errors.Add($"duplicate board changed state seat={sync.MySeatId.Value} count={sync.SeatedCount.Value}");
+                    TripStep(3); return;
+                case 3:   // owner starts the route; everyone rides Outbound to Anchored
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (phase == BoatTripPhase.Anchored) { TripStep(4); return; }
+                    if (owner && phase == BoatTripPhase.Docked && now >= tripNext) { tripNext = now + 1.5f; sync.RequestStartRouteLocal(BoatTripIds.NearRouteId); }
+                    return;
+                case 4:   // anchorage: the non-owner steps off (return marker), the owner waits for the dip
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (phase != BoatTripPhase.Anchored) return;
+                    if (!owner)
+                    {
+                        if (sync.IsSeated) { if (now >= tripNext) { tripNext = now + 1.2f; sync.RequestDisembarkLocal(); } return; }
+                        if (tripDisembarkedAt == 0) tripDisembarkedAt = now;
+                        if (now - tripDisembarkedAt > 2.0f) TripStep(5);   // long enough for the return marker to be sampled
+                        return;
+                    }
+                    if (sync.SeatedCount.Value < expected) tripDropSeen = true;
+                    if (tripDropSeen) TripStep(6);
+                    return;
+                case 5:   // non-owner boards again beside the hull
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (sync.IsSeated) { result.tripReboarded = true; TripStep(7); return; }
+                    if (now >= tripNext)
+                    {
+                        tripNext = now + 1.2f; sync.RequestBoardNearestLocal();
+                        if (result.tripTrace.Count < 60) result.tripTrace.Add($"reboard pos={local.transform.position} boat={sync.BoatWorldPosition.Value} last={sync.LastReasonCode.Value}");
+                    }
+                    return;
+                case 6:   // owner waits until the party is whole again
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (sync.SeatedCount.Value < expected) return;
+                    TripStep(7); return;
+                case 7:   // owner recalls; everyone rides Inbound to Docked
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (phase == BoatTripPhase.Inbound) tripUnderwaySeen.Add("Inbound");
+                    if (phase == BoatTripPhase.Docked && tripUnderwaySeen.Contains("Inbound")) { TripStep(8); return; }
+                    if (owner && phase == BoatTripPhase.Anchored && sync.SeatedCount.Value >= expected && now >= tripNext)
+                    { tripNext = now + 1.5f; sync.RequestReturnLocal(); }
+                    return;
+                case 8:   // docked: everybody steps off; the boat is left empty
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!sync.IsSeated) { TripStep(9); return; }
+                    if (now >= tripNext) { tripNext = now + 1.2f; sync.RequestDisembarkLocal(); }
+                    return;
+                case 9:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (phase == BoatTripPhase.Docked && sync.SeatedCount.Value == 0) result.tripDockedEmpty = true;
+                    if (result.tripDockedEmpty) { result.tripDone = true; TripStep(90); }
+                    return;
+                default:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (adapter.IsAuthority && result.tripDone && !result.tripSaveReload) HostTripSaveCheck();
+                    return;
+            }
+        }
+
+        private void SampleTripMap(BoatTripPlayerSync sync, BoatTripPhase phase)
+        {
+            var icons = BoatMapView.LastIcons;
+            if (icons == null || icons.Count == 0 || !BoatMapView.LastHadRegion) return;
+            MapIcon dock = default, boat = default;
+            bool hasDock = false, hasBoat = false, marker = false;
+            var players = 0;
+            for (var i = 0; i < icons.Count; i++)
+            {
+                var icon = icons[i];
+                if (icon.IconId == BoatMapPresenter.DockIconId) { dock = icon; hasDock = true; }
+                else if (icon.IconId == BoatTripIds.BoatId) { boat = icon; hasBoat = true; }
+                else if (icon.IconId == BoatMapPresenter.ReturnMarkerIconId) marker = true;
+                else if (icon.IconId.StartsWith(BoatMapPresenter.PlayerIconPrefix, StringComparison.Ordinal)) players++;
+            }
+            result.tripMapPlayersMax = Math.Max(result.tripMapPlayersMax, players);
+            // The map refreshes every 0.1 s, so the icon list can lag the seat by a frame or two; only a marker that
+            // OUTLASTS that window while seated is a real defect.
+            if (marker && sync.IsSeated)
+            {
+                if (tripMarkerSeatedSince == 0) tripMarkerSeatedSince = Time.realtimeSinceStartup;
+                else if (Time.realtimeSinceStartup - tripMarkerSeatedSince > 0.6f && !tripMarkerErrored)
+                { tripMarkerErrored = true; result.errors.Add("return marker drawn while aboard"); }
+            }
+            else tripMarkerSeatedSince = 0;
+            if (!hasDock) return;
+
+            var region = FindFirstObjectByType<DiveRegionField>();
+            var anchors = FindObjectsByType<RouteAnchor>(FindObjectsSortMode.None);
+            var dockAnchor = anchors.FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.Dock);
+            var seaAnchor = anchors.FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.AnchorPoint);
+            if (region == null || dockAnchor == null || seaAnchor == null) return;
+            region.TryWorldToMap(dockAnchor.WorldPosition, out var expectedDock);
+            region.TryWorldToMap(seaAnchor.WorldPosition, out var expectedAnchor);
+
+            if (phase == BoatTripPhase.Docked && hasBoat && MapDist(dock, (expectedDock.x, expectedDock.y)) < 0.01f &&
+                MapDist(boat, (expectedDock.x, expectedDock.y)) < 0.01f) result.tripMapDockedAtDock = true;
+            if ((phase == BoatTripPhase.Outbound || phase == BoatTripPhase.Inbound) && hasBoat)
+            {
+                tripPositionsSeen.Add($"{Mathf.Round(boat.MapX * 50)}:{Mathf.Round(boat.MapZ * 50)}");
+                result.tripUnderwayPositions = tripPositionsSeen.Count;
+                if (result.tripUnderwayPositions >= 3) result.tripMapUnderwayMoved = true;
+            }
+            if (phase == BoatTripPhase.Anchored && hasBoat && MapDist(boat, (expectedAnchor.x, expectedAnchor.y)) < 0.01f)
+                result.tripMapAnchoredAtAnchor = true;
+            if (phase == BoatTripPhase.Anchored && !sync.IsSeated && marker) result.tripReturnMarkerSeen = true;
+        }
+
+        // Host only, after the party is back at the dock: the REAL EconomySaveStore round trip must leave the
+        // boat repaired and the trip manager Docked with no seats. A live trip is never in the save file.
+        private void HostTripSaveCheck()
+        {
+            var economy = adapter.GetComponent<EconomyManager>();
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var manager = adapter.GetComponent<BoatTripManager>();
+            var ok = store.SaveNow() && store.LoadNow() && economy.BoatRepair.Status == BoatRepairStatus.Repaired &&
+                manager != null && manager.State.Phase == BoatTripPhase.Docked && manager.State.Seats.Count == 0;
+            result.tripSaveReload = ok;
+            if (!ok) result.errors.Add("trip save/load check failed: " + store.LastError);
+        }
+
         private void HostSampleBoatRepair()
         {
             var state = adapter.GetComponent<EconomyManager>().BoatRepair;
