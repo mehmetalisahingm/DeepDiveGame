@@ -81,7 +81,7 @@ namespace DeepDive.Network
         public const float HullWidth = 2.4f;
         public const float HullLength = 5f;
 
-        [SerializeField, Min(0.25f)] private float boardingRange = 2.5f;
+        [SerializeField, Min(0.25f)] private float boardingRange = 2.75f;
         [SerializeField, Min(0.1f)] private float fallbackMoveSpeed = 4f;
         [SerializeField, Min(1f)] private float turnDegreesPerSecond = 120f;
         [SerializeField, Min(0.02f)] private float waypointTolerance = 0.2f;
@@ -326,7 +326,7 @@ namespace DeepDive.Network
                 var index = SeatIndex(pair.Value);
                 if (index < 0) continue;
                 var worldPosition = transform.TransformPoint(BoatSeatLayoutRules.LocalSeatOffsets[index]);
-                player.transform.SetPositionAndRotation(worldPosition, transform.rotation);
+                player.Teleport(new Pose(worldPosition, transform.rotation));
             }
         }
 
@@ -339,7 +339,8 @@ namespace DeepDive.Network
             var localExit = state.Phase == BoatTripPhase.Docked
                 ? new Vector3(0f, 0.4f, -3.3f)
                 : new Vector3(2f, 0f, 0.5f);
-            player.transform.SetPositionAndRotation(transform.TransformPoint(localExit), transform.rotation);
+            var exitPosition = transform.TransformPoint(localExit);
+            player.Teleport(new Pose(exitPosition, transform.rotation));
         }
 
         private void ReleaseAllPlayers()
