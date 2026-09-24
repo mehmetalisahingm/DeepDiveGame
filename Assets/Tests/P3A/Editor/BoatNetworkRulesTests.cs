@@ -11,6 +11,7 @@ namespace DeepDive.Tests.P3A
     public class BoatNetworkRulesTests
     {
         private const string DiverPrefabPath = "Assets/DeepDive/Network/Prefabs/NetworkDiver.prefab";
+        private const string BoatControllerPath = "Assets/DeepDive/Network/NetworkBoatController.cs";
 
         [Test]
         public void NearRouteLengthAndNominalDurationProduceExpectedSpeed()
@@ -71,6 +72,35 @@ namespace DeepDive.Tests.P3A
             Assert.IsNotNull(prefab, "NetworkDiver prefab missing");
             Assert.IsNotNull(prefab.GetComponent<BoatTripPlayerSync>(),
                 "BoatTripPlayerSync must be authored on the NGO player prefab before spawn");
+        }
+
+        [Test]
+        public void BoatSeatAuthorityUsesNetworkPlayerTeleportInsteadOfRawTransformWrites()
+        {
+            var script = AssetDatabase.LoadAssetAtPath<MonoScript>(BoatControllerPath);
+            Assert.IsNotNull(script, "NetworkBoatController source missing");
+            StringAssert.Contains("player.Teleport(new Pose(worldPosition, transform.rotation))", script.text);
+            StringAssert.Contains("player.Teleport(new Pose(exitPosition, transform.rotation))", script.text);
+            StringAssert.DoesNotContain("player.transform.SetPositionAndRotation", script.text,
+                "CharacterController can overwrite raw transform seat writes; use NetworkPlayer.Teleport");
+        }
+
+        [Test]
+        public void BoardingRangeIncludesDockClearanceMargin()
+        {
+            var go = new GameObject("BoatControllerTest");
+            try
+            {
+                var controller = go.AddComponent<NetworkBoatController>();
+                var serialized = new SerializedObject(controller);
+                var range = serialized.FindProperty("boardingRange");
+                Assert.IsNotNull(range);
+                Assert.AreEqual(2.75f, range.floatValue, 0.0001f);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
         }
     }
 }
