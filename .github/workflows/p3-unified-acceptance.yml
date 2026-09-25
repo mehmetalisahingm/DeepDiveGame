@@ -1,0 +1,117 @@
+name: P3.4 unified acceptance
+
+on:
+  push:
+    branches: ['p3/mehmet-unified-acceptance']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p3-unified-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Require Unity CI credentials
+        shell: bash
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
+            echo '::error::Unity CI licensing is not configured.'
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: EditMode tests
+        id: tests
+        uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          testMode: EditMode
+          artifactsPath: Logs/CI-Tests
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Windows integrated build
+        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          targetPlatform: StandaloneWindows64
+          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildWindows
+          versioning: None
+      - name: Upload integrated Windows build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p3-unified-windows-${{ github.sha }}
+          path: Builds/P1-Integrated
+          if-no-files-found: error
+          retention-days: 2
+      - name: Upload EditMode reports
+        if: always() && steps.tests.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p3-unified-editmode-${{ github.sha }}
+          path: Logs/CI-Tests/**/*.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  unified-2-process:
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: false
+          persist-credentials: false
+      - name: Download integrated Windows build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: p3-unified-windows-${{ github.sha }}
+          path: Builds/P1-Integrated
+      - name: Real 2-process P3.4 unified smoke
+        shell: pwsh
+        run: ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18942 -Unified -Capture
+      - name: Upload 2-process evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p3-unified-2p-${{ github.sha }}
+          path: Logs/P1-integrated-*
+          if-no-files-found: warn
+          retention-days: 7
+
+  unified-4-process:
+    needs: [build, unified-2-process]
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: false
+          persist-credentials: false
+      - name: Download integrated Windows build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: p3-unified-windows-${{ github.sha }}
+          path: Builds/P1-Integrated
+      - name: Real 4-process P3.4 unified smoke
+        shell: pwsh
+        run: ./tools/Test-P1-Integrated.ps1 -Players 4 -Port 18943 -Unified
+      - name: Upload 4-process evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p3-unified-4p-${{ github.sha }}
+          path: Logs/P1-integrated-*
+          if-no-files-found: warn
+          retention-days: 7
