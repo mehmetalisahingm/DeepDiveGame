@@ -45,6 +45,11 @@ namespace DeepDive.P1.Lab
                 tripMapAnchoredAtAnchor, tripReturnMarkerSeen, tripReboarded, tripDockedEmpty, tripDone, tripSaveReload;
             public int tripMapPlayersMax, tripUnderwayPositions;
             public List<string> tripTrace = new List<string>();
+            public List<int> dayNumbers = new List<int>(), daySummaries = new List<int>();
+            public bool dayClockAdvanced, dayMidnightClosed, daySavedOnDisk, dayReloadNoAdvance, dayReplayIgnored,
+                dayBedAccepted, dayEarlyGateHeld, dayEarlyClosed, dayHostDone, dayReloadPass;
+            public int dayStartMinute, dayLostDivers, dayMirroredLostDivers, dayFinalNumber, dayReloadNumber, dayReloadHistory, dayReloadMinute;
+            public int dayMirroredEarlyReason = -1, dayMirroredMidnightReason = -1;
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
@@ -63,6 +68,8 @@ namespace DeepDive.P1.Lab
         private bool Event => Arg("-p3-event") == "1";
         private bool Record => Arg("-p3-record") == "1" || Event;
         private bool Town => Arg("-p3-town") == "1";
+        private bool Day => Arg("-p4-day") == "1";
+        private bool DayReload => Arg("-p4-day-reload") == "1";
         private bool Trip => Arg("-p3-trip") == "1";
         private bool Boat => Arg("-p3-boat") == "1" || Trip;
         private bool purchaseSent;
@@ -111,7 +118,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -181,14 +188,17 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
+                if (Day) ObserveDay();
+                if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && elapsed > (Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -196,7 +206,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -219,6 +229,14 @@ namespace DeepDive.P1.Lab
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
+            if (Day) result.passed &= result.dayClockAdvanced &&
+                result.dayNumbers.SequenceEqual(new[] { 1, 2, 3 }) && result.daySummaries.SequenceEqual(new[] { 1, 2 }) &&
+                result.dayMirroredMidnightReason == (int)DayCloseReason.Midnight &&
+                result.dayMirroredEarlyReason == (int)DayCloseReason.EarlySleep &&
+                result.dayMirroredLostDivers == expected &&
+                (!host || (result.dayMidnightClosed && result.dayLostDivers == expected && result.daySavedOnDisk &&
+                    result.dayReloadNoAdvance && result.dayReplayIgnored && result.dayBedAccepted && result.dayEarlyGateHeld &&
+                    result.dayEarlyClosed && result.dayHostDone && result.dayFinalNumber == 3));
             if (Trip) result.passed &= result.tripBoarded && result.tripDuplicateBoardHeld && result.tripMapDockedAtDock &&
                 result.tripMapUnderwayMoved && result.tripMapAnchoredAtAnchor && result.tripDockedEmpty && result.tripDone &&
                 result.tripMapPlayersMax >= expected &&
@@ -538,6 +556,104 @@ namespace DeepDive.P1.Lab
         // Host-only, authoritative: samples the real EconomyManager.BoatRepair (not the replicated
         // BoatPartsDone NetworkVariable) so the recorded sequence is the source of truth itself, not a mirror
         // of it, and records the exact 0/1/2/3 progression rather than just a before/after snapshot.
+        // ---- P4.1 shared day: real host clock, real close through the real session/inventory/save --------------
+        // Day 1 runs to a real 00:00 (the host only raises the clock RATE, never sets the time): the open dive is
+        // closed through the normal return path (D07), one summary is produced, the next day is written to the
+        // campaign file, and every process's mirrored state follows. Day 2 then closes by sleep: the host's own bed
+        // must NOT close it while the connected guest is awake; the guest's bed does. Beds are entered through
+        // HomeBedInteraction, the seam Mehmet's physical bed layer (#88) will call - the physical part is his.
+        private int dayStage;
+        private float dayStageAt;
+        private ulong dayRequest = 1000;
+        private readonly List<int> dayNumbersSeen = new List<int>();
+        private readonly List<int> daySummariesSeen = new List<int>();
+
+        private void ObserveDay()
+        {
+            var local = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsOwner && p.IsSpawned);
+            var sync = local != null ? local.GetComponent<EconomyPlayerSync>() : null;
+            if (sync == null || !sync.IsSpawned) return;
+
+            var number = sync.DayNumber.Value;
+            if (dayNumbersSeen.Count == 0 || dayNumbersSeen[dayNumbersSeen.Count - 1] != number) dayNumbersSeen.Add(number);
+            result.dayNumbers = dayNumbersSeen;
+            var summary = sync.SummaryDayNumber.Value;
+            if (summary > 0 && (daySummariesSeen.Count == 0 || daySummariesSeen[daySummariesSeen.Count - 1] != summary))
+            {
+                daySummariesSeen.Add(summary);
+                if (summary == 1) result.dayMirroredLostDivers = sync.SummaryLostDivers.Value;
+                if (summary == 2) result.dayMirroredEarlyReason = sync.SummaryReason.Value;
+                if (summary == 1) result.dayMirroredMidnightReason = sync.SummaryReason.Value;
+            }
+            result.daySummaries = daySummariesSeen;
+            if (number == 1 && sync.DayClockMinute.Value > DayIds.DayStartMinute + 30) result.dayClockAdvanced = true;
+        }
+
+        private void HostDay(SessionState state)
+        {
+            var binding = adapter.GetComponent<DayNetworkBinding>();
+            var engine = binding != null ? binding.Engine : null;
+            if (engine == null) return;
+            var now = Time.realtimeSinceStartup;
+            if (dayStageAt == 0) dayStageAt = now;
+
+            switch (dayStage)
+            {
+                case 0:   // Dive is running with everybody in it: let the day's own clock reach 00:00, quickly.
+                    if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading ||
+                        SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene ||
+                        Time.realtimeSinceStartup - sceneStarted < 5f || engine.State.ActivePlayers.Count < result.maxPlayers) return;
+                    result.dayStartMinute = engine.ClockMinute;
+                    engine.GameMinutesPerRealSecond = 60f;
+                    dayStage = 1; dayStageAt = now;
+                    return;
+                case 1:   // 00:00 closes the day exactly once
+                    if (engine.DayNumber < 2) { if (now - dayStageAt > 40f) { result.errors.Add("day never closed at 00:00"); dayStage = 99; } return; }
+                    engine.GameMinutesPerRealSecond = 0.8f;   // no accidental second midnight during the checks
+                    var summary = engine.History.Count > 0 ? engine.History[0] : null;
+                    result.dayMidnightClosed = summary != null && summary.Reason == DayCloseReason.Midnight &&
+                        summary.CloseId == DayIds.CloseId(1) && engine.History.Count == 1;
+                    result.dayLostDivers = summary != null ? summary.LostDivers : -1;
+                    var store = adapter.GetComponent<EconomySaveStore>();
+                    var onDisk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+                    result.daySavedOnDisk = onDisk.HasDay && onDisk.Day.DayNumber == 2 &&
+                        onDisk.Day.ClosedCloseIds.Contains(DayIds.CloseId(1)) && onDisk.Day.SummaryHistory.Count == 1;
+                    var before = engine.DayNumber;
+                    result.dayReloadNoAdvance = store.LoadNow() && engine.DayNumber == before && engine.History.Count == 1;
+                    // A replay of day 1's close (same id) arriving now, on day 2, must do nothing.
+                    result.dayReplayIgnored = engine.BeginClose(DayCloseReason.Midnight, DayIds.CloseId(1)) == DayIds.CloseId(1) &&
+                        engine.History.Count == 1 && engine.DayNumber == before && engine.Phase != DayPhase.Closing;
+                    dayStage = 2; dayStageAt = now;
+                    return;
+                case 2:   // day 2: everyone is in the Return phase now. The host alone in bed must not close it.
+                    if (engine.Phase != DayPhase.Running || engine.State.ActivePlayers.Count < result.maxPlayers) return;
+                    var host = adapter.Connection.LocalPlayerId ?? new PlayerId(0);
+                    result.dayBedAccepted = HomeBedInteraction.TryEnterBed(host, DayIds.Bed0, dayRequest++).Accepted;
+                    dayStage = 3; dayStageAt = now;
+                    return;
+                case 3:
+                    if (now - dayStageAt < 1.5f) return;
+                    result.dayEarlyGateHeld = engine.DayNumber == 2 && engine.State.SleepingPlayers.Count == 1;
+                    var bed = 1;
+                    foreach (var id in engine.State.ActivePlayers)
+                    {
+                        if (engine.State.SleepingPlayers.Contains(id)) continue;
+                        HomeBedInteraction.TryEnterBed(id, DayIds.Beds[bed++], dayRequest++);
+                    }
+                    dayStage = 4; dayStageAt = now;
+                    return;
+                case 4:
+                    if (engine.DayNumber < 3) { if (now - dayStageAt > 10f) { result.errors.Add("day did not close when everyone slept"); dayStage = 99; } return; }
+                    var second = engine.History.Count > 1 ? engine.History[1] : null;
+                    result.dayEarlyClosed = second != null && second.Reason == DayCloseReason.EarlySleep &&
+                        second.CloseId == DayIds.CloseId(2) && engine.History.Count == 2;
+                    result.dayFinalNumber = engine.DayNumber;
+                    result.dayHostDone = true;
+                    dayStage = 5;
+                    return;
+            }
+        }
+
         // ---- P3.3 trip: real owner inputs + RPCs against the real dock, seats, route and map -----------
         // Walks the beach to the dock, boards through BoatTripPlayerSync's owner RPCs (host resolves the seat), the
         // trip owner starts the route, the non-owner steps off at the anchorage (return marker must show) and back on,
@@ -763,6 +879,22 @@ namespace DeepDive.P1.Lab
                 manager != null && manager.State.Phase == BoatTripPhase.Docked && manager.State.Seats.Count == 0;
             result.tripSaveReload = ok;
             if (!ok) result.errors.Add("trip save/load check failed: " + store.LastError);
+        }
+
+        // Second launch of the host on the SAME campaign file: the closed days must come back as they were.
+        private bool HostDayReload()
+        {
+            var binding = adapter.GetComponent<DayNetworkBinding>();
+            var engine = binding != null ? binding.Engine : null;
+            if (engine == null || adapter.Connection.Status != ConnectionStatus.Connected) return false;
+            result.dayReloadNumber = engine.DayNumber;
+            result.dayReloadHistory = engine.History.Count;
+            result.dayReloadMinute = engine.ClockMinute;
+            result.dayReloadPass = engine.DayNumber == 3 && engine.History.Count == 2 && engine.ClockMinute == DayIds.DayStartMinute &&
+                engine.Phase == DayPhase.Running && engine.History[0].CloseId == DayIds.CloseId(1) &&
+                engine.History[1].CloseId == DayIds.CloseId(2);
+            result.passed = result.dayReloadPass && result.errors.Count == 0;
+            return true;
         }
 
         private void HostSampleBoatRepair()
