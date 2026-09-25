@@ -109,7 +109,7 @@ jobs:
         run: ./tools/Test-P1-Integrated.ps1 -Players 4 -Port 18943 -Unified
       - name: Upload 4-process evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: p3-unified-4p-${{ github.sha }}
           path: Logs/P1-integrated-*
