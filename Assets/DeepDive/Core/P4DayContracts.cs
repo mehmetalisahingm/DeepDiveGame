@@ -203,6 +203,33 @@ namespace DeepDive.Core.Contracts
             LeaveHandler != null ? LeaveHandler(player, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
     }
 
+    // Mehmet's physical storage interaction (#88) validates the real player/storage/proximity and then calls
+    // this; EconomyManager (the one authority over pending items and the shared home storage) binds the
+    // handlers while it is the host. Unbound means "no storage authority here": every request is refused.
+    public static class HomeStorageInteraction
+    {
+        public static Func<PlayerId, string, ulong, TransactionResult> StoreHandler { get; private set; }
+        public static Func<PlayerId, string, ulong, TransactionResult> RetrieveHandler { get; private set; }
+
+        public static void Bind(Func<PlayerId, string, ulong, TransactionResult> store, Func<PlayerId, string, ulong, TransactionResult> retrieve)
+        {
+            StoreHandler = store;
+            RetrieveHandler = retrieve;
+        }
+
+        public static void Unbind(Func<PlayerId, string, ulong, TransactionResult> store, Func<PlayerId, string, ulong, TransactionResult> retrieve)
+        {
+            if (StoreHandler == store) StoreHandler = null;
+            if (RetrieveHandler == retrieve) RetrieveHandler = null;
+        }
+
+        public static TransactionResult TryStore(PlayerId player, string itemId, ulong requestId) =>
+            StoreHandler != null ? StoreHandler(player, itemId, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
+
+        public static TransactionResult TryRetrieve(PlayerId player, string itemId, ulong requestId) =>
+            RetrieveHandler != null ? RetrieveHandler(player, itemId, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
+    }
+
     // ---- save shapes (plain Serializable so JsonUtility writes them; nothing here is a scene type) ----
 
     [Serializable]

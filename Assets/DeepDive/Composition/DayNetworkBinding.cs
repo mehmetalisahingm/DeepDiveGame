@@ -43,7 +43,10 @@ namespace DeepDive.Composition
         private Action boatDelegate;
         private Action<DaySummary> summaryDelegate;
         private Action stateDelegate;
+        private Action stateDelegateStorage;
         private bool dirty;
+        private Func<PlayerId, string, ulong, TransactionResult> storeDelegate;
+        private Func<PlayerId, string, ulong, TransactionResult> retrieveDelegate;
 
         public DayEngine Engine => day != null ? day.Engine : null;
 
@@ -121,6 +124,9 @@ namespace DeepDive.Composition
             enterDelegate = day.Engine.TryEnterBed;
             leaveDelegate = day.Engine.TryLeaveBed;
             HomeBedInteraction.Bind(enterDelegate, leaveDelegate);
+            storeDelegate = economy.TryStoreItem;
+            retrieveDelegate = economy.TryRetrieveItem;
+            HomeStorageInteraction.Bind(storeDelegate, retrieveDelegate);
 
             settledDelegate = (id, count, grams, earned, isCatch) =>
                 day.Engine.RecordSale(id, isCatch ? count : 0, isCatch ? grams : 0, earned);
@@ -128,6 +134,8 @@ namespace DeepDive.Composition
             boatDelegate = ReportBoatProgress;
             summaryDelegate = OnSummary;
             stateDelegate = () => dirty = true;
+            stateDelegateStorage = () => dirty = true;
+            economy.OnStorageChanged += stateDelegateStorage;
             economy.OnSettled += settledDelegate;
             economy.OnSpent += spentDelegate;
             economy.OnBoatRepairChanged += boatDelegate;
@@ -142,11 +150,13 @@ namespace DeepDive.Composition
         {
             if (!bound) return;
             HomeBedInteraction.Unbind(enterDelegate, leaveDelegate);
+            HomeStorageInteraction.Unbind(storeDelegate, retrieveDelegate);
             if (economy != null)
             {
                 economy.OnSettled -= settledDelegate;
                 economy.OnSpent -= spentDelegate;
                 economy.OnBoatRepairChanged -= boatDelegate;
+                economy.OnStorageChanged -= stateDelegateStorage;
             }
             if (day != null)
             {
@@ -184,6 +194,7 @@ namespace DeepDive.Composition
                 if (!syncs[i].IsSpawned || !syncs[i].IsServer) continue;
                 syncs[i].PublishDay(state);
                 syncs[i].PublishSummary(day.Engine.LastSummary);
+                syncs[i].PublishStorage(economy.StoredCount);
             }
         }
 
