@@ -8,7 +8,8 @@ namespace DeepDive.Economy
     {
         // v2 (P3.2-C) adds pending turn-ins and boat repair progress. v1 saves stay loadable: the new
         // lists are simply absent/empty, which means "nothing pending, boat still broken".
-        public const int CurrentSchemaVersion = 2;
+        // v3 (P4.1-C) adds the campaign day. v1/v2 files load as HasDay=false, which means "day 1, 08:00".
+        public const int CurrentSchemaVersion = 3;
         public const int OldestSupportedSchemaVersion = 1;
 
         public int SchemaVersion = CurrentSchemaVersion;
@@ -21,6 +22,8 @@ namespace DeepDive.Economy
         public List<EconomyLoadoutSave> Loadouts = new List<EconomyLoadoutSave>();
         public List<PendingTurnInSave> PendingTurnIns = new List<PendingTurnInSave>();
         public List<string> BoatPartIds = new List<string>();
+        public bool HasDay;
+        public DeepDive.Core.Contracts.DaySaveData Day = new DeepDive.Core.Contracts.DaySaveData();
     }
 
     [Serializable]

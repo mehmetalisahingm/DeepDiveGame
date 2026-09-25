@@ -26,6 +26,25 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> LastServiceAmount = new NetworkVariable<int>();
         public readonly NetworkVariable<int> LastServiceItems = new NetworkVariable<int>();
 
+        // P4.1 shared day, host-written, mirrored to every player like the balance. Clients only display it.
+        public readonly NetworkVariable<int> DayNumber = new NetworkVariable<int>(1);
+        public readonly NetworkVariable<int> DayClockMinute = new NetworkVariable<int>(DayIds.DayStartMinute);
+        public readonly NetworkVariable<byte> DayPhaseValue = new NetworkVariable<byte>();
+        public readonly NetworkVariable<int> DaySleepingCount = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> DayActiveCount = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> DayWeatherSeed = new NetworkVariable<int>();
+        // The last closed day's summary (a new number appears in SummaryDayNumber exactly once per close).
+        public readonly NetworkVariable<int> SummaryDayNumber = new NetworkVariable<int>();
+        public readonly NetworkVariable<byte> SummaryReason = new NetworkVariable<byte>();
+        public readonly NetworkVariable<int> SummaryFishSold = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryIncome = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryExpenses = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryDiscoveries = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryLostDivers = new NetworkVariable<int>();
+
+        private float _summaryShownUntil;
+        private int _observedSummaryDay;
+
         private EconomyManager _economy;
         private ulong _observedRequestId;
         private ulong _observedServiceRequestId;
@@ -99,6 +118,30 @@ namespace DeepDive.Economy
             if (BoatPartsMask.Value != boatPartsMask) BoatPartsMask.Value = boatPartsMask;
         }
 
+        public void PublishDay(CampaignDayState state)
+        {
+            if (!IsServer) return;
+            if (DayNumber.Value != state.DayNumber) DayNumber.Value = state.DayNumber;
+            if (DayClockMinute.Value != state.ClockMinute) DayClockMinute.Value = state.ClockMinute;
+            if (DayPhaseValue.Value != (byte)state.Phase) DayPhaseValue.Value = (byte)state.Phase;
+            if (DaySleepingCount.Value != state.SleepingPlayers.Count) DaySleepingCount.Value = state.SleepingPlayers.Count;
+            if (DayActiveCount.Value != state.ActivePlayers.Count) DayActiveCount.Value = state.ActivePlayers.Count;
+            if (DayWeatherSeed.Value != state.WeatherSeed) DayWeatherSeed.Value = state.WeatherSeed;
+        }
+
+        public void PublishSummary(DaySummary summary)
+        {
+            if (!IsServer || summary == null || summary.DayNumber <= SummaryDayNumber.Value) return;
+            SummaryReason.Value = (byte)summary.Reason;
+            SummaryFishSold.Value = summary.FishSold;
+            SummaryIncome.Value = summary.Income;
+            SummaryExpenses.Value = summary.Expenses;
+            SummaryDiscoveries.Value = summary.DiscoveredSpeciesIds.Count;
+            SummaryLostDivers.Value = summary.LostDivers;
+            // Written last, so an observer that sees the day number sees the whole summary.
+            SummaryDayNumber.Value = summary.DayNumber;
+        }
+
         public void RequestPurchase(string itemId)
         {
             if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(itemId)) return;
@@ -127,6 +170,11 @@ namespace DeepDive.Economy
             _observedBalance = SharedBalance.Value;
 
             ObserveServiceOutcome();
+            if (SummaryDayNumber.Value != _observedSummaryDay)
+            {
+                _observedSummaryDay = SummaryDayNumber.Value;
+                _summaryShownUntil = Time.unscaledTime + 12f;
+            }
 
             if (LastRequestId.Value == 0 || LastRequestId.Value == _observedRequestId) return;
             _observedRequestId = LastRequestId.Value;
@@ -171,6 +219,7 @@ namespace DeepDive.Economy
                 $"BEKLEYEN: {PendingCatches.Value} AV / {PendingRecordings.Value} KAYIT");
             GUI.Box(new Rect(20, 222, 230, 24), $"SANDAL ONARIM: {BoatPartsDone.Value}/{BoatRepairParts.All.Count}");
             GUI.Box(new Rect(20, 250, 230, 24), "F: NPC ILE ETKILESIM");
+            DrawDay();
 
             if (Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusMessage))
                 GUI.Box(new Rect(20, 278, 260, 24), _statusMessage);
@@ -184,6 +233,36 @@ namespace DeepDive.Economy
             ShopRow(202, "Sandal motoru | 120", "MOTOR AL", BoatRepairParts.Engine);
             ShopRow(240, "Sandal yakit deposu | 120", "DEPO AL", BoatRepairParts.FuelTank);
         }
+
+        private void DrawDay()
+        {
+            var minute = DayClockMinute.Value;
+            var phase = (DayPhase)DayPhaseValue.Value;
+            var label = phase == DayPhase.Running
+                ? $"GUN {DayNumber.Value}  {minute / 60 % 24:00}:{minute % 60:00}   UYKU {DaySleepingCount.Value}/{DayActiveCount.Value}"
+                : $"GUN {DayNumber.Value}  {DayPhaseLabel(phase)}";
+            var wide = 320f;
+            GUI.Box(new Rect((Screen.width - wide) * 0.5f, 8, wide, 24), label);
+            if (minute >= DayIds.FirstWarningMinute && phase == DayPhase.Running)
+                GUI.Box(new Rect((Screen.width - wide) * 0.5f, 36, wide, 24),
+                    minute >= DayIds.SecondWarningMinute ? "GECE YARISINA 1 SAAT: DON!" : "GECE YARISINA 2 SAAT KALDI");
+
+            if (Time.unscaledTime >= _summaryShownUntil || SummaryDayNumber.Value <= 0) return;
+            var box = new Rect((Screen.width - 360f) * 0.5f, 70, 360, 128);
+            GUI.Box(box, $"GUN {SummaryDayNumber.Value} OZETI" + ((DayCloseReason)SummaryReason.Value == DayCloseReason.Midnight ? " (00:00)" : " (UYKU)"));
+            GUI.Label(new Rect(box.x + 12, box.y + 26, 340, 20), $"Satilan av: {SummaryFishSold.Value}");
+            GUI.Label(new Rect(box.x + 12, box.y + 46, 340, 20), $"Gelir {SummaryIncome.Value} / Gider {SummaryExpenses.Value} / Net {SummaryIncome.Value - SummaryExpenses.Value}");
+            GUI.Label(new Rect(box.x + 12, box.y + 66, 340, 20), $"Yeni tur: {SummaryDiscoveries.Value}");
+            GUI.Label(new Rect(box.x + 12, box.y + 86, 340, 20), $"Geri donemeyen dalgic: {SummaryLostDivers.Value}");
+        }
+
+        private static string DayPhaseLabel(DayPhase phase) => phase switch
+        {
+            DayPhase.Closing => "GUN KAPANIYOR",
+            DayPhase.Summary => "GUN OZETI",
+            DayPhase.Morning => "SABAH",
+            _ => ""
+        };
 
         private void ShopRow(float y, string label, string button, string itemId)
         {

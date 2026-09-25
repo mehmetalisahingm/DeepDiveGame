@@ -176,6 +176,8 @@ namespace DeepDive.Trip
         {
             var key = (player, requestId, OpStartRoute);
             if (_processed.TryGetValue(key, out var replayed)) return replayed;
+            // A departure is new travel: refused while the day is closing (P4.1), not cached.
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", _revision);
 
             TransactionResult result;
             if (_phase != BoatTripPhase.Docked)

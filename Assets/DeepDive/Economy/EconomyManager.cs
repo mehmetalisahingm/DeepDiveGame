@@ -24,6 +24,12 @@ namespace DeepDive.Economy
         public event Action OnPendingChanged;
         public event Action OnBoatRepairChanged;
 
+        // P4.1 day ledger feeds. A settled hand-in: (deal id, item count, total grams, credits, was it catches).
+        // The deal id is the joined ids of the handed-in items, so it is unique (each item leaves the queue once).
+        public event Action<string, int, int, int, bool> OnSettled;
+        // A spend that was committed and saved: (spend id, credits).
+        public event Action<string, int> OnSpent;
+
         public int SharedBalance { get; private set; }
         public int Revision { get; private set; }
         public string LastCheckpointId { get; private set; } = "";
@@ -301,6 +307,8 @@ namespace DeepDive.Economy
             EnsureSubscribed();
             var key = (player, requestId, op);
             if (_processedTurnIns.TryGetValue(key, out var replayed)) return replayed;
+            // Closing the day locks new trade; not cached, so the same request id can succeed tomorrow.
+            if (DayLock.IsLocked) return TurnInResult.Reject(requestId, "DayClosing", Revision);
 
             var items = new List<PendingItem>();
             var earned = 0;
@@ -340,6 +348,10 @@ namespace DeepDive.Economy
                 }
 
                 result = TurnInResult.Ok(requestId, earned, items.Count, Revision);
+                var ids = new List<string>(items.Count);
+                var grams = 0;
+                foreach (var item in items) { ids.Add(item.ItemId); grams += item.WeightGrams; }
+                OnSettled?.Invoke(string.Join("+", ids), items.Count, grams, earned, kind == TurnInKind.Catch);
             }
 
             _processedTurnIns[key] = result;
@@ -358,6 +370,7 @@ namespace DeepDive.Economy
             EnsureSubscribed();
             var requestKey = (player, requestId, OpEquipment);
             if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
 
             TransactionResult result;
             if (string.IsNullOrWhiteSpace(equipmentId) || !_catalog.TryGetValue(equipmentId, out var definition))
@@ -389,7 +402,11 @@ namespace DeepDive.Economy
                     Revision = previousRevision;
                     result = TransactionResult.Reject(requestId, "SaveFailed", Revision);
                 }
-                else result = TransactionResult.Ok(requestId, Revision);
+                else
+                {
+                    result = TransactionResult.Ok(requestId, Revision);
+                    OnSpent?.Invoke("equip-" + equipmentId + "-" + player.Value, definition.Price);
+                }
             }
 
             _processedRequests[requestKey] = result;
@@ -424,6 +441,7 @@ namespace DeepDive.Economy
             EnsureSubscribed();
             var requestKey = (player, requestId, OpBoatPart);
             if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
 
             TransactionResult result;
             var cost = source == BoatPartSource.Purchased ? BoatPartPrice : 0;
@@ -449,6 +467,7 @@ namespace DeepDive.Economy
                     return TransactionResult.Reject(requestId, "SaveFailed", Revision);
                 }
                 result = TransactionResult.Ok(requestId, Revision);
+                if (cost > 0) OnSpent?.Invoke("boat-part-" + partId, cost);
             }
 
             _processedRequests[requestKey] = result;
