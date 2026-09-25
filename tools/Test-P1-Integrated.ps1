@@ -42,6 +42,7 @@ function Wait-P1Marker([string]$Marker, [int]$Seconds) {
     } while (-not $p1Found -and (Get-Date) -lt $p1Limit)
     if (-not $p1Found) { throw "Host asamaya gelemedi: $Marker; $p1Run" }
 }
+function Test-True($Value) { return $Value -eq $true }
 try {
     Start-P1Integrated 'host' 'host'
     Start-Sleep -Seconds 2
@@ -58,10 +59,13 @@ try {
     $seconds = if ($Unified) { 360 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Hunt -or $Record) { 90 } else { 60 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
+
     $p1Failures = @()
+    $p1Parsed = @()
     foreach ($p1Entry in $p1Processes) {
         if (-not (Test-Path -LiteralPath $p1Entry.Report)) { $p1Failures += "$($p1Entry.Name): rapor yok"; continue }
         $p1Result = Get-Content -Raw -LiteralPath $p1Entry.Report | ConvertFrom-Json
+        $p1Parsed += [pscustomobject]@{Entry=$p1Entry; Result=$p1Result}
         if ($Unified) {
             [pscustomobject]@{Process=$p1Entry.Name; Passed=$p1Result.passed; Players=$p1Result.maxPlayers;
                 Camera=$p1Result.cameraBought; Recording=$p1Result.recordingStopped; Hunt=$p1Result.catchDespawned;
@@ -73,6 +77,50 @@ try {
         }
         if (-not $p1Result.passed -or $p1Entry.Process.ExitCode -ne 0) { $p1Failures += "$($p1Entry.Name): $($p1Result.errors -join ', ')" }
     }
+
+    if ($Unified -and $p1Parsed.Count -eq $Players) {
+        $hostEvidence = @($p1Parsed | Where-Object {$_.Entry.Name -eq 'host'})
+        if ($hostEvidence.Count -ne 1) { $p1Failures += 'unified: host raporu tek degil' }
+        else {
+            $h = $hostEvidence[0].Result
+            $hostOk = (Test-True $h.fixtureBalanceSeeded) -and (Test-True $h.recordingClaimed) -and
+                (Test-True $h.inventoryAdded) -and (Test-True $h.safeReturned) -and
+                (Test-True $h.boatHullFound) -and (Test-True $h.boatFuelTankFound) -and
+                (Test-True $h.boatDuplicateRejected) -and (Test-True $h.tripUniqueSeats) -and
+                (Test-True $h.servicesCleared) -and (Test-True $h.saveReload) -and
+                $h.boatPartsSequence.Count -ge 4 -and $h.boatPartsSequence[-1] -eq 3
+            if (-not $hostOk) { $p1Failures += 'unified host evidence eksik' }
+        }
+
+        $actors = @($p1Parsed | Where-Object {$_.Entry.Name -ne 'host' -and $_.Result.cameraBought})
+        if ($Players -eq 1) { $actors = $hostEvidence }
+        if ($actors.Count -ne 1) { $p1Failures += "unified: tam bir actor bekleniyordu, bulundu=$($actors.Count)" }
+        else {
+            $a = $actors[0].Result
+            $actorOk = (Test-True $a.cameraBought) -and (Test-True $a.cameraDuplicateRejected) -and
+                (Test-True $a.recordingStarted) -and (Test-True $a.recordingStopped) -and
+                (Test-True $a.catchObserved) -and (Test-True $a.catchDespawned) -and
+                (Test-True $a.boatEngineFound) -and (Test-True $a.recordingTurnedIn) -and
+                (Test-True $a.recordingDuplicateNoPay) -and (Test-True $a.fishSold) -and
+                (Test-True $a.fishDuplicateNoPay)
+            if (-not $actorOk) { $p1Failures += 'unified actor evidence eksik' }
+        }
+
+        $markerEvidence = @($p1Parsed | Where-Object {$_.Result.tripReturnMarkerSeen -and $_.Result.tripReboarded})
+        if ($markerEvidence.Count -lt 1) { $p1Failures += 'unified: anchor return marker + reboard kaniti yok' }
+
+        foreach ($row in $p1Parsed) {
+            $r = $row.Result
+            $commonOk = (Test-True $r.boatRepaired) -and (Test-True $r.boatPartsHidden) -and
+                (Test-True $r.tripBoarded) -and (Test-True $r.tripDuplicateBoardHeld) -and
+                (Test-True $r.tripMapDockedAtDock) -and (Test-True $r.tripMapUnderwayMoved) -and
+                (Test-True $r.tripMapAnchoredAtAnchor) -and (Test-True $r.tripDockedEmpty) -and
+                (Test-True $r.tripDone) -and $r.tripMapPlayersMax -ge $Players -and
+                (($r.tripPhases -join ',') -eq 'Docked,Outbound,Anchored,Inbound,Docked')
+            if (-not $commonOk) { $p1Failures += "unified common evidence eksik: $($row.Entry.Name)" }
+        }
+    }
+
     Write-Output "Yerel entegre test raporlari: $p1Run"
     if ($p1Failures.Count -gt 0) { throw ($p1Failures -join '; ') }
 } finally {
