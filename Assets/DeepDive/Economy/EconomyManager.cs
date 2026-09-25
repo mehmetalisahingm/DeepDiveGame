@@ -18,11 +18,17 @@ namespace DeepDive.Economy
         private const byte OpSellCatches = 2;
         private const byte OpTurnInRecordings = 3;
         private const byte OpBoatPart = 4;
+        private const byte OpStore = 5;
+        private const byte OpRetrieve = 6;
+
+        // Shared home storage (P4.1). Slots, not weight: what limits carrying is the bag rule on retrieval.
+        public const int StorageCapacityItems = 40;
 
         public event Action OnBalanceChanged;
         public event Action<PlayerId> OnLoadoutChanged;
         public event Action OnPendingChanged;
         public event Action OnBoatRepairChanged;
+        public event Action OnStorageChanged;
 
         // P4.1 day ledger feeds. A settled hand-in: (deal id, item count, total grams, credits, was it catches).
         // The deal id is the joined ids of the handed-in items, so it is unique (each item leaves the queue once).
@@ -60,6 +66,7 @@ namespace DeepDive.Economy
         private readonly HashSet<string> _soldCaptureIds = new HashSet<string>();
         private readonly HashSet<string> _paidRecordingIds = new HashSet<string>();
         private readonly List<PendingItem> _pending = new List<PendingItem>();
+        private readonly List<PendingItem> _stored = new List<PendingItem>();
         private readonly List<string> _boatParts = new List<string>();
         private readonly Dictionary<(PlayerId, ulong, byte), TransactionResult> _processedRequests =
             new Dictionary<(PlayerId, ulong, byte), TransactionResult>();
@@ -186,6 +193,117 @@ namespace DeepDive.Economy
             foreach (var item in _pending)
                 if (item.Kind == kind && CanHandIn(item, player)) count++;
             return count;
+        }
+
+        // ---- Shared home storage ---------------------------------------------------------------
+        // A safe, unpaid catch can be parked at home and taken back out to be sold. An item is in exactly
+        // one place - carried/pending OR stored - because the two moves below are single atomic steps
+        // (remove from one list, add to the other, write the save; any failure restores both). A stored
+        // item is not in _pending, so no NPC can pay it, and it cannot be sold twice or stored twice.
+
+        public IReadOnlyList<PendingTurnInState> StoredItems()
+        {
+            var list = new List<PendingTurnInState>(_stored.Count);
+            foreach (var item in _stored) list.Add(item.ToState());
+            return list;
+        }
+
+        public int StoredCount => _stored.Count;
+
+        // Total weight of the unpaid catches this player is personally carrying (the bag rule for retrieval).
+        private int CarriedGrams(PlayerId player)
+        {
+            var grams = 0;
+            foreach (var item in _pending)
+                if (item.Kind == TurnInKind.Catch && !item.Shared && item.Carrier.Equals(player)) grams += item.WeightGrams;
+            return grams;
+        }
+
+        public TransactionResult TryStoreItem(PlayerId player, string itemId, ulong requestId)
+        {
+            EnsureSubscribed();
+            var key = (player, requestId, OpStore);
+            if (_processedRequests.TryGetValue(key, out var replayed)) return replayed;
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
+
+            TransactionResult result;
+            var item = FindPending(TurnInKind.Catch, itemId);
+            if (requestId == 0 || string.IsNullOrWhiteSpace(itemId) || item == null || !CanHandIn(item, player))
+                result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            else if (_stored.Count >= StorageCapacityItems)
+                result = TransactionResult.Reject(requestId, "StorageFull", Revision);
+            else
+            {
+                var previousRevision = Revision;
+                _pending.Remove(item);
+                _stored.Add(item);
+                Revision++;
+                if (!Persist())
+                {
+                    _stored.Remove(item);
+                    _pending.Add(item);
+                    Revision = previousRevision;
+                    // Not cached: the same request id may be retried once the disk recovers.
+                    return TransactionResult.Reject(requestId, "SaveFailed", Revision);
+                }
+                result = TransactionResult.Ok(requestId, Revision);
+            }
+
+            _processedRequests[key] = result;
+            if (result.Accepted)
+            {
+                OnPendingChanged?.Invoke();
+                OnStorageChanged?.Invoke();
+            }
+            return result;
+        }
+
+        // Taking an item out makes the caller its carrier again, so the bag capacity applies.
+        public TransactionResult TryRetrieveItem(PlayerId player, string itemId, ulong requestId)
+        {
+            EnsureSubscribed();
+            var key = (player, requestId, OpRetrieve);
+            if (_processedRequests.TryGetValue(key, out var replayed)) return replayed;
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
+
+            PendingItem item = null;
+            foreach (var stored in _stored)
+                if (string.Equals(stored.ItemId, itemId, StringComparison.Ordinal)) { item = stored; break; }
+
+            TransactionResult result;
+            if (requestId == 0 || item == null)
+                result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            else if (CarriedGrams(player) + item.WeightGrams > InventoryManager.CapacityGrams)
+                result = TransactionResult.Reject(requestId, "InventoryFull", Revision);
+            else
+            {
+                var previousRevision = Revision;
+                var previousCarrier = item.Carrier;
+                var previousShared = item.Shared;
+                _stored.Remove(item);
+                item.Carrier = player;
+                item.Shared = false;
+                _pending.Add(item);
+                Revision++;
+                if (!Persist())
+                {
+                    _pending.Remove(item);
+                    item.Carrier = previousCarrier;
+                    item.Shared = previousShared;
+                    _stored.Add(item);
+                    Revision = previousRevision;
+                    return TransactionResult.Reject(requestId, "SaveFailed", Revision);
+                }
+                result = TransactionResult.Ok(requestId, Revision);
+            }
+
+            _processedRequests[key] = result;
+            if (result.Accepted)
+            {
+                OnPendingChanged?.Invoke();
+                OnStorageChanged?.Invoke();
+            }
+            return result;
         }
 
         private static bool CanHandIn(PendingItem item, PlayerId player) =>
@@ -504,6 +622,23 @@ namespace DeepDive.Economy
                 });
             }
 
+            foreach (var item in _stored)
+            {
+                data.StoredItems.Add(new PendingTurnInSave
+                {
+                    ItemId = item.ItemId,
+                    Kind = (byte)item.Kind,
+                    SourceDiveId = item.DiveId,
+                    SubjectId = item.SubjectId,
+                    WeightGrams = item.WeightGrams,
+                    Quality = item.Quality,
+                    ValidDurationSeconds = item.ValidDurationSeconds,
+                    CarrierPlayerId = 0,
+                    SharedEscrow = true,
+                    Revision = item.Revision
+                });
+            }
+
             foreach (var item in _pending)
             {
                 // Only the host has a persistent id (D06); anyone else's item becomes shared escrow.
@@ -539,6 +674,7 @@ namespace DeepDive.Economy
             _paidRecordingIds.Clear();
             _loadout.Clear();
             _pending.Clear();
+            _stored.Clear();
             _boatParts.Clear();
             _processedRequests.Clear();
             _processedTurnIns.Clear();
@@ -567,15 +703,46 @@ namespace DeepDive.Economy
             }
 
             RestorePending(data.PendingTurnIns);
+            RestoreStored(data.StoredItems);
             if (data.BoatPartIds != null)
                 foreach (var partId in data.BoatPartIds)
                     if (BoatRepairParts.IsPart(partId) && !_boatParts.Contains(partId)) _boatParts.Add(partId);
 
             OnBalanceChanged?.Invoke();
             OnPendingChanged?.Invoke();
+            OnStorageChanged?.Invoke();
             OnBoatRepairChanged?.Invoke();
             foreach (var player in _loadout.Keys) OnLoadoutChanged?.Invoke(player);
             return true;
+        }
+
+        // A stored catch that an edited/old file also lists as pending or already paid is dropped: an item is
+        // never in two places, and a paid id never comes back.
+        private void RestoreStored(List<PendingTurnInSave> saved)
+        {
+            if (saved == null) return;
+            foreach (var entry in saved)
+            {
+                if (entry == null || string.IsNullOrWhiteSpace(entry.ItemId) || (TurnInKind)entry.Kind != TurnInKind.Catch) continue;
+                if (_soldCaptureIds.Contains(entry.ItemId) || FindPending(TurnInKind.Catch, entry.ItemId) != null) continue;
+                var duplicate = false;
+                foreach (var stored in _stored) if (stored.ItemId == entry.ItemId) duplicate = true;
+                if (duplicate || _stored.Count >= StorageCapacityItems) continue;
+
+                _stored.Add(new PendingItem
+                {
+                    ItemId = entry.ItemId,
+                    Kind = TurnInKind.Catch,
+                    DiveId = entry.SourceDiveId ?? "",
+                    SubjectId = entry.SubjectId ?? "",
+                    WeightGrams = Math.Max(0, entry.WeightGrams),
+                    Quality = entry.Quality,
+                    ValidDurationSeconds = entry.ValidDurationSeconds,
+                    Carrier = default,
+                    Shared = true,
+                    Revision = entry.Revision
+                });
+            }
         }
 
         private void RestorePending(List<PendingTurnInSave> saved)

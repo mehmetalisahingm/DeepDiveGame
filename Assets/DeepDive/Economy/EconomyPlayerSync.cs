@@ -42,6 +42,8 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> SummaryDiscoveries = new NetworkVariable<int>();
         public readonly NetworkVariable<int> SummaryLostDivers = new NetworkVariable<int>();
 
+        public readonly NetworkVariable<int> StoredCatches = new NetworkVariable<int>();
+
         private float _summaryShownUntil;
         private int _observedSummaryDay;
 
@@ -138,6 +140,11 @@ namespace DeepDive.Economy
             if (DayWeatherSeed.Value != state.WeatherSeed) DayWeatherSeed.Value = state.WeatherSeed;
         }
 
+        public void PublishStorage(int storedCount)
+        {
+            if (IsServer && StoredCatches.Value != storedCount) StoredCatches.Value = storedCount;
+        }
+
         public void PublishSummary(DaySummary summary)
         {
             if (!IsServer || summary == null || summary.DayNumber <= SummaryDayNumber.Value) return;
@@ -228,6 +235,7 @@ namespace DeepDive.Economy
                 $"BEKLEYEN: {PendingCatches.Value} AV / {PendingRecordings.Value} KAYIT");
             GUI.Box(new Rect(20, 222, 230, 24), $"SANDAL ONARIM: {BoatPartsDone.Value}/{BoatRepairParts.All.Count}");
             GUI.Box(new Rect(20, 250, 230, 24), "F: NPC ILE ETKILESIM");
+            GUI.Box(new Rect(20, 138, 230, 24), $"DEPO: {StoredCatches.Value} AV");
             DrawDay();
 
             if (Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusMessage))

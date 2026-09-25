@@ -22,6 +22,8 @@ namespace DeepDive.Economy
         public List<EconomyLoadoutSave> Loadouts = new List<EconomyLoadoutSave>();
         public List<PendingTurnInSave> PendingTurnIns = new List<PendingTurnInSave>();
         public List<string> BoatPartIds = new List<string>();
+        // v3: safe catches parked in the shared home storage. Always shared (D06: no persistent non-host ids).
+        public List<PendingTurnInSave> StoredItems = new List<PendingTurnInSave>();
         public bool HasDay;
         public DeepDive.Core.Contracts.DaySaveData Day = new DeepDive.Core.Contracts.DaySaveData();
     }
