@@ -1,6 +1,6 @@
 # P4.1 fiziksel ev + gün: gerçek 2-süreç kabul (PR #92 üstünde, #88/#90)
 
-Tarih: 2026-09-26. Taban: PR #92 başı (`6eb66ce`) = `codex/p4-integration` (#91 sonrası) + Mehmet'in fiziksel ev paketi. Dal: `p4/mert-home-smoke`.
+Tarih: 2026-09-26. Taban: `codex/p4-integration` @ `4accae9` (PR #92 birleşti). Dal: `p4/mert-home-smoke`.
 
 ## Yeni smoke: `tools/Test-P1-Integrated.ps1 -Players 2 -HomeSleep`
 Her süreç kendi oyuncusunu **gerçekten yürütür**, kendi yatağına **bakar** (host hedefi oyuncunun kendi görüş ışınından çözer), binding'in kendi istek yoluyla `H`'ye basar; sonra dalış sahnesinde host `P` ile ping atar.
@@ -15,7 +15,7 @@ Her süreç kendi oyuncusunu **gerçekten yürütür**, kendi yatağına **bakar
 4. **(bilgi) İki `HomeStorageInteraction` çakışacak:** #92'nin `Bind(open)/TryOpen` sınıfı ile depo dalımın `Bind(store, retrieve)` sınıfı aynı adı taşıyor; #92 birleşince depo dalını tek sınıfta birleştireceğim.
 
 ## Kanıt
-EditMode 677/678 (tek kırmızı yukarıdaki #92 test hatası; benim testlerim ve önceki 640+ test yeşil). Aynı build'de `-Day` (host+client1+yeniden açılan host), `-Trip` ve yeni `-HomeSleep` PASS.
+EditMode **678/678** (Mehmet'in `Has.Count` test hatası bu PR'da tek satırla düzeltildi; benim testlerim yeşil). Aynı build'de `-Day` (host+client1+yeniden açılan host) ve yeni `-HomeSleep` PASS; `-Trip`/taban #92 üstünde önceki koşuda PASS.
 
 ## Doğrulanmadı
 Ortak depo fiziksel akışı (`H` depoya bakınca `StorageUnavailable`; gerçek depo #90 sahibinin bağlaması — sonraki paket), 4 süreç, ayrı bilgisayar, gün 00:00'da evde olmayanın yerleşimi.
