@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$Unified)
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Unified)
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe'
@@ -31,6 +31,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($Boat) { $p1Args += @('-p3-boat', '1') }
         if ($Trip) { $p1Args += @('-p3-trip', '1') }
         if ($Day) { $p1Args += @('-p4-day', '1') }
+        if ($HomeSleep) { $p1Args += @('-p4-home', '1') }
     }
     $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -WindowStyle Hidden -PassThru
     $p1Processes.Add([pscustomobject]@{Name=$Name; Process=$p1Process; Report=$p1Report})
@@ -57,7 +58,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $seconds = if ($Unified) { 360 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Day) { 125 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Hunt -or $Record) { 90 } else { 60 }
+    $seconds = if ($Unified) { 360 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Hunt -or $Record) { 90 } else { 60 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
 

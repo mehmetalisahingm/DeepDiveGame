@@ -50,6 +50,9 @@ namespace DeepDive.P1.Lab
                 dayBedAccepted, dayEarlyGateHeld, dayEarlyClosed, dayHostDone, dayReloadPass;
             public int dayStartMinute, dayLostDivers, dayMirroredLostDivers, dayFinalNumber, dayReloadNumber, dayReloadHistory, dayReloadMinute;
             public int dayMirroredEarlyReason = -1, dayMirroredMidnightReason = -1;
+            public string homeStatus = "";
+            public bool homeBedAccepted, homeMorningClean, homePingSeen, homePingOnMap, homePingAccepted;
+            public int homeSleepersMax;
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
@@ -68,6 +71,7 @@ namespace DeepDive.P1.Lab
         private bool Event => Arg("-p3-event") == "1";
         private bool Record => Arg("-p3-record") == "1" || Event;
         private bool Town => Arg("-p3-town") == "1";
+        private bool Home => Arg("-p4-home") == "1";
         private bool Day => Arg("-p4-day") == "1";
         private bool DayReload => Arg("-p4-day-reload") == "1";
         private bool Trip => Arg("-p3-trip") == "1";
@@ -118,7 +122,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -167,7 +171,7 @@ namespace DeepDive.P1.Lab
                 { reconnectSent = true; adapter.JoinRoom("127.0.0.1", port); }
                 if (reconnectSent && connection.Status == ConnectionStatus.Connected && connection.Players.Count == expected)
                     result.clientRejoined = true;
-                if (host && elapsed > 19 && !prepSent && allReady)
+                if (host && elapsed > (Home ? 40 : 19) && !prepSent && allReady && (!Home || result.dayNumbers.Contains(2)))
                 { prepSent = true; GameObject.Find("BeginPrepButton").GetComponent<Button>().onClick.Invoke(); }
                 result.prep |= state.Phase == SessionPhase.Prep && !connection.IsSceneLoading;
                 if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep && !connection.IsSceneLoading)
@@ -189,16 +193,16 @@ namespace DeepDive.P1.Lab
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
                 if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
-                if (Day) ObserveDay();
+                if (Day || Home) ObserveDay();
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && elapsed > (Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -206,7 +210,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -237,6 +241,9 @@ namespace DeepDive.P1.Lab
                 (!host || (result.dayMidnightClosed && result.dayLostDivers == expected && result.daySavedOnDisk &&
                     result.dayReloadNoAdvance && result.dayReplayIgnored && result.dayBedAccepted && result.dayEarlyGateHeld &&
                     result.dayEarlyClosed && result.dayHostDone && result.dayFinalNumber == 3));
+            if (Home) result.passed &= result.homeBedAccepted && result.homeMorningClean &&
+                result.dayNumbers.Contains(2) && result.daySummaries.Contains(1) && result.homePingSeen && result.homePingOnMap &&
+                (!host || result.homePingAccepted);
             if (Trip) result.passed &= result.tripBoarded && result.tripDuplicateBoardHeld && result.tripMapDockedAtDock &&
                 result.tripMapUnderwayMoved && result.tripMapAnchoredAtAnchor && result.tripDockedEmpty && result.tripDone &&
                 result.tripMapPlayersMax >= expected &&
@@ -274,6 +281,8 @@ namespace DeepDive.P1.Lab
                 else if (Record && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeRecording(local, players);
                 else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
                 else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
+                else if (Home && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
+                else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
             }
@@ -556,6 +565,148 @@ namespace DeepDive.P1.Lab
         // Host-only, authoritative: samples the real EconomyManager.BoatRepair (not the replicated
         // BoatPartsDone NetworkVariable) so the recorded sequence is the source of truth itself, not a mirror
         // of it, and records the exact 0/1/2/3 progression rather than just a before/after snapshot.
+        // ---- P4.1 physical home (Mehmet #88 / PR #92): real H interaction against the real beds, real P ping --------------
+        // Each process walks its own player to its own bed in PrepArea, AIMS at it (the host resolves the target from
+        // the player's own view ray, the client never names a bed) and presses H through the binding's own request
+        // path. The day must close by everyone being in bed, the morning must leave nobody seated, and a host P ping in
+        // the dive scene must reach every process on the map.
+        private int homeStage;
+        private float homeStageAt, homeAimAt, homeNext;
+        private int homeAttempts;
+        private float homeCleanSince;
+
+        private static string HomeStatus(HomePlayerInteractionBinding binding) =>
+            (string)typeof(HomePlayerInteractionBinding).GetField("statusMessage",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(binding);
+
+        private static void HomeSend(HomePlayerInteractionBinding binding, byte op) =>
+            typeof(HomePlayerInteractionBinding).GetMethod("SendRequest",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(binding, new object[] { op });
+
+        private static void AimAt(NetworkPlayer local, Camera cam, Vector3 target, out float yaw, out float pitch)
+        {
+            var to = target - cam.transform.position;
+            yaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
+            pitch = -Mathf.Atan2(to.y, new Vector2(to.x, to.z).magnitude) * Mathf.Rad2Deg;
+        }
+
+        private void ProbeHome(NetworkPlayer local)
+        {
+            var binding = FindFirstObjectByType<HomePlayerInteractionBinding>();
+            var cam = local.GetComponentInChildren<Camera>(true);
+            var sync = local.GetComponent<EconomyPlayerSync>();
+            var now = Time.realtimeSinceStartup;
+            if (homeStageAt == 0) homeStageAt = now;
+            if (binding == null || cam == null || sync == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            if (homeStage < 90 && now - homeStageAt > 40f)
+            {
+                result.errors.Add($"home stage {homeStage} timeout status='{HomeStatus(binding)}' day={sync.DayNumber.Value} sleepers={HomePlayerInteractionBinding.SnapshotSleepers().Count} pos={local.transform.position}");
+                homeStage = 99;
+            }
+
+            var bedId = adapter.IsAuthority ? DayIds.Bed0 : DayIds.Bed1;
+            var anchor = FindObjectsByType<HomeInteractionAnchor>(FindObjectsSortMode.None)
+                .FirstOrDefault(a => a.Kind == HomeInteractionKind.Bed && a.BedId == bedId);
+            if (anchor == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+
+            switch (homeStage)
+            {
+                case 0:   // walk to the bed
+                {
+                    var to = anchor.WorldPosition - local.transform.position; to.y = 0;
+                    if (to.magnitude > 1.9f)
+                    {
+                        var yaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
+                        local.SubmitLocalInput(Vector3.forward, yaw, 0);
+                        return;
+                    }
+                    homeStage = 1; homeAimAt = 0; return;
+                }
+                case 1:   // aim at it, let the aim reach the host, press H
+                {
+                    var target = anchor.GetComponentInChildren<Collider>() != null ? anchor.GetComponentInChildren<Collider>().bounds.center : anchor.WorldPosition;
+                    AimAt(local, cam, target, out var yaw, out var pitch);
+                    local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+                    if (homeAimAt == 0) homeAimAt = now + 0.7f;
+                    if (now < homeAimAt) return;
+                    HomeSend(binding, 1);
+                    homeAttempts++;
+                    homeNext = now + 1.0f;
+                    homeStage = 2; return;
+                }
+                case 2:   // did the host accept? (status text is the client-visible result)
+                {
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (now < homeNext) return;
+                    var status = HomeStatus(binding);
+                    result.homeStatus = status;
+                    if (status == "EV ETKILESIMI TAMAM") { result.homeBedAccepted = true; homeStage = 3; return; }
+                    if (homeAttempts >= 3) { result.errors.Add("home bed refused: " + status); homeStage = 99; return; }
+                    homeStage = 1; homeAimAt = 0; return;
+                }
+                case 3:   // everybody in bed -> the day closes, morning leaves nobody seated
+                {
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    result.homeSleepersMax = Math.Max(result.homeSleepersMax, HomePlayerInteractionBinding.SnapshotSleepers().Count);
+                    if (sync.DayNumber.Value < 2 || (DayPhase)sync.DayPhaseValue.Value != DayPhase.Running) return;
+                    // The sleep mirror is a named message; give it a moment to arrive after the day advanced.
+                    if (homeCleanSince == 0) homeCleanSince = now;
+                    var clean = !local.Seated.Value && HomePlayerInteractionBinding.SnapshotSleepers().Count == 0 &&
+                        SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene;
+                    if (clean) { result.homeMorningClean = true; homeStage = 90; return; }
+                    if (now - homeCleanSince > 8f)
+                    {
+                        result.errors.Add($"morning not clean seated={local.Seated.Value} sleepers={HomePlayerInteractionBinding.SnapshotSleepers().Count} scene={SceneManager.GetActiveScene().name}");
+                        homeStage = 90;
+                    }
+                    return;
+                }
+                default:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+            }
+        }
+
+        // In the dive scene (it has Utku's region): the host presses P, every process must see the ping on the map.
+        private void ProbeHomePing(NetworkPlayer local)
+        {
+            var binding = FindFirstObjectByType<HomePlayerInteractionBinding>();
+            var cam = local.GetComponentInChildren<Camera>(true);
+            if (binding == null || cam == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var now = Time.realtimeSinceStartup;
+            if (homePingAt == 0) homePingAt = now + 5f;
+
+            var pings = HomePlayerInteractionBinding.SnapshotPings();
+            if (pings.Count > 0)
+            {
+                var ping = pings[0];
+                result.homePingSeen = true;
+                result.homePingOnMap |= P4MapPositionFeed.TryWorldToMap(ping.WorldPosition, out _);
+            }
+
+            if (adapter.IsAuthority && !homePingSent && now >= homePingAt)
+            {
+                AimAt(local, cam, local.transform.position + Vector3.down * 3f + local.transform.forward * 2f, out var yaw, out var pitch);
+                local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+                if (homePingAimAt == 0) homePingAimAt = now + 0.7f;
+                if (now < homePingAimAt) return;
+                homePingSent = true;
+                HomeSend(binding, 2);
+                homePingCheckAt = now + 1f;
+                return;
+            }
+            if (homePingSent && now >= homePingCheckAt && homePingCheckAt > 0)
+            {
+                result.homePingAccepted = HomeStatus(binding) == "PING GONDERILDI";
+                if (!result.homePingAccepted) result.errors.Add("home ping refused: " + HomeStatus(binding));
+                homePingCheckAt = 0;
+            }
+            local.SubmitLocalInput(Vector3.zero, 0);
+        }
+
+        private float homePingAt, homePingAimAt, homePingCheckAt;
+        private bool homePingSent;
+
         // ---- P4.1 shared day: real host clock, real close through the real session/inventory/save --------------
         // Day 1 runs to a real 00:00 (the host only raises the clock RATE, never sets the time): the open dive is
         // closed through the normal return path (D07), one summary is produced, the next day is written to the

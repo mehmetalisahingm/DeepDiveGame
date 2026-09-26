@@ -144,6 +144,24 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void APausedClockHoldsTimeStillButPlayersCanStillSleep()
+        {
+            var (engine, _, _) = Make(P0);
+            engine.ClockPaused = true;
+            engine.Tick(100000f);
+            Assert.AreEqual(DayIds.DayStartMinute, engine.ClockMinute, "paused: no time passes");
+            Assert.AreEqual(1, engine.DayNumber);
+
+            Assert.IsTrue(engine.TryEnterBed(P0, DayIds.Bed0, 1).Accepted, "the lobby is home: beds work while the clock is paused");
+            Assert.AreEqual(2, engine.DayNumber);
+
+            engine.CompleteMorning();
+            engine.ClockPaused = false;
+            engine.Tick(60f);
+            Assert.Greater(engine.ClockMinute, DayIds.DayStartMinute);
+        }
+
+        [Test]
         public void PlayersWhoAreNotActiveCannotUseABed()
         {
             var (engine, _, _) = Make(P0);

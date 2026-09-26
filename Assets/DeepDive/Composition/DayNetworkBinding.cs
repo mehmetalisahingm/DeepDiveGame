@@ -21,7 +21,7 @@ namespace DeepDive.Composition
     [DisallowMultipleComponent]
     public sealed class DayNetworkBinding : MonoBehaviour, IDayRoster, IDayCloseHooks
     {
-        private const float PublishInterval = 0.25f;
+        private const float PublishInterval = 0.1f;   // a freshly spawned player sync shows defaults until the first publish, so keep it short
 
         // Mehmet's morning placement (players at home, active boat at the dock) subscribes here.
         public static event Action<int> MorningBegan;
@@ -81,6 +81,9 @@ namespace DeepDive.Composition
             EnsureObjects();
             if (economy == null || store == null || inventory == null || day == null) return;
             Bind();
+
+            // The clock holds still in the lobby and while a scene loads; the sleep gate does not.
+            day.Engine.ClockPaused = adapter.Session.State.Phase == SessionPhase.Lobby || adapter.Connection.IsSceneLoading;
 
             var signature = RosterSignature();
             if (signature != rosterSignature)
@@ -186,13 +189,12 @@ namespace DeepDive.Composition
 
         // ---- IDayRoster ------------------------------------------------------------------------
 
-        // Connected AND not passive, and only while a session is actually running: in the lobby or
-        // while a scene loads there is nobody "in the world" to sleep, so the clock stays frozen.
+        // Connected AND not passive. Deliberately NOT phase-dependent: the home (beds) is the lobby room, so
+        // players there are active sleepers; only the CLOCK is held still in the lobby (see Update).
         public IReadOnlyList<PlayerId> ActivePlayers()
         {
             var result = new List<PlayerId>();
             if (adapter == null || manager == null || adapter.Session == null) return result;
-            if (adapter.Session.State.Phase == SessionPhase.Lobby || adapter.Connection.IsSceneLoading) return result;
 
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
             foreach (var id in adapter.Session.Roster.Keys)

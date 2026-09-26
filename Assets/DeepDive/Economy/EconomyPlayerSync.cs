@@ -55,7 +55,16 @@ namespace DeepDive.Economy
 
         public bool ShopOpen => ActiveServiceId.Value.ToString() == TownServiceCatalog.EquipmentShopId;
 
-        public override void OnNetworkSpawn() => EnsureEconomy();
+        public override void OnNetworkSpawn()
+        {
+            EnsureEconomy();
+            // A player who (re)spawns starts at today's day, not at the variable defaults.
+            if (IsServer && DayLock.StateProvider != null)
+            {
+                PublishDay(DayLock.StateProvider());
+                PublishSummary(DayLock.SummaryProvider != null ? DayLock.SummaryProvider() : null);
+            }
+        }
 
         public override void OnNetworkDespawn()
         {
