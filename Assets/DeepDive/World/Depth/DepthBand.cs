@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DeepDive.Core.Contracts;
 
 namespace DeepDive.World
 {
@@ -56,7 +57,9 @@ namespace DeepDive.World
     // the new species and boss gating. An asset would add a silent-drift path with no review.
     public static class DiveDepthBands
     {
-        public const string ShallowId = "shallow";
+        // The id itself lives in Core's DepthBandIds so a cell, an observation and this band can
+        // never spell it two ways; World only adds the metre range.
+        public const string ShallowId = DepthBandIds.Shallow;
         public const float ShallowMinDepth = 0f;
         public const float ShallowMaxDepth = 8f;
 
