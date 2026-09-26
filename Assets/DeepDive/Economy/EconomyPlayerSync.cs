@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using Unity.Collections;
 using Unity.Netcode;
@@ -43,6 +44,10 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> SummaryLostDivers = new NetworkVariable<int>();
 
         public readonly NetworkVariable<int> StoredCatches = new NetworkVariable<int>();
+        // Host-written, read by the owner's storage panel: what I can put in / what is in there.
+        public readonly NetworkList<FixedString64Bytes> CarriedCatchIds = new NetworkList<FixedString64Bytes>();
+        public readonly NetworkList<FixedString64Bytes> StoredCatchIdList = new NetworkList<FixedString64Bytes>();
+        private ulong _storageRequestId;
 
         private float _summaryShownUntil;
         private int _observedSummaryDay;
@@ -145,6 +150,51 @@ namespace DeepDive.Economy
             if (IsServer && StoredCatches.Value != storedCount) StoredCatches.Value = storedCount;
         }
 
+        // Rewritten only when the set actually changed, so a steady state costs no network traffic.
+        public void PublishStorageLists(IReadOnlyList<string> carried, IReadOnlyList<string> stored)
+        {
+            if (!IsServer) return;
+            Sync(CarriedCatchIds, carried);
+            Sync(StoredCatchIdList, stored);
+        }
+
+        private static void Sync(NetworkList<FixedString64Bytes> list, IReadOnlyList<string> ids)
+        {
+            var same = list.Count == ids.Count;
+            for (var i = 0; same && i < ids.Count; i++)
+                if (list[i].ToString() != ids[i]) same = false;
+            if (same) return;
+            list.Clear();
+            for (var i = 0; i < ids.Count; i++) list.Add(new FixedString64Bytes(ids[i]));
+        }
+
+        public void RequestStoreItem(string itemId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(itemId)) return;
+            RequestStoreServerRpc(new FixedString64Bytes(itemId), ++_storageRequestId);
+        }
+
+        public void RequestRetrieveItem(string itemId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(itemId)) return;
+            RequestRetrieveServerRpc(new FixedString64Bytes(itemId), ++_storageRequestId);
+        }
+
+        // The seam refuses unless Mehmet's/the composition layer verified the player is at the storage.
+        [ServerRpc(RequireOwnership = true)]
+        private void RequestStoreServerRpc(FixedString64Bytes itemId, ulong requestId, ServerRpcParams rpc = default)
+        {
+            if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
+            PublishPurchaseResult(HomeStorageItems.TryStore(new PlayerId(OwnerClientId), itemId.ToString(), requestId));
+        }
+
+        [ServerRpc(RequireOwnership = true)]
+        private void RequestRetrieveServerRpc(FixedString64Bytes itemId, ulong requestId, ServerRpcParams rpc = default)
+        {
+            if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
+            PublishPurchaseResult(HomeStorageItems.TryRetrieve(new PlayerId(OwnerClientId), itemId.ToString(), requestId));
+        }
+
         public void PublishSummary(DaySummary summary)
         {
             if (!IsServer || summary == null || summary.DayNumber <= SummaryDayNumber.Value) return;
@@ -194,7 +244,7 @@ namespace DeepDive.Economy
 
             if (LastRequestId.Value == 0 || LastRequestId.Value == _observedRequestId) return;
             _observedRequestId = LastRequestId.Value;
-            _statusMessage = LastAccepted.Value ? "SATIN ALINDI" : FriendlyReason(LastReasonCode.Value.ToString());
+            _statusMessage = LastAccepted.Value ? "TAMAM" : FriendlyReason(LastReasonCode.Value.ToString());
             _statusUntil = Time.unscaledTime + 2f;
         }
 
@@ -223,6 +273,10 @@ namespace DeepDive.Economy
             "InvalidTarget" => "GECERSIZ URUN",
             "SaveFailed" => "KAYIT HATASI",
             "NotAtShop" => "DUKKANA YAKIN DEGILSIN",
+            "NotAtStorage" => "DEPODAN UZAKSIN",
+            "StorageFull" => "DEPO DOLU",
+            "InventoryFull" => "CANTA DOLU",
+            "DayClosing" => "GUN KAPANIYOR",
             "NothingToTurnIn" => "TESLIM EDILECEK URUN YOK",
             _ => string.IsNullOrWhiteSpace(reason) ? "ISLEM REDDEDILDI" : reason
         };

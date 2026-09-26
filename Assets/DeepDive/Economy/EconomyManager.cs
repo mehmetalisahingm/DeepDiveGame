@@ -210,6 +210,22 @@ namespace DeepDive.Economy
 
         public int StoredCount => _stored.Count;
 
+        // The unpaid catch ids this player could put into storage (shared escrow or personally carried).
+        public IReadOnlyList<string> PendingCatchIdsFor(PlayerId player)
+        {
+            var ids = new List<string>();
+            foreach (var item in _pending)
+                if (item.Kind == TurnInKind.Catch && CanHandIn(item, player)) ids.Add(item.ItemId);
+            return ids;
+        }
+
+        public IReadOnlyList<string> StoredCatchIds()
+        {
+            var ids = new List<string>(_stored.Count);
+            foreach (var item in _stored) ids.Add(item.ItemId);
+            return ids;
+        }
+
         // Total weight of the unpaid catches this player is personally carrying (the bag rule for retrieval).
         private int CarriedGrams(PlayerId player)
         {

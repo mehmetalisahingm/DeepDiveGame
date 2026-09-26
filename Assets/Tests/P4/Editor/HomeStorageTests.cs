@@ -225,17 +225,17 @@ namespace DeepDive.P4.Tests
         [Test]
         public void ThePhysicalInteractionSeamRefusesWhenNothingIsBoundAndRoutesWhenBound()
         {
-            Assert.AreEqual("InvalidState", HomeStorageInteraction.TryStore(Host, "c1", 1).ReasonCode);
-            Assert.AreEqual("InvalidState", HomeStorageInteraction.TryRetrieve(Host, "c1", 1).ReasonCode);
+            Assert.AreEqual("InvalidState", HomeStorageItems.TryStore(Host, "c1", 1).ReasonCode);
+            Assert.AreEqual("InvalidState", HomeStorageItems.TryRetrieve(Host, "c1", 1).ReasonCode);
 
             Seed(Catch("c1", 1000, true));
             Func<PlayerId, string, ulong, TransactionResult> store = economy.TryStoreItem;
             Func<PlayerId, string, ulong, TransactionResult> retrieve = economy.TryRetrieveItem;
-            HomeStorageInteraction.Bind(store, retrieve);
-            Assert.IsTrue(HomeStorageInteraction.TryStore(Host, "c1", 2).Accepted);
-            Assert.IsTrue(HomeStorageInteraction.TryRetrieve(Host, "c1", 3).Accepted);
-            HomeStorageInteraction.Unbind(store, retrieve);
-            Assert.AreEqual("InvalidState", HomeStorageInteraction.TryStore(Host, "c1", 4).ReasonCode);
+            HomeStorageItems.Bind(store, retrieve);
+            Assert.IsTrue(HomeStorageItems.TryStore(Host, "c1", 2).Accepted);
+            Assert.IsTrue(HomeStorageItems.TryRetrieve(Host, "c1", 3).Accepted);
+            HomeStorageItems.Unbind(store, retrieve);
+            Assert.AreEqual("InvalidState", HomeStorageItems.TryStore(Host, "c1", 4).ReasonCode);
         }
     }
 }
