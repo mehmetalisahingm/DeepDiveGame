@@ -15,7 +15,7 @@ namespace DeepDive.Tests.P4
         public void P4Home_HasExactlyFourStableBedIds()
         {
             Assert.That(DayIds.BedCount, Is.EqualTo(4));
-            Assert.That(DayIds.Beds, Has.Count.EqualTo(4));
+            Assert.That(DayIds.Beds.Count, Is.EqualTo(4));
             for (var i = 0; i < DayIds.Beds.Count; i++)
             {
                 Assert.That(DayIds.IsBed(DayIds.Beds[i]), Is.True);

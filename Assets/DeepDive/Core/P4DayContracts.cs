@@ -150,6 +150,24 @@ namespace DeepDive.Core.Contracts
 
         public static bool IsLocked => IsLockedProvider != null && IsLockedProvider();
 
+        // The current day and last summary, readable by anything that spawns late (a respawned player's
+        // mirror must start at today's values, not at the defaults). Null while there is no day authority.
+        public static Func<CampaignDayState> StateProvider { get; private set; }
+        public static Func<DaySummary> SummaryProvider { get; private set; }
+
+        public static void BindState(Func<CampaignDayState> state, Func<DaySummary> summary)
+        {
+            StateProvider = state;
+            SummaryProvider = summary;
+        }
+
+        public static void UnbindState(Func<CampaignDayState> state)
+        {
+            if (StateProvider != state) return;
+            StateProvider = null;
+            SummaryProvider = null;
+        }
+
         public static void Bind(Func<bool> provider) => IsLockedProvider = provider;
 
         public static void Unbind(Func<bool> provider)

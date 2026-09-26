@@ -12,6 +12,7 @@ namespace DeepDive.Day
         private const float PersistRetrySeconds = 2f;
 
         private System.Func<bool> _lock;
+        private System.Func<CampaignDayState> _state;
         private bool _configured;
         private float _nextRetry;
 
@@ -23,13 +24,17 @@ namespace DeepDive.Day
             Engine.Configure(roster, hooks, campaignSeed);
             _lock = () => Engine.IsLocked;
             DayLock.Bind(_lock);
+            _state = () => Engine.State;
+            DayLock.BindState(_state, () => Engine.LastSummary);
             _configured = true;
         }
 
         public void Shutdown()
         {
             if (_lock != null) DayLock.Unbind(_lock);
+            if (_state != null) DayLock.UnbindState(_state);
             _lock = null;
+            _state = null;
             _configured = false;
         }
 

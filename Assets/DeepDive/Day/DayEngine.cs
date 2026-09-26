@@ -23,6 +23,10 @@ namespace DeepDive.Day
         // playtests, so it is a settable field, not a contract.
         public float GameMinutesPerRealSecond { get; set; } = (DayIds.DayEndMinute - DayIds.DayStartMinute) / (20f * 60f);
 
+        // The clock can be held still (lobby, scene loading) WITHOUT changing who counts for the sleep gate:
+        // the beds are in the home room, which is the lobby, so people there must still be able to sleep.
+        public bool ClockPaused { get; set; }
+
         public event Action OnStateChanged;
         public event Action<int> OnWarning;
         public event Action<DaySummary> OnSummaryReady;
@@ -82,7 +86,7 @@ namespace DeepDive.Day
         // cikmisken gun ilerlemez"), nor once the day is already closing.
         public void Tick(float realSeconds)
         {
-            if (_phase != DayPhase.Running || realSeconds <= 0f) return;
+            if (_phase != DayPhase.Running || realSeconds <= 0f || ClockPaused) return;
             if (ActiveNow().Count == 0) return;
 
             _clock += realSeconds * GameMinutesPerRealSecond;
