@@ -47,6 +47,7 @@ namespace DeepDive.Composition
         private bool dirty;
         private Func<PlayerId, string, ulong, TransactionResult> storeDelegate;
         private Func<PlayerId, string, ulong, TransactionResult> retrieveDelegate;
+        private Func<PlayerId, ulong, TransactionResult> openDelegate;
 
         public DayEngine Engine => day != null ? day.Engine : null;
 
@@ -124,9 +125,17 @@ namespace DeepDive.Composition
             enterDelegate = day.Engine.TryEnterBed;
             leaveDelegate = day.Engine.TryLeaveBed;
             HomeBedInteraction.Bind(enterDelegate, leaveDelegate);
-            storeDelegate = economy.TryStoreItem;
-            retrieveDelegate = economy.TryRetrieveItem;
-            HomeStorageInteraction.Bind(storeDelegate, retrieveDelegate);
+            // Mehmet's physical layer resolves what the player is looking at and calls Open; this answers "the storage
+            // authority exists". The item moves re-check, on the host, that the player really is at the storage.
+            openDelegate = (player, requestId) => TransactionResult.Ok(requestId, economy.Revision);
+            storeDelegate = (player, itemId, requestId) => IsAtStorage(player)
+                ? economy.TryStoreItem(player, itemId, requestId)
+                : TransactionResult.Reject(requestId, "NotAtStorage", economy.Revision);
+            retrieveDelegate = (player, itemId, requestId) => IsAtStorage(player)
+                ? economy.TryRetrieveItem(player, itemId, requestId)
+                : TransactionResult.Reject(requestId, "NotAtStorage", economy.Revision);
+            HomeStorageInteraction.Bind(openDelegate);
+            HomeStorageItems.Bind(storeDelegate, retrieveDelegate);
 
             settledDelegate = (id, count, grams, earned, isCatch) =>
                 day.Engine.RecordSale(id, isCatch ? count : 0, isCatch ? grams : 0, earned);
@@ -150,7 +159,8 @@ namespace DeepDive.Composition
         {
             if (!bound) return;
             HomeBedInteraction.Unbind(enterDelegate, leaveDelegate);
-            HomeStorageInteraction.Unbind(storeDelegate, retrieveDelegate);
+            HomeStorageInteraction.Unbind(openDelegate);
+            HomeStorageItems.Unbind(storeDelegate, retrieveDelegate);
             if (economy != null)
             {
                 economy.OnSettled -= settledDelegate;
@@ -195,7 +205,24 @@ namespace DeepDive.Composition
                 syncs[i].PublishDay(state);
                 syncs[i].PublishSummary(day.Engine.LastSummary);
                 syncs[i].PublishStorage(economy.StoredCount);
+                syncs[i].PublishStorageLists(economy.PendingCatchIdsFor(new PlayerId(syncs[i].OwnerClientId)), economy.StoredCatchIds());
             }
+        }
+
+        // Host-side proximity: the player's own authoritative position against the physical storage target.
+        private bool IsAtStorage(PlayerId player)
+        {
+            HomeInteractionAnchor storage = null;
+            var anchors = FindObjectsByType<HomeInteractionAnchor>(FindObjectsSortMode.None);
+            for (var i = 0; i < anchors.Length; i++)
+                if (anchors[i].Kind == HomeInteractionKind.Storage) { storage = anchors[i]; break; }
+            if (storage == null) return false;
+
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+            for (var i = 0; i < players.Length; i++)
+                if (players[i].IsSpawned && players[i].OwnerClientId == player.Value)
+                    return Vector3.Distance(players[i].transform.position, storage.WorldPosition) <= HomePlayerInteractionBinding.InteractionRange + 0.5f;
+            return false;
         }
 
         // ---- IDayRoster ------------------------------------------------------------------------

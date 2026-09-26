@@ -203,10 +203,12 @@ namespace DeepDive.Core.Contracts
             LeaveHandler != null ? LeaveHandler(player, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
     }
 
-    // Mehmet's physical storage interaction (#88) validates the real player/storage/proximity and then calls
-    // this; EconomyManager (the one authority over pending items and the shared home storage) binds the
-    // handlers while it is the host. Unbound means "no storage authority here": every request is refused.
-    public static class HomeStorageInteraction
+    // The item moves of the shared home storage (store a safe catch / take one back out). Mehmet's physical
+    // layer (HomeStorageInteraction.TryOpen, P4HomeInteractionContracts) decides whether a player may use the
+    // storage at all; these are the transactions once the host has verified the player is at it. The
+    // composition root binds them to EconomyManager (the one authority over pending items and the storage)
+    // while it is the host. Unbound means "no storage authority here": every request is refused.
+    public static class HomeStorageItems
     {
         public static Func<PlayerId, string, ulong, TransactionResult> StoreHandler { get; private set; }
         public static Func<PlayerId, string, ulong, TransactionResult> RetrieveHandler { get; private set; }
