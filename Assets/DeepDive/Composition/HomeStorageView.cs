@@ -53,13 +53,17 @@ namespace DeepDive.Composition
             sync = local != null ? local.GetComponent<EconomyPlayerSync>() : null;
         }
 
+        // Computed per frame (not in OnGUI, which a headless build never calls) so the state is observable.
+        private void Update()
+        {
+            Lookup();
+            PanelOpen = storage != null && local != null && sync != null && sync.IsSpawned &&
+                        Vector3.Distance(local.transform.position, storage.WorldPosition) <= ShowRange;
+        }
+
         private void OnGUI()
         {
-            PanelOpen = false;
-            Lookup();
-            if (storage == null || local == null || sync == null || !sync.IsSpawned) return;
-            if (Vector3.Distance(local.transform.position, storage.WorldPosition) > ShowRange) return;
-            PanelOpen = true;
+            if (!PanelOpen) return;
 
             var rows = Mathf.Max(Mathf.Min(sync.CarriedCatchIds.Count, VisibleRows), Mathf.Min(sync.StoredCatchIdList.Count, VisibleRows));
             var height = 56f + Mathf.Max(1, rows) * 24f + 28f;
