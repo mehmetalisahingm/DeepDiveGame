@@ -470,6 +470,350 @@ namespace DeepDive.World.Tests
             Assert.That(opened, Is.EqualTo(2), "only the first tick opens the two new cells");
         }
 
+        // ---- restore (save/load) ----
+        // Every TryRestore below goes through AssertRestore, so "Restored <=> revision moved by one"
+        // is checked on each call.
+
+        private static readonly Vector3 Wet00 = new Vector3(0f, 4f, 0f);  // cell (0,0), shallow
+        private static readonly Vector3 Dry00 = new Vector3(0f, 8.5f, 0f); // cell (0,0), above the line
+
+        [Test]
+        public void TryRestore_BlankCellId_IsInvalid()
+        {
+            var fog = NearRegion();
+            foreach (var id in new[] { null, "", "  ", "\t" })
+                AssertRestore(fog, id, 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Invalid);
+
+            Assert.That(fog.IsDiscovered(0, 0), Is.False);
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(0));
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.Empty);
+        }
+
+        [Test]
+        public void TryRestore_OutsideTheGrid_IsInvalid()
+        {
+            var fog = NearRegion(); // gx/gz -3..2
+            foreach (var (gx, gz) in new[] { (3, 0), (-4, 0), (0, 3), (0, -4), (-4, -3), (3, 2) })
+                AssertRestore(fog, Id(gx, gz), gx, gz, DepthBandIds.Shallow, CellRestoreOutcome.Invalid);
+
+            // (3, 0) would be row-major slot 24, which is (-3, 1): the grid check runs before any index.
+            Assert.That(fog.IsDiscovered(-3, 1), Is.False);
+            foreach (var cell in fog.Snapshot().Cells) Assert.That(cell.Discovered, Is.False, cell.CellId);
+        }
+
+        [Test]
+        public void TryRestore_CellIdNotMatchingItsCoordinates_IsInvalid()
+        {
+            var fog = NearRegion();
+            foreach (var id in new[]
+                     {
+                         ExplorationIds.CellId("region-far-1", 0, 0), // another region
+                         Id(1, 0),                                    // the neighbour
+                         "REGION-NEAR-1:gx0:gz0",                     // ids are exact
+                         Id(0, 0) + " "
+                     })
+                AssertRestore(fog, id, 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Invalid);
+
+            // Swapped coordinates: (1, 2) given the id of (2, 1).
+            AssertRestore(fog, Id(2, 1), 1, 2, DepthBandIds.Shallow, CellRestoreOutcome.Invalid);
+
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(0));
+            Assert.That(fog.IsDiscovered(1, 0), Is.False);
+            Assert.That(fog.IsDiscovered(2, 1), Is.False);
+        }
+
+        [Test]
+        public void TryRestore_InvalidBand_IsInvalid_EvenWhereABandCouldBeFilled()
+        {
+            var fog = NearRegion();
+            fog.Tick(new FakeSource().Set(Dry00)); // (0,0) open with an empty band
+            var bad = new[] { null, " ", "Shallow", "abyss", "shallow " };
+
+            foreach (var band in bad)
+            {
+                AssertRestore(fog, Id(1, 1), 1, 1, band, CellRestoreOutcome.Invalid); // closed cell
+                AssertRestore(fog, Id(0, 0), 0, 0, band, CellRestoreOutcome.Invalid); // empty band
+            }
+
+            Assert.That(fog.IsDiscovered(1, 1), Is.False);
+            Assert.That(CellOf(fog, 1, 1).DepthBandId, Is.Empty);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.Empty, "an invalid band never fills an empty one");
+        }
+
+        [Test]
+        public void TryRestore_UndiscoveredCell_WithABand_IsRestored()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Restored);
+
+            Assert.That(fog.IsDiscovered(0, 0), Is.True);
+            Assert.That(fog.IsDiscovered(Id(0, 0)), Is.True);
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(1));
+            Assert.That(fog.Revision, Is.EqualTo(1), "opened and banded in one call: one revision step");
+            var cell = CellOf(fog, 0, 0);
+            Assert.That(cell.Discovered, Is.True);
+            Assert.That(cell.DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+        }
+
+        [Test]
+        public void TryRestore_UndiscoveredCell_Unclassified_IsRestored_WithAnEmptyBand()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Unclassified, CellRestoreOutcome.Restored);
+
+            Assert.That(fog.IsDiscovered(0, 0), Is.True);
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(1));
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.Empty);
+        }
+
+        [Test]
+        public void TryRestore_DiscoveredCellWithNoBand_FilledBand_IsRestored_NotADiscovery()
+        {
+            var fog = NearRegion();
+            var events = new List<string>();
+            fog.Tick(new FakeSource().Set(Dry00), events);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.Empty);
+
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Restored);
+
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(1));
+            Assert.That(events, Is.EqualTo(new[] { Id(0, 0) }), "the band fill is not a second discovery");
+        }
+
+        [Test]
+        public void TryRestore_DiscoveredCellWithABand_SameBand_IsAlreadyDiscovered()
+        {
+            var fog = NearRegion();
+            fog.Tick(new FakeSource().Set(Wet00));
+
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
+
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+        }
+
+        [Test]
+        public void TryRestore_DiscoveredCellWithABand_DifferentBand_IsAlreadyDiscovered_BandKept()
+        {
+            var fog = NearRegion();
+            fog.Tick(new FakeSource().Set(Wet00));
+
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.AlreadyDiscovered);
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Deep, CellRestoreOutcome.AlreadyDiscovered);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+
+            // The other way round: a restored band is not replaced by a later restore either.
+            AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Reef, CellRestoreOutcome.Restored);
+            AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
+            Assert.That(CellOf(fog, 1, 1).DepthBandId, Is.EqualTo(DepthBandIds.Reef));
+        }
+
+        [Test]
+        public void TryRestore_DiscoveredCell_UnclassifiedIncoming_IsAlreadyDiscovered()
+        {
+            var fog = NearRegion();
+            var source = new FakeSource();
+            fog.Tick(source.Set(Wet00));                      // (0,0) shallow
+            fog.Tick(source.Set(new Vector3(7f, 8.5f, 7f)));  // (1,1) dry, empty band
+
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Unclassified, CellRestoreOutcome.AlreadyDiscovered);
+            AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Unclassified, CellRestoreOutcome.AlreadyDiscovered);
+
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow), "not cleared");
+            Assert.That(CellOf(fog, 1, 1).DepthBandId, Is.Empty);
+        }
+
+        [Test]
+        public void TryRestore_Twice_SecondIsAlreadyDiscovered()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Restored);
+            var revision = fog.Revision;
+
+            for (var i = 0; i < 100; i++)
+                AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
+
+            Assert.That(fog.Revision, Is.EqualTo(revision));
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TryRestore_ThenTickAndTryObserve_GiveNoSecondDiscovery()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Restored);
+            var revision = fog.Revision;
+            var events = new List<string>();
+            var source = new FakeSource();
+
+            Assert.That(fog.Tick(source.Set(Wet00), events), Is.EqualTo(0));
+            Assert.That(fog.Tick(source.Set(new Vector3(4.9f, 1f, 4.9f), new Vector3(0.1f, 7f, 0.1f)), events),
+                Is.EqualTo(0));
+            Assert.That(events, Is.Empty);
+            Assert.That(fog.TryObserve(Wet00, out var index), Is.False);
+            Assert.That(index, Is.EqualTo(-1));
+            Assert.That(fog.Revision, Is.EqualTo(revision));
+            Assert.That(fog.DiscoveredCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TryRestore_Unclassified_ThenWetTick_FillsTheBand_WithoutADiscovery()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Unclassified, CellRestoreOutcome.Restored);
+            var revision = fog.Revision;
+            var events = new List<string>();
+
+            Assert.That(fog.Tick(new FakeSource().Set(Wet00), events), Is.EqualTo(0));
+
+            Assert.That(events, Is.Empty);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+            Assert.That(fog.Revision, Is.EqualTo(revision + 1), "the live band fill is a change the map must see");
+        }
+
+        [Test]
+        public void TryRestore_ReservedBand_IsNotOverwrittenByALiveVisit()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.Restored);
+            var revision = fog.Revision;
+            var events = new List<string>();
+
+            fog.Tick(new FakeSource().Set(Wet00), events);
+
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Reef));
+            Assert.That(fog.Revision, Is.EqualTo(revision));
+            Assert.That(events, Is.Empty);
+        }
+
+        [Test]
+        public void TryRestore_ThenTryGetCell_ReturnsTheRestoredBand()
+        {
+            var fog = NearRegion();
+            AssertRestore(fog, Id(-2, 1), -2, 1, DepthBandIds.Shallow, CellRestoreOutcome.Restored);
+
+            Assert.That(fog.TryGetCell(new Vector3(-7.5f, 4f, 7.5f), out var id, out var band), Is.True);
+            Assert.That(id, Is.EqualTo(Id(-2, 1)));
+            Assert.That(band, Is.EqualTo(DepthBandIds.Shallow));
+
+            // The neighbour was not restored: it has its id, but no band.
+            Assert.That(fog.TryGetCell(new Vector3(-2.5f, 4f, 7.5f), out var nid, out var nband), Is.True);
+            Assert.That(nid, Is.EqualTo(Id(-1, 1)));
+            Assert.That(nband, Is.Empty);
+        }
+
+        [Test]
+        public void TryRestore_MovesTheReadModelRevision_AndItsSnapshot()
+        {
+            var fog = NearRegion();
+            var obs = new SpeciesObservationAuthority(fog);
+            var before = obs.Snapshot();
+            var revision = obs.Revision;
+
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.Restored);
+            var after = obs.Snapshot();
+            Assert.That(obs.Revision, Is.EqualTo(revision + 1));
+            Assert.That(after.Revision, Is.EqualTo(obs.Revision));
+            Assert.That(after.Cells, Is.Not.SameAs(before.Cells));
+            Assert.That(Find(after, Id(0, 0)).Discovered, Is.True);
+            Assert.That(Find(after, Id(0, 0)).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+            Assert.That(Find(before, Id(0, 0)).Discovered, Is.False, "an earlier snapshot is not mutated");
+
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
+            Assert.That(obs.Revision, Is.EqualTo(revision + 1));
+            Assert.That(obs.Snapshot().Cells, Is.SameAs(after.Cells));
+        }
+
+        [Test]
+        public void RestoringALiveSnapshot_ReproducesEveryCell()
+        {
+            var a = NearRegion();
+            var source = new FakeSource();
+            foreach (var p in new[]
+                     {
+                         new Vector3(0f, 4f, 0f),      // (0,0) shallow
+                         new Vector3(7f, 8.5f, 7f),    // (1,1) dry, empty band
+                         new Vector3(-12f, -5f, -12f), // (-3,-3) 13 m, empty band
+                         new Vector3(-7f, 3f, 6f),     // (-2,1) shallow
+                         new Vector3(12f, 2f, -12f)    // (2,-3) shallow
+                     })
+                a.Tick(source.Set(p));
+
+            var sa = a.Snapshot();
+            var b = NearRegion();
+            foreach (var cell in sa.Cells)
+                if (cell.Discovered)
+                    AssertRestore(b, cell.CellId, cell.GridX, cell.GridZ, cell.DepthBandId, CellRestoreOutcome.Restored);
+
+            var sb = b.Snapshot();
+            Assert.That(sb.Cells.Count, Is.EqualTo(sa.Cells.Count));
+            var closed = 0;
+            for (var i = 0; i < sa.Cells.Count; i++)
+            {
+                var x = sa.Cells[i];
+                var y = sb.Cells[i];
+                Assert.That(y.CellId, Is.EqualTo(x.CellId));
+                Assert.That((y.GridX, y.GridZ), Is.EqualTo((x.GridX, x.GridZ)), x.CellId);
+                Assert.That(y.Discovered, Is.EqualTo(x.Discovered), x.CellId);
+                Assert.That(y.DepthBandId, Is.EqualTo(x.DepthBandId), x.CellId);
+                if (!x.Discovered) closed++;
+            }
+
+            Assert.That(closed, Is.GreaterThan(0), "undiscovered cells must stay closed in the copy");
+            Assert.That(b.DiscoveredCount, Is.EqualTo(a.DiscoveredCount));
+            // Revisions are not compared: a's counts its live band fills, b's counts its restores.
+        }
+
+        [Test]
+        public void TryRestore_RepeatedAndInvalid_DoNotAllocate()
+        {
+            var fog = NearRegion();
+            var known = Id(0, 0);
+            var outside = ExplorationIds.CellId(ExplorationIds.NearRegionId, 3, 0);
+            var mismatch = Id(1, 0);
+            fog.TryRestore(known, 0, 0, DepthBandIds.Shallow);
+            fog.Snapshot();
+            var revision = fog.Revision;
+
+            // Warm up (JIT) every path measured below.
+            fog.TryRestore(known, 0, 0, DepthBandIds.Shallow);
+            fog.TryRestore(outside, 3, 0, DepthBandIds.Shallow);
+            fog.TryRestore(mismatch, 0, 0, DepthBandIds.Shallow);
+
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            var repeats = 0;
+            for (var i = 0; i < 10000; i++)
+            {
+                if (fog.TryRestore(known, 0, 0, DepthBandIds.Shallow) == CellRestoreOutcome.AlreadyDiscovered) repeats++;
+                if (fog.TryRestore(outside, 3, 0, DepthBandIds.Shallow) == CellRestoreOutcome.Invalid) repeats++;
+                if (fog.TryRestore(mismatch, 0, 0, DepthBandIds.Shallow) == CellRestoreOutcome.Invalid) repeats++;
+                fog.Snapshot();
+            }
+            var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+            Assert.That(allocated, Is.EqualTo(0), $"allocated {allocated} bytes");
+            Assert.That(repeats, Is.EqualTo(30000));
+            Assert.That(fog.Revision, Is.EqualTo(revision));
+        }
+
+        private static void AssertRestore(ExplorationCellAuthority fog, string id, int gx, int gz, string band,
+            CellRestoreOutcome expected)
+        {
+            var revision = fog.Revision;
+            var discoveredCount = fog.DiscoveredCount;
+            var cells = fog.Snapshot().Cells;
+
+            Assert.That(fog.TryRestore(id, gx, gz, band), Is.EqualTo(expected), $"'{id}' {gx},{gz} band '{band}'");
+
+            var restored = expected == CellRestoreOutcome.Restored;
+            Assert.That(fog.Revision - revision, Is.EqualTo(restored ? 1 : 0), "Restored <=> revision moved by exactly one");
+            if (!restored)
+            {
+                Assert.That(fog.DiscoveredCount, Is.EqualTo(discoveredCount), "nothing opened");
+                Assert.That(fog.Snapshot().Cells, Is.SameAs(cells), "nothing changed, cached snapshot kept");
+            }
+        }
+
         private static ExplorationCellState CellOf(ExplorationCellAuthority fog, int gx, int gz) =>
             Find(fog.Snapshot(), ExplorationIds.CellId(fog.Grid.RegionId, gx, gz));
 
