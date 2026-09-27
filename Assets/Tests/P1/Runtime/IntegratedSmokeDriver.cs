@@ -11,6 +11,7 @@ using DeepDive.World;
 using DeepDive.Inventory;
 using DeepDive.Economy;
 using DeepDive.Trip;
+using DeepDive.MapUI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -53,6 +54,9 @@ namespace DeepDive.P1.Lab
             public string homeStatus = "";
             public bool homeBedAccepted, homeMorningClean, homePingSeen, homePingOnMap, homePingAccepted;
             public int homeSleepersMax;
+            public bool exploreMirrorSeen, exploreEncyclopediaSilhouette, exploreEncyclopediaNameHidden, exploreReloaded;
+            public int exploreFogCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
+            public string exploreEncyclopediaSpecies = "", exploreSightingOutcome = "", exploreSightingReplay = "";
             public bool storageCarriedSeen, storageFarRefused, storageOpenAccepted, storagePanelOpen, storageStored,
                 storageDuplicateRefused, storageRetrieved, storageAllStored, storageHostChecked, storageHostFinal, storageReloadKept;
             public float returnToPendingSeconds, returnToTurnInSeconds;
@@ -74,6 +78,7 @@ namespace DeepDive.P1.Lab
         private bool Record => Arg("-p3-record") == "1" || Event;
         private bool Town => Arg("-p3-town") == "1";
         private bool Storage => Arg("-p4-storage") == "1";
+        private bool Explore => Arg("-p4-explore") == "1";
         private bool Home => Arg("-p4-home") == "1";
         private bool Day => Arg("-p4-day") == "1";
         private bool DayReload => Arg("-p4-day-reload") == "1";
@@ -125,7 +130,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -197,6 +202,7 @@ namespace DeepDive.P1.Lab
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
                 if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
                 if (Day || Home) ObserveDay();
+                if (Explore) { if (host) HostExplore(state); ObserveExplore(); }
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
@@ -204,9 +210,9 @@ namespace DeepDive.P1.Lab
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && elapsed > (Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -214,7 +220,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -245,6 +251,10 @@ namespace DeepDive.P1.Lab
                 (!host || (result.dayMidnightClosed && result.dayLostDivers == expected && result.daySavedOnDisk &&
                     result.dayReloadNoAdvance && result.dayReplayIgnored && result.dayBedAccepted && result.dayEarlyGateHeld &&
                     result.dayEarlyClosed && result.dayHostDone && result.dayFinalNumber == 3));
+            if (Explore) result.passed &= result.exploreMirrorSeen && result.exploreFogCells == 36 && result.exploreFogDiscoveredMax >= 1 &&
+                result.exploreEncyclopediaSpecies == "sea_bass" && result.exploreEncyclopediaSilhouette && result.exploreEncyclopediaNameHidden &&
+                (!host || (result.exploreSightingOutcome == "CountedNewEvidence" && result.exploreSightingReplay == "AlreadyCounted" &&
+                    result.exploreSavedCells >= 1 && result.exploreSavedObservations == 1 && result.exploreReloaded));
             if (Home) result.passed &= result.homeBedAccepted && result.homeMorningClean &&
                 result.dayNumbers.Contains(2) && result.daySummaries.Contains(1) && result.homePingSeen && result.homePingOnMap &&
                 (!host || result.homePingAccepted);
@@ -898,6 +908,95 @@ namespace DeepDive.P1.Lab
             var before = economy.StoredCount;
             result.storageReloadKept = store.LoadNow() && economy.StoredCount == before && economy.PendingTurnIns().Count == 0;
             if (!result.storageHostFinal) result.errors.Add($"storage host final stored={economy.StoredCount} pending={economy.PendingTurnIns().Count} disk={onDisk.StoredItems.Count}/{onDisk.PendingTurnIns.Count}");
+        }
+
+        // ---- P4.1 exploration map/encyclopedia/save (#90) over the network -------------------------------------------
+        // TEST FIXTURE, NOT PRODUCT WIRING: the host shell that owns Utku's authorities in the game is Mehmet's
+        // composition binding (#89 follow-up), which does not exist yet. So that the parts that ARE product code -
+        // ExplorationMirror, the map fog / encyclopedia presenters, ExplorationPersistenceAdapter and the campaign
+        // save - can be proven across real processes now, the host here builds Utku's real authorities from the
+        // real scene (DiveRegionField bounds, WaterField bodies), feeds them the host-authoritative NetworkPlayer
+        // positions every tick, binds ExplorationFeed and the save, and accepts ONE sighting at the host's own
+        // position. Nothing of this ships; it lives in the smoke driver only.
+        private ExplorationCellAuthority exploreCells;
+        private SpeciesObservationAuthority exploreSpecies;
+        private bool exploreSighted, exploreSaveChecked;
+
+        private sealed class NetworkPlayerExplorers : IExplorerPositionSource
+        {
+            public void CollectPositions(List<ExplorerPosition> into)
+            {
+                into.Clear();
+                foreach (var p in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
+                    if (p.IsSpawned) into.Add(new ExplorerPosition(new PlayerId(p.OwnerClientId), p.transform.position));
+            }
+        }
+
+        private readonly NetworkPlayerExplorers exploreFeed = new NetworkPlayerExplorers();
+
+        private void HostExplore(SessionState state)
+        {
+            if (exploreCells == null)
+            {
+                if (SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene || adapter.Connection.IsSceneLoading) return;
+                if (!DiveRegionField.TryFind(out var region)) return;
+                var water = FindFirstObjectByType<WaterField>();
+                exploreCells = new ExplorationCellAuthority(region.RegionId, region.Bounds, water != null ? water.Bodies : null);
+                exploreSpecies = new SpeciesObservationAuthority(exploreCells);
+                ExplorationFeed.Bind(exploreSpecies);
+                adapter.GetComponent<EconomySaveStore>().Exploration = new ExplorationPersistenceAdapter(exploreCells, exploreSpecies);
+            }
+
+            if (SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene && !adapter.Connection.IsSceneLoading)
+                exploreCells.Tick(exploreFeed);
+
+            if (!exploreSighted && state.Phase == SessionPhase.Dive && Time.realtimeSinceStartup - sceneStarted > 8f)
+            {
+                var me = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsOwner && p.IsSpawned);
+                if (me != null)
+                {
+                    exploreSighted = true;
+                    result.exploreSightingOutcome = exploreSpecies.AcceptSighting("sea_bass", me.transform.position, 1).ToString();
+                    // The same sighting again is not a second observation.
+                    result.exploreSightingReplay = exploreSpecies.AcceptSighting("sea_bass", me.transform.position, 1).ToString();
+                }
+            }
+
+            if (!exploreSaveChecked && state.Phase == SessionPhase.Return && exploreSighted)
+            {
+                exploreSaveChecked = true;
+                var store = adapter.GetComponent<EconomySaveStore>();
+                var saved = store.SaveNow();
+                var onDisk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+                result.exploreSavedCells = onDisk.Exploration.DiscoveredCells.Count;
+                result.exploreSavedObservations = onDisk.Exploration.Observations.Count;
+
+                // A fresh authority pair, re-hydrated from that file through the product adapter.
+                var fresh = new ExplorationCellAuthority(exploreCells.Grid.RegionId, DiveRegionField.TryFind(out var r) ? r.Bounds : default,
+                    FindFirstObjectByType<WaterField>()?.Bodies);
+                var freshSpecies = new SpeciesObservationAuthority(fresh);
+                var freshAdapter = new ExplorationPersistenceAdapter(fresh, freshSpecies);
+                result.exploreReloaded = saved && freshAdapter.RestoreExploration(onDisk.Exploration) &&
+                    freshSpecies.Observations.Count == result.exploreSavedObservations &&
+                    freshAdapter.ExportExploration().DiscoveredCells.Count == result.exploreSavedCells;
+            }
+        }
+
+        // Every process: what its OWN map and encyclopedia show (host: live model; guest: mirrored from the host).
+        private void ObserveExplore()
+        {
+            if (!ExplorationMirror.HasData) return;
+            result.exploreMirrorSeen = true;
+            var fog = BoatMapView.LastFog;
+            result.exploreFogCells = fog.Count;
+            result.exploreFogDiscoveredMax = Math.Max(result.exploreFogDiscoveredMax, ExplorationMapPresenter.DiscoveredCount(fog));
+            var encyclopedia = BoatMapView.LastEncyclopedia;
+            if (encyclopedia.Count > 0)
+            {
+                result.exploreEncyclopediaSpecies = encyclopedia[0].SpeciesId;
+                result.exploreEncyclopediaSilhouette = encyclopedia[0].Silhouette;
+                result.exploreEncyclopediaNameHidden = !encyclopedia[0].NameKnown;
+            }
         }
 
         // ---- P4.1 shared day: real host clock, real close through the real session/inventory/save --------------

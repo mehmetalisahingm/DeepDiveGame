@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
+using DeepDive.MapUI;
 using DeepDive.Network;
 using DeepDive.Trip;
 using DeepDive.World;
@@ -30,6 +31,14 @@ namespace DeepDive.Composition
         public static BoatTripPhase LastPhase { get; private set; }
         public static bool LastHadRegion { get; private set; }
 
+        // #90 exploration layer: the fog tiles and encyclopedia this process is showing, rebuilt from
+        // ExplorationMirror (host: the live read model; clients: the host's mirrored snapshot).
+        public const KeyCode EncyclopediaKey = KeyCode.J;
+        public static IReadOnlyList<FogTile> LastFog { get; private set; } = new List<FogTile>();
+        public static IReadOnlyList<EncyclopediaEntry> LastEncyclopedia { get; private set; } = new List<EncyclopediaEntry>();
+        private int fogRevision = -1;
+        private bool encyclopediaVisible;
+
         private bool visible = true;
         private float nextRefresh;
         private BoatTripPlayerSync localSync;
@@ -52,6 +61,8 @@ namespace DeepDive.Composition
         private void Update()
         {
             if (Input.GetKeyDown(ToggleKey)) visible = !visible;
+            if (Input.GetKeyDown(EncyclopediaKey)) encyclopediaVisible = !encyclopediaVisible;
+            RebuildExploration();
             if (Time.unscaledTime < nextRefresh) return;
             nextRefresh = Time.unscaledTime + RefreshInterval;
             Rebuild();
@@ -92,6 +103,21 @@ namespace DeepDive.Composition
                 live, party, localSync.IsSeated);
         }
 
+        private void RebuildExploration()
+        {
+            if (!ExplorationMirror.HasData)
+            {
+                if (LastFog.Count > 0) { LastFog = new List<FogTile>(); LastEncyclopedia = new List<EncyclopediaEntry>(); }
+                fogRevision = -1;
+                return;
+            }
+            var snapshot = ExplorationMirror.Current;
+            if (snapshot.Revision == fogRevision) return;
+            fogRevision = snapshot.Revision;
+            LastFog = ExplorationMapPresenter.BuildFog(snapshot);
+            LastEncyclopedia = EncyclopediaPresenter.Build(snapshot);
+        }
+
         private bool ResolveLocalSync(NetworkManager manager)
         {
             if (localSync != null && localSync.IsSpawned && localSync.IsOwner) return true;
@@ -123,6 +149,7 @@ namespace DeepDive.Composition
 
         private void OnGUI()
         {
+            if (encyclopediaVisible) DrawEncyclopedia();
             if (!visible || LastIcons.Count == 0) return;
 
             var rect = new Rect(Screen.width - MapSize - 20f, 20f, MapSize, MapSize);
@@ -130,9 +157,53 @@ namespace DeepDive.Composition
             GUI.color = new Color(0.05f, 0.18f, 0.28f, 0.85f);
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
             GUI.color = previous;
+            DrawFog(rect);
             GUI.Label(new Rect(rect.x + 4f, rect.y + 2f, MapSize, 20f), $"HARITA [{ToggleKey}]  sandal: {LastPhase}");
+            if (LastFog.Count > 0)
+                GUI.Label(new Rect(rect.x + 4f, rect.y + MapSize - 20f, MapSize, 20f),
+                    $"kesif {ExplorationMapPresenter.DiscoveredCount(LastFog)}/{LastFog.Count}   ansiklopedi [{EncyclopediaKey}]");
 
             for (var i = 0; i < LastIcons.Count; i++) DrawIcon(rect, LastIcons[i]);
+        }
+
+        // Undiscovered cells are covered; discovered ones show their depth band. Tiles and icons share the
+        // region's 0..1 square (ExplorationMapProjection: exact for the -15..15 arena on the 5 m lines).
+        private static void DrawFog(Rect map)
+        {
+            var previous = GUI.color;
+            for (var i = 0; i < LastFog.Count; i++)
+            {
+                var t = LastFog[i];
+                GUI.color = !t.Discovered ? new Color(0.02f, 0.03f, 0.05f, 0.9f)
+                    : t.DepthBandId == DepthBandIds.Shallow ? new Color(0.25f, 0.6f, 0.75f, 0.35f)
+                    : new Color(0.3f, 0.5f, 0.55f, 0.2f);
+                var x = map.x + (t.CenterU - t.Width * 0.5f) * map.width;
+                var y = map.y + (1f - t.CenterV - t.Height * 0.5f) * map.height;
+                GUI.DrawTexture(new Rect(x, y, t.Width * map.width, t.Height * map.height), Texture2D.whiteTexture);
+            }
+            GUI.color = previous;
+        }
+
+        private static void DrawEncyclopedia()
+        {
+            var rows = Mathf.Max(1, LastEncyclopedia.Count);
+            var box = new Rect(20f, Screen.height - 60f - rows * 44f, 380f, 36f + rows * 44f);
+            GUI.Box(box, $"ANSIKLOPEDI [{EncyclopediaKey}]  ({LastEncyclopedia.Count} tur)");
+            if (LastEncyclopedia.Count == 0)
+            {
+                GUI.Label(new Rect(box.x + 10f, box.y + 26f, 360f, 20f), "Henuz dogrulanmis bir karsilasma yok.");
+                return;
+            }
+            for (var i = 0; i < LastEncyclopedia.Count; i++)
+            {
+                var e = LastEncyclopedia[i];
+                var y = box.y + 26f + i * 44f;
+                GUI.Label(new Rect(box.x + 10f, y, 360f, 20f),
+                    $"{e.DisplayName}  -  {e.Category}   [{e.ProgressSteps}/{EncyclopediaEntry.MaxProgressSteps}]");
+                var habitat = e.HabitatKnown ? string.Join(", ", System.Linq.Enumerable.Select(e.HabitatBandIds, EncyclopediaPresenter.BandLabel)) : "kayit gerekir";
+                GUI.Label(new Rect(box.x + 22f, y + 18f, 350f, 20f),
+                    $"siluet {(e.Silhouette ? "acik" : "-")}  |  av verisi {(e.CatchData ? "acik" : "av gerekir")}  |  habitat: {habitat}");
+            }
         }
 
         private void DrawIcon(Rect map, MapIcon icon)

@@ -1,0 +1,8 @@
+{
+  "name": "DeepDive.MapUI",
+  "rootNamespace": "DeepDive.MapUI",
+  "references": [
+    "DeepDive.Core.Contracts",
+    "DeepDive.World"
+  ]
+}
