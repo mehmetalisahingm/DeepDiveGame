@@ -1,6 +1,6 @@
 # P4.1-C ikinci teslim: ortak ev deposu (#90)
 
-Tarih: 2026-09-26. Taban: `p4/mert-home-smoke` (PR #93) üstünde; #93 birleşince `codex/p4-integration`'a alınır.
+Tarih: 2026-09-27. Taban: `codex/p4-integration` @ `8b73f23` (#93 ve #94 birleşik).
 
 ## Karar (mevcut modelle uyumlu)
 - Depo, **güvenli ve henüz ödenmemiş av**ı (`PendingTurnIn`, yalnız `Catch`) evde park eder; klipler P4.2 PC arşivinin işidir, depoya girmez.
@@ -12,7 +12,7 @@ Tarih: 2026-09-26. Taban: `p4/mert-home-smoke` (PR #93) üstünde; #93 birleşin
 - İstemci: `EconomyPlayerSync` host'un yazdığı iki liste taşır (taşıdığım av / depodaki av); `HomeStorageView` (IMGUI) depoya yakınken bu listeleri gösterir ve `KOY`/`AL` isteği gönderir. Panel hiçbir eşya durumu tutmaz.
 
 ## Kanıt
-- EditMode **691/691** (13 `HomeStorageTests` dahil).
+- EditMode **759/759** (13 `HomeStorageTests` dahil, #94 sonrası taban).
 - **Gerçek 2-süreç `tools/Test-P1-Integrated.ps1 -Players 2 -Storage` smoke: host PASS, client1 PASS.** Gerçek güvenli dönüşle sıraya giren 2'şer av (town smoke'undaki gibi envantere eklenip güvenli dönüş işaretlenir; gerçek dalış özeti bekleyen kaydı üretir) → eve dönüş → her süreç depoya yürür, bakar, `H` (Mehmet'in fiziksel açılışı kabul edilir) → panel açık → koy (taşınan 2→1, depoda 1) → aynı eşyayı tekrar koy (**reddedilir**, `InvalidTarget`) → geri al (taşınan 2, depoda 0) → ikisini de koy. Depodan uzakta gelen koy isteği **host tarafından reddedildi** (`NotAtStorage`, misafirde gözlendi). Host: yetki, kayıt dosyası (`StoredItems`) ve yeniden yükleme (`LoadNow`) aynı — `2×oyuncu` av depoda, bekleyen 0.
 - Aynı build'de `-HomeSleep`, `-Day` (yeniden açılan host dahil) ve `-Trip` PASS.
 
