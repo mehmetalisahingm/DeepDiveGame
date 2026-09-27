@@ -53,6 +53,8 @@ namespace DeepDive.P1.Lab
             public string homeStatus = "";
             public bool homeBedAccepted, homeMorningClean, homePingSeen, homePingOnMap, homePingAccepted;
             public int homeSleepersMax;
+            public bool storageCarriedSeen, storageFarRefused, storageOpenAccepted, storagePanelOpen, storageStored,
+                storageDuplicateRefused, storageRetrieved, storageAllStored, storageHostChecked, storageHostFinal, storageReloadKept;
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
             public float recordingValidSeconds;
@@ -71,6 +73,7 @@ namespace DeepDive.P1.Lab
         private bool Event => Arg("-p3-event") == "1";
         private bool Record => Arg("-p3-record") == "1" || Event;
         private bool Town => Arg("-p3-town") == "1";
+        private bool Storage => Arg("-p4-storage") == "1";
         private bool Home => Arg("-p4-home") == "1";
         private bool Day => Arg("-p4-day") == "1";
         private bool DayReload => Arg("-p4-day-reload") == "1";
@@ -122,7 +125,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -194,15 +197,16 @@ namespace DeepDive.P1.Lab
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
                 if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
                 if (Day || Home) ObserveDay();
+                if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
                 if (host && Record && !Town) SeedRecorderCamera(state);
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && elapsed > (Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -210,7 +214,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -244,6 +248,9 @@ namespace DeepDive.P1.Lab
             if (Home) result.passed &= result.homeBedAccepted && result.homeMorningClean &&
                 result.dayNumbers.Contains(2) && result.daySummaries.Contains(1) && result.homePingSeen && result.homePingOnMap &&
                 (!host || result.homePingAccepted);
+            if (Storage) result.passed &= result.storageCarriedSeen && result.storageOpenAccepted && result.storagePanelOpen &&
+                result.storageStored && result.storageDuplicateRefused && result.storageRetrieved && result.storageAllStored &&
+                (!host || (result.storageHostChecked && result.storageHostFinal && result.storageReloadKept));
             if (Trip) result.passed &= result.tripBoarded && result.tripDuplicateBoardHeld && result.tripMapDockedAtDock &&
                 result.tripMapUnderwayMoved && result.tripMapAnchoredAtAnchor && result.tripDockedEmpty && result.tripDone &&
                 result.tripMapPlayersMax >= expected &&
@@ -282,6 +289,7 @@ namespace DeepDive.P1.Lab
                 else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
                 else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
                 else if (Home && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
+                else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
@@ -706,6 +714,191 @@ namespace DeepDive.P1.Lab
 
         private float homePingAt, homePingAimAt, homePingCheckAt;
         private bool homePingSent;
+
+        // ---- P4.1 shared home storage: real safe-return catches, real walk/aim/H, real store/retrieve requests ------------
+        // The catches enter the way the town smoke does (inventory add + safe-return mark, then the real dive summary
+        // queues them as unpaid). Back home each process walks to the storage, aims, presses H (Mehmet's physical open),
+        // and uses the panel's own request path. Checked: a request from too far away is refused by the HOST, storing
+        // moves an item, a repeat is refused, retrieving puts it back, and everything left stored survives the save.
+        private int storageStage;
+        private float storageStageAt, storageAimAt, storageNext;
+        private ulong storageLastRequest;
+        private string storageFirstId = "";
+        private bool storageInjected;
+
+        private void HostInjectStorageCatches(SessionState state)
+        {
+            if (storageInjected || state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading ||
+                SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene || Time.realtimeSinceStartup - sceneStarted < 6f) return;
+            storageInjected = true;
+            var inventory = adapter.GetComponent<InventoryManager>();
+            foreach (var id in adapter.Session.Roster.Keys)
+            {
+                for (var i = 0; i < 2; i++)
+                    inventory.TryAddCatch(id, new CaptureResult($"store-{id.Value}-{i}", state.DiveId, "sea_bass", 800, 1));
+                inventory.TryMarkSafeReturn(id);
+            }
+        }
+
+        private bool StorageAnswered(EconomyPlayerSync sync, out bool accepted, out string reason)
+        {
+            accepted = sync.LastAccepted.Value;
+            reason = sync.LastReasonCode.Value.ToString();
+            return sync.LastRequestId.Value == storageLastRequest && storageLastRequest != 0;
+        }
+
+        private void ProbeStorage(NetworkPlayer local)
+        {
+            var binding = FindFirstObjectByType<HomePlayerInteractionBinding>();
+            var cam = local.GetComponentInChildren<Camera>(true);
+            var sync = local.GetComponent<EconomyPlayerSync>();
+            var now = Time.realtimeSinceStartup;
+            if (storageStageAt == 0) storageStageAt = now;
+            if (binding == null || cam == null || sync == null || !sync.IsSpawned) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            if (storageStage < 90 && now - storageStageAt > 45f)
+            {
+                result.errors.Add($"storage stage {storageStage} timeout carried={sync.CarriedCatchIds.Count} stored={sync.StoredCatchIdList.Count} status='{HomeStatus(binding)}' last={sync.LastReasonCode.Value}");
+                storageStage = 99;
+            }
+            var anchor = FindObjectsByType<HomeInteractionAnchor>(FindObjectsSortMode.None).FirstOrDefault(a => a.Kind == HomeInteractionKind.Storage);
+            if (anchor == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var far = Vector3.Distance(local.transform.position, anchor.WorldPosition) > HomePlayerInteractionBinding.InteractionRange + 1.5f;
+
+            switch (storageStage)
+            {
+                case 0:   // the panel offers this player's own two catches once the day's dive summary was queued
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (sync.CarriedCatchIds.Count < 2) return;
+                    result.storageCarriedSeen = true;
+                    storageFirstId = sync.CarriedCatchIds[0].ToString();
+                    if (far)
+                    {
+                        // Too far from the storage: the HOST must refuse, whatever the client shows.
+                        sync.RequestStoreItem(storageFirstId);
+                        storageLastRequest = sync.LastRequestId.Value + 1;
+                        storageNext = now + 1.2f;
+                        storageStage = 1; return;
+                    }
+                    storageStage = 2; return;
+                case 1:
+                {
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (now < storageNext) return;
+                    result.storageFarRefused = !sync.LastAccepted.Value && sync.LastReasonCode.Value.ToString() == "NotAtStorage" &&
+                        sync.CarriedCatchIds.Count == 2;
+                    if (!result.storageFarRefused) result.errors.Add($"far store not refused: accepted={sync.LastAccepted.Value} reason={sync.LastReasonCode.Value}");
+                    storageStage = 2; return;
+                }
+                case 2:   // walk to the storage
+                {
+                    var to = anchor.WorldPosition - local.transform.position; to.y = 0;
+                    if (to.magnitude > 1.9f)
+                    {
+                        var yaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
+                        local.SubmitLocalInput(Vector3.forward, yaw, 0);
+                        return;
+                    }
+                    storageAimAt = 0; storageStage = 3; return;
+                }
+                case 3:   // aim, press H: Mehmet's physical layer opens it
+                {
+                    var col = anchor.GetComponentInChildren<Collider>();
+                    AimAt(local, cam, col != null ? col.bounds.center : anchor.WorldPosition, out var yaw, out var pitch);
+                    local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+                    if (storageAimAt == 0) storageAimAt = now + 0.7f;
+                    if (now < storageAimAt) return;
+                    HomeSend(binding, 1);
+                    storageNext = now + 1.0f; storageStage = 4; return;
+                }
+                case 4:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (now < storageNext) return;
+                    result.storageOpenAccepted = HomeStatus(binding) == "EV ETKILESIMI TAMAM";
+                    result.storagePanelOpen = HomeStorageView.PanelOpen;
+                    if (!result.storageOpenAccepted) result.errors.Add("storage open refused: " + HomeStatus(binding));
+                    storageStage = 5; return;
+                case 5:   // store one
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    sync.RequestStoreItem(storageFirstId);
+                    storageLastRequest = sync.LastRequestId.Value + 1;
+                    storageNext = now + 1.2f; storageStage = 6; return;
+                case 6:
+                {
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (now < storageNext) return;
+                    var moved = sync.LastAccepted.Value && sync.StoredCatchIdList.Count >= 1 && sync.CarriedCatchIds.Count == 1;
+                    result.storageStored = moved;
+                    if (!moved) result.errors.Add($"store failed accepted={sync.LastAccepted.Value} reason={sync.LastReasonCode.Value} carried={sync.CarriedCatchIds.Count} stored={sync.StoredCatchIdList.Count}");
+                    storageStage = 7; return;
+                }
+                case 7:   // the same item again: it is already in storage, so it is not offered and not accepted
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    sync.RequestStoreItem(storageFirstId);
+                    storageLastRequest = sync.LastRequestId.Value + 1;
+                    storageNext = now + 1.2f; storageStage = 8; return;
+                case 8:
+                {
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (now < storageNext) return;
+                    result.storageDuplicateRefused = !sync.LastAccepted.Value && sync.LastReasonCode.Value.ToString() == "InvalidTarget" &&
+                        sync.CarriedCatchIds.Count == 1;
+                    if (!result.storageDuplicateRefused) result.errors.Add($"duplicate store not refused accepted={sync.LastAccepted.Value} reason={sync.LastReasonCode.Value}");
+                    storageStage = 9; return;
+                }
+                case 9:   // take it back out
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    sync.RequestRetrieveItem(storageFirstId);
+                    storageLastRequest = sync.LastRequestId.Value + 1;
+                    storageNext = now + 1.2f; storageStage = 10; return;
+                case 10:
+                {
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (now < storageNext) return;
+                    result.storageRetrieved = sync.LastAccepted.Value && sync.CarriedCatchIds.Count == 2 && !ContainsId(sync.StoredCatchIdList, storageFirstId);
+                    if (!result.storageRetrieved) result.errors.Add($"retrieve failed accepted={sync.LastAccepted.Value} reason={sync.LastReasonCode.Value} carried={sync.CarriedCatchIds.Count}");
+                    storageStage = 11; return;
+                }
+                case 11:  // leave both stored: this is what the save must keep
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (sync.CarriedCatchIds.Count > 0)
+                    {
+                        if (now >= storageNext)
+                        {
+                            storageNext = now + 0.8f;
+                            sync.RequestStoreItem(sync.CarriedCatchIds[0].ToString());
+                        }
+                        return;
+                    }
+                    result.storageAllStored = true;
+                    storageStage = 90; return;
+                default:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+            }
+        }
+
+        private static bool ContainsId(Unity.Netcode.NetworkList<Unity.Collections.FixedString64Bytes> list, string id)
+        {
+            for (var i = 0; i < list.Count; i++) if (list[i].ToString() == id) return true;
+            return false;
+        }
+
+        // Host: once every process finished storing, the authority, the mirror count and the file must agree.
+        private void HostStorageChecks()
+        {
+            if (result.storageHostChecked || !result.storageAllStored) return;
+            var economy = adapter.GetComponent<EconomyManager>();
+            var want = adapter.Session.Roster.Count * 2;
+            if (economy.StoredCount < want) return;
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var onDisk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+            result.storageHostChecked = true;
+            result.storageHostFinal = economy.StoredCount == want && economy.PendingTurnIns().Count == 0 &&
+                onDisk.StoredItems.Count == want && onDisk.PendingTurnIns.Count == 0;
+            var before = economy.StoredCount;
+            result.storageReloadKept = store.LoadNow() && economy.StoredCount == before && economy.PendingTurnIns().Count == 0;
+            if (!result.storageHostFinal) result.errors.Add($"storage host final stored={economy.StoredCount} pending={economy.PendingTurnIns().Count} disk={onDisk.StoredItems.Count}/{onDisk.PendingTurnIns.Count}");
+        }
 
         // ---- P4.1 shared day: real host clock, real close through the real session/inventory/save --------------
         // Day 1 runs to a real 00:00 (the host only raises the clock RATE, never sets the time): the open dive is

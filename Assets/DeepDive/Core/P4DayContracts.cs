@@ -203,6 +203,35 @@ namespace DeepDive.Core.Contracts
             LeaveHandler != null ? LeaveHandler(player, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
     }
 
+    // The item moves of the shared home storage (store a safe catch / take one back out). Mehmet's physical
+    // layer (HomeStorageInteraction.TryOpen, P4HomeInteractionContracts) decides whether a player may use the
+    // storage at all; these are the transactions once the host has verified the player is at it. The
+    // composition root binds them to EconomyManager (the one authority over pending items and the storage)
+    // while it is the host. Unbound means "no storage authority here": every request is refused.
+    public static class HomeStorageItems
+    {
+        public static Func<PlayerId, string, ulong, TransactionResult> StoreHandler { get; private set; }
+        public static Func<PlayerId, string, ulong, TransactionResult> RetrieveHandler { get; private set; }
+
+        public static void Bind(Func<PlayerId, string, ulong, TransactionResult> store, Func<PlayerId, string, ulong, TransactionResult> retrieve)
+        {
+            StoreHandler = store;
+            RetrieveHandler = retrieve;
+        }
+
+        public static void Unbind(Func<PlayerId, string, ulong, TransactionResult> store, Func<PlayerId, string, ulong, TransactionResult> retrieve)
+        {
+            if (StoreHandler == store) StoreHandler = null;
+            if (RetrieveHandler == retrieve) RetrieveHandler = null;
+        }
+
+        public static TransactionResult TryStore(PlayerId player, string itemId, ulong requestId) =>
+            StoreHandler != null ? StoreHandler(player, itemId, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
+
+        public static TransactionResult TryRetrieve(PlayerId player, string itemId, ulong requestId) =>
+            RetrieveHandler != null ? RetrieveHandler(player, itemId, requestId) : TransactionResult.Reject(requestId, "InvalidState", 0);
+    }
+
     // ---- save shapes (plain Serializable so JsonUtility writes them; nothing here is a scene type) ----
 
     [Serializable]
