@@ -22,12 +22,22 @@ namespace DeepDive.Core.Contracts
         // the kiyi/resif/derin cuts of P4.3 stay under this id (no second region system).
         public const string NearRegionId = "region-near-1";
 
-        // A cell is a column/row of the region's 0..1 map square, so its id is a pure function of the
-        // two indices: the same cell always gets the same id, across hosts, reloads and replays.
-        public static string CellId(int column, int row) => "cell-" + column + "-" + row;
+        // Cells are fixed CellSizeMetres x CellSizeMetres squares of ONE world grid anchored at world
+        // X = 0, Z = 0: cell (gx, gz) covers x in [gx*size, (gx+1)*size) and z in [gz*size, (gz+1)*size).
+        // The id is regionId + those two grid coordinates and nothing else - never a running index,
+        // a column count or a region corner - so the same world position keeps the same id when the
+        // region grows; a larger footprint only adds cells around the old ones. Coordinates can be
+        // negative (the arena runs -15..15). Changing the size or the origin renames every cell, so it
+        // changes only together with a save migration.
+        public const float CellSizeMetres = 5f;
 
-        public static bool IsCellInGrid(int column, int row, ExplorationGrid grid) =>
-            grid.IsValid && column >= 0 && row >= 0 && column < grid.Columns && row < grid.Rows;
+        public static string CellId(string regionId, int gridX, int gridZ) =>
+            regionId + ":gx" + gridX + ":gz" + gridZ;
+
+        public static bool IsCellInGrid(int gridX, int gridZ, ExplorationGrid grid) =>
+            grid.IsValid &&
+            gridX >= grid.MinGridX && gridX < grid.MinGridX + grid.Columns &&
+            gridZ >= grid.MinGridZ && gridZ < grid.MinGridZ + grid.Rows;
     }
 
     // The canonical depth cut ids (WORLD_SYSTEMS P4.3/P4.4: kiyi/resif/derin), the BoatTripIds pattern:
@@ -43,6 +53,14 @@ namespace DeepDive.Core.Contracts
 
         public static readonly IReadOnlyList<string> All = new[] { Shallow, Reef, Deep };
 
+        // "No band": the cell or observation has no classified depth. Not a band and not in All.
+        public const string Unclassified = "";
+
+        // What a cell/observation DepthBandId may hold: a known id or Unclassified. Null and
+        // whitespace are invalid - the host never produces them and a save must not load them.
+        public static bool IsValidOrUnclassified(string depthBandId) =>
+            depthBandId != null && (depthBandId.Length == 0 || IsKnown(depthBandId));
+
         public static bool IsKnown(string depthBandId)
         {
             for (var i = 0; i < All.Count; i++)
@@ -51,17 +69,22 @@ namespace DeepDive.Core.Contracts
         }
     }
 
-    // How the region's map square is cut into cells. Ints only: the map side already knows the
-    // region's 0..1 square, it needs just the counts to draw the fog over it.
+    // Which grid cells the region's footprint touches: gx MinGridX .. MinGridX+Columns-1, likewise z.
+    // Columns and Rows are derived from the footprint at runtime (the 30 x 30 m arena gives 6 x 6) and
+    // are part of no id; a bigger region only widens the range.
     public readonly struct ExplorationGrid
     {
         public readonly string RegionId;
+        public readonly int MinGridX;
+        public readonly int MinGridZ;
         public readonly int Columns;
         public readonly int Rows;
 
-        public ExplorationGrid(string regionId, int columns, int rows)
+        public ExplorationGrid(string regionId, int minGridX, int minGridZ, int columns, int rows)
         {
             RegionId = regionId ?? string.Empty;
+            MinGridX = minGridX;
+            MinGridZ = minGridZ;
             Columns = columns;
             Rows = rows;
         }
@@ -69,25 +92,30 @@ namespace DeepDive.Core.Contracts
         public bool IsValid => !string.IsNullOrEmpty(RegionId) && Columns > 0 && Rows > 0;
     }
 
-    // One cell of the shared exploration fog. Discovered only ever goes false -> true; the host opens
-    // a cell because an approved position really reached it, never because a client asked.
+    // One cell of the shared exploration fog: the canonical grid state only (coordinates, discovered,
+    // band). Where it is drawn on the map is derived by World's projection, not stored here, so the
+    // save never holds a second copy of the world->map transform. Discovered only ever goes
+    // false -> true; the host opens a cell because an approved position really reached it, never
+    // because a client asked.
     public readonly struct ExplorationCellState
     {
         public readonly string CellId;
-        public readonly int Column;
-        public readonly int Row;
+        public readonly int GridX;
+        public readonly int GridZ;
         public readonly bool Discovered;
 
-        // The depth band the host saw this cell reach ("kesfedilmis derinlik cizgileri"), one of
-        // DepthBandIds. Empty = not known yet. An id, never a metre value or display text, so the
-        // P4.4 cuts can grow without changing this shape.
+        // The depth band the host saw this cell reach ("kesfedilmis derinlik cizgileri"). FROZEN:
+        // a known DepthBandIds id, or DepthBandIds.Unclassified ("") - not seen wet yet, or deeper than
+        // any authored band (reef/deep are reserved ids with no metres until P4.4). Never null (the
+        // constructor folds null to ""), never whitespace, never a metre value or display text. A save
+        // stores "" as it is, and a consumer never guesses reef/deep from it.
         public readonly string DepthBandId;
 
-        public ExplorationCellState(string cellId, int column, int row, bool discovered, string depthBandId)
+        public ExplorationCellState(string cellId, int gridX, int gridZ, bool discovered, string depthBandId)
         {
             CellId = cellId ?? string.Empty;
-            Column = column;
-            Row = row;
+            GridX = gridX;
+            GridZ = gridZ;
             Discovered = discovered;
             DepthBandId = depthBandId ?? string.Empty;
         }
