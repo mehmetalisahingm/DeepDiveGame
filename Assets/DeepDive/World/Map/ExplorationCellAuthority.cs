@@ -11,13 +11,12 @@ namespace DeepDive.World
     // re-set, no second result is produced and the revision does not move.
     //
     // Pure class, no MonoBehaviour and no scene lookup: the host shell (Composition, later) owns
-    // one, hands it the real feed and WaterField.Bodies, and publishes Snapshot() to Mert's
-    // map/encyclopedia through IExplorationReadModel. No world position is stored or published -
-    // only cell ids and band ids - and no creature position ever enters, since the only input is
-    // the player feed.
-    //
-    // Species evidence is a later step; until then the snapshot's Species list is empty.
-    public sealed class ExplorationCellAuthority : IExplorationReadModel
+    // one and hands it the real feed and WaterField.Bodies. Mert reads it through
+    // SpeciesObservationAuthority, the one IExplorationReadModel, which adds the species; this
+    // class's own Snapshot() carries the cells with an empty Species list. No world position is
+    // stored or published - only cell ids and band ids - and no creature position ever enters,
+    // since the only input is the player feed.
+    public sealed class ExplorationCellAuthority
     {
         private readonly ExplorationCellLayout layout;
         private readonly IReadOnlyList<WaterBody> water;
@@ -90,6 +89,20 @@ namespace DeepDive.World
             cellId = string.Empty;
             if (!layout.TryCell(world, out var gx, out var gz)) return false;
             cellId = cellIds[layout.IndexOf(gx, gz)];
+            return true;
+        }
+
+        // The cell a world position is in and the band that cell holds right now (may be
+        // DepthBandIds.Unclassified), discovered or not; false out of region. Pre-built strings, no
+        // allocation. An observation stamps these, never the position itself.
+        public bool TryGetCell(Vector3 world, out string cellId, out string depthBandId)
+        {
+            cellId = string.Empty;
+            depthBandId = DepthBandIds.Unclassified;
+            if (!layout.TryCell(world, out var gx, out var gz)) return false;
+            var index = layout.IndexOf(gx, gz);
+            cellId = cellIds[index];
+            depthBandId = depthBandIds[index];
             return true;
         }
 

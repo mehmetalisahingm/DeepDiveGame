@@ -437,7 +437,7 @@ namespace DeepDive.World.Tests
         public void Snapshot_IsReused_UntilTheRevisionMoves()
         {
             var fog = NearRegion();
-            IExplorationReadModel read = fog;
+            var read = fog;
             var first = read.Snapshot();
             Assert.That(read.Snapshot().Cells, Is.SameAs(first.Cells));
 
