@@ -174,7 +174,7 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
-        public void SavedCellsAreNeverLostEvenBeforeTheAuthorityCanRestoreThem()
+        public void SavedCellsRestoreIntoAuthorityAndReplayIsIdempotent()
         {
             var (cells, species) = World();
             Visit(cells, ShallowSpot);
@@ -183,13 +183,17 @@ namespace DeepDive.P4.Tests
 
             var (freshCells, freshSpecies) = World();
             var adapter = new ExplorationPersistenceAdapter(freshCells, freshSpecies);
-            adapter.RestoreExploration(saved);
-            Assert.AreEqual(2, adapter.UnrestoredCells, "reported, not faked into the authority");
+            Assert.IsTrue(adapter.RestoreExploration(saved));
+            Assert.AreEqual(2, freshCells.DiscoveredCount, "saved truth is restored into the real authority");
+            Assert.AreEqual(2, ExplorationMapPresenter.DiscoveredCount(
+                ExplorationMapPresenter.BuildFog(freshSpecies.Snapshot())), "restored cells immediately open the fog");
 
-            Visit(freshCells, ShallowSpot);   // one of them is really visited again
+            var restoredRevision = freshCells.Revision;
+            Assert.IsTrue(adapter.RestoreExploration(saved), "replaying the same save is harmless");
+            Assert.AreEqual(restoredRevision, freshCells.Revision, "replay does not move the cell revision");
+
             var again = adapter.ExportExploration();
-            Assert.AreEqual(2, again.DiscoveredCells.Count, "the other saved cell is carried forward, not dropped");
-            Assert.AreEqual(1, adapter.UnrestoredCells);
+            Assert.AreEqual(2, again.DiscoveredCells.Count, "the authority is now the only source of saved cells");
         }
 
         [Test]
@@ -205,7 +209,7 @@ namespace DeepDive.P4.Tests
             data.DiscoveredCells.Add(new ExplorationCellSave { CellId = ExplorationIds.CellId(ExplorationIds.NearRegionId, 0, 0), GridX = 0, GridZ = 0, DepthBandId = " " });
             data.Observations.Add(new SpeciesObservationSave { ObservationId = "x", SpeciesId = "sea_bass", RegionId = "region-far-9", CellId = "c" });
             Assert.IsTrue(adapter.RestoreExploration(data));
-            Assert.AreEqual(0, adapter.UnrestoredCells, "id/coordinate mismatch, out of grid and a whitespace band are dropped");
+            Assert.AreEqual(0, cells.DiscoveredCount, "id/coordinate mismatch, out of grid and a whitespace band are dropped");
             Assert.AreEqual(0, species.Observations.Count, "the authority refuses a foreign-region observation");
         }
 
@@ -235,6 +239,7 @@ namespace DeepDive.P4.Tests
                 var (c2, s2) = World();
                 store2.Exploration = new ExplorationPersistenceAdapter(c2, s2);
                 Assert.AreEqual(1, s2.Observations.Count);
+                Assert.AreEqual(1, c2.DiscoveredCount, "late bind restores fog cells into the authority too");
 
                 // A boot where exploration never binds must still carry it forward on the next save.
                 var store3 = Boot(path, roots, out _);
