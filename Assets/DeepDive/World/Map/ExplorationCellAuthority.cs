@@ -5,10 +5,29 @@ using UnityEngine;
 
 namespace DeepDive.World
 {
+    public enum CellRestoreOutcome : byte
+    {
+        // Blank id, a cell outside the grid, an id that is not the one its coordinates have, or a
+        // band the contract does not allow. Nothing changed; the revision did not move.
+        Invalid = 0,
+
+        // Valid, but nothing to change: the cell is already discovered and its band is already
+        // filled (or the saved band is Unclassified). Nothing changed; the revision did not move.
+        AlreadyDiscovered = 1,
+
+        // State changed: the cell was opened and/or its empty band was filled. The revision moved
+        // by one. Not a discovery - no event is produced.
+        Restored = 2
+    }
+
     // Host state of the shared exploration fog (P4.1-B #89, CONTRACTS "Harita ve kalici kesif").
     // A cell opens because an approved player position (IExplorerPositionSource) reached it; it
     // opens once. A revisit is not a second discovery: the flag is already set, nothing is
     // re-set, no second result is produced and the revision does not move.
+    //
+    // A save puts cells back through TryRestore: that is saved truth, not a discovery - it takes
+    // no position and produces no discovery event. On both paths a cell's band is first-filled-wins:
+    // an empty band may be filled, a filled one is never overwritten.
     //
     // Pure class, no MonoBehaviour and no scene lookup: the host shell (Composition, later) owns
     // one and hands it the real feed and WaterField.Bodies. Mert reads it through
@@ -157,6 +176,42 @@ namespace DeepDive.World
 
             cellIndex = index;
             return true;
+        }
+
+        // Host load path: puts back one saved discovered cell. Every check runs before any write, so
+        // Invalid leaves nothing half-changed. Restored <=> state changed <=> revision moved by one;
+        // AlreadyDiscovered and Invalid leave the revision where it was. Nothing is appended to a
+        // tick's newlyDiscoveredCellIds and a later TryObserve of the cell is not a discovery.
+        public CellRestoreOutcome TryRestore(string cellId, int gridX, int gridZ, string depthBandId)
+        {
+            if (string.IsNullOrWhiteSpace(cellId)) return CellRestoreOutcome.Invalid;
+
+            // Before any index: IndexOf has no range check and would land on another cell's slot.
+            if (!ExplorationIds.IsCellInGrid(gridX, gridZ, layout.Grid)) return CellRestoreOutcome.Invalid;
+
+            // Against the pre-built id, so no id string is minted here. Another region, another
+            // cell, swapped coordinates or a case variant all fail.
+            var index = layout.IndexOf(gridX, gridZ);
+            if (!string.Equals(cellId, cellIds[index], StringComparison.Ordinal)) return CellRestoreOutcome.Invalid;
+
+            if (!DepthBandIds.IsValidOrUnclassified(depthBandId)) return CellRestoreOutcome.Invalid;
+
+            var changed = false;
+            if (!discovered[index])
+            {
+                discovered[index] = true;
+                changed = true;
+            }
+
+            if (depthBandIds[index].Length == 0 && depthBandId.Length > 0)
+            {
+                depthBandIds[index] = depthBandId;
+                changed = true;
+            }
+
+            if (!changed) return CellRestoreOutcome.AlreadyDiscovered;
+            revision++;
+            return CellRestoreOutcome.Restored;
         }
 
         // Every cell of the region, discovered or not, ordered by gz then gx. Rebuilt only when the revision has
