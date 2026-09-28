@@ -35,12 +35,34 @@ jobs:
           persist-credentials: false
       - name: EditMode tests
         id: tests
+        continue-on-error: true
         uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4
         with:
           unityVersion: 6000.3.23f1
           testMode: EditMode
           artifactsPath: Logs/CI-Tests
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Validate EditMode XML
+        shell: python
+        run: |
+          import glob
+          import sys
+          import xml.etree.ElementTree as ET
+          reports = glob.glob('Logs/CI-Tests/**/*.xml', recursive=True)
+          if not reports:
+              raise SystemExit('No EditMode XML report produced')
+          total = passed = failed = skipped = 0
+          for path in reports:
+              root = ET.parse(path).getroot()
+              if root.tag != 'test-run':
+                  continue
+              total += int(root.attrib.get('total', 0))
+              passed += int(root.attrib.get('passed', 0))
+              failed += int(root.attrib.get('failed', 0))
+              skipped += int(root.attrib.get('skipped', 0))
+          print(f'EditMode total={total} passed={passed} failed={failed} skipped={skipped}')
+          if total == 0 or failed != 0 or passed + skipped != total:
+              raise SystemExit('EditMode XML is not green')
       - name: Windows integrated build
         uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
         with:
