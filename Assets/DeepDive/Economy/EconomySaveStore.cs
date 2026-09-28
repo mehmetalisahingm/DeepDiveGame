@@ -23,6 +23,20 @@ namespace DeepDive.Economy
 
         private IDayPersistence day;
         private DaySaveData loadedDay;
+        private IExplorationPersistence exploration;
+        private ExplorationSaveData loadedExploration;
+
+        // Same late-binding rule as the day: the host shell that owns the exploration authorities binds after the
+        // file was read, and is handed what was already on disk.
+        public IExplorationPersistence Exploration
+        {
+            get => exploration;
+            set
+            {
+                exploration = value;
+                if (exploration != null && loadedExploration != null) exploration.RestoreExploration(loadedExploration);
+            }
+        }
 
         // The day authority is bound after the file was first read (the store loads in Awake), so a
         // binding that arrives late is handed the day that was already on disk - and every later
@@ -115,6 +129,17 @@ namespace DeepDive.Economy
                     snapshot.Day = day.ExportDay();
                     snapshot.HasDay = true;
                 }
+                if (exploration != null)
+                {
+                    snapshot.Exploration = exploration.ExportExploration();
+                    snapshot.HasExploration = true;
+                }
+                else if (loadedExploration != null)
+                {
+                    // Nothing bound on this machine right now: carry the saved exploration forward untouched.
+                    snapshot.Exploration = loadedExploration;
+                    snapshot.HasExploration = true;
+                }
                 var json = JsonUtility.ToJson(snapshot, true);
                 File.WriteAllText(temp, json);
 
@@ -135,6 +160,9 @@ namespace DeepDive.Economy
                 else File.Move(temp, path);
 
                 checkpointId = effectiveCheckpoint ?? "";
+                // A later re-bind must be handed what is on disk NOW, not what was there at the first load.
+                if (snapshot.HasDay) loadedDay = snapshot.Day;
+                if (snapshot.HasExploration) loadedExploration = snapshot.Exploration;
                 LastError = "";
                 return true;
             }
@@ -177,6 +205,12 @@ namespace DeepDive.Economy
                     return Fail("invalid or unsupported save");
                 }
                 loadedDay = data.HasDay ? data.Day : null;
+                loadedExploration = data.HasExploration ? data.Exploration : null;
+                if (loadedExploration != null && exploration != null && !exploration.RestoreExploration(loadedExploration))
+                {
+                    restoring = false;
+                    return Fail("invalid exploration state");
+                }
                 if (loadedDay != null && day != null && !day.RestoreDay(loadedDay))
                 {
                     restoring = false;
