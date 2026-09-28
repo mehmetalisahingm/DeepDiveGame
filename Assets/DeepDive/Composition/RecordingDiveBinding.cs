@@ -26,6 +26,13 @@ namespace DeepDive.Composition
         public bool IsActive => !disposed && isAuthority() && session.State.Phase == SessionPhase.Dive &&
             !string.IsNullOrWhiteSpace(session.State.DiveId);
 
+        // Composition-level observation hooks. The World recording rules still own what is a valid
+        // take/result; these merely let P4 exploration consume the already host-verified outcome.
+        // TakeRegistered is useful for remembering the observer's dive position. RecordingQueued
+        // carries the persistent RecordingId minted at settlement, which is the id exploration saves.
+        public event Action<RecordingTake> TakeRegistered;
+        public event Action<RecordingResult> RecordingQueued;
+
         public RecordingDiveBinding(SessionManager session, InventoryManager inventory, Func<bool> isAuthority)
         {
             this.session = session ?? throw new ArgumentNullException(nameof(session));
@@ -63,7 +70,7 @@ namespace DeepDive.Composition
             if (disposed) return;
             if (sessionId != session.State.SessionId)
             {
-                ReleaseEvaluation();
+                ReleaseDirector();
                 pending.Clear();
                 Director = null;
                 diveId = null;
@@ -74,9 +81,10 @@ namespace DeepDive.Composition
             {
                 if (Director == null || diveId != session.State.DiveId)
                 {
-                    ReleaseEvaluation();
+                    ReleaseDirector();
                     diveId = session.State.DiveId;
                     Director = new RecordingDirector();
+                    Director.TakeRegistered += ForwardTakeRegistered;
                 }
                 RecordingEvaluation.Bind(Director);
             }
@@ -89,6 +97,8 @@ namespace DeepDive.Composition
             }
             else if (ReferenceEquals(RecordingClaim.Sink, this)) RecordingClaim.Unbind();
         }
+
+        private void ForwardTakeRegistered(RecordingTake take) => TakeRegistered?.Invoke(take);
 
         private void SummaryReady(DiveSummary summary)
         {
@@ -120,7 +130,14 @@ namespace DeepDive.Composition
             if (disposed || !isAuthority() || payment == null || !settling.HasValue ||
                 settling.Value.DiveId != result.DiveId)
                 return PlayerActionResult.InvalidState;
-            return payment(result);
+
+            var answer = payment(result);
+            // Accepted is the normal path; DuplicateRequest is a retry of the same persistent
+            // RecordingId. Exploration is idempotent by that id, so replaying the notification is safe
+            // and lets it repair a missed observation without minting a second encyclopedia entry.
+            if (answer == PlayerActionResult.Accepted || answer == PlayerActionResult.DuplicateRequest)
+                RecordingQueued?.Invoke(result);
+            return answer;
         }
 
         private void ReleaseEvaluation()
@@ -130,13 +147,19 @@ namespace DeepDive.Composition
             views.Clear();
         }
 
+        private void ReleaseDirector()
+        {
+            ReleaseEvaluation();
+            if (Director != null) Director.TakeRegistered -= ForwardTakeRegistered;
+        }
+
         public void Dispose()
         {
             if (disposed) return;
             disposed = true;
             session.OnSessionStateChanged -= StateChanged;
             inventory.OnDiveSummaryReady -= SummaryReady;
-            ReleaseEvaluation();
+            ReleaseDirector();
             if (ReferenceEquals(RecordingClaim.Sink, this)) RecordingClaim.Unbind();
             pending.Clear();
             payment = null;
