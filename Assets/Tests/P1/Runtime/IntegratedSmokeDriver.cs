@@ -54,6 +54,13 @@ namespace DeepDive.P1.Lab
             public string homeStatus = "";
             public bool homeBedAccepted, homeMorningClean, homePingSeen, homePingOnMap, homePingAccepted;
             public int homeSleepersMax;
+            public List<string> mediaTrace = new List<string>();
+            public int mediaSubmitted, mediaArchiveSeen, mediaPaid, mediaFollowersSeen;
+            public int mediaReloadClips, mediaReloadPublications, mediaReloadBalance;
+            public bool mediaReloadPass;
+            public bool mediaRetryHeld, mediaFarRefused, mediaPanelOpen, mediaNotOwnerRefused, mediaNotPublishableRefused, mediaPublished,
+                mediaDuplicateRefused, mediaFeedBoth, mediaResultSeen, mediaNpcWithdrawn, mediaPaidOnce, mediaReplayPaysNothing,
+                mediaSavedOnDisk, mediaReloadClean;
             public bool exploreMirrorSeen, exploreEncyclopediaSilhouette, exploreEncyclopediaNameHidden, exploreReloaded;
             public int exploreFogCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
             public string exploreEncyclopediaSpecies = "", exploreSightingOutcome = "", exploreSightingReplay = "";
@@ -78,6 +85,8 @@ namespace DeepDive.P1.Lab
         private bool Record => Arg("-p3-record") == "1" || Event;
         private bool Town => Arg("-p3-town") == "1";
         private bool Storage => Arg("-p4-storage") == "1";
+        private bool MediaFlow => Arg("-p4-media") == "1";
+        private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
         private bool Home => Arg("-p4-home") == "1";
         private bool Day => Arg("-p4-day") == "1";
@@ -130,7 +139,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -200,9 +209,11 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (MediaReload) { if (host && HostMediaReload()) { Finish(); yield break; } yield return null; continue; }
                 if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
                 if (Day || Home) ObserveDay();
                 if (Explore) { if (host) HostExplore(state); ObserveExplore(); }
+                if (MediaFlow && host) { HostSubmitMediaClips(state); HostMediaChecks(); }
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
@@ -210,9 +221,9 @@ namespace DeepDive.P1.Lab
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && elapsed > (MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                if (host && elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -220,7 +231,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                if (host && elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -251,6 +262,11 @@ namespace DeepDive.P1.Lab
                 (!host || (result.dayMidnightClosed && result.dayLostDivers == expected && result.daySavedOnDisk &&
                     result.dayReloadNoAdvance && result.dayReplayIgnored && result.dayBedAccepted && result.dayEarlyGateHeld &&
                     result.dayEarlyClosed && result.dayHostDone && result.dayFinalNumber == 3));
+            if (MediaFlow) result.passed &= result.mediaArchiveSeen >= 2 * expected && result.mediaFarRefused && result.mediaPanelOpen &&
+                result.mediaNotOwnerRefused && result.mediaNotPublishableRefused && result.mediaPublished && result.mediaDuplicateRefused &&
+                result.mediaFeedBoth && result.mediaResultSeen &&
+                (!host || (result.mediaSubmitted == 2 * expected && result.mediaRetryHeld && result.mediaNpcWithdrawn && result.mediaPaidOnce &&
+                    result.mediaReplayPaysNothing && result.mediaSavedOnDisk && result.mediaReloadClean));
             if (Explore) result.passed &= result.exploreMirrorSeen && result.exploreFogCells == 36 && result.exploreFogDiscoveredMax >= 1 &&
                 result.exploreEncyclopediaSpecies == "sea_bass" && result.exploreEncyclopediaSilhouette && result.exploreEncyclopediaNameHidden &&
                 (!host || (result.exploreSightingOutcome == "CountedNewEvidence" && result.exploreSightingReplay == "AlreadyCounted" &&
@@ -299,6 +315,7 @@ namespace DeepDive.P1.Lab
                 else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
                 else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
                 else if (Home && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
+                else if (MediaFlow && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && mediaStage < 90) ProbeMedia(local);
                 else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
@@ -997,6 +1014,189 @@ namespace DeepDive.P1.Lab
                 result.exploreEncyclopediaSilhouette = encyclopedia[0].Silhouette;
                 result.exploreEncyclopediaNameHidden = !encyclopedia[0].NameKnown;
             }
+        }
+
+        // ---- P4.2 home PC + channel (#102) over the network ----------------------------------------------------------
+        // TEST FIXTURE, NOT PRODUCT WIRING: real clips come from Mehmet's capture (#100), which does not exist yet.
+        // So that the archive, the PC publish path, the single commercial right, the day-close result and the save
+        // (all product code) can be proven across real processes now, the host here submits clip manifests through
+        // the SAME ClipArchive seam #100 will call, and later lets the day close the way midnight would. Every
+        // publish below is a real request from each process's own player standing (or not) at the real home PC.
+        private int mediaStage;
+        private float mediaStageAt, mediaNext;
+        private ulong mediaAwait;
+        private bool mediaSubmitted, mediaHostClosed;
+
+        private void HostSubmitMediaClips(SessionState state)
+        {
+            if (mediaSubmitted || state.Phase != SessionPhase.Return || adapter.Connection.IsSceneLoading) return;
+            var day = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (day == null) return;
+            mediaSubmitted = true;
+            foreach (var id in adapter.Session.Roster.Keys)
+            {
+                var owner = new PlayerId(id.Value);
+                result.mediaSubmitted += ClipArchive.TrySubmit(new ClipManifest($"clip-{id.Value}-a", $"rec-media-{id.Value}", state.DiveId,
+                    day.DayNumber, owner, "sea_bass", 3, 14f, $"hash-{id.Value}-a", 900000, true, true)) == ClipArchiveOutcome.Added ? 1 : 0;
+                result.mediaSubmitted += ClipArchive.TrySubmit(new ClipManifest($"clip-{id.Value}-b", "", state.DiveId,
+                    day.DayNumber, owner, "", 0, 6f, $"hash-{id.Value}-b", 300000, true, true)) == ClipArchiveOutcome.Added ? 1 : 0;
+            }
+            // The host's commercial clip is ALSO an NPC candidate: publishing must withdraw it from the NPC.
+            adapter.GetComponent<EconomyManager>().TryQueueRecordingTurnIn(
+                new RecordingResult("rec-media-0", state.DiveId, new PlayerId(0), "sea_bass", 3, 14f));
+            // A capture retry of the same clip is not a second clip.
+            result.mediaRetryHeld = ClipArchive.TrySubmit(new ClipManifest("clip-0-a", "rec-media-0", state.DiveId, day.DayNumber,
+                new PlayerId(0), "sea_bass", 3, 14f, "hash-0-a", 900000, true, true)) == ClipArchiveOutcome.AlreadyArchived;
+        }
+
+        private bool MediaAnswered(out bool accepted, out string reason)
+        {
+            accepted = MediaNetworkBinding.LastResultAccepted;
+            reason = MediaNetworkBinding.LastResultReason;
+            var answered = mediaAwait != 0 && MediaNetworkBinding.LastResultRequest == mediaAwait;
+            if (answered) result.mediaTrace.Add($"stage{mediaStage}:{(accepted ? "ok" : reason)}");
+            return answered;
+        }
+
+        private void MediaAsk(string clipId, string title, int next)
+        {
+            mediaAwait = MediaNetworkBinding.RequestPublish(clipId, title);
+            mediaStage = next;
+        }
+
+        private void ProbeMedia(NetworkPlayer local)
+        {
+            local.SubmitLocalInput(Vector3.zero, 0);
+            var now = Time.realtimeSinceStartup;
+            if (mediaStageAt == 0) mediaStageAt = now;
+            if (mediaStage < 90 && now - mediaStageAt > 45f)
+            {
+                result.errors.Add($"media stage {mediaStage} timeout clips={MediaNetworkBinding.Mirrored.Clips.Count} pubs={MediaNetworkBinding.Mirrored.Publications.Count} last={MediaNetworkBinding.LastResultReason}");
+                mediaStage = 99;
+            }
+            var me = local.OwnerClientId;
+            // The other player is whoever else owns a clip: a rejoining guest gets a NEW client id, never assume 1.
+            var otherClip = MediaNetworkBinding.Mirrored.Clips.Find(c => c.OwnerPlayerId != me);
+            var other = otherClip != null ? otherClip.OwnerPlayerId : ulong.MaxValue;
+            var data = MediaNetworkBinding.Mirrored;
+            var pc = FindFirstObjectByType<HomePcAnchor>();
+            bool ok; string reason;
+
+            switch (mediaStage)
+            {
+                case 0:   // my two clips (and the other player's) arrived in my own mirror
+                    if (data.Clips.Count < 4 || pc == null) return;
+                    result.mediaArchiveSeen = data.Clips.Count;
+                    {
+                        // Make sure we really ARE far first (a spawn point can be near the PC): step away, then ask.
+                        var away = local.transform.position - pc.transform.position; away.y = 0;
+                        if (away.magnitude < 6f)
+                        {
+                            if (away.sqrMagnitude < 0.01f) away = Vector3.back;
+                            local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg, 0);
+                            return;
+                        }
+                    }
+                    MediaAsk($"clip-{me}-a", "uzaktan", 1);   // not at the PC: the HOST must refuse
+                    return;
+                case 1:
+                    if (!MediaAnswered(out ok, out reason)) return;
+                    result.mediaFarRefused = !ok && reason == "NotAtPc";
+                    mediaStage = 2; return;
+                case 2:   // walk to the PC
+                {
+                    var to = pc.transform.position - local.transform.position; to.y = 0;
+                    if (to.magnitude > 1.9f)
+                    {
+                        local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg, 0);
+                        return;
+                    }
+                    result.mediaPanelOpen = HomePcView.PanelOpen;
+                    MediaAsk($"clip-{other}-a", "baskasinin", 3);
+                    return;
+                }
+                case 3:
+                    if (!MediaAnswered(out ok, out reason)) return;
+                    result.mediaNotOwnerRefused = !ok && reason == "NotOwner";
+                    MediaAsk($"clip-{me}-b", "bos", 4); return;
+                case 4:
+                    if (!MediaAnswered(out ok, out reason)) return;
+                    result.mediaNotPublishableRefused = !ok && reason == "NotPublishable";
+                    MediaAsk($"clip-{me}-a", $"Levrek P{me}", 5); return;
+                case 5:
+                    if (!MediaAnswered(out ok, out reason)) return;
+                    result.mediaPublished = ok;
+                    if (!ok) result.errors.Add("publish refused: " + reason);
+                    MediaAsk($"clip-{me}-a", "tekrar", 6); return;
+                case 6:
+                    if (!MediaAnswered(out ok, out reason)) return;
+                    result.mediaDuplicateRefused = !ok && reason == "PublicationAlreadyQueued";
+                    mediaStage = 7; return;
+                case 7:   // both players' posts in MY feed
+                    if (data.Publications.Count < 2) return;
+                    result.mediaFeedBoth = data.Publications.Exists(p => p.OwnerPlayerId == me) && data.Publications.Exists(p => p.OwnerPlayerId == other);
+                    mediaStage = 8; return;
+                case 8:   // after the day closes, my post shows its result in MY feed
+                {
+                    var mine = data.Publications.Find(p => p.OwnerPlayerId == me);
+                    if (mine == null || string.IsNullOrEmpty(mine.SettledId)) return;
+                    result.mediaResultSeen = mine.Views > 0 && mine.Income > 0;
+                    result.mediaFollowersSeen = data.Followers;
+                    mediaStage = 90; return;
+                }
+            }
+        }
+
+        // Host: once both posts exist, the NPC can no longer pay the host's published recording; then the day closes
+        // (fixture: midnight arrives) and the results must be paid exactly once, into the same file, and survive a load.
+        // Second launch of the host on the SAME campaign file: archive, posts, results, followers and the NPC/channel
+        // right must come back as they were, and nothing may be paid or published again.
+        private bool HostMediaReload()
+        {
+            var binding = adapter.GetComponent<MediaNetworkBinding>();
+            var economy = adapter.GetComponent<EconomyManager>();
+            if (binding == null || economy == null || adapter.Connection.Status != ConnectionStatus.Connected || binding.Channel.ClipCount == 0) return false;
+            var pubs = binding.Channel.Publications();
+            result.mediaReloadClips = binding.Channel.ClipCount;
+            result.mediaReloadPublications = pubs.Count;
+            result.mediaReloadBalance = economy.SharedBalance;
+            var before = economy.SharedBalance;
+            result.mediaReloadPass = binding.Channel.ClipCount == 4 && pubs.Count == 2 &&
+                pubs.All(p => !string.IsNullOrEmpty(p.SettledId) && p.Views > 0) &&
+                binding.Channel.Followers > 0 && economy.IsChannelClaimed("rec-media-0") &&
+                binding.Channel.SettleThrough(99) == 0 && economy.SharedBalance == before &&
+                binding.Channel.TryPublish(new PlayerId(0), "clip-0-a", "x", 777).ReasonCode == "PublicationAlreadyQueued";
+            result.passed = result.mediaReloadPass && result.errors.Count == 0;
+            return true;
+        }
+
+        private void HostMediaChecks()
+        {
+            if (mediaHostClosed) return;
+            var binding = adapter.GetComponent<MediaNetworkBinding>();
+            var engine = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (binding == null || engine == null || binding.Channel.Publications().Count < result.maxPlayers) return;
+            mediaHostClosed = true;
+            var economy = adapter.GetComponent<EconomyManager>();
+            result.mediaNpcWithdrawn = economy.PendingCountFor(new PlayerId(0), TurnInKind.Recording) == 0 &&
+                economy.IsChannelClaimed("rec-media-0");
+
+            var before = economy.SharedBalance;
+            var day = engine.DayNumber;
+            engine.BeginClose(DayCloseReason.Midnight);
+            var expected = 0;
+            foreach (var p in binding.Channel.Publications()) expected += p.Income;
+            result.mediaPaid = economy.SharedBalance - before;
+            result.mediaPaidOnce = expected > 0 && result.mediaPaid == expected && engine.DayNumber == day + 1;
+            result.mediaReplayPaysNothing = binding.Channel.SettleThrough(day) == 0 && economy.SharedBalance - before == expected;
+
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+            result.mediaSavedOnDisk = disk.HasMedia && disk.Media.Publications.Count == result.maxPlayers &&
+                disk.Media.Publications.TrueForAll(p => !string.IsNullOrEmpty(p.SettledId)) && disk.SharedBalance == economy.SharedBalance;
+            var balance = economy.SharedBalance;
+            result.mediaReloadClean = store.LoadNow() && binding.Channel.Publications().Count == result.maxPlayers &&
+                economy.SharedBalance == balance && binding.Channel.SettleThrough(day + 5) == 0;
         }
 
         // ---- P4.1 shared day: real host clock, real close through the real session/inventory/save --------------

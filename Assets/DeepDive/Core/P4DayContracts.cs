@@ -95,6 +95,8 @@ namespace DeepDive.Core.Contracts
         public int LostDivers;
         public List<string> LostCaptureIds = new List<string>();
         public List<string> ProgressIds = new List<string>();
+        // P4.2: publications queued today (their result arrives tomorrow morning; not counted as income here).
+        public int PublicationsQueued;
 
         public int Net => Income - Expenses;
     }
@@ -133,6 +135,10 @@ namespace DeepDive.Core.Contracts
 
         // Players wake at home, the active boat is back at the dock (Mehmet's placement).
         void BeginMorning(int dayNumber);
+
+        // Step 4, "siradaki gune ait kanal sonuclari" (P4.2): evaluated once per close, after the summary and
+        // BEFORE the atomic write, so the payout and the next day land in the same file. Default: nothing.
+        void SettleNextDayResults(string closeId, int closingDayNumber) { }
     }
 
     // Who counts for the sleep gate: connected AND active. Dead/passive-in-dive and disconnected

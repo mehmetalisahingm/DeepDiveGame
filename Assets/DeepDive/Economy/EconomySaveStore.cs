@@ -25,6 +25,19 @@ namespace DeepDive.Economy
         private DaySaveData loadedDay;
         private IExplorationPersistence exploration;
         private ExplorationSaveData loadedExploration;
+        private IMediaPersistence media;
+        private MediaSaveData loadedMedia;
+
+        // Same late-binding rule as the day and exploration.
+        public IMediaPersistence Media
+        {
+            get => media;
+            set
+            {
+                media = value;
+                if (media != null && loadedMedia != null) media.RestoreMedia(loadedMedia);
+            }
+        }
 
         // Same late-binding rule as the day: the host shell that owns the exploration authorities binds after the
         // file was read, and is handed what was already on disk.
@@ -140,6 +153,16 @@ namespace DeepDive.Economy
                     snapshot.Exploration = loadedExploration;
                     snapshot.HasExploration = true;
                 }
+                if (media != null)
+                {
+                    snapshot.Media = media.ExportMedia();
+                    snapshot.HasMedia = true;
+                }
+                else if (loadedMedia != null)
+                {
+                    snapshot.Media = loadedMedia;
+                    snapshot.HasMedia = true;
+                }
                 var json = JsonUtility.ToJson(snapshot, true);
                 File.WriteAllText(temp, json);
 
@@ -163,6 +186,7 @@ namespace DeepDive.Economy
                 // A later re-bind must be handed what is on disk NOW, not what was there at the first load.
                 if (snapshot.HasDay) loadedDay = snapshot.Day;
                 if (snapshot.HasExploration) loadedExploration = snapshot.Exploration;
+                if (snapshot.HasMedia) loadedMedia = snapshot.Media;
                 LastError = "";
                 return true;
             }
@@ -206,6 +230,12 @@ namespace DeepDive.Economy
                 }
                 loadedDay = data.HasDay ? data.Day : null;
                 loadedExploration = data.HasExploration ? data.Exploration : null;
+                loadedMedia = data.HasMedia ? data.Media : null;
+                if (loadedMedia != null && media != null && !media.RestoreMedia(loadedMedia))
+                {
+                    restoring = false;
+                    return Fail("invalid media state");
+                }
                 if (loadedExploration != null && exploration != null && !exploration.RestoreExploration(loadedExploration))
                 {
                     restoring = false;

@@ -285,6 +285,9 @@ namespace DeepDive.Composition
 
         public void BeginMorning(int dayNumber) => MorningBegan?.Invoke(dayNumber);
 
+        // P4.2: publications queued up to the closing day get their result now, inside the close transaction.
+        public void SettleNextDayResults(string closeId, int closingDayNumber) => MediaNetworkBinding.SettleThrough(closingDayNumber);
+
         private void OnDisable() => Unbind();
         private void OnDestroy() => Unbind();
     }
