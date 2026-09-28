@@ -67,17 +67,17 @@ namespace DeepDive.P1.Lab
                     (f.transform.position - local.transform.position).sqrMagnitude)
                 .FirstOrDefault();
 
-            if (binding != null && binding.IsBound && binding.OwnsSavePersistence && local != null && fish != null)
+            if (binding != null && binding.IsBound && binding.OwnsSavePersistence &&
+                binding.Cells != null && binding.Species != null && local != null && fish != null)
             {
                 DriveRealOwnerToward(local, fish);
 
+                var snapshot = binding.Cells.Snapshot();
                 var discoveredCell = false;
-                var snapshot = binding.Cells?.Snapshot();
-                if (snapshot != null)
-                    for (var i = 0; i < snapshot.Cells.Count; i++)
-                        if (snapshot.Cells[i].Discovered) { discoveredCell = true; break; }
+                for (var i = 0; i < snapshot.Cells.Count; i++)
+                    if (snapshot.Cells[i].Discovered) { discoveredCell = true; break; }
 
-                if (discoveredCell && binding.Species != null &&
+                if (discoveredCell &&
                     binding.Species.TryGetSpecies(fish.Species.SpeciesId, out var observation) && observation.Sighted)
                 {
                     done = true;
@@ -98,9 +98,8 @@ namespace DeepDive.P1.Lab
 
         private static void DriveRealOwnerToward(NetworkPlayer local, FishActor fish)
         {
-            var target = fish.GetComponent<Collider>() != null
-                ? fish.GetComponent<Collider>().bounds.center
-                : fish.transform.position;
+            var collider = fish.GetComponent<Collider>();
+            var target = collider != null ? collider.bounds.center : fish.transform.position;
             var delta = target - local.RecordingEyePosition;
             if (delta.sqrMagnitude <= 0.0001f) return;
 
