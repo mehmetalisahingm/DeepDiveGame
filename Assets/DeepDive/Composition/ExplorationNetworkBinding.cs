@@ -52,6 +52,7 @@ namespace DeepDive.Composition
         public ExplorationCellAuthority Cells => cells;
         public SpeciesObservationAuthority Species => species;
         public bool IsBound => species != null && ReferenceEquals(ExplorationFeed.Current, species);
+        public bool OwnsSavePersistence => persistence != null && saveStore != null && ReferenceEquals(saveStore.Exploration, persistence);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -111,7 +112,13 @@ namespace DeepDive.Composition
         {
             if (species != null)
             {
+                // Product composition owns both seams for the lifetime of the authoritative dive scene.
+                // Reasserting here also prevents an opt-in smoke fixture or a late UI bootstrap from
+                // accidentally replacing the live model/save adapter after startup.
                 if (!ReferenceEquals(ExplorationFeed.Current, species)) ExplorationFeed.Bind(species);
+                if (saveStore == null) saveStore = GetComponent<EconomySaveStore>();
+                if (saveStore != null && !ReferenceEquals(saveStore.Exploration, persistence))
+                    saveStore.Exploration = persistence;
                 return true;
             }
 
