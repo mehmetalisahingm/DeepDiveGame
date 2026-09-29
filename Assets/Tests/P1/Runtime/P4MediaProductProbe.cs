@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using DeepDive.Composition;
 using DeepDive.Core.Contracts;
+using DeepDive.Media;
 using DeepDive.Session;
 using UnityEngine;
 
