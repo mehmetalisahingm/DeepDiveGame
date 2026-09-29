@@ -46,7 +46,7 @@ try {
     }
 
     $hostLog = Join-Path $run 'host.log'
-    $productOk = Test-Path -LiteralPath $hostLog -and
+    $productOk = (Test-Path -LiteralPath $hostLog) -and
         (Select-String -LiteralPath $hostLog -SimpleMatch 'P4_MEDIA_PRODUCT_OK' -Quiet -ErrorAction SilentlyContinue)
     if (-not $productOk) { $failures += 'host: P4_MEDIA_PRODUCT_OK yok (gercek capture/archive/playback zinciri kanitlanmadi)' }
 
