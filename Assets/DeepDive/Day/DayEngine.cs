@@ -54,6 +54,8 @@ namespace DeepDive.Day
         private DayDiveClosure _pendingDives;
         private bool _divesClosed;
         private bool _actionsSettled;
+        private bool _channelSettled;
+        private int _publicationsQueued;
         private int _campaignSeed;
 
         public int DayNumber => _dayNumber;
@@ -220,6 +222,14 @@ namespace DeepDive.Day
             return true;
         }
 
+        public bool RecordPublicationQueued(string publicationId)
+        {
+            if (string.IsNullOrEmpty(publicationId) || !_ledgerEvents.Add("pub:" + publicationId)) return false;
+            _publicationsQueued++;
+            Changed();
+            return true;
+        }
+
         public bool RecordProgress(string progressId)
         {
             if (string.IsNullOrEmpty(progressId) || !_progress.Add(progressId)) return false;
@@ -267,6 +277,13 @@ namespace DeepDive.Day
             // 3. the summary is built once and then only ever replayed.
             if (_pendingSummary == null) _pendingSummary = BuildSummary(closeId);
 
+            // 4. next-day channel results, once per close (a write retry does not re-run it).
+            if (!_channelSettled)
+            {
+                _hooks?.SettleNextDayResults(closeId, _dayNumber);
+                _channelSettled = true;
+            }
+
             _phase = DayPhase.Summary;
             Changed();
             TryPersistAndAdvance(closeId);
@@ -302,6 +319,7 @@ namespace DeepDive.Day
             _pendingSummary = null;
             _divesClosed = false;
             _actionsSettled = false;
+            _channelSettled = false;
             _pendingDives = DayDiveClosure.None;
             Changed();
 
@@ -330,7 +348,8 @@ namespace DeepDive.Day
                 FishSoldWeightGrams = _fishWeight,
                 Income = _income,
                 Expenses = _expenses,
-                LostDivers = _pendingDives.LostDivers
+                LostDivers = _pendingDives.LostDivers,
+                PublicationsQueued = _publicationsQueued
             };
             summary.DiscoveredSpeciesIds.AddRange(_discovered);
             summary.LostCaptureIds.AddRange(_pendingDives.LostCaptureIds);
@@ -340,7 +359,7 @@ namespace DeepDive.Day
 
         private void ClearLedger()
         {
-            _fishSold = _fishWeight = _income = _expenses = 0;
+            _fishSold = _fishWeight = _income = _expenses = _publicationsQueued = 0;
             _ledgerEvents.Clear();
             _discovered.Clear();
             _progress.Clear();
@@ -404,6 +423,7 @@ namespace DeepDive.Day
             _pendingSummary = null;
             _divesClosed = false;
             _actionsSettled = false;
+            _channelSettled = false;
             _pendingDives = DayDiveClosure.None;
             _closedCloseIds.Clear();
             _history.Clear();
@@ -428,6 +448,7 @@ namespace DeepDive.Day
                     foreach (var id in ledger.ProgressIds) if (!string.IsNullOrEmpty(id)) _progress.Add(id);
                 if (ledger.EventIds != null)
                     foreach (var id in ledger.EventIds) if (!string.IsNullOrEmpty(id)) _ledgerEvents.Add(id);
+                foreach (var id in _ledgerEvents) if (id.StartsWith("pub:", StringComparison.Ordinal)) _publicationsQueued++;
             }
 
             // Warnings already passed at the saved minute are not re-announced after a reload.

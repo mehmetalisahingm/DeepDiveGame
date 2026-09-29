@@ -65,6 +65,9 @@ namespace DeepDive.Economy
         private readonly Dictionary<PlayerId, HashSet<string>> _loadout = new Dictionary<PlayerId, HashSet<string>>();
         private readonly HashSet<string> _soldCaptureIds = new HashSet<string>();
         private readonly HashSet<string> _paidRecordingIds = new HashSet<string>();
+        // P4.2: recordings whose ONE commercial right went to the channel, and channel payouts already credited.
+        private readonly HashSet<string> _channelRightIds = new HashSet<string>();
+        private readonly HashSet<string> _channelSettleIds = new HashSet<string>();
         private readonly List<PendingItem> _pending = new List<PendingItem>();
         private readonly List<PendingItem> _stored = new List<PendingItem>();
         private readonly List<string> _boatParts = new List<string>();
@@ -322,6 +325,54 @@ namespace DeepDive.Economy
             return result;
         }
 
+        // ---- P4.2 single commercial right (CONTRACTS: "NPC veya Kanal secimi hak kullanimiyla ayni islemde") ----
+
+        public bool IsChannelClaimed(string recordingId) => recordingId != null && _channelRightIds.Contains(recordingId);
+
+        // Claims the right in memory; the caller (the channel publish) writes the campaign file once for the whole
+        // publication and releases the claim if that write fails. A recording already paid at the NPC is refused.
+        // A still-pending NPC candidate is withdrawn from the NPC queue in the same step.
+        public bool TryClaimRecordingForChannel(string recordingId)
+        {
+            if (string.IsNullOrWhiteSpace(recordingId) || _paidRecordingIds.Contains(recordingId)) return false;
+            if (!_channelRightIds.Add(recordingId)) return true;
+            var pending = FindPending(TurnInKind.Recording, recordingId);
+            if (pending != null)
+            {
+                _pending.Remove(pending);
+                _withdrawnForChannel[recordingId] = pending;
+                OnPendingChanged?.Invoke();
+            }
+            Revision++;
+            return true;
+        }
+
+        private readonly Dictionary<string, PendingItem> _withdrawnForChannel = new Dictionary<string, PendingItem>();
+
+        public void ReleaseChannelClaim(string recordingId)
+        {
+            if (recordingId == null || !_channelRightIds.Remove(recordingId)) return;
+            if (_withdrawnForChannel.TryGetValue(recordingId, out var item))
+            {
+                _withdrawnForChannel.Remove(recordingId);
+                _pending.Add(item);
+                OnPendingChanged?.Invoke();
+            }
+        }
+
+        // Paid inside the day-close transaction (no own write): idempotent by the settle id.
+        public bool CreditChannelIncome(string settleId, int amount)
+        {
+            if (string.IsNullOrWhiteSpace(settleId) || amount < 0) return false;
+            if (!_channelSettleIds.Add(settleId)) return true;
+            SharedBalance += amount;
+            Revision++;
+            OnBalanceChanged?.Invoke();
+            return true;
+        }
+
+        public bool PersistNow() => Persist();
+
         private static bool CanHandIn(PendingItem item, PlayerId player) =>
             item.Shared || item.Carrier.Equals(player);
 
@@ -397,7 +448,7 @@ namespace DeepDive.Economy
                 result.Quality < 1 || result.Quality > 4)
                 return PlayerActionResult.InvalidTarget;
 
-            if (_paidRecordingIds.Contains(result.RecordingId) ||
+            if (_paidRecordingIds.Contains(result.RecordingId) || _channelRightIds.Contains(result.RecordingId) ||
                 FindPending(TurnInKind.Recording, result.RecordingId) != null)
                 return PlayerActionResult.DuplicateRequest;
             if (!_subjectRewards.TryGetValue((result.SubjectId, result.Quality), out var reward) || reward <= 0)
@@ -626,7 +677,9 @@ namespace DeepDive.Economy
                 Revision = Revision,
                 SoldCaptureIds = new List<string>(_soldCaptureIds),
                 PaidRecordingIds = new List<string>(_paidRecordingIds),
-                BoatPartIds = new List<string>(_boatParts)
+                BoatPartIds = new List<string>(_boatParts),
+                ChannelRightIds = new List<string>(_channelRightIds),
+                ChannelSettleIds = new List<string>(_channelSettleIds)
             };
 
             foreach (var pair in _loadout)
@@ -688,6 +741,9 @@ namespace DeepDive.Economy
             LastCheckpointId = data.CheckpointId ?? "";
             _soldCaptureIds.Clear();
             _paidRecordingIds.Clear();
+            _channelRightIds.Clear();
+            _channelSettleIds.Clear();
+            _withdrawnForChannel.Clear();
             _loadout.Clear();
             _pending.Clear();
             _stored.Clear();
@@ -718,6 +774,12 @@ namespace DeepDive.Economy
                 }
             }
 
+            if (data.ChannelRightIds != null)
+                foreach (var id in data.ChannelRightIds)
+                    if (!string.IsNullOrWhiteSpace(id)) _channelRightIds.Add(id);
+            if (data.ChannelSettleIds != null)
+                foreach (var id in data.ChannelSettleIds)
+                    if (!string.IsNullOrWhiteSpace(id)) _channelSettleIds.Add(id);
             RestorePending(data.PendingTurnIns);
             RestoreStored(data.StoredItems);
             if (data.BoatPartIds != null)

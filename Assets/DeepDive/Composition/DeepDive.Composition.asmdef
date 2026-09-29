@@ -1,4 +1,4 @@
 {
   "name": "DeepDive.Composition",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.Session", "DeepDive.World", "DeepDive.Inventory", "DeepDive.Economy", "DeepDive.Trip", "DeepDive.Day", "DeepDive.MapUI", "Unity.Netcode.Runtime", "Unity.Collections"]
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network", "DeepDive.Session", "DeepDive.World", "DeepDive.Inventory", "DeepDive.Economy", "DeepDive.Trip", "DeepDive.Day", "DeepDive.MapUI", "DeepDive.Media", "Unity.Netcode.Runtime", "Unity.Collections"]
 }

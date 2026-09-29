@@ -10,7 +10,8 @@ namespace DeepDive.Economy
         // lists are simply absent/empty, which means "nothing pending, boat still broken".
         // v3 (P4.1-C) adds the campaign day. v1/v2 files load as HasDay=false, which means "day 1, 08:00".
         // v4 (P4.1-C) adds exploration (discovered cells + species observations). Older files load with none.
-        public const int CurrentSchemaVersion = 4;
+        // v5 (P4.2-C) adds the clip archive, channel publications and the single-right/settle ids.
+        public const int CurrentSchemaVersion = 5;
         public const int OldestSupportedSchemaVersion = 1;
 
         public int SchemaVersion = CurrentSchemaVersion;
@@ -29,6 +30,10 @@ namespace DeepDive.Economy
         public DeepDive.Core.Contracts.DaySaveData Day = new DeepDive.Core.Contracts.DaySaveData();
         public bool HasExploration;
         public DeepDive.Core.Contracts.ExplorationSaveData Exploration = new DeepDive.Core.Contracts.ExplorationSaveData();
+        public List<string> ChannelRightIds = new List<string>();
+        public List<string> ChannelSettleIds = new List<string>();
+        public bool HasMedia;
+        public DeepDive.Core.Contracts.MediaSaveData Media = new DeepDive.Core.Contracts.MediaSaveData();
     }
 
     [Serializable]
