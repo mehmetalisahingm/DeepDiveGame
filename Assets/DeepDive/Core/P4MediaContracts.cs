@@ -7,6 +7,47 @@ namespace DeepDive.Core.Contracts
     // docs/plan/CONTRACTS.md "RecordingClipManifest" (Mehmet media, Utku result -> Mert archive/publish) and
     // "PublicationState" (Mert). UnityEngine-free like every Core contract.
     //
+    // What a recording's subject is (#101). Explicit values: a save stores the byte, so a later kind is added,
+    // never renumbered. A byte the enum does not know folds to Unknown.
+    public enum RecordingSubjectKind : byte
+    {
+        Unknown = 0,
+        Species = 1,
+        Event = 2
+    }
+
+    // #101 (Utku World -> Mehmet media -> Mert archive/PC): where a recording was made, coarse and stable. The
+    // exploration region, cell and depth band ids (ExplorationIds / DepthBandIds), never a Vector3 or any
+    // position, and no day (the manifest has DayNumber). FirstRecordingOfSubject is true only for the first
+    // recorded observation of a species; an event or an unknown subject is never "first".
+    //
+    // Members are properties so default(RecordingWorldContext) - also a default ClipManifest - reads as Empty:
+    // Kind Unknown, every id "" (never null), not first.
+    public readonly struct RecordingWorldContext
+    {
+        private readonly string regionId;
+        private readonly string cellId;
+        private readonly string depthBandId;
+
+        public RecordingSubjectKind Kind { get; }
+        public string RegionId => regionId ?? string.Empty;
+        public string CellId => cellId ?? string.Empty;
+        public string DepthBandId => depthBandId ?? string.Empty;
+        public bool FirstRecordingOfSubject { get; }
+
+        public static RecordingWorldContext Empty => default;
+
+        public RecordingWorldContext(RecordingSubjectKind kind, string regionId, string cellId, string depthBandId,
+            bool firstRecordingOfSubject)
+        {
+            Kind = kind <= RecordingSubjectKind.Event ? kind : RecordingSubjectKind.Unknown;
+            this.regionId = regionId ?? string.Empty;
+            this.cellId = cellId ?? string.Empty;
+            this.depthBandId = depthBandId ?? string.Empty;
+            FirstRecordingOfSubject = Kind == RecordingSubjectKind.Species && firstRecordingOfSubject;
+        }
+    }
+
     // OWNERSHIP NOTE: ClipManifest is the CONSUMER-SIDE shape Mert's archive needs, written from the CONTRACTS
     // row so #102 can start before #100 exists. Mehmet owns what a clip is and when one is valid; if his
     // capture needs a different field set, this struct follows his PR, not the other way round.
@@ -24,10 +65,19 @@ namespace DeepDive.Core.Contracts
         public readonly long SizeBytes;
         public readonly bool MediaReady;         // manifest complete: expected size/hash/duration all arrived
         public readonly bool SafeReturned;       // the recording made it back to safety (D07)
+        public readonly RecordingWorldContext WorldContext; // #101; Empty when the capture had none
 
         public ClipManifest(string clipId, string recordingId, string diveId, int dayNumber, PlayerId owner,
             string subjectId, int quality, float durationSeconds, string contentHash, long sizeBytes,
             bool mediaReady, bool safeReturned)
+            : this(clipId, recordingId, diveId, dayNumber, owner, subjectId, quality, durationSeconds, contentHash,
+                sizeBytes, mediaReady, safeReturned, default)
+        {
+        }
+
+        public ClipManifest(string clipId, string recordingId, string diveId, int dayNumber, PlayerId owner,
+            string subjectId, int quality, float durationSeconds, string contentHash, long sizeBytes,
+            bool mediaReady, bool safeReturned, in RecordingWorldContext worldContext)
         {
             ClipId = clipId ?? string.Empty;
             RecordingId = recordingId ?? string.Empty;
@@ -41,6 +91,7 @@ namespace DeepDive.Core.Contracts
             SizeBytes = sizeBytes;
             MediaReady = mediaReady;
             SafeReturned = safeReturned;
+            WorldContext = worldContext;
         }
 
         public bool IsWellFormed => !string.IsNullOrWhiteSpace(ClipId) && DurationSeconds > 0f && SizeBytes >= 0;
@@ -129,15 +180,26 @@ namespace DeepDive.Core.Contracts
         public bool MediaReady;
         public bool SafeReturned;
 
+        // #101 world context. A save written before these fields loads them as their defaults: Unknown, "", false.
+        public byte SubjectKind;
+        public string RegionId = "";
+        public string CellId = "";
+        public string DepthBandId = "";
+        public bool FirstRecordingOfSubject;
+
         public static ClipSave From(in ClipManifest m) => new ClipSave
         {
             ClipId = m.ClipId, RecordingId = m.RecordingId, DiveId = m.DiveId, DayNumber = m.DayNumber,
             OwnerPlayerId = m.Owner.Value, SubjectId = m.SubjectId, Quality = m.Quality, DurationSeconds = m.DurationSeconds,
-            ContentHash = m.ContentHash, SizeBytes = m.SizeBytes, MediaReady = m.MediaReady, SafeReturned = m.SafeReturned
+            ContentHash = m.ContentHash, SizeBytes = m.SizeBytes, MediaReady = m.MediaReady, SafeReturned = m.SafeReturned,
+            SubjectKind = (byte)m.WorldContext.Kind, RegionId = m.WorldContext.RegionId, CellId = m.WorldContext.CellId,
+            DepthBandId = m.WorldContext.DepthBandId, FirstRecordingOfSubject = m.WorldContext.FirstRecordingOfSubject
         };
 
+        // The context constructor folds an unknown kind to Unknown, null to "" and "first" off for a non-species.
         public ClipManifest ToManifest() => new ClipManifest(ClipId, RecordingId, DiveId, DayNumber, new PlayerId(OwnerPlayerId),
-            SubjectId, Quality, DurationSeconds, ContentHash, SizeBytes, MediaReady, SafeReturned);
+            SubjectId, Quality, DurationSeconds, ContentHash, SizeBytes, MediaReady, SafeReturned,
+            new RecordingWorldContext((RecordingSubjectKind)SubjectKind, RegionId, CellId, DepthBandId, FirstRecordingOfSubject));
     }
 
     // CONTRACTS "PublicationState": publicationId/clipId, rights, title, queuedDay/resultDay, views/followers/income, settledId.

@@ -42,6 +42,7 @@ namespace DeepDive.Composition
         private SpeciesObservationAuthority species;
         private ExplorationPersistenceAdapter persistence;
         private readonly ApprovedPlayerPositions playerPositions = new ApprovedPlayerPositions();
+        private readonly RecordingWorldContextLedger recordingContexts = new RecordingWorldContextLedger();
         private readonly HashSet<string> processedCaptureIds = new HashSet<string>(StringComparer.Ordinal);
         private readonly HashSet<string> knownSpeciesIds = new HashSet<string>(StringComparer.Ordinal);
         private readonly Dictionary<(string DiveId, ulong Player, string Subject), Vector3> recordingPositions =
@@ -53,6 +54,11 @@ namespace DeepDive.Composition
         public SpeciesObservationAuthority Species => species;
         public bool IsBound => species != null && ReferenceEquals(ExplorationFeed.Current, species);
         public bool OwnsSavePersistence => persistence != null && saveStore != null && ReferenceEquals(saveStore.Exploration, persistence);
+
+        // Session-lifetime seam for #101. The ledger deliberately outlives dive authorities, so a
+        // RecordingQueued notification that races scene teardown can still terminate media pending state.
+        public bool TryResolveRecordingWorldContext(string recordingId, out RecordingWorldContext context) =>
+            recordingContexts.TryResolve(recordingId, out context);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -161,22 +167,37 @@ namespace DeepDive.Composition
 
         private void RecordingTakeRegistered(RecordingTake take)
         {
-            if (!IsHostAuthority() || species == null || !IsSpeciesId(take.SubjectId)) return;
+            if (!IsHostAuthority()) return;
             if (!P4MapPositionFeed.TryGetPlayerWorldPosition(take.PlayerId, out var observerWorld)) return;
             recordingPositions[(take.DiveId ?? string.Empty, take.PlayerId.Value, take.SubjectId ?? string.Empty)] = observerWorld;
+            // Warm the stable species-id cache while the dive scene still has its fish definitions. Non-species
+            // subjects are events for the recording contract and need only their remembered observer position.
+            IsSpeciesId(take.SubjectId);
         }
 
         private void RecordingQueued(RecordingResult result)
         {
-            if (!IsHostAuthority() || species == null || !IsSpeciesId(result.SubjectId)) return;
-            var key = (result.DiveId ?? string.Empty, result.PlayerId.Value, result.SubjectId ?? string.Empty);
-            if (!recordingPositions.TryGetValue(key, out var observerWorld) &&
-                !P4MapPositionFeed.TryGetPlayerWorldPosition(result.PlayerId, out observerWorld))
-                return;
+            if (!IsHostAuthority() || string.IsNullOrWhiteSpace(result.RecordingId)) return;
 
-            var wasKnown = species.TryGetSpecies(result.SubjectId, out _);
-            var outcome = species.AcceptRecording(result.RecordingId, result.SubjectId, observerWorld, CurrentDayNumber());
-            RecordFirstDiscovery(result.SubjectId, wasKnown, outcome);
+            var key = (result.DiveId ?? string.Empty, result.PlayerId.Value, result.SubjectId ?? string.Empty);
+            var observerKnown = recordingPositions.TryGetValue(key, out var observerWorld);
+            if (!observerKnown)
+                observerKnown = P4MapPositionFeed.TryGetPlayerWorldPosition(result.PlayerId, out observerWorld);
+
+            // Recording takes are either a known species or a World event. knownSpeciesIds intentionally
+            // survives ReleaseAuthorities so a species queued during scene teardown is not reclassified.
+            var kind = IsSpeciesId(result.SubjectId) ? RecordingSubjectKind.Species : RecordingSubjectKind.Event;
+            var wasKnown = kind == RecordingSubjectKind.Species && species != null && species.TryGetSpecies(result.SubjectId, out _);
+            var processed = RecordingWorldContextRules.Process(species, cells, result.RecordingId, result.SubjectId,
+                kind, observerKnown, observerWorld, CurrentDayNumber());
+
+            // Empty/kind-only contexts are valid terminal results. Complete is first-write-wins, so replaying
+            // RecordingQueued cannot change the context already consumed by media.
+            recordingContexts.Complete(result.RecordingId, processed.Context);
+            if (kind == RecordingSubjectKind.Species && processed.Outcome.HasValue)
+                RecordFirstDiscovery(result.SubjectId, wasKnown, processed.Outcome.Value);
+
+            recordingPositions.Remove(key);
         }
 
         private void BagChanged(PlayerId player)
@@ -306,8 +327,8 @@ namespace DeepDive.Composition
             species = null;
             persistence = null;
             processedCaptureIds.Clear();
-            knownSpeciesIds.Clear();
-            recordingPositions.Clear();
+            // #101 session state intentionally survives dive authority teardown: RecordingQueued may arrive
+            // after the scene has started unloading. recordingPositions entries are removed when processed.
         }
 
         private void OnDisable()
