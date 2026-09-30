@@ -66,11 +66,18 @@ namespace DeepDive.World
             public readonly List<string> CellIds = new List<string>(4);
             public readonly List<string> ObservationIds = new List<string>(4);
 
+            // The first Recorded observation of this species in acceptance order (#101). Set once in
+            // Record, so a replay or reload through TryApply in the same order sets the same id.
+            public string FirstRecordedId;
+
             public SpeciesRecord(string speciesId) => SpeciesId = speciesId;
         }
 
         private readonly ExplorationCellAuthority cells;
         private readonly HashSet<string> countedIds = new HashSet<string>(StringComparer.Ordinal);
+
+        // ObservationId -> index in observations, so a recording's context is read without a scan.
+        private readonly Dictionary<string, int> observationIndex = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, SpeciesRecord> species = new Dictionary<string, SpeciesRecord>(StringComparer.Ordinal);
         private readonly List<SpeciesObservation> observations = new List<SpeciesObservation>();
 
@@ -100,6 +107,25 @@ namespace DeepDive.World
             state = default;
             if (speciesId == null || !species.TryGetValue(speciesId, out var record)) return false;
             state = ToState(record);
+            return true;
+        }
+
+        // #101: the world context of a counted species recording. True only when a Recorded observation with
+        // ObservationId == recordingId exists; region, cell and band are that observation's own (not the
+        // cell's band now), and FirstRecordingOfSubject says whether it is the species' first Recorded
+        // observation. Read only - it accepts nothing - and allocation-free: the strings are the stored ones.
+        public bool TryGetRecordingContext(string recordingId, out RecordingWorldContext context)
+        {
+            context = default;
+            if (recordingId == null || !observationIndex.TryGetValue(recordingId, out var index)) return false;
+
+            var observation = observations[index];
+            if (observation.Evidence != SpeciesEvidence.Recorded) return false;
+
+            var first = species.TryGetValue(observation.SpeciesId, out var record) &&
+                        string.Equals(record.FirstRecordedId, observation.ObservationId, StringComparison.Ordinal);
+            context = new RecordingWorldContext(RecordingSubjectKind.Species, observation.RegionId, observation.CellId,
+                observation.DepthBandId, first);
             return true;
         }
 
@@ -167,10 +193,14 @@ namespace DeepDive.World
                 case SpeciesEvidence.Caught: newEvidence = !record.Caught; record.Caught = true; break;
             }
 
+            if (observation.Evidence == SpeciesEvidence.Recorded && record.FirstRecordedId == null)
+                record.FirstRecordedId = observation.ObservationId;
+
             AddDistinct(record.BandIds, observation.DepthBandId);
             AddDistinct(record.CellIds, observation.CellId);
             record.ObservationIds.Add(observation.ObservationId);
             countedIds.Add(observation.ObservationId);
+            observationIndex.Add(observation.ObservationId, observations.Count);
             observations.Add(observation);
             revision++;
 

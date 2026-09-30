@@ -125,6 +125,22 @@ namespace DeepDive.World
             return true;
         }
 
+        // #101: the place a recording was made (an event, or a species recording that was not counted), from
+        // TryGetCell. Resolved: (kind, region, cell, band, not first). Out of region or a non-finite position:
+        // false with the kind kept and every id "". The position is only the lookup input and is never kept;
+        // FirstRecordingOfSubject is always false here. Pre-built strings, no allocation.
+        public bool TryGetPlaceContext(RecordingSubjectKind kind, Vector3 observerWorld, out RecordingWorldContext context)
+        {
+            if (!TryGetCell(observerWorld, out var cellId, out var depthBandId))
+            {
+                context = new RecordingWorldContext(kind, string.Empty, string.Empty, string.Empty, false);
+                return false;
+            }
+
+            context = new RecordingWorldContext(kind, layout.Grid.RegionId, cellId, depthBandId, false);
+            return true;
+        }
+
         // Polls the approved positions once and returns how many cells opened this tick. When
         // newlyDiscoveredCellIds is given, each newly opened cell's id is appended exactly once -
         // the discovery event. Ids are the pre-built strings, so a tick does not allocate.
