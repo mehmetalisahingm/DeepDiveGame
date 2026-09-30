@@ -139,7 +139,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -221,9 +221,19 @@ namespace DeepDive.P1.Lab
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                // Recording scenarios end the dive when the recorder has REALLY swum to the safe pad (an event), not at a fixed
+                // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
+                // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
+                var recordingSettled = !Record || MediaFlow || result.recordingSafe;
+                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
+                var returnCeiling = Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
+                if (host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
+                // because the dive now ends when the recorder is safe, not at a fixed second.
+                var recordRelative = Record && !MediaFlow && !Event && returnPhaseAt > 0;
+                var lobbyDue = recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -231,7 +241,8 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                var leaveDue = recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -365,6 +376,13 @@ namespace DeepDive.P1.Lab
                     result.recordingQuality = take.Quality;
             }
             if (local.OwnerClientId != recorder) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            // Where the recorder is while it climbs to the safe pad, every 2 s: a -Record run that never gets safe is diagnosed
+            // from this trace instead of guessed at.
+            if (Time.realtimeSinceStartup >= townTraceAt && result.townTrace.Count < 60)
+            {
+                townTraceAt = Time.realtimeSinceStartup + 2f;
+                result.townTrace.Add($"rec t={Time.realtimeSinceStartup - sceneStarted:F0} pos={local.transform.position} stopped={result.recordingStopped} swimming={local.Swimming.Value}");
+            }
             var delta = subject.transform.position - local.RecordingEyePosition;
             var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             var pitch = -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg;
@@ -421,15 +439,51 @@ namespace DeepDive.P1.Lab
             // the paced climb entirely - it has to be "am I already over the ledge" the way the wade's check is
             // "am I already over the platform", using the near end of the solid ground, not the far one.
             var ledgeWestEdge = ledgeCollider.bounds.min.x;
-            if (position.x >= ledgeWestEdge - 0.2f) return ledgeCollider.bounds.center;   // already over solid ground
+            // "Over the ledge" needs BOTH axes. A recorder measured stuck for 15+ s at (7.57, 6.32, -6.59): east of the ledge's west
+            // edge but NORTH of its z range (-11..-7), so the old x-only test sent it at the ledge centre and it pressed against the
+            // ledge's north face. Until it is over the ledge in z as well it first swims WEST along its own z, clear of the ledge,
+            // and only then turns into the ramp lane (the existing paced climb below).
+            var overLedgeZ = position.z >= ledgeCollider.bounds.min.z - 0.2f && position.z <= ledgeCollider.bounds.max.z + 0.2f;
+            if (position.x >= ledgeWestEdge - 0.2f)
+            {
+                if (overLedgeZ) return ledgeCollider.bounds.center;   // already over solid ground
+                return new Vector3(ledgeWestEdge - 1.5f, position.y, position.z);
+            }
 
             var laneZ = ramp.transform.position.z;
+
+            // The ramp is a solid slab: entered from its SIDE at x near the ledge the diver's body (feet 6.3 .. head 8.1) is level with the
+            // slab and just pushes against its north face (measured: stuck at (6.7, 6.4, -6.6) for 20+ s). It has to enter at the FOOT
+            // and climb east. So: (1) off the lane, swim west along its own side, clear of the slab, to beyond the foot;
+            // (2) slide into the lane there, in open water; (3) only then the paced climb below.
+            var rampBounds = rampCollider.bounds;
+            var footX = rampBounds.min.x;
+            var inLane = position.z <= rampBounds.max.z - 0.3f && position.z >= rampBounds.min.z + 0.3f;
+            // How high the slab's top is just past its foot: the height the diver has to ARRIVE at, or it climbs from underneath the slab
+            // (measured: entering the lane at y 1.9 it swam up under the ramp and then under the ledge at y 5.6, never on top).
+            var footSurfaceY = rampBounds.min.y + 0.6f;
+            if (Physics.Raycast(new Vector3(footX + 0.6f, rampBounds.max.y + 5f, laneZ), Vector3.down, out var footHit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
+                footHit.collider == rampCollider)
+                footSurfaceY = footHit.point.y;
+            if (!inLane)
+            {
+                if (position.x > footX - 0.5f)
+                {
+                    var sideZ = position.z >= rampBounds.max.z ? Mathf.Max(position.z, rampBounds.max.z + 1.0f)
+                                                              : Mathf.Min(position.z, rampBounds.min.z - 1.0f);
+                    return new Vector3(footX - 1.0f, position.y, sideZ);
+                }
+                return new Vector3(footX - 1.0f, footSurfaceY + 0.2f, laneZ);
+            }
+
             var aheadX = Mathf.Min(position.x + 1.2f, ledgeWestEdge);
             var probeOrigin = new Vector3(aheadX, rampCollider.bounds.max.y + 5f, laneZ);
             float targetY;
             if (Physics.Raycast(probeOrigin, Vector3.down, out var hit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
                 (hit.collider == rampCollider || hit.collider == ledgeCollider))
                 targetY = hit.point.y - 0.05f;
+            else if (position.x < footX + 0.3f)
+                targetY = footSurfaceY + 0.1f;   // west of the foot: arrive at the slab's height and push east onto it
             else
                 targetY = Mathf.Min(position.y, rampCollider.bounds.min.y - 0.3f);   // still short of the ramp: dive under it
             return new Vector3(aheadX, targetY, laneZ);
@@ -1622,6 +1676,12 @@ namespace DeepDive.P1.Lab
             if (wadeCollider == null || strip == null) return stand;
             var northEdge = strip.bounds.max.z;
             if (position.z <= northEdge + 0.2f) return stand;   // already on the platform: walk to the NPC
+
+            // Standing on dry ground that is flush with the platform but is not it - the return pad on Shore_Ledge, z -11..-7 - the
+            // next step is straight onto the platform (north, -z). Sending it to the wade lane instead walks it WEST along the ledge
+            // and off the ramp into the water beside the shelf, where it pressed against the shelf's side wall for the rest of the
+            // run and never sold (measured, recorder stopped at (-3.1, 7.9, -10.6)).
+            if (position.y >= strip.bounds.max.y - 0.35f) return new Vector3(position.x, position.y, northEdge - 0.6f);
 
             var lane = wade.transform.position.x;
             var aheadZ = Mathf.Max(position.z - 1.2f, northEdge);
