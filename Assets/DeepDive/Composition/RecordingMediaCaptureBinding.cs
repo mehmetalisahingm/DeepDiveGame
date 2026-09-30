@@ -53,6 +53,7 @@ namespace DeepDive.Composition
         private RecordingWorldBinding world;
         private RecordingDiveBinding observed;
         private DayNetworkBinding day;
+        private ExplorationNetworkBinding exploration;
         private readonly Dictionary<ulong, Active> active = new Dictionary<ulong, Active>();
         private readonly Dictionary<string, Pending> pending = new Dictionary<string, Pending>(StringComparer.Ordinal);
         private readonly Dictionary<string, RecordingResult> waiting = new Dictionary<string, RecordingResult>(StringComparer.Ordinal);
@@ -88,6 +89,7 @@ namespace DeepDive.Composition
             manager = GetComponent<NetworkManager>();
             world = GetComponent<RecordingWorldBinding>();
             day = GetComponent<DayNetworkBinding>();
+            exploration = GetComponent<ExplorationNetworkBinding>();
             if (adapter == null || manager == null) enabled = false;
         }
 
@@ -121,6 +123,7 @@ namespace DeepDive.Composition
         {
             if (world == null) world = GetComponent<RecordingWorldBinding>();
             if (day == null) day = GetComponent<DayNetworkBinding>();
+            if (exploration == null) exploration = GetComponent<ExplorationNetworkBinding>();
             var next = world != null ? world.Binding : null;
             if (ReferenceEquals(next, observed)) return;
             if (observed != null)
@@ -208,12 +211,23 @@ namespace DeepDive.Composition
             var key = Key(result.DiveId, result.PlayerId, result.SubjectId);
             if (!pending.TryGetValue(key, out var media) || media.Frames == null || media.Frames.Count == 0) return;
 
+            // #101 ordering seam: RecordingMediaCaptureBinding and ExplorationNetworkBinding both consume
+            // RecordingQueued. Media must not archive an Empty-by-default manifest merely because its handler
+            // ran first. TryResolve false means "not processed yet"; true includes terminal Empty/kind-only.
+            if (exploration == null) exploration = GetComponent<ExplorationNetworkBinding>();
+            if (exploration == null || !exploration.TryResolveRecordingWorldContext(result.RecordingId, out var worldContext)) return;
+
             try
             {
                 media.Encoded ??= RecordingClipFile.Encode(Width, Height, media.Duration, media.Frames);
                 media.Hash ??= RecordingClipFile.Sha256Hex(media.Encoded);
                 if (!RecordingClipFile.TryBuildManifest(result, media.DayNumber, media.Duration, media.Hash,
-                        media.Encoded.LongLength, out var manifest)) return;
+                        media.Encoded.LongLength, out var baseManifest)) return;
+
+                var manifest = new ClipManifest(baseManifest.ClipId, baseManifest.RecordingId, baseManifest.DiveId,
+                    baseManifest.DayNumber, baseManifest.Owner, baseManifest.SubjectId, baseManifest.Quality,
+                    baseManifest.DurationSeconds, baseManifest.ContentHash, baseManifest.SizeBytes,
+                    baseManifest.MediaReady, baseManifest.SafeReturned, worldContext);
 
                 var path = PathFor(manifest.ClipId);
                 if (string.IsNullOrEmpty(path)) return;
