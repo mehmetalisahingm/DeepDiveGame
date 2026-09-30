@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace DeepDive.P1.Lab
 {
-    // #100 acceptance guard. It creates no clip, manifest or recording fixture. The existing real -Record
-    // smoke drives owner input through RecordingNetworkBridge. This probe only starts judging the media path
-    // after RecordingDiveBinding emits the REAL safely-settled RecordingQueued event, so a slow CI return cannot
-    // fail merely because settlement has not happened yet.
+    // #100/#101 acceptance guard. It creates no clip, manifest, world context or recording fixture. The existing
+    // real -Record smoke drives owner input through RecordingNetworkBridge. This probe only starts judging the
+    // media path after RecordingDiveBinding emits the REAL safely-settled RecordingQueued event, so a slow CI
+    // return cannot fail merely because settlement has not happened yet.
     public sealed class P4MediaProductProbe : MonoBehaviour
     {
         private SessionNetworkAdapter adapter;
@@ -57,14 +57,20 @@ namespace DeepDive.P1.Lab
             var real = data?.Clips?.FirstOrDefault(c => c != null && c.RecordingId == expectedRecordingId && c.ClipId == clipId);
             if (real != null)
             {
+                var context = real.ToManifest().WorldContext;
+                var worldValid = context.Kind == RecordingSubjectKind.Species &&
+                                 !string.IsNullOrWhiteSpace(context.RegionId) &&
+                                 !string.IsNullOrWhiteSpace(context.CellId) &&
+                                 !string.IsNullOrWhiteSpace(context.DepthBandId);
                 var valid = sawRealRecordingPresentation && real.MediaReady && real.SafeReturned &&
                             !string.IsNullOrWhiteSpace(real.SubjectId) && real.Quality >= 1 && real.Quality <= 4 &&
                             real.DurationSeconds > 0f && real.SizeBytes > 0 && real.ContentHash != null &&
-                            real.ContentHash.Length == 64 && ClipPlayback.CanPlay(real.ClipId);
+                            real.ContentHash.Length == 64 && ClipPlayback.CanPlay(real.ClipId) && worldValid;
                 if (valid)
                 {
                     finished = true;
-                    Debug.Log($"P4_MEDIA_PRODUCT_OK clip={real.ClipId} recording={real.RecordingId} subject={real.SubjectId} q={real.Quality} bytes={real.SizeBytes}");
+                    Debug.Log($"P4_MEDIA_PRODUCT_OK clip={real.ClipId} recording={real.RecordingId} subject={real.SubjectId} q={real.Quality} bytes={real.SizeBytes} " +
+                              $"kind={context.Kind} region={context.RegionId} cell={context.CellId} band={context.DepthBandId} first={context.FirstRecordingOfSubject}");
                     return;
                 }
             }
@@ -75,8 +81,10 @@ namespace DeepDive.P1.Lab
             if (Time.realtimeSinceStartupAsDouble - queuedAt > 6.0)
             {
                 finished = true;
+                var context = real != null ? real.ToManifest().WorldContext : default;
                 Debug.LogError($"P4_MEDIA_PRODUCT_FAIL queued={expectedRecordingId} presentation={sawRealRecordingPresentation} " +
-                    $"clips={data?.Clips?.Count ?? 0} real={(real != null)} playable={(real != null && ClipPlayback.CanPlay(real.ClipId))}");
+                    $"clips={data?.Clips?.Count ?? 0} real={(real != null)} playable={(real != null && ClipPlayback.CanPlay(real.ClipId))} " +
+                    $"kind={context.Kind} region={context.RegionId} cell={context.CellId} band={context.DepthBandId}");
             }
         }
 
