@@ -2,7 +2,7 @@ name: P4.2-A media capture acceptance
 
 on:
   push:
-    branches: ['p4/mehmet-media-capture']
+    branches: ['p4/mehmet-media-capture', 'p4/utku-media-world']
   workflow_dispatch:
 
 permissions:
