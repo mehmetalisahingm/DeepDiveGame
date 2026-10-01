@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DeepDive.Core.Contracts;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,8 +14,12 @@ namespace DeepDive.Network
         [SerializeField] private Renderer[] thirdPersonRenderers;
         [SerializeField] private GameObject firstPersonHarpoon;
         [SerializeField] private GameObject firstPersonCamera;
+        [SerializeField] private GameObject firstPersonCameraAdvanced;
+        [SerializeField] private GameObject firstPersonCameraProfessional;
         [SerializeField] private GameObject thirdPersonHarpoon;
         [SerializeField] private GameObject thirdPersonCamera;
+        [SerializeField] private GameObject thirdPersonCameraAdvanced;
+        [SerializeField] private GameObject thirdPersonCameraProfessional;
 
         [Header("P3.1 runtime presentation")]
         [SerializeField] private DiverPresentationCatalog presentationCatalog;
@@ -29,6 +34,7 @@ namespace DeepDive.Network
         private bool initialized;
         private int drivenAnimatorState;
         private CoastalDiverPose bodyPose, armsPose;
+        private NetworkPlayer networkPlayer;
 
         private static readonly int LocomotionParam = Animator.StringToHash("LocomotionMode");
         private static readonly int SpeedParam = Animator.StringToHash("MoveSpeed");
@@ -42,6 +48,13 @@ namespace DeepDive.Network
         }
 
         public void Apply(bool isOwner, PlayerPresentationState state, float normalizedSpeed)
+        {
+            EnsureInitialized();
+            var cameraTier = networkPlayer != null ? networkPlayer.CurrentCameraTier : CameraTier.Basic;
+            Apply(isOwner, state, normalizedSpeed, cameraTier);
+        }
+
+        public void Apply(bool isOwner, PlayerPresentationState state, float normalizedSpeed, CameraTier cameraTier)
         {
             EnsureInitialized();
 
@@ -58,9 +71,13 @@ namespace DeepDive.Network
             }
 
             SetActive(firstPersonHarpoon, isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Harpoon);
-            SetActive(firstPersonCamera, isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Camera);
             SetActive(thirdPersonHarpoon, !isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Harpoon);
-            SetActive(thirdPersonCamera, !isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Camera);
+
+            var showCamera = showEquipment && state.HeldEquipment == HeldEquipmentMode.Camera;
+            SetCameraTier(firstPersonCamera, firstPersonCameraAdvanced, firstPersonCameraProfessional,
+                isOwner && showCamera, cameraTier);
+            SetCameraTier(thirdPersonCamera, thirdPersonCameraAdvanced, thirdPersonCameraProfessional,
+                !isOwner && showCamera, cameraTier);
 
             ApplyAnimator(state, normalizedSpeed);
             bodyPose?.Present(state, normalizedSpeed);
@@ -71,6 +88,7 @@ namespace DeepDive.Network
         {
             if (initialized) return;
             initialized = true;
+            networkPlayer = GetComponent<NetworkPlayer>();
 
             if (presentationCatalog == null)
                 presentationCatalog = Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
@@ -93,9 +111,8 @@ namespace DeepDive.Network
 
             SetRendererGroup(firstPersonRenderers, false, false);
             SetActive(firstPersonHarpoon, false);
-            SetActive(firstPersonCamera, false);
             SetActive(thirdPersonHarpoon, false);
-            SetActive(thirdPersonCamera, false);
+            HideAllCameras();
         }
 
         private void BuildRuntimePresentation()
@@ -124,6 +141,12 @@ namespace DeepDive.Network
                     if (thirdPersonCamera == null)
                         thirdPersonCamera = InstantiateGripAligned(presentationCatalog.CameraPropPrefab, handSocket,
                             "P3_ThirdPersonCamera");
+                    if (thirdPersonCameraAdvanced == null && presentationCatalog.CameraAdvancedPropPrefab != null)
+                        thirdPersonCameraAdvanced = InstantiateGripAligned(presentationCatalog.CameraAdvancedPropPrefab, handSocket,
+                            "P4_ThirdPersonCameraAdvanced");
+                    if (thirdPersonCameraProfessional == null && presentationCatalog.CameraProfessionalPropPrefab != null)
+                        thirdPersonCameraProfessional = InstantiateGripAligned(presentationCatalog.CameraProfessionalPropPrefab, handSocket,
+                            "P4_ThirdPersonCameraProfessional");
                 }
             }
 
@@ -150,12 +173,23 @@ namespace DeepDive.Network
             }
 
             if (firstPersonCamera == null && presentationCatalog.CameraPropPrefab != null)
-            {
-                firstPersonCamera = Instantiate(presentationCatalog.CameraPropPrefab, firstPersonMount, false);
-                firstPersonCamera.name = "P3_FirstPersonCamera";
-                firstPersonCamera.transform.localPosition = new Vector3(0f, -0.16f, 0.42f);
-                firstPersonCamera.transform.localRotation = Quaternion.identity;
-            }
+                firstPersonCamera = InstantiateFirstPersonCamera(presentationCatalog.CameraPropPrefab, "P3_FirstPersonCamera");
+            if (firstPersonCameraAdvanced == null && presentationCatalog.CameraAdvancedPropPrefab != null)
+                firstPersonCameraAdvanced = InstantiateFirstPersonCamera(presentationCatalog.CameraAdvancedPropPrefab,
+                    "P4_FirstPersonCameraAdvanced");
+            if (firstPersonCameraProfessional == null && presentationCatalog.CameraProfessionalPropPrefab != null)
+                firstPersonCameraProfessional = InstantiateFirstPersonCamera(presentationCatalog.CameraProfessionalPropPrefab,
+                    "P4_FirstPersonCameraProfessional");
+        }
+
+        private GameObject InstantiateFirstPersonCamera(GameObject prefab, string instanceName)
+        {
+            if (prefab == null || firstPersonMount == null) return null;
+            var instance = Instantiate(prefab, firstPersonMount, false);
+            instance.name = instanceName;
+            instance.transform.localPosition = new Vector3(0f, -0.16f, 0.42f);
+            instance.transform.localRotation = Quaternion.identity;
+            return instance;
         }
 
         private void ApplyAnimator(PlayerPresentationState state, float normalizedSpeed)
@@ -247,6 +281,34 @@ namespace DeepDive.Network
             foreach (var child in root.GetComponentsInChildren<Transform>(true))
                 if (child.name == name) return child;
             return null;
+        }
+
+        private void HideAllCameras()
+        {
+            SetActive(firstPersonCamera, false);
+            SetActive(firstPersonCameraAdvanced, false);
+            SetActive(firstPersonCameraProfessional, false);
+            SetActive(thirdPersonCamera, false);
+            SetActive(thirdPersonCameraAdvanced, false);
+            SetActive(thirdPersonCameraProfessional, false);
+        }
+
+        private static void SetCameraTier(GameObject basic, GameObject advanced, GameObject professional,
+            bool active, CameraTier tier)
+        {
+            SetActive(basic, false);
+            SetActive(advanced, false);
+            SetActive(professional, false);
+            if (!active || tier == CameraTier.None) return;
+
+            GameObject selected;
+            if (tier == CameraTier.Professional)
+                selected = professional != null ? professional : advanced != null ? advanced : basic;
+            else if (tier == CameraTier.Advanced)
+                selected = advanced != null ? advanced : basic;
+            else
+                selected = basic;
+            SetActive(selected, selected != null);
         }
 
         private static void SetRendererGroup(Renderer[] renderers, bool enabled, bool shadowsOnly)
