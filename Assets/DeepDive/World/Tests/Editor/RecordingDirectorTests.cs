@@ -32,12 +32,17 @@ namespace DeepDive.World.Tests
             public int Stops;
             public PlayerId LastPlayer;
             public ulong LastRequestId;
+            public CameraTier LastStartTier;
 
-            public PlayerActionResult TryStartTake(PlayerId player, ulong requestId)
+            public PlayerActionResult TryStartTake(PlayerId player, ulong requestId) =>
+                TryStartTake(player, requestId, CameraTier.Basic);
+
+            public PlayerActionResult TryStartTake(PlayerId player, ulong requestId, CameraTier tier)
             {
                 Starts++;
                 LastPlayer = player;
                 LastRequestId = requestId;
+                LastStartTier = tier;
                 return StartResult;
             }
 
@@ -400,6 +405,141 @@ namespace DeepDive.World.Tests
             // Mert refusing is his decision about this dive, not a reason to try the runner-up.
             Assert.AreEqual(1, economy.Claims.Count);
             Assert.AreEqual(Alice, economy.Claims[0].PlayerId);
+        }
+
+        // --- camera tier (P4.3) ------------------------------------------------------------
+
+        // A subject backed by a real session, sampling the way RecordingSubject.FixedUpdate does:
+        // the tier comes from the open take, never from the latest candidate.
+        private sealed class SessionSubject : IRecordingSubject
+        {
+            public readonly RecordingSession Session = new RecordingSession(Subject, new[]
+            {
+                new QualityTier("Bronze", 0.25f, 2f)
+            });
+
+            public string SubjectId => Subject;
+
+            public PlayerActionResult TryStartTake(PlayerId player, ulong requestId) =>
+                TryStartTake(player, requestId, CameraTier.Basic);
+
+            public PlayerActionResult TryStartTake(PlayerId player, ulong requestId, CameraTier tier) =>
+                Session.TryStart(DiveContext.Source, player, requestId, tier);
+
+            public PlayerActionResult TryStopTake(PlayerId player, ulong requestId, out RecordingTake take) =>
+                Session.TryStop(DiveContext.Source, player, requestId, out take);
+
+            // A large subject 18 m ahead in daylight: past Basic's reach, inside the extended one.
+            public void TickAtEighteenMetres(PlayerId player, float seconds)
+            {
+                for (var elapsed = 0f; elapsed < seconds - 0.0001f; elapsed += 0.5f)
+                {
+                    var sample = RecordingCameraRules.Sample(UnityEngine.Vector3.zero, UnityEngine.Vector3.forward,
+                        60f, new UnityEngine.Vector3(0f, 0f, 18f), 3f, false, RecordingTuning.Default,
+                        Session.TierFor(player), 1f);
+                    Session.Tick(player, 0.5f, sample);
+                }
+            }
+        }
+
+        // A subject written before P4.3: it knows only the tier-less start, like Composition's
+        // RecordingDiveBindingTests double. The interface's default body must still reach it.
+        private sealed class LegacySubject : IRecordingSubject
+        {
+            public int Starts;
+
+            public string SubjectId => Subject;
+
+            public PlayerActionResult TryStartTake(PlayerId player, ulong requestId)
+            {
+                Starts++;
+                return PlayerActionResult.Accepted;
+            }
+
+            public PlayerActionResult TryStopTake(PlayerId player, ulong requestId, out RecordingTake take)
+            {
+                take = default;
+                return PlayerActionResult.Accepted;
+            }
+        }
+
+        private static RecordingCandidate Candidate(IRecordingTarget target, PlayerId player, ulong requestId,
+            CameraTier tier) =>
+            new RecordingCandidate(requestId, Dive, player, target, tier);
+
+        [Test]
+        public void StartForwardsTheCandidatesTier()
+        {
+            LiveDive();
+            var subject = new FakeSubject();
+            var director = new RecordingDirector();
+
+            director.TryStart(Candidate(subject, Alice, 1, CameraTier.Advanced));
+
+            Assert.AreEqual(CameraTier.Advanced, subject.LastStartTier);
+        }
+
+        [Test]
+        public void StopIgnoresTheCandidatesTier()
+        {
+            LiveDive();
+            var subject = new SessionSubject();
+            var director = new RecordingDirector();
+
+            director.TryStart(Candidate(subject, Alice, 1, CameraTier.Basic));
+            subject.TickAtEighteenMetres(Alice, 1f);
+            Assert.AreEqual(CameraTier.Basic, subject.Session.TierFor(Alice));
+
+            Assert.AreEqual(PlayerActionResult.Accepted,
+                director.TryStop(Candidate(subject, Alice, 2, CameraTier.Professional)));
+            Assert.IsFalse(subject.Session.IsRecording(Alice));
+            Assert.AreEqual(0, director.ClaimCount, "a stop carrying a better tier did not regrade the take");
+        }
+
+        [Test]
+        public void ALegacyCandidateStillStarts()
+        {
+            LiveDive();
+            var subject = new SessionSubject();
+            var director = new RecordingDirector();
+
+            Assert.AreEqual(PlayerActionResult.Accepted, director.TryStart(Candidate(subject, Alice)));
+            Assert.AreEqual(CameraTier.Basic, subject.Session.TierFor(Alice));
+        }
+
+        [Test]
+        public void ASubjectWithoutTierSupportStillStarts()
+        {
+            LiveDive();
+            var subject = new LegacySubject();
+            var director = new RecordingDirector();
+
+            Assert.AreEqual(PlayerActionResult.Accepted,
+                director.TryStart(Candidate(subject, Alice, 1, CameraTier.Professional)));
+            Assert.AreEqual(1, subject.Starts);
+        }
+
+        [Test]
+        public void TierChangeMidTakeHasNoEffectOnTheJudgedSamples()
+        {
+            LiveDive();
+            var subject = new SessionSubject();
+            var director = new RecordingDirector();
+
+            director.TryStart(Candidate(subject, Alice, 1, CameraTier.Basic));
+            subject.TickAtEighteenMetres(Alice, 6f);
+
+            // The diver "upgrades" before stopping; the bridge would now read Professional.
+            Assert.AreEqual(PlayerActionResult.Accepted,
+                director.TryStop(Candidate(subject, Alice, 2, CameraTier.Professional)));
+            Assert.IsFalse(director.TryGetBestClaim(Alice, Subject, out _),
+                "the take was judged by Basic's reach throughout");
+
+            // Control: the same shot started with the extended optics is in reach and registers.
+            director.TryStart(Candidate(subject, Bob, 1, CameraTier.Professional));
+            subject.TickAtEighteenMetres(Bob, 6f);
+            director.TryStop(Candidate(subject, Bob, 2, CameraTier.Basic));
+            Assert.IsTrue(director.TryGetBestClaim(Bob, Subject, out _));
         }
     }
 }
