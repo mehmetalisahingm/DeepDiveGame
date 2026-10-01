@@ -1,6 +1,6 @@
 # P4.3-C: limandaki tekne satıcısı, üç araç sahipliği, aktif seçim, kalıcı kayıt ve ekipman kademeleri (#109)
 
-Tarih: 2026-10-02. Taban: `codex/p4-integration` @ `128bfd6`. Dal: `p4/mert-vehicle-shop-progression`. Kurallar: `docs/plan/CONTRACTS.md` "Tekne satın alma ve aktif araç" altındaki *Uygulama (#109)* maddeleri.
+Tarih: 2026-10-02. Taban: `codex/p4-integration` @ `1bae433` (#115 dahil, merge edildi). Dal: `p4/mert-vehicle-shop-progression`. Kurallar: `docs/plan/CONTRACTS.md` "Tekne satın alma ve aktif araç" altındaki *Uygulama (#109)* maddeleri.
 
 ## Ne var
 - **Tek kaynak** (`EconomyManager`, host): `boat-1` sandal (sahip = P3 onarımı tamam, saklanmaz, satılmaz), `boat-2` motorlu tekne, `boat-3` küçük araştırma teknesi. Sıra sabit (`RequirementMissing`), ortak bakiye öder, para eksiye düşmez, replay/çift istek tek çekim ve tek araç, yazma hatasında para+sahiplik geri alınır. Araç kampanya malıdır, hiçbir oyuncunun yüküne girmez.
@@ -12,9 +12,9 @@ Tarih: 2026-10-02. Taban: `codex/p4-integration` @ `128bfd6`. Dal: `p4/mert-vehi
 - **Rota açılımı**: ayrı liste yok; Utku'nun rota tanımındaki gerekli tekne sınıfı (`VehicleClass`) ile sahip olunan/aktif araçtan türetilir (rota kimlikleri #108 ile gelince bağlanır).
 
 ## Kanıt
-- EditMode tam suite **903/903** (rebase sonrası; 25 yeni `VehicleFleetTests`: gerçek `EconomyManager`, gerçek kayıt dosyası, gerçek `BoatTripManager`, gerçek `TownServiceHandler`).
+- EditMode tam suite **905/905** (#115 merge'ünden sonra; 25 yeni `VehicleFleetTests`: gerçek `EconomyManager`, gerçek kayıt dosyası, gerçek `BoatTripManager`, gerçek `TownServiceHandler`).
 - **Gerçek 2-süreç `tools/Test-P1-Integrated.ps1 -Players 2 -Fleet`** (Windows build, gerçek yürüyüş + gerçek RPC'ler): ekipman dükkânı açılır; kademe zinciri (`RequirementMissing` → basic → advanced → fins, ikisi de kendi yüküne); liman satıcısı açılır; host motorlu tekneyi alır, guest aynısını tekrar alamaz (`AlreadyProcessed`), araştırma teknesini alır; host sandalda otururken guest'in geçişi `SeatsOccupied`, host inince kabul; her iki süreçte ayna ve `ActiveVehicle` seam'i `boat-2`; host: bakiye beklenen, iki oyuncunun yükü doğru, park edilen sandal bindirilemez (`InvalidTarget`), dosyada filo/aktif/bakiye doğru, `LoadNow` sonrası çoğalma yok. **Gerçek ikinci host başlatması** aynı dosyada: 3 araç, aktif `boat-2`, bakiye aynı, sefer `Docked` ve koltuklar boş, tekrar satın alma/seçim `AlreadyProcessed`.
-- Aynı son build'de regresyon (host + client1): `-Town`, `-Trip`, `-Boat`, `-Event`, `-Record`, `-Storage`, `-Day` (+yeniden açma), `-HomeSleep`, `-Explore`, `-Media` (+yeniden açma), `-Acceptance` (+yeniden açma): hepsi PASS; `-Fleet` iki kez PASS.
+- Aynı son build'de regresyon (host + client1): `-Town`, `-Trip`, `-Boat`, `-Event`, `-Record`, `-Storage`, `-Day` (+yeniden açma), `-HomeSleep`, `-Explore`, `-Media` (+yeniden açma), `-Acceptance` (+yeniden açma): hepsi PASS; `-Fleet` iki kez PASS. #115 merge'ünden sonraki build'de ayrıca yeniden koşuldu (host + client1 + reload): `-Fleet`, `-Town`, `-Trip`, `-Record`, `-Acceptance`, `-Day` PASS; kalan regresyonlar (`-Boat`, `-Event`, `-Storage`, `-HomeSleep`, `-Explore`, `-Media`) #115 öncesi aynı kod üzerinde PASS, merge sonrası yeniden koşulmadı.
 
 ## Doğrulanmadı / açık
 - **Fiziksel gövde/hareket #107'de**: Mehmet'in `NetworkBoatController`'ı bugün yalnız `boat-1`'i bindirir/yürütür. `boat-2/3` sahip olunur ve seçilebilir, sefer otoritesi onu kabul eder, ama gerçek motorlu/araştırma teknesi board→outbound→anchor→inbound zinciri (gerçek 2-süreç) bu PR'da yok; #107'nin işi.
@@ -23,4 +23,4 @@ Tarih: 2026-10-02. Taban: `codex/p4-integration` @ `128bfd6`. Dal: `p4/mert-vehi
 - **D06**: yalnız host'un yükü kayda yazılır; guest'in aldığı kamera/palet/çanta/zıpkın yeniden açılışta korunmaz (tüp ve temel kamerayla aynı kural). Kalıcı oyuncu kimliği ayrı karar.
 - Fiyatlar (900 / 2400, kameralar 400 / 900, palet 220, çanta 260, zıpkın 300) **çalışma değerleri**; denge P4.5.
 - Tekne sandığı/sandık eşya aktarımı ve tekne satışı bu issue'da yok (CONTRACTS taslağındaki `sandık` alanı sonraya kaldı).
-- #115 (Mehmet) aynı iki üst kamerayı ayrı bir `P4EquipmentCatalog` ile ekliyor; kimlik/fiyatları buradakiyle aynı tuttum (`camera-advanced` 400, `camera-professional` 900). Katalog sahipliği `EconomyManager` olduğu için #115'teki katalog kısmı bu PR ile gereksiz (varsayılanlar `ConfigureDefaults`'ta, kayıt yeniden okuma hilesi gerekmez); smoke desteği kısmı bundan bağımsız.
+- #115 (Mehmet, merge edildi) aynı iki üst kamerayı `P4EquipmentCatalog` ile de ekliyor. Kimlik/fiyatlar aynı (`camera-advanced` 400, `camera-professional` 900), `AddToCatalog` aynı değeri yazdığı için çakışma yok; ama katalog artık iki yerde tanımlı. `EconomyManager` varsayılanlarında olduğu için `P4EquipmentCatalog` ve yeniden okuma bootstrap'i gereksiz kaldı: sonra tek kaynağa indirilmeli (karar Mehmet'te, bu PR'da dokunmadım).
