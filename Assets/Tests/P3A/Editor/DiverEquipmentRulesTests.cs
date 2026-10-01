@@ -65,6 +65,96 @@ namespace DeepDive.P3A.Tests
         }
 
         [Test]
+        public void CameraSlotBelongsOnlyToMatchingPlayerAndOwnedDefinition()
+        {
+            var loadout = new LoadoutState(Alice, new[] { "camera-basic" }, 7);
+            var camera = new EquipmentDefinition("camera-basic", "camera", 1, 150);
+
+            Assert.IsTrue(DiverEquipmentRules.OwnsEquipmentSlot(Alice, loadout, new[] { camera }, "camera"));
+            Assert.IsFalse(DiverEquipmentRules.OwnsEquipmentSlot(Bob, loadout, new[] { camera }, "camera"));
+
+            var mismatchedDefinition = new EquipmentDefinition("camera-other", "camera", 1, 150);
+            Assert.IsFalse(DiverEquipmentRules.OwnsEquipmentSlot(Alice, loadout,
+                new[] { mismatchedDefinition }, "camera"),
+                "A camera definition not present in this player's loadout must not grant camera ownership.");
+        }
+
+        [Test]
+        public void CameraLevelsMapToThreeP4TiersWithoutStacking()
+        {
+            var loadout = new LoadoutState(Alice, new[] { "camera-basic", "camera-pro" }, 8);
+            var definitions = new[]
+            {
+                new EquipmentDefinition("camera-basic", DiverEquipmentRules.CameraSlot, 1, 150),
+                new EquipmentDefinition("camera-pro", DiverEquipmentRules.CameraSlot, 3, 900)
+            };
+
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(Alice, loadout, definitions);
+
+            Assert.AreEqual(CameraTier.Professional, capabilities.CameraTier);
+            Assert.IsTrue(capabilities.HasCamera);
+        }
+
+        [Test]
+        public void P4UpgradeSlotsResolveStrongestOwnedLevelIndependently()
+        {
+            var loadout = new LoadoutState(Alice,
+                new[] { "fins-1", "fins-2", "bag-1", "harpoon-1" }, 9);
+            var definitions = new[]
+            {
+                new EquipmentDefinition("fins-1", DiverEquipmentRules.FinsSlot, 1, 100),
+                new EquipmentDefinition("fins-2", DiverEquipmentRules.FinsSlot, 2, 250),
+                new EquipmentDefinition("bag-1", DiverEquipmentRules.BagSlot, 1, 150),
+                new EquipmentDefinition("harpoon-1", DiverEquipmentRules.HarpoonSlot, 1, 200)
+            };
+
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(Alice, loadout, definitions);
+
+            Assert.AreEqual(2, capabilities.FinsLevel);
+            Assert.AreEqual(1, capabilities.BagLevel);
+            Assert.AreEqual(1, capabilities.HarpoonLevel);
+        }
+
+        [Test]
+        public void ForeignLoadoutCannotGrantP4Capabilities()
+        {
+            var bobLoadout = new LoadoutState(Bob,
+                new[] { "camera-pro", "fins-2", "bag-1", "harpoon-1" }, 10);
+            var definitions = new[]
+            {
+                new EquipmentDefinition("camera-pro", DiverEquipmentRules.CameraSlot, 3, 900),
+                new EquipmentDefinition("fins-2", DiverEquipmentRules.FinsSlot, 2, 250),
+                new EquipmentDefinition("bag-1", DiverEquipmentRules.BagSlot, 1, 150),
+                new EquipmentDefinition("harpoon-1", DiverEquipmentRules.HarpoonSlot, 1, 200)
+            };
+
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(Alice, bobLoadout, definitions);
+
+            Assert.AreEqual(CameraTier.None, capabilities.CameraTier);
+            Assert.AreEqual(0, capabilities.FinsLevel);
+            Assert.AreEqual(0, capabilities.BagLevel);
+            Assert.AreEqual(0, capabilities.HarpoonLevel);
+        }
+
+        [Test]
+        public void MissingCatalogDefinitionCannotGrantCapabilityFromRawLoadoutId()
+        {
+            var loadout = new LoadoutState(Alice,
+                new[] { "camera-pro", "fins-2", "bag-1", "harpoon-1" }, 11);
+            var definitions = new[]
+            {
+                new EquipmentDefinition("camera-basic", DiverEquipmentRules.CameraSlot, 1, 150)
+            };
+
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(Alice, loadout, definitions);
+
+            Assert.AreEqual(CameraTier.None, capabilities.CameraTier);
+            Assert.AreEqual(0, capabilities.FinsLevel);
+            Assert.AreEqual(0, capabilities.BagLevel);
+            Assert.AreEqual(0, capabilities.HarpoonLevel);
+        }
+
+        [Test]
         public void VitalsCapacityUpgradeRefillsOnceAndPersistsAcrossDiveReset()
         {
             var vitals = new DiverVitalsState(120f, 100f, 1f, 0.2f);

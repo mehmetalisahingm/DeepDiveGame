@@ -11,6 +11,7 @@ namespace DeepDive.P3.Tests
         private GameObject root;
         private EconomyManager economy;
         private PlayerId alice;
+        private ulong nextRequest = 1000;
 
         [SetUp]
         public void SetUp()
@@ -30,13 +31,22 @@ namespace DeepDive.P3.Tests
         private static RecordingResult Recording(string id, int quality) =>
             new RecordingResult(id, "dive-1", new PlayerId(1), "sea_bass", quality, 4f);
 
-        [Test] public void UnknownSubjectIsRejectedAndEventHasExplicitPrice()
+        // A recording earns nothing by itself; queue it, then hand it in at the recording buyer.
+        private TurnInResult QueueAndTurnIn(RecordingResult recording, PlayerId? by = null)
         {
-            Assert.AreEqual(PlayerActionResult.Rejected, economy.TryRewardRecording(
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryQueueRecordingTurnIn(recording));
+            return economy.TryTurnInRecordings(by ?? recording.PlayerId, nextRequest++);
+        }
+
+        [Test]
+        public void UnknownSubjectIsRejectedAndEventHasExplicitPrice()
+        {
+            Assert.AreEqual(PlayerActionResult.Rejected, economy.TryQueueRecordingTurnIn(
                 new RecordingResult("unknown", "dive-1", alice, "not-priced", 3, 4)));
-            Assert.AreEqual(0, economy.SharedBalance);
-            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(
-                new RecordingResult("event", "dive-1", alice, "event_bioluminescence", 3, 4)));
+            Assert.AreEqual(0, economy.PendingCountFor(alice, TurnInKind.Recording));
+
+            var paid = QueueAndTurnIn(new RecordingResult("event", "dive-1", alice, "event_bioluminescence", 3, 4));
+            Assert.AreEqual(100, paid.Earned);
             Assert.AreEqual(100, economy.SharedBalance);
         }
 
@@ -50,29 +60,47 @@ namespace DeepDive.P3.Tests
         }
 
         [Test]
+        public void QueuingARecordingNeverPaysMoney()
+        {
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryQueueRecordingTurnIn(Recording("rec-1", 4)));
+            Assert.AreEqual(0, economy.SharedBalance);
+        }
+
+        [Test]
         public void RecordingIdCanNeverPayTwice()
         {
             var recording = Recording("rec-1", 3);
-            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(recording));
+            Assert.AreEqual(100, QueueAndTurnIn(recording).Earned);
             Assert.AreEqual(100, economy.SharedBalance);
 
-            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryRewardRecording(recording));
+            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryQueueRecordingTurnIn(recording));
+            Assert.IsFalse(economy.TryTurnInRecordings(alice, nextRequest++).Accepted);
             Assert.AreEqual(100, economy.SharedBalance);
+        }
+
+        [Test]
+        public void QueuedRecordingCannotBeQueuedAgain()
+        {
+            var recording = Recording("rec-dup", 3);
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryQueueRecordingTurnIn(recording));
+            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryQueueRecordingTurnIn(recording));
+            Assert.AreEqual(1, economy.PendingCountFor(alice, TurnInKind.Recording));
         }
 
         [Test]
         public void InvalidOrUnpayableRecordingDoesNotChangeMoney()
         {
             Assert.AreEqual(PlayerActionResult.InvalidTarget,
-                economy.TryRewardRecording(Recording("rec-zero", 0)));
+                economy.TryQueueRecordingTurnIn(Recording("rec-zero", 0)));
             Assert.AreEqual(0, economy.SharedBalance);
+            Assert.AreEqual(0, economy.PendingCountFor(alice, TurnInKind.Recording));
         }
 
         [Test]
         public void RestoredSnapshotKeepsMoneyEquipmentAndPaidRecordingIds()
         {
             var recording = Recording("rec-restore", 4);
-            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(recording));
+            Assert.AreEqual(200, QueueAndTurnIn(recording).Earned);
             Assert.IsTrue(economy.TryPurchase(alice, "tube-1", 1).Accepted);
             Assert.AreEqual(100, economy.SharedBalance);
 
@@ -86,14 +114,14 @@ namespace DeepDive.P3.Tests
 
             Assert.AreEqual(100, economy.SharedBalance);
             CollectionAssert.Contains(economy.LoadoutFor(alice), "tube-1");
-            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryRewardRecording(recording));
+            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryQueueRecordingTurnIn(recording));
             Assert.AreEqual(100, economy.SharedBalance);
         }
 
         [Test]
         public void SharedBalanceNeverGoesNegativeAcrossCompetingPurchases()
         {
-            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(Recording("rec-funds", 4)));
+            Assert.AreEqual(200, QueueAndTurnIn(Recording("rec-funds", 4)).Earned);
             Assert.IsTrue(economy.TryPurchase(alice, "tube-1", 1).Accepted);
 
             var bob = new PlayerId(2);
@@ -104,21 +132,28 @@ namespace DeepDive.P3.Tests
         }
 
         [Test]
-        public void RecordingRewardRollsBackWhenPersistenceFails()
+        public void RecordingTurnInRollsBackWhenPersistenceFailsAndCanBeRetriedWithTheSameRequest()
         {
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryQueueRecordingTurnIn(Recording("rec-save-fail", 4)));
             economy.SetPersistenceHandler(() => false);
-            Assert.AreEqual(PlayerActionResult.Rejected, economy.TryRewardRecording(Recording("rec-save-fail", 4)));
-            Assert.AreEqual(0, economy.SharedBalance);
+
+            var failed = economy.TryTurnInRecordings(alice, 77);
+            Assert.IsFalse(failed.Accepted);
+            Assert.AreEqual("SaveFailed", failed.ReasonCode);
+            Assert.AreEqual(0, economy.SharedBalance, "no money without a durable save");
+            Assert.AreEqual(1, economy.PendingCountFor(alice, TurnInKind.Recording), "item must still be handed in later");
 
             economy.SetPersistenceHandler(null);
-            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(Recording("rec-save-fail", 4)));
+            var retried = economy.TryTurnInRecordings(alice, 77);
+            Assert.IsTrue(retried.Accepted);
             Assert.AreEqual(200, economy.SharedBalance);
+            Assert.AreEqual(0, economy.PendingCountFor(alice, TurnInKind.Recording));
         }
 
         [Test]
         public void PurchaseReturnsSaveFailedAndRollsBackWhenPersistenceFails()
         {
-            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(Recording("rec-buy-funds", 4)));
+            Assert.AreEqual(200, QueueAndTurnIn(Recording("rec-buy-funds", 4)).Earned);
             economy.SetPersistenceHandler(() => false);
 
             var result = economy.TryPurchase(alice, "tube-1", 7);

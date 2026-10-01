@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.Day",
+  "rootNamespace": "DeepDive.Day",
+  "references": ["DeepDive.Core.Contracts"]
+}

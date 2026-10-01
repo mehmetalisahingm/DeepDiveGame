@@ -55,6 +55,7 @@ namespace DeepDive.Composition
             var player = LocalPlayer();
             if (player == null || adapter.Session.State.Phase != SessionPhase.Dive) return;
             cameraMode = true;
+            player.SetHeldEquipmentLocal(HeldEquipmentMode.Camera);
             SubmitLocal(player);
         }
 
@@ -93,15 +94,23 @@ namespace DeepDive.Composition
                 return;
             }
 
-            if (adapter.Session.State.Phase != SessionPhase.Dive)
-            {
-                cameraMode = localRecording = false;
-                localRecordingTarget = 0;
-                activeTargetByPlayer.Clear();
-            }
-
             var player = LocalPlayer();
             if (player == null) return;
+
+            if (adapter.Session.State.Phase != SessionPhase.Dive)
+            {
+                if (cameraMode || localRecording)
+                    player.SetHeldEquipmentLocal(HeldEquipmentMode.None);
+                cameraMode = localRecording = false;
+                localRecordingTarget = 0;
+                if (adapter.IsAuthority)
+                {
+                    foreach (var activePlayer in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
+                        if (activePlayer.IsSpawned) activePlayer.SetRecordingPresentationServer(false);
+                }
+                activeTargetByPlayer.Clear();
+                return;
+            }
 
             if (Application.isFocused && Input.GetKeyDown(KeyCode.C))
             {
@@ -110,6 +119,7 @@ namespace DeepDive.Composition
                 else
                 {
                     cameraMode = !cameraMode;
+                    player.SetHeldEquipmentLocal(cameraMode ? HeldEquipmentMode.Camera : HeldEquipmentMode.Harpoon);
                     ShowStatus(cameraMode ? "CAMERA OPEN" : "CAMERA CLOSED");
                 }
             }
@@ -251,17 +261,13 @@ namespace DeepDive.Composition
                 result = PlayerActionResult.InvalidState;
 
             NetworkPlayer player = null;
-            if (result == PlayerActionResult.Accepted)
-            {
-                if (!manager.ConnectedClients.TryGetValue(sender, out var client) || client.PlayerObject == null)
-                    result = PlayerActionResult.InvalidState;
-                else
-                {
-                    player = client.PlayerObject.GetComponent<NetworkPlayer>();
-                    if (player == null || !player.IsSpawned || player.Passive.Value)
-                        result = PlayerActionResult.InvalidState;
-                }
-            }
+            if (manager.ConnectedClients.TryGetValue(sender, out var connected) && connected.PlayerObject != null)
+                player = connected.PlayerObject.GetComponent<NetworkPlayer>();
+
+            if (result == PlayerActionResult.Accepted &&
+                (player == null || !player.IsSpawned || player.Passive.Value ||
+                 player.CurrentHeldEquipment != HeldEquipmentMode.Camera))
+                result = PlayerActionResult.InvalidState;
 
             IRecordingTarget recordingTarget = null;
             var lockedNetworkObjectId = 0UL;
@@ -292,7 +298,10 @@ namespace DeepDive.Composition
 
             if (result == PlayerActionResult.Accepted)
             {
-                var candidate = new RecordingCandidate(requestId, state.DiveId, new PlayerId(sender), recordingTarget);
+                // The host supplies the replicated tier from NetworkPlayer. No client-sent tier or
+                // range value is trusted here; Utku's recording evaluator remains the validation authority.
+                var tier = player != null ? player.CurrentCameraTier : CameraTier.None;
+                var candidate = new RecordingCandidate(requestId, state.DiveId, new PlayerId(sender), recordingTarget, tier);
                 result = command == RecordingCommand.Start
                     ? RecordingEvaluation.TryStart(candidate)
                     : RecordingEvaluation.TryStop(candidate);
@@ -308,6 +317,9 @@ namespace DeepDive.Composition
             else if (command == RecordingCommand.Stop &&
                 (result == PlayerActionResult.InvalidTarget || result == PlayerActionResult.InvalidState))
                 activeTargetByPlayer.Remove(sender); // a destroyed target must not lock REC forever
+
+            if (player != null && player.IsSpawned)
+                player.SetRecordingPresentationServer(activeTargetByPlayer.ContainsKey(sender));
 
             SendResult(sender, requestId, command, result);
         }
@@ -352,6 +364,10 @@ namespace DeepDive.Composition
             localRecording = active;
             localRecordingTarget = active ? targetId : 0;
 
+            var player = LocalPlayer();
+            if (player != null)
+                player.SetHeldEquipmentLocal(active || cameraMode ? HeldEquipmentMode.Camera : HeldEquipmentMode.Harpoon);
+
             if (result == PlayerActionResult.Accepted)
                 ShowStatus(command == RecordingCommand.Start ? "RECORDING STARTED" : "RECORDING STOPPED");
             else if (result == PlayerActionResult.InvalidTarget)
@@ -394,6 +410,7 @@ namespace DeepDive.Composition
                 ? $"TARGET #{localRecordingTarget}"
                 : hasTarget ? $"TARGET LOCK #{previewTarget}" : "NO TARGET";
             GUI.Box(new Rect(frame.x + 12, frame.y + 12, 190, 26), targetText);
+            GUI.Box(new Rect(frame.xMax - 170, frame.y + 12, 158, 26), $"TIER {player.CurrentCameraTier}");
             GUI.Box(new Rect(frame.x + 12, frame.yMax - 38, 270, 26),
                 localRecording ? "[R] STOP RECORDING" : "[R] START RECORDING   [C] CLOSE");
 

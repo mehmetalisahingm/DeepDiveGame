@@ -1,0 +1,43 @@
+name: P4.2-A media smoke recheck
+
+on:
+  push:
+    branches: ['p4/mehmet-media-capture']
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: false
+          persist-credentials: false
+      - name: Download already validated Windows build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: p4-2-media-windows-a865a37f5f15578b652c8659c6668afb950f8951
+          path: Builds/P1-Integrated
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: mehmetalisahingm/DeepDiveGame
+          run-id: 36624657007
+      - name: Fixture-free real capture/archive/playback smoke
+        shell: pwsh
+        run: ./tools/Test-P4-MediaProduct.ps1 -Port 19054
+      - name: Existing PC/channel media regression smoke
+        shell: pwsh
+        run: ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 19055 -Media
+      - name: Upload recheck evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p4-2-media-smoke-recheck-${{ github.sha }}
+          path: |
+            Logs/P4-media-product-*
+            Logs/P1-integrated-*
+          if-no-files-found: warn
+          retention-days: 7
