@@ -63,6 +63,7 @@ namespace DeepDive.P1.Lab
 
         private void PrepareCamera()
         {
+            if (cameraReady) return;
             var economy = adapter.GetComponent<EconomyManager>();
             if (economy == null) return;
 
@@ -136,6 +137,11 @@ namespace DeepDive.P1.Lab
             var player = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                 .FirstOrDefault(x => x.IsSpawned && x.OwnerClientId == recorder.Value);
             if (subject == null || player == null) return;
+
+            // The real loadout binding is periodic. Do not stamp evidence until the purchased tier
+            // is actually replicated onto the authoritative NetworkPlayer used by RecordingNetworkBridge.
+            var expectedTier = Mode == "professional" ? CameraTier.Professional : CameraTier.Basic;
+            if (player.CurrentCameraTier != expectedTier) return;
 
             var depth = 0f;
             var field = FindFirstObjectByType<WaterField>();
