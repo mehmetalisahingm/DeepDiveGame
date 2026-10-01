@@ -15,7 +15,7 @@ namespace DeepDive.Economy
         public const string CameraBasicId = "camera-basic";
         // P4.3-C tiers. The slot/level pairs are what Mehmet's DiverEquipmentRules resolves (strongest owned level, no stacking).
         public const string CameraAdvancedId = "camera-advanced";
-        public const string CameraProId = "camera-pro";
+        public const string CameraProId = "camera-professional";   // same ids/prices as Mehmet's #115 so the two catalogs agree
         public const string FinsId = "fins-1";
         public const string BagId = "bag-1";
         public const string HarpoonId = "harpoon-1";
@@ -138,8 +138,8 @@ namespace DeepDive.Economy
             _catalog[CameraBasicId] = new EquipmentDefinition(CameraBasicId, "camera", 1, 150);
             // P4.3 tiers. Prices are WORKING values for the P4.5 balance pass. The catalog owns id/level/price; what a tier DOES
             // (range, low light, speed, capacity, damage) is Mehmet's/Utku's rule, resolved from the owning player's loadout.
-            _catalog[CameraAdvancedId] = new EquipmentDefinition(CameraAdvancedId, "camera", 2, 450);
-            _catalog[CameraProId] = new EquipmentDefinition(CameraProId, "camera", 3, 1100);
+            _catalog[CameraAdvancedId] = new EquipmentDefinition(CameraAdvancedId, "camera", 2, 400);
+            _catalog[CameraProId] = new EquipmentDefinition(CameraProId, "camera", 3, 900);
             _catalog[FinsId] = new EquipmentDefinition(FinsId, "fins", 1, 220);
             _catalog[BagId] = new EquipmentDefinition(BagId, "bag", 1, 260);
             _catalog[HarpoonId] = new EquipmentDefinition(HarpoonId, "harpoon", 1, 300);

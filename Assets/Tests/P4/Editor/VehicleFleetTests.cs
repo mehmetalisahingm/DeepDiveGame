@@ -509,7 +509,7 @@ namespace DeepDive.P4.Tests
 
             CollectionAssert.AreEquivalent(new[] { EconomyManager.CameraBasicId, EconomyManager.CameraAdvancedId, EconomyManager.CameraProId }, economy.LoadoutFor(Guest));
             Assert.AreEqual(0, economy.LoadoutFor(Host).Count, "nothing leaked to the other player");
-            Assert.AreEqual(5000 - 150 - 450 - 1100, economy.SharedBalance);
+            Assert.AreEqual(5000 - 150 - 400 - 900, economy.SharedBalance);
         }
 
         [Test]

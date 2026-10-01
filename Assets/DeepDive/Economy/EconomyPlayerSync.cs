@@ -339,8 +339,8 @@ namespace DeepDive.Economy
             ShopRow(50, "Tup I  | +30 sn | 100", "TUP I AL", "tube-1");
             ShopRow(88, "Tup II | +60 sn | 250", "TUP II AL", "tube-2");
             ShopRow(126, "Temel kamera | 150", "KAMERA AL", EconomyManager.CameraBasicId);
-            ShopRow(164, "Gelismis kamera | 450", "KAMERA II AL", EconomyManager.CameraAdvancedId);
-            ShopRow(202, "Profesyonel kamera | 1100", "KAMERA III AL", EconomyManager.CameraProId);
+            ShopRow(164, "Gelismis kamera | 400", "KAMERA II AL", EconomyManager.CameraAdvancedId);
+            ShopRow(202, "Profesyonel kamera | 900", "KAMERA III AL", EconomyManager.CameraProId);
             ShopRow(50, "Palet I | 220", "PALET AL", EconomyManager.FinsId, 574);
             ShopRow(88, "Canta I | 260", "CANTA AL", EconomyManager.BagId, 574);
             ShopRow(126, "Zipkin I | 300", "ZIPKIN AL", EconomyManager.HarpoonId, 574);
