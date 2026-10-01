@@ -298,7 +298,10 @@ namespace DeepDive.Composition
 
             if (result == PlayerActionResult.Accepted)
             {
-                var candidate = new RecordingCandidate(requestId, state.DiveId, new PlayerId(sender), recordingTarget);
+                // The host supplies the replicated tier from NetworkPlayer. No client-sent tier or
+                // range value is trusted here; Utku's recording evaluator remains the validation authority.
+                var tier = player != null ? player.CurrentCameraTier : CameraTier.None;
+                var candidate = new RecordingCandidate(requestId, state.DiveId, new PlayerId(sender), recordingTarget, tier);
                 result = command == RecordingCommand.Start
                     ? RecordingEvaluation.TryStart(candidate)
                     : RecordingEvaluation.TryStop(candidate);
@@ -407,6 +410,7 @@ namespace DeepDive.Composition
                 ? $"TARGET #{localRecordingTarget}"
                 : hasTarget ? $"TARGET LOCK #{previewTarget}" : "NO TARGET";
             GUI.Box(new Rect(frame.x + 12, frame.y + 12, 190, 26), targetText);
+            GUI.Box(new Rect(frame.xMax - 170, frame.y + 12, 158, 26), $"TIER {player.CurrentCameraTier}");
             GUI.Box(new Rect(frame.x + 12, frame.yMax - 38, 270, 26),
                 localRecording ? "[R] STOP RECORDING" : "[R] START RECORDING   [C] CLOSE");
 
