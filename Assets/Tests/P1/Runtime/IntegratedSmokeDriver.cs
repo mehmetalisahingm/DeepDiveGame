@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DeepDive.Composition;
+using DeepDive.Media;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
 using DeepDive.Session;
@@ -61,6 +62,15 @@ namespace DeepDive.P1.Lab
             public bool mediaRetryHeld, mediaFarRefused, mediaPanelOpen, mediaNotOwnerRefused, mediaNotPublishableRefused, mediaPublished,
                 mediaDuplicateRefused, mediaFeedBoth, mediaResultSeen, mediaNpcWithdrawn, mediaPaidOnce, mediaReplayPaysNothing,
                 mediaSavedOnDisk, mediaReloadClean;
+            public bool acceptOwner, acceptClipReal, acceptWorldContext, acceptPlayable, acceptPanelOpen, acceptFarRefused, acceptNotOwnerRefused, acceptPublished,
+                acceptDuplicateRefused, acceptResultSeen, acceptNpcQueuedBefore, acceptNpcWithdrawn, acceptNpcRefused, acceptNoNpcPay, acceptPaidOnce,
+                acceptReplayPaysNothing, acceptSavedOnDisk, acceptReloadClean, acceptHostDone, acceptReloadPass, acceptReloadPlayable;
+            public string acceptClipId = "", acceptRecordingId = "", acceptHash = "", acceptSubject = "", acceptRegion = "", acceptCell = "", acceptBand = "";
+            public long acceptBytes;
+            public int acceptQuality, acceptDayBefore, acceptDayAfter, acceptIncome, acceptViews, acceptFollowers, acceptBalance, acceptExploreObs;
+            public string acceptReloadClipId = "", acceptReloadRecordingId = "", acceptReloadHash = "";
+            public long acceptReloadBytes;
+            public int acceptReloadClips, acceptReloadPublications, acceptReloadBalance, acceptReloadIncome, acceptReloadViews, acceptReloadFollowers, acceptReloadDay, acceptReloadExploreObs;
             public bool exploreMirrorSeen, exploreEncyclopediaSilhouette, exploreEncyclopediaNameHidden, exploreReloaded;
             public int exploreFogCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
             public string exploreEncyclopediaSpecies = "", exploreSightingOutcome = "", exploreSightingReplay = "";
@@ -82,7 +92,11 @@ namespace DeepDive.P1.Lab
         private Vector3? firstFishPosition;
         private bool Hunt => Arg("-p2-hunt") == "1";
         private bool Event => Arg("-p3-event") == "1";
-        private bool Record => Arg("-p3-record") == "1" || Event;
+        private bool Record => Arg("-p3-record") == "1" || Event || Acceptance;
+        // #106 acceptance: NO fixture. The real -Record capture produces the clip; the recorder does not sell it to the NPC but
+        // publishes it from the real PC, the day is closed by the real sleep gate, and a second host launch reloads the campaign.
+        private bool Acceptance => Arg("-p4-acceptance") == "1";
+        private bool AcceptanceReload => Arg("-p4-acceptance-reload") == "1";
         private bool Town => Arg("-p3-town") == "1";
         private bool Storage => Arg("-p4-storage") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
@@ -139,7 +153,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 66f : Hunt ? 58f : 46f;
+            var duration = AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -209,11 +223,13 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (AcceptanceReload) { if (host && HostAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
                 if (MediaReload) { if (host && HostMediaReload()) { Finish(); yield break; } yield return null; continue; }
                 if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
                 if (Day || Home) ObserveDay();
                 if (Explore) { if (host) HostExplore(state); ObserveExplore(); }
                 if (MediaFlow && host) { HostSubmitMediaClips(state); HostMediaChecks(); }
+                if (Acceptance && host) HostAcceptance(state);
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
@@ -221,9 +237,19 @@ namespace DeepDive.P1.Lab
                 if (host && Boat) HostSampleBoatRepair();
                 if (host && Record && (state.Phase == SessionPhase.Return || result.returned))
                     result.recordingPaid |= adapter.GetComponent<EconomyManager>().SharedBalance > 0;
-                if (host && elapsed > (MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                // Recording scenarios end the dive when the recorder has REALLY swum to the safe pad (an event), not at a fixed
+                // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
+                // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
+                var recordingSettled = !Record || MediaFlow || result.recordingSafe;
+                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
+                var returnCeiling = Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
+                if (host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
-                if (host && elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36) && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
+                // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
+                // because the dive now ends when the recorder is safe, not at a fixed second.
+                var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
+                var lobbyDue = Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
@@ -231,7 +257,8 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                if (host && elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41) && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
+                var leaveDue = Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 yield return null;
@@ -246,7 +273,12 @@ namespace DeepDive.P1.Lab
             // roster/movement/scene assertion, but must not be required to send recording input.
             if (Record) result.passed &= result.recordingRoleResolved &&
                 (!(host || result.recordingRecorder) || (result.recordingStarted && result.recordingStopped)) &&
-                (!host || (result.recordingClaimed && result.recordingViews && result.recordingPaid && result.recordingSafe));
+                (!host || (result.recordingClaimed && result.recordingViews && (Acceptance || result.recordingPaid) && result.recordingSafe));
+            if (Acceptance) result.passed &= result.acceptClipReal && result.acceptWorldContext && result.acceptPanelOpen && result.acceptResultSeen &&
+                (!result.acceptOwner || (result.acceptFarRefused && result.acceptPublished && result.acceptDuplicateRefused)) &&
+                (result.acceptOwner || result.acceptNotOwnerRefused) &&
+                (!host || (result.acceptPlayable && result.acceptNpcQueuedBefore && result.acceptNpcWithdrawn && result.acceptNpcRefused && result.acceptNoNpcPay &&
+                    result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone));
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
@@ -316,6 +348,7 @@ namespace DeepDive.P1.Lab
                 else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
                 else if (Home && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
                 else if (MediaFlow && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && mediaStage < 90) ProbeMedia(local);
+                else if (Acceptance && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
                 else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
@@ -365,6 +398,13 @@ namespace DeepDive.P1.Lab
                     result.recordingQuality = take.Quality;
             }
             if (local.OwnerClientId != recorder) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            // Where the recorder is while it climbs to the safe pad, every 2 s: a -Record run that never gets safe is diagnosed
+            // from this trace instead of guessed at.
+            if (Time.realtimeSinceStartup >= townTraceAt && result.townTrace.Count < 60)
+            {
+                townTraceAt = Time.realtimeSinceStartup + 2f;
+                result.townTrace.Add($"rec t={Time.realtimeSinceStartup - sceneStarted:F0} pos={local.transform.position} stopped={result.recordingStopped} swimming={local.Swimming.Value}");
+            }
             var delta = subject.transform.position - local.RecordingEyePosition;
             var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             var pitch = -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg;
@@ -421,15 +461,51 @@ namespace DeepDive.P1.Lab
             // the paced climb entirely - it has to be "am I already over the ledge" the way the wade's check is
             // "am I already over the platform", using the near end of the solid ground, not the far one.
             var ledgeWestEdge = ledgeCollider.bounds.min.x;
-            if (position.x >= ledgeWestEdge - 0.2f) return ledgeCollider.bounds.center;   // already over solid ground
+            // "Over the ledge" needs BOTH axes. A recorder measured stuck for 15+ s at (7.57, 6.32, -6.59): east of the ledge's west
+            // edge but NORTH of its z range (-11..-7), so the old x-only test sent it at the ledge centre and it pressed against the
+            // ledge's north face. Until it is over the ledge in z as well it first swims WEST along its own z, clear of the ledge,
+            // and only then turns into the ramp lane (the existing paced climb below).
+            var overLedgeZ = position.z >= ledgeCollider.bounds.min.z - 0.2f && position.z <= ledgeCollider.bounds.max.z + 0.2f;
+            if (position.x >= ledgeWestEdge - 0.2f)
+            {
+                if (overLedgeZ) return ledgeCollider.bounds.center;   // already over solid ground
+                return new Vector3(ledgeWestEdge - 1.5f, position.y, position.z);
+            }
 
             var laneZ = ramp.transform.position.z;
+
+            // The ramp is a solid slab: entered from its SIDE at x near the ledge the diver's body (feet 6.3 .. head 8.1) is level with the
+            // slab and just pushes against its north face (measured: stuck at (6.7, 6.4, -6.6) for 20+ s). It has to enter at the FOOT
+            // and climb east. So: (1) off the lane, swim west along its own side, clear of the slab, to beyond the foot;
+            // (2) slide into the lane there, in open water; (3) only then the paced climb below.
+            var rampBounds = rampCollider.bounds;
+            var footX = rampBounds.min.x;
+            var inLane = position.z <= rampBounds.max.z - 0.3f && position.z >= rampBounds.min.z + 0.3f;
+            // How high the slab's top is just past its foot: the height the diver has to ARRIVE at, or it climbs from underneath the slab
+            // (measured: entering the lane at y 1.9 it swam up under the ramp and then under the ledge at y 5.6, never on top).
+            var footSurfaceY = rampBounds.min.y + 0.6f;
+            if (Physics.Raycast(new Vector3(footX + 0.6f, rampBounds.max.y + 5f, laneZ), Vector3.down, out var footHit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
+                footHit.collider == rampCollider)
+                footSurfaceY = footHit.point.y;
+            if (!inLane)
+            {
+                if (position.x > footX - 0.5f)
+                {
+                    var sideZ = position.z >= rampBounds.max.z ? Mathf.Max(position.z, rampBounds.max.z + 1.0f)
+                                                              : Mathf.Min(position.z, rampBounds.min.z - 1.0f);
+                    return new Vector3(footX - 1.0f, position.y, sideZ);
+                }
+                return new Vector3(footX - 1.0f, footSurfaceY + 0.2f, laneZ);
+            }
+
             var aheadX = Mathf.Min(position.x + 1.2f, ledgeWestEdge);
             var probeOrigin = new Vector3(aheadX, rampCollider.bounds.max.y + 5f, laneZ);
             float targetY;
             if (Physics.Raycast(probeOrigin, Vector3.down, out var hit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
                 (hit.collider == rampCollider || hit.collider == ledgeCollider))
                 targetY = hit.point.y - 0.05f;
+            else if (position.x < footX + 0.3f)
+                targetY = footSurfaceY + 0.1f;   // west of the foot: arrive at the slab's height and push east onto it
             else
                 targetY = Mathf.Min(position.y, rampCollider.bounds.min.y - 0.3f);   // still short of the ramp: dive under it
             return new Vector3(aheadX, targetY, laneZ);
@@ -1170,6 +1246,242 @@ namespace DeepDive.P1.Lab
             return true;
         }
 
+        // ---- #106 acceptance (no fixture) ------------------------------------------------------------------
+        private int acceptStage, acceptHostStage, acceptBalanceBase;
+        private float acceptStageAt, acceptHostAt, acceptDoneAt;
+        private ulong acceptRequest = 5000;
+
+        private static ClipSave AcceptRealClip() => MediaNetworkBinding.Mirrored.Clips.Find(c => c != null && !string.IsNullOrEmpty(c.RecordingId));
+
+        private static bool IsRealClip(ClipSave c) =>
+            c != null && c.MediaReady && c.SafeReturned && !string.IsNullOrEmpty(c.RecordingId) && c.ClipId == RecordingClipFile.ClipIdForRecording(c.RecordingId) &&
+            !string.IsNullOrEmpty(c.SubjectId) && c.Quality >= 1 && c.Quality <= 4 && c.DurationSeconds > 0f && c.SizeBytes > 0 &&
+            c.ContentHash != null && c.ContentHash.Length == 64;
+
+        private static bool HasWorldContext(ClipSave c)
+        {
+            var ctx = c.ToManifest().WorldContext;
+            return ctx.Kind == RecordingSubjectKind.Species && !string.IsNullOrWhiteSpace(ctx.RegionId) &&
+                   !string.IsNullOrWhiteSpace(ctx.CellId) && !string.IsNullOrWhiteSpace(ctx.DepthBandId);
+        }
+
+        private bool AcceptanceLobbyReady() =>
+            adapter.IsAuthority && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 6f && result.recordingSafe && AcceptRealClip() != null;
+
+        private void AcceptAsk(string clipId, string title, int next)
+        {
+            mediaAwait = MediaNetworkBinding.RequestPublish(clipId, title);
+            acceptStage = next;
+        }
+
+        private bool AcceptAnswered(out bool accepted, out string reason)
+        {
+            accepted = MediaNetworkBinding.LastResultAccepted;
+            reason = MediaNetworkBinding.LastResultReason;
+            var answered = mediaAwait != 0 && MediaNetworkBinding.LastResultRequest == mediaAwait;
+            if (answered) result.mediaTrace.Add($"accept{acceptStage}:{(accepted ? "ok" : reason)}");
+            return answered;
+        }
+
+        // Every process, in the lobby (home) after the real dive. The recorder owns the real clip; the other process does not.
+        private void ProbeAcceptance(NetworkPlayer local)
+        {
+            local.SubmitLocalInput(Vector3.zero, 0);
+            var now = Time.realtimeSinceStartup;
+            if (acceptStageAt == 0) acceptStageAt = now;
+            if (acceptStage < 90 && now - acceptStageAt > 70f)
+            {
+                result.errors.Add($"acceptance stage {acceptStage} timeout clips={MediaNetworkBinding.Mirrored.Clips.Count} pubs={MediaNetworkBinding.Mirrored.Publications.Count} last={MediaNetworkBinding.LastResultReason}");
+                acceptStage = 99;
+                return;
+            }
+            var clip = AcceptRealClip();
+            var pc = FindFirstObjectByType<HomePcAnchor>();
+            if (clip == null || pc == null) return;
+            var me = local.OwnerClientId;
+            var mine = clip.OwnerPlayerId == me;
+            bool ok; string reason;
+
+            switch (acceptStage)
+            {
+                case 0:
+                {
+                    result.acceptOwner = mine;
+                    result.acceptClipId = clip.ClipId; result.acceptRecordingId = clip.RecordingId; result.acceptHash = clip.ContentHash;
+                    result.acceptBytes = clip.SizeBytes; result.acceptSubject = clip.SubjectId; result.acceptQuality = clip.Quality;
+                    var ctx = clip.ToManifest().WorldContext;
+                    result.acceptRegion = ctx.RegionId; result.acceptCell = ctx.CellId; result.acceptBand = ctx.DepthBandId;
+                    result.acceptClipReal = IsRealClip(clip);
+                    result.acceptWorldContext = HasWorldContext(clip);
+                    acceptStage = mine ? 1 : 2;
+                    return;
+                }
+                case 1:   // owner, still away from the PC: the HOST must refuse
+                {
+                    var away = local.transform.position - pc.transform.position; away.y = 0;
+                    if (away.magnitude < 6f)
+                    {
+                        if (away.sqrMagnitude < 0.01f) away = Vector3.back;
+                        local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg, 0);
+                        return;
+                    }
+                    AcceptAsk(clip.ClipId, "uzaktan", 11);
+                    return;
+                }
+                case 11:
+                    if (!AcceptAnswered(out ok, out reason)) return;
+                    result.acceptFarRefused = !ok && reason == "NotAtPc";
+                    acceptStage = 2; return;
+                case 2:   // walk to the PC; the REAL clip must be listed and playable there
+                {
+                    var to = pc.transform.position - local.transform.position; to.y = 0;
+                    if (to.magnitude > 1.9f)
+                    {
+                        local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg, 0);
+                        return;
+                    }
+                    result.acceptPanelOpen = HomePcView.PanelOpen;
+                    result.acceptPlayable = ClipPlayback.CanPlay(clip.ClipId);
+                    acceptStage = mine ? 3 : 6;
+                    return;
+                }
+                case 3:
+                    AcceptAsk(clip.ClipId, "Gercek klip", 4); return;
+                case 4:
+                    if (!AcceptAnswered(out ok, out reason)) return;
+                    result.acceptPublished = ok;
+                    if (!ok) result.errors.Add("acceptance publish refused: " + reason);
+                    AcceptAsk(clip.ClipId, "tekrar", 5); return;
+                case 5:
+                    if (!AcceptAnswered(out ok, out reason)) return;
+                    result.acceptDuplicateRefused = !ok && reason == "PublicationAlreadyQueued";
+                    acceptStage = 7; return;
+                case 6:   // not the owner: asking to publish somebody else's clip must be refused
+                    AcceptAsk(clip.ClipId, "baskasinin", 61); return;
+                case 61:
+                    if (!AcceptAnswered(out ok, out reason)) return;
+                    result.acceptNotOwnerRefused = !ok && reason == "NotOwner";
+                    acceptStage = 7; return;
+                case 7:   // after the day closes the owner's post carries its result, in MY mirror as well
+                {
+                    var pub = MediaNetworkBinding.Mirrored.Publications.Find(p => p.ClipId == clip.ClipId);
+                    if (pub == null || string.IsNullOrEmpty(pub.SettledId)) return;
+                    result.acceptResultSeen = pub.Views > 0 && pub.Income > 0;
+                    result.acceptViews = pub.Views; result.acceptIncome = pub.Income; result.acceptFollowers = MediaNetworkBinding.Mirrored.Followers;
+                    acceptStage = 90; return;
+                }
+            }
+        }
+
+        // Host: the one real clip is archived; the NPC still holds the real recording; the owner publishes; the right moves to the
+        // channel (NPC queue empty, a second NPC claim refused, no NPC money); everybody goes to bed and the REAL sleep gate closes
+        // the day; the result is paid exactly once into the campaign file.
+        private void HostAcceptance(SessionState state)
+        {
+            var binding = adapter.GetComponent<MediaNetworkBinding>();
+            var economy = adapter.GetComponent<EconomyManager>();
+            var engine = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (binding == null || economy == null || engine == null || acceptHostStage >= 90) return;
+            var now = Time.realtimeSinceStartup;
+            var clip = AcceptRealClip();
+            if (clip == null) return;
+            var owner = new PlayerId(clip.OwnerPlayerId);
+
+            switch (acceptHostStage)
+            {
+                case 0:   // home: baseline BEFORE anybody publishes
+                    if (state.Phase != SessionPhase.Lobby || adapter.Connection.IsSceneLoading) return;
+                    acceptBalanceBase = economy.SharedBalance;
+                    result.acceptNpcQueuedBefore = economy.PendingCountFor(owner, TurnInKind.Recording) == 1 && !economy.IsChannelClaimed(clip.RecordingId);
+                    acceptHostStage = 1; return;
+                case 1:
+                {
+                    var pubs = binding.Channel.Publications();
+                    if (pubs.Count < 1) return;
+                    result.acceptNpcWithdrawn = economy.PendingCountFor(owner, TurnInKind.Recording) == 0 && economy.IsChannelClaimed(clip.RecordingId);
+                    result.acceptNpcRefused = economy.TryQueueRecordingTurnIn(new RecordingResult(clip.RecordingId, clip.DiveId, owner, clip.SubjectId,
+                        clip.Quality, clip.DurationSeconds)) == PlayerActionResult.DuplicateRequest;
+                    result.acceptNoNpcPay = economy.SharedBalance == acceptBalanceBase && economy.PendingCountFor(owner, TurnInKind.Recording) == 0;
+                    acceptHostAt = now; acceptHostStage = 2; return;
+                }
+                case 2:   // let the owner's duplicate request land, then everybody sleeps: the real gate closes the day
+                {
+                    if (now - acceptHostAt < 6f || engine.Phase != DayPhase.Running || engine.State.ActivePlayers.Count < result.maxPlayers) return;
+                    result.acceptDayBefore = engine.DayNumber;
+                    var bed = 0;
+                    foreach (var id in engine.State.ActivePlayers) HomeBedInteraction.TryEnterBed(id, DayIds.Beds[bed++], acceptRequest++);
+                    acceptHostAt = now; acceptHostStage = 3; return;
+                }
+                case 3:
+                {
+                    if (engine.DayNumber <= result.acceptDayBefore)
+                    {
+                        if (now - acceptHostAt > 15f) { result.errors.Add("acceptance: day did not close when everybody slept"); acceptHostStage = 99; }
+                        return;
+                    }
+                    var pubs = binding.Channel.Publications();
+                    result.acceptDayAfter = engine.DayNumber;
+                    var income = 0;
+                    foreach (var p in pubs) income += p.Income;
+                    result.acceptBalance = economy.SharedBalance;
+                    result.acceptPaidOnce = pubs.Count == 1 && income > 0 && economy.SharedBalance - acceptBalanceBase == income &&
+                        engine.DayNumber == result.acceptDayBefore + 1 && !string.IsNullOrEmpty(pubs[0].SettledId);
+                    result.acceptReplayPaysNothing = binding.Channel.SettleThrough(result.acceptDayBefore) == 0 && economy.SharedBalance == result.acceptBalance;
+
+                    var store = adapter.GetComponent<EconomySaveStore>();
+                    var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+                    result.acceptExploreObs = disk.HasExploration ? disk.Exploration.Observations.Count : 0;
+                    result.acceptSavedOnDisk = disk.HasMedia && disk.Media.Clips.Count == 1 && disk.Media.Publications.Count == 1 &&
+                        disk.Media.Clips[0].ClipId == clip.ClipId && !string.IsNullOrEmpty(disk.Media.Publications[0].SettledId) &&
+                        disk.SharedBalance == economy.SharedBalance && disk.ChannelRightIds.Contains(clip.RecordingId) &&
+                        disk.ChannelSettleIds.Count == 1 && disk.HasDay && disk.Day.DayNumber == engine.DayNumber;
+                    var balance = economy.SharedBalance;
+                    result.acceptReloadClean = store.LoadNow() && binding.Channel.Publications().Count == 1 && binding.Channel.ClipCount == 1 &&
+                        economy.SharedBalance == balance && binding.Channel.SettleThrough(result.acceptDayBefore + 5) == 0;
+                    result.acceptHostDone = true;
+                    acceptDoneAt = now; acceptHostStage = 90; return;
+                }
+            }
+        }
+
+        // Second launch of the host on the SAME campaign file. The report is compared by the script with the first run's.
+        private bool HostAcceptanceReload()
+        {
+            var binding = adapter.GetComponent<MediaNetworkBinding>();
+            var economy = adapter.GetComponent<EconomyManager>();
+            var engine = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (binding == null || economy == null || engine == null || adapter.Connection.Status != ConnectionStatus.Connected || binding.Channel.ClipCount == 0) return false;
+            var clips = binding.Channel.Clips();
+            var pubs = binding.Channel.Publications();
+            var clip = clips.Count > 0 ? ClipSave.From(clips[0]) : null;
+            result.acceptReloadClips = clips.Count;
+            result.acceptReloadPublications = pubs.Count;
+            result.acceptReloadBalance = economy.SharedBalance;
+            result.acceptReloadDay = engine.DayNumber;
+            result.acceptReloadFollowers = binding.Channel.Followers;
+            if (clip != null)
+            {
+                result.acceptReloadClipId = clip.ClipId; result.acceptReloadRecordingId = clip.RecordingId;
+                result.acceptReloadHash = clip.ContentHash; result.acceptReloadBytes = clip.SizeBytes;
+                result.acceptReloadPlayable = ClipPlayback.CanPlay(clip.ClipId);
+            }
+            if (pubs.Count > 0) { result.acceptReloadIncome = pubs[0].Income; result.acceptReloadViews = pubs[0].Views; }
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+            result.acceptReloadExploreObs = disk.HasExploration ? disk.Exploration.Observations.Count : 0;
+            var before = economy.SharedBalance;
+            var owner = clip != null ? new PlayerId(clip.OwnerPlayerId) : new PlayerId(0);
+            result.acceptReloadPass = clip != null && IsRealClip(clip) && HasWorldContext(clip) && clips.Count == 1 && pubs.Count == 1 &&
+                !string.IsNullOrEmpty(pubs[0].SettledId) && pubs[0].Views > 0 && pubs[0].Income > 0 && binding.Channel.Followers > 0 &&
+                economy.IsChannelClaimed(clip.RecordingId) && economy.PendingCountFor(owner, TurnInKind.Recording) == 0 &&
+                result.acceptReloadPlayable &&
+                binding.Channel.SettleThrough(99) == 0 && economy.SharedBalance == before &&
+                binding.Channel.TryPublish(owner, clip.ClipId, "x", 777).ReasonCode == "PublicationAlreadyQueued" &&
+                economy.TryQueueRecordingTurnIn(new RecordingResult(clip.RecordingId, clip.DiveId, owner, clip.SubjectId, clip.Quality, clip.DurationSeconds)) == PlayerActionResult.DuplicateRequest;
+            result.passed = result.acceptReloadPass && result.errors.Count == 0;
+            return true;
+        }
+
         private void HostMediaChecks()
         {
             if (mediaHostClosed) return;
@@ -1623,6 +1935,12 @@ namespace DeepDive.P1.Lab
             var northEdge = strip.bounds.max.z;
             if (position.z <= northEdge + 0.2f) return stand;   // already on the platform: walk to the NPC
 
+            // Standing on dry ground that is flush with the platform but is not it - the return pad on Shore_Ledge, z -11..-7 - the
+            // next step is straight onto the platform (north, -z). Sending it to the wade lane instead walks it WEST along the ledge
+            // and off the ramp into the water beside the shelf, where it pressed against the shelf's side wall for the rest of the
+            // run and never sold (measured, recorder stopped at (-3.1, 7.9, -10.6)).
+            if (position.y >= strip.bounds.max.y - 0.35f) return new Vector3(position.x, position.y, northEdge - 0.6f);
+
             var lane = wade.transform.position.x;
             var aheadZ = Mathf.Max(position.z - 1.2f, northEdge);
             var probeOrigin = new Vector3(lane, wadeCollider.bounds.max.y + 5f, aheadZ);
@@ -1680,7 +1998,7 @@ namespace DeepDive.P1.Lab
                         sync.LastServiceAccepted.Value && returnPhaseAt > 0)
                     { turnInAt = Time.realtimeSinceStartup; result.returnToTurnInSeconds = turnInAt - returnPhaseAt; }
                 }
-                if (local.OwnerClientId == recorder && sync.PendingRecordings.Value > 0)
+                if (local.OwnerClientId == recorder && sync.PendingRecordings.Value > 0 && !Acceptance)   // acceptance: the channel, not the NPC, takes this recording
                 { if (GoToService(local, cam, TownServiceCatalog.RecordingBuyerId)) InteractEvery(local, 1.2f); return; }
                 if (Event && host && !sync.ShopOpen)
                 { if (GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) InteractEvery(local, 1.2f); return; }
