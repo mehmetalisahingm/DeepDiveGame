@@ -54,6 +54,9 @@ namespace DeepDive.World
         private sealed class OpenTake
         {
             public string DiveId;
+            // The camera tier the take was started with. Written once by TryStart and never
+            // again: a tier that changes mid-take changes nothing about the frames still to come.
+            public CameraTier Tier;
             public float ValidSeconds;
             public float WeightedScore;
 
@@ -101,9 +104,17 @@ namespace DeepDive.World
         public float Score01For(PlayerId player) =>
             open.TryGetValue(player.Value, out var openTake) ? openTake.Score01 : 0f;
 
-        // Accepted opens a take stamped with the live dive id. Nothing about the shot is judged
-        // here: a player may start filming a badly framed subject, they just bank no time.
-        public PlayerActionResult TryStart(IDiveContext dive, PlayerId player, ulong requestId)
+        // The tier the host samples this player's open take with. Basic for a player with no
+        // open take, the same tier a legacy caller's start would have stamped.
+        public CameraTier TierFor(PlayerId player) =>
+            open.TryGetValue(player.Value, out var openTake) ? openTake.Tier : CameraTier.Basic;
+
+        // Accepted opens a take stamped with the live dive id and the candidate's camera tier.
+        // Nothing about the shot is judged here: a player may start filming a badly framed
+        // subject, they just bank no time. A replayed start returns the earlier result before
+        // anything is written, so a repeat carrying another tier cannot swap the take's tier.
+        public PlayerActionResult TryStart(IDiveContext dive, PlayerId player, ulong requestId,
+            CameraTier tier = CameraTier.Basic)
         {
             if (handled.TryGetValue((player.Value, requestId), out var earlier)) return earlier;
 
@@ -128,7 +139,7 @@ namespace DeepDive.World
             // who pressed record a second too early must succeed once the window opens.
             if (IsWindowShut) return PlayerActionResult.InvalidTarget;
 
-            open[player.Value] = new OpenTake { DiveId = diveId };
+            open[player.Value] = new OpenTake { DiveId = diveId, Tier = RecordingCameraRules.Normalize(tier) };
             return Remember(player, requestId, PlayerActionResult.Accepted);
         }
 
