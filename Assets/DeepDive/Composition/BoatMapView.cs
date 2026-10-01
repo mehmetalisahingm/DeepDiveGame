@@ -99,7 +99,7 @@ namespace DeepDive.Composition
 
             LastPhase = (BoatTripPhase)localSync.Phase.Value;
             LastIcons = BoatMapPresenter.BuildIcons(
-                LastPhase, BoatTripIds.BoatId, dock, hasAnchor ? anchor : ((float, float)?)null,
+                LastPhase, ActiveVehicle.BoatId, dock, hasAnchor ? anchor : ((float, float)?)null,
                 live, party, localSync.IsSeated);
         }
 

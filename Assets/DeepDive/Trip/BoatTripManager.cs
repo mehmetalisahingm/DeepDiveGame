@@ -42,6 +42,8 @@ namespace DeepDive.Trip
         private int _tripSequence;
 
         private Func<BoatRepairStatus> _repairStatus;
+        // P4.3-C: which vehicle is the one at sea (the economy's fleet state). Null = the P3 rowboat, as before.
+        private Func<string> _activeBoatId;
         private ISessionRoster _roster;
 
         // Kept as a thin interface rather than a direct EconomyManager/NetworkSession reference so
@@ -51,8 +53,11 @@ namespace DeepDive.Trip
             bool IsConnected(PlayerId player);
         }
 
+        // The one vehicle this trip authority serves right now. "" = no vehicle owned yet (nothing to board).
+        public string ActiveBoatId => _activeBoatId != null ? (_activeBoatId() ?? string.Empty) : BoatTripIds.BoatId;
+
         public BoatTripState State => new BoatTripState(
-            BoatTripIds.BoatId, _tripId, _routeId, _phase, SnapshotSeats(), SnapshotParty(), _owner, _hasOwner, _revision);
+            ActiveBoatId, _tripId, _routeId, _phase, SnapshotSeats(), SnapshotParty(), _owner, _hasOwner, _revision);
 
         // Binds here rather than in Awake/OnEnable: plain MonoBehaviours do not receive those Unity
         // lifecycle calls in the Editor outside Play mode (measured directly - AddComponent in an
@@ -60,13 +65,20 @@ namespace DeepDive.Trip
         // is also why EconomyManager leans on a lazily-called EnsureSubscribed() rather than trusting
         // Awake alone. Composition and every test call Configure explicitly, so binding here is the
         // one path that actually runs in both contexts.
-        public void Configure(Func<BoatRepairStatus> repairStatus, ISessionRoster roster)
+        public void Configure(Func<BoatRepairStatus> repairStatus, ISessionRoster roster, Func<string> activeBoatId = null)
         {
             _repairStatus = repairStatus;
             _roster = roster;
+            _activeBoatId = activeBoatId;
             BoatBoarding.Bind(TryBoard, TryDisembark);
             BoatRouteProgress.Bind(ReportArrival);
+            VehicleSwitchGate.Bind(SwitchBlockedReason);
         }
+
+        // The active vehicle may only be swapped while it is docked and empty (P4.3-C): a moving boat or a seated player
+        // would otherwise be left on a vehicle that is no longer the active one.
+        private string SwitchBlockedReason() =>
+            _phase != BoatTripPhase.Docked ? "TripActive" : _seats.Count > 0 ? "SeatsOccupied" : null;
 
         // Composition calls this before destroying the host object; tests call it in TearDown. Not
         // OnDestroy, for the same reason binding is not in OnEnable.
@@ -74,6 +86,7 @@ namespace DeepDive.Trip
         {
             BoatBoarding.Unbind(TryBoard, TryDisembark);
             BoatRouteProgress.Unbind(ReportArrival);
+            VehicleSwitchGate.Unbind(SwitchBlockedReason);
         }
 
         private List<BoatSeatAssignment> SnapshotSeats()
@@ -95,7 +108,7 @@ namespace DeepDive.Trip
             if (_processed.TryGetValue(key, out var replayed)) return replayed;
 
             TransactionResult result;
-            if (!string.Equals(boatId, BoatTripIds.BoatId, StringComparison.Ordinal))
+            if (string.IsNullOrEmpty(ActiveBoatId) || !string.Equals(boatId, ActiveBoatId, StringComparison.Ordinal))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", _revision);
             else if (!BoatTripIds.IsSeat(seatId))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", _revision);
@@ -190,12 +203,14 @@ namespace DeepDive.Trip
                 result = TransactionResult.Reject(requestId, "NoPassengers", _revision);
             else if (!_hasOwner || !_owner.Equals(player))
                 result = TransactionResult.Reject(requestId, "InvalidState", _revision);
-            else if (_repairStatus != null && _repairStatus() != BoatRepairStatus.Repaired)
+            else if (string.IsNullOrEmpty(ActiveBoatId) ||
+                     (string.Equals(ActiveBoatId, VehicleIds.Rowboat, StringComparison.Ordinal) && _repairStatus != null && _repairStatus() != BoatRepairStatus.Repaired))
+                // The rowboat needs its repair; a bought boat is owned only after the rowboat was, so it needs nothing more.
                 result = TransactionResult.Reject(requestId, "BoatNotRepaired", _revision);
             else
             {
                 _tripSequence++;
-                _tripId = $"{BoatTripIds.BoatId}-trip-{_tripSequence}";
+                _tripId = $"{ActiveBoatId}-trip-{_tripSequence}";
                 _routeId = routeId;
                 _phase = BoatTripPhase.Outbound;
                 _revision++;
@@ -242,7 +257,7 @@ namespace DeepDive.Trip
             if (_processed.TryGetValue(key, out var replayed)) return replayed;
 
             TransactionResult result;
-            if (!string.Equals(boatId, BoatTripIds.BoatId, StringComparison.Ordinal))
+            if (string.IsNullOrEmpty(ActiveBoatId) || !string.Equals(boatId, ActiveBoatId, StringComparison.Ordinal))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", _revision);
             else if (reachedPhase == BoatTripPhase.Anchored && _phase == BoatTripPhase.Outbound)
             {

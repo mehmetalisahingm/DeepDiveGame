@@ -13,6 +13,12 @@ namespace DeepDive.Economy
     public class EconomyManager : MonoBehaviour
     {
         public const string CameraBasicId = "camera-basic";
+        // P4.3-C tiers. The slot/level pairs are what Mehmet's DiverEquipmentRules resolves (strongest owned level, no stacking).
+        public const string CameraAdvancedId = "camera-advanced";
+        public const string CameraProId = "camera-pro";
+        public const string FinsId = "fins-1";
+        public const string BagId = "bag-1";
+        public const string HarpoonId = "harpoon-1";
 
         private const byte OpEquipment = 1;
         private const byte OpSellCatches = 2;
@@ -20,6 +26,8 @@ namespace DeepDive.Economy
         private const byte OpBoatPart = 4;
         private const byte OpStore = 5;
         private const byte OpRetrieve = 6;
+        private const byte OpVehicleBuy = 7;
+        private const byte OpVehicleSelect = 8;
 
         // Shared home storage (P4.1). Slots, not weight: what limits carrying is the bag rule on retrieval.
         public const int StorageCapacityItems = 40;
@@ -29,6 +37,7 @@ namespace DeepDive.Economy
         public event Action OnPendingChanged;
         public event Action OnBoatRepairChanged;
         public event Action OnStorageChanged;
+        public event Action OnFleetChanged;
 
         // P4.1 day ledger feeds. A settled hand-in: (deal id, item count, total grams, credits, was it catches).
         // The deal id is the joined ids of the handed-in items, so it is unique (each item leaves the queue once).
@@ -71,6 +80,11 @@ namespace DeepDive.Economy
         private readonly List<PendingItem> _pending = new List<PendingItem>();
         private readonly List<PendingItem> _stored = new List<PendingItem>();
         private readonly List<string> _boatParts = new List<string>();
+        // P4.3-C fleet: only PURCHASED boats are stored here; the rowboat is owned when its repair is complete.
+        private readonly List<string> _purchasedVehicles = new List<string>();
+        private string _activeVehicleId = "";
+        // Tier chains: an upgrade can only be bought on top of the previous tier (the same player's loadout).
+        private readonly Dictionary<string, string> _equipmentRequires = new Dictionary<string, string>();
         private readonly Dictionary<(PlayerId, ulong, byte), TransactionResult> _processedRequests =
             new Dictionary<(PlayerId, ulong, byte), TransactionResult>();
         private readonly Dictionary<(PlayerId, ulong, byte), TurnInResult> _processedTurnIns =
@@ -122,6 +136,15 @@ namespace DeepDive.Economy
             _catalog["tube-2"] = new EquipmentDefinition("tube-2", "tube", 2, 250);
             // The basic camera is a separately bought item, not a free default.
             _catalog[CameraBasicId] = new EquipmentDefinition(CameraBasicId, "camera", 1, 150);
+            // P4.3 tiers. Prices are WORKING values for the P4.5 balance pass. The catalog owns id/level/price; what a tier DOES
+            // (range, low light, speed, capacity, damage) is Mehmet's/Utku's rule, resolved from the owning player's loadout.
+            _catalog[CameraAdvancedId] = new EquipmentDefinition(CameraAdvancedId, "camera", 2, 450);
+            _catalog[CameraProId] = new EquipmentDefinition(CameraProId, "camera", 3, 1100);
+            _catalog[FinsId] = new EquipmentDefinition(FinsId, "fins", 1, 220);
+            _catalog[BagId] = new EquipmentDefinition(BagId, "bag", 1, 260);
+            _catalog[HarpoonId] = new EquipmentDefinition(HarpoonId, "harpoon", 1, 300);
+            _equipmentRequires[CameraAdvancedId] = CameraBasicId;
+            _equipmentRequires[CameraProId] = CameraAdvancedId;
         }
 
         private void EnsureSubscribed()
@@ -562,6 +585,9 @@ namespace DeepDive.Economy
                 result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
             else if (_loadout.TryGetValue(player, out var owned) && owned.Contains(equipmentId))
                 result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            else if (_equipmentRequires.TryGetValue(equipmentId, out var requiredId) &&
+                     !(_loadout.TryGetValue(player, out var ownedForTier) && ownedForTier.Contains(requiredId)))
+                result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
             else if (SharedBalance < definition.Price)
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
             else
@@ -660,8 +686,135 @@ namespace DeepDive.Economy
             {
                 if (cost > 0) OnBalanceChanged?.Invoke();
                 OnBoatRepairChanged?.Invoke();
+                OnFleetChanged?.Invoke();   // the last part makes the rowboat owned (and active when nothing else is)
             }
             return result;
+        }
+
+        // ---- Vehicle fleet (P4.3-C) --------------------------------------------------------
+        // ONE source for "which vehicles do we own and which one is at sea". The shared balance pays (D06: ownership is
+        // campaign-wide, never a player's personal inventory item), so a purchase can neither duplicate into a loadout nor be
+        // bought twice. Mehmet's hull/seat/movement and Utku's routes only READ this (ActiveVehicle / Fleet).
+
+        private bool RowboatOwned => _boatParts.Count >= BoatRepairParts.All.Count;
+
+        private bool OwnsVehicle(string boatId) =>
+            string.Equals(boatId, VehicleIds.Rowboat, StringComparison.Ordinal) ? RowboatOwned : _purchasedVehicles.Contains(boatId);
+
+        // The stored selection when it is still owned, otherwise the rowboat (when repaired), otherwise nothing.
+        public string ActiveVehicleId =>
+            !string.IsNullOrEmpty(_activeVehicleId) && OwnsVehicle(_activeVehicleId) ? _activeVehicleId
+            : RowboatOwned ? VehicleIds.Rowboat : string.Empty;
+
+        public VehicleFleetState Fleet
+        {
+            get
+            {
+                var owned = new List<string>(3);
+                for (var i = 0; i < VehicleIds.All.Count; i++)
+                    if (OwnsVehicle(VehicleIds.All[i])) owned.Add(VehicleIds.All[i]);
+                return new VehicleFleetState(owned, ActiveVehicleId, Revision);
+            }
+        }
+
+        public TransactionResult TryPurchaseVehicle(PlayerId player, string boatId, ulong requestId)
+        {
+            EnsureSubscribed();
+            var requestKey = (player, requestId, OpVehicleBuy);
+            if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
+
+            TransactionResult result;
+            if (!VehicleCatalog.TryGet(boatId, out var definition) || !definition.IsForSale)
+                result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            else if (OwnsVehicle(boatId))
+                result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            else if (definition.RequiresBoatId.Length > 0 && !OwnsVehicle(definition.RequiresBoatId))
+                result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
+            else if (SharedBalance < definition.Price)
+                result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
+            else
+            {
+                var previousBalance = SharedBalance;
+                var previousRevision = Revision;
+                SharedBalance -= definition.Price;
+                _purchasedVehicles.Add(boatId);
+                Revision++;
+                if (!Persist())
+                {
+                    _purchasedVehicles.Remove(boatId);
+                    SharedBalance = previousBalance;
+                    Revision = previousRevision;
+                    return TransactionResult.Reject(requestId, "SaveFailed", Revision);
+                }
+                result = TransactionResult.Ok(requestId, Revision);
+                OnSpent?.Invoke("vehicle-" + boatId, definition.Price);
+            }
+
+            _processedRequests[requestKey] = result;
+            if (result.Accepted)
+            {
+                OnBalanceChanged?.Invoke();
+                OnFleetChanged?.Invoke();
+            }
+            return result;
+        }
+
+        // Switching the active vehicle: only an owned one, never to the one already active, and only while the trip
+        // authority says nothing is under way and nobody is seated (VehicleSwitchGate). The gate refusals can change on
+        // their own (the boat docks), so - like DayClosing - they are not cached against the request id.
+        public TransactionResult TrySelectVehicle(PlayerId player, string boatId, ulong requestId)
+        {
+            EnsureSubscribed();
+            var requestKey = (player, requestId, OpVehicleSelect);
+            if (_processedRequests.TryGetValue(requestKey, out var replayed)) return replayed;
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
+
+            TransactionResult result;
+            if (!VehicleIds.IsVehicle(boatId))
+                result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            else if (!OwnsVehicle(boatId))
+                result = TransactionResult.Reject(requestId, "NotOwned", Revision);
+            else if (string.Equals(ActiveVehicleId, boatId, StringComparison.Ordinal))
+                result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            else
+            {
+                var blocked = VehicleSwitchGate.Check();
+                if (blocked != null) return TransactionResult.Reject(requestId, blocked, Revision);
+
+                var previousActive = _activeVehicleId;
+                var previousRevision = Revision;
+                _activeVehicleId = boatId;
+                Revision++;
+                if (!Persist())
+                {
+                    _activeVehicleId = previousActive;
+                    Revision = previousRevision;
+                    return TransactionResult.Reject(requestId, "SaveFailed", Revision);
+                }
+                result = TransactionResult.Ok(requestId, Revision);
+            }
+
+            _processedRequests[requestKey] = result;
+            if (result.Accepted) OnFleetChanged?.Invoke();
+            return result;
+        }
+
+        // A file can only restore what the rules would have allowed: known purchasable ids, once each, whose requirement
+        // chain is owned (the rowboat through the repair parts restored just before). The active id must be an owned one.
+        private void RestoreFleet(EconomySaveData data)
+        {
+            _purchasedVehicles.Clear();
+            _activeVehicleId = "";
+            if (!data.HasFleet) return;
+            for (var i = 0; i < VehicleCatalog.All.Count; i++)
+            {
+                var definition = VehicleCatalog.All[i];
+                if (!definition.IsForSale || data.FleetPurchasedBoatIds == null || !data.FleetPurchasedBoatIds.Contains(definition.BoatId)) continue;
+                if (definition.RequiresBoatId.Length > 0 && !OwnsVehicle(definition.RequiresBoatId)) continue;
+                _purchasedVehicles.Add(definition.BoatId);
+            }
+            if (!string.IsNullOrEmpty(data.FleetActiveBoatId) && OwnsVehicle(data.FleetActiveBoatId)) _activeVehicleId = data.FleetActiveBoatId;
         }
 
         // ---- Save / load -------------------------------------------------------------------
@@ -679,7 +832,10 @@ namespace DeepDive.Economy
                 PaidRecordingIds = new List<string>(_paidRecordingIds),
                 BoatPartIds = new List<string>(_boatParts),
                 ChannelRightIds = new List<string>(_channelRightIds),
-                ChannelSettleIds = new List<string>(_channelSettleIds)
+                ChannelSettleIds = new List<string>(_channelSettleIds),
+                HasFleet = true,
+                FleetPurchasedBoatIds = new List<string>(_purchasedVehicles),
+                FleetActiveBoatId = _activeVehicleId ?? string.Empty
             };
 
             foreach (var pair in _loadout)
@@ -785,11 +941,13 @@ namespace DeepDive.Economy
             if (data.BoatPartIds != null)
                 foreach (var partId in data.BoatPartIds)
                     if (BoatRepairParts.IsPart(partId) && !_boatParts.Contains(partId)) _boatParts.Add(partId);
+            RestoreFleet(data);
 
             OnBalanceChanged?.Invoke();
             OnPendingChanged?.Invoke();
             OnStorageChanged?.Invoke();
             OnBoatRepairChanged?.Invoke();
+            OnFleetChanged?.Invoke();
             foreach (var player in _loadout.Keys) OnLoadoutChanged?.Invoke(player);
             return true;
         }

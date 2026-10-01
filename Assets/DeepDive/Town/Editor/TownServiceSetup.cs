@@ -117,6 +117,7 @@ namespace DeepDive.Town.Editor
         {
             var color = type == ServicePointType.EquipmentShop ? new Color(0.20f, 0.45f, 0.85f)
                 : type == ServicePointType.FishBuyer ? new Color(0.25f, 0.70f, 0.35f)
+                : type == ServicePointType.VehicleVendor ? new Color(0.55f, 0.30f, 0.75f)
                 : new Color(0.85f, 0.55f, 0.15f);
             return Color.Lerp(Color.white, color, strength);
         }

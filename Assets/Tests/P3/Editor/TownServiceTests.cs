@@ -98,9 +98,10 @@ namespace DeepDive.P3.Tests
         // ---- Catalog ----------------------------------------------------------------------
 
         [Test]
-        public void CatalogDefinesExactlyThreeDistinctServicesWithUniqueAnchors()
+        public void CatalogDefinesExactlyFourDistinctServicesWithUniqueAnchors()
         {
-            Assert.AreEqual(3, TownServiceCatalog.All.Count);
+            // P4.3-C added the harbor vehicle vendor to the three P3.2 services.
+            Assert.AreEqual(4, TownServiceCatalog.All.Count);
             var ids = new HashSet<string>();
             var anchors = new HashSet<string>();
             var types = new HashSet<ServicePointType>();
@@ -111,9 +112,9 @@ namespace DeepDive.P3.Tests
                 anchors.Add(definition.WorldAnchor);
                 types.Add(definition.ServiceType);
             }
-            Assert.AreEqual(3, ids.Count);
-            Assert.AreEqual(3, anchors.Count);
-            Assert.AreEqual(3, types.Count);
+            Assert.AreEqual(4, ids.Count);
+            Assert.AreEqual(4, anchors.Count);
+            Assert.AreEqual(4, types.Count);
         }
 
         [Test]

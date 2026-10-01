@@ -174,6 +174,7 @@ namespace DeepDive.Core.Contracts
         public const string EquipmentShopId = "shop-equipment";
         public const string FishBuyerId = "buyer-fish";
         public const string RecordingBuyerId = "buyer-recording";
+        public const string VehicleVendorId = "vendor-vehicle";
         public const float DefaultInteractionDistance = 3f;
 
         public static readonly IReadOnlyList<ServicePointDefinition> All = new[]
@@ -183,7 +184,9 @@ namespace DeepDive.Core.Contracts
             new ServicePointDefinition(FishBuyerId, ServicePointType.FishBuyer,
                 "anchor-buyer-fish", DefaultInteractionDistance, "catalog-fish"),
             new ServicePointDefinition(RecordingBuyerId, ServicePointType.RecordingBuyer,
-                "anchor-buyer-recording", DefaultInteractionDistance, "catalog-recording")
+                "anchor-buyer-recording", DefaultInteractionDistance, "catalog-recording"),
+            new ServicePointDefinition(VehicleVendorId, ServicePointType.VehicleVendor,
+                "anchor-vendor-vehicle", DefaultInteractionDistance, "catalog-vehicle")
         };
 
         // True only for a scene-provided definition that matches the catalog id AND type, so a

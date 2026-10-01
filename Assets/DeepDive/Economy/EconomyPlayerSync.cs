@@ -43,6 +43,11 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> SummaryDiscoveries = new NetworkVariable<int>();
         public readonly NetworkVariable<int> SummaryLostDivers = new NetworkVariable<int>();
 
+        // P4.3-C fleet mirror (host-written): which of VehicleIds.All are owned (bit i) and which one is active.
+        public readonly NetworkVariable<int> FleetOwnedMask = new NetworkVariable<int>();
+        public readonly NetworkVariable<FixedString32Bytes> ActiveVehicleId = new NetworkVariable<FixedString32Bytes>();
+        private System.Func<string> _clientActiveProvider;
+
         public readonly NetworkVariable<int> StoredCatches = new NetworkVariable<int>();
         // Host-written, read by the owner's storage panel: what I can put in / what is in there.
         public readonly NetworkList<FixedString64Bytes> CarriedCatchIds = new NetworkList<FixedString64Bytes>();
@@ -61,10 +66,17 @@ namespace DeepDive.Economy
         private int _observedBalance;
 
         public bool ShopOpen => ActiveServiceId.Value.ToString() == TownServiceCatalog.EquipmentShopId;
+        public bool VendorOpen => ActiveServiceId.Value.ToString() == TownServiceCatalog.VehicleVendorId;
 
         public override void OnNetworkSpawn()
         {
             EnsureEconomy();
+            // A guest has no economy: its map/UI read the active boat from its own mirror. The host binds the economy itself.
+            if (IsOwner && !IsServer)
+            {
+                _clientActiveProvider = () => ActiveVehicleId.Value.ToString();
+                ActiveVehicle.Bind(_clientActiveProvider);
+            }
             // A player who (re)spawns starts at today's day, not at the variable defaults.
             if (IsServer && DayLock.StateProvider != null)
             {
@@ -75,6 +87,7 @@ namespace DeepDive.Economy
 
         public override void OnNetworkDespawn()
         {
+            if (_clientActiveProvider != null) { ActiveVehicle.Unbind(_clientActiveProvider); _clientActiveProvider = null; }
             if (_economy != null) _economy.OnBalanceChanged -= Refresh;
             _economy = null;
         }
@@ -104,7 +117,7 @@ namespace DeepDive.Economy
         public void PublishServiceOutcome(TownServiceOutcome outcome)
         {
             if (!IsServer) return;
-            if (outcome.ServiceType == ServicePointType.EquipmentShop && outcome.ReasonCode == "ShopOpen")
+            if ((outcome.ServiceType == ServicePointType.EquipmentShop || outcome.ServiceType == ServicePointType.VehicleVendor) && outcome.ReasonCode == "ShopOpen")
             {
                 SetActiveService(outcome.ServiceId);
                 return;
@@ -132,6 +145,14 @@ namespace DeepDive.Economy
             if (PendingRecordings.Value != pendingRecordings) PendingRecordings.Value = pendingRecordings;
             if (BoatPartsDone.Value != boatPartsDone) BoatPartsDone.Value = boatPartsDone;
             if (BoatPartsMask.Value != boatPartsMask) BoatPartsMask.Value = boatPartsMask;
+        }
+
+        public void PublishFleet(int ownedMask, string activeBoatId)
+        {
+            if (!IsServer) return;
+            if (FleetOwnedMask.Value != ownedMask) FleetOwnedMask.Value = ownedMask;
+            var active = new FixedString32Bytes(activeBoatId ?? string.Empty);
+            if (!ActiveVehicleId.Value.Equals(active)) ActiveVehicleId.Value = active;
         }
 
         public void PublishDay(CampaignDayState state)
@@ -215,6 +236,19 @@ namespace DeepDive.Economy
             RequestPurchaseServerRpc(new FixedString32Bytes(itemId), id);
         }
 
+        public void RequestSelectVehicle(string boatId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(boatId)) return;
+            RequestSelectVehicleServerRpc(new FixedString32Bytes(boatId), ++_localRequestId);
+        }
+
+        [ServerRpc(RequireOwnership = true)]
+        private void RequestSelectVehicleServerRpc(FixedString32Bytes boatId, ulong requestId, ServerRpcParams rpc = default)
+        {
+            if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
+            PublishPurchaseResult(VehicleSelectionAuthority.TrySelect(new PlayerId(OwnerClientId), boatId.ToString(), requestId));
+        }
+
         [ServerRpc(RequireOwnership = true)]
         private void RequestPurchaseServerRpc(FixedString32Bytes equipmentId, ulong requestId, ServerRpcParams rpc = default)
         {
@@ -278,6 +312,10 @@ namespace DeepDive.Economy
             "InventoryFull" => "CANTA DOLU",
             "DayClosing" => "GUN KAPANIYOR",
             "NothingToTurnIn" => "TESLIM EDILECEK URUN YOK",
+            "RequirementMissing" => "ONCE ONCEKI KADEME GEREK",
+            "NotOwned" => "BU ARAC SENIN DEGIL",
+            "TripActive" => "TEKNE SEFERDE",
+            "SeatsOccupied" => "TEKNEDE OYUNCU VAR",
             _ => string.IsNullOrWhiteSpace(reason) ? "ISLEM REDDEDILDI" : reason
         };
 
@@ -295,14 +333,40 @@ namespace DeepDive.Economy
             if (Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusMessage))
                 GUI.Box(new Rect(20, 278, 260, 24), _statusMessage);
 
+            if (VendorOpen) { DrawVendor(); return; }
             if (!ShopOpen) return;
-            GUI.Box(new Rect(270, 20, 290, 296), "EKIPMAN DUKKANI");
+            GUI.Box(new Rect(270, 20, 590, 296), "EKIPMAN DUKKANI");
             ShopRow(50, "Tup I  | +30 sn | 100", "TUP I AL", "tube-1");
             ShopRow(88, "Tup II | +60 sn | 250", "TUP II AL", "tube-2");
             ShopRow(126, "Temel kamera | 150", "KAMERA AL", EconomyManager.CameraBasicId);
-            ShopRow(164, "Sandal govdesi | 120", "GOVDE AL", BoatRepairParts.Hull);
-            ShopRow(202, "Sandal motoru | 120", "MOTOR AL", BoatRepairParts.Engine);
-            ShopRow(240, "Sandal yakit deposu | 120", "DEPO AL", BoatRepairParts.FuelTank);
+            ShopRow(164, "Gelismis kamera | 450", "KAMERA II AL", EconomyManager.CameraAdvancedId);
+            ShopRow(202, "Profesyonel kamera | 1100", "KAMERA III AL", EconomyManager.CameraProId);
+            ShopRow(50, "Palet I | 220", "PALET AL", EconomyManager.FinsId, 574);
+            ShopRow(88, "Canta I | 260", "CANTA AL", EconomyManager.BagId, 574);
+            ShopRow(126, "Zipkin I | 300", "ZIPKIN AL", EconomyManager.HarpoonId, 574);
+            ShopRow(164, "Sandal govdesi | 120", "GOVDE AL", BoatRepairParts.Hull, 574);
+            ShopRow(202, "Sandal motoru | 120", "MOTOR AL", BoatRepairParts.Engine, 574);
+            ShopRow(240, "Sandal yakit deposu | 120", "DEPO AL", BoatRepairParts.FuelTank, 574);
+        }
+
+        // Harbor vendor: one row per vehicle. Buy (host checks money / chain / day), select (host checks owned, docked, empty).
+        private void DrawVendor()
+        {
+            GUI.Box(new Rect(270, 20, 330, 216), "LIMAN SATICISI");
+            var active = ActiveVehicleId.Value.ToString();
+            var y = 50f;
+            for (var i = 0; i < VehicleCatalog.All.Count; i++, y += 56f)
+            {
+                var definition = VehicleCatalog.All[i];
+                var owned = (FleetOwnedMask.Value & (1 << i)) != 0;
+                var state = owned ? (definition.BoatId == active ? "AKTIF" : "SAHIPSIN") : definition.IsForSale ? definition.Price.ToString() : "ONARILINCA SENIN";
+                GUI.Label(new Rect(284, y, 300, 18), $"{definition.DisplayName} | {state}");
+                if (owned)
+                {
+                    if (definition.BoatId != active && GUI.Button(new Rect(284, y + 18, 300, 18), "AKTIF YAP")) RequestSelectVehicle(definition.BoatId);
+                }
+                else if (definition.IsForSale && GUI.Button(new Rect(284, y + 18, 300, 18), "SATIN AL")) RequestPurchase(definition.BoatId);
+            }
         }
 
         private void DrawDay()
@@ -335,10 +399,10 @@ namespace DeepDive.Economy
             _ => ""
         };
 
-        private void ShopRow(float y, string label, string button, string itemId)
+        private void ShopRow(float y, string label, string button, string itemId, float x = 284f)
         {
-            GUI.Label(new Rect(284, y, 260, 18), label);
-            if (GUI.Button(new Rect(284, y + 18, 260, 18), button)) RequestPurchase(itemId);
+            GUI.Label(new Rect(x, y, 260, 18), label);
+            if (GUI.Button(new Rect(x, y + 18, 260, 18), button)) RequestPurchase(itemId);
         }
     }
 }
