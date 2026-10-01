@@ -1,0 +1,6 @@
+{
+  "name": "DeepDive.Town.Editor",
+  "rootNamespace": "DeepDive.Town.Editor",
+  "references": ["DeepDive.Core.Contracts", "DeepDive.Network"],
+  "includePlatforms": ["Editor"]
+}

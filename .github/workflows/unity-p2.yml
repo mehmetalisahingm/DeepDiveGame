@@ -2,7 +2,9 @@ name: Unity tests and Windows build
 
 on:
   push:
-    branches: [main, 'codex/p2-*', 'p2/*', 'codex/p3-*', 'p3/*']
+    branches: [main, 'codex/p2-*', 'p2/*', 'codex/p3-*', 'p3/*', 'codex/p4-*', 'p4/*']
+  pull_request:
+    branches: [main, codex/p4-integration]
   workflow_dispatch:
 
 permissions:

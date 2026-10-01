@@ -81,3 +81,12 @@ desktop.ini
 .env
 .env.*
 !.env.example
+
+# Mixamo kaynak varlıkları: ham FBX'lerin lisansı (bkz. docs/assets/CREDITS.md
+# ve docs/assets/MIXAMO_FETCH.md) tekil dağıtımı yasaklıyor; public repoda
+# bulunmamalı, her geliştirici kendi Mixamo/Adobe hesabıyla indirir.
+/Assets/DeepDive/Player/Character/DiverBase.fbx
+/Assets/DeepDive/Player/Character/Animations/Walk.fbx
+/Assets/DeepDive/Player/Character/Animations/SwimSurface.fbx
+/Assets/DeepDive/Player/Character/Animations/SwimIdle.fbx
+/Assets/DeepDive/Player/Character/Animations/Idle.fbx

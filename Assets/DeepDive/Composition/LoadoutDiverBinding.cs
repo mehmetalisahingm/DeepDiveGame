@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using DeepDive.Economy;
+using DeepDive.Inventory;
 using DeepDive.Network;
 using DeepDive.Session;
 using Unity.Netcode;
@@ -15,6 +16,7 @@ namespace DeepDive.Composition
         private SessionNetworkAdapter adapter;
         private NetworkManager manager;
         private EconomyManager economy;
+        private InventoryManager inventory;
         private bool subscribed;
         private double nextSync;
 
@@ -47,13 +49,11 @@ namespace DeepDive.Composition
         private void OnEnable()
         {
             EnsureEconomy();
-            BindPurchaseAuthority();
         }
 
         private void Update()
         {
             EnsureEconomy();
-            BindPurchaseAuthority();
             if (economy == null || adapter == null || manager == null || !manager.IsListening || !adapter.IsAuthority)
                 return;
             if (adapter.Session.State.Phase == SessionPhase.Dive) return;
@@ -79,29 +79,13 @@ namespace DeepDive.Composition
                 economy = current;
             }
 
+            if (inventory == null) inventory = GetComponent<InventoryManager>();
+
             if (economy != null && !subscribed)
             {
                 economy.OnLoadoutChanged += LoadoutChanged;
                 subscribed = true;
             }
-        }
-
-        private void BindPurchaseAuthority()
-        {
-            if (economy != null && adapter != null && manager != null && manager.IsListening && adapter.IsAuthority)
-                EconomyPurchaseAuthority.Bind(HandlePurchase);
-            else EconomyPurchaseAuthority.Unbind(HandlePurchase);
-        }
-
-        private TransactionResult HandlePurchase(PlayerId player, string equipmentId, ulong requestId)
-        {
-            if (economy == null || adapter == null || manager == null || !manager.IsListening || !adapter.IsAuthority)
-                return TransactionResult.Reject(requestId, "InvalidState", economy != null ? economy.Revision : 0);
-            if (adapter.Session.State.Phase == SessionPhase.Dive)
-                return TransactionResult.Reject(requestId, "WrongPhase", economy.Revision);
-            if (!adapter.Session.Roster.ContainsKey(player) || !manager.ConnectedClients.ContainsKey(player.Value))
-                return TransactionResult.Reject(requestId, "PlayerInactive", economy.Revision);
-            return economy.TryPurchase(player, equipmentId, requestId);
         }
 
         private void LoadoutChanged(PlayerId player)
@@ -131,7 +115,14 @@ namespace DeepDive.Composition
                 if (economy.TryGetEquipmentDefinition(equipmentId, out var definition))
                     definitions.Add(definition);
 
-            diver.ApplyLoadoutServer(loadout, definitions.ToArray());
+            var definitionArray = definitions.ToArray();
+            diver.ApplyLoadoutServer(loadout, definitionArray);
+
+            // Inventory keeps the actual per-player bag authority, but the level is derived from
+            // the same authoritative loadout/catalog as NetworkPlayer. Re-sync replaces the level;
+            // it never increments, so reconnect/save restore cannot multiply capacity.
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(player, loadout, definitionArray);
+            inventory?.SetBagUpgradeLevel(player, capabilities.BagLevel);
         }
 
         private void Unsubscribe()
@@ -142,13 +133,11 @@ namespace DeepDive.Composition
 
         private void OnDisable()
         {
-            EconomyPurchaseAuthority.Unbind(HandlePurchase);
             Unsubscribe();
         }
 
         private void OnDestroy()
         {
-            EconomyPurchaseAuthority.Unbind(HandlePurchase);
             Unsubscribe();
         }
     }

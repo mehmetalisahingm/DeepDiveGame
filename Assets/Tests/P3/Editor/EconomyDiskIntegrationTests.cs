@@ -30,8 +30,14 @@ namespace DeepDive.P3.Tests
             foreach (var suffix in new[] { "", ".bak", ".tmp" })
                 if (File.Exists(path + suffix)) File.Delete(path + suffix);
         }
-        private void Credit(string id) => Assert.AreEqual(PlayerActionResult.Accepted, economy.TryRewardRecording(
-            new RecordingResult(id, "dive", new PlayerId(0), "event_bioluminescence", 4, 8)));
+        private ulong request = 1;
+        // Recordings pay only at the recording buyer: queue, then hand in.
+        private void Credit(string id)
+        {
+            Assert.AreEqual(PlayerActionResult.Accepted, economy.TryQueueRecordingTurnIn(
+                new RecordingResult(id, "dive", new PlayerId(0), "event_bioluminescence", 4, 8)));
+            Assert.IsTrue(economy.TryTurnInRecordings(new PlayerId(0), request++).Accepted);
+        }
 
         [Test] public void RealDiskRestoreKeepsHostTubeAndReplayGuardsWithoutReassigningGuestEquipment()
         {
@@ -48,7 +54,7 @@ namespace DeepDive.P3.Tests
             var loadout = economy.LoadoutStateFor(new PlayerId(0));
             Assert.AreEqual(150, DiverEquipmentRules.ResolveMaxOxygen(120, new PlayerId(0), loadout, new[] { tube }));
             Assert.AreEqual(120, DiverEquipmentRules.ResolveMaxOxygen(120, new PlayerId(1), loadout, new[] { tube }));
-            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryRewardRecording(
+            Assert.AreEqual(PlayerActionResult.DuplicateRequest, economy.TryQueueRecordingTurnIn(
                 new RecordingResult("a", "dive", new PlayerId(0), "event_bioluminescence", 4, 8)));
             Assert.AreEqual(200, economy.SharedBalance);
         }

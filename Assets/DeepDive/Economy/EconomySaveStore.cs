@@ -21,6 +21,49 @@ namespace DeepDive.Economy
         private bool restoring;
         public Func<bool> CanWrite { get; set; }
 
+        private IDayPersistence day;
+        private DaySaveData loadedDay;
+        private IExplorationPersistence exploration;
+        private ExplorationSaveData loadedExploration;
+        private IMediaPersistence media;
+        private MediaSaveData loadedMedia;
+
+        // Same late-binding rule as the day and exploration.
+        public IMediaPersistence Media
+        {
+            get => media;
+            set
+            {
+                media = value;
+                if (media != null && loadedMedia != null) media.RestoreMedia(loadedMedia);
+            }
+        }
+
+        // Same late-binding rule as the day: the host shell that owns the exploration authorities binds after the
+        // file was read, and is handed what was already on disk.
+        public IExplorationPersistence Exploration
+        {
+            get => exploration;
+            set
+            {
+                exploration = value;
+                if (exploration != null && loadedExploration != null) exploration.RestoreExploration(loadedExploration);
+            }
+        }
+
+        // The day authority is bound after the file was first read (the store loads in Awake), so a
+        // binding that arrives late is handed the day that was already on disk - and every later
+        // write carries the day, the money and the boat in the SAME file.
+        public IDayPersistence Day
+        {
+            get => day;
+            set
+            {
+                day = value;
+                if (day != null && loadedDay != null) day.RestoreDay(loadedDay);
+            }
+        }
+
         public string SavePath => string.IsNullOrWhiteSpace(pathOverride)
             ? Path.Combine(Application.persistentDataPath, fileName)
             : pathOverride;
@@ -94,6 +137,32 @@ namespace DeepDive.Economy
                 var snapshot = economy.ExportSaveData(campaignId, effectiveCheckpoint);
                 // Session client IDs are not persistent identities. D06 saves the host's loadout only.
                 snapshot.Loadouts.RemoveAll(x => x.PlayerId != 0);
+                if (day != null)
+                {
+                    snapshot.Day = day.ExportDay();
+                    snapshot.HasDay = true;
+                }
+                if (exploration != null)
+                {
+                    snapshot.Exploration = exploration.ExportExploration();
+                    snapshot.HasExploration = true;
+                }
+                else if (loadedExploration != null)
+                {
+                    // Nothing bound on this machine right now: carry the saved exploration forward untouched.
+                    snapshot.Exploration = loadedExploration;
+                    snapshot.HasExploration = true;
+                }
+                if (media != null)
+                {
+                    snapshot.Media = media.ExportMedia();
+                    snapshot.HasMedia = true;
+                }
+                else if (loadedMedia != null)
+                {
+                    snapshot.Media = loadedMedia;
+                    snapshot.HasMedia = true;
+                }
                 var json = JsonUtility.ToJson(snapshot, true);
                 File.WriteAllText(temp, json);
 
@@ -114,6 +183,10 @@ namespace DeepDive.Economy
                 else File.Move(temp, path);
 
                 checkpointId = effectiveCheckpoint ?? "";
+                // A later re-bind must be handed what is on disk NOW, not what was there at the first load.
+                if (snapshot.HasDay) loadedDay = snapshot.Day;
+                if (snapshot.HasExploration) loadedExploration = snapshot.Exploration;
+                if (snapshot.HasMedia) loadedMedia = snapshot.Media;
                 LastError = "";
                 return true;
             }
@@ -154,6 +227,24 @@ namespace DeepDive.Economy
                 {
                     restoring = false;
                     return Fail("invalid or unsupported save");
+                }
+                loadedDay = data.HasDay ? data.Day : null;
+                loadedExploration = data.HasExploration ? data.Exploration : null;
+                loadedMedia = data.HasMedia ? data.Media : null;
+                if (loadedMedia != null && media != null && !media.RestoreMedia(loadedMedia))
+                {
+                    restoring = false;
+                    return Fail("invalid media state");
+                }
+                if (loadedExploration != null && exploration != null && !exploration.RestoreExploration(loadedExploration))
+                {
+                    restoring = false;
+                    return Fail("invalid exploration state");
+                }
+                if (loadedDay != null && day != null && !day.RestoreDay(loadedDay))
+                {
+                    restoring = false;
+                    return Fail("invalid day state");
                 }
                 campaignId = string.IsNullOrWhiteSpace(data.CampaignId) ? campaignId : data.CampaignId;
                 checkpointId = data.CheckpointId ?? "";

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using Unity.Collections;
 using Unity.Netcode;
@@ -13,15 +14,64 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<bool> LastAccepted = new NetworkVariable<bool>();
         public readonly NetworkVariable<FixedString32Bytes> LastReasonCode = new NetworkVariable<FixedString32Bytes>();
 
+        // P3.2 town state, host-written and only informational for the client UI.
+        public readonly NetworkVariable<int> PendingCatches = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> PendingRecordings = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> BoatPartsDone = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> BoatPartsMask = new NetworkVariable<int>();
+        public readonly NetworkVariable<FixedString32Bytes> ActiveServiceId = new NetworkVariable<FixedString32Bytes>();
+        public readonly NetworkVariable<ulong> LastServiceRequestId = new NetworkVariable<ulong>();
+        public readonly NetworkVariable<byte> LastServiceType = new NetworkVariable<byte>();
+        public readonly NetworkVariable<bool> LastServiceAccepted = new NetworkVariable<bool>();
+        public readonly NetworkVariable<FixedString32Bytes> LastServiceReason = new NetworkVariable<FixedString32Bytes>();
+        public readonly NetworkVariable<int> LastServiceAmount = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> LastServiceItems = new NetworkVariable<int>();
+
+        // P4.1 shared day, host-written, mirrored to every player like the balance. Clients only display it.
+        public readonly NetworkVariable<int> DayNumber = new NetworkVariable<int>(1);
+        public readonly NetworkVariable<int> DayClockMinute = new NetworkVariable<int>(DayIds.DayStartMinute);
+        public readonly NetworkVariable<byte> DayPhaseValue = new NetworkVariable<byte>();
+        public readonly NetworkVariable<int> DaySleepingCount = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> DayActiveCount = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> DayWeatherSeed = new NetworkVariable<int>();
+        // The last closed day's summary (a new number appears in SummaryDayNumber exactly once per close).
+        public readonly NetworkVariable<int> SummaryDayNumber = new NetworkVariable<int>();
+        public readonly NetworkVariable<byte> SummaryReason = new NetworkVariable<byte>();
+        public readonly NetworkVariable<int> SummaryFishSold = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryIncome = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryExpenses = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryDiscoveries = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> SummaryLostDivers = new NetworkVariable<int>();
+
+        public readonly NetworkVariable<int> StoredCatches = new NetworkVariable<int>();
+        // Host-written, read by the owner's storage panel: what I can put in / what is in there.
+        public readonly NetworkList<FixedString64Bytes> CarriedCatchIds = new NetworkList<FixedString64Bytes>();
+        public readonly NetworkList<FixedString64Bytes> StoredCatchIdList = new NetworkList<FixedString64Bytes>();
+        private ulong _storageRequestId;
+
+        private float _summaryShownUntil;
+        private int _observedSummaryDay;
+
         private EconomyManager _economy;
         private ulong _observedRequestId;
+        private ulong _observedServiceRequestId;
         private ulong _localRequestId;
         private string _statusMessage = "";
         private float _statusUntil;
-        private bool _shopOpen;
         private int _observedBalance;
 
-        public override void OnNetworkSpawn() => EnsureEconomy();
+        public bool ShopOpen => ActiveServiceId.Value.ToString() == TownServiceCatalog.EquipmentShopId;
+
+        public override void OnNetworkSpawn()
+        {
+            EnsureEconomy();
+            // A player who (re)spawns starts at today's day, not at the variable defaults.
+            if (IsServer && DayLock.StateProvider != null)
+            {
+                PublishDay(DayLock.StateProvider());
+                PublishSummary(DayLock.SummaryProvider != null ? DayLock.SummaryProvider() : null);
+            }
+        }
 
         public override void OnNetworkDespawn()
         {
@@ -51,11 +101,118 @@ namespace DeepDive.Economy
             LastRequestId.Value = result.RequestId;
         }
 
-        public void RequestPurchase(string equipmentId)
+        public void PublishServiceOutcome(TownServiceOutcome outcome)
         {
-            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(equipmentId)) return;
+            if (!IsServer) return;
+            if (outcome.ServiceType == ServicePointType.EquipmentShop && outcome.ReasonCode == "ShopOpen")
+            {
+                SetActiveService(outcome.ServiceId);
+                return;
+            }
+            LastServiceType.Value = (byte)outcome.ServiceType;
+            LastServiceAccepted.Value = outcome.Accepted;
+            LastServiceReason.Value = new FixedString32Bytes(outcome.ReasonCode);
+            LastServiceAmount.Value = outcome.Amount;
+            LastServiceItems.Value = outcome.ItemCount;
+            // Written last so the owner sees a consistent outcome when it observes the id change.
+            LastServiceRequestId.Value = outcome.RequestId;
+        }
+
+        public void SetActiveService(string serviceId)
+        {
+            if (!IsServer) return;
+            var value = new FixedString32Bytes(serviceId ?? "");
+            if (!ActiveServiceId.Value.Equals(value)) ActiveServiceId.Value = value;
+        }
+
+        public void PublishTownProgress(int pendingCatches, int pendingRecordings, int boatPartsDone, int boatPartsMask = 0)
+        {
+            if (!IsServer) return;
+            if (PendingCatches.Value != pendingCatches) PendingCatches.Value = pendingCatches;
+            if (PendingRecordings.Value != pendingRecordings) PendingRecordings.Value = pendingRecordings;
+            if (BoatPartsDone.Value != boatPartsDone) BoatPartsDone.Value = boatPartsDone;
+            if (BoatPartsMask.Value != boatPartsMask) BoatPartsMask.Value = boatPartsMask;
+        }
+
+        public void PublishDay(CampaignDayState state)
+        {
+            if (!IsServer) return;
+            if (DayNumber.Value != state.DayNumber) DayNumber.Value = state.DayNumber;
+            if (DayClockMinute.Value != state.ClockMinute) DayClockMinute.Value = state.ClockMinute;
+            if (DayPhaseValue.Value != (byte)state.Phase) DayPhaseValue.Value = (byte)state.Phase;
+            if (DaySleepingCount.Value != state.SleepingPlayers.Count) DaySleepingCount.Value = state.SleepingPlayers.Count;
+            if (DayActiveCount.Value != state.ActivePlayers.Count) DayActiveCount.Value = state.ActivePlayers.Count;
+            if (DayWeatherSeed.Value != state.WeatherSeed) DayWeatherSeed.Value = state.WeatherSeed;
+        }
+
+        public void PublishStorage(int storedCount)
+        {
+            if (IsServer && StoredCatches.Value != storedCount) StoredCatches.Value = storedCount;
+        }
+
+        // Rewritten only when the set actually changed, so a steady state costs no network traffic.
+        public void PublishStorageLists(IReadOnlyList<string> carried, IReadOnlyList<string> stored)
+        {
+            if (!IsServer) return;
+            Sync(CarriedCatchIds, carried);
+            Sync(StoredCatchIdList, stored);
+        }
+
+        private static void Sync(NetworkList<FixedString64Bytes> list, IReadOnlyList<string> ids)
+        {
+            var same = list.Count == ids.Count;
+            for (var i = 0; same && i < ids.Count; i++)
+                if (list[i].ToString() != ids[i]) same = false;
+            if (same) return;
+            list.Clear();
+            for (var i = 0; i < ids.Count; i++) list.Add(new FixedString64Bytes(ids[i]));
+        }
+
+        public void RequestStoreItem(string itemId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(itemId)) return;
+            RequestStoreServerRpc(new FixedString64Bytes(itemId), ++_storageRequestId);
+        }
+
+        public void RequestRetrieveItem(string itemId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(itemId)) return;
+            RequestRetrieveServerRpc(new FixedString64Bytes(itemId), ++_storageRequestId);
+        }
+
+        // The seam refuses unless Mehmet's/the composition layer verified the player is at the storage.
+        [ServerRpc(RequireOwnership = true)]
+        private void RequestStoreServerRpc(FixedString64Bytes itemId, ulong requestId, ServerRpcParams rpc = default)
+        {
+            if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
+            PublishPurchaseResult(HomeStorageItems.TryStore(new PlayerId(OwnerClientId), itemId.ToString(), requestId));
+        }
+
+        [ServerRpc(RequireOwnership = true)]
+        private void RequestRetrieveServerRpc(FixedString64Bytes itemId, ulong requestId, ServerRpcParams rpc = default)
+        {
+            if (!IsServer || rpc.Receive.SenderClientId != OwnerClientId || requestId == 0) return;
+            PublishPurchaseResult(HomeStorageItems.TryRetrieve(new PlayerId(OwnerClientId), itemId.ToString(), requestId));
+        }
+
+        public void PublishSummary(DaySummary summary)
+        {
+            if (!IsServer || summary == null || summary.DayNumber <= SummaryDayNumber.Value) return;
+            SummaryReason.Value = (byte)summary.Reason;
+            SummaryFishSold.Value = summary.FishSold;
+            SummaryIncome.Value = summary.Income;
+            SummaryExpenses.Value = summary.Expenses;
+            SummaryDiscoveries.Value = summary.DiscoveredSpeciesIds.Count;
+            SummaryLostDivers.Value = summary.LostDivers;
+            // Written last, so an observer that sees the day number sees the whole summary.
+            SummaryDayNumber.Value = summary.DayNumber;
+        }
+
+        public void RequestPurchase(string itemId)
+        {
+            if (!IsSpawned || !IsOwner || string.IsNullOrWhiteSpace(itemId)) return;
             var id = ++_localRequestId;
-            RequestPurchaseServerRpc(new FixedString32Bytes(equipmentId), id);
+            RequestPurchaseServerRpc(new FixedString32Bytes(itemId), id);
         }
 
         [ServerRpc(RequireOwnership = true)]
@@ -78,12 +235,32 @@ namespace DeepDive.Economy
             }
             _observedBalance = SharedBalance.Value;
 
-            if (Input.GetKeyDown(KeyCode.B)) _shopOpen = !_shopOpen;
+            ObserveServiceOutcome();
+            if (SummaryDayNumber.Value != _observedSummaryDay)
+            {
+                _observedSummaryDay = SummaryDayNumber.Value;
+                _summaryShownUntil = Time.unscaledTime + 12f;
+            }
 
             if (LastRequestId.Value == 0 || LastRequestId.Value == _observedRequestId) return;
             _observedRequestId = LastRequestId.Value;
-            _statusMessage = LastAccepted.Value ? "SATIN ALINDI" : FriendlyReason(LastReasonCode.Value.ToString());
+            _statusMessage = LastAccepted.Value ? "TAMAM" : FriendlyReason(LastReasonCode.Value.ToString());
             _statusUntil = Time.unscaledTime + 2f;
+        }
+
+        private void ObserveServiceOutcome()
+        {
+            if (LastServiceRequestId.Value == 0 || LastServiceRequestId.Value == _observedServiceRequestId) return;
+            _observedServiceRequestId = LastServiceRequestId.Value;
+
+            if (!LastServiceAccepted.Value)
+                _statusMessage = FriendlyReason(LastServiceReason.Value.ToString());
+            else if ((ServicePointType)LastServiceType.Value == ServicePointType.FishBuyer)
+                _statusMessage = $"AV SATILDI: +{LastServiceAmount.Value} KREDI ({LastServiceItems.Value} AV)";
+            else if ((ServicePointType)LastServiceType.Value == ServicePointType.RecordingBuyer)
+                _statusMessage = $"KAYIT TESLIM: +{LastServiceAmount.Value} KREDI ({LastServiceItems.Value} KAYIT)";
+            else return;
+            _statusUntil = Time.unscaledTime + 3f;
         }
 
         private static string FriendlyReason(string reason) => reason switch
@@ -95,6 +272,12 @@ namespace DeepDive.Economy
             "InvalidState" => "DUKKAN HAZIR DEGIL",
             "InvalidTarget" => "GECERSIZ URUN",
             "SaveFailed" => "KAYIT HATASI",
+            "NotAtShop" => "DUKKANA YAKIN DEGILSIN",
+            "NotAtStorage" => "DEPODAN UZAKSIN",
+            "StorageFull" => "DEPO DOLU",
+            "InventoryFull" => "CANTA DOLU",
+            "DayClosing" => "GUN KAPANIYOR",
+            "NothingToTurnIn" => "TESLIM EDILECEK URUN YOK",
             _ => string.IsNullOrWhiteSpace(reason) ? "ISLEM REDDEDILDI" : reason
         };
 
@@ -102,17 +285,60 @@ namespace DeepDive.Economy
         {
             if (!IsSpawned || !IsOwner) return;
             GUI.Box(new Rect(20, 166, 230, 24), $"PARA: {SharedBalance.Value}");
-            GUI.Box(new Rect(20, 194, 230, 24), "B: DUKKAN");
+            GUI.Box(new Rect(20, 194, 230, 24),
+                $"BEKLEYEN: {PendingCatches.Value} AV / {PendingRecordings.Value} KAYIT");
+            GUI.Box(new Rect(20, 222, 230, 24), $"SANDAL ONARIM: {BoatPartsDone.Value}/{BoatRepairParts.All.Count}");
+            GUI.Box(new Rect(20, 250, 230, 24), "F: NPC ILE ETKILESIM");
+            GUI.Box(new Rect(20, 138, 230, 24), $"DEPO: {StoredCatches.Value} AV");
+            DrawDay();
 
             if (Time.unscaledTime < _statusUntil && !string.IsNullOrEmpty(_statusMessage))
-                GUI.Box(new Rect(20, 222, 230, 24), _statusMessage);
+                GUI.Box(new Rect(20, 278, 260, 24), _statusMessage);
 
-            if (!_shopOpen) return;
-            GUI.Box(new Rect(270, 20, 250, 136), "DALIS EKIPMANI");
-            GUI.Label(new Rect(284, 50, 220, 20), "Tup I  | +30 sn | 100 kredi");
-            if (GUI.Button(new Rect(284, 72, 220, 28), "TUP I SATIN AL")) RequestPurchase("tube-1");
-            GUI.Label(new Rect(284, 104, 220, 20), "Tup II | +60 sn | 250 kredi");
-            if (GUI.Button(new Rect(284, 126, 220, 28), "TUP II SATIN AL")) RequestPurchase("tube-2");
+            if (!ShopOpen) return;
+            GUI.Box(new Rect(270, 20, 290, 296), "EKIPMAN DUKKANI");
+            ShopRow(50, "Tup I  | +30 sn | 100", "TUP I AL", "tube-1");
+            ShopRow(88, "Tup II | +60 sn | 250", "TUP II AL", "tube-2");
+            ShopRow(126, "Temel kamera | 150", "KAMERA AL", EconomyManager.CameraBasicId);
+            ShopRow(164, "Sandal govdesi | 120", "GOVDE AL", BoatRepairParts.Hull);
+            ShopRow(202, "Sandal motoru | 120", "MOTOR AL", BoatRepairParts.Engine);
+            ShopRow(240, "Sandal yakit deposu | 120", "DEPO AL", BoatRepairParts.FuelTank);
+        }
+
+        private void DrawDay()
+        {
+            var minute = DayClockMinute.Value;
+            var phase = (DayPhase)DayPhaseValue.Value;
+            var label = phase == DayPhase.Running
+                ? $"GUN {DayNumber.Value}  {minute / 60 % 24:00}:{minute % 60:00}   UYKU {DaySleepingCount.Value}/{DayActiveCount.Value}"
+                : $"GUN {DayNumber.Value}  {DayPhaseLabel(phase)}";
+            var wide = 320f;
+            GUI.Box(new Rect((Screen.width - wide) * 0.5f, 8, wide, 24), label);
+            if (minute >= DayIds.FirstWarningMinute && phase == DayPhase.Running)
+                GUI.Box(new Rect((Screen.width - wide) * 0.5f, 36, wide, 24),
+                    minute >= DayIds.SecondWarningMinute ? "GECE YARISINA 1 SAAT: DON!" : "GECE YARISINA 2 SAAT KALDI");
+
+            if (Time.unscaledTime >= _summaryShownUntil || SummaryDayNumber.Value <= 0) return;
+            var box = new Rect((Screen.width - 360f) * 0.5f, 70, 360, 128);
+            GUI.Box(box, $"GUN {SummaryDayNumber.Value} OZETI" + ((DayCloseReason)SummaryReason.Value == DayCloseReason.Midnight ? " (00:00)" : " (UYKU)"));
+            GUI.Label(new Rect(box.x + 12, box.y + 26, 340, 20), $"Satilan av: {SummaryFishSold.Value}");
+            GUI.Label(new Rect(box.x + 12, box.y + 46, 340, 20), $"Gelir {SummaryIncome.Value} / Gider {SummaryExpenses.Value} / Net {SummaryIncome.Value - SummaryExpenses.Value}");
+            GUI.Label(new Rect(box.x + 12, box.y + 66, 340, 20), $"Yeni tur: {SummaryDiscoveries.Value}");
+            GUI.Label(new Rect(box.x + 12, box.y + 86, 340, 20), $"Geri donemeyen dalgic: {SummaryLostDivers.Value}");
+        }
+
+        private static string DayPhaseLabel(DayPhase phase) => phase switch
+        {
+            DayPhase.Closing => "GUN KAPANIYOR",
+            DayPhase.Summary => "GUN OZETI",
+            DayPhase.Morning => "SABAH",
+            _ => ""
+        };
+
+        private void ShopRow(float y, string label, string button, string itemId)
+        {
+            GUI.Label(new Rect(284, y, 260, 18), label);
+            if (GUI.Button(new Rect(284, y + 18, 260, 18), button)) RequestPurchase(itemId);
         }
     }
 }
