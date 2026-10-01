@@ -1,6 +1,6 @@
 # Güncel durum ve görev takibi
 
-Plan **3.0 — 15 Eylül 2026**. Son durum güncellemesi: **30 Eylül 2026**.
+Plan **3.0 — 15 Eylül 2026**. Son durum güncellemesi: **1 Ekim 2026**.
 
 Aktif faz: **P4**. P0–P3 kapalıdır. P4 kendi içinde sıralı ilerler: **P4.1 → P4.2 → P4.3 → P4.4 → P4.5 → P4.6**. Bir ara teslim birleşik kabul kapısını geçmeden sıradaki özellik işi tamamlanmış sayılmaz.
 
@@ -45,7 +45,7 @@ Teslim edilen ana parçalar:
 
 ## P4.2 — Çek, izle ve yayınla
 
-**Durum: ÜÇ ANA PARÇA MERGE EDİLDİ; birleşik acceptance kapısı açık.**
+**Durum: TAMAMLANDI. Üç ana teslim merge edildi ve birleşik acceptance kapısı #112 / #106 ile PASS olarak kapandı.**
 
 ### A — Mehmet · gerçek clip capture / playback
 - PR `#104` merge edildi.
@@ -73,7 +73,9 @@ Teslim edilen ana parçalar:
 
 ### P4.2 kapanış kapısı
 
-P4.2, üç PR'ın ayrı ayrı merge edilmesiyle otomatik kapanmaz. Aşağıdaki birleşik ürün akışı **aynı güncel integration build'inde** kanıtlanmalıdır:
+**KAPANDI.** Acceptance harness/raporu PR `#112` ile integration'a alındı; issue `#106` completed olarak kapatıldı.
+
+Birleşik ürün akışında aynı güncel integration build'i üzerinde şu zincir doğrulandı:
 
 1. Gerçek oyuncu kamerası ile kayıt başlatılır ve gerçek clip oluşur.
 2. Recording world context clip manifestine aynı authoritative akışta bağlanır.
@@ -85,11 +87,11 @@ P4.2, üç PR'ın ayrı ayrı merge edilmesiyle otomatik kapanmaz. Aşağıdaki 
 8. `-Explore`, `-Storage`, `-Day`, `-HomeSleep`, `-Trip` regresyonları korunur.
 9. En az iki gerçek süreçte fixture'sız birleşik medya smoke PASS olur.
 
-Bu kabul tamamlanmadan **P4.3 uygulaması tamamlanmış sayılmaz**.
+P4.2 acceptance tamamlandığı için **P4.3 aktif geliştirmeye açıldı**.
 
 ## P4.3 — Kamera ve büyük tekneler
 
-**Durum: PLANLANDI / P4.2 acceptance sonrası uygulama.**
+**Durum: AKTİF.**
 
 Alan dağılımı:
 
@@ -108,6 +110,8 @@ P4.3 kabulünde:
 - sabit rotalı seyahat korunmalı; serbest dümen/fizik simülasyonu eklenmemeli,
 - gerçek en az iki süreçli araç satın alma → seçim → binme → rota → dönüş smoke'u kaydedilmeli.
 
+Mehmet'in P4.3-A foundation'ı PR `#111` ile merge edildi. Utku `#108` ve Mert `#109` kapsamları ile final cross-owner binding/smoke tamamlanmadan P4.3 kapanmaz.
+
 ## Sonraki P4 teslimleri
 
 | Ara teslim | Durum |
@@ -122,8 +126,8 @@ P4.3 kabulünde:
 
 ## Şu an sıradaki tek ortak kapı
 
-**P4.2 birleşik acceptance:**
+**P4.3 birleşik entegrasyon ve araç acceptance:**
 
-`gerçek kayıt -> world metadata -> güvenli dönüş -> ev PC -> gerçek playback -> kanal yayını -> gün kapanışı -> gelir -> save/load`
+`kamera tier/world doğrulaması + tekne sahipliği/aktif seçim + Mehmet'in araç network seam'i -> gerçek 2-process board -> outbound -> anchor -> disembark/reboard -> inbound -> dock`
 
-Bu zincir fixture'sız ve aynı integration build'inde geçince P4.2 kapanır ve P4.3 aktif geliştirmeye geçer.
+Bu zincir fixture'sız ve aynı integration build'inde geçince P4.3 kapanır ve P4.4 açılabilir.
