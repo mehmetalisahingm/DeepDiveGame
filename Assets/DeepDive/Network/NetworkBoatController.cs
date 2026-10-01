@@ -54,6 +54,8 @@ namespace DeepDive.Network
             BoatTripIds.Seat0, BoatTripIds.Seat1, BoatTripIds.Seat2, BoatTripIds.Seat3
         };
 
+        // P3 compatibility snapshot. Runtime P4 placement uses BoatHullSeatRules so larger hulls
+        // keep these same stable ids while scaling their physical footprint.
         public static readonly IReadOnlyList<Vector3> LocalSeatOffsets = new[]
         {
             new Vector3(-0.55f, 0.35f, -0.9f),
@@ -72,12 +74,13 @@ namespace DeepDive.Network
         }
     }
 
-    // Host-only physical authority for the repaired P3 rowboat. The GameObject itself is not a
-    // second NetworkObject; its approved pose is mirrored through BoatTripPlayerSync, while seated
-    // NetworkPlayers keep using their existing server-authoritative NetworkTransform.
+    // Host-only physical authority for whichever progression vehicle Mert selects. The GameObject
+    // itself is not a second NetworkObject; its approved pose is mirrored through the existing trip
+    // sync while seated NetworkPlayers keep their server-authoritative NetworkTransform.
     [DisallowMultipleComponent]
     public sealed class NetworkBoatController : MonoBehaviour, IBoatApprovedWorldPositionSource
     {
+        // P3 compatibility constants for the repaired rowboat.
         public const float HullWidth = 2.4f;
         public const float HullLength = 5f;
 
@@ -101,8 +104,12 @@ namespace DeepDive.Network
         private float legSpeed;
         private float outboundSeconds = 8f;
         private float inboundSeconds = 8f;
+        private string activeBoatId = BoatTripIds.BoatId;
+        private string dockRouteId = BoatTripIds.NearRouteId;
+        private BoatHullKind hullKind = BoatHullKind.Rowboat;
 
-        public string BoatId => BoatTripIds.BoatId;
+        public string BoatId => activeBoatId;
+        public BoatHullKind HullKind => hullKind;
         public BoatTripState AppliedState => state;
         public float CurrentLegSpeed => legSpeed;
         public bool IsHostAuthority => networkManager != null && networkManager.IsServer;
@@ -113,6 +120,32 @@ namespace DeepDive.Network
             routeSource = source;
             BoatApprovedPositions.Bind(this);
             SnapToDockRouteStart();
+        }
+
+        // Physical/network configuration seam only. Mert decides whether a switch is owned/valid
+        // and which stable boatId is active. If a valid switch arrives here, old seats and movement
+        // are normalized first so no player can remain attached to the previous hull.
+        public bool ConfigureActiveVehicle(string boatId, BoatHullKind nextHullKind, string nextDockRouteId)
+        {
+            if (!IsHostAuthority || string.IsNullOrWhiteSpace(boatId) || string.IsNullOrWhiteSpace(nextDockRouteId) ||
+                !BoatHullSeatRules.TryGetDimensions(nextHullKind, out _))
+                return false;
+
+            var changed = !string.Equals(activeBoatId, boatId, StringComparison.Ordinal) || hullKind != nextHullKind ||
+                          !string.Equals(dockRouteId, nextDockRouteId, StringComparison.Ordinal);
+            if (!changed) return true;
+
+            ReleaseAllPlayers();
+            routeActive = false;
+            arrivalPending = false;
+            path.Clear();
+            state = default;
+            appliedRevision = int.MinValue;
+            activeBoatId = boatId;
+            hullKind = nextHullKind;
+            dockRouteId = nextDockRouteId;
+            SnapToDockRouteStart();
+            return true;
         }
 
         public void Shutdown()
@@ -136,7 +169,7 @@ namespace DeepDive.Network
 
         public void ApplyTripState(BoatTripState next)
         {
-            if (!IsHostAuthority || !string.Equals(next.BoatId, BoatTripIds.BoatId, StringComparison.Ordinal)) return;
+            if (!IsHostAuthority || !string.Equals(next.BoatId, activeBoatId, StringComparison.Ordinal)) return;
             if (next.Revision == appliedRevision) return;
 
             var previousPhase = state.Phase;
@@ -169,8 +202,9 @@ namespace DeepDive.Network
             for (var i = 0; i < BoatSeatLayoutRules.SeatIds.Count; i++)
             {
                 var seatId = BoatSeatLayoutRules.SeatIds[i];
-                if (IsSeatOccupied(seatId)) continue;
-                var seatPosition = transform.TransformPoint(BoatSeatLayoutRules.LocalSeatOffsets[i]);
+                if (IsSeatOccupied(seatId) || !BoatHullSeatRules.TryResolveLocalOffset(hullKind, seatId, out var localOffset))
+                    continue;
+                var seatPosition = transform.TransformPoint(localOffset);
                 var distance = Vector3.Distance(networkPlayer.transform.position, seatPosition);
                 if (distance > boardingRange || distance >= bestDistance) continue;
                 bestIndex = i;
@@ -178,7 +212,7 @@ namespace DeepDive.Network
             }
 
             if (bestIndex < 0) return TransactionResult.Reject(requestId, "OutOfRange", state.Revision);
-            return BoatBoarding.TryBoard(player, BoatTripIds.BoatId, BoatSeatLayoutRules.SeatIds[bestIndex], requestId);
+            return BoatBoarding.TryBoard(player, activeBoatId, BoatSeatLayoutRules.SeatIds[bestIndex], requestId);
         }
 
         public TransactionResult TryDisembark(PlayerId player, ulong requestId)
@@ -272,7 +306,7 @@ namespace DeepDive.Network
         private void ReportArrival()
         {
             if (!arrivalPending) return;
-            var result = BoatRouteProgress.ReportArrival(BoatTripIds.BoatId, arrivalPhase, arrivalRequestId);
+            var result = BoatRouteProgress.ReportArrival(activeBoatId, arrivalPhase, arrivalRequestId);
             if (result.Accepted)
             {
                 arrivalPending = false;
@@ -283,9 +317,9 @@ namespace DeepDive.Network
 
         private void SnapToDockRouteStart()
         {
-            if (!IsHostAuthority || routeSource == null) return;
+            if (!IsHostAuthority || routeSource == null || string.IsNullOrWhiteSpace(dockRouteId)) return;
             var scratch = new List<Vector3>();
-            if (!routeSource.TryGetRoute(BoatTripIds.NearRouteId, scratch, out outboundSeconds, out inboundSeconds) || scratch.Count == 0)
+            if (!routeSource.TryGetRoute(dockRouteId, scratch, out outboundSeconds, out inboundSeconds) || scratch.Count == 0)
                 return;
             transform.position = scratch[0];
             if (scratch.Count > 1)
@@ -301,7 +335,8 @@ namespace DeepDive.Network
             if (next.Seats != null)
             {
                 for (var i = 0; i < next.Seats.Count; i++)
-                    desired[next.Seats[i].Player] = next.Seats[i].SeatId;
+                    if (BoatTripIds.IsSeat(next.Seats[i].SeatId))
+                        desired[next.Seats[i].Player] = next.Seats[i].SeatId;
             }
 
             var released = new List<PlayerId>();
@@ -322,10 +357,10 @@ namespace DeepDive.Network
         {
             foreach (var pair in boundSeats)
             {
-                if (!TryGetPlayer(pair.Key, out var player)) continue;
-                var index = SeatIndex(pair.Value);
-                if (index < 0) continue;
-                var worldPosition = transform.TransformPoint(BoatSeatLayoutRules.LocalSeatOffsets[index]);
+                if (!TryGetPlayer(pair.Key, out var player) ||
+                    !BoatHullSeatRules.TryResolveLocalOffset(hullKind, pair.Value, out var localOffset))
+                    continue;
+                var worldPosition = transform.TransformPoint(localOffset);
                 player.Teleport(new Pose(worldPosition, transform.rotation));
             }
         }
@@ -336,9 +371,10 @@ namespace DeepDive.Network
             if (!TryGetPlayer(playerId, out var player)) return;
             player.SetSeatedServer(false);
 
+            BoatHullSeatRules.TryGetDimensions(hullKind, out var dimensions);
             var localExit = state.Phase == BoatTripPhase.Docked
-                ? new Vector3(0f, 0.4f, -3.3f)
-                : new Vector3(2f, 0f, 0.5f);
+                ? new Vector3(0f, Mathf.Max(0.4f, dimensions.SeatHeight), -Mathf.Max(3.3f, dimensions.Length * 0.66f))
+                : new Vector3(Mathf.Max(2f, dimensions.Width * 0.85f), 0f, dimensions.Length * 0.1f);
             var exitPosition = transform.TransformPoint(localExit);
             player.Teleport(new Pose(exitPosition, transform.rotation));
         }
@@ -367,16 +403,9 @@ namespace DeepDive.Network
             return false;
         }
 
-        private static int SeatIndex(string seatId)
-        {
-            for (var i = 0; i < BoatSeatLayoutRules.SeatIds.Count; i++)
-                if (string.Equals(BoatSeatLayoutRules.SeatIds[i], seatId, StringComparison.Ordinal)) return i;
-            return -1;
-        }
-
         public bool TryGetBoatWorldPosition(string boatId, out Vector3 position)
         {
-            if (IsHostAuthority && string.Equals(boatId, BoatTripIds.BoatId, StringComparison.Ordinal))
+            if (IsHostAuthority && string.Equals(boatId, activeBoatId, StringComparison.Ordinal))
             {
                 position = transform.position;
                 return true;

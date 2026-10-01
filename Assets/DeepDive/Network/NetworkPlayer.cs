@@ -51,6 +51,10 @@ namespace DeepDive.Network
         public readonly NetworkVariable<byte> Locomotion = new NetworkVariable<byte>();
         public readonly NetworkVariable<byte> HeldEquipment = new NetworkVariable<byte>();
         public readonly NetworkVariable<bool> RecordingPresentation = new NetworkVariable<bool>();
+        public readonly NetworkVariable<byte> EquippedCameraTier = new NetworkVariable<byte>();
+        public readonly NetworkVariable<byte> EquippedFinsLevel = new NetworkVariable<byte>();
+        public readonly NetworkVariable<byte> EquippedBagLevel = new NetworkVariable<byte>();
+        public readonly NetworkVariable<byte> EquippedHarpoonLevel = new NetworkVariable<byte>();
         public readonly NetworkVariable<ulong> LastActionRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<int> LastActionResult = new NetworkVariable<int>();
         public readonly NetworkVariable<byte> LastActionKind = new NetworkVariable<byte>();
@@ -58,6 +62,9 @@ namespace DeepDive.Network
         public bool ReadKeyboard { get; set; } = true;
         public LocomotionMode CurrentLocomotion => (LocomotionMode)Locomotion.Value;
         public HeldEquipmentMode CurrentHeldEquipment => (HeldEquipmentMode)HeldEquipment.Value;
+        public CameraTier CurrentCameraTier => (CameraTier)EquippedCameraTier.Value;
+        public PlayerEquipmentCapabilities EquipmentCapabilities => new PlayerEquipmentCapabilities(
+            CurrentCameraTier, EquippedFinsLevel.Value, EquippedBagLevel.Value, EquippedHarpoonLevel.Value);
         public PlayerPresentationState PresentationState =>
             new PlayerPresentationState(CurrentLocomotion, CurrentHeldEquipment, RecordingPresentation.Value);
 
@@ -117,6 +124,10 @@ namespace DeepDive.Network
                 actionGate.Reset();
                 Seated.Value = false;
                 RecordingPresentation.Value = false;
+                EquippedCameraTier.Value = (byte)CameraTier.None;
+                EquippedFinsLevel.Value = 0;
+                EquippedBagLevel.Value = 0;
+                EquippedHarpoonLevel.Value = 0;
                 environmentLocomotion = EnvironmentLocomotion.Land;
                 externalEnvironmentBound = false;
                 cameraOwned = false;
@@ -289,7 +300,8 @@ namespace DeepDive.Network
             var move = PlayerPresentationRules.FilterMoveInput(locomotion, frame.Move);
             move = Quaternion.Euler(0, frame.Yaw, 0) * move;
             var swimming = PlayerPresentationRules.IsSwimming(locomotion);
-            var velocity = move * (swimming ? swimSpeed : walkSpeed);
+            var effectiveSwimSpeed = P4EquipmentEffectRules.ResolveSwimSpeed(swimSpeed, EquippedFinsLevel.Value);
+            var velocity = move * (swimming ? effectiveSwimSpeed : walkSpeed);
             if (swimming)
             {
                 gravityVelocity = 0;
@@ -375,7 +387,8 @@ namespace DeepDive.Network
             var delta = transform.position - lastPresentationPosition;
             lastPresentationPosition = transform.position;
             var planar = Vector3.ProjectOnPlane(delta, Vector3.up).magnitude;
-            var referenceSpeed = PlayerPresentationRules.IsSwimming(CurrentLocomotion) ? swimSpeed : walkSpeed;
+            var effectiveSwimSpeed = P4EquipmentEffectRules.ResolveSwimSpeed(swimSpeed, EquippedFinsLevel.Value);
+            var referenceSpeed = PlayerPresentationRules.IsSwimming(CurrentLocomotion) ? effectiveSwimSpeed : walkSpeed;
             var normalizedSpeed = Time.deltaTime > 0.0001f
                 ? Mathf.Clamp01(planar / Time.deltaTime / Mathf.Max(0.01f, referenceSpeed))
                 : 0f;
@@ -386,8 +399,9 @@ namespace DeepDive.Network
         {
             if (!IsServer) return;
             var kind = PlayerActionKind.Harpoon;
+            var effectiveCooldown = P4EquipmentEffectRules.ResolveHarpoonCooldown(harpoonCooldown, EquippedHarpoonLevel.Value);
             var result = actionGate.TryAccept(requestId, kind,
-                Time.realtimeSinceStartupAsDouble, harpoonCooldown);
+                Time.realtimeSinceStartupAsDouble, effectiveCooldown);
             if (result != PlayerActionResult.Accepted)
             {
                 PublishAction(requestId, kind, result);
@@ -403,16 +417,18 @@ namespace DeepDive.Network
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
             var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, harpoonRange), ~0, QueryTriggerInteraction.Ignore))
+            var effectiveRange = P4EquipmentEffectRules.ResolveHarpoonRange(harpoonRange, EquippedHarpoonLevel.Value);
+            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, effectiveRange), ~0, QueryTriggerInteraction.Ignore))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
             }
 
             var target = FindTarget<IHarpoonTarget>(hit.collider);
+            var effectiveDamage = P4EquipmentEffectRules.ResolveHarpoonDamage(harpoonDamage, EquippedHarpoonLevel.Value);
             result = target == null
                 ? PlayerActionResult.InvalidTarget
-                : target.TryApplyHarpoonHit(new HarpoonHit(new PlayerId(OwnerClientId), requestId, Mathf.Max(0f, harpoonDamage)));
+                : target.TryApplyHarpoonHit(new HarpoonHit(new PlayerId(OwnerClientId), requestId, Mathf.Max(0f, effectiveDamage)));
             PublishAction(requestId, kind, result);
             Debug.DrawRay(origin, direction * hit.distance, result == PlayerActionResult.Accepted ? Color.green : Color.yellow, 0.4f);
         }
@@ -541,18 +557,31 @@ namespace DeepDive.Network
         }
 
         // Mert owns purchase/loadout state; Mehmet owns the diver stat effect. This method is
-        // host-only, player-scoped and recomputes from the serialized base so duplicate loadout
-        // delivery or save/load restoration can never stack the oxygen bonus.
+        // host-only, player-scoped and always recomputes from serialized base values. Duplicate
+        // loadout delivery or save/load restoration therefore cannot stack any P4 equipment bonus.
         public bool ApplyLoadoutServer(LoadoutState loadout, EquipmentDefinition[] equippedDefinitions)
         {
             if (!IsServer || vitals == null || loadout.PlayerId.Value != OwnerClientId) return false;
             if (session != null && session.DiveActive) return false;
 
             var player = new PlayerId(OwnerClientId);
-            var resolved = DiverEquipmentRules.ResolveMaxOxygen(maxOxygen, player, loadout, equippedDefinitions);
-            var ownsCamera = DiverEquipmentRules.OwnsEquipmentSlot(player, loadout, equippedDefinitions, "camera");
-            var cameraOwnershipChanged = cameraOwned != ownsCamera;
-            cameraOwned = ownsCamera;
+            var resolvedOxygen = DiverEquipmentRules.ResolveMaxOxygen(maxOxygen, player, loadout, equippedDefinitions);
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(player, loadout, equippedDefinitions);
+
+            var nextCameraTier = (byte)capabilities.CameraTier;
+            var nextFinsLevel = LevelByte(capabilities.FinsLevel);
+            var nextBagLevel = LevelByte(capabilities.BagLevel);
+            var nextHarpoonLevel = LevelByte(capabilities.HarpoonLevel);
+            var capabilitiesChanged = EquippedCameraTier.Value != nextCameraTier ||
+                                      EquippedFinsLevel.Value != nextFinsLevel ||
+                                      EquippedBagLevel.Value != nextBagLevel ||
+                                      EquippedHarpoonLevel.Value != nextHarpoonLevel;
+
+            EquippedCameraTier.Value = nextCameraTier;
+            EquippedFinsLevel.Value = nextFinsLevel;
+            EquippedBagLevel.Value = nextBagLevel;
+            EquippedHarpoonLevel.Value = nextHarpoonLevel;
+            cameraOwned = capabilities.HasCamera;
 
             if (!cameraOwned)
             {
@@ -561,10 +590,12 @@ namespace DeepDive.Network
                     requestedEquipment = HeldEquipmentMode.Harpoon;
             }
 
-            var changed = vitals.SetMaxOxygen(resolved, refill: true);
+            var oxygenChanged = vitals.SetMaxOxygen(resolvedOxygen, refill: true);
             PublishVitals();
-            return changed || cameraOwnershipChanged;
+            return oxygenChanged || capabilitiesChanged;
         }
+
+        private static byte LevelByte(int level) => (byte)Mathf.Clamp(level, 0, byte.MaxValue);
 
         public bool ApplyDamageServer(float amount)
         {

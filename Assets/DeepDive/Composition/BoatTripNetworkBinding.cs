@@ -93,6 +93,18 @@ namespace DeepDive.Composition
             boatController.Initialize(networkManager, this);
         }
 
+        // P4.3 seam consumed by Mert's authoritative active-vehicle selection. This method owns no
+        // unlock/ownership decision; it only applies the already-approved physical profile to
+        // Mehmet's host mover. The authoritative trip state must already carry the same boatId so
+        // clients never observe old-trip state paired with a newly selected hull.
+        public bool ConfigureActiveVehiclePhysicalProfile(string boatId, BoatHullKind hullKind, string dockRouteId)
+        {
+            if (!IsHost) return false;
+            EnsureRuntimeObjects();
+            if (tripManager == null || tripManager.State.BoatId != boatId) return false;
+            return boatController != null && boatController.ConfigureActiveVehicle(boatId, hullKind, dockRouteId);
+        }
+
         private void RefreshWorldRoute()
         {
             if (!IsHost || boatController == null) return;

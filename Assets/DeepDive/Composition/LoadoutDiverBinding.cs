@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using DeepDive.Economy;
+using DeepDive.Inventory;
 using DeepDive.Network;
 using DeepDive.Session;
 using Unity.Netcode;
@@ -15,6 +16,7 @@ namespace DeepDive.Composition
         private SessionNetworkAdapter adapter;
         private NetworkManager manager;
         private EconomyManager economy;
+        private InventoryManager inventory;
         private bool subscribed;
         private double nextSync;
 
@@ -77,6 +79,8 @@ namespace DeepDive.Composition
                 economy = current;
             }
 
+            if (inventory == null) inventory = GetComponent<InventoryManager>();
+
             if (economy != null && !subscribed)
             {
                 economy.OnLoadoutChanged += LoadoutChanged;
@@ -111,7 +115,14 @@ namespace DeepDive.Composition
                 if (economy.TryGetEquipmentDefinition(equipmentId, out var definition))
                     definitions.Add(definition);
 
-            diver.ApplyLoadoutServer(loadout, definitions.ToArray());
+            var definitionArray = definitions.ToArray();
+            diver.ApplyLoadoutServer(loadout, definitionArray);
+
+            // Inventory keeps the actual per-player bag authority, but the level is derived from
+            // the same authoritative loadout/catalog as NetworkPlayer. Re-sync replaces the level;
+            // it never increments, so reconnect/save restore cannot multiply capacity.
+            var capabilities = DiverEquipmentRules.ResolveCapabilities(player, loadout, definitionArray);
+            inventory?.SetBagUpgradeLevel(player, capabilities.BagLevel);
         }
 
         private void Unsubscribe()

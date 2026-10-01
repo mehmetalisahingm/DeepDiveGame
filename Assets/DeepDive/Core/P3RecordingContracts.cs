@@ -24,13 +24,16 @@ namespace DeepDive.Core.Contracts
         public readonly string DiveId;
         public readonly PlayerId PlayerId;
         public readonly IRecordingTarget Target;
+        public readonly CameraTier CameraTier;
 
-        public RecordingCandidate(ulong requestId, string diveId, PlayerId playerId, IRecordingTarget target)
+        public RecordingCandidate(ulong requestId, string diveId, PlayerId playerId, IRecordingTarget target,
+            CameraTier cameraTier = CameraTier.None)
         {
             RequestId = requestId;
             DiveId = diveId ?? string.Empty;
             PlayerId = playerId;
             Target = target;
+            CameraTier = cameraTier;
         }
     }
 

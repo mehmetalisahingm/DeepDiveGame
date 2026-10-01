@@ -25,7 +25,7 @@ namespace DeepDive.Inventory
     [RequireComponent(typeof(SessionManager))]
     public class InventoryManager : MonoBehaviour
     {
-        // 20kg placeholder; retune with Mehmet/Utku once real species weights exist (P2-B).
+        // 20kg placeholder; P4.3 bag upgrades add capacity through P4EquipmentEffectRules.
         public const int CapacityGrams = 20000;
 
         public event Action<PlayerId> OnBagChanged;
@@ -33,6 +33,7 @@ namespace DeepDive.Inventory
 
         private SessionManager _session;
         private readonly Dictionary<PlayerId, PlayerBag> _bags = new Dictionary<PlayerId, PlayerBag>();
+        private readonly Dictionary<PlayerId, int> _bagUpgradeLevels = new Dictionary<PlayerId, int>();
         private readonly Dictionary<string, CaptureResult> _captures = new Dictionary<string, CaptureResult>();
         private string _trackedDiveId = string.Empty;
         private SessionPhase _previousPhase = SessionPhase.Lobby;
@@ -46,6 +47,25 @@ namespace DeepDive.Inventory
             _bags.TryGetValue(player, out var bag)
                 ? (bag.WeightGrams, bag.Items.Count, bag.SafelyReturned)
                 : (0, 0, false);
+
+        public int CapacityFor(PlayerId player)
+        {
+            _bagUpgradeLevels.TryGetValue(player, out var level);
+            return P4EquipmentEffectRules.ResolveBagCapacityGrams(CapacityGrams, level);
+        }
+
+        // Host-side composition derives this level from Mert's authoritative loadout catalog.
+        // Setting a level replaces the previous value; it never increments, so replay/reconnect
+        // cannot stack carrying capacity.
+        public bool SetBagUpgradeLevel(PlayerId player, int level)
+        {
+            var safeLevel = Math.Max(0, level);
+            _bagUpgradeLevels.TryGetValue(player, out var previous);
+            if (previous == safeLevel) return false;
+            _bagUpgradeLevels[player] = safeLevel;
+            OnBagChanged?.Invoke(player);
+            return true;
+        }
 
         // For anything (e.g. EconomyManager pricing a sale) that needs the full capture a
         // DiveSummary preserved/lost id refers to, without DiveSummary itself carrying full
@@ -100,7 +120,7 @@ namespace DeepDive.Inventory
             if (!_bags.TryGetValue(player, out var bag)) return InventoryActionResult.PlayerInactive;
             if (capture.DiveId != Session.State.DiveId) return InventoryActionResult.InvalidTarget;
             if (_captures.ContainsKey(capture.CaptureId)) return InventoryActionResult.AlreadyClaimed;
-            if (bag.WeightGrams + capture.WeightGrams > CapacityGrams) return InventoryActionResult.InventoryFull;
+            if (bag.WeightGrams + capture.WeightGrams > CapacityFor(player)) return InventoryActionResult.InventoryFull;
 
             _captures[capture.CaptureId] = capture;
             bag.Items.Add(capture);
@@ -133,7 +153,11 @@ namespace DeepDive.Inventory
             var stale = new List<PlayerId>();
             foreach (var player in _bags.Keys)
                 if (!roster.ContainsKey(player)) stale.Add(player);
-            foreach (var player in stale) _bags.Remove(player);
+            foreach (var player in stale)
+            {
+                _bags.Remove(player);
+                _bagUpgradeLevels.Remove(player);
+            }
         }
 
         private void HandleSessionStateChanged(SessionState state)
