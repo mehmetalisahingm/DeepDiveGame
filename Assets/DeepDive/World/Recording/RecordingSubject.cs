@@ -18,7 +18,18 @@ namespace DeepDive.World
         // subject is misconfigured and can never produce a payable take.
         string SubjectId { get; }
 
+        // A start without a camera tier, as every pre-P4.3 caller makes it: the take films with
+        // the base camera, the same meaning CameraTier.None has.
         PlayerActionResult TryStartTake(PlayerId player, ulong requestId);
+
+        // A start with the tier the host resolved for this player (RecordingCandidate.CameraTier).
+        // The tier is fixed on the take for its whole life; stop takes none on purpose.
+        //
+        // A default body rather than a new abstract member, so implementations written before
+        // P4.3 - Composition's test doubles among them - keep compiling unchanged and are filmed
+        // as Basic, which is exactly what a tier-less start means. RecordingSubject implements it.
+        PlayerActionResult TryStartTake(PlayerId player, ulong requestId, CameraTier tier) =>
+            TryStartTake(player, requestId);
 
         // Accepted means the stop was processed, not that anything was earned: the take may
         // carry Quality 0, and a replayed requestId returns the earlier result with an empty
@@ -70,6 +81,20 @@ namespace DeepDive.World
         private readonly RaycastHit[] occlusionBuffer = new RaycastHit[8];
         private string resolvedSubjectId = "";
 
+        // Light and depth for the camera tier's low-light rule (P4.3). The water is WaterField's
+        // live body list - the same one DepthBandId is classified against - so there is no second
+        // surface number; null means no water was found and the subject reads as lit.
+        private IReadOnlyList<WaterBody> water;
+        private IRecordingLightSource lightSource;
+
+        // The fallback is reported once per play session, not once per fish: every subject would
+        // otherwise repeat the same line. A plain log, not a warning - a scene without a day
+        // authority (every P3 smoke) is a supported setup, not a fault.
+        private static bool reportedLightFallback;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetLightFallbackReport() => reportedLightFallback = false;
+
         public string SubjectId => resolvedSubjectId;
 
         // What SubjectId will become once the host spawns this subject. Readable in the editor
@@ -120,6 +145,21 @@ namespace DeepDive.World
             // wiring step can be forgotten.
             session = new RecordingSession(resolvedSubjectId, quality.Tiers,
                 GetComponent<IRecordingWindow>());
+
+            var field = FindFirstObjectByType<WaterField>();
+            water = field != null ? field.Bodies : null;
+
+            // Same idiom as the window: a light source on this object wins (a scene that wants
+            // to force the light), otherwise the host's campaign day.
+            lightSource = TryGetComponent<IRecordingLightSource>(out var ownLight)
+                ? ownLight
+                : RecordingLight.CampaignDay;
+            if (ReferenceEquals(lightSource, RecordingLight.CampaignDay) &&
+                !RecordingLight.IsDayProviderBound && !reportedLightFallback)
+            {
+                reportedLightFallback = true;
+                Debug.Log("recording light: day provider not bound, using daylight fallback", this);
+            }
         }
 
         // A despawned subject cannot be filmed any further, and there is no half-recording to
@@ -153,14 +193,17 @@ namespace DeepDive.World
             return species == null ? null : species.SpeciesId;
         }
 
-        public PlayerActionResult TryStartTake(PlayerId player, ulong requestId)
+        public PlayerActionResult TryStartTake(PlayerId player, ulong requestId) =>
+            TryStartTake(player, requestId, CameraTier.Basic);
+
+        public PlayerActionResult TryStartTake(PlayerId player, ulong requestId, CameraTier tier)
         {
             // IsSpawned first: reading IsServer off an unspawned behaviour depends on a live
             // NetworkManager. Only the host opens a take.
             if (!IsSpawned || !IsServer) return PlayerActionResult.Rejected;
             if (session == null) return PlayerActionResult.InvalidTarget;
 
-            var result = session.TryStart(DiveContext.Source, player, requestId);
+            var result = session.TryStart(DiveContext.Source, player, requestId, tier);
             SyncRecorder(player);
             return result;
         }
@@ -202,6 +245,10 @@ namespace DeepDive.World
             var deltaTime = Time.fixedDeltaTime;
             var subject = framingAnchor != null ? framingAnchor.position : transform.position;
 
+            // The light belongs to the subject, not to whoever films it: resolved once per tick
+            // at the subject's own depth, then judged per diver against their take's tier.
+            var light01 = RecordingCameraRules.Light01(RecordingLight.Resolve(lightSource), SubjectDepth(subject));
+
             for (var i = recorders.Count - 1; i >= 0; i--)
             {
                 var player = new PlayerId(recorders[i]);
@@ -216,11 +263,17 @@ namespace DeepDive.World
                 if (!RecorderViews.TryGetActive(player, out var view)) continue;
 
                 var eye = view.EyePosition;
-                var sample = RecordingFraming.Evaluate(eye, view.EyeForward, view.VerticalFieldOfViewDegrees,
-                    subject, subjectRadiusMetres, IsOccluded(eye, subject), tuning);
+                var sample = RecordingCameraRules.Sample(eye, view.EyeForward, view.VerticalFieldOfViewDegrees,
+                    subject, subjectRadiusMetres, IsOccluded(eye, subject), tuning, session.TierFor(player),
+                    light01);
                 session.Tick(player, deltaTime, sample);
             }
         }
+
+        // Off the water (or with no WaterField at all) the subject counts as at the surface, which
+        // is fully lit: only water that is really there can make a shot too dark.
+        private float SubjectDepth(Vector3 subject) =>
+            WaterDepth.TryDepthAt(water, subject, out var depth) ? depth : 0f;
 
         // Solid geometry between the camera and the subject makes the shot worthless. Hits on
         // this subject's own hierarchy are skipped: its collider sits between the eye and its

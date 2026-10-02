@@ -12,7 +12,11 @@ namespace DeepDive.World
         TooClose,     // inside the near band: the subject overfills or clips the camera
         TooFar,       // past the far band, where water fog makes the shot worthless
         OffFrame,     // outside the framing cone: the subject is not actually in shot
-        TooSmall      // in frame but too few pixels to identify the animal
+        TooSmall,     // in frame but too few pixels to identify the animal
+        // P4.3: appended, never inserted - the values above keep their numbers. Not decided by
+        // Evaluate: RecordingCameraRules.ApplyLight turns an otherwise valid frame into this when
+        // the subject is darker than the take's camera tier can film.
+        TooDark
     }
 
     // One instant of a running recording, as judged by the framing rules. Carries the measured
