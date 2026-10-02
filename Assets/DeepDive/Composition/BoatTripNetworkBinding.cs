@@ -22,6 +22,7 @@ namespace DeepDive.Composition
         private NetworkManager networkManager;
         private EconomyManager economy;
         private BoatTripManager tripManager;
+        private System.Func<string> activeVehicleProvider;
         private NetworkBoatController boatController;
         private bool bound;
         private double nextMirror;
@@ -116,7 +117,9 @@ namespace DeepDive.Composition
         {
             if (bound || economy == null || tripManager == null || boatController == null) return;
 
-            tripManager.Configure(() => economy.BoatRepair.Status, this);
+            activeVehicleProvider = () => economy.ActiveVehicleId;
+            tripManager.Configure(() => economy.BoatRepair.Status, this, activeVehicleProvider);
+            ActiveVehicle.Bind(activeVehicleProvider);
             tripManager.OnTripChanged += PublishStateAndPose;
             networkManager.OnClientDisconnectCallback += HandleClientDisconnected;
             BoatBoardingPhysicalInteraction.Bind(TryBoardNearest, TryDisembark);
@@ -139,6 +142,7 @@ namespace DeepDive.Composition
                 if (networkManager != null)
                     networkManager.OnClientDisconnectCallback -= HandleClientDisconnected;
                 BoatBoardingPhysicalInteraction.Unbind(TryBoardNearest, TryDisembark);
+                if (activeVehicleProvider != null) { ActiveVehicle.Unbind(activeVehicleProvider); activeVehicleProvider = null; }
             }
 
             bound = false;

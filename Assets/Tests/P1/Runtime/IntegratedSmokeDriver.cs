@@ -71,6 +71,12 @@ namespace DeepDive.P1.Lab
             public string acceptReloadClipId = "", acceptReloadRecordingId = "", acceptReloadHash = "";
             public long acceptReloadBytes;
             public int acceptReloadClips, acceptReloadPublications, acceptReloadBalance, acceptReloadIncome, acceptReloadViews, acceptReloadFollowers, acceptReloadDay, acceptReloadExploreObs;
+            public bool fleetSeeded, fleetShopOpened, fleetTierGateRefused, fleetTiersBought, fleetVendorOpened, fleetMotorBought, fleetMotorDuplicateRefused,
+                fleetResearchBought, fleetHostSeated, fleetSeatBlocked, fleetSelected, fleetMirrorOwned, fleetMirrorActive, fleetActiveSeam, fleetParkedRefused,
+                fleetHostChecks, fleetSavedOnDisk, fleetReloadClean, fleetHostDone, fleetReloadPass;
+            public int fleetBalance, fleetReloadBalance, fleetReloadOwned;
+            public string fleetReloadActive = "", fleetReloadTripBoat = "";
+            public List<string> fleetTrace = new List<string>();
             public bool exploreMirrorSeen, exploreEncyclopediaSilhouette, exploreEncyclopediaNameHidden, exploreReloaded;
             public int exploreFogCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
             public string exploreEncyclopediaSpecies = "", exploreSightingOutcome = "", exploreSightingReplay = "";
@@ -99,6 +105,10 @@ namespace DeepDive.P1.Lab
         private bool AcceptanceReload => Arg("-p4-acceptance-reload") == "1";
         private bool Town => Arg("-p3-town") == "1";
         private bool Storage => Arg("-p4-storage") == "1";
+        // #109 fleet: real walking to the real equipment shop and harbor vendor, real purchase/select RPCs from two processes,
+        // then a second host launch on the same campaign file. The money is a labelled seed (like SeedRecorderCamera).
+        private bool Fleet => Arg("-p4-fleet") == "1";
+        private bool FleetReload => Arg("-p4-fleet-reload") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -153,7 +163,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -223,6 +233,7 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (FleetReload) { if (host && HostFleetReload()) { Finish(); yield break; } yield return null; continue; }
                 if (AcceptanceReload) { if (host && HostAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
                 if (MediaReload) { if (host && HostMediaReload()) { Finish(); yield break; } yield return null; continue; }
                 if (DayReload) { if (host && HostDayReload()) { Finish(); yield break; } yield return null; continue; }
@@ -230,6 +241,7 @@ namespace DeepDive.P1.Lab
                 if (Explore) { if (host) HostExplore(state); ObserveExplore(); }
                 if (MediaFlow && host) { HostSubmitMediaClips(state); HostMediaChecks(); }
                 if (Acceptance && host) HostAcceptance(state);
+                if (Fleet && host) HostFleet(state);
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
@@ -248,7 +260,7 @@ namespace DeepDive.P1.Lab
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -257,7 +269,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                var leaveDue = Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
@@ -279,6 +291,11 @@ namespace DeepDive.P1.Lab
                 (result.acceptOwner || result.acceptNotOwnerRefused) &&
                 (!host || (result.acceptPlayable && result.acceptNpcQueuedBefore && result.acceptNpcWithdrawn && result.acceptNpcRefused && result.acceptNoNpcPay &&
                     result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone));
+            if (Fleet) result.passed &= result.fleetShopOpened && result.fleetTierGateRefused && result.fleetTiersBought && result.fleetVendorOpened &&
+                result.fleetMirrorOwned && result.fleetMirrorActive && result.fleetActiveSeam &&
+                (!host || (result.fleetSeeded && result.fleetMotorBought && result.fleetHostSeated && result.fleetParkedRefused && result.fleetHostChecks &&
+                    result.fleetSavedOnDisk && result.fleetReloadClean && result.fleetHostDone)) &&
+                (host || (result.fleetMotorDuplicateRefused && result.fleetResearchBought && result.fleetSeatBlocked && result.fleetSelected));
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
@@ -351,6 +368,7 @@ namespace DeepDive.P1.Lab
                 else if (Acceptance && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
                 else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
+                else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeFleet(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
             }
@@ -1246,6 +1264,214 @@ namespace DeepDive.P1.Lab
             return true;
         }
 
+        // ---- #109 fleet smoke --------------------------------------------------------------------------------
+        private int fleetStep, fleetHostStage;
+        private float fleetStepAt, fleetHostAt, fleetDoneAt, fleetNext, fleetTraceAt;
+        private ulong fleetRequest = 7000;
+        private const int FleetSeedBalance = 5000;
+
+        private void FleetStep(int step)
+        {
+            result.fleetTrace.Add($"step {fleetStep}->{step} t={Time.realtimeSinceStartup - sceneStarted:F1}");
+            fleetStep = step; fleetStepAt = Time.realtimeSinceStartup; townAwaiting = false; townSettleAt = 0;
+        }
+
+        // Sends one request and reports its host answer on a later frame (the host answer arrives through the player's own sync).
+        private bool FleetCall(EconomyPlayerSync sync, Action send, out bool accepted, out string reason)
+        {
+            accepted = false; reason = "";
+            if (!townAwaiting) { townBefore = (int)sync.LastRequestId.Value; townAwaiting = true; send(); return false; }
+            if (!PurchaseAnswered(sync)) return false;
+            townAwaiting = false;
+            accepted = sync.LastAccepted.Value;
+            reason = sync.LastReasonCode.Value.ToString();
+            result.fleetTrace.Add($"answer step={fleetStep} ok={accepted} reason={reason}");
+            return true;
+        }
+
+        private void ProbeFleet(NetworkPlayer local)
+        {
+            var sync = local.GetComponent<EconomyPlayerSync>();
+            var tripSync = local.GetComponent<BoatTripPlayerSync>();
+            var cam = local.GetComponentInChildren<Camera>(true);
+            if (sync == null || cam == null || tripSync == null) return;
+            var host = adapter.IsAuthority;
+            var now = Time.realtimeSinceStartup;
+            if (fleetStepAt == 0) fleetStepAt = now;
+            if (now >= fleetTraceAt && result.fleetTrace.Count < 60)
+            {
+                fleetTraceAt = now + 3f;
+                var q = local.transform.position;
+                result.fleetTrace.Add($"step={fleetStep} pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) sw={local.Swimming.Value} shop={sync.ActiveServiceId.Value} mask={sync.FleetOwnedMask.Value} active={sync.ActiveVehicleId.Value} seated={tripSync.SeatedCount.Value} bal={sync.SharedBalance.Value}");
+            }
+            if (fleetStep < 90 && now - fleetStepAt > 60f)
+            {
+                result.errors.Add($"fleet step {fleetStep} timeout mask={sync.FleetOwnedMask.Value} active={sync.ActiveVehicleId.Value} seated={tripSync.SeatedCount.Value} last={sync.LastReasonCode.Value}");
+                FleetStep(99);
+            }
+            bool ok; string reason;
+
+            switch (fleetStep)
+            {
+                case 0:   // equipment shop: really walk there and interact
+                    if (GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) InteractEvery(local, 1.2f);
+                    if (sync.ShopOpen) { result.fleetShopOpened = true; FleetStep(1); }
+                    return;
+                case 1:   // a tier cannot be bought on top of nothing
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraAdvancedId), out ok, out reason)) return;
+                    result.fleetTierGateRefused = !ok && reason == "RequirementMissing";
+                    if (!result.fleetTierGateRefused) result.errors.Add($"tier gate answer ok={ok} reason={reason}");
+                    FleetStep(2); return;
+                case 2:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    if (!ok) result.errors.Add("camera-basic refused: " + reason);
+                    FleetStep(3); return;
+                case 3:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraAdvancedId), out ok, out reason)) return;
+                    if (!ok) result.errors.Add("camera-advanced refused: " + reason);
+                    FleetStep(4); return;
+                case 4:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.FinsId), out ok, out reason)) return;
+                    result.fleetTiersBought = ok;
+                    if (!ok) result.errors.Add("fins refused: " + reason);
+                    FleetStep(5); return;
+                case 5:   // harbor vendor: walk along the beach to the fourth NPC and interact
+                    if (GoToService(local, cam, TownServiceCatalog.VehicleVendorId)) InteractEvery(local, 1.2f);
+                    if (sync.VendorOpen) { result.fleetVendorOpened = true; FleetStep(host ? 6 : 7); }
+                    return;
+                case 6:   // host: buy the motorboat (needs the repaired sandal the seed repaired through the real part seam)
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.fleetMotorBought = ok;
+                    if (!ok) result.errors.Add("motorboat refused: " + reason);
+                    FleetStep(10); return;
+                case 7:   // guest: once the motorboat is owned, buying it again is refused (one vehicle, one charge)
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if ((sync.FleetOwnedMask.Value & 2) == 0) return;
+                    if (!FleetCall(sync, () => sync.RequestPurchase(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.fleetMotorDuplicateRefused = !ok && reason == "AlreadyProcessed";
+                    if (!result.fleetMotorDuplicateRefused) result.errors.Add($"duplicate motorboat answer ok={ok} reason={reason}");
+                    FleetStep(8); return;
+                case 8:   // guest: the research boat is available only after the motorboat
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(VehicleIds.ResearchBoat), out ok, out reason)) return;
+                    result.fleetResearchBought = ok;
+                    if (!ok) result.errors.Add("research boat refused: " + reason);
+                    FleetStep(11); return;
+                case 11:  // guest: while the host sits in the sandal the swap is refused; once it stepped off it works
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (tripSync.SeatedCount.Value <= 0) return;
+                    if (!FleetCall(sync, () => sync.RequestSelectVehicle(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.fleetSeatBlocked = !ok && reason == "SeatsOccupied";
+                    if (!result.fleetSeatBlocked) result.errors.Add($"seated swap answer ok={ok} reason={reason}");
+                    FleetStep(12); return;
+                case 12:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (tripSync.SeatedCount.Value > 0) return;
+                    if (!FleetCall(sync, () => sync.RequestSelectVehicle(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.fleetSelected = ok;
+                    if (!ok) result.errors.Add("select motorboat refused: " + reason);
+                    FleetStep(10); return;
+                case 10:  // everybody: the mirrors and the seam follow the host's decisions
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    result.fleetMirrorOwned |= sync.FleetOwnedMask.Value == 7;
+                    result.fleetMirrorActive |= sync.ActiveVehicleId.Value.ToString() == VehicleIds.Motorboat;
+                    result.fleetActiveSeam |= ActiveVehicle.BoatId == VehicleIds.Motorboat;
+                    if (result.fleetMirrorOwned && result.fleetMirrorActive && result.fleetActiveSeam) FleetStep(90);
+                    return;
+                default:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+            }
+        }
+
+        // Host: the labelled money seed + the real free-part seam repair the sandal; later it sits in the sandal for a while (real
+        // trip authority) so the guest's swap request meets a real seated player, then verifies the authoritative state and the file.
+        private void HostFleet(SessionState state)
+        {
+            var economy = adapter.GetComponent<EconomyManager>();
+            var trip = adapter.GetComponent<BoatTripManager>();
+            if (economy == null || trip == null) return;
+            var host = new PlayerId(0);
+            var now = Time.realtimeSinceStartup;
+
+            switch (fleetHostStage)
+            {
+                case 0:
+                    if (state.Phase != SessionPhase.Prep || adapter.Connection.IsSceneLoading) return;
+                    var seed = economy.ExportSaveData("smoke", "smoke");
+                    seed.SharedBalance = FleetSeedBalance;
+                    var restored = economy.TryRestore(seed);
+                    var repaired = true;
+                    foreach (var part in BoatRepairParts.All) repaired &= BoatPartClaim.TryClaimFound(host, part, fleetRequest++).Accepted;
+                    result.fleetSeeded = restored && repaired && economy.Fleet.IsOwned(VehicleIds.Rowboat) && economy.SharedBalance == FleetSeedBalance;
+                    if (!result.fleetSeeded) result.errors.Add($"fleet seed restored={restored} repaired={repaired} balance={economy.SharedBalance}");
+                    fleetHostStage = 1; return;
+                case 1:   // the research boat just got bought: the host takes a seat in the (still active) sandal
+                    if (!economy.Fleet.IsOwned(VehicleIds.ResearchBoat)) return;
+                    result.fleetHostSeated = BoatBoarding.TryBoard(host, VehicleIds.Rowboat, BoatTripIds.Seat0, fleetRequest++).Accepted;
+                    if (!result.fleetHostSeated) result.errors.Add("host could not take a seat in the sandal");
+                    fleetHostAt = now; fleetHostStage = 2; return;
+                case 2:   // hold the seat long enough for the guest's refused swap, then step off
+                    if (now - fleetHostAt < 8f) return;
+                    BoatBoarding.TryDisembark(host, fleetRequest++);
+                    fleetHostStage = 3; return;
+                case 3:
+                    if (economy.ActiveVehicleId != VehicleIds.Motorboat) return;
+                    var guest = adapter.Session.Roster.Keys.First(k => k.Value != 0);
+                    // The parked sandal can no longer be boarded: the trip authority serves the active motorboat.
+                    result.fleetParkedRefused = BoatBoarding.TryBoard(host, VehicleIds.Rowboat, BoatTripIds.Seat0, fleetRequest++).ReasonCode == "InvalidTarget" &&
+                        trip.State.BoatId == VehicleIds.Motorboat;
+                    var tiers = new[] { EconomyManager.CameraBasicId, EconomyManager.CameraAdvancedId, EconomyManager.FinsId };
+                    var expectedBalance = FleetSeedBalance - 2 * (150 + 400 + 220) - VehicleCatalog.MotorboatPrice - VehicleCatalog.ResearchBoatPrice;
+                    result.fleetBalance = economy.SharedBalance;
+                    result.fleetHostChecks = economy.SharedBalance == expectedBalance &&
+                        economy.Fleet.OwnedBoatIds.Count == 3 && economy.ActiveVehicleId == VehicleIds.Motorboat &&
+                        tiers.All(economy.LoadoutFor(host).Contains) && economy.LoadoutFor(host).Count == 3 &&
+                        tiers.All(economy.LoadoutFor(guest).Contains) && economy.LoadoutFor(guest).Count == 3 &&
+                        economy.TryPurchaseVehicle(guest, VehicleIds.ResearchBoat, fleetRequest++).ReasonCode == "AlreadyProcessed" &&
+                        economy.SharedBalance == expectedBalance;
+                    if (!result.fleetHostChecks) result.errors.Add($"fleet host checks balance={economy.SharedBalance} expected={expectedBalance} owned={economy.Fleet.OwnedBoatIds.Count} active={economy.ActiveVehicleId}");
+
+                    var store = adapter.GetComponent<EconomySaveStore>();
+                    var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+                    result.fleetSavedOnDisk = disk.HasFleet && disk.FleetPurchasedBoatIds.SequenceEqual(new[] { VehicleIds.Motorboat, VehicleIds.ResearchBoat }) &&
+                        disk.FleetActiveBoatId == VehicleIds.Motorboat && disk.SharedBalance == economy.SharedBalance && disk.SchemaVersion == EconomySaveData.CurrentSchemaVersion;
+                    var balance = economy.SharedBalance;
+                    result.fleetReloadClean = store.LoadNow() && economy.Fleet.OwnedBoatIds.Count == 3 && economy.ActiveVehicleId == VehicleIds.Motorboat &&
+                        economy.SharedBalance == balance && economy.TrySelectVehicle(host, VehicleIds.Motorboat, fleetRequest++).ReasonCode == "AlreadyProcessed";
+                    fleetDoneAt = now; result.fleetHostDone = true; fleetHostStage = 90; return;
+            }
+        }
+
+        // Second launch of the host on the SAME campaign file: ownership, active selection and money come back, nothing was
+        // bought again, and "movement" did not survive (the trip authority is docked and empty, serving the active boat).
+        private bool HostFleetReload()
+        {
+            var economy = adapter.GetComponent<EconomyManager>();
+            var trip = adapter.GetComponent<BoatTripManager>();
+            if (economy == null || trip == null || adapter.Connection.Status != ConnectionStatus.Connected) return false;
+            var host = new PlayerId(0);
+            result.fleetReloadBalance = economy.SharedBalance;
+            result.fleetReloadOwned = economy.Fleet.OwnedBoatIds.Count;
+            result.fleetReloadActive = economy.ActiveVehicleId;
+            var state = trip.State;
+            result.fleetReloadTripBoat = state.BoatId;
+            var before = economy.SharedBalance;
+            result.fleetReloadPass = economy.Fleet.OwnedBoatIds.SequenceEqual(VehicleIds.All) && economy.ActiveVehicleId == VehicleIds.Motorboat &&
+                state.BoatId == VehicleIds.Motorboat && state.Phase == BoatTripPhase.Docked && state.Seats.Count == 0 &&
+                economy.TryPurchaseVehicle(host, VehicleIds.ResearchBoat, fleetRequest++).ReasonCode == "AlreadyProcessed" &&
+                economy.TryPurchaseVehicle(host, VehicleIds.Motorboat, fleetRequest++).ReasonCode == "AlreadyProcessed" &&
+                economy.SharedBalance == before && economy.LoadoutFor(host).Contains(EconomyManager.CameraAdvancedId) &&
+                economy.TrySelectVehicle(host, VehicleIds.Motorboat, fleetRequest++).ReasonCode == "AlreadyProcessed";
+            result.passed = result.fleetReloadPass && result.errors.Count == 0;
+            return true;
+        }
+
         // ---- #106 acceptance (no fixture) ------------------------------------------------------------------
         private int acceptStage, acceptHostStage, acceptBalanceBase;
         private float acceptStageAt, acceptHostAt, acceptDoneAt;
@@ -1887,7 +2113,9 @@ namespace DeepDive.P1.Lab
             if (anchor == null) { local.SubmitLocalInput(Vector3.zero, 0); return false; }
             // Each player gets its own spot in front of the NPC: two bodies cannot share one standing point.
             // Keyed on host vs guest, not on the client id: a rejoining guest gets a new id.
-            var lateral = anchor.transform.right * (adapter.IsAuthority ? 0f : 0.9f);
+            // The harbor vendor is the last NPC of the row and the host is already standing in front of it when the guest arrives
+            // from the west: the guest takes the west side there, otherwise it would have to walk THROUGH the host.
+            var lateral = anchor.transform.right * (adapter.IsAuthority ? 0f : serviceId == TownServiceCatalog.VehicleVendorId ? -0.9f : 0.9f);
             var stand = anchor.WorldPosition + anchor.transform.forward * 1.6f + lateral;
             var toStand = stand - local.transform.position; toStand.y = 0;
             if (toStand.magnitude > 0.35f)

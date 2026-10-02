@@ -48,6 +48,7 @@ namespace DeepDive.Economy
                 case ServicePointType.RecordingBuyer:
                     return Report(player, service, requestId, economy.TryTurnInRecordings(player, requestId));
                 case ServicePointType.EquipmentShop:
+                case ServicePointType.VehicleVendor:
                     shopSessions[player] = service;
                     Publish(player, new TownServiceOutcome(service.ServiceId, service.ServiceType, requestId,
                         true, "ShopOpen", 0, 0));
@@ -69,12 +70,44 @@ namespace DeepDive.Economy
                 return TransactionResult.Reject(requestId, "NotAtShop", economy.Revision);
             }
 
-            var result = BoatRepairParts.IsPart(itemId)
-                ? economy.TryContributeBoatPart(player, itemId, BoatPartSource.Purchased, requestId)
-                : economy.TryPurchase(player, itemId, requestId);
+            // Each shop sells its own goods: boats at the harbor vendor, equipment and boat parts at the equipment shop.
+            var isVehicle = VehicleIds.IsVehicle(itemId);
+            if (isVehicle != (shop.ServiceType == ServicePointType.VehicleVendor))
+                return RejectAtShop(player, shop, requestId, "NotAtShop");
+
+            var result = isVehicle
+                ? economy.TryPurchaseVehicle(player, itemId, requestId)
+                : BoatRepairParts.IsPart(itemId)
+                    ? economy.TryContributeBoatPart(player, itemId, BoatPartSource.Purchased, requestId)
+                    : economy.TryPurchase(player, itemId, requestId);
 
             Publish(player, new TownServiceOutcome(shop.ServiceId, shop.ServiceType, requestId, result.Accepted,
                 result.ReasonCode, 0, 0));
+            return result;
+        }
+
+        // Changing the active vehicle happens at the harbor vendor too: an open vendor session and the player in range. The
+        // economy then applies the fleet rules (owned, not already active, docked and empty, day not closing).
+        public TransactionResult HandleSelectVehicle(PlayerId player, string boatId, ulong requestId)
+        {
+            if (!townOpen()) return TransactionResult.Reject(requestId, "WrongPhase", economy.Revision);
+            if (!canServe(player)) return TransactionResult.Reject(requestId, "PlayerInactive", economy.Revision);
+            if (!shopSessions.TryGetValue(player, out var shop) || shop.ServiceType != ServicePointType.VehicleVendor || !inRange(player, shop))
+            {
+                CloseShop(player);
+                return TransactionResult.Reject(requestId, "NotAtShop", economy.Revision);
+            }
+
+            var result = economy.TrySelectVehicle(player, boatId, requestId);
+            Publish(player, new TownServiceOutcome(shop.ServiceId, shop.ServiceType, requestId, result.Accepted,
+                result.ReasonCode, 0, 0));
+            return result;
+        }
+
+        private TransactionResult RejectAtShop(PlayerId player, ServicePointDefinition shop, ulong requestId, string reason)
+        {
+            var result = TransactionResult.Reject(requestId, reason, economy.Revision);
+            Publish(player, new TownServiceOutcome(shop.ServiceId, shop.ServiceType, requestId, false, reason, 0, 0));
             return result;
         }
 
