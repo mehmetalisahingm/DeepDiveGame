@@ -90,8 +90,9 @@ namespace DeepDive.World.Editor
 
         // --- The region ------------------------------------------------------------------------
 
-        public const float RegionExtent = 15f;
-        public const string RegionId = "region-near-1";
+        // P4.3 (#108) grew the region north over the reef and deep water. Its extents live in DiveTestAreaRegion so
+        // this script and the P4.3 one write the same numbers; re-running this one can no longer shrink the map.
+        public const string RegionId = DiveTestAreaRegion.RegionId;
 
         // --- The hull the route has to fit ------------------------------------------------------
 
@@ -193,7 +194,8 @@ namespace DeepDive.World.Editor
                 $"dockAnchor={DockAnchorPosition} route={BoatTripIds.NearRouteId} " +
                 $"waypoints={route.Waypoints.Count} berth={WaypointPositions[0]} " +
                 $"anchor={AnchorPosition} boarding={BoardingPosition} " +
-                $"region={RegionId} extent={RegionExtent} surfaceY={surfaceY} " +
+                $"region={RegionId} bounds=x[{DiveTestAreaRegion.MinX},{DiveTestAreaRegion.MaxX}] " +
+                $"z[{DiveTestAreaRegion.MinZ},{DiveTestAreaRegion.MaxZ}] surfaceY={surfaceY} " +
                 $"waterVolumes={field.VolumeCount}");
         }
 
@@ -325,11 +327,12 @@ namespace DeepDive.World.Editor
             root.transform.localScale = Vector3.one;
 
             var region = root.GetComponent<DiveRegionField>() ?? root.AddComponent<DiveRegionField>();
-            region.Configure(RegionId, -RegionExtent, RegionExtent, -RegionExtent, RegionExtent);
+            region.Configure(RegionId, DiveTestAreaRegion.MinX, DiveTestAreaRegion.MaxX,
+                DiveTestAreaRegion.MinZ, DiveTestAreaRegion.MaxZ);
             EditorUtility.SetDirty(region);
 
             if (!region.Bounds.IsValid)
-                throw new InvalidOperationException($"P3_ROUTE_REGION_INVALID extent={RegionExtent}");
+                throw new InvalidOperationException($"P3_ROUTE_REGION_INVALID region={RegionId}");
 
             RequireNotNetworked(root, RegionName);
             return region;
