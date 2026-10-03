@@ -20,6 +20,12 @@ namespace DeepDive.Core.Contracts
     {
         public const string BoatId = BoatRepairParts.BoatId;   // "boat-1" - #62 already fixed this
         public const string NearRouteId = "route-near-1";
+
+        // P4.3 (#108): the reef and deep anchorages of the same region. Ids only, like NearRouteId - the
+        // geometry and the vehicle class each route needs are Utku's world data (DiveRouteDefinition).
+        public const string ReefRouteId = "route-reef-1";
+        public const string DeepRouteId = "route-deep-1";
+
         public const string Seat0 = "seat-0";
         public const string Seat1 = "seat-1";
         public const string Seat2 = "seat-2";
@@ -86,6 +92,11 @@ namespace DeepDive.Core.Contracts
     // lives on a World-authored scene component, so Core stays free of UnityEngine types. Mehmet's
     // fixed-route movement reads DepartureDockAnchor/AnchorPointAnchor as its start/end; Mert's map
     // UI reads them to place the dock and anchor icons.
+    //
+    // P4.3 (#108): RequiredVehicleClass is the least vehicle class that may sail the route (CONTRACTS
+    // "gerekli tekne sinifi"). Core only carries it; whether the active vehicle is eligible is World's
+    // rule. default(DiveRouteDefinition) skips every constructor: its ids are null and its class is
+    // VehicleClass.None, which no vehicle is eligible for - "None" never means "any vehicle".
     public readonly struct DiveRouteDefinition
     {
         public readonly string RouteId;
@@ -94,14 +105,26 @@ namespace DeepDive.Core.Contracts
         public readonly float OutboundSeconds;
         public readonly float InboundSeconds;
 
+        public VehicleClass RequiredVehicleClass { get; }
+
+        // The P3 shape. Every existing caller keeps meaning "the rowboat's route": the class is set to
+        // Rowboat explicitly, never left at default(VehicleClass) = None.
         public DiveRouteDefinition(string routeId, string departureDockAnchor, string anchorPointAnchor,
             float outboundSeconds, float inboundSeconds)
+            : this(routeId, departureDockAnchor, anchorPointAnchor, outboundSeconds, inboundSeconds, VehicleClass.Rowboat)
+        {
+        }
+
+        // Stored as given, None included: validating it is the eligibility rule's job, in one place.
+        public DiveRouteDefinition(string routeId, string departureDockAnchor, string anchorPointAnchor,
+            float outboundSeconds, float inboundSeconds, VehicleClass requiredVehicleClass)
         {
             RouteId = routeId ?? string.Empty;
             DepartureDockAnchor = departureDockAnchor ?? string.Empty;
             AnchorPointAnchor = anchorPointAnchor ?? string.Empty;
             OutboundSeconds = outboundSeconds;
             InboundSeconds = inboundSeconds;
+            RequiredVehicleClass = requiredVehicleClass;
         }
     }
 
