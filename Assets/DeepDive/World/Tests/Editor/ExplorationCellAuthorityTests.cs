@@ -593,16 +593,20 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void TryRestore_DiscoveredCellWithABand_DifferentBand_IsAlreadyDiscovered_BandKept()
+        public void TryRestore_DiscoveredCellWithABand_DeeperBandUpgrades_ShallowerIsAlreadyDiscovered()
         {
+            // P4.3 (#108) deepest wins: a saved deeper band moves a live shallow cell deeper; a saved shallower
+            // band changes nothing. (Before P4.3 any filled band was kept, first-filled-wins.)
             var fog = NearRegion();
             fog.Tick(new FakeSource().Set(Wet00));
 
-            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.AlreadyDiscovered);
-            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Deep, CellRestoreOutcome.AlreadyDiscovered);
-            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.Restored);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Reef));
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Deep, CellRestoreOutcome.Restored);
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Deep));
 
-            // The other way round: a restored band is not replaced by a later restore either.
+            // The other way round: a restored band is not lowered by a later, shallower restore.
             AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Reef, CellRestoreOutcome.Restored);
             AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
             Assert.That(CellOf(fog, 1, 1).DepthBandId, Is.EqualTo(DepthBandIds.Reef));
@@ -672,8 +676,10 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void TryRestore_ReservedBand_IsNotOverwrittenByALiveVisit()
+        public void TryRestore_DeeperBand_IsNotLoweredByAShallowerLiveVisit()
         {
+            // Deepest wins (P4.3 #108): a restored reef cell visited again at shallow depth stays reef, and the
+            // visit is neither a change nor a discovery.
             var fog = NearRegion();
             AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.Restored);
             var revision = fog.Revision;
