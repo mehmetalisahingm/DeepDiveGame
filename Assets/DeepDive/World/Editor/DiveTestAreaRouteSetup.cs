@@ -284,7 +284,10 @@ namespace DeepDive.World.Editor
             root.transform.localScale = Vector3.one;
 
             var path = root.GetComponent<DiveRoutePath>() ?? root.AddComponent<DiveRoutePath>();
-            path.Configure(BoatTripIds.NearRouteId);
+            // The whole definition, written out (P4.3 #108): the near route stays the rowboat's route on the
+            // frozen dock/anchor pair and Mehmet's 8 s nominal - the same values the P3 contract produced.
+            path.Configure(BoatTripIds.NearRouteId, DiveRouteAnchors.Dock, DiveRouteAnchors.AnchorPoint,
+                VehicleClass.Rowboat, DiveRoutePath.NominalOutboundSeconds, DiveRoutePath.NominalInboundSeconds);
 
             // Nothing here destroys a child, so a leftover WP_3 from a longer route would quietly
             // become a fourth leg. Refusing is the repair a human has to make by hand.
