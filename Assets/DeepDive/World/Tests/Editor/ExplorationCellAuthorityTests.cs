@@ -250,11 +250,11 @@ namespace DeepDive.World.Tests
         {
             var fog = NearRegion();
             var source = new FakeSource();
-            fog.Tick(source.Set(new Vector3(0f, 4f, 0f), new Vector3(-12f, -5f, -12f), new Vector3(12f, 9f, 12f)));
+            fog.Tick(source.Set(new Vector3(0f, 4f, 0f), new Vector3(-12f, -28f, -12f), new Vector3(12f, 9f, 12f)));
             foreach (var cell in fog.Snapshot().Cells)
                 Assert.That(DepthBandIds.IsValidOrUnclassified(cell.DepthBandId), Is.True, cell.CellId);
             Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
-            Assert.That(CellOf(fog, -3, -3).DepthBandId, Is.EqualTo(DepthBandIds.Unclassified), "13 m: no guessed band");
+            Assert.That(CellOf(fog, -3, -3).DepthBandId, Is.EqualTo(DepthBandIds.Unclassified), "36 m, past deep: no guessed band");
             Assert.That(CellOf(fog, 2, 2).DepthBandId, Is.EqualTo(DepthBandIds.Unclassified), "above the line");
         }
 
@@ -395,9 +395,9 @@ namespace DeepDive.World.Tests
         [Test]
         public void Cell_DeeperThanAnyAuthoredBand_HasNoBand_NotAGuessedOne()
         {
-            // y -5 under a surface at 8 is 13 m down. Reef/deep have no metres yet, so no band.
+            // y -28 under a surface at 8 is 36 m down, past the deepest band (35 m, P4.3), so no band.
             var fog = NearRegion();
-            fog.Tick(new FakeSource().Set(new Vector3(0f, -5f, 0f)));
+            fog.Tick(new FakeSource().Set(new Vector3(0f, -28f, 0f)));
             Assert.That(fog.IsDiscovered(0, 0), Is.True);
             Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.Empty);
             Assert.That(DepthBandIds.IsKnown(DepthBandIds.Reef), Is.True, "reef stays a reserved id");

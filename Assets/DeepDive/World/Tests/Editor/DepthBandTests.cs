@@ -40,12 +40,14 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void ShallowIsTheOnlyBandToday()
+        public void AllIsShallowReefDeepInDepthOrder()
         {
-            // P4.4 adds the deeper cuts. Until then a second band appearing here would change
-            // what "shallow" means for every reader without anyone having to say so.
-            Assert.AreEqual(1, DiveDepthBands.All.Count, "band count");
+            // P4.3 (#108) authored the deeper cuts. A fourth band, or a reorder, would change
+            // which band the shared 8 m edge belongs to without anyone having to say so.
+            Assert.AreEqual(3, DiveDepthBands.All.Count, "band count");
             Assert.AreEqual(DiveDepthBands.ShallowId, DiveDepthBands.All[0].Id);
+            Assert.AreEqual(DiveDepthBands.ReefId, DiveDepthBands.All[1].Id);
+            Assert.AreEqual(DiveDepthBands.DeepId, DiveDepthBands.All[2].Id);
         }
 
         [Test]
@@ -79,7 +81,7 @@ namespace DeepDive.World.Tests
             Assert.IsTrue(DiveDepthBands.TryFind(4f, out var found), "4 m is shallow");
             Assert.AreEqual(DiveDepthBands.ShallowId, found.Id);
 
-            Assert.IsFalse(DiveDepthBands.TryFind(9f, out var missed), "9 m is past the band");
+            Assert.IsFalse(DiveDepthBands.TryFind(36f, out var missed), "36 m is past every band");
             Assert.IsFalse(missed.IsValid, "a failed find must not leak a usable band");
         }
 

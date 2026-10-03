@@ -417,7 +417,9 @@ namespace DeepDive.World.Editor
 
                     foreach (var y in new[] { home + reach, home, home - reach })
                     {
-                        if (bands.TryClassify(y, out _)) continue;
+                        // Shallow by id, not just "some band": since P4.3 a fish 9 m down would
+                        // classify as reef and slip past a bare TryClassify.
+                        if (bands.TryClassify(y, out var band) && band.Id == DiveDepthBands.ShallowId) continue;
                         throw new InvalidOperationException(
                             $"P3_BEACH_FISH_OUTSIDE_SHALLOW fish={fish.name} y={y} " +
                             $"depth={bands.DepthAt(y)} reason=wander box leaves the shallow band");
