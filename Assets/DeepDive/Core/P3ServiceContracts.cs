@@ -5,7 +5,8 @@ namespace DeepDive.Core.Contracts
         None = 0,
         EquipmentShop = 1,
         FishBuyer = 2,
-        RecordingBuyer = 3
+        RecordingBuyer = 3,
+        VehicleVendor = 4   // P4.3-C: the harbor boat seller (vehicle purchase + active selection)
     }
 
     // P3.2 service data owned by progression/economy and consumed by the player interaction layer.

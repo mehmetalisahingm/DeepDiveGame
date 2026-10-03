@@ -27,6 +27,7 @@ namespace DeepDive.Composition
         private Func<PlayerId, ServicePointDefinition, ulong, PlayerActionResult> interactionDelegate;
         private Func<PlayerId, string, ulong, TransactionResult> purchaseDelegate;
         private Func<PlayerId, string, ulong, TransactionResult> foundPartDelegate;
+        private Func<PlayerId, string, ulong, TransactionResult> selectVehicleDelegate;
         private readonly Dictionary<string, ServicePointAnchor> anchors = new Dictionary<string, ServicePointAnchor>();
         private double nextProgress;
         private double nextAnchorRefresh;
@@ -94,6 +95,7 @@ namespace DeepDive.Composition
             interactionDelegate = handler.HandleInteraction;
             purchaseDelegate = handler.HandlePurchase;
             foundPartDelegate = handler.HandleFoundPart;
+            selectVehicleDelegate = handler.HandleSelectVehicle;
         }
 
         private void Bind()
@@ -101,6 +103,7 @@ namespace DeepDive.Composition
             ServiceInteractionAuthority.Bind(interactionDelegate);
             EconomyPurchaseAuthority.Bind(purchaseDelegate);
             BoatPartClaim.Bind(foundPartDelegate);
+            VehicleSelectionAuthority.Bind(selectVehicleDelegate);
         }
 
         private void Unbind()
@@ -109,11 +112,13 @@ namespace DeepDive.Composition
             ServiceInteractionAuthority.Unbind(interactionDelegate);
             EconomyPurchaseAuthority.Unbind(purchaseDelegate);
             BoatPartClaim.Unbind(foundPartDelegate);
+            VehicleSelectionAuthority.Unbind(selectVehicleDelegate);
             handler.CloseAll();
             handler = null;
             interactionDelegate = null;
             purchaseDelegate = null;
             foundPartDelegate = null;
+            selectVehicleDelegate = null;
         }
 
         private void RefreshAnchors()
@@ -151,9 +156,14 @@ namespace DeepDive.Composition
             foreach (var part in economy.BoatRepair.CompletedPartIds)
                 for (var i = 0; i < BoatRepairParts.All.Count; i++)
                     if (part == BoatRepairParts.All[i]) mask |= 1 << i;
+            var fleet = economy.Fleet;
+            var fleetMask = 0;
+            for (var i = 0; i < VehicleIds.All.Count; i++)
+                if (fleet.IsOwned(VehicleIds.All[i])) fleetMask |= 1 << i;
             foreach (var pair in manager.ConnectedClients)
             {
                 var player = new PlayerId(pair.Key);
+                SyncFor(player)?.PublishFleet(fleetMask, fleet.ActiveBoatId);
                 SyncFor(player)?.PublishTownProgress(economy.PendingCountFor(player, TurnInKind.Catch),
                     economy.PendingCountFor(player, TurnInKind.Recording), boatParts, mask);
             }

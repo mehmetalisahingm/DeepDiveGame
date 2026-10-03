@@ -179,11 +179,13 @@ namespace DeepDive.World.Tests
 
         [TestCase("dock-town-1")]
         [TestCase("anchor-near-1")]
+        [TestCase("anchor-reef-1")]
+        [TestCase("anchor-deep-1")]
         public void AnchorAcceptsEachContractId(string anchorId)
         {
             var anchor = NewAnchor(anchorId);
             Assert.AreEqual(anchorId, anchor.AnchorId);
-            Assert.IsTrue(anchor.IsContractAnchor, anchorId + " must be one of the two route ends");
+            Assert.IsTrue(anchor.IsContractAnchor, anchorId + " must be one of the route ends");
             Validate(anchor);
         }
 
@@ -233,8 +235,14 @@ namespace DeepDive.World.Tests
             Assert.AreEqual("route-near-1", BoatTripIds.NearRouteId);
             Assert.AreEqual("dock-town-1", DiveRouteAnchors.Dock);
             Assert.AreEqual("anchor-near-1", DiveRouteAnchors.AnchorPoint);
+            // P4.3 (#108): one shared departure and the three sea anchorages, nothing else.
+            Assert.AreEqual("anchor-reef-1", DiveRouteAnchors.ReefAnchorPoint);
+            Assert.AreEqual("anchor-deep-1", DiveRouteAnchors.DeepAnchorPoint);
             CollectionAssert.AreEquivalent(
-                new[] { "dock-town-1", "anchor-near-1" }, DiveRouteAnchors.All);
+                new[] { "dock-town-1", "anchor-near-1", "anchor-reef-1", "anchor-deep-1" }, DiveRouteAnchors.All);
+            CollectionAssert.AreEquivalent(
+                new[] { "anchor-near-1", "anchor-reef-1", "anchor-deep-1" }, DiveRouteAnchors.AnchorPoints);
+            Assert.IsFalse(DiveRouteAnchors.IsAnchorPoint(DiveRouteAnchors.Dock), "the dock is a departure, not an anchorage");
         }
 
         [Test]
@@ -297,6 +305,113 @@ namespace DeepDive.World.Tests
                     "routeId=" + path.RouteId + " waypoints=" + path.Waypoints.Count + " produced a definition");
                 StringAssert.Contains("P3_ROUTE_NO_DEFINITION", error.Message);
             }
+        }
+
+        // --- P4.3 (#108): per-route definitions authored on the path ---------------------------------
+
+        [Test]
+        public void TheNearDefinitionIsIdenticalToTheP33Definition()
+        {
+            // A path configured with its id only - the shape every P3 scene was saved in - must still describe
+            // exactly the definition the P3 five-argument contract built: same ids, 8 s / 8 s, a rowboat route.
+            var path = NewRoute(BoatTripIds.NearRouteId, new Vector3(9f, 8f, -0.4f), new Vector3(9f, 8f, 8.5f));
+            var legacy = new DiveRouteDefinition(BoatTripIds.NearRouteId, DiveRouteAnchors.Dock,
+                DiveRouteAnchors.AnchorPoint, DiveRoutePath.NominalOutboundSeconds, DiveRoutePath.NominalInboundSeconds);
+
+            var definition = path.ToDefinition();
+
+            Assert.AreEqual(legacy.RouteId, definition.RouteId);
+            Assert.AreEqual(legacy.DepartureDockAnchor, definition.DepartureDockAnchor);
+            Assert.AreEqual(legacy.AnchorPointAnchor, definition.AnchorPointAnchor);
+            Assert.AreEqual(legacy.OutboundSeconds, definition.OutboundSeconds);
+            Assert.AreEqual(legacy.InboundSeconds, definition.InboundSeconds);
+            Assert.AreEqual(VehicleClass.Rowboat, definition.RequiredVehicleClass);
+            Assert.AreEqual(legacy.RequiredVehicleClass, definition.RequiredVehicleClass);
+        }
+
+        [TestCase("route-near-1", "anchor-near-1", VehicleClass.Rowboat, 8f)]
+        [TestCase("route-reef-1", "anchor-reef-1", VehicleClass.Motorboat, 28f)]
+        [TestCase("route-deep-1", "anchor-deep-1", VehicleClass.ResearchBoat, 52f)]
+        public void EachRouteCarriesItsOwnAuthoredDefinition(string routeId, string anchorId, VehicleClass required, float seconds)
+        {
+            var path = NewRoute(routeId, new Vector3(9f, 8f, -0.4f), new Vector3(9f, 8f, 3.5f));
+            path.Configure(routeId, DiveRouteAnchors.Dock, anchorId, required, seconds, seconds);
+
+            var definition = path.ToDefinition();
+
+            Assert.AreEqual(routeId, definition.RouteId);
+            Assert.AreEqual("dock-town-1", definition.DepartureDockAnchor);
+            Assert.AreEqual(anchorId, definition.AnchorPointAnchor);
+            Assert.AreEqual(required, definition.RequiredVehicleClass);
+            Assert.AreEqual(seconds, definition.OutboundSeconds);
+            Assert.AreEqual(seconds, definition.InboundSeconds);
+            Assert.AreEqual(required, path.RequiredVehicleClass);
+        }
+
+        [Test]
+        public void AHalfAuthoredDefinitionIsRefused()
+        {
+            var waypoints = new[] { new Vector3(9f, 8f, -0.4f), new Vector3(9f, 8f, 3.5f) };
+            var broken = new (string Dock, string Anchor, VehicleClass Class, float Out, float In)[]
+            {
+                (DiveRouteAnchors.Dock, DiveRouteAnchors.Dock, VehicleClass.Motorboat, 28f, 28f),        // the dock as an anchorage
+                ("dock-town-2", DiveRouteAnchors.ReefAnchorPoint, VehicleClass.Motorboat, 28f, 28f),      // unknown departure
+                (DiveRouteAnchors.Dock, DiveRouteAnchors.ReefAnchorPoint, VehicleClass.None, 28f, 28f),   // no class
+                (DiveRouteAnchors.Dock, DiveRouteAnchors.ReefAnchorPoint, (VehicleClass)9, 28f, 28f),     // undefined class
+                (DiveRouteAnchors.Dock, DiveRouteAnchors.ReefAnchorPoint, VehicleClass.Motorboat, 0f, 28f),
+                (DiveRouteAnchors.Dock, DiveRouteAnchors.ReefAnchorPoint, VehicleClass.Motorboat, 28f, float.NaN)
+            };
+
+            foreach (var b in broken)
+            {
+                var path = NewRoute(BoatTripIds.ReefRouteId, waypoints);
+                path.Configure(BoatTripIds.ReefRouteId, b.Dock, b.Anchor, b.Class, b.Out, b.In);
+                Assert.IsFalse(path.HasAuthoredDefinition, b.ToString());
+                Assert.Throws<System.InvalidOperationException>(() => path.ToDefinition(), b.ToString());
+                Assert.IsFalse(DiveRoutePath.TryGetDefinition(BoatTripIds.ReefRouteId, out var none), b.ToString());
+                Assert.IsNull(none.RouteId, "a refusal hands back default, not a partial definition");
+                var host = path.gameObject;
+                spawned.Remove(host);
+                Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void TryGetDefinitionReadsTheScenePathByExactIdAndNothingElse()
+        {
+            var near = NewRoute(BoatTripIds.NearRouteId, new Vector3(9f, 8f, -0.4f), new Vector3(9f, 8f, 8.5f));
+            var reef = NewRoute(BoatTripIds.ReefRouteId, new Vector3(9f, 8f, -0.4f), new Vector3(3f, 8f, 30f));
+            reef.Configure(BoatTripIds.ReefRouteId, DiveRouteAnchors.Dock, DiveRouteAnchors.ReefAnchorPoint,
+                VehicleClass.Motorboat, 28f, 28f);
+
+            Assert.IsTrue(DiveRoutePath.TryGetDefinition(BoatTripIds.NearRouteId, out var n));
+            Assert.AreEqual(VehicleClass.Rowboat, n.RequiredVehicleClass);
+            Assert.IsTrue(DiveRoutePath.TryGetDefinition(BoatTripIds.ReefRouteId, out var r));
+            Assert.AreEqual(VehicleClass.Motorboat, r.RequiredVehicleClass);
+            Assert.AreEqual(DiveRouteAnchors.ReefAnchorPoint, r.AnchorPointAnchor);
+
+            // Not in the scene, not a contract id, empty: refused, never "the only route there is".
+            Assert.IsFalse(DiveRoutePath.TryGetDefinition(BoatTripIds.DeepRouteId, out _), "deep is not authored here");
+            Assert.IsFalse(DiveRoutePath.TryGetDefinition("route-far-2", out _));
+            Assert.IsFalse(DiveRoutePath.TryGetDefinition("", out _));
+            Assert.IsFalse(DiveRoutePath.TryGetDefinition(null, out _));
+
+            // Two paths claiming one id are ambiguous.
+            NewRoute(BoatTripIds.NearRouteId, new Vector3(0f, 8f, 0f), new Vector3(0f, 8f, 5f));
+            LogAssert.Expect(LogType.Error, new Regex("P3_ROUTE_DUPLICATE_ID"));
+            Assert.IsFalse(DiveRoutePath.TryGetDefinition(BoatTripIds.NearRouteId, out _));
+            Assert.IsNotNull(near);
+        }
+
+        [Test]
+        public void ExactlyTheThreeContractRouteIdsAreRoutes()
+        {
+            Assert.IsTrue(DiveRoutePath.IsContractRouteId(BoatTripIds.NearRouteId));
+            Assert.IsTrue(DiveRoutePath.IsContractRouteId(BoatTripIds.ReefRouteId));
+            Assert.IsTrue(DiveRoutePath.IsContractRouteId(BoatTripIds.DeepRouteId));
+            Assert.IsFalse(DiveRoutePath.IsContractRouteId("route-near-2"));
+            Assert.IsFalse(DiveRoutePath.IsContractRouteId("ROUTE-REEF-1"));
+            Assert.IsFalse(DiveRoutePath.IsContractRouteId(null));
         }
     }
 }

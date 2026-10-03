@@ -43,9 +43,12 @@ namespace DeepDive.World
         public PlayerActionResult TryStart(RecordingCandidate candidate)
         {
             if (!TryResolve(candidate, out var subject, out var refusal)) return refusal;
-            return subject.TryStartTake(candidate.PlayerId, candidate.RequestId);
+            return subject.TryStartTake(candidate.PlayerId, candidate.RequestId, candidate.CameraTier);
         }
 
+        // candidate.CameraTier is deliberately not read here: the take carries the tier it was
+        // started with, and a stop that could restate it would be a second door for a mid-take
+        // tier change.
         public PlayerActionResult TryStop(RecordingCandidate candidate)
         {
             if (!TryResolve(candidate, out var subject, out var refusal)) return refusal;

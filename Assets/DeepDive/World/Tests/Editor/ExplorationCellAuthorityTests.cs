@@ -250,11 +250,11 @@ namespace DeepDive.World.Tests
         {
             var fog = NearRegion();
             var source = new FakeSource();
-            fog.Tick(source.Set(new Vector3(0f, 4f, 0f), new Vector3(-12f, -5f, -12f), new Vector3(12f, 9f, 12f)));
+            fog.Tick(source.Set(new Vector3(0f, 4f, 0f), new Vector3(-12f, -28f, -12f), new Vector3(12f, 9f, 12f)));
             foreach (var cell in fog.Snapshot().Cells)
                 Assert.That(DepthBandIds.IsValidOrUnclassified(cell.DepthBandId), Is.True, cell.CellId);
             Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
-            Assert.That(CellOf(fog, -3, -3).DepthBandId, Is.EqualTo(DepthBandIds.Unclassified), "13 m: no guessed band");
+            Assert.That(CellOf(fog, -3, -3).DepthBandId, Is.EqualTo(DepthBandIds.Unclassified), "36 m, past deep: no guessed band");
             Assert.That(CellOf(fog, 2, 2).DepthBandId, Is.EqualTo(DepthBandIds.Unclassified), "above the line");
         }
 
@@ -395,9 +395,9 @@ namespace DeepDive.World.Tests
         [Test]
         public void Cell_DeeperThanAnyAuthoredBand_HasNoBand_NotAGuessedOne()
         {
-            // y -5 under a surface at 8 is 13 m down. Reef/deep have no metres yet, so no band.
+            // y -28 under a surface at 8 is 36 m down, past the deepest band (35 m, P4.3), so no band.
             var fog = NearRegion();
-            fog.Tick(new FakeSource().Set(new Vector3(0f, -5f, 0f)));
+            fog.Tick(new FakeSource().Set(new Vector3(0f, -28f, 0f)));
             Assert.That(fog.IsDiscovered(0, 0), Is.True);
             Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.Empty);
             Assert.That(DepthBandIds.IsKnown(DepthBandIds.Reef), Is.True, "reef stays a reserved id");
@@ -593,16 +593,20 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void TryRestore_DiscoveredCellWithABand_DifferentBand_IsAlreadyDiscovered_BandKept()
+        public void TryRestore_DiscoveredCellWithABand_DeeperBandUpgrades_ShallowerIsAlreadyDiscovered()
         {
+            // P4.3 (#108) deepest wins: a saved deeper band moves a live shallow cell deeper; a saved shallower
+            // band changes nothing. (Before P4.3 any filled band was kept, first-filled-wins.)
             var fog = NearRegion();
             fog.Tick(new FakeSource().Set(Wet00));
 
-            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.AlreadyDiscovered);
-            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Deep, CellRestoreOutcome.AlreadyDiscovered);
-            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Shallow));
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.Restored);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Reef));
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Deep, CellRestoreOutcome.Restored);
+            AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
+            Assert.That(CellOf(fog, 0, 0).DepthBandId, Is.EqualTo(DepthBandIds.Deep));
 
-            // The other way round: a restored band is not replaced by a later restore either.
+            // The other way round: a restored band is not lowered by a later, shallower restore.
             AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Reef, CellRestoreOutcome.Restored);
             AssertRestore(fog, Id(1, 1), 1, 1, DepthBandIds.Shallow, CellRestoreOutcome.AlreadyDiscovered);
             Assert.That(CellOf(fog, 1, 1).DepthBandId, Is.EqualTo(DepthBandIds.Reef));
@@ -672,8 +676,10 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void TryRestore_ReservedBand_IsNotOverwrittenByALiveVisit()
+        public void TryRestore_DeeperBand_IsNotLoweredByAShallowerLiveVisit()
         {
+            // Deepest wins (P4.3 #108): a restored reef cell visited again at shallow depth stays reef, and the
+            // visit is neither a change nor a discovery.
             var fog = NearRegion();
             AssertRestore(fog, Id(0, 0), 0, 0, DepthBandIds.Reef, CellRestoreOutcome.Restored);
             var revision = fog.Revision;

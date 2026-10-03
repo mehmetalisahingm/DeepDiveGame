@@ -142,13 +142,14 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(volumes.Count, field.VolumeCount, "field must reference every SwimVolume");
             Assert.AreEqual(volumes.Count, field.Bodies.Count, "every referenced volume must read as water");
 
-            // The canonical water: centre (0,4,0), size (30,8,30).
+            // The canonical water, grown in place by P4.3 (#108): centre (0,-9.5,25), size (30,35,80) - same
+            // water line, footprint now reaching the reef and deep basin north of the arena.
             var body = field.Bodies[0];
             Assert.AreEqual(8f, body.SurfaceY);
             Assert.AreEqual(-15f, body.MinX);
             Assert.AreEqual(15f, body.MaxX);
             Assert.AreEqual(-15f, body.MinZ);
-            Assert.AreEqual(15f, body.MaxZ);
+            Assert.AreEqual(65f, body.MaxZ);
         }
 
         [Test]

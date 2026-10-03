@@ -86,8 +86,9 @@ namespace DeepDive.World.Tests
         // P3.1's shore and P2's arena, pinned so the beach cannot have moved them.
         private static readonly Vector3 LedgeCenter = new Vector3(9f, 7.9f, -9f);
         private static readonly Vector3 LedgeSize = new Vector3(4f, 1f, 4f);
-        private static readonly Vector3 SwimCenter = new Vector3(0f, 4f, 0f);
-        private static readonly Vector3 SwimSize = new Vector3(30f, 8f, 30f);
+        // P4.3 (#108): the one SwimVolume grown in place over the reef and deep water (top still y 8).
+        private static readonly Vector3 SwimCenter = new Vector3(0f, -9.5f, 25f);
+        private static readonly Vector3 SwimSize = new Vector3(30f, 35f, 80f);
 
         private Scene scene;
         private Scene previousActive;
@@ -563,7 +564,7 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(-15f, body.MinX);
             Assert.AreEqual(15f, body.MaxX);
             Assert.AreEqual(-15f, body.MinZ);
-            Assert.AreEqual(15f, body.MaxZ);
+            Assert.AreEqual(65f, body.MaxZ, "P4.3 (#108) grew the one volume north over the reef and deep water");
         }
 
         [Test]

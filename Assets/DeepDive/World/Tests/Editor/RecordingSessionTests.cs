@@ -455,5 +455,97 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(5f, session.ValidSecondsFor(Alice), 0.0001f,
                 "a fish is filmable whenever the diver can see it");
         }
+
+        // --- camera tier (P4.3) ------------------------------------------------------------
+
+        [Test]
+        public void StartStampsTheCandidatesTierOnTheTake()
+        {
+            var session = Session();
+            Assert.AreEqual(PlayerActionResult.Accepted,
+                session.TryStart(ActiveDive(), Alice, 1, CameraTier.Professional));
+
+            Assert.AreEqual(CameraTier.Professional, session.TierFor(Alice));
+        }
+
+        [Test]
+        public void StartWithoutATierRecordsBasic()
+        {
+            var session = Session();
+            session.TryStart(ActiveDive(), Alice, 1);
+
+            Assert.AreEqual(CameraTier.Basic, session.TierFor(Alice), "a legacy caller films with the base camera");
+        }
+
+        [Test]
+        public void StartWithNoneRecordsBasic()
+        {
+            var session = Session();
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStart(ActiveDive(), Alice, 1, CameraTier.None),
+                "owning a camera is the bridge's invariant, not a World refusal");
+
+            Assert.AreEqual(CameraTier.Basic, session.TierFor(Alice));
+        }
+
+        [Test]
+        public void AReplayedStartCannotSwapTheTier()
+        {
+            var session = Session();
+            var dive = ActiveDive();
+            session.TryStart(dive, Alice, 1, CameraTier.Basic);
+
+            Assert.AreEqual(PlayerActionResult.Accepted, session.TryStart(dive, Alice, 1, CameraTier.Professional));
+            Assert.AreEqual(CameraTier.Basic, session.TierFor(Alice));
+        }
+
+        [Test]
+        public void ARefusedSecondStartCannotSwapTheTier()
+        {
+            var session = Session();
+            var dive = ActiveDive();
+            session.TryStart(dive, Alice, 1, CameraTier.Advanced);
+
+            Assert.AreEqual(PlayerActionResult.InvalidState, session.TryStart(dive, Alice, 2, CameraTier.Professional));
+            Assert.AreEqual(CameraTier.Advanced, session.TierFor(Alice));
+        }
+
+        [Test]
+        public void TheNextTakeUsesTheNextStartsTier()
+        {
+            var session = Session();
+            var dive = ActiveDive();
+            session.TryStart(dive, Alice, 1, CameraTier.Basic);
+            session.TryStop(dive, Alice, 2, out _);
+
+            session.TryStart(dive, Alice, 3, CameraTier.Advanced);
+            Assert.AreEqual(CameraTier.Advanced, session.TierFor(Alice));
+        }
+
+        [Test]
+        public void TooDarkFramesBankNoTimeAndNoScore()
+        {
+            var session = Session();
+            var dive = ActiveDive();
+            session.TryStart(dive, Alice, 1);
+
+            var dark = RecordingCameraRules.ApplyLight(Good(0.9f), CameraTier.Basic, 0.1f);
+            Assume.That(dark.Rejection, Is.EqualTo(RecordingSampleRejection.TooDark));
+            for (var i = 0; i < 20; i++) session.Tick(Alice, 0.5f, dark);
+
+            Assert.AreEqual(0f, session.ValidSecondsFor(Alice));
+            Assert.AreEqual(0f, session.Score01For(Alice));
+            session.TryStop(dive, Alice, 2, out var take);
+            Assert.AreEqual(RecordingQuality.NoPayout, take.Quality);
+            Assert.IsFalse(take.IsPayable);
+        }
+
+        [Test]
+        public void APlayerWithNoTakeReadsBasic()
+        {
+            var session = Session();
+            session.TryStart(ActiveDive(), Alice, 1, CameraTier.Professional);
+
+            Assert.AreEqual(CameraTier.Basic, session.TierFor(Bob));
+        }
     }
 }

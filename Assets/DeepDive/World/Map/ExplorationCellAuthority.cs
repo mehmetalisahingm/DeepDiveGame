@@ -11,12 +11,13 @@ namespace DeepDive.World
         // band the contract does not allow. Nothing changed; the revision did not move.
         Invalid = 0,
 
-        // Valid, but nothing to change: the cell is already discovered and its band is already
-        // filled (or the saved band is Unclassified). Nothing changed; the revision did not move.
+        // Valid, but nothing to change: the cell is already discovered and its band is already at
+        // least as deep as the saved one (or the saved band is Unclassified). Nothing changed; the
+        // revision did not move.
         AlreadyDiscovered = 1,
 
-        // State changed: the cell was opened and/or its empty band was filled. The revision moved
-        // by one. Not a discovery - no event is produced.
+        // State changed: the cell was opened and/or its band moved deeper. The revision moved by
+        // one. Not a discovery - no event is produced.
         Restored = 2
     }
 
@@ -26,8 +27,11 @@ namespace DeepDive.World
     // re-set, no second result is produced and the revision does not move.
     //
     // A save puts cells back through TryRestore: that is saved truth, not a discovery - it takes
-    // no position and produces no discovery event. On both paths a cell's band is first-filled-wins:
-    // an empty band may be filled, a filled one is never overwritten.
+    // no position and produces no discovery event. On both paths a cell's band is the DEEPEST band any
+    // approved diver has reached in it (P4.3 #108): Unclassified < Shallow < Reef < Deep, the band only
+    // ever moves deeper, never back. A diver who jumps off the boat at the reef anchorage enters the
+    // cell at the surface; first-filled-wins would have stamped it shallow for good. Max is order-free,
+    // so a save restored before or after a live visit ends in the same state.
     //
     // Pure class, no MonoBehaviour and no scene lookup: the host shell (Composition, later) owns
     // one and hands it the real feed and WaterField.Bodies. Mert reads it through
@@ -163,10 +167,10 @@ namespace DeepDive.World
         // One approved position. True only the first time its cell opens; out of region, a
         // non-finite position or an already discovered cell is false.
         //
-        // The band is recorded once, the first time the host sees one for the cell (a cell first
-        // entered from the dry beach learns its band on the first wet visit). That fill moves the
-        // revision but is not a discovery. It is never overwritten: which band a cell "is" once
-        // P4.4 authors the deeper cuts is decided then, not guessed here.
+        // The band moves to the deepest one seen in the cell (a cell first entered from the dry
+        // beach learns its band on the first wet visit; a reef cell entered at the surface becomes
+        // reef once a diver is 8 m down in it). A deeper band moves the revision but is not a
+        // discovery; a shallower reading changes nothing.
         public bool TryObserve(Vector3 world, out int cellIndex)
         {
             cellIndex = -1;
@@ -181,9 +185,11 @@ namespace DeepDive.World
                 changed = true;
             }
 
-            if (depthBandIds[index].Length == 0 && WaterDepth.TryClassify(water, world, out var bandId))
+            if (BandRank(depthBandIds[index]) < MaxBandRank &&
+                WaterDepth.TryClassify(water, world, out var bandId) &&
+                BandRank(bandId) > BandRank(depthBandIds[index]))
             {
-                depthBandIds[index] = bandId;
+                depthBandIds[index] = CanonicalBand(bandId);
                 changed = true;
             }
 
@@ -219,15 +225,47 @@ namespace DeepDive.World
                 changed = true;
             }
 
-            if (depthBandIds[index].Length == 0 && depthBandId.Length > 0)
+            // Deepest wins here too, and the stored string is the contract constant rather than the
+            // caller's instance, like every band the live path writes.
+            if (BandRank(depthBandId) > BandRank(depthBandIds[index]))
             {
-                depthBandIds[index] = depthBandId;
+                depthBandIds[index] = CanonicalBand(depthBandId);
                 changed = true;
             }
 
             if (!changed) return CellRestoreOutcome.AlreadyDiscovered;
             revision++;
             return CellRestoreOutcome.Restored;
+        }
+
+        // P4.3 (#108) reef-discovery read: has any discovered cell reached exactly this band? Read from the
+        // cells this authority already holds (live or restored) - no flag of its own, nothing persisted, no
+        // boat or money knowledge. Exact match: a deep cell is not a reef cell, though reaching it means
+        // passing through reef water. An unknown id (or Unclassified) is false. No allocation.
+        public bool HasDiscoveredCellInBand(string depthBandId)
+        {
+            if (!DepthBandIds.IsKnown(depthBandId)) return false;
+            for (var i = 0; i < discovered.Length; i++)
+                if (discovered[i] && string.Equals(depthBandIds[i], depthBandId, StringComparison.Ordinal))
+                    return true;
+            return false;
+        }
+
+        // Unclassified = 0, then DepthBandIds.All in order (shallow 1, reef 2, deep 3). The order is the
+        // contract's, so a fourth band would extend it without touching this.
+        private static readonly int MaxBandRank = DepthBandIds.All.Count;
+
+        private static int BandRank(string depthBandId)
+        {
+            for (var i = 0; i < DepthBandIds.All.Count; i++)
+                if (string.Equals(DepthBandIds.All[i], depthBandId, StringComparison.Ordinal)) return i + 1;
+            return 0;
+        }
+
+        private static string CanonicalBand(string depthBandId)
+        {
+            var rank = BandRank(depthBandId);
+            return rank == 0 ? DepthBandIds.Unclassified : DepthBandIds.All[rank - 1];
         }
 
         // Every cell of the region, discovered or not, ordered by gz then gx. Rebuilt only when the revision has
