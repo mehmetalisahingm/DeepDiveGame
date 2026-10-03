@@ -78,7 +78,7 @@ namespace DeepDive.P1.Lab
             public string fleetReloadActive = "", fleetReloadTripBoat = "";
             public List<string> fleetTrace = new List<string>();
             public bool exploreMirrorSeen, exploreEncyclopediaSilhouette, exploreEncyclopediaNameHidden, exploreReloaded;
-            public int exploreFogCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
+            public int exploreFogCells, exploreGridCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
             public string exploreEncyclopediaSpecies = "", exploreSightingOutcome = "", exploreSightingReplay = "";
             public bool storageCarriedSeen, storageFarRefused, storageOpenAccepted, storagePanelOpen, storageStored,
                 storageDuplicateRefused, storageRetrieved, storageAllStored, storageHostChecked, storageHostFinal, storageReloadKept;
@@ -316,7 +316,9 @@ namespace DeepDive.P1.Lab
                 result.mediaFeedBoth && result.mediaResultSeen &&
                 (!host || (result.mediaSubmitted == 2 * expected && result.mediaRetryHeld && result.mediaNpcWithdrawn && result.mediaPaidOnce &&
                     result.mediaReplayPaysNothing && result.mediaSavedOnDisk && result.mediaReloadClean));
-            if (Explore) result.passed &= result.exploreMirrorSeen && result.exploreFogCells == 36 && result.exploreFogDiscoveredMax >= 1 &&
+            // P4.3 (#108): the cell count is the region's own grid (Columns x Rows), not a number - the region grew.
+            if (Explore) result.passed &= result.exploreMirrorSeen && result.exploreGridCells > 0 &&
+                result.exploreFogCells == result.exploreGridCells && result.exploreFogDiscoveredMax >= 1 &&
                 result.exploreEncyclopediaSpecies == "sea_bass" && result.exploreEncyclopediaSilhouette && result.exploreEncyclopediaNameHidden &&
                 (!host || (result.exploreSightingOutcome == "CountedNewEvidence" && result.exploreSightingReplay == "AlreadyCounted" &&
                     result.exploreSavedCells >= 1 && result.exploreSavedObservations == 1 && result.exploreReloaded));
@@ -1100,6 +1102,12 @@ namespace DeepDive.P1.Lab
             result.exploreMirrorSeen = true;
             var fog = BoatMapView.LastFog;
             result.exploreFogCells = fog.Count;
+            // Expected tiles = the scene region's grid, Columns x Rows, measured on this process's own scene.
+            if (DiveRegionField.TryFind(out var region))
+            {
+                var grid = new ExplorationCellLayout(region.RegionId, region.Bounds).Grid;
+                result.exploreGridCells = grid.Columns * grid.Rows;
+            }
             result.exploreFogDiscoveredMax = Math.Max(result.exploreFogDiscoveredMax, ExplorationMapPresenter.DiscoveredCount(fog));
             var encyclopedia = BoatMapView.LastEncyclopedia;
             if (encyclopedia.Count > 0)
