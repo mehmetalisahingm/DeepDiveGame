@@ -131,15 +131,14 @@ namespace DeepDive.P4.Tests
             Seed(VehicleCatalog.ResearchBoatPrice, repaired: true, purchased: new[] { VehicleIds.Motorboat });
             explorationProgress.ReefDiscovered = false;
 
-            var requestId = request++;
-            var blocked = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, requestId);
+            var blocked = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, request++);
             Assert.AreEqual("RequirementMissing", blocked.ReasonCode);
             Assert.AreEqual(VehicleCatalog.ResearchBoatPrice, economy.SharedBalance);
             CollectionAssert.AreEqual(new[] { "boat-1", "boat-2" }, Owned(economy));
 
             explorationProgress.ReefDiscovered = true;
-            var accepted = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, requestId);
-            Assert.IsTrue(accepted.Accepted, "discovery gates are not cached: the same request may succeed after Reef is discovered");
+            var accepted = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, request++);
+            Assert.IsTrue(accepted.Accepted, "a new vendor request succeeds after Reef is discovered");
             Assert.AreEqual(0, economy.SharedBalance);
             CollectionAssert.AreEqual(new[] { "boat-1", "boat-2", "boat-3" }, Owned(economy));
         }
