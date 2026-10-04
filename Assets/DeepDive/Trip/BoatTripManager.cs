@@ -211,7 +211,7 @@ namespace DeepDive.Trip
                 // The rowboat needs its repair; a bought boat is owned only after the rowboat was, so it needs nothing more.
                 result = TransactionResult.Reject(requestId, "BoatNotRepaired", _revision);
             else if (route.RequiredVehicleClass == VehicleClass.None ||
-                     VehicleCatalog.ClassOf(ActiveBoatId) < route.RequiredVehicleClass)
+                     (byte)VehicleCatalog.ClassOf(ActiveBoatId) < (byte)route.RequiredVehicleClass)
                 result = TransactionResult.Reject(requestId, "RequirementMissing", _revision);
             else
             {
