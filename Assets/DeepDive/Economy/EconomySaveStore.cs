@@ -8,7 +8,7 @@ namespace DeepDive.Economy
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(EconomyManager), typeof(InventoryManager))]
-    public sealed class EconomySaveStore : MonoBehaviour
+    public sealed class EconomySaveStore : MonoBehaviour, IExplorationProgressReadModel
     {
         [SerializeField] private string fileName = "deepdive-campaign.json";
         [SerializeField] private string campaignId = "local-host";
@@ -49,6 +49,23 @@ namespace DeepDive.Economy
                 exploration = value;
                 if (exploration != null && loadedExploration != null) exploration.RestoreExploration(loadedExploration);
             }
+        }
+
+        // Campaign-level progression read: while the dive authority is alive read its current snapshot;
+        // in town or after restart fall back to the exploration snapshot loaded from the same campaign file.
+        // This keeps Economy independent from the World authority and makes discovery gates scene-safe.
+        public bool HasDiscoveredCellInBand(string depthBandId)
+        {
+            if (string.IsNullOrWhiteSpace(depthBandId)) return false;
+            var data = exploration != null ? exploration.ExportExploration() : loadedExploration;
+            var cells = data?.DiscoveredCells;
+            if (cells == null) return false;
+            for (var i = 0; i < cells.Count; i++)
+            {
+                var cell = cells[i];
+                if (cell != null && string.Equals(cell.DepthBandId, depthBandId, StringComparison.Ordinal)) return true;
+            }
+            return false;
         }
 
         // The day authority is bound after the file was first read (the store loads in Awake), so a
