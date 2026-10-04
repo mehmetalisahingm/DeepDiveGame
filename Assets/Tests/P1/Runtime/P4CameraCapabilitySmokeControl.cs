@@ -21,6 +21,7 @@ namespace DeepDive.P1.Lab
     {
         private const int NightMinute = 23 * 60;
         private const float FastMinutesPerSecond = 480f;
+        private const ulong AdvancedPurchaseRequest = 9430302;
         private const ulong ProfessionalPurchaseRequest = 9430301;
 
         private SessionNetworkAdapter adapter;
@@ -78,10 +79,14 @@ namespace DeepDive.P1.Lab
             if (Mode == "professional" &&
                 !economy.LoadoutFor(recorder).Contains(P4EquipmentCatalog.CameraProfessionalId))
             {
-                // Smoke-only balance seed, same pattern as the existing -Record driver. Export/restore
-                // preserves Basic ownership; the actual Professional acquisition is still TryPurchase.
+                // Professional requires Advanced, so seed only the tiers still missing. Smoke-only balance
+                // seed, same pattern as the existing -Record driver. Export/restore preserves owned tiers;
+                // every acquisition is still a real TryPurchase.
+                var needsAdvanced = !economy.LoadoutFor(recorder).Contains(P4EquipmentCatalog.CameraAdvancedId);
+                var missingCost = P4EquipmentCatalog.CameraProfessionalPrice +
+                                  (needsAdvanced ? P4EquipmentCatalog.CameraAdvancedPrice : 0);
                 var seed = economy.ExportSaveData("p4-camera-smoke", "p4-camera-smoke");
-                seed.SharedBalance = Math.Max(seed.SharedBalance, P4EquipmentCatalog.CameraProfessionalPrice);
+                seed.SharedBalance = Math.Max(seed.SharedBalance, missingCost);
                 if (!economy.TryRestore(seed))
                 {
                     Debug.LogError("P4_CAMERA_SMOKE_SETUP_FAIL restore");
@@ -90,6 +95,18 @@ namespace DeepDive.P1.Lab
                 }
 
                 P4EquipmentCatalog.Apply(economy);
+                if (needsAdvanced)
+                {
+                    var advanced = economy.TryPurchase(recorder, P4EquipmentCatalog.CameraAdvancedId,
+                        AdvancedPurchaseRequest);
+                    if (!advanced.Accepted)
+                    {
+                        Debug.LogError($"P4_CAMERA_SMOKE_SETUP_FAIL adv-purchase reason={advanced.ReasonCode}");
+                        enabled = false;
+                        return;
+                    }
+                }
+
                 var purchase = economy.TryPurchase(recorder, P4EquipmentCatalog.CameraProfessionalId,
                     ProfessionalPurchaseRequest);
                 if (!purchase.Accepted)
