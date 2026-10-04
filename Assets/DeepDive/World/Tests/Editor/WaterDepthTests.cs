@@ -64,9 +64,9 @@ namespace DeepDive.World.Tests
         {
             AssertNoBand(new Vector3(0f, 8.01f, 0f));   // just above the line
             AssertNoBand(new Vector3(20f, 4f, 0f));     // not over water
-            // Deeper than 8 m: reef/deep have no authored metres yet (P4.4), so no band - never
-            // a guess that it is "shallow" or "reef".
-            AssertNoBand(new Vector3(0f, -0.01f, 0f));
+            // Deeper than 35 m: past the deepest authored band (P4.3), so no band - never a guess
+            // that it is "deep".
+            AssertNoBand(new Vector3(0f, 8f - DiveDepthBands.DeepMaxDepth - 0.01f, 0f));
         }
 
         [Test]

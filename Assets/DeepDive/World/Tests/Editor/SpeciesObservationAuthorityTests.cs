@@ -160,7 +160,7 @@ namespace DeepDive.World.Tests
             var original = Explored(out _);
             original.AcceptSighting(SeaBass, Centre, 1);
             original.AcceptCatch(Capture("cap-1", SeaBass), Centre, 1);
-            original.AcceptRecording("rec-1", Mullet, new Vector3(-12f, -5f, 9f), 2); // 13 m, band ""
+            original.AcceptRecording("rec-1", Mullet, new Vector3(-12f, -28f, 9f), 2); // 36 m, past the deepest band: band ""
             var stored = new List<SpeciesObservation>(original.Observations);
 
             // A fresh host after reload: cells not explored yet - stored cell/band must win, not a
@@ -227,11 +227,11 @@ namespace DeepDive.World.Tests
         [Test]
         public void Observation_DeepCellInsideTheRegion_IsCounted_WithUnclassifiedBand()
         {
-            // No band is not an invalid region: 13 m inside the region is a valid cell, so it counts.
+            // No band is not an invalid region: 36 m (past deep, P4.3) inside the region is a valid cell, so it counts.
             var cells = Cells();
-            cells.Tick(new FakeSource().Set(new Vector3(0f, -5f, 0f))); // 13 m
+            cells.Tick(new FakeSource().Set(new Vector3(0f, -28f, 0f))); // 36 m
             var obs = new SpeciesObservationAuthority(cells);
-            Assert.That(obs.AcceptSighting(SeaBass, new Vector3(0f, -5f, 0f), 1),
+            Assert.That(obs.AcceptSighting(SeaBass, new Vector3(0f, -28f, 0f), 1),
                 Is.EqualTo(SpeciesObservationOutcome.CountedNewEvidence));
             Assert.That(obs.Observations[0].CellId, Is.EqualTo(Id(0, 0)));
             Assert.That(obs.Observations[0].DepthBandId, Is.EqualTo(DepthBandIds.Unclassified));

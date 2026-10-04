@@ -57,7 +57,10 @@ namespace DeepDive.World.Tests
         private static readonly Vector3 BoardingPosition = new Vector3(11f, 8f, 8.5f);
 
         private const string RegionId = "region-near-1";
+
+        // P4.3 (#108) grew the one region north over the reef and the deep basin: x is unchanged, z now ends at 65.
         private const float RegionExtent = 15f;
+        private const float RegionMaxZ = 65f;
 
         // --- The hull the route has to fit ----------------------------------------------------
 
@@ -91,8 +94,9 @@ namespace DeepDive.World.Tests
         private const float LedgeTopY = 8.4f;
         private const float LedgeSeawardZ = -7f;
 
-        private static readonly Vector3 SwimCenter = new Vector3(0f, 4f, 0f);
-        private static readonly Vector3 SwimSize = new Vector3(30f, 8f, 30f);
+        // P4.3 (#108): the one SwimVolume grown in place over the reef and deep water (top still y 8).
+        private static readonly Vector3 SwimCenter = new Vector3(0f, -9.5f, 25f);
+        private static readonly Vector3 SwimSize = new Vector3(30f, 35f, 80f);
 
         private static readonly Vector3 PlatformCenter = new Vector3(0f, 4.2f, -12.875f);
         private static readonly Vector3 PlatformSize = new Vector3(29.5f, 8.4f, 3.75f);
@@ -158,10 +162,12 @@ namespace DeepDive.World.Tests
             return fields[0];
         }
 
+        // The near route. Since P4.3 the scene also holds the reef and deep routes, so this is "exactly one path with
+        // the near id", not "exactly one path".
         private DiveRoutePath Route()
         {
-            var paths = FindAll<DiveRoutePath>(scene);
-            Assert.AreEqual(1, paths.Count, "DiveTestArea must hold exactly one route path");
+            var paths = FindAll<DiveRoutePath>(scene).Where(p => p.RouteId == BoatTripIds.NearRouteId).ToList();
+            Assert.AreEqual(1, paths.Count, "DiveTestArea must hold exactly one near route path");
             paths[0].Refresh();
             return paths[0];
         }
@@ -676,7 +682,7 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(-RegionExtent, region.Bounds.MinX, 0.001f, "region minX");
             Assert.AreEqual(RegionExtent, region.Bounds.MaxX, 0.001f, "region maxX");
             Assert.AreEqual(-RegionExtent, region.Bounds.MinZ, 0.001f, "region minZ");
-            Assert.AreEqual(RegionExtent, region.Bounds.MaxZ, 0.001f, "region maxZ");
+            Assert.AreEqual(RegionMaxZ, region.Bounds.MaxZ, 0.001f, "region maxZ");
 
             // Every corner of the water, so no reachable spot is off the map.
             var water = BoxOf(Require("SwimVolume"));
@@ -703,10 +709,10 @@ namespace DeepDive.World.Tests
             }
 
             // The anchorage's own map coordinate, so a drifted region fails here rather than only
-            // in Mert's UI: 9 of 15 is 0.8 across, 8.5 of 15 is 0.7833 up.
+            // in Mert's UI: 9 of 15 is 0.8 across; z 8.5 in -15..65 is 23.5 / 80 = 0.29375 up (P4.3).
             Assert.IsTrue(region.TryWorldToMap(AnchorPosition, out var map));
             Assert.AreEqual(0.8f, map.x, 1e-4f, "the anchorage's mapX");
-            Assert.AreEqual(0.7833f, map.y, 1e-3f, "the anchorage's mapZ");
+            Assert.AreEqual(0.29375f, map.y, 1e-4f, "the anchorage's mapZ");
         }
 
         // 33
@@ -726,7 +732,7 @@ namespace DeepDive.World.Tests
             // The square's own edge still converts, so this is a boundary and not a wall.
             Assert.IsTrue(region.TryMapToWorld(new Vector2(1f, 1f), out var corner));
             Assert.AreEqual(RegionExtent, corner.x, 0.001f, "the region's far corner moved");
-            Assert.AreEqual(RegionExtent, corner.y, 0.001f, "the region's far corner moved");
+            Assert.AreEqual(RegionMaxZ, corner.y, 0.001f, "the region's far corner moved");
         }
 
         // --- Regression --------------------------------------------------------------------------------

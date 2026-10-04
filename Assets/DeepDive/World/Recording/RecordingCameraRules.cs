@@ -25,9 +25,10 @@ namespace DeepDive.World
 
         // Light reaching the subject. The shallow band is fully lit - it is the water every P3
         // shot was taken in - and below it the light falls linearly to a floor at the bottom of
-        // the deep cut (docs/plan/GAMEPLAY_LOOP.md draft: reef 8-20 m, deep 20-35 m).
+        // the deep cut. Both ends are DiveDepthBands' own constants (P4.3 #108), so the camera's
+        // light and the bands a cell or an observation carries cannot disagree about the metres.
         public const float LitDepthMetres = DiveDepthBands.ShallowMaxDepth;
-        public const float DarkDepthMetres = 35f;
+        public const float DarkDepthMetres = DiveDepthBands.DeepMaxDepth;
         public const float DeepLightFloor = 0.2f;
 
         // The least light each tier films in. Basic and Advanced share one floor: the first
