@@ -44,6 +44,7 @@ namespace DeepDive.Trip
         private Func<BoatRepairStatus> _repairStatus;
         // P4.3-C: which vehicle is the one at sea (the economy's fleet state). Null = the P3 rowboat, as before.
         private Func<string> _activeBoatId;
+        private IBoatTripRouteCatalog _routeCatalog;
         private ISessionRoster _roster;
 
         // Kept as a thin interface rather than a direct EconomyManager/NetworkSession reference so
@@ -65,11 +66,13 @@ namespace DeepDive.Trip
         // is also why EconomyManager leans on a lazily-called EnsureSubscribed() rather than trusting
         // Awake alone. Composition and every test call Configure explicitly, so binding here is the
         // one path that actually runs in both contexts.
-        public void Configure(Func<BoatRepairStatus> repairStatus, ISessionRoster roster, Func<string> activeBoatId = null)
+        public void Configure(Func<BoatRepairStatus> repairStatus, ISessionRoster roster,
+            Func<string> activeBoatId = null, IBoatTripRouteCatalog routeCatalog = null)
         {
             _repairStatus = repairStatus;
             _roster = roster;
             _activeBoatId = activeBoatId;
+            _routeCatalog = routeCatalog;
             BoatBoarding.Bind(TryBoard, TryDisembark);
             BoatRouteProgress.Bind(ReportArrival);
             VehicleSwitchGate.Bind(SwitchBlockedReason);
@@ -195,7 +198,7 @@ namespace DeepDive.Trip
             TransactionResult result;
             if (_phase != BoatTripPhase.Docked)
                 result = TransactionResult.Reject(requestId, "WrongPhase", _revision);
-            else if (!string.Equals(routeId, BoatTripIds.NearRouteId, StringComparison.Ordinal))
+            else if (!TryResolveRoute(routeId, out var route))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", _revision);
             else if (_seats.Count == 0)
                 // Checked before ownership: with nobody aboard there is no meaningful owner to
@@ -207,11 +210,14 @@ namespace DeepDive.Trip
                      (string.Equals(ActiveBoatId, VehicleIds.Rowboat, StringComparison.Ordinal) && _repairStatus != null && _repairStatus() != BoatRepairStatus.Repaired))
                 // The rowboat needs its repair; a bought boat is owned only after the rowboat was, so it needs nothing more.
                 result = TransactionResult.Reject(requestId, "BoatNotRepaired", _revision);
+            else if (route.RequiredVehicleClass == VehicleClass.None ||
+                     VehicleCatalog.ClassOf(ActiveBoatId) < route.RequiredVehicleClass)
+                result = TransactionResult.Reject(requestId, "RequirementMissing", _revision);
             else
             {
                 _tripSequence++;
                 _tripId = $"{ActiveBoatId}-trip-{_tripSequence}";
-                _routeId = routeId;
+                _routeId = route.RouteId;
                 _phase = BoatTripPhase.Outbound;
                 _revision++;
                 result = TransactionResult.Ok(requestId, _revision);
@@ -220,6 +226,23 @@ namespace DeepDive.Trip
             _processed[key] = result;
             if (result.Accepted) OnTripChanged?.Invoke();
             return result;
+        }
+
+        private bool TryResolveRoute(string routeId, out DiveRouteDefinition route)
+        {
+            if (_routeCatalog != null) return _routeCatalog.TryGetDefinition(routeId, out route);
+
+            // Legacy P3 tests/embedders that have not composed World yet keep their one near route.
+            // P4 reef/deep are never duplicated here: once a catalog is supplied, World is canonical.
+            if (string.Equals(routeId, BoatTripIds.NearRouteId, StringComparison.Ordinal))
+            {
+                route = new DiveRouteDefinition(BoatTripIds.NearRouteId, string.Empty, string.Empty, 0f, 0f,
+                    VehicleClass.Rowboat);
+                return true;
+            }
+
+            route = default;
+            return false;
         }
 
         public TransactionResult TryRequestReturn(PlayerId player, ulong requestId)
