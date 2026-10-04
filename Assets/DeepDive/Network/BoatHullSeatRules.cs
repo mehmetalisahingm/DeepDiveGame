@@ -34,6 +34,40 @@ namespace DeepDive.Network
         private const float AftLengthFraction = 0.18f;       // 5m rowboat -> -0.90m
         private const float ForeLengthFraction = 0.16f;      // 5m rowboat -> +0.80m
 
+        // Core keeps the semantic progression name ResearchBoat. The physical/presentation layer
+        // intentionally keeps ResearchVessel; this is the only mapping between the two vocabularies.
+        public static bool TryFromVehicleClass(VehicleClass vehicleClass, out BoatHullKind kind)
+        {
+            switch (vehicleClass)
+            {
+                case VehicleClass.Rowboat:
+                    kind = BoatHullKind.Rowboat;
+                    return true;
+                case VehicleClass.Motorboat:
+                    kind = BoatHullKind.Motorboat;
+                    return true;
+                case VehicleClass.ResearchBoat:
+                    kind = BoatHullKind.ResearchVessel;
+                    return true;
+                default:
+                    kind = default;
+                    return false;
+            }
+        }
+
+        // Physical docking offset measured from canonical World WP_0 along WP_0 -> WP_1.
+        // World route ids/waypoints/save/map stay canonical and never change per hull.
+        public static float DockOffsetMeters(BoatHullKind kind)
+        {
+            switch (kind)
+            {
+                case BoatHullKind.Rowboat: return 0f;
+                case BoatHullKind.Motorboat: return 1f;
+                case BoatHullKind.ResearchVessel: return 2.5f;
+                default: return 0f;
+            }
+        }
+
         // First-pass physical footprints only. These values do not grant ownership/unlock and do
         // not choose an active vehicle; Mert's progression state supplies the stable boat id.
         public static bool TryGetDimensions(BoatHullKind kind, out BoatHullDimensions dimensions)
