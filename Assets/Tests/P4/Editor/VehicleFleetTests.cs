@@ -23,6 +23,15 @@ namespace DeepDive.P4.Tests
         private string path;
         private ulong request = 1;
         private Func<string> gateForCleanup;
+        private ExplorationProgress explorationProgress;
+
+        private sealed class ExplorationProgress : IExplorationProgressReadModel
+        {
+            public bool ReefDiscovered = true;
+
+            public bool HasDiscoveredCellInBand(string depthBandId) =>
+                ReefDiscovered && string.Equals(depthBandId, DepthBandIds.Reef, StringComparison.Ordinal);
+        }
 
         [SetUp]
         public void Setup()
@@ -33,6 +42,8 @@ namespace DeepDive.P4.Tests
             economy = root.AddComponent<EconomyManager>();
             store = root.AddComponent<EconomySaveStore>();
             store.SetPathForTests(path);
+            explorationProgress = new ExplorationProgress();
+            economy.SetExplorationProgressReadModel(explorationProgress);
         }
 
         [TearDown]
@@ -110,6 +121,25 @@ namespace DeepDive.P4.Tests
             Assert.IsTrue(economy.TryPurchaseVehicle(Host, VehicleIds.Motorboat, request++).Accepted);
             Assert.AreEqual(VehicleCatalog.ResearchBoatPrice, economy.SharedBalance);
             Assert.IsTrue(economy.TryPurchaseVehicle(Guest, VehicleIds.ResearchBoat, request++).Accepted, "any player at the vendor may buy for the campaign");
+            Assert.AreEqual(0, economy.SharedBalance);
+            CollectionAssert.AreEqual(new[] { "boat-1", "boat-2", "boat-3" }, Owned(economy));
+        }
+
+        [Test]
+        public void ResearchBoatRequiresAReefDiscoveryAfterTheMotorboatRequirement()
+        {
+            Seed(VehicleCatalog.ResearchBoatPrice, repaired: true, purchased: new[] { VehicleIds.Motorboat });
+            explorationProgress.ReefDiscovered = false;
+
+            var requestId = request++;
+            var blocked = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, requestId);
+            Assert.AreEqual("RequirementMissing", blocked.ReasonCode);
+            Assert.AreEqual(VehicleCatalog.ResearchBoatPrice, economy.SharedBalance);
+            CollectionAssert.AreEqual(new[] { "boat-1", "boat-2" }, Owned(economy));
+
+            explorationProgress.ReefDiscovered = true;
+            var accepted = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, requestId);
+            Assert.IsTrue(accepted.Accepted, "discovery gates are not cached: the same request may succeed after Reef is discovered");
             Assert.AreEqual(0, economy.SharedBalance);
             CollectionAssert.AreEqual(new[] { "boat-1", "boat-2", "boat-3" }, Owned(economy));
         }
