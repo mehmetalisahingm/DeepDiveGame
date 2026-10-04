@@ -14,7 +14,8 @@ namespace DeepDive.Composition
     // P3.3 runtime composition root. It owns no trip, repair, route or movement rules; it only
     // connects Mert's BoatTripManager, Utku's authored DiveRoutePath and Mehmet's host mover.
     [DisallowMultipleComponent]
-    public sealed class BoatTripNetworkBinding : MonoBehaviour, BoatTripManager.ISessionRoster, IBoatRoutePathSource
+    public sealed class BoatTripNetworkBinding : MonoBehaviour, BoatTripManager.ISessionRoster,
+        IBoatRoutePathSource, IBoatTripRouteCatalog
     {
         private const float MirrorInterval = 0.1f;
 
@@ -110,6 +111,7 @@ namespace DeepDive.Composition
         {
             if (!IsHost || boatController == null) return;
             boatController.SetRoutePathSource(this);
+            ApplyActiveVehiclePhysicalProfile();
             PublishStateAndPose();
         }
 
@@ -118,13 +120,15 @@ namespace DeepDive.Composition
             if (bound || economy == null || tripManager == null || boatController == null) return;
 
             activeVehicleProvider = () => economy.ActiveVehicleId;
-            tripManager.Configure(() => economy.BoatRepair.Status, this, activeVehicleProvider);
+            tripManager.Configure(() => economy.BoatRepair.Status, this, activeVehicleProvider, this);
             ActiveVehicle.Bind(activeVehicleProvider);
             tripManager.OnTripChanged += PublishStateAndPose;
+            economy.OnFleetChanged += HandleFleetChanged;
             networkManager.OnClientDisconnectCallback += HandleClientDisconnected;
             BoatBoardingPhysicalInteraction.Bind(TryBoardNearest, TryDisembark);
             boatController.SetRoutePathSource(this);
             bound = true;
+            ApplyActiveVehiclePhysicalProfile();
             PublishStateAndPose();
         }
 
@@ -139,6 +143,7 @@ namespace DeepDive.Composition
                     tripManager.OnTripChanged -= PublishStateAndPose;
                     tripManager.Shutdown();
                 }
+                if (economy != null) economy.OnFleetChanged -= HandleFleetChanged;
                 if (networkManager != null)
                     networkManager.OnClientDisconnectCallback -= HandleClientDisconnected;
                 BoatBoardingPhysicalInteraction.Unbind(TryBoardNearest, TryDisembark);
@@ -152,6 +157,26 @@ namespace DeepDive.Composition
                 Destroy(boatController.gameObject);
                 boatController = null;
             }
+        }
+
+        private void HandleFleetChanged()
+        {
+            if (!bound) return;
+            ApplyActiveVehiclePhysicalProfile();
+            PublishStateAndPose();
+        }
+
+        private bool ApplyActiveVehiclePhysicalProfile()
+        {
+            if (!IsHost || economy == null || tripManager == null || boatController == null) return false;
+            var boatId = economy.ActiveVehicleId;
+            if (string.IsNullOrWhiteSpace(boatId)) return false;
+            var vehicleClass = VehicleCatalog.ClassOf(boatId);
+            if (!BoatHullSeatRules.TryFromVehicleClass(vehicleClass, out var hullKind)) return false;
+
+            // Every route departs from the same canonical town berth. Physical hull spacing is applied
+            // by NetworkBoatController along near WP_0 -> WP_1, never by mutating World route data.
+            return ConfigureActiveVehiclePhysicalProfile(boatId, hullKind, BoatTripIds.NearRouteId);
         }
 
         private TransactionResult TryBoardNearest(PlayerId player, ulong requestId)
@@ -207,6 +232,9 @@ namespace DeepDive.Composition
 
         public bool IsConnected(PlayerId player) =>
             networkManager != null && networkManager.IsServer && networkManager.ConnectedClients.ContainsKey(player.Value);
+
+        public bool TryGetDefinition(string routeId, out DiveRouteDefinition definition) =>
+            DiveRoutePath.TryGetDefinition(routeId, out definition);
 
         public bool TryGetRoute(string routeId, List<Vector3> points, out float outboundSeconds, out float inboundSeconds)
         {
