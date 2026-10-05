@@ -24,3 +24,11 @@ Tarih: 2026-10-02. Taban: `codex/p4-integration` @ `1bae433` (#115 dahil, merge 
 - Fiyatlar (900 / 2400, kameralar 400 / 900, palet 220, çanta 260, zıpkın 300) **çalışma değerleri**; denge P4.5.
 - Tekne sandığı/sandık eşya aktarımı ve tekne satışı bu issue'da yok (CONTRACTS taslağındaki `sandık` alanı sonraya kaldı).
 - #115 (Mehmet, merge edildi) aynı iki üst kamerayı `P4EquipmentCatalog` ile de ekliyor. Kimlik/fiyatlar aynı (`camera-advanced` 400, `camera-professional` 900), `AddToCatalog` aynı değeri yazdığı için çakışma yok; ama katalog artık iki yerde tanımlı. `EconomyManager` varsayılanlarında olduğu için `P4EquipmentCatalog` ve yeniden okuma bootstrap'i gereksiz kaldı: sonra tek kaynağa indirilmeli (karar Mehmet'te, bu PR'da dokunmadım).
+
+## Ek (2026-10-05): Resif keşfi kapısı (#119) ve `-Fleet` smoke'u
+#119 araştırma teknesi satın almayı gerçek Reef keşfine bağladı (`HasDiscoveredCellInBand(Reef)`, kayıttan da okunur). `-Fleet` smoke'u buna göre güncellendi:
+- Prep'te (etiketli tohum): motorlu tekne gerçek ekonomi API'siyle alınır; araştırma teknesi **reddedilir** (`RequirementMissing`, bakiye aynı, Reef keşfi yok).
+- Dalışta host **gerçekten** resif rafına yüzer (derinlik 8-20 m); Utku'nun gerçek keşif binding'i onaylı oyuncu konumundan Reef hücresi açar (ölçüm: t≈9,5 sn, konum y≈0, z≈15); host kıyıya döner.
+- Limanda yeniden başlatmadan guest araştırma teknesini RPC ile alır (Utku'nun "resif keşfet → limana dön → boat-3 al" satırı); dosyada Reef hücresi var.
+- İkinci host başlatması: dalış yokken keşif yalnız kayıttan gelir (`fleetReloadReefKept`), sahiplik yeniden kapılanmaz, 3 araç/aktif `boat-2`/bakiye aynı.
+- Doğrulama: #119 tabanında EditMode **1064/1064**; `-Fleet` 3/3 PASS (host + client1 + reload). Motorlu teknenin RPC ile satın alınışı bu sürümde yok (tohumlanıyor); o yol ilk `-Fleet` sürümünde 3 koşuda kanıtlandı.

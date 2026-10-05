@@ -71,6 +71,7 @@ namespace DeepDive.P1.Lab
             public string acceptReloadClipId = "", acceptReloadRecordingId = "", acceptReloadHash = "";
             public long acceptReloadBytes;
             public int acceptReloadClips, acceptReloadPublications, acceptReloadBalance, acceptReloadIncome, acceptReloadViews, acceptReloadFollowers, acceptReloadDay, acceptReloadExploreObs;
+            public bool fleetMotorSeeded, fleetReefGateRefused, fleetReefSwum, fleetReefOnDisk, fleetReloadReefKept;
             public bool fleetSeeded, fleetShopOpened, fleetTierGateRefused, fleetTiersBought, fleetVendorOpened, fleetMotorBought, fleetMotorDuplicateRefused,
                 fleetResearchBought, fleetHostSeated, fleetSeatBlocked, fleetSelected, fleetMirrorOwned, fleetMirrorActive, fleetActiveSeam, fleetParkedRefused,
                 fleetHostChecks, fleetSavedOnDisk, fleetReloadClean, fleetHostDone, fleetReloadPass;
@@ -252,9 +253,9 @@ namespace DeepDive.P1.Lab
                 // Recording scenarios end the dive when the recorder has REALLY swum to the safe pad (an event), not at a fixed
                 // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
                 // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
-                var recordingSettled = !Record || MediaFlow || result.recordingSafe;
+                var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && (!Fleet || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
                 var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
-                var returnCeiling = Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
+                var returnCeiling = Fleet ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
                 if (host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
@@ -293,7 +294,7 @@ namespace DeepDive.P1.Lab
                     result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone));
             if (Fleet) result.passed &= result.fleetShopOpened && result.fleetTierGateRefused && result.fleetTiersBought && result.fleetVendorOpened &&
                 result.fleetMirrorOwned && result.fleetMirrorActive && result.fleetActiveSeam &&
-                (!host || (result.fleetSeeded && result.fleetMotorBought && result.fleetHostSeated && result.fleetParkedRefused && result.fleetHostChecks &&
+                (!host || (result.fleetSeeded && result.fleetMotorSeeded && result.fleetReefGateRefused && result.fleetReefSwum && result.fleetReefOnDisk && result.fleetHostSeated && result.fleetParkedRefused && result.fleetHostChecks &&
                     result.fleetSavedOnDisk && result.fleetReloadClean && result.fleetHostDone)) &&
                 (host || (result.fleetMotorDuplicateRefused && result.fleetResearchBought && result.fleetSeatBlocked && result.fleetSelected));
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
@@ -370,6 +371,7 @@ namespace DeepDive.P1.Lab
                 else if (Acceptance && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
                 else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
+                else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
                 else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeFleet(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
@@ -1297,6 +1299,37 @@ namespace DeepDive.P1.Lab
             return true;
         }
 
+        // The host REALLY swims to the reef shelf (depth 8-20 m, z > 19) so Utku's real exploration binding discovers a Reef-band
+        // cell from the approved player position, then swims back near the beach. The research boat's gate reads exactly that
+        // discovery. The guest stays put.
+        private float fleetBackAt = float.MaxValue;
+        private static readonly Vector3 FleetReefTarget = new Vector3(3f, -4f, 28f);
+        private static readonly Vector3 FleetBackTarget = new Vector3(-3f, 6f, -4f);
+
+        private void ProbeFleetDive(NetworkPlayer local)
+        {
+            if (!adapter.IsAuthority) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var now = Time.realtimeSinceStartup;
+            if (!result.fleetReefSwum && store != null && store.HasDiscoveredCellInBand(DepthBandIds.Reef))
+            {
+                result.fleetReefSwum = true; fleetBackAt = now;
+                result.fleetTrace.Add($"reef band discovered t={now - sceneStarted:F1} pos={local.transform.position}");
+            }
+            var target = result.fleetReefSwum ? FleetBackTarget : FleetReefTarget;
+            var heading = target - local.transform.position;
+            var flat = new Vector3(heading.x, 0f, heading.z);
+            var yaw = flat.sqrMagnitude > 0.01f ? Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg : 0f;
+            var move = Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * heading.normalized;
+            local.SubmitLocalInput(heading.magnitude > 0.6f ? move : Vector3.zero, yaw, 0);
+            if (now >= fleetTraceAt && result.fleetTrace.Count < 60)
+            {
+                fleetTraceAt = now + 3f;
+                var q = local.transform.position;
+                result.fleetTrace.Add($"dive pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) reef={result.fleetReefSwum}");
+            }
+        }
+
         private void ProbeFleet(NetworkPlayer local)
         {
             var sync = local.GetComponent<EconomyPlayerSync>();
@@ -1349,7 +1382,7 @@ namespace DeepDive.P1.Lab
                     FleetStep(5); return;
                 case 5:   // harbor vendor: walk along the beach to the fourth NPC and interact
                     if (GoToService(local, cam, TownServiceCatalog.VehicleVendorId)) InteractEvery(local, 1.2f);
-                    if (sync.VendorOpen) { result.fleetVendorOpened = true; FleetStep(host ? 6 : 7); }
+                    if (sync.VendorOpen) { result.fleetVendorOpened = true; FleetStep(host ? 10 : 7); }
                     return;
                 case 6:   // host: buy the motorboat (needs the repaired sandal the seed repaired through the real part seam)
                     local.SubmitLocalInput(Vector3.zero, 0);
@@ -1417,6 +1450,15 @@ namespace DeepDive.P1.Lab
                     var repaired = true;
                     foreach (var part in BoatRepairParts.All) repaired &= BoatPartClaim.TryClaimFound(host, part, fleetRequest++).Accepted;
                     result.fleetSeeded = restored && repaired && economy.Fleet.IsOwned(VehicleIds.Rowboat) && economy.SharedBalance == FleetSeedBalance;
+                    // Labelled seed: the motorboat is bought through the real economy API here (the RPC purchase path was proven by the first
+                    // -Fleet version); the research boat must then be refused until a Reef cell is really discovered (the dive does that).
+                    var guestId = adapter.Session.Roster.Keys.First(k => k.Value != 0);
+                    result.fleetMotorSeeded = economy.TryPurchaseVehicle(host, VehicleIds.Motorboat, fleetRequest++).Accepted;
+                    var beforeGate = economy.SharedBalance;
+                    result.fleetReefGateRefused = economy.TryPurchaseVehicle(guestId, VehicleIds.ResearchBoat, fleetRequest++).ReasonCode == "RequirementMissing" &&
+                        economy.SharedBalance == beforeGate && !economy.Fleet.IsOwned(VehicleIds.ResearchBoat) &&
+                        !adapter.GetComponent<EconomySaveStore>().HasDiscoveredCellInBand(DepthBandIds.Reef);
+                    if (!result.fleetMotorSeeded || !result.fleetReefGateRefused) result.errors.Add($"fleet seed motor={result.fleetMotorSeeded} reefGate={result.fleetReefGateRefused}");
                     if (!result.fleetSeeded) result.errors.Add($"fleet seed restored={restored} repaired={repaired} balance={economy.SharedBalance}");
                     fleetHostStage = 1; return;
                 case 1:   // the research boat just got bought: the host takes a seat in the (still active) sandal
@@ -1449,6 +1491,7 @@ namespace DeepDive.P1.Lab
                     var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
                     result.fleetSavedOnDisk = disk.HasFleet && disk.FleetPurchasedBoatIds.SequenceEqual(new[] { VehicleIds.Motorboat, VehicleIds.ResearchBoat }) &&
                         disk.FleetActiveBoatId == VehicleIds.Motorboat && disk.SharedBalance == economy.SharedBalance && disk.SchemaVersion == EconomySaveData.CurrentSchemaVersion;
+                    result.fleetReefOnDisk = disk.HasExploration && disk.Exploration.DiscoveredCells.Any(c => c != null && c.DepthBandId == DepthBandIds.Reef);
                     var balance = economy.SharedBalance;
                     result.fleetReloadClean = store.LoadNow() && economy.Fleet.OwnedBoatIds.Count == 3 && economy.ActiveVehicleId == VehicleIds.Motorboat &&
                         economy.SharedBalance == balance && economy.TrySelectVehicle(host, VehicleIds.Motorboat, fleetRequest++).ReasonCode == "AlreadyProcessed";
@@ -1470,7 +1513,9 @@ namespace DeepDive.P1.Lab
             var state = trip.State;
             result.fleetReloadTripBoat = state.BoatId;
             var before = economy.SharedBalance;
-            result.fleetReloadPass = economy.Fleet.OwnedBoatIds.SequenceEqual(VehicleIds.All) && economy.ActiveVehicleId == VehicleIds.Motorboat &&
+            // No dive yet in this launch: the Reef discovery can only come from the loaded campaign file.
+            result.fleetReloadReefKept = adapter.GetComponent<EconomySaveStore>().HasDiscoveredCellInBand(DepthBandIds.Reef);
+            result.fleetReloadPass = result.fleetReloadReefKept && economy.Fleet.OwnedBoatIds.SequenceEqual(VehicleIds.All) && economy.ActiveVehicleId == VehicleIds.Motorboat &&
                 state.BoatId == VehicleIds.Motorboat && state.Phase == BoatTripPhase.Docked && state.Seats.Count == 0 &&
                 economy.TryPurchaseVehicle(host, VehicleIds.ResearchBoat, fleetRequest++).ReasonCode == "AlreadyProcessed" &&
                 economy.TryPurchaseVehicle(host, VehicleIds.Motorboat, fleetRequest++).ReasonCode == "AlreadyProcessed" &&
