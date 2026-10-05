@@ -17,4 +17,4 @@
 - Bu testler oyuncunun denizde yürüme/yüzme girdisini veya iki ayrı bilgisayarlı seferi kanıtlamaz. Yeni `NetworkVariable` nedeniyle birlikte oynayanlar aynı build'i kullanmalıdır.
 - PR #119'un motorlu/araştırma teknesiyle gerçek iki süreçli tam gidiş-dönüş kabulü ayrı açık kapıdır.
 
-- Windows integrated build: **PASS**; 	ools/Build-P1.ps1 -Integrated, Logs/P1-build.log içinde P1_BUILD_SUCCEEDED integrated=true, Unity çıkış kodu 0.
+- Windows integrated build: **PASS**; `tools/Build-P1.ps1 -Integrated`, `Logs/P1-build.log` i�inde `P1_BUILD_SUCCEEDED integrated=true`, Unity ��k�� kodu 0.
