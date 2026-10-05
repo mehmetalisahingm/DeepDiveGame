@@ -6,6 +6,8 @@ using DeepDive.Core.Contracts;
 using DeepDive.Economy;
 using DeepDive.Inventory;
 using DeepDive.Trip;
+using DeepDive.World;
+using DeepDive.Composition;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -23,14 +25,18 @@ namespace DeepDive.P4.Tests
         private string path;
         private ulong request = 1;
         private Func<string> gateForCleanup;
-        private ExplorationProgress explorationProgress;
+        private ExplorationCellAuthority explorationProgress;
+        private static ExplorationCellAuthority NewExploration() => new ExplorationCellAuthority(
+            ExplorationIds.NearRegionId, new DiveRegionBounds(-15f, 15f, -15f, 65f),
+            new[] { new WaterBody(-15f, 15f, -15f, 65f, 8f) });
 
-        private sealed class ExplorationProgress : IExplorationProgressReadModel
+        private sealed class ReefExplorer : IExplorerPositionSource
         {
-            public bool ReefDiscovered = true;
-
-            public bool HasDiscoveredCellInBand(string depthBandId) =>
-                ReefDiscovered && string.Equals(depthBandId, DepthBandIds.Reef, StringComparison.Ordinal);
+            public void CollectPositions(List<ExplorerPosition> into)
+            {
+                into.Clear();
+                into.Add(new ExplorerPosition(Host, new Vector3(2f, -6f, 32f)));
+            }
         }
 
         [SetUp]
@@ -42,8 +48,10 @@ namespace DeepDive.P4.Tests
             economy = root.AddComponent<EconomyManager>();
             store = root.AddComponent<EconomySaveStore>();
             store.SetPathForTests(path);
-            explorationProgress = new ExplorationProgress();
-            economy.SetExplorationProgressReadModel(explorationProgress);
+            explorationProgress = NewExploration();
+            explorationProgress.Tick(new ReefExplorer());
+            store.Exploration = new ExplorationPersistenceAdapter(explorationProgress, new SpeciesObservationAuthority(explorationProgress));
+            economy.SetExplorationProgressReadModel(store);
         }
 
         [TearDown]
@@ -129,14 +137,37 @@ namespace DeepDive.P4.Tests
         public void ResearchBoatRequiresAReefDiscoveryAfterTheMotorboatRequirement()
         {
             Seed(VehicleCatalog.ResearchBoatPrice, repaired: true, purchased: new[] { VehicleIds.Motorboat });
-            explorationProgress.ReefDiscovered = false;
+            explorationProgress = NewExploration();
+            economy.SetExplorationProgressReadModel(store);
+            store.Exploration = new ExplorationPersistenceAdapter(explorationProgress, new SpeciesObservationAuthority(explorationProgress));
+            Assert.IsFalse(explorationProgress.HasDiscoveredCellInBand(DepthBandIds.Reef));
 
             var blocked = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, request++);
             Assert.AreEqual("RequirementMissing", blocked.ReasonCode);
             Assert.AreEqual(VehicleCatalog.ResearchBoatPrice, economy.SharedBalance);
             CollectionAssert.AreEqual(new[] { "boat-1", "boat-2" }, Owned(economy));
 
-            explorationProgress.ReefDiscovered = true;
+            explorationProgress.Tick(new ReefExplorer());
+            Assert.IsTrue(explorationProgress.HasDiscoveredCellInBand(DepthBandIds.Reef));
+            Assert.IsTrue(store.SaveNow(), store.LastError);
+            var saved = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(path));
+            Assert.IsTrue(saved.HasExploration);
+            Assert.IsTrue(saved.Exploration.DiscoveredCells.Any(c => c.DepthBandId == DepthBandIds.Reef));
+
+            // Fresh authorities obtain purchase permission from the real campaign file.
+            UnityEngine.Object.DestroyImmediate(root);
+            root = new GameObject("fleet-restored");
+            root.AddComponent<InventoryManager>();
+            economy = root.AddComponent<EconomyManager>();
+            store = root.AddComponent<EconomySaveStore>();
+            store.SetPathForTests(path);
+            explorationProgress = NewExploration();
+            Assert.IsFalse(explorationProgress.HasDiscoveredCellInBand(DepthBandIds.Reef));
+            store.Exploration = new ExplorationPersistenceAdapter(explorationProgress, new SpeciesObservationAuthority(explorationProgress));
+            economy.SetExplorationProgressReadModel(store);
+            Assert.IsTrue(store.LoadNow(), store.LastError);
+            Assert.IsTrue(explorationProgress.HasDiscoveredCellInBand(DepthBandIds.Reef));
+            Assert.IsTrue(store.HasDiscoveredCellInBand(DepthBandIds.Reef));
             var accepted = economy.TryPurchaseVehicle(Host, VehicleIds.ResearchBoat, request++);
             Assert.IsTrue(accepted.Accepted, "a new vendor request succeeds after Reef is discovered");
             Assert.AreEqual(0, economy.SharedBalance);

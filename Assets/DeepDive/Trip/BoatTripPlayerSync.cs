@@ -1,4 +1,5 @@
 using DeepDive.Core.Contracts;
+using DeepDive.Network;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -28,6 +29,9 @@ namespace DeepDive.Trip
         public readonly NetworkVariable<bool> LastAccepted = new NetworkVariable<bool>();
         public readonly NetworkVariable<FixedString32Bytes> LastReasonCode = new NetworkVariable<FixedString32Bytes>();
 
+        public readonly NetworkVariable<byte> HullKind = new NetworkVariable<byte>();
+
+        private BoatHullPresentation hullPresentation;
         private ulong localRequestId;
         private GameObject boatVisual;
         private Material runtimeBoatMaterial;
@@ -85,12 +89,13 @@ namespace DeepDive.Trip
             MySeatId.Value = new FixedString32Bytes(seat);
         }
 
-        public void PublishBoatPose(Vector3 position, Quaternion rotation, bool visible)
+        public void PublishBoatPose(Vector3 position, Quaternion rotation, bool visible, BoatHullKind hull = BoatHullKind.Rowboat)
         {
             if (!IsServer) return;
             BoatWorldPosition.Value = position;
             BoatYaw.Value = rotation.eulerAngles.y;
             BoatVisible.Value = visible;
+            HullKind.Value = (byte)hull;
         }
 
         public void PublishResult(TransactionResult result)
@@ -174,9 +179,9 @@ namespace DeepDive.Trip
             if (!IsOwner || boatVisual != null) return;
 
             boatVisual = new GameObject("P3BoatVisual");
-            BuildVisualPart(boatVisual.transform, "Hull", Vector3.zero, new Vector3(2.4f, 0.6f, 5f));
-            BuildVisualPart(boatVisual.transform, "Bench_A", new Vector3(0f, 0.45f, -0.9f), new Vector3(2f, 0.15f, 0.4f));
-            BuildVisualPart(boatVisual.transform, "Bench_B", new Vector3(0f, 0.45f, 0.8f), new Vector3(2f, 0.15f, 0.4f));
+            hullPresentation = boatVisual.AddComponent<BoatHullPresentation>();
+            hullPresentation.Initialize(ResolveBoatMaterial());
+            hullPresentation.ApplyHullPresentation((BoatHullKind)HullKind.Value);
         }
 
         private Material ResolveBoatMaterial()
@@ -189,24 +194,10 @@ namespace DeepDive.Trip
             return runtimeBoatMaterial;
         }
 
-        private void BuildVisualPart(Transform root, string name, Vector3 localPosition, Vector3 localScale)
-        {
-            var part = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            part.name = name;
-            part.transform.SetParent(root, false);
-            part.transform.localPosition = localPosition;
-            part.transform.localRotation = Quaternion.identity;
-            part.transform.localScale = localScale;
-            var collider = part.GetComponent<Collider>();
-            if (collider != null) collider.enabled = false;
-            var renderer = part.GetComponent<Renderer>();
-            var material = ResolveBoatMaterial();
-            if (renderer != null && material != null) renderer.sharedMaterial = material;
-        }
-
         private void UpdateBoatVisual()
         {
             if (boatVisual == null) return;
+            hullPresentation.ApplyHullPresentation((BoatHullKind)HullKind.Value);
             boatVisual.SetActive(BoatVisible.Value);
             if (!BoatVisible.Value) return;
             boatVisual.transform.SetPositionAndRotation(

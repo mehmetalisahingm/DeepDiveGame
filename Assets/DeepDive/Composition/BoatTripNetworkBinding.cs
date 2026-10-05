@@ -219,7 +219,7 @@ namespace DeepDive.Composition
                 var sync = syncs[i];
                 if (!sync.IsSpawned || !sync.IsServer) continue;
                 sync.PublishTripState(state, new PlayerId(sync.OwnerClientId));
-                sync.PublishBoatPose(position, rotation, visible);
+                sync.PublishBoatPose(position, rotation, visible, boatController.HullKind);
             }
         }
 
