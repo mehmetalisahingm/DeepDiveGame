@@ -187,11 +187,12 @@ namespace DeepDive.Composition
         private static void DrawEncyclopedia()
         {
             var rows = Mathf.Max(1, LastEncyclopedia.Count);
-            var box = new Rect(20f, Screen.height - 60f - rows * 44f, 380f, 36f + rows * 44f);
+            var box = new Rect(20f, Screen.height - 88f - rows * 44f, 380f, 64f + rows * 44f);
             GUI.Box(box, $"ANSIKLOPEDI [{EncyclopediaKey}]  ({LastEncyclopedia.Count} tur)");
             if (LastEncyclopedia.Count == 0)
             {
                 GUI.Label(new Rect(box.x + 10f, box.y + 26f, 360f, 20f), "Henuz dogrulanmis bir karsilasma yok.");
+                DrawDeepProgression(box, 0);
                 return;
             }
             for (var i = 0; i < LastEncyclopedia.Count; i++)
@@ -204,6 +205,14 @@ namespace DeepDive.Composition
                 GUI.Label(new Rect(box.x + 22f, y + 18f, 350f, 20f),
                     $"siluet {(e.Silhouette ? "acik" : "-")}  |  av verisi {(e.CatchData ? "acik" : "av gerekir")}  |  habitat: {habitat}");
             }
+            DrawDeepProgression(box, LastEncyclopedia.Count);
+        }
+
+        // P4.4-C: where the deep chain stands (stage and trace count only, no place), read from the host-mirrored state.
+        private static void DrawDeepProgression(Rect box, int entryRows)
+        {
+            var state = BossProgression.State;
+            GUI.Label(new Rect(box.x + 10f, box.y + 26f + Mathf.Max(1, entryRows) * 44f, 360f, 20f), DeepProgressionPresenter.Line(state));
         }
 
         private void DrawIcon(Rect map, MapIcon icon)

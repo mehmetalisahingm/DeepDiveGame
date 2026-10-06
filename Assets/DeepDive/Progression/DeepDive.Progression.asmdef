@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.Progression",
+  "rootNamespace": "DeepDive.Progression",
+  "references": ["DeepDive.Core.Contracts"]
+}
