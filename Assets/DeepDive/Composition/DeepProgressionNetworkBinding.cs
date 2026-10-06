@@ -49,7 +49,6 @@ namespace DeepDive.Composition
         {
             adapter = GetComponent<SessionNetworkAdapter>();
             manager = GetComponent<NetworkManager>();
-            saveStore = GetComponent<EconomySaveStore>();
             if (adapter == null || manager == null) enabled = false;
         }
 
@@ -57,6 +56,8 @@ namespace DeepDive.Composition
 
         private void Update()
         {
+            // The campaign store is added by its own bootstrap, possibly after this component's Awake: resolve it lazily.
+            if (saveStore == null) saveStore = GetComponent<EconomySaveStore>();
             if (!IsHost)
             {
                 Release();
