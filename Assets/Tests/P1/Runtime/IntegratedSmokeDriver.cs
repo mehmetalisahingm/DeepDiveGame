@@ -1402,6 +1402,16 @@ namespace DeepDive.P1.Lab
                 return;
             }
 
+            var arenaPlayers = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .Count(player => player.IsSpawned && !player.Passive.Value &&
+                                 Vector3.Distance(player.transform.position, DeepEncounterWorld.ArenaPosition) <=
+                                 DeepEncounterWorld.ArenaRadius + 1.5f);
+            if (arenaPlayers < Math.Min(2, adapter.Session.Roster.Count))
+            {
+                local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
             var delta = DeepEncounterWorld.BossPosition - local.RecordingEyePosition;
             var flat = new Vector3(delta.x, 0f, delta.z);
             var yaw = flat.sqrMagnitude > 0.0001f ? Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg : 0f;
