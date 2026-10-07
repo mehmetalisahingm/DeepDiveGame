@@ -339,7 +339,7 @@ namespace DeepDive.P1.Lab
                 result.tripMapPlayersMax >= expected &&
                 result.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
                 (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload) &&
-                (!FleetRoute || (result.tripFleetVehicleReady && (!host || result.tripHullKindCorrect)));
+                (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect));
             Finish();
         }
 
@@ -1388,12 +1388,13 @@ namespace DeepDive.P1.Lab
                     FleetStep(5); return;
                 case 5:   // harbor vendor: walk along the beach to the fourth NPC and interact
                     if (GoToService(local, cam, TownServiceCatalog.VehicleVendorId)) InteractEvery(local, 1.2f);
-                    if (sync.VendorOpen) { result.fleetVendorOpened = true; FleetStep(host ? 10 : 7); }
+                    if (sync.VendorOpen) { result.fleetVendorOpened = true; FleetStep(host ? 6 : 7); }
                     return;
                 case 6:   // host: buy the motorboat (needs the repaired sandal the seed repaired through the real part seam)
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(VehicleIds.Motorboat), out ok, out reason)) return;
                     result.fleetMotorBought = ok;
+                    result.fleetMotorSeeded = ok;
                     if (!ok) result.errors.Add("motorboat refused: " + reason);
                     FleetStep(10); return;
                 case 7:   // guest: once the motorboat is owned, buying it again is refused (one vehicle, one charge)
@@ -1456,15 +1457,14 @@ namespace DeepDive.P1.Lab
                     var repaired = true;
                     foreach (var part in BoatRepairParts.All) repaired &= BoatPartClaim.TryClaimFound(host, part, fleetRequest++).Accepted;
                     result.fleetSeeded = restored && repaired && economy.Fleet.IsOwned(VehicleIds.Rowboat) && economy.SharedBalance == FleetSeedBalance;
-                    // Labelled seed: the motorboat is bought through the real economy API here (the RPC purchase path was proven by the first
-                    // -Fleet version); the research boat must then be refused until a Reef cell is really discovered (the dive does that).
+                    // Before any vehicle purchase, prove the research boat is closed. The motorboat itself is
+                    // bought later through the real harbor-vendor owner RPC in ProbeFleet case 6.
                     var guestId = adapter.Session.Roster.Keys.First(k => k.Value != 0);
-                    result.fleetMotorSeeded = economy.TryPurchaseVehicle(host, VehicleIds.Motorboat, fleetRequest++).Accepted;
                     var beforeGate = economy.SharedBalance;
                     result.fleetReefGateRefused = economy.TryPurchaseVehicle(guestId, VehicleIds.ResearchBoat, fleetRequest++).ReasonCode == "RequirementMissing" &&
                         economy.SharedBalance == beforeGate && !economy.Fleet.IsOwned(VehicleIds.ResearchBoat) &&
                         !adapter.GetComponent<EconomySaveStore>().HasDiscoveredCellInBand(DepthBandIds.Reef);
-                    if (!result.fleetMotorSeeded || !result.fleetReefGateRefused) result.errors.Add($"fleet seed motor={result.fleetMotorSeeded} reefGate={result.fleetReefGateRefused}");
+                    if (!result.fleetReefGateRefused) result.errors.Add($"fleet reef gate={result.fleetReefGateRefused}");
                     if (!result.fleetSeeded) result.errors.Add($"fleet seed restored={restored} repaired={repaired} balance={economy.SharedBalance}");
                     fleetHostStage = 1; return;
                 case 1:   // the research boat just got bought: the host takes a seat in the (still active) sandal
@@ -1922,31 +1922,41 @@ namespace DeepDive.P1.Lab
             if (sync == null || !sync.IsSpawned) { local.SubmitLocalInput(Vector3.zero, 0); return; }
             if (FleetRoute)
             {
-                if (adapter.IsAuthority && !EnsureFleetRouteVehicle())
+                var economySync = local.GetComponent<EconomyPlayerSync>();
+                if (economySync == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+                var expectedMask = TripVehicleId == VehicleIds.ResearchBoat ? 4 : TripVehicleId == VehicleIds.Motorboat ? 2 : 1;
+                if ((economySync.FleetOwnedMask.Value & expectedMask) == 0)
                 {
+                    if (adapter.IsAuthority) result.errors.Add($"fleet-route campaign does not own {TripVehicleId}");
                     local.SubmitLocalInput(Vector3.zero, 0);
                     return;
                 }
-                var economySync = local.GetComponent<EconomyPlayerSync>();
-                if (economySync == null || economySync.ActiveVehicleId.Value.ToString() != TripVehicleId)
+                if (economySync.ActiveVehicleId.Value.ToString() != TripVehicleId)
                 {
+                    if (Time.realtimeSinceStartup >= tripNext)
+                    {
+                        tripNext = Time.realtimeSinceStartup + 1.2f;
+                        economySync.RequestSelectVehicle(TripVehicleId); // real owner RPC; no save rewrite
+                    }
                     local.SubmitLocalInput(Vector3.zero, 0);
                     return;
                 }
                 result.tripFleetVehicleReady = true;
+
+                var expectedHull = TripVehicleId == VehicleIds.ResearchBoat ? BoatHullKind.ResearchVessel :
+                    TripVehicleId == VehicleIds.Motorboat ? BoatHullKind.Motorboat : BoatHullKind.Rowboat;
+                var localPresentation = FindObjectsByType<BoatHullPresentation>(FindObjectsSortMode.None)
+                    .FirstOrDefault(p => p.gameObject.name == "P3BoatVisual");
+                var mirrorCorrect = (BoatHullKind)sync.HullKind.Value == expectedHull &&
+                    localPresentation != null && localPresentation.PresentedHull == expectedHull;
                 if (adapter.IsAuthority)
                 {
                     var physical = FindFirstObjectByType<NetworkBoatController>();
-                    var expectedHull = TripVehicleId == VehicleIds.ResearchBoat ? BoatHullKind.ResearchVessel :
-                        TripVehicleId == VehicleIds.Motorboat ? BoatHullKind.Motorboat : BoatHullKind.Rowboat;
-                    var presentation = physical != null ? physical.GetComponent<BoatHullPresentation>() : null;
-                    var visibleModels = presentation != null
-                        ? presentation.transform.Cast<Transform>().Count(child => child.gameObject.activeSelf)
-                        : 0;
-                    result.tripHullKindCorrect |= physical != null && physical.BoatId == TripVehicleId &&
-                        physical.HullKind == expectedHull && presentation != null &&
-                        presentation.PresentedHull == expectedHull && visibleModels == 1;
+                    var hostPhysicalCorrect = physical != null && physical.BoatId == TripVehicleId &&
+                        physical.HullKind == expectedHull;
+                    result.tripHullKindCorrect |= mirrorCorrect && hostPhysicalCorrect;
                 }
+                else result.tripHullKindCorrect |= mirrorCorrect;
             }
             var phase = (BoatTripPhase)sync.Phase.Value;
             var phaseName = phase.ToString();
@@ -2144,30 +2154,6 @@ namespace DeepDive.P1.Lab
 
         // Host only, after the party is back at the dock: the REAL EconomySaveStore round trip must leave the
         // boat repaired and the trip manager Docked with no seats. A live trip is never in the save file.
-        private bool EnsureFleetRouteVehicle()
-        {
-            if (!FleetRoute) return true;
-            var economy = adapter.GetComponent<EconomyManager>();
-            if (economy == null || economy.BoatRepair.Status != BoatRepairStatus.Repaired) return false;
-            if (economy.Fleet.IsOwned(TripVehicleId) && economy.ActiveVehicleId == TripVehicleId) return true;
-            if (fleetRouteSeedAttempted) return false;
-
-            fleetRouteSeedAttempted = true;
-            var seed = economy.ExportSaveData("p43-route-smoke", "vehicle-seed");
-            seed.HasFleet = true;
-            seed.FleetPurchasedBoatIds.Clear();
-            seed.FleetPurchasedBoatIds.Add(VehicleIds.Motorboat);
-            seed.FleetPurchasedBoatIds.Add(VehicleIds.ResearchBoat);
-            seed.FleetActiveBoatId = TripVehicleId;
-            var restored = economy.TryRestore(seed);
-            if (!restored || !economy.Fleet.IsOwned(TripVehicleId) || economy.ActiveVehicleId != TripVehicleId)
-            {
-                result.errors.Add($"fleet-route seed failed boat={TripVehicleId} restored={restored} active={economy.ActiveVehicleId}");
-                return false;
-            }
-            return true;
-        }
-
         private void HostTripSaveCheck()
         {
             var economy = adapter.GetComponent<EconomyManager>();
