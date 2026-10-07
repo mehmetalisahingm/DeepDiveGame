@@ -82,7 +82,7 @@ namespace DeepDive.P1.Lab
                 deepDiscoveryRefused, deepUnlocked, deepCompletedOnce, deepSavedOnDisk, deepReloadClean, deepHostDone, deepReloadPass;
             public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
             public bool bossSighting, bossRumor, bossTraceStage, bossArenaUnlocked, bossActiveSeen, bossDamageSeen,
-                bossShotSent, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
+                bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -276,7 +276,8 @@ namespace DeepDive.P1.Lab
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
                 var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
                 var returnCeiling = Fleet || Deep ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
-                if (host && BossAcceptance && result.bossHostDone && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
+                    !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 else if (!BossAcceptance && host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
@@ -324,8 +325,9 @@ namespace DeepDive.P1.Lab
                     result.deepFailClosed && result.deepContextRefused && result.deepTracesOk && result.deepTraceStage && result.deepDiscoveryRefused &&
                     result.deepUnlocked && result.deepCompletedOnce && result.deepSavedOnDisk && result.deepReloadClean && result.deepHostDone));
             if (BossAcceptance) result.passed &= result.bossRumor && result.bossTraceStage && result.bossArenaUnlocked &&
-                result.bossActiveSeen && result.bossShotSent && result.bossCompletedSeen &&
-                (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossSaved && result.bossHostDone));
+                result.bossActiveSeen && result.bossShotSent && result.bossDefeatedPending && result.bossCompletedSeen &&
+                (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossPartySafe &&
+                    result.bossSaved && result.bossHostDone));
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
@@ -1317,11 +1319,18 @@ namespace DeepDive.P1.Lab
             result.bossCompletedSeen |= BossProgression.IsCompleted(DeepProgressionIds.BossId) ||
                                         boss.Phase == BossEncounterPhase.Completed;
             if (boss.MaxHealth > 0f && boss.Health < boss.MaxHealth) result.bossDamageSeen = true;
+            result.bossDefeatedPending |= boss.Phase == BossEncounterPhase.Active && boss.Health <= 0f;
 
             if (!adapter.IsAuthority || result.bossHostDone) return;
             var binding = adapter.GetComponent<BossEncounterSessionBinding>();
             result.bossTwoAttackers |= binding != null && binding.AcceptedHitPlayerCount >= 2;
-            if (!result.bossCompletedSeen || !result.bossTwoAttackers) return;
+            var inventory = adapter.GetComponent<InventoryManager>();
+            result.bossPartySafe |= inventory != null && adapter.Session.Roster.Keys.All(id =>
+                inventory.Bags.TryGetValue(id, out var bag) && bag.SafelyReturned);
+
+            // Durable completion must appear only after BeginReturn finalized the real DiveSummary.
+            if (adapter.Session.State.Phase != SessionPhase.Return || !result.bossCompletedSeen || !result.bossTwoAttackers)
+                return;
 
             var store = adapter.GetComponent<EconomySaveStore>();
             if (store == null || !File.Exists(store.SavePath)) return;
@@ -1399,6 +1408,15 @@ namespace DeepDive.P1.Lab
             {
                 result.bossCompletedSeen = true;
                 local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
+            // A defeated boss stays transient until the crew reaches the real safe-return zone.
+            // Both processes physically swim back; the host only advances Return after every roster bag is marked safe.
+            if (boss.Phase == BossEncounterPhase.Active && boss.Health <= 0f)
+            {
+                result.bossDefeatedPending = true;
+                SwimAcceptance(local, FleetBackTarget, 0.7f, surfaceTransit: true);
                 return;
             }
 
