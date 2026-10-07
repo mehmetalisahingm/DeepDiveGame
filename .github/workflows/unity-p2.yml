@@ -41,6 +41,7 @@ jobs:
         uses: game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213 # v4
         with:
           unityVersion: 6000.3.23f1
+          cliVersion: v0.1.72
           testMode: EditMode
           artifactsPath: Logs/CI-Tests
           githubToken: ''
