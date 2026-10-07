@@ -93,6 +93,7 @@ namespace DeepDive.Network
         private readonly List<Vector3> path = new List<Vector3>();
         private NetworkManager networkManager;
         private IBoatRoutePathSource routeSource;
+        private BoatHullPresentation hullPresentation;
         private BoatTripState state;
         private int appliedRevision = int.MinValue;
         private int waypointIndex;
@@ -118,6 +119,8 @@ namespace DeepDive.Network
         {
             networkManager = manager;
             routeSource = source;
+            hullPresentation = GetComponent<BoatHullPresentation>();
+            hullPresentation?.ApplyHullPresentation(hullKind);
             BoatApprovedPositions.Bind(this);
             SnapToDockRouteStart();
         }
@@ -133,7 +136,11 @@ namespace DeepDive.Network
 
             var changed = !string.Equals(activeBoatId, boatId, StringComparison.Ordinal) || hullKind != nextHullKind ||
                           !string.Equals(dockRouteId, nextDockRouteId, StringComparison.Ordinal);
-            if (!changed) return true;
+            if (!changed)
+            {
+                hullPresentation?.ApplyHullPresentation(hullKind);
+                return true;
+            }
 
             ReleaseAllPlayers();
             routeActive = false;
@@ -144,6 +151,7 @@ namespace DeepDive.Network
             activeBoatId = boatId;
             hullKind = nextHullKind;
             dockRouteId = nextDockRouteId;
+            hullPresentation?.ApplyHullPresentation(hullKind);
             SnapToDockRouteStart();
             return true;
         }
