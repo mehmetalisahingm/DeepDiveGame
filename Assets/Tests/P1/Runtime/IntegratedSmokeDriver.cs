@@ -45,6 +45,7 @@ namespace DeepDive.P1.Lab
             public string tripSeatId;
             public bool tripBoarded, tripDuplicateBoardHeld, tripMapDockedAtDock, tripMapUnderwayMoved,
                 tripMapAnchoredAtAnchor, tripReturnMarkerSeen, tripReboarded, tripDockedEmpty, tripDone, tripSaveReload;
+            public bool tripFleetVehicleReady, tripHullKindCorrect;
             public int tripMapPlayersMax, tripUnderwayPositions;
             public List<string> tripTrace = new List<string>();
             public List<int> dayNumbers = new List<int>(), daySummaries = new List<int>();
@@ -132,6 +133,9 @@ namespace DeepDive.P1.Lab
         private bool Day => Arg("-p4-day") == "1";
         private bool DayReload => Arg("-p4-day-reload") == "1";
         private bool Trip => Arg("-p3-trip") == "1";
+        private string TripVehicleId => Arg("-p4-trip-vehicle");
+        private bool FleetRoute => !string.IsNullOrEmpty(TripVehicleId);
+        private string TripRouteId => FleetRoute ? Arg("-p4-trip-route", BoatTripIds.NearRouteId) : BoatTripIds.NearRouteId;
         private bool Boat => Arg("-p3-boat") == "1" || Trip;
         private bool purchaseSent;
         private int townStep, townBefore;
@@ -180,7 +184,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 320f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 320f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -284,7 +288,7 @@ namespace DeepDive.P1.Lab
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -293,7 +297,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                var leaveDue = BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
@@ -364,7 +368,8 @@ namespace DeepDive.P1.Lab
                 result.tripMapUnderwayMoved && result.tripMapAnchoredAtAnchor && result.tripDockedEmpty && result.tripDone &&
                 result.tripMapPlayersMax >= expected &&
                 result.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
-                (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload);
+                (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload) &&
+                (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect));
             Finish();
         }
 
@@ -2257,6 +2262,45 @@ namespace DeepDive.P1.Lab
         {
             var sync = local.GetComponent<BoatTripPlayerSync>();
             if (sync == null || !sync.IsSpawned) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            if (FleetRoute)
+            {
+                var economySync = local.GetComponent<EconomyPlayerSync>();
+                if (economySync == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+                var expectedMask = TripVehicleId == VehicleIds.ResearchBoat ? 4 : TripVehicleId == VehicleIds.Motorboat ? 2 : 1;
+                if ((economySync.FleetOwnedMask.Value & expectedMask) == 0)
+                {
+                    if (adapter.IsAuthority && !result.errors.Contains($"fleet-route campaign does not own {TripVehicleId}"))
+                        result.errors.Add($"fleet-route campaign does not own {TripVehicleId}");
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+                }
+                if (economySync.ActiveVehicleId.Value.ToString() != TripVehicleId)
+                {
+                    if (Time.realtimeSinceStartup >= tripNext)
+                    {
+                        tripNext = Time.realtimeSinceStartup + 1.2f;
+                        economySync.RequestSelectVehicle(TripVehicleId);
+                    }
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+                }
+                result.tripFleetVehicleReady = true;
+
+                var expectedHull = TripVehicleId == VehicleIds.ResearchBoat ? BoatHullKind.ResearchVessel :
+                    TripVehicleId == VehicleIds.Motorboat ? BoatHullKind.Motorboat : BoatHullKind.Rowboat;
+                var localPresentation = FindObjectsByType<BoatHullPresentation>(FindObjectsSortMode.None)
+                    .FirstOrDefault(p => p.gameObject.name == "P3BoatVisual");
+                var mirrorCorrect = (BoatHullKind)sync.HullKind.Value == expectedHull &&
+                    localPresentation != null && localPresentation.PresentedHull == expectedHull;
+                if (adapter.IsAuthority)
+                {
+                    var physical = FindFirstObjectByType<NetworkBoatController>();
+                    var hostPhysicalCorrect = physical != null && physical.BoatId == TripVehicleId &&
+                        physical.HullKind == expectedHull;
+                    result.tripHullKindCorrect |= mirrorCorrect && hostPhysicalCorrect;
+                }
+                else result.tripHullKindCorrect |= mirrorCorrect;
+            }
             var phase = (BoatTripPhase)sync.Phase.Value;
             var phaseName = phase.ToString();
             if (sync.BoatVisible.Value && tripLastPhase != phaseName)
@@ -2266,7 +2310,8 @@ namespace DeepDive.P1.Lab
             var owner = sync.AmOwner.Value;
             var now = Time.realtimeSinceStartup;
             if (tripStepAt == 0) tripStepAt = now;
-            if (tripStep < 90 && now - tripStepAt > 32f)
+            var tripStepTimeout = FleetRoute && TripRouteId == BoatTripIds.DeepRouteId ? 75f : FleetRoute ? 50f : 32f;
+            if (tripStep < 90 && now - tripStepAt > tripStepTimeout)
             {
                 result.errors.Add($"trip step {tripStep} timeout phase={phaseName} seated={sync.SeatedCount.Value} seat={sync.MySeatId.Value} last={sync.LastReasonCode.Value}");
                 TripStep(99);
@@ -2286,7 +2331,9 @@ namespace DeepDive.P1.Lab
                 {
                     var dock = FindObjectsByType<RouteAnchor>(FindObjectsSortMode.None).FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.Dock);
                     if (dock == null || !sync.BoatVisible.Value) { local.SubmitLocalInput(Vector3.zero, 0); return; }
-                    var stand = new Vector3(dock.BoardingPosition.x + (adapter.IsAuthority ? -0.4f : 0.4f), dock.BoardingPosition.y, -3.6f);   // deck end, as close to the stern as the deck goes
+                    var stand = FleetRoute
+                        ? new Vector3(sync.BoatWorldPosition.Value.x + (adapter.IsAuthority ? -0.35f : 0.35f), dock.BoardingPosition.y, sync.BoatWorldPosition.Value.z - 2.5f)
+                        : new Vector3(dock.BoardingPosition.x + (adapter.IsAuthority ? -0.4f : 0.4f), dock.BoardingPosition.y, -3.6f);
                     var toStand = stand - local.transform.position; toStand.y = 0;
                     if (now - tripNext > 1.5f) { tripNext = now; result.tripTrace.Add($"walk pos={local.transform.position} onBeach={tripOnBeach} platMaxZ={(GameObject.Find("Beach_Platform") != null ? GameObject.Find("Beach_Platform").GetComponent<Collider>().bounds.max.z : 0f)}"); }
                     if (toStand.magnitude > 0.1f)
@@ -2345,7 +2392,7 @@ namespace DeepDive.P1.Lab
                 case 3:   // owner starts the route; everyone rides Outbound to Anchored
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (phase == BoatTripPhase.Anchored) { TripStep(4); return; }
-                    if (owner && phase == BoatTripPhase.Docked && now >= tripNext) { tripNext = now + 1.5f; sync.RequestStartRouteLocal(BoatTripIds.NearRouteId); }
+                    if (owner && phase == BoatTripPhase.Docked && now >= tripNext) { tripNext = now + 1.5f; sync.RequestStartRouteLocal(TripRouteId); }
                     return;
                 case 4:   // anchorage: the non-owner steps off (return marker), the owner waits for the dip
                     local.SubmitLocalInput(Vector3.zero, 0);
@@ -2408,7 +2455,7 @@ namespace DeepDive.P1.Lab
             {
                 var icon = icons[i];
                 if (icon.IconId == BoatMapPresenter.DockIconId) { dock = icon; hasDock = true; }
-                else if (icon.IconId == BoatTripIds.BoatId) { boat = icon; hasBoat = true; }
+                else if (icon.IconId == (FleetRoute ? TripVehicleId : BoatTripIds.BoatId)) { boat = icon; hasBoat = true; }
                 else if (icon.IconId == BoatMapPresenter.ReturnMarkerIconId) marker = true;
                 else if (icon.IconId.StartsWith(BoatMapPresenter.PlayerIconPrefix, StringComparison.Ordinal)) players++;
             }
@@ -2427,7 +2474,10 @@ namespace DeepDive.P1.Lab
             var region = FindFirstObjectByType<DiveRegionField>();
             var anchors = FindObjectsByType<RouteAnchor>(FindObjectsSortMode.None);
             var dockAnchor = anchors.FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.Dock);
-            var seaAnchor = anchors.FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.AnchorPoint);
+            var targetAnchorId = DiveRouteAnchors.AnchorPoint;
+            if (FleetRoute && DiveRoutePath.TryGetDefinition(TripRouteId, out var fleetDefinition))
+                targetAnchorId = fleetDefinition.AnchorPointAnchor;
+            var seaAnchor = anchors.FirstOrDefault(a => a.AnchorId == targetAnchorId);
             if (region == null || dockAnchor == null || seaAnchor == null) return;
             region.TryWorldToMap(dockAnchor.WorldPosition, out var expectedDock);
             region.TryWorldToMap(seaAnchor.WorldPosition, out var expectedAnchor);
