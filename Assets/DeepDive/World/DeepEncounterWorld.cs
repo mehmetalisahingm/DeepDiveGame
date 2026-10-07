@@ -19,13 +19,13 @@ namespace DeepDive.World
         public static readonly string[] TraceIds = { "deep-trace-1", "deep-trace-2", "deep-trace-3" };
         public static readonly Vector3[] TracePositions =
         {
-            new Vector3(-7f, -16f, 50f),
-            new Vector3( 7f, -17f, 54f),
-            new Vector3(-4f, -18f, 60f)
+            new Vector3(-7.5f, -16f, 52.5f),
+            new Vector3( 7.5f, -17f, 52.5f),
+            new Vector3(-7.5f, -18f, 57.5f)
         };
 
-        public static readonly Vector3 ArenaPosition = new Vector3(5f, -18f, 59f);
-        public static readonly Vector3 BossPosition = new Vector3(5f, -18f, 60.5f);
+        public static readonly Vector3 ArenaPosition = new Vector3(7.5f, -18f, 57.5f);
+        public static readonly Vector3 BossPosition = new Vector3(7.5f, -18f, 59f);
         public static string ExpectedCellId(Vector3 position, string regionId, DiveRegionBounds bounds)
         {
             var layout = new ExplorationCellLayout(regionId, bounds);
