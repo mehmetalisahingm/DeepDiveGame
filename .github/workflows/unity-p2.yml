@@ -63,7 +63,7 @@ jobs:
 
   p43-runtime:
     name: P4.3 real 2-process fleet routes
-    if: github.ref == 'refs/heads/p4/p43-final-acceptance-ci'
+    if: github.ref == 'refs/heads/p4/p43-final-acceptance-ci' || github.ref == 'refs/heads/codex/p4-integration' || (github.event_name == 'pull_request' && github.head_ref == 'p4/p43-final-acceptance-ci')
     needs: unity
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -97,14 +97,24 @@ jobs:
           sudo chown -R "$(id -u):$(id -g)" Builds Logs 2>/dev/null || true
           mkdir -p Logs
           chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Prepare real purchased fleet campaign (2 processes)
+        shell: pwsh
+        run: |
+          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18677 -Fleet -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+          $fleetRun = Get-ChildItem -LiteralPath ./Logs -Directory -Filter 'P1-integrated-*' |
+            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if ($null -eq $fleetRun) { throw 'Fleet smoke output bulunamadi' }
+          $seed = Join-Path $fleetRun.FullName 'host.json.campaign.json'
+          if (-not (Test-Path -LiteralPath $seed)) { throw "Fleet campaign bulunamadi: $seed" }
+          "P43_FLEET_SEED=$seed" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
       - name: Motorboat reef full roundtrip (2 processes)
         shell: pwsh
         run: |
-          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18777 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -TripVehicle boat-2 -TripRoute route-reef-1
+          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18777 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -CampaignSeed $env:P43_FLEET_SEED -TripVehicle boat-2 -TripRoute route-reef-1
       - name: Research vessel deep full roundtrip (2 processes)
         shell: pwsh
         run: |
-          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18877 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -TripVehicle boat-3 -TripRoute route-deep-1
+          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18877 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -CampaignSeed $env:P43_FLEET_SEED -TripVehicle boat-3 -TripRoute route-deep-1
       - name: Upload P4.3 runtime evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
