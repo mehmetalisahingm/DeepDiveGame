@@ -1939,7 +1939,13 @@ namespace DeepDive.P1.Lab
                     var physical = FindFirstObjectByType<NetworkBoatController>();
                     var expectedHull = TripVehicleId == VehicleIds.ResearchBoat ? BoatHullKind.ResearchVessel :
                         TripVehicleId == VehicleIds.Motorboat ? BoatHullKind.Motorboat : BoatHullKind.Rowboat;
-                    result.tripHullKindCorrect |= physical != null && physical.BoatId == TripVehicleId && physical.HullKind == expectedHull;
+                    var presentation = physical != null ? physical.GetComponent<BoatHullPresentation>() : null;
+                    var visibleModels = presentation != null
+                        ? presentation.transform.Cast<Transform>().Count(child => child.gameObject.activeSelf)
+                        : 0;
+                    result.tripHullKindCorrect |= physical != null && physical.BoatId == TripVehicleId &&
+                        physical.HullKind == expectedHull && presentation != null &&
+                        presentation.PresentedHull == expectedHull && visibleModels == 1;
                 }
             }
             var phase = (BoatTripPhase)sync.Phase.Value;
