@@ -386,7 +386,10 @@ namespace DeepDive.Network
             BoatHullSeatRules.TryGetDimensions(hullKind, out var dimensions);
             var localExit = state.Phase == BoatTripPhase.Docked
                 ? new Vector3(0f, Mathf.Max(0.4f, dimensions.SeatHeight), -Mathf.Max(3.3f, dimensions.Length * 0.66f))
-                : new Vector3(Mathf.Max(2f, dimensions.Width * 0.85f), 0f, dimensions.Length * 0.1f);
+                // Step off just outside the hull, not a hull-width fraction away from its centre.
+                // On the research vessel the old 0.85 * width offset put the diver beyond the
+                // 2.75 m boarding radius, making a legitimate anchor re-board impossible.
+                : new Vector3(dimensions.Width * 0.5f + 0.55f, 0f, dimensions.Length * 0.1f);
             var exitPosition = transform.TransformPoint(localExit);
             player.Teleport(new Pose(exitPosition, transform.rotation));
         }
