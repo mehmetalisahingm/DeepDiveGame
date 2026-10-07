@@ -1322,6 +1322,17 @@ namespace DeepDive.P1.Lab
 
         private void ObserveBossAcceptance()
         {
+            // The real product exploration binding may verify the sea-bass sighting before this
+            // smoke driver gets its first Locked-stage tick. Observe that authoritative state
+            // directly instead of requiring our fallback AcceptSighting call to be the writer.
+            if (adapter.IsAuthority)
+            {
+                var exploration = adapter.GetComponent<ExplorationNetworkBinding>();
+                if (exploration != null && exploration.Species != null &&
+                    exploration.Species.TryGetSpecies("sea_bass", out var discoveredSpecies))
+                    result.bossSighting |= discoveredSpecies.Sighted;
+            }
+
             result.bossRumor |= BossProgression.State.Stage >= DeepProgressionStage.Rumor;
             result.bossTraceStage |= BossProgression.State.Stage >= DeepProgressionStage.Trace;
             result.bossArenaUnlocked |= BossProgression.State.Stage >= DeepProgressionStage.Discovery;
