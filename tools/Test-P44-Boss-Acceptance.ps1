@@ -41,7 +41,7 @@ try {
     $client = Start-Game 'client1' 'client' 2 $Port
     $procs += $client
 
-    $deadline = (Get-Date).AddSeconds(360)
+    $deadline = (Get-Date).AddSeconds(390)
     while (@($procs | Where-Object { -not $_.Process.HasExited }).Count -gt 0 -and (Get-Date) -lt $deadline) {
         Start-Sleep -Milliseconds 500
     }
@@ -68,6 +68,10 @@ try {
             Completed=$r.bossCompletedSeen
             TwoAttackers=$r.bossTwoAttackers
             Saved=$r.bossSaved
+            Returned=$r.returned
+            ReadyReset=$r.readyReset
+            Stopped=$r.stopped
+            HostDone=$r.bossHostDone
             Errors=($r.errors -join '; ')
         })
         if (-not $r.passed -or $entry.Process.ExitCode -ne 0) {
