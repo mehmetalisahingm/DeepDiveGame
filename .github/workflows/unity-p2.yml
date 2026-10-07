@@ -91,10 +91,15 @@ jobs:
           targetPlatform: StandaloneLinux64
           buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildLinux
           versioning: None
+      - name: Normalize Linux build permissions
+        shell: bash
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" Builds Logs 2>/dev/null || true
+          mkdir -p Logs
+          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
       - name: Motorboat reef full roundtrip (2 processes)
         shell: pwsh
         run: |
-          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
           ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18777 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -TripVehicle boat-2 -TripRoute route-reef-1
       - name: Research vessel deep full roundtrip (2 processes)
         shell: pwsh
