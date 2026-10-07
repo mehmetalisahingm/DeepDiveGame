@@ -90,6 +90,7 @@ namespace DeepDive.Economy
         private readonly Dictionary<(PlayerId, ulong, byte), TurnInResult> _processedTurnIns =
             new Dictionary<(PlayerId, ulong, byte), TurnInResult>();
         private Func<bool> _persist;
+        private IExplorationProgressReadModel _explorationProgress;
         private bool _subscribed;
         private bool _configured;
         private readonly Dictionary<(string Subject, int Quality), int> _subjectRewards = new Dictionary<(string, int), int>();
@@ -163,6 +164,14 @@ namespace DeepDive.Economy
             if (_persist == persist) _persist = null;
         }
         private bool Persist() => _persist == null || _persist();
+
+        public void SetExplorationProgressReadModel(IExplorationProgressReadModel progress) => _explorationProgress = progress;
+
+        private bool HasDiscoveredCellInBand(string depthBandId)
+        {
+            if (_explorationProgress == null) _explorationProgress = GetComponent<EconomySaveStore>();
+            return _explorationProgress != null && _explorationProgress.HasDiscoveredCellInBand(depthBandId);
+        }
 
         public void SetPrice(string speciesId, int pricePerCapture)
         {
@@ -730,6 +739,8 @@ namespace DeepDive.Economy
             else if (OwnsVehicle(boatId))
                 result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
             else if (definition.RequiresBoatId.Length > 0 && !OwnsVehicle(definition.RequiresBoatId))
+                result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
+            else if (definition.Class == VehicleClass.ResearchBoat && !HasDiscoveredCellInBand(DepthBandIds.Reef))
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
             else if (SharedBalance < definition.Price)
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);

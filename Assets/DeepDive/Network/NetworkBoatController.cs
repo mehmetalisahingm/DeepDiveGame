@@ -93,6 +93,7 @@ namespace DeepDive.Network
         private readonly List<Vector3> path = new List<Vector3>();
         private NetworkManager networkManager;
         private IBoatRoutePathSource routeSource;
+        private BoatHullPresentation hullPresentation;
         private BoatTripState state;
         private int appliedRevision = int.MinValue;
         private int waypointIndex;
@@ -118,6 +119,8 @@ namespace DeepDive.Network
         {
             networkManager = manager;
             routeSource = source;
+            hullPresentation = GetComponent<BoatHullPresentation>();
+            hullPresentation?.ApplyHullPresentation(hullKind);
             BoatApprovedPositions.Bind(this);
             SnapToDockRouteStart();
         }
@@ -133,7 +136,11 @@ namespace DeepDive.Network
 
             var changed = !string.Equals(activeBoatId, boatId, StringComparison.Ordinal) || hullKind != nextHullKind ||
                           !string.Equals(dockRouteId, nextDockRouteId, StringComparison.Ordinal);
-            if (!changed) return true;
+            if (!changed)
+            {
+                hullPresentation?.ApplyHullPresentation(hullKind);
+                return true;
+            }
 
             ReleaseAllPlayers();
             routeActive = false;
@@ -144,6 +151,7 @@ namespace DeepDive.Network
             activeBoatId = boatId;
             hullKind = nextHullKind;
             dockRouteId = nextDockRouteId;
+            hullPresentation?.ApplyHullPresentation(hullKind);
             SnapToDockRouteStart();
             return true;
         }
@@ -252,6 +260,7 @@ namespace DeepDive.Network
                 return;
             }
 
+            ApplyDockOffset(path);
             if (state.Phase == BoatTripPhase.Inbound) path.Reverse();
             var duration = state.Phase == BoatTripPhase.Outbound ? outboundSeconds : inboundSeconds;
             legSpeed = BoatRouteMath.ResolveLegSpeed(path, duration, fallbackMoveSpeed);
@@ -321,12 +330,23 @@ namespace DeepDive.Network
             var scratch = new List<Vector3>();
             if (!routeSource.TryGetRoute(dockRouteId, scratch, out outboundSeconds, out inboundSeconds) || scratch.Count == 0)
                 return;
+            ApplyDockOffset(scratch);
             transform.position = scratch[0];
             if (scratch.Count > 1)
             {
                 var forward = Vector3.ProjectOnPlane(scratch[1] - scratch[0], Vector3.up);
                 if (forward.sqrMagnitude > 0.0001f) transform.rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
             }
+        }
+
+        private void ApplyDockOffset(List<Vector3> points)
+        {
+            if (points == null || points.Count < 2) return;
+            var offset = BoatHullSeatRules.DockOffsetMeters(hullKind);
+            if (offset <= 0f) return;
+            var forward = Vector3.ProjectOnPlane(points[1] - points[0], Vector3.up);
+            if (forward.sqrMagnitude <= 0.0001f) return;
+            points[0] += forward.normalized * offset;
         }
 
         private void SyncSeatBindings(BoatTripState next)
