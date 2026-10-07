@@ -75,10 +75,19 @@ try {
         if (-not (Test-Path -LiteralPath $campaign)) { $failures += 'campaign dosyasi yok' }
         else {
             $reloadReport = Join-Path $run 'host-reload.json'
-            Copy-Item -LiteralPath $campaign -Destination ($reloadReport + '.campaign.json')
-            $reload = Start-Game 'host-reload' 'host' 1 ($Port + 1) -Reload
-            # Start-Game created a different report path; use the path it returns as campaign destination.
-            Copy-Item -LiteralPath $campaign -Destination ($reload.Report + '.campaign.json') -Force
+            Copy-Item -LiteralPath $campaign -Destination ($reloadReport + '.campaign.json') -Force
+            $reloadLog = Join-Path $run 'host-reload.log'
+            $reloadArgs = @(
+                '-batchmode', '-nographics',
+                '-p1-integrated', 'host',
+                '-p1-count', 1,
+                '-p1-port', ($Port + 1),
+                '-p1-report', $reloadReport,
+                '-logFile', $reloadLog,
+                '-p4-boss-acceptance-reload', '1'
+            )
+            $reloadProcess = Start-Process -FilePath $BuildPath -ArgumentList $reloadArgs -PassThru
+            $reload = [pscustomobject]@{ Name='host-reload'; Process=$reloadProcess; Report=$reloadReport; Log=$reloadLog }
             if (-not $reload.Process.WaitForExit(60000)) {
                 Stop-Process -Id $reload.Process.Id -Force
                 $failures += 'host-reload: timeout'
