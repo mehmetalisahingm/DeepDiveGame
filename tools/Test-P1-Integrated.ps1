@@ -1,8 +1,11 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Unified)
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '')
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
-$p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe'
-if (-not (Test-Path -LiteralPath $p1Build)) { throw 'Build-P1.ps1 -Integrated calistirin.' }
+$p1IsWindows = $env:OS -eq 'Windows_NT'
+if ($BuildPath) { $p1Build = $BuildPath }
+elseif ($p1IsWindows) { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe' }
+else { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.x86_64' }
+if (-not (Test-Path -LiteralPath $p1Build)) { throw "Integrated build bulunamadi: $p1Build" }
 $p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
 New-Item -ItemType Directory -Path $p1Run | Out-Null
 $p1Processes = [System.Collections.Generic.List[object]]::new()
@@ -32,7 +35,11 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($Event) { $p1Args += @('-p3-event', '1') }
         if ($Town) { $p1Args += @('-p3-town', '1') }
         if ($Boat) { $p1Args += @('-p3-boat', '1') }
-        if ($Trip) { $p1Args += @('-p3-trip', '1') }
+        if ($Trip) {
+            $p1Args += @('-p3-trip', '1')
+            if ($TripVehicle) { $p1Args += @('-p4-trip-vehicle', $TripVehicle) }
+            if ($TripRoute) { $p1Args += @('-p4-trip-route', $TripRoute) }
+        }
         if ($Day) { $p1Args += @('-p4-day', '1') }
         if ($HomeSleep) { $p1Args += @('-p4-home', '1') }
         if ($Explore) { $p1Args += @('-p4-explore', '1') }
@@ -41,7 +48,8 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($Acceptance) { $p1Args += @('-p4-acceptance', '1', '-p3-record', '1', '-p4-media-product', '1') }   # #106: no fixture, real capture -> PC -> channel -> day -> reload
         if ($Storage) { $p1Args += @('-p4-storage', '1') }
     }
-    $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -WindowStyle Hidden -PassThru
+    if ($p1IsWindows) { $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -WindowStyle Hidden -PassThru }
+    else { $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -PassThru }
     $p1Processes.Add([pscustomobject]@{Name=$Name; Process=$p1Process; Report=$p1Report})
 }
 function Wait-P1Marker([string]$Marker, [int]$Seconds) {
@@ -66,7 +74,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $seconds = if ($Unified) { 360 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
+    $seconds = if ($Unified) { 360 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
 
@@ -137,9 +145,11 @@ try {
         $p1Reload = Join-Path $p1Run 'host-reload.json'
         Copy-Item -LiteralPath $p1Campaign -Destination ($p1Reload + '.campaign.json')
         $p1ReloadGraphics = if ($Acceptance) { @('-screen-width', '960', '-screen-height', '540', '-screen-fullscreen', '0') } else { @('-nographics') }
-        $p1ReloadProcess = Start-Process -FilePath $p1Build -WindowStyle Hidden -PassThru -ArgumentList (@('-batchmode') + $p1ReloadGraphics + @(
+        $p1ReloadArgs = (@('-batchmode') + $p1ReloadGraphics + @(
             '-p1-integrated', 'host', '-p1-count', 1, '-p1-port', ($Port + 1), '-p1-report', ('"{0}"' -f $p1Reload),
             '-logFile', ('"{0}"' -f (Join-Path $p1Run 'host-reload.log')), $(if ($Fleet) { '-p4-fleet-reload' } elseif ($Acceptance) { '-p4-acceptance-reload' } elseif ($Media) { '-p4-media-reload' } else { '-p4-day-reload' }), '1'))
+        if ($p1IsWindows) { $p1ReloadProcess = Start-Process -FilePath $p1Build -WindowStyle Hidden -PassThru -ArgumentList $p1ReloadArgs }
+        else { $p1ReloadProcess = Start-Process -FilePath $p1Build -PassThru -ArgumentList $p1ReloadArgs }
         $p1ReloadProcess.WaitForExit(60000) | Out-Null
         if (-not (Test-Path -LiteralPath $p1Reload)) { $p1Failures += 'host-reload: rapor yok' }
         else {
