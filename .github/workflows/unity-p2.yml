@@ -100,7 +100,7 @@ jobs:
       - name: Fixture-free progression, traces, arena, two-player boss and reload
         shell: pwsh
         run: |
-          ./tools/Test-P44-Boss-Acceptance.ps1 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -Port 18977
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P44-Boss-Acceptance.ps1 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -Port 18977
       - name: Upload P4.4 runtime evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
