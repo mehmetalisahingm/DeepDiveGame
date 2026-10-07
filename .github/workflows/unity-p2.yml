@@ -91,10 +91,15 @@ jobs:
           targetPlatform: StandaloneLinux64
           buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildLinux
           versioning: None
+      - name: Normalize Linux build permissions
+        shell: bash
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" Builds Logs 2>/dev/null || true
+          mkdir -p Logs
+          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
       - name: Fixture-free progression, traces, arena, two-player boss and reload
         shell: pwsh
         run: |
-          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
           ./tools/Test-P44-Boss-Acceptance.ps1 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -Port 18977
       - name: Upload P4.4 runtime evidence
         if: always()
