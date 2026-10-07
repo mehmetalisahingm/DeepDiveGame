@@ -26,6 +26,8 @@ namespace DeepDive.Network
         public BossEncounterPhase Phase => (BossEncounterPhase)phase.Value;
         public float Health => health.Value;
         public int Revision => revision.Value;
+        public float MaxHealth => maxHealth;
+        public BossEncounterSnapshot Snapshot => new BossEncounterSnapshot(Phase, Health, MaxHealth, Revision);
 
         public event Action<BossEncounterActor> Completed;
 
@@ -130,28 +132,77 @@ namespace DeepDive.Network
         }
     }
 
-    // Host-side seam for Utku's #122 arena trigger. There is deliberately no client RPC here:
-    // world code activates/aborts the one live encounter only on the authoritative process.
+    public readonly struct BossEncounterSnapshot
+    {
+        public readonly BossEncounterPhase Phase;
+        public readonly float Health;
+        public readonly float MaxHealth;
+        public readonly int Revision;
+
+        public BossEncounterSnapshot(BossEncounterPhase phase, float health, float maxHealth, int revision)
+        {
+            Phase = phase;
+            Health = health;
+            MaxHealth = maxHealth;
+            Revision = revision;
+        }
+
+        public bool IsVisible => Phase == BossEncounterPhase.Available || Phase == BossEncounterPhase.Active;
+    }
+
+    // One host-side encounter seam shared by the network carrier and Utku's local world target.
+    // The default is fail-closed; a scene/session binding must explicitly bind the delegates.
     public static class BossEncounterRuntime
     {
-        public static BossEncounterActor Current { get; private set; }
-        public static bool IsBound => Current != null;
+        private static object owner;
+        private static Func<string, PlayerActionResult> activate;
+        private static Func<HarpoonHit, PlayerActionResult> hit;
+        private static Func<bool> abort;
+        private static Func<BossEncounterSnapshot> snapshot;
+
+        public static bool IsBound => owner != null;
+        public static BossEncounterSnapshot Snapshot =>
+            snapshot != null ? snapshot() : new BossEncounterSnapshot(BossEncounterPhase.Locked, 0f, 0f, 0);
 
         internal static void Bind(BossEncounterActor actor)
         {
-            if (actor != null) Current = actor;
+            if (actor == null) return;
+            Bind(actor, actor.TryActivateServer, actor.TryApplyHarpoonHit, actor.AbortServer, () => actor.Snapshot);
         }
 
-        internal static void Unbind(BossEncounterActor actor)
+        public static void Bind(object nextOwner,
+            Func<string, PlayerActionResult> activateHandler,
+            Func<HarpoonHit, PlayerActionResult> hitHandler,
+            Func<bool> abortHandler,
+            Func<BossEncounterSnapshot> snapshotProvider)
         {
-            if (ReferenceEquals(Current, actor)) Current = null;
+            if (nextOwner == null || activateHandler == null || hitHandler == null || abortHandler == null || snapshotProvider == null)
+                return;
+            owner = nextOwner;
+            activate = activateHandler;
+            hit = hitHandler;
+            abort = abortHandler;
+            snapshot = snapshotProvider;
+        }
+
+        internal static void Unbind(BossEncounterActor actor) => Unbind((object)actor);
+
+        public static void Unbind(object priorOwner)
+        {
+            if (!ReferenceEquals(owner, priorOwner)) return;
+            owner = null;
+            activate = null;
+            hit = null;
+            abort = null;
+            snapshot = null;
         }
 
         public static PlayerActionResult TryActivate(string encounterId) =>
-            Current != null
-                ? Current.TryActivateServer(encounterId)
-                : PlayerActionResult.InvalidState;
+            activate != null ? activate(encounterId) : PlayerActionResult.InvalidState;
 
-        public static bool Abort() => Current != null && Current.AbortServer();
+        public static PlayerActionResult TryHit(HarpoonHit harpoonHit) =>
+            hit != null ? hit(harpoonHit) : PlayerActionResult.InvalidState;
+
+        public static bool Abort() => abort != null && abort();
     }
 }
