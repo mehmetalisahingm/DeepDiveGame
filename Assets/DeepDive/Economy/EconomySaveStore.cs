@@ -27,6 +27,24 @@ namespace DeepDive.Economy
         private ExplorationSaveData loadedExploration;
         private IMediaPersistence media;
         private MediaSaveData loadedMedia;
+        private IProgressionPersistence progression;
+        private DeepProgressionSaveData loadedProgression;
+
+        // Same late-binding rule as the day, exploration and media. A progression record that is absent from the file is the closed
+        // default (the authority starts Locked); one that is present is restored through the authority's fail-closed validation.
+        public IProgressionPersistence Progression
+        {
+            get => progression;
+            set
+            {
+                progression = value;
+                if (progression != null) progression.RestoreProgression(loadedProgression);
+            }
+        }
+
+        // The exploration the host already counted: the live dive authority's export while it exists, otherwise what the campaign
+        // file loaded. Read-only evidence for the progression chain (never a position, never a second exploration record).
+        public ExplorationSaveData GetExplorationSnapshot() => exploration != null ? exploration.ExportExploration() : loadedExploration;
 
         // Same late-binding rule as the day and exploration.
         public IMediaPersistence Media
@@ -57,7 +75,7 @@ namespace DeepDive.Economy
         public bool HasDiscoveredCellInBand(string depthBandId)
         {
             if (string.IsNullOrWhiteSpace(depthBandId)) return false;
-            var data = exploration != null ? exploration.ExportExploration() : loadedExploration;
+            var data = GetExplorationSnapshot();
             var cells = data?.DiscoveredCells;
             if (cells == null) return false;
             for (var i = 0; i < cells.Count; i++)
@@ -180,6 +198,16 @@ namespace DeepDive.Economy
                     snapshot.Media = loadedMedia;
                     snapshot.HasMedia = true;
                 }
+                if (progression != null)
+                {
+                    snapshot.Progression = progression.ExportProgression();
+                    snapshot.HasProgression = true;
+                }
+                else if (loadedProgression != null)
+                {
+                    snapshot.Progression = loadedProgression;
+                    snapshot.HasProgression = true;
+                }
                 var json = JsonUtility.ToJson(snapshot, true);
                 File.WriteAllText(temp, json);
 
@@ -204,6 +232,7 @@ namespace DeepDive.Economy
                 if (snapshot.HasDay) loadedDay = snapshot.Day;
                 if (snapshot.HasExploration) loadedExploration = snapshot.Exploration;
                 if (snapshot.HasMedia) loadedMedia = snapshot.Media;
+                if (snapshot.HasProgression) loadedProgression = snapshot.Progression;
                 LastError = "";
                 return true;
             }
@@ -248,6 +277,12 @@ namespace DeepDive.Economy
                 loadedDay = data.HasDay ? data.Day : null;
                 loadedExploration = data.HasExploration ? data.Exploration : null;
                 loadedMedia = data.HasMedia ? data.Media : null;
+                loadedProgression = data.HasProgression ? data.Progression : null;
+                if (progression != null && !progression.RestoreProgression(loadedProgression))
+                {
+                    restoring = false;
+                    return Fail("invalid progression state");
+                }
                 if (loadedMedia != null && media != null && !media.RestoreMedia(loadedMedia))
                 {
                     restoring = false;

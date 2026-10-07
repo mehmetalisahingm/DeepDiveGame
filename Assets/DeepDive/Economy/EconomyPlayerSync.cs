@@ -48,6 +48,13 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<FixedString32Bytes> ActiveVehicleId = new NetworkVariable<FixedString32Bytes>();
         private System.Func<string> _clientActiveProvider;
 
+        // P4.4-C deep progression mirror (host-written): the stage and the trace count only - never a position - so the encyclopedia
+        // can show where the chain stands. Guests bind BossProgression to it for read-only use.
+        public readonly NetworkVariable<byte> DeepStage = new NetworkVariable<byte>();
+        public readonly NetworkVariable<int> DeepTraces = new NetworkVariable<int>();
+        public readonly NetworkVariable<bool> DeepBossCompleted = new NetworkVariable<bool>();
+        private System.Func<DeepProgressionState> _clientProgressionProvider;
+
         public readonly NetworkVariable<int> StoredCatches = new NetworkVariable<int>();
         // Host-written, read by the owner's storage panel: what I can put in / what is in there.
         public readonly NetworkList<FixedString64Bytes> CarriedCatchIds = new NetworkList<FixedString64Bytes>();
@@ -76,6 +83,9 @@ namespace DeepDive.Economy
             {
                 _clientActiveProvider = () => ActiveVehicleId.Value.ToString();
                 ActiveVehicle.Bind(_clientActiveProvider);
+                _clientProgressionProvider = () => new DeepProgressionState((DeepProgressionStage)DeepStage.Value, DeepTraces.Value, DeepProgressionIds.RequiredTraceCount,
+                    DeepBossCompleted.Value ? new[] { DeepProgressionIds.BossId } : null, 0);
+                BossProgression.Bind(_clientProgressionProvider);
             }
             // A player who (re)spawns starts at today's day, not at the variable defaults.
             if (IsServer && DayLock.StateProvider != null)
@@ -88,6 +98,7 @@ namespace DeepDive.Economy
         public override void OnNetworkDespawn()
         {
             if (_clientActiveProvider != null) { ActiveVehicle.Unbind(_clientActiveProvider); _clientActiveProvider = null; }
+            if (_clientProgressionProvider != null) { BossProgression.Unbind(_clientProgressionProvider); _clientProgressionProvider = null; }
             if (_economy != null) _economy.OnBalanceChanged -= Refresh;
             _economy = null;
         }
@@ -145,6 +156,15 @@ namespace DeepDive.Economy
             if (PendingRecordings.Value != pendingRecordings) PendingRecordings.Value = pendingRecordings;
             if (BoatPartsDone.Value != boatPartsDone) BoatPartsDone.Value = boatPartsDone;
             if (BoatPartsMask.Value != boatPartsMask) BoatPartsMask.Value = boatPartsMask;
+        }
+
+        public void PublishProgression(DeepProgressionState state)
+        {
+            if (!IsServer) return;
+            if (DeepStage.Value != (byte)state.Stage) DeepStage.Value = (byte)state.Stage;
+            if (DeepTraces.Value != state.TracesFound) DeepTraces.Value = state.TracesFound;
+            var completed = state.IsCompleted(DeepProgressionIds.BossId);
+            if (DeepBossCompleted.Value != completed) DeepBossCompleted.Value = completed;
         }
 
         public void PublishFleet(int ownedMask, string activeBoatId)

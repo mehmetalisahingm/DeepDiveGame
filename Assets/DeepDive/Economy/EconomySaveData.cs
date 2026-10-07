@@ -12,7 +12,9 @@ namespace DeepDive.Economy
         // v4 (P4.1-C) adds exploration (discovered cells + species observations). Older files load with none.
         // v5 (P4.2-C) adds the clip archive, channel publications and the single-right/settle ids.
         // v6 (P4.3-C) adds the vehicle fleet (purchased boats + active boat). Older files load as HasFleet=false: only the repaired rowboat, if any.
-        public const int CurrentSchemaVersion = 6;
+        // v7 (P4.4-C) adds the deep progression chain (encyclopedia -> rumor -> trace -> discovery -> boss unlock). Older files load as
+        // HasProgression=false, which means the closed default: Locked, nothing counted.
+        public const int CurrentSchemaVersion = 7;
         public const int OldestSupportedSchemaVersion = 1;
 
         public int SchemaVersion = CurrentSchemaVersion;
@@ -35,6 +37,8 @@ namespace DeepDive.Economy
         public List<string> ChannelSettleIds = new List<string>();
         public bool HasMedia;
         public bool HasFleet;
+        public bool HasProgression;
+        public DeepDive.Core.Contracts.DeepProgressionSaveData Progression = new DeepDive.Core.Contracts.DeepProgressionSaveData();
         // Only PURCHASED boats are stored: the rowboat's ownership is the P3 repair state (BoatPartIds), a single source.
         public List<string> FleetPurchasedBoatIds = new List<string>();
         public string FleetActiveBoatId = "";

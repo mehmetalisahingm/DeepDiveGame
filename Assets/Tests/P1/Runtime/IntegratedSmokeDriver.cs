@@ -78,6 +78,13 @@ namespace DeepDive.P1.Lab
             public int fleetBalance, fleetReloadBalance, fleetReloadOwned;
             public string fleetReloadActive = "", fleetReloadTripBoat = "";
             public List<string> fleetTrace = new List<string>();
+            public bool deepOrderRefused, deepSightingCounted, deepEncyclopedia, deepRumor, deepFailClosed, deepContextRefused, deepTracesOk, deepTraceStage,
+                deepDiscoveryRefused, deepUnlocked, deepCompletedOnce, deepSavedOnDisk, deepReloadClean, deepHostDone, deepReloadPass;
+            public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
+            public string deepReloadStage = "";
+            public int deepReloadTraces, deepReloadCompleted;
+            public List<int> deepStagesSeen = new List<int>();
+            public List<string> deepTrace = new List<string>();
             public bool exploreMirrorSeen, exploreEncyclopediaSilhouette, exploreEncyclopediaNameHidden, exploreReloaded;
             public int exploreFogCells, exploreGridCells, exploreFogDiscoveredMax, exploreSavedCells, exploreSavedObservations;
             public string exploreEncyclopediaSpecies = "", exploreSightingOutcome = "", exploreSightingReplay = "";
@@ -110,6 +117,10 @@ namespace DeepDive.P1.Lab
         // then a second host launch on the same campaign file. The money is a labelled seed (like SeedRecorderCamera).
         private bool Fleet => Arg("-p4-fleet") == "1";
         private bool FleetReload => Arg("-p4-fleet-reload") == "1";
+        // #123 deep progression: real encyclopedia sighting + REAL swim to the reef, then the host-fed trace/discovery steps through a LABELLED
+        // fixture world validator (Utku's #122 world rule does not exist yet), then a second host launch on the same campaign file.
+        private bool Deep => Arg("-p4-deep") == "1";
+        private bool DeepReload => Arg("-p4-deep-reload") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -164,7 +175,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -234,6 +245,7 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (DeepReload) { if (host && HostDeepReload()) { Finish(); yield break; } yield return null; continue; }
                 if (FleetReload) { if (host && HostFleetReload()) { Finish(); yield break; } yield return null; continue; }
                 if (AcceptanceReload) { if (host && HostAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
                 if (MediaReload) { if (host && HostMediaReload()) { Finish(); yield break; } yield return null; continue; }
@@ -243,6 +255,7 @@ namespace DeepDive.P1.Lab
                 if (MediaFlow && host) { HostSubmitMediaClips(state); HostMediaChecks(); }
                 if (Acceptance && host) HostAcceptance(state);
                 if (Fleet && host) HostFleet(state);
+                if (Deep) { ObserveDeep(); if (host) HostDeep(state); }
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
@@ -253,15 +266,15 @@ namespace DeepDive.P1.Lab
                 // Recording scenarios end the dive when the recorder has REALLY swum to the safe pad (an event), not at a fixed
                 // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
                 // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
-                var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && (!Fleet || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
+                var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
                 var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
-                var returnCeiling = Fleet ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
+                var returnCeiling = Fleet || Deep ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
                 if (host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -270,7 +283,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                var leaveDue = Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
@@ -297,6 +310,10 @@ namespace DeepDive.P1.Lab
                 (!host || (result.fleetSeeded && result.fleetMotorSeeded && result.fleetReefGateRefused && result.fleetReefSwum && result.fleetReefOnDisk && result.fleetHostSeated && result.fleetParkedRefused && result.fleetHostChecks &&
                     result.fleetSavedOnDisk && result.fleetReloadClean && result.fleetHostDone)) &&
                 (host || (result.fleetMotorDuplicateRefused && result.fleetResearchBought && result.fleetSeatBlocked && result.fleetSelected));
+            if (Deep) result.passed &= result.deepGuestSeqOk && result.deepMirrorUnlocked && result.deepLineShown && result.deepMirrorCompleted &&
+                (!host || (result.deepOrderRefused && result.deepSightingCounted && result.deepEncyclopedia && result.fleetReefSwum && result.deepRumor &&
+                    result.deepFailClosed && result.deepContextRefused && result.deepTracesOk && result.deepTraceStage && result.deepDiscoveryRefused &&
+                    result.deepUnlocked && result.deepCompletedOnce && result.deepSavedOnDisk && result.deepReloadClean && result.deepHostDone));
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
@@ -371,7 +388,7 @@ namespace DeepDive.P1.Lab
                 else if (Acceptance && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
                 else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
-                else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
+                else if ((Fleet || Deep) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
                 else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeFleet(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
@@ -1271,6 +1288,139 @@ namespace DeepDive.P1.Lab
                 binding.Channel.SettleThrough(99) == 0 && economy.SharedBalance == before &&
                 binding.Channel.TryPublish(new PlayerId(0), "clip-0-a", "x", 777).ReasonCode == "PublicationAlreadyQueued";
             result.passed = result.mediaReloadPass && result.errors.Count == 0;
+            return true;
+        }
+
+        // ---- #123 deep progression smoke -------------------------------------------------------------------------
+        // LABELLED FIXTURE: the world rule that says which trace/arena contexts count (Utku's #122). The progression authority, the exploration
+        // evidence (a real sighting + a real swim to the reef), the save file, the mirrors and the read seam are all the product's.
+        private sealed class SmokeDeepWorld : IDeepProgressionWorld
+        {
+            public bool IsValidTrace(string traceId, string cellId, string depthBandId) => traceId.StartsWith("smoke-trace-") && depthBandId == DepthBandIds.Deep && cellId.Length > 0;
+            public bool IsDiscoveryArea(string arenaId, string cellId, string depthBandId) => arenaId == "smoke-arena" && depthBandId == DepthBandIds.Deep && cellId.Length > 0;
+        }
+
+        private readonly SmokeDeepWorld deepWorld = new SmokeDeepWorld();
+        private int deepStage;
+        private float deepAt, deepDoneAt;
+        private ulong deepRequest = 9000;
+
+        private void DeepNext(int next) { result.deepTrace.Add($"stage {deepStage}->{next} t={Time.realtimeSinceStartup - sceneStarted:F1} state={BossProgression.State.Stage}"); deepStage = next; deepAt = Time.realtimeSinceStartup; }
+
+        // Every process: what its OWN mirrored read seam shows, in order (a guest has no authority: it can only watch).
+        private void ObserveDeep()
+        {
+            var local = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsOwner && p.IsSpawned);
+            var sync = local != null ? local.GetComponent<EconomyPlayerSync>() : null;
+            if (sync == null || !sync.IsSpawned) return;
+            var stage = (int)BossProgression.State.Stage;
+            if (result.deepStagesSeen.Count == 0 || result.deepStagesSeen[result.deepStagesSeen.Count - 1] != stage) result.deepStagesSeen.Add(stage);
+            result.deepGuestSeqOk = result.deepStagesSeen.SequenceEqual(new[] { 0, 1, 2, 3, 4 });
+            result.deepMirrorUnlocked |= BossProgression.IsAvailable(DeepProgressionIds.BossId);
+            result.deepLineShown |= BossProgression.State.BossUnlocked && DeepProgressionPresenter.Line(BossProgression.State).Length > 0;
+            result.deepMirrorCompleted |= BossProgression.IsCompleted(DeepProgressionIds.BossId);
+        }
+
+        private void HostDeep(SessionState state)
+        {
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var now = Time.realtimeSinceStartup;
+            var host = new PlayerId(0);
+            var guest = adapter.Session.Roster.Keys.FirstOrDefault(k => k.Value != 0);
+            switch (deepStage)
+            {
+                case 0:   // dive: the chain is closed; nothing can be skipped; then ONE real, host-counted sighting opens the encyclopedia step
+                {
+                    if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading || SceneManager.GetActiveScene().name != SessionNetworkAdapter.DiveScene ||
+                        Time.realtimeSinceStartup - sceneStarted < 6f || !DeepProgressionEvidence.IsBound) return;
+                    var binding = adapter.GetComponent<ExplorationNetworkBinding>();
+                    var me = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsOwner && p.IsSpawned);
+                    if (binding == null || binding.Species == null || me == null) return;
+                    result.deepOrderRefused = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "OutOfOrder" &&
+                        DeepProgressionEvidence.TrySubmitDiscovery(host, "smoke-arena", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "OutOfOrder" &&
+                        DeepProgressionEvidence.TryCompleteBoss(DeepProgressionIds.BossId, "smoke-enc", deepRequest++).ReasonCode == "OutOfOrder" &&
+                        !BossProgression.IsAvailable(DeepProgressionIds.BossId);
+                    // Sighting through the product's real species authority (labelled like -Explore: the fish itself is not hunted here).
+                    var sighting = binding.Species.AcceptSighting("sea_bass", me.transform.position, 1).ToString();
+                    result.deepSightingCounted = sighting == "CountedNewEvidence" || sighting == "AlreadyCounted";   // the product binding may have counted a real fish first
+                    DeepNext(1); return;
+                }
+                case 1:
+                    if (BossProgression.State.Stage >= DeepProgressionStage.Encyclopedia) { result.deepEncyclopedia = BossProgression.State.Stage == DeepProgressionStage.Encyclopedia; DeepNext(2); }
+                    else if (now - deepAt > 8f) { result.errors.Add("deep: encyclopedia step never opened"); DeepNext(99); }
+                    return;
+                case 2:   // the host really swims to the reef (ProbeFleetDive); the discovered Reef cell opens the rumor
+                    if (BossProgression.State.Stage >= DeepProgressionStage.Rumor)
+                    {
+                        result.deepRumor = BossProgression.State.Stage == DeepProgressionStage.Rumor && result.fleetReefSwum;
+                        DeepNext(3);
+                    }
+                    else if (now - deepAt > 60f) { result.errors.Add("deep: rumor never opened (reef not reached?)"); DeepNext(99); }
+                    return;
+                case 3:   // back at the beach (Return phase): with NO world validator bound a trace is refused (fail-closed)
+                    if (state.Phase != SessionPhase.Return || now - deepAt < 2f) return;
+                    result.deepFailClosed = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "WorldUnavailable" &&
+                        BossProgression.State.TracesFound == 0;
+                    DeepProgressionWorld.Bind(deepWorld);
+                    DeepNext(4); return;
+                case 4:   // the world validator decides the context; three DISTINCT traces (any player) open the trace stage; a duplicate counts once
+                {
+                    result.deepContextRefused = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Shallow, deepRequest++).ReasonCode == "InvalidContext" &&
+                        DeepProgressionEvidence.TrySubmitTrace(host, "bogus", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "InvalidContext";
+                    var ok = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).Accepted &&
+                        DeepProgressionEvidence.TrySubmitTrace(guest, "smoke-trace-2", "smoke-cell-2", DepthBandIds.Deep, deepRequest++).Accepted &&
+                        DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "AlreadyProcessed" &&
+                        BossProgression.State.Stage == DeepProgressionStage.Rumor && BossProgression.State.TracesFound == 2;
+                    ok &= DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-3", "smoke-cell-3", DepthBandIds.Deep, deepRequest++).Accepted;
+                    result.deepTracesOk = ok;
+                    result.deepTraceStage = BossProgression.State.Stage == DeepProgressionStage.Trace && BossProgression.State.TracesFound == DeepProgressionIds.RequiredTraceCount;
+                    DeepNext(5); return;
+                }
+                case 5:   // hold the trace stage long enough for every mirror to show it, then the arena: wrong context refused, real one unlocks
+                    if (now - deepAt < 1.5f) return;
+                    result.deepDiscoveryRefused = DeepProgressionEvidence.TrySubmitDiscovery(host, "smoke-arena", "smoke-cell", DepthBandIds.Reef, deepRequest++).ReasonCode == "InvalidContext" &&
+                        !BossProgression.IsAvailable(DeepProgressionIds.BossId);
+                    result.deepUnlocked = DeepProgressionEvidence.TrySubmitDiscovery(guest, "smoke-arena", "smoke-cell", DepthBandIds.Deep, deepRequest++).Accepted &&
+                        BossProgression.IsAvailable(DeepProgressionIds.BossId);
+                    DeepNext(6); return;
+                case 6:   // the encounter layer reports one completion; a second encounter id is not a second completion; the file and a reload agree
+                {
+                    if (now - deepAt < 1.5f) return;
+                    result.deepCompletedOnce = DeepProgressionEvidence.TryCompleteBoss(DeepProgressionIds.BossId, "smoke-enc-1", deepRequest++).Accepted &&
+                        DeepProgressionEvidence.TryCompleteBoss(DeepProgressionIds.BossId, "smoke-enc-2", deepRequest++).ReasonCode == "AlreadyProcessed" &&
+                        BossProgression.State.CompletedBossIds.Count == 1;
+                    var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+                    result.deepSavedOnDisk = disk.HasProgression && disk.Progression.Stage == (byte)DeepProgressionStage.Discovery &&
+                        disk.Progression.TraceIds.Count == DeepProgressionIds.RequiredTraceCount && disk.Progression.CompletedBossIds.SequenceEqual(new[] { DeepProgressionIds.BossId }) &&
+                        disk.SchemaVersion == EconomySaveData.CurrentSchemaVersion;
+                    var traces = BossProgression.State.TracesFound;
+                    result.deepReloadClean = store.LoadNow() && BossProgression.State.Stage == DeepProgressionStage.Discovery && BossProgression.State.TracesFound == traces &&
+                        BossProgression.State.CompletedBossIds.Count == 1 &&
+                        DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-9", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "AlreadyProcessed";
+                    deepDoneAt = now; result.deepHostDone = true; DeepNext(90); return;
+                }
+            }
+        }
+
+        // Second launch of the host on the SAME campaign file: the chain, the traces and the completion come back, nothing is counted twice, and a boss
+        // that was never persisted as "active" is simply available again (the encounter itself is not restored).
+        private bool HostDeepReload()
+        {
+            var store = adapter.GetComponent<EconomySaveStore>();
+            if (store == null || adapter.Connection.Status != ConnectionStatus.Connected || !DeepProgressionEvidence.IsBound) return false;
+            var host = new PlayerId(0);
+            var state = BossProgression.State;
+            result.deepReloadStage = state.Stage.ToString();
+            result.deepReloadTraces = state.TracesFound;
+            result.deepReloadCompleted = state.CompletedBossIds.Count;
+            var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+            result.deepReloadPass = state.Stage == DeepProgressionStage.Discovery && state.TracesFound == DeepProgressionIds.RequiredTraceCount && state.CompletedBossIds.Count == 1 &&
+                BossProgression.IsAvailable(DeepProgressionIds.BossId) && BossProgression.IsCompleted(DeepProgressionIds.BossId) &&
+                DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "AlreadyProcessed" &&
+                DeepProgressionEvidence.TrySubmitDiscovery(host, "smoke-arena", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "AlreadyProcessed" &&
+                DeepProgressionEvidence.TryCompleteBoss(DeepProgressionIds.BossId, "smoke-enc-3", deepRequest++).ReasonCode == "AlreadyProcessed" &&
+                BossProgression.State.CompletedBossIds.Count == 1 && disk.HasProgression && disk.Progression.CompletedBossIds.Count == 1;
+            result.passed = result.deepReloadPass && result.errors.Count == 0;
             return true;
         }
 
