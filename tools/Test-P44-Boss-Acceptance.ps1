@@ -28,7 +28,9 @@ function Start-Game([string]$name, [string]$mode, [int]$count, [int]$port, [swit
     if ($Reload) { $args += @('-p4-boss-acceptance-reload', '1') }
     else { $args += @('-p4-boss-acceptance', '1') }
 
-    $p = Start-Process -FilePath $BuildPath -ArgumentList $args -PassThru
+    $options = @{ FilePath=$BuildPath; ArgumentList=$args; PassThru=$true }
+    if ($isWindowsPlatform) { $options.WindowStyle = "Hidden" }
+    $p = Start-Process @options
     return [pscustomobject]@{ Name=$name; Process=$p; Report=$report; Log=$log }
 }
 
@@ -89,7 +91,9 @@ try {
                 '-logFile', $reloadLog,
                 '-p4-boss-acceptance-reload', '1'
             )
-            $reloadProcess = Start-Process -FilePath $BuildPath -ArgumentList $reloadArgs -PassThru
+            $options = @{ FilePath=$BuildPath; ArgumentList=$reloadArgs; PassThru=$true }
+            if ($isWindowsPlatform) { $options.WindowStyle = "Hidden"; $reloadArgs += "-nographics"; $options.ArgumentList = $reloadArgs }
+            $reloadProcess = Start-Process @options
             $reload = [pscustomobject]@{ Name='host-reload'; Process=$reloadProcess; Report=$reloadReport; Log=$reloadLog }
             if (-not $reload.Process.WaitForExit(60000)) {
                 Stop-Process -Id $reload.Process.Id -Force

@@ -148,7 +148,7 @@ namespace DeepDive.P1.Lab
         private bool townInjected, townSampledReturn, cameraSeeded;
         private float returnPhaseAt, pendingSeenAt, turnInAt;
         private float recordingStartTime;
-        private float bossNextShot;
+        private float bossNextShot, bossTraceAt;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -335,7 +335,7 @@ namespace DeepDive.P1.Lab
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
-            if (Boat) result.passed &= result.boatRepaired && result.boatPartsHidden &&
+            if (Boat && !FleetRoute) result.passed &= result.boatRepaired && result.boatPartsHidden &&
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
@@ -369,7 +369,7 @@ namespace DeepDive.P1.Lab
                 result.tripMapPlayersMax >= expected &&
                 result.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
                 (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload) &&
-                (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect));
+                (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect && result.boatRepaired && result.boatPartsHidden));
             Finish();
         }
 
@@ -630,6 +630,9 @@ namespace DeepDive.P1.Lab
                     a.GetComponentsInChildren<Renderer>().All(r => !r.enabled) &&
                     a.GetComponentsInChildren<Collider>().All(c => !c.enabled));
             }
+            // A fleet-route run loads a previously repaired/purchased campaign. Keep verifying
+            // replicated repair/hidden parts, but do not attempt to collect already consumed parts.
+            if (FleetRoute) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
             var partName = host ? boatStep == 0 || boatStep == 1 ? "BoatPart_Hull" : "BoatPart_FuelTank" : "BoatPart_Engine";
             var part = GameObject.Find(partName);
             var cam = local.GetComponentInChildren<Camera>(true);
@@ -1350,6 +1353,12 @@ namespace DeepDive.P1.Lab
         private void ProbeBossAcceptance(NetworkPlayer local)
         {
             var state = BossProgression.State;
+            if (Time.realtimeSinceStartup >= bossTraceAt && result.deepTrace.Count < 100)
+            {
+                bossTraceAt = Time.realtimeSinceStartup + 3f;
+                var encounter = BossEncounterRuntime.Snapshot;
+                result.deepTrace.Add($"stage={state.Stage} pos={local.transform.position} hp={encounter.Health} passive={local.Passive.Value} oxygen={local.Oxygen.Value}");
+            }
 
             // First proof is created through the real host species authority; all later steps are caused only
             // by real player movement through the real Reef/deep world volumes.
@@ -1389,7 +1398,7 @@ namespace DeepDive.P1.Lab
 
             if (state.Stage == DeepProgressionStage.Trace)
             {
-                SwimAcceptance(local, DeepEncounterWorld.ArenaPosition, 0.8f, surfaceTransit: true);
+                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: true);
                 return;
             }
 
@@ -1399,16 +1408,25 @@ namespace DeepDive.P1.Lab
                 return;
             }
 
-            // Both real processes converge on the arena, aim at the locally presented boss collider and fire
-            // through NetworkPlayer's existing harpoon RPC/raycast path.
-            var toArena = DeepEncounterWorld.ArenaPosition - local.transform.position;
-            if (toArena.magnitude > 1.4f)
+            var boss = BossEncounterRuntime.Snapshot;
+            // A defeated boss stays transient until the crew reaches the real safe-return zone.
+            // Both processes physically swim back; the host only advances Return after every roster bag is marked safe.
+            if (boss.Phase == BossEncounterPhase.Active && boss.Health <= 0f)
             {
-                SwimAcceptance(local, DeepEncounterWorld.ArenaPosition, 0.8f, surfaceTransit: true);
+                result.bossDefeatedPending = true;
+                ReturnBossPartyToShore(local);
                 return;
             }
 
-            var boss = BossEncounterRuntime.Snapshot;
+            // Both real processes converge on the arena, aim at the locally presented boss collider and fire
+            // through NetworkPlayer's existing harpoon RPC/raycast path.
+            var toArena = BossFiringPosition(local) - local.transform.position;
+            if (toArena.magnitude > 1.4f)
+            {
+                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: true);
+                return;
+            }
+
             if (boss.Phase == BossEncounterPhase.Completed || BossProgression.IsCompleted(DeepProgressionIds.BossId))
             {
                 result.bossCompletedSeen = true;
@@ -1416,19 +1434,9 @@ namespace DeepDive.P1.Lab
                 return;
             }
 
-            // A defeated boss stays transient until the crew reaches the real safe-return zone.
-            // Both processes physically swim back; the host only advances Return after every roster bag is marked safe.
-            if (boss.Phase == BossEncounterPhase.Active && boss.Health <= 0f)
-            {
-                result.bossDefeatedPending = true;
-                SwimAcceptance(local, FleetBackTarget, 0.7f, surfaceTransit: true);
-                return;
-            }
-
             var arenaPlayers = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                 .Count(player => player.IsSpawned && !player.Passive.Value &&
-                                 Vector3.Distance(player.transform.position, DeepEncounterWorld.ArenaPosition) <=
-                                 DeepEncounterWorld.ArenaRadius + 1.5f);
+                                 Vector3.Distance(player.transform.position, BossFiringPosition(player)) <= 1.4f);
             if (arenaPlayers < Math.Min(2, adapter.Session.Roster.Count))
             {
                 local.SubmitLocalInput(Vector3.zero, 0f, 0f);
@@ -1448,6 +1456,28 @@ namespace DeepDive.P1.Lab
                 result.bossShotSent = true;
             }
         }
+
+        private void ReturnBossPartyToShore(NetworkPlayer local)
+        {
+            if (local.transform.position.z > -3f)
+            {
+                SwimAcceptance(local, FleetBackTarget, 0.7f, surfaceTransit: true);
+                return;
+            }
+            var zone = FindFirstObjectByType<SafeReturnZone>();
+            var box = zone != null ? zone.GetComponent<BoxCollider>() : null;
+            if (box == null) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
+            var target = box.bounds.center - Vector3.up * 0.9f;
+            target.x += local.OwnerClientId == 0 ? -0.7f : 0.7f;
+            var next = NextBeachWaypoint(local.transform.position, target);
+            var heading = next - local.transform.position;
+            var yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
+            var move = heading.magnitude > 0.4f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * heading.normalized : Vector3.zero;
+            local.SubmitLocalInput(move, yaw, 0f);
+        }
+
+        private static Vector3 BossFiringPosition(NetworkPlayer player) =>
+            DeepEncounterWorld.ArenaPosition + new Vector3(player.OwnerClientId == 0 ? -1.2f : 1.2f, 0f, -1.2f);
 
         private static void SwimAcceptance(NetworkPlayer local, Vector3 target, float tolerance, bool surfaceTransit = false)
         {
