@@ -1,6 +1,7 @@
 using System;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
+using DeepDive.Inventory;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -28,6 +29,8 @@ namespace DeepDive.Composition
         private int receivedRevision = -1;
         private double nextBroadcast;
         private ulong completionSequence = 0xB055100000000000UL;
+        private InventoryManager inventory;
+        private string pendingDefeatDiveId = string.Empty;
 
         public BossEncounterSnapshot Snapshot => mirror;
         private bool IsHost => adapter != null && manager != null && manager.IsListening && adapter.IsAuthority;
@@ -56,6 +59,8 @@ namespace DeepDive.Composition
                 return;
             }
 
+            inventory = GetComponent<InventoryManager>();
+            if (inventory != null) inventory.OnDiveSummaryReady += DiveSummaryReady;
             BossEncounterRuntime.Bind(this, TryActivate, TryHit, Abort, () => mirror);
         }
 
@@ -118,6 +123,7 @@ namespace DeepDive.Composition
                 BossProgression.IsAvailable(DeepProgressionIds.BossId),
                 BossProgression.IsCompleted(DeepProgressionIds.BossId));
             var result = authority.TryActivate(requestedEncounterId);
+            if (result == PlayerActionResult.Accepted) pendingDefeatDiveId = string.Empty;
             MirrorAuthority();
             Broadcast();
             return result;
@@ -138,25 +144,48 @@ namespace DeepDive.Composition
                 return result;
             }
 
+            // Lethal damage stays transient until InventoryManager emits the real safe-return DiveSummary.
+            // Host loss / failed return therefore cannot persist a boss clear.
             if (authority.DefeatedPendingPersistence)
-            {
-                var completion = DeepProgressionEvidence.TryCompleteBoss(
-                    DeepProgressionIds.BossId, EncounterId, ++completionSequence);
-                if (completion.Accepted ||
-                    string.Equals(completion.ReasonCode, "AlreadyProcessed", StringComparison.Ordinal))
-                    authority.MarkCompletionPersisted();
-                else
-                    authority.RestoreAfterFailedCompletion();
-            }
+                pendingDefeatDiveId = adapter != null ? adapter.Session.State.DiveId : string.Empty;
 
             MirrorAuthority();
             Broadcast();
             return result;
         }
 
+        private void DiveSummaryReady(DiveSummary summary)
+        {
+            if (!IsHost || authority == null || !authority.DefeatedPendingPersistence ||
+                string.IsNullOrWhiteSpace(pendingDefeatDiveId) ||
+                !string.Equals(summary.DiveId, pendingDefeatDiveId, StringComparison.Ordinal))
+                return;
+
+            if (summary.SafelyReturned == null || summary.SafelyReturned.Count == 0)
+            {
+                authority.Abort();
+            }
+            else
+            {
+                var durableEncounterId = EncounterId + ":" + (summary.CheckpointId ?? string.Empty);
+                var completion = DeepProgressionEvidence.TryCompleteBoss(
+                    DeepProgressionIds.BossId, durableEncounterId, ++completionSequence);
+                if (completion.Accepted ||
+                    string.Equals(completion.ReasonCode, "AlreadyProcessed", StringComparison.Ordinal))
+                    authority.MarkCompletionPersisted();
+                else
+                    authority.Abort();
+            }
+
+            pendingDefeatDiveId = string.Empty;
+            MirrorAuthority();
+            Broadcast();
+        }
+
         private bool Abort()
         {
             if (!IsHost || authority == null) return false;
+            pendingDefeatDiveId = string.Empty;
             var changed = authority.Abort();
             if (changed)
             {
@@ -205,6 +234,7 @@ namespace DeepDive.Composition
         {
             if (authority != null) authority.Abort();
             authority = null;
+            pendingDefeatDiveId = string.Empty;
             receivedRevision = -1;
             lastBroadcastRevision = int.MinValue;
             mirror = new BossEncounterSnapshot(BossEncounterPhase.Locked, 0f, DefaultMaxHealth, 0);
@@ -212,6 +242,8 @@ namespace DeepDive.Composition
 
         private void OnDisable()
         {
+            if (inventory != null) inventory.OnDiveSummaryReady -= DiveSummaryReady;
+            inventory = null;
             BossEncounterRuntime.Unbind(this);
             UnregisterMessages();
             ResetTransient();
