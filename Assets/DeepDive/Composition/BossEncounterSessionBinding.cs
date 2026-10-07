@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
 using Unity.Collections;
@@ -28,8 +29,10 @@ namespace DeepDive.Composition
         private int receivedRevision = -1;
         private double nextBroadcast;
         private ulong completionSequence = 0xB055100000000000UL;
+        private readonly HashSet<ulong> acceptedHitPlayers = new HashSet<ulong>();
 
         public BossEncounterSnapshot Snapshot => mirror;
+        public int AcceptedHitPlayerCount => acceptedHitPlayers.Count;
         private bool IsHost => adapter != null && manager != null && manager.IsListening && adapter.IsAuthority;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -138,6 +141,7 @@ namespace DeepDive.Composition
                 return result;
             }
 
+            acceptedHitPlayers.Add(hit.PlayerId.Value);
             if (authority.DefeatedPendingPersistence)
             {
                 var completion = DeepProgressionEvidence.TryCompleteBoss(
@@ -205,6 +209,7 @@ namespace DeepDive.Composition
         {
             if (authority != null) authority.Abort();
             authority = null;
+            acceptedHitPlayers.Clear();
             receivedRevision = -1;
             lastBroadcastRevision = int.MinValue;
             mirror = new BossEncounterSnapshot(BossEncounterPhase.Locked, 0f, DefaultMaxHealth, 0);
