@@ -30,8 +30,8 @@ function Start-Game([string]$name, [string]$mode, [int]$count, [int]$port, [swit
 }
 
 try {
-    $host = Start-Game 'host' 'host' 2 $Port
-    $procs += $host
+    $hostProc = Start-Game 'host' 'host' 2 $Port
+    $procs += $hostProc
     Start-Sleep -Seconds 2
     $client = Start-Game 'client1' 'client' 2 $Port
     $procs += $client
@@ -71,7 +71,7 @@ try {
     }
 
     if ($failures.Count -eq 0) {
-        $campaign = $host.Report + '.campaign.json'
+        $campaign = $hostProc.Report + '.campaign.json'
         if (-not (Test-Path -LiteralPath $campaign)) { $failures += 'campaign dosyasi yok' }
         else {
             $reloadReport = Join-Path $run 'host-reload.json'
