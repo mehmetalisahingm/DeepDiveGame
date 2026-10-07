@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '')
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1IsWindows = $env:OS -eq 'Windows_NT'
@@ -8,6 +8,11 @@ else { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.x86_64
 if (-not (Test-Path -LiteralPath $p1Build)) { throw "Integrated build bulunamadi: $p1Build" }
 $p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
 New-Item -ItemType Directory -Path $p1Run | Out-Null
+if ($CampaignSeed) {
+    if (-not [System.IO.Path]::IsPathRooted($CampaignSeed)) { $CampaignSeed = Join-Path $p1Root $CampaignSeed }
+    if (-not (Test-Path -LiteralPath $CampaignSeed)) { throw "Campaign seed bulunamadi: $CampaignSeed" }
+    Copy-Item -LiteralPath $CampaignSeed -Destination (Join-Path $p1Run 'host.json.campaign.json') -Force
+}
 $p1Processes = [System.Collections.Generic.List[object]]::new()
 function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') {
     $p1Report = Join-Path $p1Run ($Name + '.json')
