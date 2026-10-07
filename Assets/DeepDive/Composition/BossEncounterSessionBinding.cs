@@ -125,8 +125,15 @@ namespace DeepDive.Composition
             authority.RefreshProgression(
                 BossProgression.IsAvailable(DeepProgressionIds.BossId),
                 BossProgression.IsCompleted(DeepProgressionIds.BossId));
+            var wasActive = authority.Phase == BossEncounterPhase.Active;
             var result = authority.TryActivate(requestedEncounterId);
-            if (result == PlayerActionResult.Accepted) pendingDefeatDiveId = string.Empty;
+            // World probes the occupied arena repeatedly. An accepted activation replay must
+            // preserve the defeated encounter's pending safe-return checkpoint.
+            if (result == PlayerActionResult.Accepted && !wasActive)
+            {
+                pendingDefeatDiveId = string.Empty;
+                acceptedHitPlayers.Clear();
+            }
             MirrorAuthority();
             Broadcast();
             return result;

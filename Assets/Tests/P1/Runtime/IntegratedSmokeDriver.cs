@@ -2306,10 +2306,21 @@ namespace DeepDive.P1.Lab
                 }
                 if (economySync.ActiveVehicleId.Value.ToString() != TripVehicleId)
                 {
-                    if (Time.realtimeSinceStartup >= tripNext)
+                    // Active selection must use the real harbor vendor session, just like the player UI.
+                    if (adapter.IsAuthority)
                     {
-                        tripNext = Time.realtimeSinceStartup + 1.2f;
-                        economySync.RequestSelectVehicle(TripVehicleId);
+                        if (!economySync.VendorOpen)
+                        {
+                            var camera = local.GetComponentInChildren<Camera>(true);
+                            if (camera != null && GoToService(local, camera, TownServiceCatalog.VehicleVendorId))
+                                InteractEvery(local, 1.2f);
+                            return;
+                        }
+                        if (Time.realtimeSinceStartup >= tripNext)
+                        {
+                            tripNext = Time.realtimeSinceStartup + 1.2f;
+                            economySync.RequestSelectVehicle(TripVehicleId);
+                        }
                     }
                     local.SubmitLocalInput(Vector3.zero, 0);
                     return;
