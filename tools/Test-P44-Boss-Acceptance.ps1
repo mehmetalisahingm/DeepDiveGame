@@ -3,6 +3,7 @@ param(
     [int]$Port = 18977
 )
 $ErrorActionPreference = 'Stop'
+$isWindowsPlatform = $env:OS -eq 'Windows_NT'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not [System.IO.Path]::IsPathRooted($BuildPath)) { $BuildPath = Join-Path $root $BuildPath }
 if (-not (Test-Path -LiteralPath $BuildPath)) { throw "Build bulunamadi: $BuildPath" }
@@ -15,13 +16,15 @@ function Start-Game([string]$name, [string]$mode, [int]$count, [int]$port, [swit
     $report = Join-Path $run ($name + '.json')
     $log = Join-Path $run ($name + '.log')
     $args = @(
-        '-batchmode', '-nographics',
+        '-batchmode',
         '-p1-integrated', $mode,
         '-p1-count', $count,
         '-p1-port', $port,
         '-p1-report', $report,
         '-logFile', $log
     )
+    if ($isWindowsPlatform) { $args += '-nographics' }
+    else { $args += @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
     if ($Reload) { $args += @('-p4-boss-acceptance-reload', '1') }
     else { $args += @('-p4-boss-acceptance', '1') }
 
@@ -78,7 +81,7 @@ try {
             Copy-Item -LiteralPath $campaign -Destination ($reloadReport + '.campaign.json') -Force
             $reloadLog = Join-Path $run 'host-reload.log'
             $reloadArgs = @(
-                '-batchmode', '-nographics',
+                '-batchmode',
                 '-p1-integrated', 'host',
                 '-p1-count', 1,
                 '-p1-port', ($Port + 1),
