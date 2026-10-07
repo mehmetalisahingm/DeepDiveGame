@@ -1440,6 +1440,7 @@ namespace DeepDive.P1.Lab
                 return false;
 
             var state = BossProgression.State;
+            if (state.Stage == DeepProgressionStage.Locked) return false;
             var boss = BossEncounterRuntime.Snapshot;
             var disk = File.Exists(store.SavePath)
                 ? JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath))
