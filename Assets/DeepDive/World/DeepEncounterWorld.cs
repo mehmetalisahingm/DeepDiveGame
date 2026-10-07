@@ -26,6 +26,33 @@ namespace DeepDive.World
 
         public static readonly Vector3 ArenaPosition = new Vector3(5f, -18f, 59f);
         public static readonly Vector3 BossPosition = new Vector3(5f, -18f, 60.5f);
+        public static string ExpectedCellId(Vector3 position, string regionId, DiveRegionBounds bounds)
+        {
+            var layout = new ExplorationCellLayout(regionId, bounds);
+            if (!layout.TryCell(position, out var gx, out var gz)) return string.Empty;
+            return ExplorationIds.CellId(regionId, gx, gz);
+        }
+
+        public static bool IsValidTraceContext(string traceId, string cellId, string depthBandId,
+            string regionId, DiveRegionBounds bounds)
+        {
+            if (!string.Equals(depthBandId, DepthBandIds.Deep, StringComparison.Ordinal) ||
+                string.IsNullOrWhiteSpace(cellId) || string.IsNullOrWhiteSpace(regionId))
+                return false;
+
+            for (var i = 0; i < TraceIds.Length; i++)
+            {
+                if (!string.Equals(traceId, TraceIds[i], StringComparison.Ordinal)) continue;
+                return string.Equals(cellId, ExpectedCellId(TracePositions[i], regionId, bounds), StringComparison.Ordinal);
+            }
+            return false;
+        }
+
+        public static bool IsValidArenaContext(string arenaId, string cellId, string depthBandId,
+            string regionId, DiveRegionBounds bounds) =>
+            string.Equals(arenaId, ArenaId, StringComparison.Ordinal) &&
+            string.Equals(depthBandId, DepthBandIds.Deep, StringComparison.Ordinal) &&
+            string.Equals(cellId, ExpectedCellId(ArenaPosition, regionId, bounds), StringComparison.Ordinal);
     }
 
     // Real P4.4 world validator + host evidence feed. Progression remains Mert's authority and
@@ -130,25 +157,13 @@ namespace DeepDive.World
             hadPlayerInArena = anyInArena;
         }
 
-        public bool IsValidTrace(string traceId, string cellId, string depthBandId)
-        {
-            if (!string.Equals(depthBandId, DepthBandIds.Deep, StringComparison.Ordinal) ||
-                string.IsNullOrWhiteSpace(cellId) || !EnsureWorld())
-                return false;
-
-            for (var i = 0; i < DeepEncounterWorld.TraceIds.Length; i++)
-            {
-                if (!string.Equals(traceId, DeepEncounterWorld.TraceIds[i], StringComparison.Ordinal)) continue;
-                return string.Equals(cellId, CellIdFor(DeepEncounterWorld.TracePositions[i]), StringComparison.Ordinal);
-            }
-            return false;
-        }
+        public bool IsValidTrace(string traceId, string cellId, string depthBandId) =>
+            EnsureWorld() && DeepEncounterWorld.IsValidTraceContext(
+                traceId, cellId, depthBandId, region.RegionId, region.Bounds);
 
         public bool IsDiscoveryArea(string arenaId, string cellId, string depthBandId) =>
-            string.Equals(arenaId, DeepEncounterWorld.ArenaId, StringComparison.Ordinal) &&
-            string.Equals(depthBandId, DepthBandIds.Deep, StringComparison.Ordinal) &&
-            EnsureWorld() &&
-            string.Equals(cellId, CellIdFor(DeepEncounterWorld.ArenaPosition), StringComparison.Ordinal);
+            EnsureWorld() && DeepEncounterWorld.IsValidArenaContext(
+                arenaId, cellId, depthBandId, region.RegionId, region.Bounds);
 
         private bool EnsureWorld()
         {
