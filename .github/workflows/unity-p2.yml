@@ -59,3 +59,51 @@ jobs:
           path: Logs/CI-Tests/**/*.xml
           if-no-files-found: ignore
           retention-days: 7
+
+  p43-runtime:
+    name: P4.3 real 2-process fleet routes
+    if: github.ref == 'refs/heads/p4/p43-final-acceptance-ci'
+    needs: unity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Require Unity CI credentials
+        shell: bash
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
+            echo '::error::Unity CI licensing is not configured.'
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Build native Linux integrated player
+        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          targetPlatform: StandaloneLinux64
+          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildLinux
+          versioning: None
+      - name: Motorboat reef full roundtrip (2 processes)
+        shell: pwsh
+        run: |
+          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18777 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -TripVehicle boat-2 -TripRoute route-reef-1
+      - name: Research vessel deep full roundtrip (2 processes)
+        shell: pwsh
+        run: |
+          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18877 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -TripVehicle boat-3 -TripRoute route-deep-1
+      - name: Upload P4.3 runtime evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p43-runtime-${{ github.sha }}
+          path: Logs/P1-integrated-*
+          if-no-files-found: warn
+          retention-days: 7
