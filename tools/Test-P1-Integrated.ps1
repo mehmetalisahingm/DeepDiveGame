@@ -32,7 +32,10 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         $p1Args += @('-screen-width', '1280', '-screen-height', '720', '-screen-fullscreen', '0')
         if ($Unified) { $p1Args += @('-p3-unified-screenshot', ('"{0}"' -f $capturePath)) }
         else { $p1Args += @('-p1-screenshot', ('"{0}"' -f $capturePath)) }
-    } else { $p1Args += '-nographics' }
+    } else {
+        if ($p1IsWindows) { $p1Args += '-nographics' }
+        else { $p1Args += @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
+    }
     if (-not $Unified) {
         if ($Reason) { $p1Args += @('-p1-reason', $Reason) }
         if ($Hunt) { $p1Args += @('-p2-hunt', '1') }
