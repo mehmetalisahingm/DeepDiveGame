@@ -100,7 +100,7 @@ jobs:
       - name: Prepare real purchased fleet campaign (2 processes)
         shell: pwsh
         run: |
-          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18677 -Fleet -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18677 -Fleet -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
           $fleetRun = Get-ChildItem -LiteralPath ./Logs -Directory -Filter 'P1-integrated-*' |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1
           if ($null -eq $fleetRun) { throw 'Fleet smoke output bulunamadi' }
@@ -110,11 +110,11 @@ jobs:
       - name: Motorboat reef full roundtrip (2 processes)
         shell: pwsh
         run: |
-          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18777 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -CampaignSeed $env:P43_FLEET_SEED -TripVehicle boat-2 -TripRoute route-reef-1
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18777 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -CampaignSeed $env:P43_FLEET_SEED -TripVehicle boat-2 -TripRoute route-reef-1
       - name: Research vessel deep full roundtrip (2 processes)
         shell: pwsh
         run: |
-          ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18877 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -CampaignSeed $env:P43_FLEET_SEED -TripVehicle boat-3 -TripRoute route-deep-1
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 18877 -Trip -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64 -CampaignSeed $env:P43_FLEET_SEED -TripVehicle boat-3 -TripRoute route-deep-1
       - name: Upload P4.3 runtime evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
