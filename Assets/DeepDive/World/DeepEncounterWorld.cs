@@ -152,7 +152,8 @@ namespace DeepDive.World
                 }
             }
 
-            if (hadPlayerInArena && !anyInArena && BossEncounterRuntime.Snapshot.Phase == BossEncounterPhase.Active)
+            var encounter = BossEncounterRuntime.Snapshot;
+            if (hadPlayerInArena && !anyInArena && encounter.Phase == BossEncounterPhase.Active && encounter.Health > 0f)
                 BossEncounterRuntime.Abort();
             hadPlayerInArena = anyInArena;
         }
