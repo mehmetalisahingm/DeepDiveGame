@@ -168,6 +168,9 @@ namespace DeepDive.World
 
         private void Die(PlayerId killer)
         {
+            // The same NetworkObject becomes a catch on death. Clear the replicated night
+            // indicator immediately so clients never render a glowing dead fish.
+            nightActive.Value = false;
             var catchObject = GetComponent<CatchObject>();
             if (catchObject == null)
             {
