@@ -48,6 +48,8 @@ namespace DeepDive.Composition
         private Func<ClipManifest, ClipArchiveOutcome> submitDelegate;
 
         public ChannelAuthority Channel => channel;
+        // True only after the host archive and campaign save have been restored.
+        public bool IsHostReady => bound;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
