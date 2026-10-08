@@ -1,6 +1,7 @@
 using DeepDive.Core.Contracts;
 using DeepDive.Inventory;
 using DeepDive.Network;
+using DeepDive.Session;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
