@@ -14,6 +14,7 @@ using DeepDive.Economy;
 using DeepDive.Trip;
 using DeepDive.MapUI;
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
@@ -84,6 +85,8 @@ namespace DeepDive.P1.Lab
             public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
             public bool bossSighting, bossRumor, bossTraceStage, bossArenaUnlocked, bossActiveSeen, bossDamageSeen,
                 bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
+            public bool p45RolesSeen, p45CarrierCapacity, p45NoStack, p45GuestCrossWriteRefused,
+                p45PingSeen, p45PingOnMap, p45PingServerStamped, p45CurrentSeen, p45CurrentCleared;
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -126,6 +129,7 @@ namespace DeepDive.P1.Lab
         private bool DeepReload => Arg("-p4-deep-reload") == "1";
         private bool BossAcceptance => Arg("-p4-boss-acceptance") == "1";
         private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
+        private bool RoleEffects => Arg("-p45-role-effects") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -149,6 +153,8 @@ namespace DeepDive.P1.Lab
         private float returnPhaseAt, pendingSeenAt, turnInAt;
         private float recordingStartTime;
         private float bossNextShot, bossTraceAt;
+        private bool p45PingSent;
+        private P45CurrentSmokeSource p45CurrentSource;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -177,6 +183,12 @@ namespace DeepDive.P1.Lab
             yield return null; yield return null;
             adapter = FindFirstObjectByType<SessionNetworkAdapter>();
             if (adapter == null) { result.errors.Add("No integrated adapter in real scene"); Finish(); yield break; }
+            if (RoleEffects && host)
+            {
+                var source = new GameObject("P45CurrentSmokeSource");
+                DontDestroyOnLoad(source);
+                p45CurrentSource = source.AddComponent<P45CurrentSmokeSource>();
+            }
             GameObject.Find("Port").GetComponent<InputField>().text = port.ToString();
             GameObject.Find(host ? "HostButton" : "JoinButton").GetComponent<Button>().onClick.Invoke();
             var started = Time.realtimeSinceStartup;
@@ -184,7 +196,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 360f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -219,6 +231,7 @@ namespace DeepDive.P1.Lab
                 if (connection.Status == ConnectionStatus.Connected && !connection.IsSceneLoading)
                 {
                     Probe(expected);
+                    if (RoleEffects) ObserveP45RoleEffects(host, expected, state);
                     if (state.Phase == SessionPhase.Lobby && connection.LocalPlayerId.HasValue &&
                         adapter.Session.Roster.TryGetValue(connection.LocalPlayerId.Value, out var ready) && !ready && state.Revision == 0)
                         GameObject.Find("ReadyButton").GetComponent<Button>().onClick.Invoke();
@@ -335,6 +348,10 @@ namespace DeepDive.P1.Lab
                 result.bossActiveSeen && result.bossShotSent && result.bossDefeatedPending && result.bossCompletedSeen &&
                 (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossPartySafe &&
                     result.bossSaved && result.bossHostDone));
+            if (RoleEffects) result.passed &= result.p45RolesSeen && result.p45PingSeen && result.p45PingOnMap &&
+                result.p45CurrentSeen && result.p45CurrentCleared &&
+                (host ? (result.p45CarrierCapacity && result.p45NoStack && result.p45PingServerStamped)
+                      : result.p45GuestCrossWriteRefused);
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
@@ -374,6 +391,112 @@ namespace DeepDive.P1.Lab
                 (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload) &&
                 (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect && result.boatRepaired && result.boatPartsHidden));
             Finish();
+        }
+
+        private void ObserveP45RoleEffects(bool host, int expected, SessionState state)
+        {
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .Where(p => p.IsSpawned).ToArray();
+            var roleBinding = adapter.GetComponent<CrewRoleEffectBinding>();
+
+            if (host && state.Phase == SessionPhase.Lobby && players.Length == expected && roleBinding != null)
+            {
+                var inventory = adapter.GetComponent<InventoryManager>();
+                NetworkPlayer guest = null;
+                for (var i = 0; i < players.Length; i++)
+                {
+                    var player = players[i];
+                    var desired = player.OwnerClientId == NetworkManager.ServerClientId
+                        ? CrewRole.Explorer
+                        : CrewRole.Carrier;
+                    if (player.CurrentCrewRole != desired)
+                        roleBinding.TryApplyRoleServer(new PlayerId(player.OwnerClientId), desired);
+                    if (player.OwnerClientId != NetworkManager.ServerClientId) guest = player;
+                }
+
+                if (guest != null && inventory != null)
+                {
+                    var id = new PlayerId(guest.OwnerClientId);
+                    // Re-applying the exact role must leave capacity unchanged: replacement, never accumulation.
+                    roleBinding.TryApplyRoleServer(id, CrewRole.Carrier);
+                    var before = inventory.CapacityFor(id);
+                    roleBinding.TryApplyRoleServer(id, CrewRole.Carrier);
+                    var after = inventory.CapacityFor(id);
+                    result.p45CarrierCapacity |= before ==
+                        CrewRoleEffectRules.ResolveBagCapacityGrams(InventoryManager.CapacityGrams, CrewRole.Carrier);
+                    result.p45NoStack |= before == after;
+                }
+            }
+            else if (!host && state.Phase == SessionPhase.Lobby && roleBinding != null)
+            {
+                // A guest has the same component locally, but it is not authority and therefore
+                // cannot write the host's role (or anyone else's).
+                result.p45GuestCrossWriteRefused |=
+                    !roleBinding.TryApplyRoleServer(new PlayerId(NetworkManager.ServerClientId), CrewRole.Hunter);
+            }
+
+            if (players.Length == expected)
+            {
+                var hostRoleOk = players.Any(p => p.OwnerClientId == NetworkManager.ServerClientId &&
+                    p.CurrentCrewRole == CrewRole.Explorer);
+                var guestRoleOk = players.Where(p => p.OwnerClientId != NetworkManager.ServerClientId)
+                    .All(p => p.CurrentCrewRole == CrewRole.Carrier);
+                if (host)
+                    result.p45RolesSeen |= hostRoleOk && guestRoleOk;
+                else
+                    // The script deliberately reconnects client1. Only evidence observed after
+                    // reconnect proves the role was safely re-applied and mirrored.
+                    result.p45RolesSeen |= result.clientRejoined && hostRoleOk && guestRoleOk;
+            }
+
+            if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading)
+            {
+                // The test provider must never leak an active current across scene/phase teardown.
+                if (host && p45CurrentSource != null) p45CurrentSource.Active = false;
+                return;
+            }
+            var diveElapsed = Time.realtimeSinceStartup - sceneStarted;
+
+            if (host && p45CurrentSource != null)
+                p45CurrentSource.Active = diveElapsed >= 5f && diveElapsed < 8f;
+
+            var local = players.FirstOrDefault(p => p.IsOwner);
+            if (local != null && !p45PingSent && diveElapsed > 4f)
+            {
+                p45PingSent = true;
+                local.SubmitTeamPingLocal(CrewPingKind.Interest);
+            }
+
+            if (players.Any(p => p.CurrentWarning == CrewWarningKind.LocalCurrent &&
+                                 p.CurrentDriftVelocity.Value.magnitude > 0.1f))
+                result.p45CurrentSeen = true;
+
+            if (result.p45CurrentSeen && diveElapsed > 9f &&
+                players.All(p => p.CurrentWarning != CrewWarningKind.LocalCurrent &&
+                                 p.CurrentDriftVelocity.Value.sqrMagnitude < 0.0001f))
+                result.p45CurrentCleared = true;
+
+            var pings = P4MapPositionFeed.SnapshotTeamPings();
+            if (pings.Count >= expected) result.p45PingSeen = true;
+            if (BoatMapView.LastIcons.Any(icon =>
+                    icon.IconId.StartsWith("team-ping-", StringComparison.Ordinal)))
+                result.p45PingOnMap = true;
+
+            if (host && pings.Count >= expected)
+            {
+                var stamped = true;
+                for (var i = 0; i < pings.Count; i++)
+                {
+                    var ping = pings[i];
+                    var player = players.FirstOrDefault(p => p.OwnerClientId == ping.Player.Value);
+                    if (player == null || Vector3.Distance(player.transform.position, ping.WorldPosition) > 0.25f)
+                    {
+                        stamped = false;
+                        break;
+                    }
+                }
+                result.p45PingServerStamped |= stamped;
+            }
         }
 
         private void Probe(int expected)

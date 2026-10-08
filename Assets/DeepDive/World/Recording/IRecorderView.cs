@@ -22,6 +22,13 @@ namespace DeepDive.World
         float VerticalFieldOfViewDegrees { get; }
     }
 
+    // Optional Mehmet-owned role effect seam. World still owns framing math; a camera role may
+    // only provide a small extra centring tolerance, never a client-authored quality/score.
+    public interface IRecordingStabilityView
+    {
+        float ExtraOffAxisToleranceDegrees { get; }
+    }
+
     // Per-player binding point. DiveContext and CatchClaim each bind a single authority, but a
     // camera belongs to one diver, so this one is keyed by player.
     //

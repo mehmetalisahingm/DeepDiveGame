@@ -50,6 +50,22 @@ namespace DeepDive.Composition
             return result;
         }
 
+        // P4.5-A team pings use the same approved player objects and the same World->Map
+        // conversion as party/return icons. The ping position was stamped from the server
+        // transform in NetworkPlayer; clients never send a coordinate.
+        public static IReadOnlyList<(PlayerId Player, CrewPingKind Kind, Vector3 WorldPosition)> SnapshotTeamPings()
+        {
+            var result = new List<(PlayerId, CrewPingKind, Vector3)>();
+            var players = Object.FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+            for (var i = 0; i < players.Length; i++)
+            {
+                var player = players[i];
+                if (!player.IsSpawned || !player.TryGetActiveTeamPing(out var kind, out var world)) continue;
+                result.Add((new PlayerId(player.OwnerClientId), kind, world));
+            }
+            return result;
+        }
+
         public static bool TryWorldToMap(Vector3 worldPosition, out Vector2 mapPosition)
         {
             if (DiveRegionField.TryFind(out var region) && region.TryWorldToMap(worldPosition, out var map))

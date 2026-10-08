@@ -34,6 +34,7 @@ namespace DeepDive.Inventory
         private SessionManager _session;
         private readonly Dictionary<PlayerId, PlayerBag> _bags = new Dictionary<PlayerId, PlayerBag>();
         private readonly Dictionary<PlayerId, int> _bagUpgradeLevels = new Dictionary<PlayerId, int>();
+        private readonly Dictionary<PlayerId, CrewRole> _crewRoles = new Dictionary<PlayerId, CrewRole>();
         private readonly Dictionary<string, CaptureResult> _captures = new Dictionary<string, CaptureResult>();
         private string _trackedDiveId = string.Empty;
         private SessionPhase _previousPhase = SessionPhase.Lobby;
@@ -51,7 +52,9 @@ namespace DeepDive.Inventory
         public int CapacityFor(PlayerId player)
         {
             _bagUpgradeLevels.TryGetValue(player, out var level);
-            return P4EquipmentEffectRules.ResolveBagCapacityGrams(CapacityGrams, level);
+            _crewRoles.TryGetValue(player, out var role);
+            var equippedCapacity = P4EquipmentEffectRules.ResolveBagCapacityGrams(CapacityGrams, level);
+            return CrewRoleEffectRules.ResolveBagCapacityGrams(equippedCapacity, role);
         }
 
         // Host-side composition derives this level from Mert's authoritative loadout catalog.
@@ -63,6 +66,18 @@ namespace DeepDive.Inventory
             _bagUpgradeLevels.TryGetValue(player, out var previous);
             if (previous == safeLevel) return false;
             _bagUpgradeLevels[player] = safeLevel;
+            OnBagChanged?.Invoke(player);
+            return true;
+        }
+
+        // Mehmet's role effect mirror. Mert owns the role state; this only replaces the current
+        // capacity modifier and therefore cannot stack after reconnect/restore/reselection.
+        public bool SetCrewRole(PlayerId player, CrewRole role)
+        {
+            var safeRole = CrewRoleEffectRules.IsValid(role) ? role : CrewRole.None;
+            _crewRoles.TryGetValue(player, out var previous);
+            if (previous == safeRole) return false;
+            _crewRoles[player] = safeRole;
             OnBagChanged?.Invoke(player);
             return true;
         }
@@ -157,6 +172,7 @@ namespace DeepDive.Inventory
             {
                 _bags.Remove(player);
                 _bagUpgradeLevels.Remove(player);
+                _crewRoles.Remove(player);
             }
         }
 
