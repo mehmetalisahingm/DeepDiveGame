@@ -74,11 +74,14 @@ namespace DeepDive.Composition
             if (!bound || day == null) return;
             // Process yesterday's *settled* channel output before changing to today's objectives.
             // This survives a restart between the day-close disk write and the morning settlement.
+            if (authority.DayNumber > 0)
+                ReconcileSales(authority.DayNumber);
             if (authority.DayNumber > 0 && authority.DayNumber < day.Engine.DayNumber)
                 ReconcileSettledPublications(authority.DayNumber);
             if (authority.DayNumber != day.Engine.DayNumber)
                 authority.BeginDay(day.Engine.DayNumber, "local-host");
             if (authority.DayNumber != day.Engine.DayNumber) return;
+            ReconcileSales(authority.DayNumber);
 
             // The host's stable D06 role is restored after the network player spawns.
             if (manager.ConnectedClients.TryGetValue(0, out var host) && host.PlayerObject != null)
