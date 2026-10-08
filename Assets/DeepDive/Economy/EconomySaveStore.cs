@@ -297,7 +297,9 @@ namespace DeepDive.Economy
                 // No second storage ownership or capacity source is persisted.
                 var owned = data.HasLiving ? data.Living?.PurchasedUpgradeIds : null;
                 economy.ApplyLivingUpgradeBenefits(owned != null && owned.Contains(LivingWorldCatalog.HouseArchive),
-                    owned != null && owned.Contains(LivingWorldCatalog.FishMarket));
+                    owned != null && owned.Contains(LivingWorldCatalog.FishMarket),
+                    owned != null && owned.Contains(LivingWorldCatalog.EquipmentDisplay),
+                    owned != null && owned.Contains(LivingWorldCatalog.HarborLights));
                 restoring = true;
                 if (!economy.TryRestore(data))
                 {
