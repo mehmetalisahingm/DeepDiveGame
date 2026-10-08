@@ -173,8 +173,8 @@ namespace DeepDive.Economy
                 return Reject(requestId, "RequiresArchive");
             var cost = LivingWorldCatalog.UpgradeCost(upgradeId);
             if (!economy.TryPurchaseLivingUpgrade("living-upgrade-" + upgradeId, cost,
-                () => { upgrades.Add(upgradeId); state.PurchasedUpgradeIds.Add(upgradeId); },
-                () => { upgrades.Remove(upgradeId); state.PurchasedUpgradeIds.Remove(upgradeId); }))
+                () => { upgrades.Add(upgradeId); state.PurchasedUpgradeIds.Add(upgradeId); ApplyBenefits(); },
+                () => { upgrades.Remove(upgradeId); state.PurchasedUpgradeIds.Remove(upgradeId); ApplyBenefits(); }))
                 return Reject(requestId, economy.SharedBalance < cost ? "NotEnoughCredits" : "SaveFailed");
             Notify();
             return TransactionResult.Ok(requestId, Revision);
@@ -290,10 +290,15 @@ namespace DeepDive.Economy
             seenPublications.Clear(); foreach (var id in posts) seenPublications.Add(id);
             upgrades.Clear(); foreach (var id in newUpgrades) upgrades.Add(id);
             rewards.Clear(); foreach (var id in paid) rewards.Add(id);
+            ApplyBenefits();
             roles.Clear(); roles[new PlayerId(0)] = (CrewRole)state.HostRole;
             Notify();
             return true;
         }
+
+        private void ApplyBenefits() =>
+            economy.ApplyLivingUpgradeBenefits(upgrades.Contains(LivingWorldCatalog.HouseArchive),
+                upgrades.Contains(LivingWorldCatalog.FishMarket));
 
         private TransactionResult Reject(ulong requestId, string reason) =>
             TransactionResult.Reject(requestId, reason, Revision);
