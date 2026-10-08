@@ -111,6 +111,8 @@ namespace DeepDive.Economy
             }
         }
 
+        public string CampaignId => campaignId;
+
         public string SavePath => string.IsNullOrWhiteSpace(pathOverride)
             ? Path.Combine(Application.persistentDataPath, fileName)
             : pathOverride;
