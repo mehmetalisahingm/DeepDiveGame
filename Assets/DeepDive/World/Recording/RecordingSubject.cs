@@ -263,8 +263,15 @@ namespace DeepDive.World
                 if (!RecorderViews.TryGetActive(player, out var view)) continue;
 
                 var eye = view.EyePosition;
+                var framing = tuning;
+                if (view is IRecordingStabilityView stability && stability.ExtraOffAxisToleranceDegrees > 0f)
+                {
+                    framing = new RecordingTuning(tuning.MinDistanceMetres, tuning.MaxDistanceMetres,
+                        Mathf.Min(89f, tuning.MaxOffAxisDegrees + stability.ExtraOffAxisToleranceDegrees),
+                        tuning.MinFrameFill, tuning.IdealFrameFill, tuning.CenteringWeight);
+                }
                 var sample = RecordingCameraRules.Sample(eye, view.EyeForward, view.VerticalFieldOfViewDegrees,
-                    subject, subjectRadiusMetres, IsOccluded(eye, subject), tuning, session.TierFor(player),
+                    subject, subjectRadiusMetres, IsOccluded(eye, subject), framing, session.TierFor(player),
                     light01);
                 session.Tick(player, deltaTime, sample);
             }
