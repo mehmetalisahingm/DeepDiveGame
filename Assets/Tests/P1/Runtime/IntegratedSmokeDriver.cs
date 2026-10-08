@@ -87,6 +87,7 @@ namespace DeepDive.P1.Lab
                 bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
             public bool p45RolesSeen, p45CarrierCapacity, p45NoStack, p45GuestCrossWriteRefused,
                 p45PingSeen, p45PingOnMap, p45PingServerStamped, p45CurrentSeen, p45CurrentCleared;
+            public bool p45WorldWeatherMirror, p45WorldBuoyVisible, p45WorldCurrentSeen, p45WorldCurrentCleared;
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -130,6 +131,7 @@ namespace DeepDive.P1.Lab
         private bool BossAcceptance => Arg("-p4-boss-acceptance") == "1";
         private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
         private bool RoleEffects => Arg("-p45-role-effects") == "1";
+        private bool WorldConditions => Arg("-p45-world") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -155,6 +157,8 @@ namespace DeepDive.P1.Lab
         private float bossNextShot, bossTraceAt;
         private bool p45PingSent;
         private P45CurrentSmokeSource p45CurrentSource;
+        private readonly Dictionary<ulong, Pose> p45WorldOriginalPoses = new Dictionary<ulong, Pose>();
+        private bool p45WorldWarped, p45WorldRestored;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -232,6 +236,7 @@ namespace DeepDive.P1.Lab
                 {
                     Probe(expected);
                     if (RoleEffects) ObserveP45RoleEffects(host, expected, state);
+                    if (WorldConditions) ObserveP45WorldConditions(host, expected, state);
                     if (state.Phase == SessionPhase.Lobby && connection.LocalPlayerId.HasValue &&
                         adapter.Session.Roster.TryGetValue(connection.LocalPlayerId.Value, out var ready) && !ready && state.Revision == 0)
                         GameObject.Find("ReadyButton").GetComponent<Button>().onClick.Invoke();
@@ -348,6 +353,8 @@ namespace DeepDive.P1.Lab
                 result.bossActiveSeen && result.bossShotSent && result.bossDefeatedPending && result.bossCompletedSeen &&
                 (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossPartySafe &&
                     result.bossSaved && result.bossHostDone));
+            if (WorldConditions) result.passed &= result.p45WorldWeatherMirror &&
+                result.p45WorldBuoyVisible && result.p45WorldCurrentSeen && result.p45WorldCurrentCleared;
             if (RoleEffects) result.passed &= result.p45RolesSeen && result.p45PingSeen && result.p45PingOnMap &&
                 result.p45CurrentSeen && result.p45CurrentCleared &&
                 (host ? (result.p45CarrierCapacity && result.p45NoStack && result.p45PingServerStamped)
@@ -391,6 +398,68 @@ namespace DeepDive.P1.Lab
                 (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload) &&
                 (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect && result.boatRepaired && result.boatPartsHidden));
             Finish();
+        }
+
+        // Real World source, no synthetic current fixture: host moves players in/out of the marked area.
+        private void ObserveP45WorldConditions(bool host, int expected, SessionState state)
+        {
+            var syncs = FindObjectsByType<EconomyPlayerSync>(FindObjectsSortMode.None)
+                .Where(x => x.IsSpawned).ToArray();
+            var boats = FindObjectsByType<BoatTripPlayerSync>(FindObjectsSortMode.None)
+                .Where(x => x.IsSpawned).ToArray();
+            if (syncs.Length == expected && boats.Length == expected)
+            {
+                var first = syncs[0];
+                var weather = P45WorldRules.Weather(first.DayNumber.Value, first.DayWeatherSeed.Value);
+                result.p45WorldWeatherMirror |= syncs.All(x => x.DayNumber.Value == first.DayNumber.Value &&
+                    x.DayWeatherSeed.Value == first.DayWeatherSeed.Value) &&
+                    boats.All(x => x.WindyDay.Value == (weather == P45WeatherKind.Windy));
+            }
+            if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading) return;
+            if (adapter.GetComponent<P45WorldConditions>() == null ||
+                !DiveRegionField.TryFind(out var region)) return;
+            var depth = FindFirstObjectByType<DiveDepthBandSet>();
+            if (depth == null || !region.TryMapToWorld(P45WorldRules.CurrentMapPosition, out var xz)) return;
+            var marker = GameObject.Find("P45MarkedCurrentBuoy");
+            result.p45WorldBuoyVisible |= marker != null &&
+                region.TryWorldToMap(marker.transform.position, out var markerMap) &&
+                (markerMap - P45WorldRules.CurrentMapPosition).sqrMagnitude < 0.0025f;
+
+            var t = Time.realtimeSinceStartup - sceneStarted;
+            if (host && !p45WorldWarped && t > 5f)
+            {
+                var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                    .Where(x => x.IsSpawned && x.IsServer).ToArray();
+                if (players.Length == expected)
+                {
+                    p45WorldWarped = true;
+                    for (var i = 0; i < players.Length; i++)
+                    {
+                        var player = players[i];
+                        p45WorldOriginalPoses[player.OwnerClientId] = new Pose(player.transform.position, player.transform.rotation);
+                        player.Teleport(new Pose(new Vector3(xz.x + i * 0.3f, depth.SurfaceY - 1.4f, xz.y),
+                            player.transform.rotation));
+                    }
+                }
+            }
+            var local = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .FirstOrDefault(x => x.IsSpawned && x.IsOwner);
+            if (local != null && local.CurrentWarning == CrewWarningKind.LocalCurrent &&
+                local.CurrentDriftVelocity.Value.magnitude > 0.1f)
+                result.p45WorldCurrentSeen = true;
+            if (host && p45WorldWarped && !p45WorldRestored && t > 10f)
+            {
+                p45WorldRestored = true;
+                var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+                for (var i = 0; i < players.Length; i++)
+                    if (players[i].IsSpawned && players[i].IsServer &&
+                        p45WorldOriginalPoses.TryGetValue(players[i].OwnerClientId, out var pose))
+                        players[i].Teleport(pose);
+            }
+            if (t > 11f && result.p45WorldCurrentSeen && local != null &&
+                local.CurrentWarning != CrewWarningKind.LocalCurrent &&
+                local.CurrentDriftVelocity.Value.sqrMagnitude < 0.0001f)
+                result.p45WorldCurrentCleared = true;
         }
 
         private void ObserveP45RoleEffects(bool host, int expected, SessionState state)
