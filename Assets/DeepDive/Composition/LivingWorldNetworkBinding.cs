@@ -128,6 +128,21 @@ namespace DeepDive.Composition
             if (IsHost && authority != null) authority.OnVerifiedCatchesSold(catches);
         }
 
+        private void ReconcileSales(int goalDay)
+        {
+            if (authority == null || economy == null || goalDay < 1) return;
+            var ledger = economy.CommittedCatchSales;
+            if (goalDay == lastReconciledDay && ledger.Count == lastReconciledSaleCount) return;
+            var sales = new System.Collections.Generic.List<PendingTurnInState>();
+            foreach (var sale in ledger)
+                if (sale.DayNumber == goalDay)
+                    sales.Add(new PendingTurnInState(sale.ItemId, TurnInKind.Catch, "",
+                        sale.SpeciesId, 0, 0, 0f, new PlayerId(0), true, 0));
+            authority.OnVerifiedCatchesSold(sales);
+            lastReconciledDay = goalDay;
+            lastReconciledSaleCount = ledger.Count;
+        }
+
         private void ReconcileSettledPublications(int orderDay)
         {
             if (media == null || authority == null) return;
