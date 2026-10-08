@@ -36,12 +36,16 @@ namespace DeepDive.World
 
         // Returns where the fish should be after deltaTime. Never returns a point outside the
         // water: when the only way forward would leave it, the fish holds position instead.
-        public Vector3 Step(Vector3 position, IReadOnlyList<Vector3> threats, float deltaTime, IWaterBounds water)
+        public Vector3 Step(Vector3 position, IReadOnlyList<Vector3> threats, float deltaTime, IWaterBounds water,
+            float activityMultiplier = 1f)
         {
             if (!IsFinite(position) || !IsFinite(deltaTime) || deltaTime <= 0f) return position;
 
             IsFleeing = TryFindNearestThreat(position, threats, tuning.FleeRadius, out var threat);
-            var speed = IsFleeing ? tuning.FleeSpeed : tuning.SwimSpeed;
+            // Activity only changes peaceful swimming; flee speed and water bounds remain unchanged.
+            var safeActivity = float.IsNaN(activityMultiplier) || float.IsInfinity(activityMultiplier)
+                ? 1f : Mathf.Clamp(activityMultiplier, 1f, 1.5f);
+            var speed = IsFleeing ? tuning.FleeSpeed : tuning.SwimSpeed * safeActivity;
             var direction = IsFleeing ? FleeDirection(position, threat) : WanderDirection(position, deltaTime, water);
             if (direction == Vector3.zero) return position;
 
