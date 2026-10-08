@@ -435,9 +435,9 @@ namespace DeepDive.P4.Tests
                 state.Add(DevelopmentIds.Home2);
                 Assert.AreEqual(EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots, EconomyManager.StorageCapacity);
 
-                // dock: vehicles cost 10% less (rounded down), the catalog price itself is unchanged
+                // dock: vehicles cost less (rounded down), the catalog price itself is unchanged
                 state.Add(DevelopmentIds.TownDock);
-                Assert.AreEqual(VehicleCatalog.MotorboatPrice - VehicleCatalog.MotorboatPrice / 10, EconomyManager.VehiclePrice(motor));
+                Assert.AreEqual(VehicleCatalog.MotorboatPrice - VehicleCatalog.MotorboatPrice * DevelopmentCatalog.DockVehicleDiscountPercent / 100, EconomyManager.VehiclePrice(motor));
                 Assert.AreEqual(VehicleCatalog.MotorboatPrice, motor.Price);
 
                 // shop: the new tube tier can be bought (and gives the next level to Mehmet's strongest-level rule)

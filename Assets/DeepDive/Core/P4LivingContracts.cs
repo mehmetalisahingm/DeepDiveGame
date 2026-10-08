@@ -85,7 +85,7 @@ namespace DeepDive.Core.Contracts
             new ContractTemplate(ContractIds.OrderBass, ContractKind.FishOrder, ContractMeasure.SpeciesItemsSold,
                 "Levrek siparisi", "4 levrek teslim et", "sea_bass", 4, 200),
             new ContractTemplate(ContractIds.OrderHeavy, ContractKind.FishOrder, ContractMeasure.GramsSold,
-                "Agir sepet", "Toplam 3 kg av teslim et", "", 3000, 160),
+                "Agir sepet", "Toplam 3 kg av teslim et", "", 3000, 120),
             new ContractTemplate(ContractIds.SponsorNewSpecies, ContractKind.VideoSponsor, ContractMeasure.PublishNewSpecies,
                 "Yeni tur sponsoru", "Daha once yayinlanmamis bir turun ilk kaydini yayinla", "", 1, 150),
             new ContractTemplate(ContractIds.SponsorEvent, ContractKind.VideoSponsor, ContractMeasure.PublishEvent,
@@ -198,7 +198,7 @@ namespace DeepDive.Core.Contracts
         // more, the equipment shop stocks one more tube tier and the harbor vendor gives a discount. One-off prices, no upkeep.
         public const int HomeStorageBonusSlots = 20;
         public const int FisherPricePercent = 10;
-        public const int DockVehicleDiscountPercent = 10;
+        public const int DockVehicleDiscountPercent = 15;
         public const string ShopUnlockedEquipmentId = "tube-3";
 
         // WORKING VALUES (balance pass).
@@ -207,7 +207,7 @@ namespace DeepDive.Core.Contracts
             new DevelopmentDefinition(DevelopmentIds.Home2, "Ev 2. seviye", "Ortak depo +20 yuva, sergi rafi", 700),
             new DevelopmentDefinition(DevelopmentIds.TownFisher, "Balikci tezgahi", "Av satisi +%10", 450),
             new DevelopmentDefinition(DevelopmentIds.TownShop, "Ekipman dukkani", "Yeni tup kademesi (Tup III)", 550),
-            new DevelopmentDefinition(DevelopmentIds.TownDock, "Iskele", "Arac fiyatlari -%10", 600)
+            new DevelopmentDefinition(DevelopmentIds.TownDock, "Iskele", "Arac fiyatlari -%15", 450)
         };
 
         public static bool TryGet(string id, out DevelopmentDefinition definition)

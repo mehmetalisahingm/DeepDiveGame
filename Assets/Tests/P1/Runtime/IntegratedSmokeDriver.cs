@@ -69,6 +69,9 @@ namespace DeepDive.P1.Lab
                 acceptReplayPaysNothing, acceptSavedOnDisk, acceptReloadClean, acceptHostDone, acceptReloadPass, acceptReloadPlayable;
             public string acceptClipId = "", acceptRecordingId = "", acceptHash = "", acceptSubject = "", acceptRegion = "", acceptCell = "", acceptBand = "";
             public long acceptBytes;
+            public string acceptSponsorTemplate = "";
+            public int acceptSponsorBonus;
+            public bool acceptSponsorOk;
             public int acceptQuality, acceptDayBefore, acceptDayAfter, acceptIncome, acceptViews, acceptFollowers, acceptBalance, acceptExploreObs;
             public string acceptReloadClipId = "", acceptReloadRecordingId = "", acceptReloadHash = "";
             public long acceptReloadBytes;
@@ -346,7 +349,7 @@ namespace DeepDive.P1.Lab
                 (!result.acceptOwner || (result.acceptFarRefused && result.acceptPublished && result.acceptDuplicateRefused)) &&
                 (result.acceptOwner || result.acceptNotOwnerRefused) &&
                 (!host || (result.acceptPlayable && result.acceptNpcQueuedBefore && result.acceptNpcWithdrawn && result.acceptNpcRefused && result.acceptNoNpcPay &&
-                    result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone));
+                    result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone && result.acceptSponsorOk));
             if (Fleet) result.passed &= result.fleetShopOpened && result.fleetTierGateRefused && result.fleetTiersBought && result.fleetVendorOpened &&
                 result.fleetMirrorOwned && result.fleetMirrorActive && result.fleetActiveSeam &&
                 (!host || (result.fleetSeeded && result.fleetMotorSeeded && result.fleetReefGateRefused && result.fleetReefSwum && result.fleetReefOnDisk && result.fleetHostSeated && result.fleetParkedRefused && result.fleetHostChecks &&
@@ -1683,6 +1686,7 @@ namespace DeepDive.P1.Lab
         private float livingStageAt, livingHostAt, livingDoneAt, livingTraceAt;
         private const int LivingSeedBalance = 5000;
         private bool livingCaptured, livingTownCaptured, livingInjected;
+        private float livingVantageAt;
 
         private static CrewRole RealRole(ulong clientId)
         {
@@ -1862,7 +1866,7 @@ namespace DeepDive.P1.Lab
                     result.livingBalanceAfterBuild = economy.SharedBalance;
                     result.livingSpendOk = economy.SharedBalance == LivingSeedBalance - spent;
                     result.livingEffectsHost = EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&
-                        DevelopmentEffects.FishPricePercentBonus == 10 && DevelopmentEffects.VehiclePriceDiscountPercent == 10 && DevelopmentEffects.ShopStockUnlocked &&
+                        DevelopmentEffects.FishPricePercentBonus == DevelopmentCatalog.FisherPricePercent && DevelopmentEffects.VehiclePriceDiscountPercent == DevelopmentCatalog.DockVehicleDiscountPercent && DevelopmentEffects.ShopStockUnlocked &&
                         // The role really reached each player's body through Mehmet's effect layer, not only the record.
                         RealRole(0) == CrewRole.Hunter && RealRole(guest.Value) == CrewRole.Carrier;
                     if (!result.livingSpendOk) result.errors.Add($"living spend balance={economy.SharedBalance} expected={LivingSeedBalance - spent}");
@@ -1947,10 +1951,24 @@ namespace DeepDive.P1.Lab
                 }
                 return;
             }
-            local.SubmitLocalInput(Vector3.zero, 0);
             result.livingTownVisuals |= VisualBuilt(DevelopmentIds.TownFisher) && VisualBuilt(DevelopmentIds.TownShop) && VisualBuilt(DevelopmentIds.TownDock);
-            if (adapter.IsAuthority && !livingTownCaptured && Arg("-p1-screenshot").Length > 0 && now - livingStageAt > 2f && result.livingTownVisuals)
-            { livingTownCaptured = true; CaptureRoom("-town"); }
+            if (!(adapter.IsAuthority && !livingTownCaptured && Arg("-p1-screenshot").Length > 0 && result.livingTownVisuals)) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            // Picture of the town row for the evidence: the host steps back from the buyer to the platform's north edge and looks at the two stalls.
+            var fisherNpc = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).FirstOrDefault(x => x.Definition.ServiceId == TownServiceCatalog.FishBuyerId);
+            var shopNpc = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).FirstOrDefault(x => x.Definition.ServiceId == TownServiceCatalog.EquipmentShopId);
+            if (fisherNpc == null || shopNpc == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var mid = (fisherNpc.WorldPosition + shopNpc.WorldPosition) * 0.5f;
+            var vantage = new Vector3(mid.x, local.transform.position.y, mid.z + 3.4f);
+            var toVantage = vantage - local.transform.position; toVantage.y = 0;
+            if (toVantage.magnitude > 0.35f && now - livingStageAt < 12f)
+            {
+                local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(toVantage.x, toVantage.z) * Mathf.Rad2Deg, 0);
+                livingVantageAt = now;
+                return;
+            }
+            AimAt(local, cam, mid + new Vector3(0f, 1.6f, 0f), out var shotYaw, out var shotPitch);
+            local.SubmitLocalInput(Vector3.zero, shotYaw, shotPitch);
+            if (now - livingVantageAt > 1.5f) { livingTownCaptured = true; CaptureRoom("-town"); }
         }
 
         // Second launch of the host on the SAME campaign file: the board, the builds and the host's role come back; nothing is paid or bought again.
@@ -2522,7 +2540,22 @@ namespace DeepDive.P1.Lab
                     result.acceptNpcWithdrawn = economy.PendingCountFor(owner, TurnInKind.Recording) == 0 && economy.IsChannelClaimed(clip.RecordingId);
                     result.acceptNpcRefused = economy.TryQueueRecordingTurnIn(new RecordingResult(clip.RecordingId, clip.DiveId, owner, clip.SubjectId,
                         clip.Quality, clip.DurationSeconds)) == PlayerActionResult.DuplicateRequest;
-                    result.acceptNoNpcPay = economy.SharedBalance == acceptBalanceBase && economy.PendingCountFor(owner, TurnInKind.Recording) == 0;
+                    // #132: the day's video sponsor reads the REAL published clip's verified manifest. Whether it completes depends on which template today's
+                    // deterministic roll picked, so the check is conditional both ways: the matching clip completes and pays once, any other leaves it open.
+                    var living = adapter.GetComponent<LivingWorldNetworkBinding>()?.Authority;
+                    if (living != null && living.Board.Sponsor.HasContract && ContractCatalog.TryGet(living.Board.Sponsor.TemplateId, out var sponsor))
+                    {
+                        var manifest = clip.ToManifest();
+                        var matches = sponsor.Measure == ContractMeasure.PublishNewSpecies ? manifest.WorldContext.FirstRecordingOfSubject
+                            : sponsor.Measure == ContractMeasure.PublishEvent ? manifest.WorldContext.Kind == RecordingSubjectKind.Event
+                            : sponsor.Measure == ContractMeasure.PublishQuality && manifest.Quality >= sponsor.Target;
+                        var done = living.Board.Sponsor.Status == ContractStatus.Completed;
+                        result.acceptSponsorTemplate = sponsor.Id;
+                        result.acceptSponsorBonus = done ? sponsor.Reward : 0;
+                        result.acceptSponsorOk = done == matches && (!done || economy.IsRewardPaid(ContractIds.RewardId(living.Board.Day, sponsor.Id)));
+                    }
+                    else result.acceptSponsorOk = true;   // no sponsor today (nothing eligible): nothing to check
+                    result.acceptNoNpcPay = economy.SharedBalance == acceptBalanceBase + result.acceptSponsorBonus && economy.PendingCountFor(owner, TurnInKind.Recording) == 0;
                     acceptHostAt = now; acceptHostStage = 2; return;
                 }
                 case 2:   // let the owner's duplicate request land, then everybody sleeps: the real gate closes the day
@@ -2545,7 +2578,7 @@ namespace DeepDive.P1.Lab
                     var income = 0;
                     foreach (var p in pubs) income += p.Income;
                     result.acceptBalance = economy.SharedBalance;
-                    result.acceptPaidOnce = pubs.Count == 1 && income > 0 && economy.SharedBalance - acceptBalanceBase == income &&
+                    result.acceptPaidOnce = pubs.Count == 1 && income > 0 && economy.SharedBalance - acceptBalanceBase == income + result.acceptSponsorBonus &&
                         engine.DayNumber == result.acceptDayBefore + 1 && !string.IsNullOrEmpty(pubs[0].SettledId);
                     result.acceptReplayPaysNothing = binding.Channel.SettleThrough(result.acceptDayBefore) == 0 && economy.SharedBalance == result.acceptBalance;
 
