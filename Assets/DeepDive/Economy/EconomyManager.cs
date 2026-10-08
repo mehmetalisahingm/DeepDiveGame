@@ -44,6 +44,8 @@ namespace DeepDive.Economy
         public event Action<string, int, int, int, bool> OnSettled;
         // A spend that was committed and saved: (spend id, credits).
         public event Action<string, int> OnSpent;
+        // Committed catch-sale evidence; only the NPC authority emits it, never the client.
+        public event Action<IReadOnlyList<PendingTurnInState>> OnVerifiedCatchesSold;
 
         public int SharedBalance { get; private set; }
         public int Revision { get; private set; }
@@ -403,6 +405,56 @@ namespace DeepDive.Economy
             return true;
         }
 
+        // P4.5: credits and development are saved in the SAME campaign write as the goal/upgrade state.
+        // Do not reuse client-supplied money or unchecked arithmetic.
+        public bool TryCreditLivingReward(string rewardId, int credits)
+        {
+            if (string.IsNullOrWhiteSpace(rewardId) || !rewardId.StartsWith("living-", StringComparison.Ordinal) ||
+                credits <= 0 || credits > int.MaxValue - SharedBalance || !_channelSettleIds.Add(rewardId)) return false;
+            var previousRevision = Revision;
+            SharedBalance += credits;
+            Revision++;
+            if (!Persist())
+            {
+                _channelSettleIds.Remove(rewardId);
+                SharedBalance -= credits;
+                Revision = previousRevision;
+                return false;
+            }
+            OnBalanceChanged?.Invoke();
+            return true;
+        }
+
+        public bool TryPurchaseLivingUpgrade(string purchaseId, int cost, Action apply, Action undo)
+        {
+            if (string.IsNullOrWhiteSpace(purchaseId) || !purchaseId.StartsWith("living-upgrade-", StringComparison.Ordinal) ||
+                cost <= 0 || SharedBalance < cost || apply == null || undo == null || DayLock.IsLocked) return false;
+            var previousRevision = Revision;
+            SharedBalance -= cost;
+            Revision++;
+            try
+            {
+                apply();
+                if (!Persist())
+                {
+                    undo();
+                    SharedBalance += cost;
+                    Revision = previousRevision;
+                    return false;
+                }
+            }
+            catch
+            {
+                undo();
+                SharedBalance += cost;
+                Revision = previousRevision;
+                throw;
+            }
+            OnSpent?.Invoke(purchaseId, cost);
+            OnBalanceChanged?.Invoke();
+            return true;
+        }
+
         public bool PersistNow() => Persist();
 
         private static bool CanHandIn(PendingItem item, PlayerId player) =>
@@ -569,6 +621,12 @@ namespace DeepDive.Economy
                 var grams = 0;
                 foreach (var item in items) { ids.Add(item.ItemId); grams += item.WeightGrams; }
                 OnSettled?.Invoke(string.Join("+", ids), items.Count, grams, earned, kind == TurnInKind.Catch);
+                if (kind == TurnInKind.Catch)
+                {
+                    var evidence = new List<PendingTurnInState>(items.Count);
+                    foreach (var item in items) evidence.Add(item.ToState());
+                    OnVerifiedCatchesSold?.Invoke(evidence);
+                }
             }
 
             _processedTurnIns[key] = result;
