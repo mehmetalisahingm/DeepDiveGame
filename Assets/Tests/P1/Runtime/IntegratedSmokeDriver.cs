@@ -449,11 +449,16 @@ namespace DeepDive.P1.Lab
                     result.p45RolesSeen |= result.clientRejoined && hostRoleOk && guestRoleOk;
             }
 
-            if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading) return;
+            if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading)
+            {
+                // The test provider must never leak an active current across scene/phase teardown.
+                if (host && p45CurrentSource != null) p45CurrentSource.Active = false;
+                return;
+            }
             var diveElapsed = Time.realtimeSinceStartup - sceneStarted;
 
             if (host && p45CurrentSource != null)
-                p45CurrentSource.Active = diveElapsed >= 8f && diveElapsed < 12f;
+                p45CurrentSource.Active = diveElapsed >= 5f && diveElapsed < 8f;
 
             var local = players.FirstOrDefault(p => p.IsOwner);
             if (local != null && !p45PingSent && diveElapsed > 4f)
@@ -466,7 +471,7 @@ namespace DeepDive.P1.Lab
                                  p.CurrentDriftVelocity.Value.magnitude > 0.1f))
                 result.p45CurrentSeen = true;
 
-            if (result.p45CurrentSeen && diveElapsed > 14f &&
+            if (result.p45CurrentSeen && diveElapsed > 9f &&
                 players.All(p => p.CurrentWarning != CrewWarningKind.LocalCurrent &&
                                  p.CurrentDriftVelocity.Value.sqrMagnitude < 0.0001f))
                 result.p45CurrentCleared = true;
