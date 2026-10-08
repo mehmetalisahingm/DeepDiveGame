@@ -125,7 +125,10 @@ namespace DeepDive.Composition
 
         private void OnVerifiedCatches(System.Collections.Generic.IReadOnlyList<PendingTurnInState> catches)
         {
-            if (IsHost && authority != null) authority.OnVerifiedCatchesSold(catches);
+            // A boundary-frame sale cannot be credited to yesterday's objective after dawn.
+            // The durable sale ledger is reconciled against its host-recorded day on the next tick.
+            if (IsHost && authority != null && day != null && authority.DayNumber == day.Engine.DayNumber)
+                authority.OnVerifiedCatchesSold(catches);
         }
 
         private void ReconcileSales(int goalDay)
