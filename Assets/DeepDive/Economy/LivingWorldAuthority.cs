@@ -214,8 +214,9 @@ namespace DeepDive.Economy
                 publication.QueuedDay != state.DayNumber || !clip.IsCommercialCandidate ||
                 clip.ClipId != publication.ClipId || clip.RecordingId != publication.RecordingId ||
                 clip.SubjectId != publication.SubjectId ||
-                !seenPublications.Add(publication.PublicationId)) return;
+                seenPublications.Contains(publication.PublicationId)) return;
             var old = Export();
+            seenPublications.Add(publication.PublicationId);
             state.SeenPublicationIds.Add(publication.PublicationId);
             var qualifies = state.SponsorId == LivingWorldCatalog.FirstSpecies &&
                             clip.WorldContext.Kind == RecordingSubjectKind.Species &&
