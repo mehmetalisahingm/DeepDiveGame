@@ -14,9 +14,10 @@ namespace DeepDive.Economy
         // v6 (P4.3-C) adds the vehicle fleet (purchased boats + active boat). Older files load as HasFleet=false: only the repaired rowboat, if any.
         // v7 (P4.4-C) adds the deep progression chain (encyclopedia -> rumor -> trace -> discovery -> boss unlock). Older files load as
         // HasProgression=false, which means the closed default: Locked, nothing counted.
-        public const int CurrentSchemaVersion = 7;
+        public const int CurrentSchemaVersion = 8;
         public const int OldestSupportedSchemaVersion = 1;
 
+        // v8 (P4.5-C): daily goals, claim ids, free host role and visible development.
         public int SchemaVersion = CurrentSchemaVersion;
         public string CampaignId = "";
         public string CheckpointId = "";
@@ -43,6 +44,8 @@ namespace DeepDive.Economy
         public List<string> FleetPurchasedBoatIds = new List<string>();
         public string FleetActiveBoatId = "";
         public DeepDive.Core.Contracts.MediaSaveData Media = new DeepDive.Core.Contracts.MediaSaveData();
+        public bool HasLiving;
+        public LivingWorldSaveData Living = new LivingWorldSaveData();
     }
 
     [Serializable]
