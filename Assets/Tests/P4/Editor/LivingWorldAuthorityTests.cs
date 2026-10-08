@@ -130,7 +130,9 @@ namespace DeepDive.Tests.P4
             Assert.IsTrue(a.BeginDay(1, "campaign"));
             var player = new PlayerId(0);
             Assert.IsFalse(a.TryUpgrade(player, LivingWorldCatalog.HouseGallery, 1, true).Accepted);
+            Assert.AreEqual(40, economy.StorageCapacity);
             Assert.IsTrue(a.TryUpgrade(player, LivingWorldCatalog.HouseArchive, 2, true).Accepted);
+            Assert.AreEqual(50, economy.StorageCapacity);
             Assert.IsFalse(a.TryUpgrade(player, LivingWorldCatalog.HouseArchive, 2, true).Accepted);
             Assert.IsTrue(a.TryUpgrade(player, LivingWorldCatalog.HouseGallery, 3, true).Accepted);
             Assert.AreEqual(2, a.HouseTier);
@@ -139,6 +141,7 @@ namespace DeepDive.Tests.P4
             Assert.IsTrue(reloaded.Restore(a.Export()));
             Assert.IsFalse(reloaded.TryUpgrade(player, LivingWorldCatalog.HouseGallery, 4, true).Accepted);
             Assert.AreEqual(2, reloaded.HouseTier);
+            Assert.AreEqual(50, economy.StorageCapacity);
         }
 
         [Test]
