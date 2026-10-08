@@ -55,6 +55,12 @@ namespace DeepDive.Network
         public readonly NetworkVariable<byte> EquippedFinsLevel = new NetworkVariable<byte>();
         public readonly NetworkVariable<byte> EquippedBagLevel = new NetworkVariable<byte>();
         public readonly NetworkVariable<byte> EquippedHarpoonLevel = new NetworkVariable<byte>();
+        public readonly NetworkVariable<byte> AssignedCrewRole = new NetworkVariable<byte>();
+        public readonly NetworkVariable<Vector3> CurrentDriftVelocity = new NetworkVariable<Vector3>();
+        public readonly NetworkVariable<byte> CurrentCrewWarning = new NetworkVariable<byte>();
+        public readonly NetworkVariable<byte> TeamPingKind = new NetworkVariable<byte>();
+        public readonly NetworkVariable<Vector3> TeamPingWorldPosition = new NetworkVariable<Vector3>();
+        public readonly NetworkVariable<double> TeamPingExpiresAt = new NetworkVariable<double>();
         public readonly NetworkVariable<ulong> LastActionRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<int> LastActionResult = new NetworkVariable<int>();
         public readonly NetworkVariable<byte> LastActionKind = new NetworkVariable<byte>();
@@ -63,6 +69,9 @@ namespace DeepDive.Network
         public LocomotionMode CurrentLocomotion => (LocomotionMode)Locomotion.Value;
         public HeldEquipmentMode CurrentHeldEquipment => (HeldEquipmentMode)HeldEquipment.Value;
         public CameraTier CurrentCameraTier => (CameraTier)EquippedCameraTier.Value;
+        public CrewRole CurrentCrewRole => CrewRoleEffectRules.IsValid((CrewRole)AssignedCrewRole.Value)
+            ? (CrewRole)AssignedCrewRole.Value : CrewRole.None;
+        public CrewWarningKind CurrentWarning => (CrewWarningKind)CurrentCrewWarning.Value;
         public PlayerEquipmentCapabilities EquipmentCapabilities => new PlayerEquipmentCapabilities(
             CurrentCameraTier, EquippedFinsLevel.Value, EquippedBagLevel.Value, EquippedHarpoonLevel.Value);
         public PlayerPresentationState PresentationState =>
@@ -128,6 +137,12 @@ namespace DeepDive.Network
                 EquippedFinsLevel.Value = 0;
                 EquippedBagLevel.Value = 0;
                 EquippedHarpoonLevel.Value = 0;
+                AssignedCrewRole.Value = (byte)CrewRole.None;
+                CurrentDriftVelocity.Value = Vector3.zero;
+                CurrentCrewWarning.Value = (byte)CrewWarningKind.None;
+                TeamPingKind.Value = (byte)CrewPingKind.None;
+                TeamPingWorldPosition.Value = Vector3.zero;
+                TeamPingExpiresAt.Value = 0d;
                 environmentLocomotion = EnvironmentLocomotion.Land;
                 externalEnvironmentBound = false;
                 cameraOwned = false;
@@ -187,6 +202,10 @@ namespace DeepDive.Network
                     if (Input.GetKeyDown(KeyCode.F)) SubmitServiceInteractionLocal();
                     if (Input.GetKeyDown(KeyCode.Alpha1)) SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
                     if (Input.GetKeyDown(KeyCode.Alpha2)) SetHeldEquipmentLocal(HeldEquipmentMode.Camera);
+                    // G is reserved for boat disembark; use Y for interest pings.
+                    if (Input.GetKeyDown(KeyCode.Y)) SubmitTeamPingLocal(CrewPingKind.Interest);
+                    if (Input.GetKeyDown(KeyCode.H)) SubmitTeamPingLocal(CrewPingKind.Danger);
+                    if (Input.GetKeyDown(KeyCode.T)) SubmitTeamPingLocal(CrewPingKind.Return);
                 }
             }
 
@@ -293,7 +312,9 @@ namespace DeepDive.Network
             HeldEquipment.Value = (byte)PlayerPresentationRules.ResolveHeldEquipment(
                 session.DiveActive, Passive.Value, requestedEquipment, RecordingPresentation.Value, cameraOwned);
 
-            vitals.Tick(Time.fixedDeltaTime,
+            var oxygenSeconds = Time.fixedDeltaTime *
+                CrewRoleEffectRules.ResolveOxygenDrainMultiplier(CurrentCrewRole);
+            vitals.Tick(oxygenSeconds,
                 session.DiveActive && PlayerPresentationRules.DrainsOxygen(locomotion));
             PublishVitals();
 
@@ -304,6 +325,7 @@ namespace DeepDive.Network
             var velocity = move * (swimming ? effectiveSwimSpeed : walkSpeed);
             if (swimming)
             {
+                velocity += CrewEnvironmentRules.SanitizeCurrent(CurrentDriftVelocity.Value);
                 gravityVelocity = 0;
             }
             else if (locomotion == LocomotionMode.Land)
@@ -333,6 +355,72 @@ namespace DeepDive.Network
         {
             if (!IsServer) return;
             externalEnvironmentBound = false;
+        }
+
+        // Mert owns role selection/save/UI. This is the host-only effect seam he calls after
+        // validating a town role choice or restoring the saved role. It replaces the role; it
+        // never adds a modifier to the previous one.
+        public bool ApplyCrewRoleServer(CrewRole role)
+        {
+            if (!IsServer || !CrewRoleEffectRules.IsValid(role)) return false;
+            if (session != null && session.DiveActive) return false;
+            var next = (byte)role;
+            if (AssignedCrewRole.Value == next) return false;
+            AssignedCrewRole.Value = next;
+            return true;
+        }
+
+        // Utku owns the current/weather read model. Composition samples it on the host and writes
+        // only this sanitized result; clients never author a drift vector or warning.
+        public void SetCrewEnvironmentServer(Vector3 driftMetresPerSecond, CrewWarningKind warning)
+        {
+            if (!IsServer) return;
+            CurrentDriftVelocity.Value = CrewEnvironmentRules.SanitizeCurrent(driftMetresPerSecond);
+            CurrentCrewWarning.Value = warning == CrewWarningKind.LocalCurrent ||
+                                       warning == CrewWarningKind.Windy ||
+                                       warning == CrewWarningKind.ReturnRecommended
+                ? (byte)warning
+                : (byte)CrewWarningKind.None;
+        }
+
+        public void ClearCrewEnvironmentServer() =>
+            SetCrewEnvironmentServer(Vector3.zero, CrewWarningKind.None);
+
+        public void SubmitTeamPingLocal(CrewPingKind kind)
+        {
+            if (!IsSpawned || !IsOwner || kind == CrewPingKind.None) return;
+            if (IsServer) HandleTeamPing(kind);
+            else TeamPingRpc((byte)kind);
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        private void TeamPingRpc(byte kind) => HandleTeamPing((CrewPingKind)kind);
+
+        private void HandleTeamPing(CrewPingKind kind)
+        {
+            if (!IsServer || session == null || !session.DiveActive ||
+                (kind != CrewPingKind.Return && kind != CrewPingKind.Interest && kind != CrewPingKind.Danger))
+                return;
+
+            // Position is the server transform. No client-supplied coordinates exist in this path.
+            TeamPingKind.Value = (byte)kind;
+            TeamPingWorldPosition.Value = transform.position;
+            var lifetime = CrewRoleEffectRules.ResolvePingLifetime(20f, CurrentCrewRole);
+            TeamPingExpiresAt.Value = NetworkManager.ServerTime.Time + lifetime;
+        }
+
+        public bool TryGetActiveTeamPing(out CrewPingKind kind, out Vector3 worldPosition)
+        {
+            kind = (CrewPingKind)TeamPingKind.Value;
+            worldPosition = TeamPingWorldPosition.Value;
+            if (kind == CrewPingKind.None || NetworkManager == null || !NetworkManager.IsListening ||
+                TeamPingExpiresAt.Value <= NetworkManager.ServerTime.Time)
+            {
+                kind = CrewPingKind.None;
+                worldPosition = default;
+                return false;
+            }
+            return true;
         }
 
         public void SetSeatedServer(bool seated)
@@ -399,7 +487,9 @@ namespace DeepDive.Network
         {
             if (!IsServer) return;
             var kind = PlayerActionKind.Harpoon;
-            var effectiveCooldown = P4EquipmentEffectRules.ResolveHarpoonCooldown(harpoonCooldown, EquippedHarpoonLevel.Value);
+            var effectiveCooldown = CrewRoleEffectRules.ResolveHarpoonCooldown(
+                P4EquipmentEffectRules.ResolveHarpoonCooldown(harpoonCooldown, EquippedHarpoonLevel.Value),
+                CurrentCrewRole);
             var result = actionGate.TryAccept(requestId, kind,
                 Time.realtimeSinceStartupAsDouble, effectiveCooldown);
             if (result != PlayerActionResult.Accepted)
@@ -417,7 +507,9 @@ namespace DeepDive.Network
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
             var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
-            var effectiveRange = P4EquipmentEffectRules.ResolveHarpoonRange(harpoonRange, EquippedHarpoonLevel.Value);
+            var effectiveRange = CrewRoleEffectRules.ResolveHarpoonRange(
+                P4EquipmentEffectRules.ResolveHarpoonRange(harpoonRange, EquippedHarpoonLevel.Value),
+                CurrentCrewRole);
             if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, effectiveRange), ~0, QueryTriggerInteraction.Ignore))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
@@ -425,7 +517,9 @@ namespace DeepDive.Network
             }
 
             var target = FindTarget<IHarpoonTarget>(hit.collider);
-            var effectiveDamage = P4EquipmentEffectRules.ResolveHarpoonDamage(harpoonDamage, EquippedHarpoonLevel.Value);
+            var effectiveDamage = CrewRoleEffectRules.ResolveHarpoonDamage(
+                P4EquipmentEffectRules.ResolveHarpoonDamage(harpoonDamage, EquippedHarpoonLevel.Value),
+                CurrentCrewRole);
             result = target == null
                 ? PlayerActionResult.InvalidTarget
                 : target.TryApplyHarpoonHit(new HarpoonHit(new PlayerId(OwnerClientId), requestId, Mathf.Max(0f, effectiveDamage)));
@@ -699,6 +793,16 @@ namespace DeepDive.Network
             var healthRatio = Mathf.Clamp01(Health.Value / Mathf.Max(1f, maxHealth));
             GUI.Box(new Rect(20, 20, 230, 24), $"O2 {Oxygen.Value:0}/{capacity:0} ({oxygenRatio * 100f:0}%)");
             GUI.Box(new Rect(20, 48, 230, 24), $"HEALTH {Health.Value:0}/{maxHealth:0} ({healthRatio * 100f:0}%)");
+            var lowOxygenWarning = !Passive.Value && Oxygen.Value > 0f &&
+                                   Oxygen.Value <= capacity * lowOxygenFraction;
+            if (lowOxygenWarning)
+                GUI.Box(new Rect(20, 78, 230, 28), "LOW OXYGEN - RETURN");
+            if (CurrentWarning != CrewWarningKind.None)
+                GUI.Box(new Rect(20, lowOxygenWarning ? 110 : 76, 230, 24),
+                    CurrentWarning == CrewWarningKind.LocalCurrent
+                        ? "UYARI: AKINTI"
+                        : CurrentWarning == CrewWarningKind.Windy ? "UYARI: RUZGARLI"
+                        : "UYARI: DONUS ONERILI");
 
             var centerX = Screen.width * 0.5f;
             var centerY = Screen.height * 0.5f;
@@ -711,8 +815,6 @@ namespace DeepDive.Network
             if (Time.unscaledTime < actionMessageUntil && actionCue == PlayerFeedbackCue.HarpoonHit)
                 GUI.Label(new Rect(centerX - 8, centerY - 12, 30, 30), "X");
 
-            if (!Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= capacity * lowOxygenFraction)
-                GUI.Box(new Rect(20, 78, 230, 28), "LOW OXYGEN - RETURN");
             if (Passive.Value)
                 GUI.Box(new Rect(centerX - 150, centerY + 45, 300, 40), "PASSIVE - DIVE ENDED FOR YOU");
             if (Time.unscaledTime < actionMessageUntil && !string.IsNullOrEmpty(actionMessage))
