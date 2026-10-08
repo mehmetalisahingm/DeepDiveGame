@@ -51,7 +51,7 @@ namespace DeepDive.Living
         private readonly List<string> usedEvidence = new List<string>();
         private readonly HashSet<string> usedEvidenceSet = new HashSet<string>(StringComparer.Ordinal);
         private readonly List<string> development = new List<string>();
-        private readonly Dictionary<PlayerId, PlayerRole> roles = new Dictionary<PlayerId, PlayerRole>();
+        private readonly Dictionary<PlayerId, CrewRole> roles = new Dictionary<PlayerId, CrewRole>();
         private int revision;
         private int roleRevision;
 
@@ -250,15 +250,15 @@ namespace DeepDive.Living
 
         // ---- roles ------------------------------------------------------------------------------------------------------
 
-        public PlayerRole RoleOf(PlayerId player) => roles.TryGetValue(player, out var role) ? role : PlayerRole.None;
+        public CrewRole RoleOf(PlayerId player) => roles.TryGetValue(player, out var role) ? role : CrewRole.None;
 
         // Free, one per player. The caller (composition) has already checked that the player is in town. Choosing the role one already has is
         // AlreadyProcessed; choosing None clears it. Only the host's role is written to the file (D06).
-        public TransactionResult TrySelectRole(PlayerId player, PlayerRole role, ulong requestId)
+        public TransactionResult TrySelectRole(PlayerId player, CrewRole role, ulong requestId)
         {
             var key = (player, requestId, OpRole);
             if (processed.TryGetValue(key, out var replayed)) return replayed;
-            if (!RoleIds.IsValid(role)) return Cache(key, TransactionResult.Reject(requestId, "InvalidTarget", revision));
+            if (!CrewRoleEffectRules.IsValid(role)) return Cache(key, TransactionResult.Reject(requestId, "InvalidTarget", revision));
             if (RoleOf(player) == role) return TransactionResult.Reject(requestId, "AlreadyProcessed", revision);
 
             var previous = RoleOf(player);
@@ -277,9 +277,9 @@ namespace DeepDive.Living
             return result;
         }
 
-        private void Apply(PlayerId player, PlayerRole role)
+        private void Apply(PlayerId player, CrewRole role)
         {
-            if (role == PlayerRole.None) roles.Remove(player);
+            if (role == CrewRole.None) roles.Remove(player);
             else roles[player] = role;
         }
 
@@ -292,7 +292,7 @@ namespace DeepDive.Living
             OnChanged?.Invoke();
         }
 
-        public IReadOnlyDictionary<PlayerId, PlayerRole> Roles => roles;
+        public IReadOnlyDictionary<PlayerId, CrewRole> Roles => roles;
 
         private TransactionResult Cache((PlayerId, ulong, byte) key, TransactionResult result)
         {
@@ -332,8 +332,8 @@ namespace DeepDive.Living
             if (data.DevelopmentIds != null)
                 foreach (var id in data.DevelopmentIds)
                     if (DevelopmentCatalog.TryGet(id, out _) && !development.Contains(id)) development.Add(id);
-            var hostRole = (PlayerRole)data.HostRole;
-            if (RoleIds.IsValid(hostRole) && hostRole != PlayerRole.None) roles[new PlayerId(0)] = hostRole;
+            var hostRole = (CrewRole)data.HostRole;
+            if (CrewRoleEffectRules.IsValid(hostRole) && hostRole != CrewRole.None) roles[new PlayerId(0)] = hostRole;
             revision++; roleRevision++;
             OnChanged?.Invoke();
             return true;

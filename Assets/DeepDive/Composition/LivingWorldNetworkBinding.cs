@@ -32,7 +32,7 @@ namespace DeepDive.Composition
 
     // P4.5-C (#132) composition root for the daily orders/sponsors, the home/town development and the light roles. It owns no rule: those
     // are LivingWorldAuthority's, the money is EconomyManager's. It (a) builds the authority while this machine is the host and binds the
-    // seams the other systems read (DevelopmentEffects, PlayerRoles, OrderWorld default), (b) feeds it the HOST-verified events (a settled
+    // seams the other systems read (DevelopmentEffects, OrderWorld default) and applies the chosen roles through Mehmet's CrewRoleEffectBinding, (b) feeds it the HOST-verified events (a settled
     // fish hand-in, an accepted publication) and the day, (c) takes build/role requests from any process, checks on the HOST that the
     // sender is a real player standing at the home PC outside a dive, and answers, and (d) mirrors the state to every process.
     [DisallowMultipleComponent]
@@ -64,7 +64,7 @@ namespace DeepDive.Composition
         private EconomyMoney moneyAdapter;
         private DefaultOrderWorld defaultWorld;
         private Func<DevelopmentState> developmentProvider;
-        private Func<PlayerId, PlayerRole> roleProvider;
+        private CrewRoleEffectBinding roleEffects;
         private bool registered, registeredAsServer, hostBound;
         private int sentRevision = -1;
         private double nextDayPoll;
@@ -83,10 +83,10 @@ namespace DeepDive.Composition
 
         public static DevelopmentState Development => new DevelopmentState(Mirrored.Development, Mirrored.Revision);
 
-        public static PlayerRole RoleOfClient(ulong clientId)
+        public static CrewRole RoleOfClient(ulong clientId)
         {
             var i = Mirrored.RoleClients.IndexOf(clientId);
-            return i >= 0 && i < Mirrored.RoleValues.Count ? (PlayerRole)Mirrored.RoleValues[i] : PlayerRole.None;
+            return i >= 0 && i < Mirrored.RoleValues.Count ? (CrewRole)Mirrored.RoleValues[i] : CrewRole.None;
         }
 
         private static ContractState Slot(string templateId, byte status, int progress)
@@ -132,6 +132,7 @@ namespace DeepDive.Composition
             {
                 nextDayPoll = now + DayPollInterval;
                 EnsureToday();
+                ApplyRoles();
             }
             if (authority.Revision != sentRevision)
             {
@@ -158,9 +159,7 @@ namespace DeepDive.Composition
             store.Living = authority;   // hands the authority what the campaign file already held (absent = the empty default)
 
             developmentProvider = () => authority.Development;
-            roleProvider = authority.RoleOf;
             DevelopmentEffects.Bind(developmentProvider);
-            PlayerRoles.Bind(roleProvider, () => authority.RoleRevision);
             if (OrderWorld.Current == null)
             {
                 defaultWorld = new DefaultOrderWorld(media);
@@ -187,14 +186,30 @@ namespace DeepDive.Composition
                 manager.OnClientConnectedCallback -= OnClientConnected;
             }
             DevelopmentEffects.Unbind(developmentProvider);
-            PlayerRoles.Unbind(roleProvider);
             if (defaultWorld != null) { OrderWorld.Unbind(defaultWorld); defaultWorld = null; }
             if (store != null && ReferenceEquals(store.Living, authority)) store.Living = null;
             authority = null;
             developmentProvider = null;
-            roleProvider = null;
             hostBound = false;
             sentRevision = -1;
+        }
+
+        // The chosen roles reach the players through Mehmet's effect layer (TryApplyRoleServer: replacement-only, recomputed from the base value, so a
+        // repeat can never stack). Reconciling every poll covers a restore, a respawn (his player resets to None) and a rejoin; it never acts in a dive.
+        private void ApplyRoles()
+        {
+            if (!hostBound) return;
+            if (roleEffects == null) roleEffects = GetComponent<CrewRoleEffectBinding>();
+            if (roleEffects == null || adapter.Session.State.Phase == SessionPhase.Dive) return;
+            foreach (var pair in manager.ConnectedClients)
+            {
+                if (pair.Value.PlayerObject == null) continue;
+                var diver = pair.Value.PlayerObject.GetComponent<NetworkPlayer>();
+                if (diver == null || !diver.IsSpawned || !diver.IsServer) continue;
+                var player = new PlayerId(pair.Key);
+                var desired = authority.RoleOf(player);
+                if (diver.CurrentCrewRole != desired) roleEffects.TryApplyRoleServer(player, desired);
+            }
         }
 
         private void EnsureToday()
@@ -272,9 +287,12 @@ namespace DeepDive.Composition
                     if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", authority.Revision);
                     return authority.TryBuildDevelopment(player, arg, requestId);
                 case KindRole:
-                    return int.TryParse(arg, out var role) && role >= 0 && role <= byte.MaxValue
-                        ? authority.TrySelectRole(player, (PlayerRole)role, requestId)
-                        : TransactionResult.Reject(requestId, "InvalidTarget", authority.Revision);
+                {
+                    if (!int.TryParse(arg, out var role) || role < 0 || role > byte.MaxValue) return TransactionResult.Reject(requestId, "InvalidTarget", authority.Revision);
+                    var chosen = authority.TrySelectRole(player, (CrewRole)role, requestId);
+                    if (chosen.Accepted) ApplyRoles();   // the effect layer sees the new role at once, not a poll later
+                    return chosen;
+                }
                 default:
                     return TransactionResult.Reject(requestId, "InvalidTarget", authority.Revision);
             }
@@ -284,7 +302,7 @@ namespace DeepDive.Composition
 
         public static ulong RequestBuild(string developmentId) => Request(KindBuild, developmentId);
 
-        public static ulong RequestRole(PlayerRole role) => Request(KindRole, ((int)role).ToString());
+        public static ulong RequestRole(CrewRole role) => Request(KindRole, ((int)role).ToString());
 
         private static ulong Request(byte kind, string arg)
         {
@@ -370,17 +388,14 @@ namespace DeepDive.Composition
             {
                 messages.RegisterNamedMessageHandler(ResultMessage, ReceiveResult);
                 messages.RegisterNamedMessageHandler(MirrorMessage, ReceiveMirror);
-                // A guest has no authority: its reads (UI, role effects) follow the host's mirror.
+                // A guest has no authority: its reads (UI) follow the host's mirror.
                 clientDevelopment = () => Development;
-                clientRoles = id => RoleOfClient(id.Value);
                 DevelopmentEffects.Bind(clientDevelopment);
-                PlayerRoles.Bind(clientRoles, () => Mirrored.Revision);
             }
             registered = true;
         }
 
         private Func<DevelopmentState> clientDevelopment;
-        private Func<PlayerId, PlayerRole> clientRoles;
 
         private void Unregister()
         {
@@ -395,7 +410,6 @@ namespace DeepDive.Composition
                 }
             }
             if (clientDevelopment != null) { DevelopmentEffects.Unbind(clientDevelopment); clientDevelopment = null; }
-            if (clientRoles != null) { PlayerRoles.Unbind(clientRoles); clientRoles = null; }
             registered = false;
             registeredAsServer = false;
             HasMirror = false;

@@ -1684,6 +1684,12 @@ namespace DeepDive.P1.Lab
         private const int LivingSeedBalance = 5000;
         private bool livingCaptured, livingTownCaptured, livingInjected;
 
+        private static CrewRole RealRole(ulong clientId)
+        {
+            var p = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(x => x.IsSpawned && x.OwnerClientId == clientId);
+            return p != null ? p.CurrentCrewRole : CrewRole.None;
+        }
+
         private static bool VisualBuilt(string id)
         {
             var root = GameObject.Find("P45_Development_" + id);
@@ -1784,11 +1790,11 @@ namespace DeepDive.P1.Lab
                 case 32:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     result.livingDuplicateRefused = !ok && reason == "AlreadyProcessed";
-                    livingAwait = LivingWorldNetworkBinding.RequestRole(PlayerRole.Cameraman); livingStage = 33; return;
+                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.CameraOperator); livingStage = 33; return;
                 case 33:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     if (!ok) result.errors.Add("guest role refused: " + reason);
-                    livingAwait = LivingWorldNetworkBinding.RequestRole(PlayerRole.Carrier); livingStage = 34; return;
+                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.Carrier); livingStage = 34; return;
                 case 34:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     if (!ok) result.errors.Add("guest role change refused: " + reason);
@@ -1808,7 +1814,7 @@ namespace DeepDive.P1.Lab
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     result.livingBuildOk = ok;
                     if (!ok) result.errors.Add("host dock refused: " + reason);
-                    livingAwait = LivingWorldNetworkBinding.RequestRole(PlayerRole.Hunter); livingStage = 54; return;
+                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.Hunter); livingStage = 54; return;
                 case 54:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     if (!ok) result.errors.Add("host role refused: " + reason);
@@ -1819,7 +1825,7 @@ namespace DeepDive.P1.Lab
                     if (!DevelopmentIds.All.All(dev.Owns)) return;
                     var hostRole = LivingWorldNetworkBinding.RoleOfClient(0);
                     var guestRole = LivingWorldNetworkBinding.RoleOfClient(adapter.IsAuthority ? guestId : me);
-                    if (hostRole != PlayerRole.Hunter || guestRole != PlayerRole.Carrier) return;
+                    if (hostRole != CrewRole.Hunter || guestRole != CrewRole.Carrier) return;
                     result.livingRolesOk = true;
                     LivingStep(90); return;
                 }
@@ -1848,16 +1854,17 @@ namespace DeepDive.P1.Lab
                 }
                 case 1:
                 {
-                    if (!DevelopmentIds.All.All(living.Development.Owns) || living.RoleOf(new PlayerId(0)) != PlayerRole.Hunter) return;
+                    if (!DevelopmentIds.All.All(living.Development.Owns) || living.RoleOf(new PlayerId(0)) != CrewRole.Hunter) return;
                     var guest = adapter.Session.Roster.Keys.FirstOrDefault(k => k.Value != 0);
-                    if (living.RoleOf(guest) != PlayerRole.Carrier) return;
+                    if (living.RoleOf(guest) != CrewRole.Carrier) return;
                     var spent = 0;
                     foreach (var d in DevelopmentCatalog.All) spent += d.Price;
                     result.livingBalanceAfterBuild = economy.SharedBalance;
                     result.livingSpendOk = economy.SharedBalance == LivingSeedBalance - spent;
                     result.livingEffectsHost = EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&
                         DevelopmentEffects.FishPricePercentBonus == 10 && DevelopmentEffects.VehiclePriceDiscountPercent == 10 && DevelopmentEffects.ShopStockUnlocked &&
-                        PlayerRoles.RoleOf(new PlayerId(0)) == PlayerRole.Hunter && PlayerRoles.RoleOf(guest) == PlayerRole.Carrier;
+                        // The role really reached each player's body through Mehmet's effect layer, not only the record.
+                        RealRole(0) == CrewRole.Hunter && RealRole(guest.Value) == CrewRole.Carrier;
                     if (!result.livingSpendOk) result.errors.Add($"living spend balance={economy.SharedBalance} expected={LivingSeedBalance - spent}");
                     livingHostAt = now;
                     livingHostStage = 2; return;
@@ -1904,11 +1911,11 @@ namespace DeepDive.P1.Lab
 
                     var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
                     result.livingSavedOnDisk = disk.HasLiving && disk.SchemaVersion == EconomySaveData.CurrentSchemaVersion && disk.Living.DevelopmentIds.Count == 4 &&
-                        disk.Living.HostRole == (byte)PlayerRole.Hunter && disk.Living.OrderStatus == (byte)ContractStatus.Completed && disk.RewardIds.Contains(ContractIds.RewardId(board.Day, template.Id)) &&
+                        disk.Living.HostRole == (byte)CrewRole.Hunter && disk.Living.OrderStatus == (byte)ContractStatus.Completed && disk.RewardIds.Contains(ContractIds.RewardId(board.Day, template.Id)) &&
                         disk.SharedBalance == economy.SharedBalance;
                     var balance = economy.SharedBalance;
                     result.livingReloadClean = store.LoadNow() && living.Development.OwnedIds.Count == 4 && living.Board.Order.Status == ContractStatus.Completed &&
-                        economy.SharedBalance == balance && !living.EnsureDay(board.Day, 7) && living.RoleOf(new PlayerId(0)) == PlayerRole.Hunter;
+                        economy.SharedBalance == balance && !living.EnsureDay(board.Day, 7) && living.RoleOf(new PlayerId(0)) == CrewRole.Hunter;
                     livingDoneAt = now; result.livingHostDone = true; livingHostStage = 90; return;
                 }
             }
@@ -1947,8 +1954,11 @@ namespace DeepDive.P1.Lab
         }
 
         // Second launch of the host on the SAME campaign file: the board, the builds and the host's role come back; nothing is paid or bought again.
+        private float started0 = -1f;
+
         private bool HostLivingReload()
         {
+            if (started0 < 0f) started0 = Time.realtimeSinceStartup;
             var binding = adapter.GetComponent<LivingWorldNetworkBinding>();
             var economy = adapter.GetComponent<EconomyManager>();
             var living = binding != null ? binding.Authority : null;
@@ -1956,17 +1966,19 @@ namespace DeepDive.P1.Lab
             var board = living.Board;
             if (board.Day == 0) return false;
             var host = new PlayerId(0);
+            // The restored role must reach the reopened player's body through the effect layer (a respawned player starts without one).
+            if (RealRole(0) != CrewRole.Hunter && Time.realtimeSinceStartup - started0 < 12f) return false;
             result.livingReloadDay = board.Day;
             result.livingReloadBalance = economy.SharedBalance;
             result.livingReloadOrderStatus = board.Order.Status.ToString();
             var before = economy.SharedBalance;
             // The reopened session is on day 1 again only if the file said so: the board for THAT day must be exactly what was saved (not re-rolled).
             var dayState = DayLock.StateProvider();
-            result.livingReloadPass = DevelopmentIds.All.All(living.Development.Owns) && living.RoleOf(host) == PlayerRole.Hunter &&
-                board.Order.Status == ContractStatus.Completed && dayState.DayNumber == board.Day &&
+            result.livingReloadPass = DevelopmentIds.All.All(living.Development.Owns) && living.RoleOf(host) == CrewRole.Hunter &&
+                board.Order.Status == ContractStatus.Completed && dayState.DayNumber == board.Day && RealRole(0) == CrewRole.Hunter &&
                 EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&
                 living.TryBuildDevelopment(host, DevelopmentIds.TownFisher, 99001).ReasonCode == "AlreadyProcessed" && !living.EnsureDay(board.Day, 7) &&
-                economy.SharedBalance == before && living.RoleOf(new PlayerId(1)) == PlayerRole.None;
+                economy.SharedBalance == before && living.RoleOf(new PlayerId(1)) == CrewRole.None;
             result.passed = result.livingReloadPass && result.errors.Count == 0;
             return true;
         }

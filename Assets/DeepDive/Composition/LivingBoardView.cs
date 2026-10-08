@@ -65,12 +65,12 @@ namespace DeepDive.Composition
             }
 
             y += 4f;
-            GUI.Label(new Rect(x, y, Width - 20f, 18f), $"ROL (ucretsiz, PC'de): {RoleIds.Label(LivingWorldNetworkBinding.RoleOfClient(me))}");
+            GUI.Label(new Rect(x, y, Width - 20f, 18f), $"ROL (ucretsiz, PC'de): {CrewRoleLabels.Label(LivingWorldNetworkBinding.RoleOfClient(me))}");
             y += 20f;
             var bx = x;
-            foreach (var role in new[] { PlayerRole.Cameraman, PlayerRole.Hunter, PlayerRole.Explorer, PlayerRole.Carrier })
+            foreach (var role in new[] { CrewRole.CameraOperator, CrewRole.Hunter, CrewRole.Explorer, CrewRole.Carrier })
             {
-                if (GUI.Button(new Rect(bx, y, 74f, 20f), RoleIds.Label(role))) awaiting = LivingWorldNetworkBinding.RequestRole(role);
+                if (GUI.Button(new Rect(bx, y, 74f, 20f), CrewRoleLabels.Label(role))) awaiting = LivingWorldNetworkBinding.RequestRole(role);
                 bx += 78f;
             }
             y += 24f;

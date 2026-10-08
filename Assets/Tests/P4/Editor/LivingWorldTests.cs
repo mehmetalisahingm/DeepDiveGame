@@ -484,58 +484,50 @@ namespace DeepDive.P4.Tests
         {
             var before = economy.SharedBalance;
             var revision = living.RoleRevision;
-            Assert.AreEqual(PlayerRole.None, living.RoleOf(Host));
-            Assert.IsTrue(living.TrySelectRole(Host, PlayerRole.Hunter, request++).Accepted);
-            Assert.AreEqual(PlayerRole.Hunter, living.RoleOf(Host));
+            Assert.AreEqual(CrewRole.None, living.RoleOf(Host));
+            Assert.IsTrue(living.TrySelectRole(Host, CrewRole.Hunter, request++).Accepted);
+            Assert.AreEqual(CrewRole.Hunter, living.RoleOf(Host));
             Assert.AreEqual(before, economy.SharedBalance, "choosing a role costs nothing");
             Assert.AreEqual(revision + 1, living.RoleRevision);
 
-            Assert.AreEqual("AlreadyProcessed", living.TrySelectRole(Host, PlayerRole.Hunter, request++).ReasonCode);
+            Assert.AreEqual("AlreadyProcessed", living.TrySelectRole(Host, CrewRole.Hunter, request++).ReasonCode);
             Assert.AreEqual(revision + 1, living.RoleRevision, "a no-change request does not trigger a recompute");
 
-            Assert.IsTrue(living.TrySelectRole(Host, PlayerRole.Carrier, request++).Accepted);
-            Assert.AreEqual(PlayerRole.Carrier, living.RoleOf(Host), "one role per player: the new one REPLACES the old");
-            Assert.IsTrue(living.TrySelectRole(Guest, PlayerRole.Carrier, request++).Accepted, "two players may share a role");
-            Assert.AreEqual(PlayerRole.Carrier, living.RoleOf(Host));
-            Assert.IsTrue(living.TrySelectRole(Host, PlayerRole.None, request++).Accepted, "no role is a valid choice: nothing is locked behind a role");
-            Assert.AreEqual(PlayerRole.None, living.RoleOf(Host));
-            Assert.AreEqual("InvalidTarget", living.TrySelectRole(Host, (PlayerRole)9, request++).ReasonCode);
+            Assert.IsTrue(living.TrySelectRole(Host, CrewRole.Carrier, request++).Accepted);
+            Assert.AreEqual(CrewRole.Carrier, living.RoleOf(Host), "one role per player: the new one REPLACES the old");
+            Assert.IsTrue(living.TrySelectRole(Guest, CrewRole.Carrier, request++).Accepted, "two players may share a role");
+            Assert.AreEqual(CrewRole.Carrier, living.RoleOf(Host));
+            Assert.IsTrue(living.TrySelectRole(Host, CrewRole.None, request++).Accepted, "no role is a valid choice: nothing is locked behind a role");
+            Assert.AreEqual(CrewRole.None, living.RoleOf(Host));
+            Assert.AreEqual("InvalidTarget", living.TrySelectRole(Host, (CrewRole)9, request++).ReasonCode);
         }
 
         [Test]
         public void ReplayedRoleRequestsAreIdempotentAndALeavingPlayerTakesTheRoleAway()
         {
             var id = request++;
-            Assert.IsTrue(living.TrySelectRole(Guest, PlayerRole.Explorer, id).Accepted);
+            Assert.IsTrue(living.TrySelectRole(Guest, CrewRole.Explorer, id).Accepted);
             var revision = living.RoleRevision;
-            Assert.IsTrue(living.TrySelectRole(Guest, PlayerRole.Explorer, id).Accepted, "same request id: cached answer");
+            Assert.IsTrue(living.TrySelectRole(Guest, CrewRole.Explorer, id).Accepted, "same request id: cached answer");
             Assert.AreEqual(revision, living.RoleRevision);
 
             living.ForgetPlayer(Guest);
-            Assert.AreEqual(PlayerRole.None, living.RoleOf(Guest), "a rejoining guest starts without a role: no inherited or doubled bonus");
+            Assert.AreEqual(CrewRole.None, living.RoleOf(Guest), "a rejoining guest starts without a role: no inherited or doubled bonus");
             Assert.AreEqual(revision + 1, living.RoleRevision);
             living.ForgetPlayer(Host);
             Assert.AreEqual(revision + 1, living.RoleRevision, "the host's role is not dropped by a (non-)disconnect call");
         }
 
         [Test]
-        public void TheRoleSeamReadsTheAuthorityAndOnlyTheHostsRoleIsSaved()
+        public void OnlyTheHostsRoleIsSavedAndTheEffectLayerSeesTheAuthoritysRoles()
         {
-            Func<PlayerId, PlayerRole> roleOf = living.RoleOf;
-            PlayerRoles.Bind(roleOf, () => living.RoleRevision);
-            try
-            {
-                living.TrySelectRole(Host, PlayerRole.Cameraman, request++);
-                living.TrySelectRole(Guest, PlayerRole.Hunter, request++);
-                Assert.AreEqual(PlayerRole.Cameraman, PlayerRoles.RoleOf(Host));
-                Assert.AreEqual(PlayerRole.Hunter, PlayerRoles.RoleOf(Guest));
-                Assert.AreEqual(PlayerRole.None, PlayerRoles.RoleOf(Guest2));
-            }
-            finally { PlayerRoles.Unbind(roleOf); }
-            Assert.AreEqual(PlayerRole.None, PlayerRoles.RoleOf(Host), "unbound = no role");
-
+            living.TrySelectRole(Host, CrewRole.CameraOperator, request++);
+            living.TrySelectRole(Guest, CrewRole.Hunter, request++);
+            Assert.AreEqual(CrewRole.CameraOperator, living.Roles[Host]);
+            Assert.AreEqual(CrewRole.Hunter, living.Roles[Guest]);
+            Assert.IsFalse(living.Roles.ContainsKey(Guest2));
             var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(path));
-            Assert.AreEqual((byte)PlayerRole.Cameraman, disk.Living.HostRole);
+            Assert.AreEqual((byte)CrewRole.CameraOperator, disk.Living.HostRole, "D06: only the host's role is written");
         }
 
         // ---- save / load ------------------------------------------------------------------------------------------------------
@@ -572,7 +564,7 @@ namespace DeepDive.P4.Tests
             living.OnCatchesSold("deal-B", Catches(("sea_bass", 800)));   // completes the order
             living.OnPublication("pub-1", Clip(4, false));
             Assert.IsTrue(living.TryBuildDevelopment(Host, DevelopmentIds.Home2, request++).Accepted);
-            Assert.IsTrue(living.TrySelectRole(Host, PlayerRole.Explorer, request++).Accepted);
+            Assert.IsTrue(living.TrySelectRole(Host, CrewRole.Explorer, request++).Accepted);
             var balance = economy.SharedBalance;
             var day = living.Board.Day;
 
@@ -588,7 +580,7 @@ namespace DeepDive.P4.Tests
                 Assert.AreEqual(ContractStatus.Completed, board.Order.Status);
                 Assert.AreEqual(ContractStatus.Completed, board.Sponsor.Status);
                 Assert.IsTrue(reopened.Living.Development.Owns(DevelopmentIds.Home2));
-                Assert.AreEqual(PlayerRole.Explorer, reopened.Living.RoleOf(Host));
+                Assert.AreEqual(CrewRole.Explorer, reopened.Living.RoleOf(Host));
                 Assert.AreEqual(balance, reopened.Economy.SharedBalance);
 
                 // replays after the reopen change nothing
@@ -626,7 +618,7 @@ namespace DeepDive.P4.Tests
                 Assert.AreEqual(0, rig.Living.Board.Day);
                 Assert.IsFalse(rig.Living.Board.Order.HasContract);
                 Assert.AreEqual(0, rig.Living.Development.OwnedIds.Count);
-                Assert.AreEqual(PlayerRole.None, rig.Living.RoleOf(Host));
+                Assert.AreEqual(CrewRole.None, rig.Living.RoleOf(Host));
                 Assert.AreEqual(55, rig.Economy.SharedBalance);
                 Assert.IsTrue(rig.Living.EnsureDay(1, 1), "the first day simply starts");
             }
@@ -650,7 +642,7 @@ namespace DeepDive.P4.Tests
             Assert.IsFalse(living.Board.Order.HasContract, "wrong-kind template: slot dropped");
             Assert.IsFalse(living.Board.Sponsor.HasContract, "unknown template: slot dropped");
             CollectionAssert.AreEqual(new[] { DevelopmentIds.TownDock }, living.Development.OwnedIds);
-            Assert.AreEqual(PlayerRole.None, living.RoleOf(Host), "an invalid role byte is no role");
+            Assert.AreEqual(CrewRole.None, living.RoleOf(Host), "an invalid role byte is no role");
 
             // progress outside the template's range is clamped; a full one is a completed one
             living.RestoreLiving(new LivingWorldSaveData { BoardDay = 2, OrderTemplateId = ContractIds.OrderQuick, OrderStatus = 1, OrderProgress = 99 });

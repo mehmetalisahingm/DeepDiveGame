@@ -260,50 +260,19 @@ namespace DeepDive.Core.Contracts
     }
 
     // ---- roles ----------------------------------------------------------------------------------------------------
-
-    public enum PlayerRole : byte
+    // The role TYPE and what a role does belong to Mehmet (CrewRole / CrewRoleEffectRules, #130): small bonuses recomputed from the base
+    // value, so a repeated change, a reconnect or a restore never stacks. This issue owns the free town CHOICE, its UI and its save; the
+    // choice is applied to the player through CrewRoleEffectBinding.TryApplyRoleServer and nothing here touches a player stat.
+    public static class CrewRoleLabels
     {
-        None = 0,
-        Cameraman = 1,
-        Hunter = 2,
-        Explorer = 3,
-        Carrier = 4
-    }
-
-    public static class RoleIds
-    {
-        public static bool IsValid(PlayerRole role) => role >= PlayerRole.None && role <= PlayerRole.Carrier;
-
-        public static string Label(PlayerRole role) => role switch
+        public static string Label(CrewRole role) => role switch
         {
-            PlayerRole.Cameraman => "Kameraci",
-            PlayerRole.Hunter => "Avci",
-            PlayerRole.Explorer => "Kasif",
-            PlayerRole.Carrier => "Tasiyici",
+            CrewRole.CameraOperator => "Kameraci",
+            CrewRole.Hunter => "Avci",
+            CrewRole.Explorer => "Kasif",
+            CrewRole.Carrier => "Tasiyici",
             _ => "Rol yok"
         };
-    }
-
-    // Seam for Mehmet's role effects (#130): who has which role. The authority never touches a player stat; Mehmet recomputes the small
-    // bonuses FROM THE BASE VALUE whenever Revision changes, so a repeated change/reconnect/restore can never stack a bonus.
-    public static class PlayerRoles
-    {
-        private static Func<PlayerId, PlayerRole> provider;
-        private static Func<int> revision;
-
-        public static void Bind(Func<PlayerId, PlayerRole> roleOf, Func<int> revisionOf)
-        {
-            provider = roleOf; revision = revisionOf;
-        }
-
-        public static void Unbind(Func<PlayerId, PlayerRole> roleOf)
-        {
-            if (provider == roleOf) { provider = null; revision = null; }
-        }
-
-        public static PlayerRole RoleOf(PlayerId player) => provider != null ? provider(player) : PlayerRole.None;
-
-        public static int Revision => revision != null ? revision() : 0;
     }
 
     // ---- the one campaign record ---------------------------------------------------------------------------------------
