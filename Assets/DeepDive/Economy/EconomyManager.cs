@@ -75,6 +75,8 @@ namespace DeepDive.Economy
         private readonly Dictionary<string, EquipmentDefinition> _catalog = new Dictionary<string, EquipmentDefinition>();
         private readonly Dictionary<PlayerId, HashSet<string>> _loadout = new Dictionary<PlayerId, HashSet<string>>();
         private readonly HashSet<string> _soldCaptureIds = new HashSet<string>();
+        private readonly List<LivingCatchSaleSave> _livingCatchSales = new List<LivingCatchSaleSave>();
+        public IReadOnlyList<LivingCatchSaleSave> CommittedCatchSales => _livingCatchSales.AsReadOnly();
         private readonly HashSet<string> _paidRecordingIds = new HashSet<string>();
         // P4.2: recordings whose ONE commercial right went to the channel, and channel payouts already credited.
         private readonly HashSet<string> _channelRightIds = new HashSet<string>();
@@ -597,10 +599,17 @@ namespace DeepDive.Economy
                 var previousBalance = SharedBalance;
                 var previousRevision = Revision;
                 var snapshot = new List<PendingItem>(_pending);
+                var oldSaleCount = _livingCatchSales.Count;
                 foreach (var item in items)
                 {
                     _pending.Remove(item);
                     paidIds.Add(item.ItemId);
+                    if (kind == TurnInKind.Catch)
+                        _livingCatchSales.Add(new LivingCatchSaleSave
+                        {
+                            ItemId = item.ItemId, SpeciesId = item.SubjectId,
+                            DayNumber = DayLock.StateProvider != null ? DayLock.StateProvider().DayNumber : 1
+                        });
                 }
                 SharedBalance += earned;
                 Revision++;
@@ -610,6 +619,7 @@ namespace DeepDive.Economy
                     _pending.Clear();
                     _pending.AddRange(snapshot);
                     foreach (var item in items) paidIds.Remove(item.ItemId);
+                    _livingCatchSales.RemoveRange(oldSaleCount, _livingCatchSales.Count - oldSaleCount);
                     SharedBalance = previousBalance;
                     Revision = previousRevision;
                     // Not cached: the same request id may be retried once the disk recovers.
@@ -898,6 +908,7 @@ namespace DeepDive.Economy
                 SharedBalance = SharedBalance,
                 Revision = Revision,
                 SoldCaptureIds = new List<string>(_soldCaptureIds),
+                LivingCatchSales = new List<LivingCatchSaleSave>(_livingCatchSales),
                 PaidRecordingIds = new List<string>(_paidRecordingIds),
                 BoatPartIds = new List<string>(_boatParts),
                 ChannelRightIds = new List<string>(_channelRightIds),
@@ -965,6 +976,7 @@ namespace DeepDive.Economy
             Revision = Math.Max(0, data.Revision);
             LastCheckpointId = data.CheckpointId ?? "";
             _soldCaptureIds.Clear();
+            _livingCatchSales.Clear();
             _paidRecordingIds.Clear();
             _channelRightIds.Clear();
             _channelSettleIds.Clear();
@@ -979,6 +991,15 @@ namespace DeepDive.Economy
             if (data.SoldCaptureIds != null)
                 foreach (var id in data.SoldCaptureIds)
                     if (!string.IsNullOrWhiteSpace(id)) _soldCaptureIds.Add(id);
+            if (data.LivingCatchSales != null)
+                foreach (var sale in data.LivingCatchSales)
+                    if (sale != null && sale.DayNumber > 0 && !string.IsNullOrWhiteSpace(sale.ItemId) &&
+                        !string.IsNullOrWhiteSpace(sale.SpeciesId) && _soldCaptureIds.Contains(sale.ItemId) &&
+                        !_livingCatchSales.Exists(x => x.ItemId == sale.ItemId))
+                        _livingCatchSales.Add(new LivingCatchSaleSave
+                        {
+                            ItemId = sale.ItemId, SpeciesId = sale.SpeciesId, DayNumber = sale.DayNumber
+                        });
             if (data.PaidRecordingIds != null)
                 foreach (var id in data.PaidRecordingIds)
                     if (!string.IsNullOrWhiteSpace(id)) _paidRecordingIds.Add(id);
