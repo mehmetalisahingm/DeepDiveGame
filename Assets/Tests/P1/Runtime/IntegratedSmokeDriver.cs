@@ -2069,8 +2069,10 @@ namespace DeepDive.P1.Lab
                     return;
                 case 3:   // back at the beach (Return phase): with NO world validator bound a trace is refused (fail-closed)
                     if (state.Phase != SessionPhase.Return || now - deepAt < 2f) return;
-                    result.deepFailClosed = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "WorldUnavailable" &&
-                        BossProgression.State.TracesFound == 0;
+                    // Fail-closed either way: with no validator bound the answer is WorldUnavailable; since #128 the real deep world binds its own validator, which refuses
+                    // this made-up context (InvalidContext). Nothing is counted in both cases.
+                    var closedReason = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode;
+                    result.deepFailClosed = (closedReason == "WorldUnavailable" || closedReason == "InvalidContext") && BossProgression.State.TracesFound == 0;
                     DeepProgressionWorld.Bind(deepWorld);
                     DeepNext(4); return;
                 case 4:   // the world validator decides the context; three DISTINCT traces (any player) open the trace stage; a duplicate counts once
@@ -3324,8 +3326,11 @@ namespace DeepDive.P1.Lab
 
             result.townBalance = economy.SharedBalance;
             // 2 players x 2 catches x 120 = 480; two cameras (300) and one boat part (120) leave 60.
-            result.townHostChecks = economy.SharedBalance == 60;
-            if (!result.townHostChecks) result.errors.Add($"town balance={economy.SharedBalance} expected=60");
+            // #132: the day's fish order is met by these very hand-ins (4 bass, 3.2 kg), so its bonus is part of the balance - exactly once.
+            var dayBoard = adapter.GetComponent<LivingWorldNetworkBinding>()?.Authority?.Board;
+            var orderBonus = dayBoard.HasValue && dayBoard.Value.Order.Status == ContractStatus.Completed ? dayBoard.Value.Order.Reward : 0;
+            result.townHostChecks = economy.SharedBalance == 60 + orderBonus;
+            if (!result.townHostChecks) result.errors.Add($"town balance={economy.SharedBalance} expected={60 + orderBonus} (order bonus {orderBonus})");
 
             var store = adapter.GetComponent<EconomySaveStore>();
             var balance = economy.SharedBalance;
