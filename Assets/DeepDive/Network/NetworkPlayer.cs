@@ -202,7 +202,8 @@ namespace DeepDive.Network
                     if (Input.GetKeyDown(KeyCode.F)) SubmitServiceInteractionLocal();
                     if (Input.GetKeyDown(KeyCode.Alpha1)) SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
                     if (Input.GetKeyDown(KeyCode.Alpha2)) SetHeldEquipmentLocal(HeldEquipmentMode.Camera);
-                    if (Input.GetKeyDown(KeyCode.G)) SubmitTeamPingLocal(CrewPingKind.Interest);
+                    // G is reserved for boat disembark; use Y for interest pings.
+                    if (Input.GetKeyDown(KeyCode.Y)) SubmitTeamPingLocal(CrewPingKind.Interest);
                     if (Input.GetKeyDown(KeyCode.H)) SubmitTeamPingLocal(CrewPingKind.Danger);
                     if (Input.GetKeyDown(KeyCode.T)) SubmitTeamPingLocal(CrewPingKind.Return);
                 }
@@ -792,11 +793,16 @@ namespace DeepDive.Network
             var healthRatio = Mathf.Clamp01(Health.Value / Mathf.Max(1f, maxHealth));
             GUI.Box(new Rect(20, 20, 230, 24), $"O2 {Oxygen.Value:0}/{capacity:0} ({oxygenRatio * 100f:0}%)");
             GUI.Box(new Rect(20, 48, 230, 24), $"HEALTH {Health.Value:0}/{maxHealth:0} ({healthRatio * 100f:0}%)");
+            var lowOxygenWarning = !Passive.Value && Oxygen.Value > 0f &&
+                                   Oxygen.Value <= capacity * lowOxygenFraction;
+            if (lowOxygenWarning)
+                GUI.Box(new Rect(20, 78, 230, 28), "LOW OXYGEN - RETURN");
             if (CurrentWarning != CrewWarningKind.None)
-                GUI.Box(new Rect(20, 76, 230, 24), CurrentWarning == CrewWarningKind.LocalCurrent
-                    ? "UYARI: AKINTI"
-                    : CurrentWarning == CrewWarningKind.Windy ? "UYARI: RUZGARLI"
-                    : "UYARI: DONUS ONERILI");
+                GUI.Box(new Rect(20, lowOxygenWarning ? 110 : 76, 230, 24),
+                    CurrentWarning == CrewWarningKind.LocalCurrent
+                        ? "UYARI: AKINTI"
+                        : CurrentWarning == CrewWarningKind.Windy ? "UYARI: RUZGARLI"
+                        : "UYARI: DONUS ONERILI");
 
             var centerX = Screen.width * 0.5f;
             var centerY = Screen.height * 0.5f;
@@ -809,8 +815,6 @@ namespace DeepDive.Network
             if (Time.unscaledTime < actionMessageUntil && actionCue == PlayerFeedbackCue.HarpoonHit)
                 GUI.Label(new Rect(centerX - 8, centerY - 12, 30, 30), "X");
 
-            if (!Passive.Value && Oxygen.Value > 0f && Oxygen.Value <= capacity * lowOxygenFraction)
-                GUI.Box(new Rect(20, 78, 230, 28), "LOW OXYGEN - RETURN");
             if (Passive.Value)
                 GUI.Box(new Rect(centerX - 150, centerY + 45, 300, 40), "PASSIVE - DIVE ENDED FOR YOU");
             if (Time.unscaledTime < actionMessageUntil && !string.IsNullOrEmpty(actionMessage))
