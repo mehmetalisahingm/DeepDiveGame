@@ -84,11 +84,19 @@ namespace DeepDive.World
 
     public static class P45WorldObjectiveEligibility
     {
+        private static bool ContainsSpecies(IReadOnlyCollection<string> species, string id)
+        {
+            if (species == null) return false;
+            foreach (var value in species)
+                if (string.Equals(value, id, StringComparison.Ordinal)) return true;
+            return false;
+        }
+
         public static bool CanOffer(in P45ObjectiveTarget target, IReadOnlyCollection<string> authoredSpecies,
             VehicleClass activeClass, bool hasReefDiscovery, P45WeatherKind weather)
         {
             if (string.IsNullOrWhiteSpace(target.SpeciesId) || authoredSpecies == null ||
-                !authoredSpecies.Contains(target.SpeciesId)) return false;
+                !ContainsSpecies(authoredSpecies, target.SpeciesId)) return false;
 
             // Night is reached naturally during a playable day (19:30-00:00).
             // Nothing here unlocks a route or publishes the subject's current position.
