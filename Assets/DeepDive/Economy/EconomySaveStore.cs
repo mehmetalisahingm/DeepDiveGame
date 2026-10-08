@@ -29,6 +29,18 @@ namespace DeepDive.Economy
         private MediaSaveData loadedMedia;
         private IProgressionPersistence progression;
         private DeepProgressionSaveData loadedProgression;
+        private LivingWorldSaveData loadedLiving;
+        private LivingWorldAuthority living;
+
+        public LivingWorldAuthority Living
+        {
+            get => living;
+            set
+            {
+                living = value;
+                if (living != null) living.Restore(loadedLiving);
+            }
+        }
 
         // Same late-binding rule as the day, exploration and media. A progression record that is absent from the file is the closed
         // default (the authority starts Locked); one that is present is restored through the authority's fail-closed validation.
@@ -208,6 +220,16 @@ namespace DeepDive.Economy
                     snapshot.Progression = loadedProgression;
                     snapshot.HasProgression = true;
                 }
+                if (living != null)
+                {
+                    snapshot.Living = living.Export();
+                    snapshot.HasLiving = true;
+                }
+                else if (loadedLiving != null)
+                {
+                    snapshot.Living = loadedLiving;
+                    snapshot.HasLiving = true;
+                }
                 var json = JsonUtility.ToJson(snapshot, true);
                 File.WriteAllText(temp, json);
 
@@ -233,6 +255,7 @@ namespace DeepDive.Economy
                 if (snapshot.HasExploration) loadedExploration = snapshot.Exploration;
                 if (snapshot.HasMedia) loadedMedia = snapshot.Media;
                 if (snapshot.HasProgression) loadedProgression = snapshot.Progression;
+                if (snapshot.HasLiving) loadedLiving = snapshot.Living;
                 LastError = "";
                 return true;
             }
@@ -278,6 +301,12 @@ namespace DeepDive.Economy
                 loadedExploration = data.HasExploration ? data.Exploration : null;
                 loadedMedia = data.HasMedia ? data.Media : null;
                 loadedProgression = data.HasProgression ? data.Progression : null;
+                loadedLiving = data.HasLiving ? data.Living : null;
+                if (living != null && !living.Restore(loadedLiving))
+                {
+                    restoring = false;
+                    return Fail("invalid living world state");
+                }
                 if (progression != null && !progression.RestoreProgression(loadedProgression))
                 {
                     restoring = false;
