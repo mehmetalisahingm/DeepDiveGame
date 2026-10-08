@@ -31,6 +31,17 @@ namespace DeepDive.Economy
 
         // Shared home storage (P4.1). Slots, not weight: what limits carrying is the bag rule on retrieval.
         public const int StorageCapacityItems = 40;
+        private const int ArchiveBonusSlots = 10;
+        private bool archiveBonusEnabled;
+        private bool fishBuyerBonusEnabled;
+        public int StorageCapacity => StorageCapacityItems + (archiveBonusEnabled ? ArchiveBonusSlots : 0);
+
+        // These are derived ONLY from Mert's authoritative persistent purchased upgrades.
+        public void ApplyLivingUpgradeBenefits(bool archiveOwned, bool fishMarketOwned)
+        {
+            archiveBonusEnabled = archiveOwned;
+            fishBuyerBonusEnabled = fishMarketOwned;
+        }
 
         public event Action OnBalanceChanged;
         public event Action<PlayerId> OnLoadoutChanged;
@@ -285,7 +296,7 @@ namespace DeepDive.Economy
             var item = FindPending(TurnInKind.Catch, itemId);
             if (requestId == 0 || string.IsNullOrWhiteSpace(itemId) || item == null || !CanHandIn(item, player))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
-            else if (_stored.Count >= StorageCapacityItems)
+            else if (_stored.Count >= StorageCapacity)
                 result = TransactionResult.Reject(requestId, "StorageFull", Revision);
             else
             {
@@ -558,8 +569,12 @@ namespace DeepDive.Economy
             return PlayerActionResult.Accepted;
         }
 
-        private int CatchPrice(PendingItem item) =>
-            _priceBySpeciesId.TryGetValue(item.SubjectId, out var price) ? price : 0;
+        private int CatchPrice(PendingItem item)
+        {
+            if (!_priceBySpeciesId.TryGetValue(item.SubjectId, out var price)) return 0;
+            // P4.5: the upgraded fish-market counter gives +10% to real NPC sales.
+            return fishBuyerBonusEnabled ? price + price / 10 : price;
+        }
 
         private int RecordingPrice(PendingItem item) =>
             _subjectRewards.TryGetValue((item.SubjectId, item.Quality), out var reward) ? reward : 0;
@@ -1053,7 +1068,7 @@ namespace DeepDive.Economy
                 if (_soldCaptureIds.Contains(entry.ItemId) || FindPending(TurnInKind.Catch, entry.ItemId) != null) continue;
                 var duplicate = false;
                 foreach (var stored in _stored) if (stored.ItemId == entry.ItemId) duplicate = true;
-                if (duplicate || _stored.Count >= StorageCapacityItems) continue;
+                if (duplicate || _stored.Count >= StorageCapacity) continue;
 
                 _stored.Add(new PendingItem
                 {
