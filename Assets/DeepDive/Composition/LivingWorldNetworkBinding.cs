@@ -38,6 +38,8 @@ namespace DeepDive.Composition
         private bool registered, serverRegistered, bound;
         private int lastMirrorRevision = -1;
         private ulong localRequestId;
+        private int lastReconciledDay = -1;
+        private int lastReconciledSaleCount = -1;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
