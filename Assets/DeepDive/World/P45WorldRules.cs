@@ -95,10 +95,15 @@ namespace DeepDive.World
         }
 
         public static bool CanOffer(in P45ObjectiveTarget target, IReadOnlyCollection<string> authoredSpecies,
-            VehicleClass activeClass, bool hasReefDiscovery, P45WeatherKind weather)
+            VehicleClass activeClass, bool hasReefDiscovery, P45WeatherKind weather,
+            int clockMinute = DayIds.DayStartMinute, DayPhase phase = DayPhase.Running)
         {
             if (string.IsNullOrWhiteSpace(target.SpeciesId) || authoredSpecies == null ||
                 !ContainsSpecies(authoredSpecies, target.SpeciesId)) return false;
+            // A night-only goal must still have a playable night in today's session.
+            // Goals created in the morning can wait for 21:00; closing/ended days cannot.
+            if (target.RequiresNight && (phase != DayPhase.Running ||
+                clockMinute >= DayIds.DayEndMinute)) return false;
 
             // Night is reached naturally during a playable day (19:30-00:00).
             // Nothing here unlocks a route or publishes the subject's current position.
