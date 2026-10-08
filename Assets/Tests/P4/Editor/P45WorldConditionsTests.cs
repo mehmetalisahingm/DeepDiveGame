@@ -135,6 +135,8 @@ namespace DeepDive.P4.Tests
                 true, P45WeatherKind.Windy));
             Assert.IsTrue(P45WorldObjectiveEligibility.CanOffer(deep, species, VehicleClass.ResearchBoat,
                 true, P45WeatherKind.Calm));
+            Assert.IsFalse(P45WorldObjectiveEligibility.CanOffer(deep, species, VehicleClass.ResearchBoat,
+                true, P45WeatherKind.Calm, DayIds.DayEndMinute, DayPhase.Closing));
             Assert.IsFalse(P45WorldObjectiveEligibility.CanOffer(bogus, species, VehicleClass.ResearchBoat,
                 true, P45WeatherKind.Calm));
         }
