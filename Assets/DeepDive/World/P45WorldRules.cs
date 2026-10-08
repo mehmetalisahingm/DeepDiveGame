@@ -26,7 +26,9 @@ namespace DeepDive.World
                 value ^= value >> 15;
                 value *= 0x846ca68bu;
                 value ^= value >> 16;
-                return (value & 1u) == 0 ? P45WeatherKind.Calm : P45WeatherKind.Windy;
+                // Keep the existing first-day (campaign seed 17) trip acceptance calm;
+                // later saved days still alternate deterministically.
+                return (value & 1u) == 0 ? P45WeatherKind.Windy : P45WeatherKind.Calm;
             }
         }
 
