@@ -37,6 +37,8 @@ namespace DeepDive.Media
         }
 
         public event Action OnChanged;
+        // P4.5-C: a publication was accepted AND written (host). The manifest is the host's verified record of the clip (sponsors read it).
+        public event Action<PublicationSave, ClipManifest> OnPublished;
 
         private readonly Dictionary<string, ClipManifest> _clips = new Dictionary<string, ClipManifest>(StringComparer.Ordinal);
         private readonly List<string> _clipOrder = new List<string>();
@@ -144,6 +146,9 @@ namespace DeepDive.Media
                 Changed();
                 _queued?.Invoke(publication.PublicationId);
                 result = TransactionResult.Ok(requestId, _revision);
+                _processed[key] = result;
+                OnPublished?.Invoke(publication, clip);   // after the result is cached: a listener can never make the answer change
+                return result;
             }
 
             _processed[key] = result;

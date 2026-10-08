@@ -31,6 +31,8 @@ namespace DeepDive.Economy
 
         // Shared home storage (P4.1). Slots, not weight: what limits carrying is the bag rule on retrieval.
         public const int StorageCapacityItems = 40;
+        // The most the storage can ever hold (home level 2). A restore keeps up to this much, whatever is bound yet.
+        public const int MaxStorageCapacityItems = StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots;
 
         public event Action OnBalanceChanged;
         public event Action<PlayerId> OnLoadoutChanged;
@@ -38,6 +40,11 @@ namespace DeepDive.Economy
         public event Action OnBoatRepairChanged;
         public event Action OnStorageChanged;
         public event Action OnFleetChanged;
+        // P4.5-C: a fish hand-in that was settled and saved. (deal id, what was handed in). The deal id is unique per hand-in.
+        public event Action<string, IReadOnlyList<SoldCatch>> OnCatchesSold;
+
+        // Home level 2 grows the shared storage. Unbound development = the base capacity.
+        public static int StorageCapacity => StorageCapacityItems + DevelopmentEffects.StorageBonusSlots;
 
         // P4.1 day ledger feeds. A settled hand-in: (deal id, item count, total grams, credits, was it catches).
         // The deal id is the joined ids of the handed-in items, so it is unique (each item leaves the queue once).
@@ -77,6 +84,7 @@ namespace DeepDive.Economy
         // P4.2: recordings whose ONE commercial right went to the channel, and channel payouts already credited.
         private readonly HashSet<string> _channelRightIds = new HashSet<string>();
         private readonly HashSet<string> _channelSettleIds = new HashSet<string>();
+        private readonly HashSet<string> _rewardIds = new HashSet<string>();
         private readonly List<PendingItem> _pending = new List<PendingItem>();
         private readonly List<PendingItem> _stored = new List<PendingItem>();
         private readonly List<string> _boatParts = new List<string>();
@@ -144,6 +152,8 @@ namespace DeepDive.Economy
             _catalog[FinsId] = new EquipmentDefinition(FinsId, "fins", 1, 220);
             _catalog[BagId] = new EquipmentDefinition(BagId, "bag", 1, 260);
             _catalog[HarpoonId] = new EquipmentDefinition(HarpoonId, "harpoon", 1, 300);
+            // P4.5-C: the improved equipment shop stocks one more tube tier (purchasable only after the town improvement; see TryPurchase).
+            _catalog[DevelopmentCatalog.ShopUnlockedEquipmentId] = new EquipmentDefinition(DevelopmentCatalog.ShopUnlockedEquipmentId, "tube", 3, 500);
             _equipmentRequires[CameraAdvancedId] = CameraBasicId;
             _equipmentRequires[CameraProId] = CameraAdvancedId;
         }
@@ -281,7 +291,7 @@ namespace DeepDive.Economy
             var item = FindPending(TurnInKind.Catch, itemId);
             if (requestId == 0 || string.IsNullOrWhiteSpace(itemId) || item == null || !CanHandIn(item, player))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
-            else if (_stored.Count >= StorageCapacityItems)
+            else if (_stored.Count >= StorageCapacity)
                 result = TransactionResult.Reject(requestId, "StorageFull", Revision);
             else
             {
@@ -504,8 +514,12 @@ namespace DeepDive.Economy
             return PlayerActionResult.Accepted;
         }
 
-        private int CatchPrice(PendingItem item) =>
-            _priceBySpeciesId.TryGetValue(item.SubjectId, out var price) ? price : 0;
+        // The fisherman's stall improvement adds a percentage to every catch price (rounded down, never below the base price).
+        private int CatchPrice(PendingItem item)
+        {
+            if (!_priceBySpeciesId.TryGetValue(item.SubjectId, out var price) || price <= 0) return 0;
+            return price + price * DevelopmentEffects.FishPricePercentBonus / 100;
+        }
 
         private int RecordingPrice(PendingItem item) =>
             _subjectRewards.TryGetValue((item.SubjectId, item.Quality), out var reward) ? reward : 0;
@@ -569,6 +583,12 @@ namespace DeepDive.Economy
                 var grams = 0;
                 foreach (var item in items) { ids.Add(item.ItemId); grams += item.WeightGrams; }
                 OnSettled?.Invoke(string.Join("+", ids), items.Count, grams, earned, kind == TurnInKind.Catch);
+                if (kind == TurnInKind.Catch && OnCatchesSold != null)
+                {
+                    var sold = new List<SoldCatch>(items.Count);
+                    foreach (var item in items) sold.Add(new SoldCatch(item.SubjectId, item.WeightGrams));
+                    OnCatchesSold(string.Join("+", ids), sold);
+                }
             }
 
             _processedTurnIns[key] = result;
@@ -594,6 +614,8 @@ namespace DeepDive.Economy
                 result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
             else if (_loadout.TryGetValue(player, out var owned) && owned.Contains(equipmentId))
                 result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            else if (equipmentId == DevelopmentCatalog.ShopUnlockedEquipmentId && !DevelopmentEffects.ShopStockUnlocked)
+                result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);   // not stocked until the shop improvement
             else if (_equipmentRequires.TryGetValue(equipmentId, out var requiredId) &&
                      !(_loadout.TryGetValue(player, out var ownedForTier) && ownedForTier.Contains(requiredId)))
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
@@ -700,10 +722,55 @@ namespace DeepDive.Economy
             return result;
         }
 
+        // ---- Rewards and one-off spends (P4.5-C) -----------------------------------------------------------
+        // The living-world authority marks its own step AND asks for the money in one transaction, then persists the campaign file ONCE
+        // (its record and the balance live in the same file). The reward id makes a payment single even if the authority were asked twice.
+        public bool IsRewardPaid(string rewardId) => rewardId != null && _rewardIds.Contains(rewardId);
+
+        public bool TryCreditReward(string rewardId, int amount)
+        {
+            if (string.IsNullOrWhiteSpace(rewardId) || amount <= 0 || !_rewardIds.Add(rewardId)) return false;
+            SharedBalance += amount;
+            Revision++;
+            OnBalanceChanged?.Invoke();
+            return true;
+        }
+
+        public void ReleaseReward(string rewardId, int amount)
+        {
+            if (!_rewardIds.Remove(rewardId)) return;
+            SharedBalance -= amount;
+            Revision++;
+            OnBalanceChanged?.Invoke();
+        }
+
+        public bool TrySpend(int amount)
+        {
+            if (amount <= 0 || SharedBalance < amount) return false;
+            SharedBalance -= amount;
+            Revision++;
+            OnBalanceChanged?.Invoke();
+            return true;
+        }
+
+        public void RefundSpend(int amount)
+        {
+            SharedBalance += amount;
+            Revision++;
+            OnBalanceChanged?.Invoke();
+        }
+
+        // Tells the day ledger a spend was committed and saved.
+        public void AnnounceSpend(string spendId, int amount) => OnSpent?.Invoke(spendId, amount);
+
         // ---- Vehicle fleet (P4.3-C) --------------------------------------------------------
         // ONE source for "which vehicles do we own and which one is at sea". The shared balance pays (D06: ownership is
         // campaign-wide, never a player's personal inventory item), so a purchase can neither duplicate into a loadout nor be
         // bought twice. Mehmet's hull/seat/movement and Utku's routes only READ this (ActiveVehicle / Fleet).
+
+        // The dock improvement discounts every vehicle (rounded down; the base catalog price is unchanged).
+        public static int VehiclePrice(in VehicleDefinition definition) =>
+            definition.Price - definition.Price * DevelopmentEffects.VehiclePriceDiscountPercent / 100;
 
         private bool RowboatOwned => _boatParts.Count >= BoatRepairParts.All.Count;
 
@@ -742,13 +809,14 @@ namespace DeepDive.Economy
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
             else if (definition.Class == VehicleClass.ResearchBoat && !HasDiscoveredCellInBand(DepthBandIds.Reef))
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
-            else if (SharedBalance < definition.Price)
+            else if (SharedBalance < VehiclePrice(definition))
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
             else
             {
                 var previousBalance = SharedBalance;
                 var previousRevision = Revision;
-                SharedBalance -= definition.Price;
+                var vehiclePrice = VehiclePrice(definition);
+                SharedBalance -= vehiclePrice;
                 _purchasedVehicles.Add(boatId);
                 Revision++;
                 if (!Persist())
@@ -759,7 +827,7 @@ namespace DeepDive.Economy
                     return TransactionResult.Reject(requestId, "SaveFailed", Revision);
                 }
                 result = TransactionResult.Ok(requestId, Revision);
-                OnSpent?.Invoke("vehicle-" + boatId, definition.Price);
+                OnSpent?.Invoke("vehicle-" + boatId, vehiclePrice);
             }
 
             _processedRequests[requestKey] = result;
@@ -844,6 +912,7 @@ namespace DeepDive.Economy
                 BoatPartIds = new List<string>(_boatParts),
                 ChannelRightIds = new List<string>(_channelRightIds),
                 ChannelSettleIds = new List<string>(_channelSettleIds),
+                RewardIds = new List<string>(_rewardIds),
                 HasFleet = true,
                 FleetPurchasedBoatIds = new List<string>(_purchasedVehicles),
                 FleetActiveBoatId = _activeVehicleId ?? string.Empty
@@ -910,6 +979,7 @@ namespace DeepDive.Economy
             _paidRecordingIds.Clear();
             _channelRightIds.Clear();
             _channelSettleIds.Clear();
+            _rewardIds.Clear();
             _withdrawnForChannel.Clear();
             _loadout.Clear();
             _pending.Clear();
@@ -944,6 +1014,9 @@ namespace DeepDive.Economy
             if (data.ChannelRightIds != null)
                 foreach (var id in data.ChannelRightIds)
                     if (!string.IsNullOrWhiteSpace(id)) _channelRightIds.Add(id);
+            if (data.RewardIds != null)
+                foreach (var id in data.RewardIds)
+                    if (!string.IsNullOrWhiteSpace(id)) _rewardIds.Add(id);
             if (data.ChannelSettleIds != null)
                 foreach (var id in data.ChannelSettleIds)
                     if (!string.IsNullOrWhiteSpace(id)) _channelSettleIds.Add(id);
@@ -974,7 +1047,7 @@ namespace DeepDive.Economy
                 if (_soldCaptureIds.Contains(entry.ItemId) || FindPending(TurnInKind.Catch, entry.ItemId) != null) continue;
                 var duplicate = false;
                 foreach (var stored in _stored) if (stored.ItemId == entry.ItemId) duplicate = true;
-                if (duplicate || _stored.Count >= StorageCapacityItems) continue;
+                if (duplicate || _stored.Count >= MaxStorageCapacityItems) continue;
 
                 _stored.Add(new PendingItem
                 {

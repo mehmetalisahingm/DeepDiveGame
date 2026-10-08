@@ -332,7 +332,7 @@ namespace DeepDive.Economy
             "InventoryFull" => "CANTA DOLU",
             "DayClosing" => "GUN KAPANIYOR",
             "NothingToTurnIn" => "TESLIM EDILECEK URUN YOK",
-            "RequirementMissing" => "ONCE ONCEKI KADEME GEREK",
+            "RequirementMissing" => "GEREKSINIM EKSIK (onceki kademe/gelisim)",
             "NotOwned" => "BU ARAC SENIN DEGIL",
             "TripActive" => "TEKNE SEFERDE",
             "SeatsOccupied" => "TEKNEDE OYUNCU VAR",
@@ -361,6 +361,7 @@ namespace DeepDive.Economy
             ShopRow(126, "Temel kamera | 150", "KAMERA AL", EconomyManager.CameraBasicId);
             ShopRow(164, "Gelismis kamera | 400", "KAMERA II AL", EconomyManager.CameraAdvancedId);
             ShopRow(202, "Profesyonel kamera | 900", "KAMERA III AL", EconomyManager.CameraProId);
+            ShopRow(240, "Tup III | +90 sn | 500 (dukkan gelisimi)", "TUP III AL", DevelopmentCatalog.ShopUnlockedEquipmentId);
             ShopRow(50, "Palet I | 220", "PALET AL", EconomyManager.FinsId, 574);
             ShopRow(88, "Canta I | 260", "CANTA AL", EconomyManager.BagId, 574);
             ShopRow(126, "Zipkin I | 300", "ZIPKIN AL", EconomyManager.HarpoonId, 574);
