@@ -71,7 +71,7 @@ namespace DeepDive.Composition
             if (!manager.IsListening && registered) Unregister();
             if (!IsHost) { Unbind(); return; }
             Bind();
-            if (!bound || day == null) return;
+            if (!bound || day == null || DayLock.StateProvider == null || !media.IsHostReady) return;
             // Process yesterday's *settled* channel output before changing to today's objectives.
             // This survives a restart between the day-close disk write and the morning settlement.
             if (authority.DayNumber > 0)
@@ -79,7 +79,7 @@ namespace DeepDive.Composition
             if (authority.DayNumber > 0 && authority.DayNumber < day.Engine.DayNumber)
                 ReconcileSettledPublications(authority.DayNumber);
             if (authority.DayNumber != day.Engine.DayNumber)
-                authority.BeginDay(day.Engine.DayNumber, "local-host");
+                authority.BeginDay(day.Engine.DayNumber, store.CampaignId);
             if (authority.DayNumber != day.Engine.DayNumber) return;
             ReconcileSales(authority.DayNumber);
 
