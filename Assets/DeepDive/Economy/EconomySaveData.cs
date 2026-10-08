@@ -46,6 +46,16 @@ namespace DeepDive.Economy
         public DeepDive.Core.Contracts.MediaSaveData Media = new DeepDive.Core.Contracts.MediaSaveData();
         public bool HasLiving;
         public LivingWorldSaveData Living = new LivingWorldSaveData();
+        // Committed NPC evidence lets a crashed post-sale goal update be replayed after restart.
+        public List<LivingCatchSaleSave> LivingCatchSales = new List<LivingCatchSaleSave>();
+    }
+
+    [Serializable]
+    public sealed class LivingCatchSaleSave
+    {
+        public string ItemId = "";
+        public string SpeciesId = "";
+        public int DayNumber;
     }
 
     [Serializable]
