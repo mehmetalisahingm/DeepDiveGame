@@ -24,6 +24,7 @@ namespace DeepDive.Composition
         public const KeyCode ToggleKey = KeyCode.M;
         private const float RefreshInterval = 0.1f;
         private const float MapSize = 220f;
+        private const string TeamPingIconPrefix = "team-ping-";
 
         // What the map currently shows, for the on-screen draw and for smoke evidence. Rebuilt on a
         // timer rather than per frame: icons move at most at boat speed and the presenter allocates.
@@ -98,9 +99,18 @@ namespace DeepDive.Composition
             }
 
             LastPhase = (BoatTripPhase)localSync.Phase.Value;
-            LastIcons = BoatMapPresenter.BuildIcons(
+            var icons = new List<MapIcon>(BoatMapPresenter.BuildIcons(
                 LastPhase, ActiveVehicle.BoatId, dock, hasAnchor ? anchor : ((float, float)?)null,
-                live, party, localSync.IsSeated);
+                live, party, localSync.IsSeated));
+
+            var pings = P4MapPositionFeed.SnapshotTeamPings();
+            for (var i = 0; i < pings.Count; i++)
+            {
+                if (!region.TryWorldToMap(pings[i].WorldPosition, out var pingMap)) continue;
+                icons.Add(new MapIcon(TeamPingIconPrefix + (byte)pings[i].Kind + "-" + pings[i].Player.Value,
+                    pingMap.x, pingMap.y));
+            }
+            LastIcons = icons;
         }
 
         private void RebuildExploration()
@@ -233,6 +243,17 @@ namespace DeepDive.Composition
                 color = isSelf ? Color.white : new Color(0.75f, 0.85f, 1f);
                 label = isSelf ? "sen" : "P" + icon.IconId.Substring(BoatMapPresenter.PlayerIconPrefix.Length);
                 size = 7f;
+            }
+            else if (icon.IconId.StartsWith(TeamPingIconPrefix, System.StringComparison.Ordinal))
+            {
+                var kind = icon.IconId.Length > TeamPingIconPrefix.Length
+                    ? icon.IconId[TeamPingIconPrefix.Length] - '0' : 0;
+                color = kind == (int)CrewPingKind.Danger ? new Color(1f, 0.35f, 0.25f)
+                    : kind == (int)CrewPingKind.Return ? new Color(0.45f, 1f, 0.55f)
+                    : new Color(1f, 0.9f, 0.3f);
+                label = kind == (int)CrewPingKind.Danger ? "TEHLIKE"
+                    : kind == (int)CrewPingKind.Return ? "DON" : "PING";
+                size = 11f;
             }
             else
             { color = new Color(1f, 0.55f, 0.2f); label = "sandal"; size = 12f; }
