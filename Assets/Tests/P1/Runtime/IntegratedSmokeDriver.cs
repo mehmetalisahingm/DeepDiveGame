@@ -45,6 +45,7 @@ namespace DeepDive.P1.Lab
             public string tripSeatId;
             public bool tripBoarded, tripDuplicateBoardHeld, tripMapDockedAtDock, tripMapUnderwayMoved,
                 tripMapAnchoredAtAnchor, tripReturnMarkerSeen, tripReboarded, tripDockedEmpty, tripDone, tripSaveReload;
+            public bool tripFleetVehicleReady, tripHullKindCorrect;
             public int tripMapPlayersMax, tripUnderwayPositions;
             public List<string> tripTrace = new List<string>();
             public List<int> dayNumbers = new List<int>(), daySummaries = new List<int>();
@@ -81,6 +82,8 @@ namespace DeepDive.P1.Lab
             public bool deepOrderRefused, deepSightingCounted, deepEncyclopedia, deepRumor, deepFailClosed, deepContextRefused, deepTracesOk, deepTraceStage,
                 deepDiscoveryRefused, deepUnlocked, deepCompletedOnce, deepSavedOnDisk, deepReloadClean, deepHostDone, deepReloadPass;
             public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
+            public bool bossSighting, bossRumor, bossTraceStage, bossArenaUnlocked, bossActiveSeen, bossDamageSeen,
+                bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -121,6 +124,8 @@ namespace DeepDive.P1.Lab
         // fixture world validator (Utku's #122 world rule does not exist yet), then a second host launch on the same campaign file.
         private bool Deep => Arg("-p4-deep") == "1";
         private bool DeepReload => Arg("-p4-deep-reload") == "1";
+        private bool BossAcceptance => Arg("-p4-boss-acceptance") == "1";
+        private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -128,6 +133,9 @@ namespace DeepDive.P1.Lab
         private bool Day => Arg("-p4-day") == "1";
         private bool DayReload => Arg("-p4-day-reload") == "1";
         private bool Trip => Arg("-p3-trip") == "1";
+        private string TripVehicleId => Arg("-p4-trip-vehicle");
+        private bool FleetRoute => !string.IsNullOrEmpty(TripVehicleId);
+        private string TripRouteId => FleetRoute ? Arg("-p4-trip-route", BoatTripIds.NearRouteId) : BoatTripIds.NearRouteId;
         private bool Boat => Arg("-p3-boat") == "1" || Trip;
         private bool purchaseSent;
         private int townStep, townBefore;
@@ -140,6 +148,7 @@ namespace DeepDive.P1.Lab
         private bool townInjected, townSampledReturn, cameraSeeded;
         private float returnPhaseAt, pendingSeenAt, turnInAt;
         private float recordingStartTime;
+        private float bossNextShot, bossTraceAt;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -175,7 +184,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 360f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -245,6 +254,7 @@ namespace DeepDive.P1.Lab
                     }
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
+                if (BossAcceptanceReload) { if (host && HostBossAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
                 if (DeepReload) { if (host && HostDeepReload()) { Finish(); yield break; } yield return null; continue; }
                 if (FleetReload) { if (host && HostFleetReload()) { Finish(); yield break; } yield return null; continue; }
                 if (AcceptanceReload) { if (host && HostAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
@@ -256,6 +266,7 @@ namespace DeepDive.P1.Lab
                 if (Acceptance && host) HostAcceptance(state);
                 if (Fleet && host) HostFleet(state);
                 if (Deep) { ObserveDeep(); if (host) HostDeep(state); }
+                if (BossAcceptance) ObserveBossAcceptance();
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
                 if (host && Town) HostTown(state);
@@ -269,12 +280,15 @@ namespace DeepDive.P1.Lab
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
                 var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
                 var returnCeiling = Fleet || Deep ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
-                if (host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
+                    !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
+                { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
+                else if (!BossAcceptance && host && ((elapsed > returnAfter && recordingSettled) || elapsed > returnCeiling) && !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -283,10 +297,13 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                var leaveDue = BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
+                // Boss acceptance can finish as soon as the real session has returned and fully
+                // shut down. The longer ceiling is only a failure bound, not a mandatory wait.
+                if (BossAcceptance && result.stopped) break;
                 yield return null;
             }
             result.reason = adapter.Connection.LastError;
@@ -314,10 +331,14 @@ namespace DeepDive.P1.Lab
                 (!host || (result.deepOrderRefused && result.deepSightingCounted && result.deepEncyclopedia && result.fleetReefSwum && result.deepRumor &&
                     result.deepFailClosed && result.deepContextRefused && result.deepTracesOk && result.deepTraceStage && result.deepDiscoveryRefused &&
                     result.deepUnlocked && result.deepCompletedOnce && result.deepSavedOnDisk && result.deepReloadClean && result.deepHostDone));
+            if (BossAcceptance) result.passed &= result.bossRumor && result.bossTraceStage && result.bossArenaUnlocked &&
+                result.bossActiveSeen && result.bossShotSent && result.bossDefeatedPending && result.bossCompletedSeen &&
+                (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossPartySafe &&
+                    result.bossSaved && result.bossHostDone));
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
-            if (Boat) result.passed &= result.boatRepaired && result.boatPartsHidden &&
+            if (Boat && !FleetRoute) result.passed &= result.boatRepaired && result.boatPartsHidden &&
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
@@ -350,7 +371,8 @@ namespace DeepDive.P1.Lab
                 result.tripMapUnderwayMoved && result.tripMapAnchoredAtAnchor && result.tripDockedEmpty && result.tripDone &&
                 result.tripMapPlayersMax >= expected &&
                 result.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
-                (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload);
+                (host || (result.tripReturnMarkerSeen && result.tripReboarded)) && (!host || result.tripSaveReload) &&
+                (!FleetRoute || (result.tripFleetVehicleReady && result.tripHullKindCorrect && result.boatRepaired && result.boatPartsHidden));
             Finish();
         }
 
@@ -388,6 +410,7 @@ namespace DeepDive.P1.Lab
                 else if (Acceptance && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
                 else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
+                else if (BossAcceptance && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBossAcceptance(local);
                 else if ((Fleet || Deep) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
                 else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeFleet(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
@@ -610,6 +633,9 @@ namespace DeepDive.P1.Lab
                     a.GetComponentsInChildren<Renderer>().All(r => !r.enabled) &&
                     a.GetComponentsInChildren<Collider>().All(c => !c.enabled));
             }
+            // A fleet-route run loads a previously repaired/purchased campaign. Keep verifying
+            // replicated repair/hidden parts, but do not attempt to collect already consumed parts.
+            if (FleetRoute) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
             var partName = host ? boatStep == 0 || boatStep == 1 ? "BoatPart_Hull" : "BoatPart_FuelTank" : "BoatPart_Engine";
             var part = GameObject.Find(partName);
             var cam = local.GetComponentInChildren<Camera>(true);
@@ -1288,6 +1314,222 @@ namespace DeepDive.P1.Lab
                 binding.Channel.SettleThrough(99) == 0 && economy.SharedBalance == before &&
                 binding.Channel.TryPublish(new PlayerId(0), "clip-0-a", "x", 777).ReasonCode == "PublicationAlreadyQueued";
             result.passed = result.mediaReloadPass && result.errors.Count == 0;
+            return true;
+        }
+
+        // ---- #124 fixture-free deep/boss acceptance ---------------------------------------------------------------
+        private bool bossSightingInjected;
+
+        private void ObserveBossAcceptance()
+        {
+            // The real product exploration binding may verify the sea-bass sighting before this
+            // smoke driver gets its first Locked-stage tick. Observe that authoritative state
+            // directly instead of requiring our fallback AcceptSighting call to be the writer.
+            if (adapter.IsAuthority)
+            {
+                var exploration = adapter.GetComponent<ExplorationNetworkBinding>();
+                if (exploration != null && exploration.Species != null &&
+                    exploration.Species.TryGetSpecies("sea_bass", out var discoveredSpecies))
+                    result.bossSighting |= discoveredSpecies.Sighted;
+            }
+
+            result.bossRumor |= BossProgression.State.Stage >= DeepProgressionStage.Rumor;
+            result.bossTraceStage |= BossProgression.State.Stage >= DeepProgressionStage.Trace;
+            result.bossArenaUnlocked |= BossProgression.State.Stage >= DeepProgressionStage.Discovery;
+            var boss = BossEncounterRuntime.Snapshot;
+            result.bossActiveSeen |= boss.Phase == BossEncounterPhase.Active;
+            result.bossCompletedSeen |= BossProgression.IsCompleted(DeepProgressionIds.BossId) ||
+                                        boss.Phase == BossEncounterPhase.Completed;
+            if (boss.MaxHealth > 0f && boss.Health < boss.MaxHealth) result.bossDamageSeen = true;
+            result.bossDefeatedPending |= boss.Phase == BossEncounterPhase.Active && boss.Health <= 0f;
+
+            if (!adapter.IsAuthority || result.bossHostDone) return;
+            var binding = adapter.GetComponent<BossEncounterSessionBinding>();
+            result.bossTwoAttackers |= binding != null && binding.AcceptedHitPlayerCount >= 2;
+            var inventory = adapter.GetComponent<InventoryManager>();
+            result.bossPartySafe |= inventory != null && adapter.Session.Roster.Keys.All(id =>
+                inventory.Bags.TryGetValue(id, out var bag) && bag.SafelyReturned);
+
+            // Durable completion must appear only after BeginReturn finalized the real DiveSummary.
+            if (adapter.Session.State.Phase != SessionPhase.Return || !result.bossCompletedSeen || !result.bossTwoAttackers)
+                return;
+
+            var store = adapter.GetComponent<EconomySaveStore>();
+            if (store == null || !File.Exists(store.SavePath)) return;
+            var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+            result.bossSaved = disk.HasProgression &&
+                               disk.Progression.Stage == (byte)DeepProgressionStage.Discovery &&
+                               disk.Progression.TraceIds.Count == DeepProgressionIds.RequiredTraceCount &&
+                               disk.Progression.CompletedBossIds.Contains(DeepProgressionIds.BossId);
+            result.bossHostDone = result.bossSaved;
+        }
+
+        private void ProbeBossAcceptance(NetworkPlayer local)
+        {
+            var state = BossProgression.State;
+            if (Time.realtimeSinceStartup >= bossTraceAt && result.deepTrace.Count < 100)
+            {
+                bossTraceAt = Time.realtimeSinceStartup + 3f;
+                var encounter = BossEncounterRuntime.Snapshot;
+                result.deepTrace.Add($"stage={state.Stage} pos={local.transform.position} hp={encounter.Health} passive={local.Passive.Value} oxygen={local.Oxygen.Value}");
+            }
+
+            // First proof is created through the real host species authority; all later steps are caused only
+            // by real player movement through the real Reef/deep world volumes.
+            if (state.Stage == DeepProgressionStage.Locked)
+            {
+                local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                if (adapter.IsAuthority && !bossSightingInjected)
+                {
+                    var exploration = adapter.GetComponent<ExplorationNetworkBinding>();
+                    if (exploration != null && exploration.Species != null)
+                    {
+                        var sighting = exploration.Species.AcceptSighting("sea_bass", local.transform.position, 1);
+                        result.bossSighting = sighting.ToString() == "CountedNewEvidence" || sighting.ToString() == "AlreadyCounted";
+                        bossSightingInjected = result.bossSighting;
+                    }
+                }
+                return;
+            }
+
+            if (state.Stage == DeepProgressionStage.Encyclopedia)
+            {
+                if (adapter.IsAuthority) SwimAcceptance(local, FleetReefTarget, 1.0f);
+                else local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
+            if (state.Stage == DeepProgressionStage.Rumor)
+            {
+                if (adapter.IsAuthority)
+                {
+                    var index = Mathf.Clamp(state.TracesFound, 0, DeepEncounterWorld.TracePositions.Length - 1);
+                    SwimAcceptance(local, DeepEncounterWorld.TracePositions[index], 0.75f, surfaceTransit: true);
+                }
+                else local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
+            if (state.Stage == DeepProgressionStage.Trace)
+            {
+                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: true);
+                return;
+            }
+
+            if (state.Stage != DeepProgressionStage.Discovery)
+            {
+                local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
+            var boss = BossEncounterRuntime.Snapshot;
+            // A defeated boss stays transient until the crew reaches the real safe-return zone.
+            // Both processes physically swim back; the host only advances Return after every roster bag is marked safe.
+            if (boss.Phase == BossEncounterPhase.Active && boss.Health <= 0f)
+            {
+                result.bossDefeatedPending = true;
+                ReturnBossPartyToShore(local);
+                return;
+            }
+
+            // Both real processes converge on the arena, aim at the locally presented boss collider and fire
+            // through NetworkPlayer's existing harpoon RPC/raycast path.
+            var toArena = BossFiringPosition(local) - local.transform.position;
+            if (toArena.magnitude > 1.4f)
+            {
+                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: true);
+                return;
+            }
+
+            if (boss.Phase == BossEncounterPhase.Completed || BossProgression.IsCompleted(DeepProgressionIds.BossId))
+            {
+                result.bossCompletedSeen = true;
+                local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
+            var arenaPlayers = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .Count(player => player.IsSpawned && !player.Passive.Value &&
+                                 Vector3.Distance(player.transform.position, BossFiringPosition(player)) <= 1.4f);
+            if (arenaPlayers < Math.Min(2, adapter.Session.Roster.Count))
+            {
+                local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+                return;
+            }
+
+            var delta = DeepEncounterWorld.BossPosition - local.RecordingEyePosition;
+            var flat = new Vector3(delta.x, 0f, delta.z);
+            var yaw = flat.sqrMagnitude > 0.0001f ? Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg : 0f;
+            var pitch = -Mathf.Atan2(delta.y, Mathf.Max(0.01f, flat.magnitude)) * Mathf.Rad2Deg;
+            local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+            if (boss.Phase == BossEncounterPhase.Active && Time.realtimeSinceStartup >= bossNextShot)
+            {
+                bossNextShot = Time.realtimeSinceStartup + 0.9f;
+                local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
+                local.SubmitHarpoonLocal();
+                result.bossShotSent = true;
+            }
+        }
+
+        private void ReturnBossPartyToShore(NetworkPlayer local)
+        {
+            if (local.transform.position.z > -3f)
+            {
+                SwimAcceptance(local, FleetBackTarget, 0.7f, surfaceTransit: true);
+                return;
+            }
+            var zone = FindFirstObjectByType<SafeReturnZone>();
+            var box = zone != null ? zone.GetComponent<BoxCollider>() : null;
+            if (box == null) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
+            var target = box.bounds.center - Vector3.up * 0.9f;
+            target.x += local.OwnerClientId == 0 ? -0.7f : 0.7f;
+            var next = NextBeachWaypoint(local.transform.position, target);
+            var heading = next - local.transform.position;
+            var yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
+            var move = heading.magnitude > 0.4f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * heading.normalized : Vector3.zero;
+            local.SubmitLocalInput(move, yaw, 0f);
+        }
+
+        private static Vector3 BossFiringPosition(NetworkPlayer player) =>
+            DeepEncounterWorld.ArenaPosition + new Vector3(player.OwnerClientId == 0 ? -1.2f : 1.2f, 0f, -1.2f);
+
+        private static void SwimAcceptance(NetworkPlayer local, Vector3 target, float tolerance, bool surfaceTransit = false)
+        {
+            var current = local.transform.position;
+            var horizontal = new Vector2(target.x - current.x, target.z - current.z).magnitude;
+            var waypoint = target;
+            if (surfaceTransit && horizontal > 2.2f)
+                waypoint = new Vector3(target.x, 7f, target.z);
+
+            var heading = waypoint - current;
+            var flat = new Vector3(heading.x, 0f, heading.z);
+            var yaw = flat.sqrMagnitude > 0.0001f ? Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg : 0f;
+            var move = heading.magnitude > tolerance
+                ? Quaternion.Inverse(Quaternion.Euler(0f, yaw, 0f)) * heading.normalized
+                : Vector3.zero;
+            local.SubmitLocalInput(move, yaw, 0f);
+        }
+
+        private bool HostBossAcceptanceReload()
+        {
+            var store = adapter.GetComponent<EconomySaveStore>();
+            if (store == null || adapter.Connection.Status != ConnectionStatus.Connected || !DeepProgressionEvidence.IsBound)
+                return false;
+
+            var state = BossProgression.State;
+            if (state.Stage == DeepProgressionStage.Locked) return false;
+            var boss = BossEncounterRuntime.Snapshot;
+            var disk = File.Exists(store.SavePath)
+                ? JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath))
+                : null;
+            result.bossReloadPass =
+                state.Stage == DeepProgressionStage.Discovery &&
+                state.TracesFound == DeepProgressionIds.RequiredTraceCount &&
+                state.IsCompleted(DeepProgressionIds.BossId) &&
+                boss.Phase != BossEncounterPhase.Active &&
+                disk != null && disk.HasProgression &&
+                disk.Progression.CompletedBossIds.Contains(DeepProgressionIds.BossId);
+            result.passed = result.bossReloadPass && result.errors.Count == 0;
             return true;
         }
 
@@ -2064,6 +2306,56 @@ namespace DeepDive.P1.Lab
         {
             var sync = local.GetComponent<BoatTripPlayerSync>();
             if (sync == null || !sync.IsSpawned) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            if (FleetRoute)
+            {
+                var economySync = local.GetComponent<EconomyPlayerSync>();
+                if (economySync == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+                var expectedMask = TripVehicleId == VehicleIds.ResearchBoat ? 4 : TripVehicleId == VehicleIds.Motorboat ? 2 : 1;
+                if ((economySync.FleetOwnedMask.Value & expectedMask) == 0)
+                {
+                    if (adapter.IsAuthority && !result.errors.Contains($"fleet-route campaign does not own {TripVehicleId}"))
+                        result.errors.Add($"fleet-route campaign does not own {TripVehicleId}");
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+                }
+                if (economySync.ActiveVehicleId.Value.ToString() != TripVehicleId)
+                {
+                    // Active selection must use the real harbor vendor session, just like the player UI.
+                    if (adapter.IsAuthority)
+                    {
+                        if (!economySync.VendorOpen)
+                        {
+                            var camera = local.GetComponentInChildren<Camera>(true);
+                            if (camera != null && GoToService(local, camera, TownServiceCatalog.VehicleVendorId))
+                                InteractEvery(local, 1.2f);
+                            return;
+                        }
+                        if (Time.realtimeSinceStartup >= tripNext)
+                        {
+                            tripNext = Time.realtimeSinceStartup + 1.2f;
+                            economySync.RequestSelectVehicle(TripVehicleId);
+                        }
+                    }
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+                }
+                result.tripFleetVehicleReady = true;
+
+                var expectedHull = TripVehicleId == VehicleIds.ResearchBoat ? BoatHullKind.ResearchVessel :
+                    TripVehicleId == VehicleIds.Motorboat ? BoatHullKind.Motorboat : BoatHullKind.Rowboat;
+                var localPresentation = FindObjectsByType<BoatHullPresentation>(FindObjectsSortMode.None)
+                    .FirstOrDefault(p => p.gameObject.name == "P3BoatVisual");
+                var mirrorCorrect = (BoatHullKind)sync.HullKind.Value == expectedHull &&
+                    localPresentation != null && localPresentation.PresentedHull == expectedHull;
+                if (adapter.IsAuthority)
+                {
+                    var physical = FindFirstObjectByType<NetworkBoatController>();
+                    var hostPhysicalCorrect = physical != null && physical.BoatId == TripVehicleId &&
+                        physical.HullKind == expectedHull;
+                    result.tripHullKindCorrect |= mirrorCorrect && hostPhysicalCorrect;
+                }
+                else result.tripHullKindCorrect |= mirrorCorrect;
+            }
             var phase = (BoatTripPhase)sync.Phase.Value;
             var phaseName = phase.ToString();
             if (sync.BoatVisible.Value && tripLastPhase != phaseName)
@@ -2073,7 +2365,8 @@ namespace DeepDive.P1.Lab
             var owner = sync.AmOwner.Value;
             var now = Time.realtimeSinceStartup;
             if (tripStepAt == 0) tripStepAt = now;
-            if (tripStep < 90 && now - tripStepAt > 32f)
+            var tripStepTimeout = FleetRoute && TripRouteId == BoatTripIds.DeepRouteId ? 75f : FleetRoute ? 50f : 32f;
+            if (tripStep < 90 && now - tripStepAt > tripStepTimeout)
             {
                 result.errors.Add($"trip step {tripStep} timeout phase={phaseName} seated={sync.SeatedCount.Value} seat={sync.MySeatId.Value} last={sync.LastReasonCode.Value}");
                 TripStep(99);
@@ -2093,7 +2386,9 @@ namespace DeepDive.P1.Lab
                 {
                     var dock = FindObjectsByType<RouteAnchor>(FindObjectsSortMode.None).FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.Dock);
                     if (dock == null || !sync.BoatVisible.Value) { local.SubmitLocalInput(Vector3.zero, 0); return; }
-                    var stand = new Vector3(dock.BoardingPosition.x + (adapter.IsAuthority ? -0.4f : 0.4f), dock.BoardingPosition.y, -3.6f);   // deck end, as close to the stern as the deck goes
+                    var stand = FleetRoute
+                        ? new Vector3(sync.BoatWorldPosition.Value.x + (adapter.IsAuthority ? -0.35f : 0.35f), dock.BoardingPosition.y, sync.BoatWorldPosition.Value.z - 2.5f)
+                        : new Vector3(dock.BoardingPosition.x + (adapter.IsAuthority ? -0.4f : 0.4f), dock.BoardingPosition.y, -3.6f);
                     var toStand = stand - local.transform.position; toStand.y = 0;
                     if (now - tripNext > 1.5f) { tripNext = now; result.tripTrace.Add($"walk pos={local.transform.position} onBeach={tripOnBeach} platMaxZ={(GameObject.Find("Beach_Platform") != null ? GameObject.Find("Beach_Platform").GetComponent<Collider>().bounds.max.z : 0f)}"); }
                     if (toStand.magnitude > 0.1f)
@@ -2152,7 +2447,7 @@ namespace DeepDive.P1.Lab
                 case 3:   // owner starts the route; everyone rides Outbound to Anchored
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (phase == BoatTripPhase.Anchored) { TripStep(4); return; }
-                    if (owner && phase == BoatTripPhase.Docked && now >= tripNext) { tripNext = now + 1.5f; sync.RequestStartRouteLocal(BoatTripIds.NearRouteId); }
+                    if (owner && phase == BoatTripPhase.Docked && now >= tripNext) { tripNext = now + 1.5f; sync.RequestStartRouteLocal(TripRouteId); }
                     return;
                 case 4:   // anchorage: the non-owner steps off (return marker), the owner waits for the dip
                     local.SubmitLocalInput(Vector3.zero, 0);
@@ -2215,7 +2510,7 @@ namespace DeepDive.P1.Lab
             {
                 var icon = icons[i];
                 if (icon.IconId == BoatMapPresenter.DockIconId) { dock = icon; hasDock = true; }
-                else if (icon.IconId == BoatTripIds.BoatId) { boat = icon; hasBoat = true; }
+                else if (icon.IconId == (FleetRoute ? TripVehicleId : BoatTripIds.BoatId)) { boat = icon; hasBoat = true; }
                 else if (icon.IconId == BoatMapPresenter.ReturnMarkerIconId) marker = true;
                 else if (icon.IconId.StartsWith(BoatMapPresenter.PlayerIconPrefix, StringComparison.Ordinal)) players++;
             }
@@ -2234,7 +2529,10 @@ namespace DeepDive.P1.Lab
             var region = FindFirstObjectByType<DiveRegionField>();
             var anchors = FindObjectsByType<RouteAnchor>(FindObjectsSortMode.None);
             var dockAnchor = anchors.FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.Dock);
-            var seaAnchor = anchors.FirstOrDefault(a => a.AnchorId == DiveRouteAnchors.AnchorPoint);
+            var targetAnchorId = DiveRouteAnchors.AnchorPoint;
+            if (FleetRoute && DiveRoutePath.TryGetDefinition(TripRouteId, out var fleetDefinition))
+                targetAnchorId = fleetDefinition.AnchorPointAnchor;
+            var seaAnchor = anchors.FirstOrDefault(a => a.AnchorId == targetAnchorId);
             if (region == null || dockAnchor == null || seaAnchor == null) return;
             region.TryWorldToMap(dockAnchor.WorldPosition, out var expectedDock);
             region.TryWorldToMap(seaAnchor.WorldPosition, out var expectedAnchor);

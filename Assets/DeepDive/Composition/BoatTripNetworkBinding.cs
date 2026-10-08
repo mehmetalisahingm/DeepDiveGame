@@ -91,8 +91,6 @@ namespace DeepDive.Composition
             if (boatController != null) return;
             var authorityObject = new GameObject("P3BoatAuthority");
             authorityObject.transform.SetParent(transform, false);
-            var hullPresentation = authorityObject.AddComponent<BoatHullPresentation>();
-            hullPresentation.Initialize(null);
             boatController = authorityObject.AddComponent<NetworkBoatController>();
             boatController.Initialize(networkManager, this);
         }

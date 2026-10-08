@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
 using DeepDive.Inventory;
@@ -29,10 +30,12 @@ namespace DeepDive.Composition
         private int receivedRevision = -1;
         private double nextBroadcast;
         private ulong completionSequence = 0xB055100000000000UL;
+        private readonly HashSet<ulong> acceptedHitPlayers = new HashSet<ulong>();
         private InventoryManager inventory;
         private string pendingDefeatDiveId = string.Empty;
 
         public BossEncounterSnapshot Snapshot => mirror;
+        public int AcceptedHitPlayerCount => acceptedHitPlayers.Count;
         private bool IsHost => adapter != null && manager != null && manager.IsListening && adapter.IsAuthority;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -122,8 +125,15 @@ namespace DeepDive.Composition
             authority.RefreshProgression(
                 BossProgression.IsAvailable(DeepProgressionIds.BossId),
                 BossProgression.IsCompleted(DeepProgressionIds.BossId));
+            var wasActive = authority.Phase == BossEncounterPhase.Active;
             var result = authority.TryActivate(requestedEncounterId);
-            if (result == PlayerActionResult.Accepted) pendingDefeatDiveId = string.Empty;
+            // World probes the occupied arena repeatedly. An accepted activation replay must
+            // preserve the defeated encounter's pending safe-return checkpoint.
+            if (result == PlayerActionResult.Accepted && !wasActive)
+            {
+                pendingDefeatDiveId = string.Empty;
+                acceptedHitPlayers.Clear();
+            }
             MirrorAuthority();
             Broadcast();
             return result;
@@ -144,8 +154,9 @@ namespace DeepDive.Composition
                 return result;
             }
 
-            // Lethal damage stays transient until InventoryManager emits the real safe-return DiveSummary.
-            // Host loss / failed return therefore cannot persist a boss clear.
+            acceptedHitPlayers.Add(hit.PlayerId.Value);
+            // The kill is transient. Completion is persisted only when the real dive summary
+            // proves a safe-return checkpoint.
             if (authority.DefeatedPendingPersistence)
                 pendingDefeatDiveId = adapter != null ? adapter.Session.State.DiveId : string.Empty;
 
@@ -234,6 +245,7 @@ namespace DeepDive.Composition
         {
             if (authority != null) authority.Abort();
             authority = null;
+            acceptedHitPlayers.Clear();
             pendingDefeatDiveId = string.Empty;
             receivedRevision = -1;
             lastBroadcastRevision = int.MinValue;

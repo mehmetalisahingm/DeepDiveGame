@@ -135,7 +135,17 @@ namespace DeepDive.Editor
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] { Prep, Dive },
                 locationPathName = path, target = BuildTarget.StandaloneWindows64, options = BuildOptions.Development });
             if (report.summary.result != BuildResult.Succeeded) throw new InvalidOperationException("Integrated P1 build failed.");
-            Debug.Log("P1_BUILD_SUCCEEDED integrated=true");
+            Debug.Log("P1_BUILD_SUCCEEDED integrated=true target=windows");
+        }
+
+        public static void BuildLinux()
+        {
+            var path = "Builds/P1-Integrated/DeepDiveGame-P1.x86_64";
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = new[] { Prep, Dive },
+                locationPathName = path, target = BuildTarget.StandaloneLinux64, options = BuildOptions.Development });
+            if (report.summary.result != BuildResult.Succeeded) throw new InvalidOperationException("Integrated P1 Linux build failed.");
+            Debug.Log("P1_BUILD_SUCCEEDED integrated=true target=linux");
         }
     }
 }
