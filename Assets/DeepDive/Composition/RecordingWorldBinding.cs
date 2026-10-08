@@ -87,7 +87,7 @@ namespace DeepDive.Composition
         }
     }
 
-    public sealed class NetworkRecorderView : IRecorderView
+    public sealed class NetworkRecorderView : IRecorderView, IRecordingStabilityView
     {
         public NetworkPlayer Player { get; }
         private readonly InventoryManager inventory;
@@ -100,5 +100,7 @@ namespace DeepDive.Composition
         public Vector3 EyePosition => Player.RecordingEyePosition;
         public Vector3 EyeForward => Player.RecordingForwardServer;
         public float VerticalFieldOfViewDegrees => Player.RecordingFieldOfView;
+        public float ExtraOffAxisToleranceDegrees =>
+            CrewRoleEffectRules.ResolveCameraFramingTolerance(Player.CurrentCrewRole);
     }
 }
