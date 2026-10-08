@@ -14,6 +14,7 @@ using DeepDive.Economy;
 using DeepDive.Trip;
 using DeepDive.MapUI;
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
