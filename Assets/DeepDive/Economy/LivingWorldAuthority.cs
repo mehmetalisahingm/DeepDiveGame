@@ -299,7 +299,9 @@ namespace DeepDive.Economy
 
         private void ApplyBenefits() =>
             economy.ApplyLivingUpgradeBenefits(upgrades.Contains(LivingWorldCatalog.HouseArchive),
-                upgrades.Contains(LivingWorldCatalog.FishMarket));
+                upgrades.Contains(LivingWorldCatalog.FishMarket),
+                upgrades.Contains(LivingWorldCatalog.EquipmentDisplay),
+                upgrades.Contains(LivingWorldCatalog.HarborLights));
 
         private TransactionResult Reject(ulong requestId, string reason) =>
             TransactionResult.Reject(requestId, reason, Revision);
