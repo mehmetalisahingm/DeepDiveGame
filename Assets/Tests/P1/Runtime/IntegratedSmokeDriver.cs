@@ -84,6 +84,8 @@ namespace DeepDive.P1.Lab
             public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
             public bool bossSighting, bossRumor, bossTraceStage, bossArenaUnlocked, bossActiveSeen, bossDamageSeen,
                 bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
+            public bool p45RolesSeen, p45CarrierCapacity, p45NoStack, p45GuestCrossWriteRefused,
+                p45PingSeen, p45PingOnMap, p45PingServerStamped, p45CurrentSeen, p45CurrentCleared;
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -126,6 +128,7 @@ namespace DeepDive.P1.Lab
         private bool DeepReload => Arg("-p4-deep-reload") == "1";
         private bool BossAcceptance => Arg("-p4-boss-acceptance") == "1";
         private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
+        private bool RoleEffects => Arg("-p45-role-effects") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -149,6 +152,8 @@ namespace DeepDive.P1.Lab
         private float returnPhaseAt, pendingSeenAt, turnInAt;
         private float recordingStartTime;
         private float bossNextShot, bossTraceAt;
+        private bool p45PingSent;
+        private P45CurrentSmokeSource p45CurrentSource;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -177,6 +182,12 @@ namespace DeepDive.P1.Lab
             yield return null; yield return null;
             adapter = FindFirstObjectByType<SessionNetworkAdapter>();
             if (adapter == null) { result.errors.Add("No integrated adapter in real scene"); Finish(); yield break; }
+            if (RoleEffects && host)
+            {
+                var source = new GameObject("P45CurrentSmokeSource");
+                DontDestroyOnLoad(source);
+                p45CurrentSource = source.AddComponent<P45CurrentSmokeSource>();
+            }
             GameObject.Find("Port").GetComponent<InputField>().text = port.ToString();
             GameObject.Find(host ? "HostButton" : "JoinButton").GetComponent<Button>().onClick.Invoke();
             var started = Time.realtimeSinceStartup;
@@ -184,7 +195,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 360f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -219,6 +230,7 @@ namespace DeepDive.P1.Lab
                 if (connection.Status == ConnectionStatus.Connected && !connection.IsSceneLoading)
                 {
                     Probe(expected);
+                    if (RoleEffects) ObserveP45RoleEffects(host, expected, state);
                     if (state.Phase == SessionPhase.Lobby && connection.LocalPlayerId.HasValue &&
                         adapter.Session.Roster.TryGetValue(connection.LocalPlayerId.Value, out var ready) && !ready && state.Revision == 0)
                         GameObject.Find("ReadyButton").GetComponent<Button>().onClick.Invoke();
@@ -335,6 +347,10 @@ namespace DeepDive.P1.Lab
                 result.bossActiveSeen && result.bossShotSent && result.bossDefeatedPending && result.bossCompletedSeen &&
                 (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossPartySafe &&
                     result.bossSaved && result.bossHostDone));
+            if (RoleEffects) result.passed &= result.p45RolesSeen && result.p45PingSeen && result.p45PingOnMap &&
+                result.p45CurrentSeen && result.p45CurrentCleared &&
+                (host ? (result.p45CarrierCapacity && result.p45NoStack && result.p45PingServerStamped)
+                      : result.p45GuestCrossWriteRefused);
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
