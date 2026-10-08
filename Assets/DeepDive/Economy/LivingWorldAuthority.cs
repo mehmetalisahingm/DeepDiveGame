@@ -188,6 +188,7 @@ namespace DeepDive.Economy
             var previous = Export();
             foreach (var item in sold)
             {
+                if (state.OrderProgress >= LivingWorldCatalog.OrderQuantity(state.OrderId)) break;
                 if (item.Kind != TurnInKind.Catch || item.SubjectId != "sea_bass" ||
                     string.IsNullOrWhiteSpace(item.ItemId) || !seenCatches.Add(item.ItemId)) continue;
                 state.SeenCatchIds.Add(item.ItemId);
