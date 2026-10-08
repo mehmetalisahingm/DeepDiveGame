@@ -293,6 +293,11 @@ namespace DeepDive.Economy
                 if (data == null) return Fail("invalid save json");
                 data.Loadouts?.RemoveAll(x => x == null || x.PlayerId != 0);
 
+                // Restore capacity *before* importing storage so upgraded 50-slot saves are not truncated.
+                // No second storage ownership or capacity source is persisted.
+                var owned = data.HasLiving ? data.Living?.PurchasedUpgradeIds : null;
+                economy.ApplyLivingUpgradeBenefits(owned != null && owned.Contains(LivingWorldCatalog.HouseArchive),
+                    owned != null && owned.Contains(LivingWorldCatalog.FishMarket));
                 restoring = true;
                 if (!economy.TryRestore(data))
                 {
