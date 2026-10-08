@@ -34,14 +34,25 @@ namespace DeepDive.Economy
         private const int ArchiveBonusSlots = 10;
         private bool archiveBonusEnabled;
         private bool fishBuyerBonusEnabled;
+        private bool equipmentShopDiscountEnabled;
+        private bool harborDiscountEnabled;
         public int StorageCapacity => StorageCapacityItems + (archiveBonusEnabled ? ArchiveBonusSlots : 0);
 
         // These are derived ONLY from Mert's authoritative persistent purchased upgrades.
-        public void ApplyLivingUpgradeBenefits(bool archiveOwned, bool fishMarketOwned)
+        public void ApplyLivingUpgradeBenefits(bool archiveOwned, bool fishMarketOwned,
+            bool equipmentDisplayOwned = false, bool harborLightsOwned = false)
         {
             archiveBonusEnabled = archiveOwned;
             fishBuyerBonusEnabled = fishMarketOwned;
+            equipmentShopDiscountEnabled = equipmentDisplayOwned;
+            harborDiscountEnabled = harborLightsOwned;
         }
+
+        // Discounts are derived from the ORIGINAL definition price, never compounded.
+        private int EquipmentPurchasePrice(int listedPrice) =>
+            equipmentShopDiscountEnabled ? listedPrice - listedPrice / 20 : listedPrice;
+        private int VehiclePurchasePrice(int listedPrice) =>
+            harborDiscountEnabled ? listedPrice - listedPrice / 20 : listedPrice;
 
         public event Action OnBalanceChanged;
         public event Action<PlayerId> OnLoadoutChanged;
@@ -680,14 +691,14 @@ namespace DeepDive.Economy
             else if (_equipmentRequires.TryGetValue(equipmentId, out var requiredId) &&
                      !(_loadout.TryGetValue(player, out var ownedForTier) && ownedForTier.Contains(requiredId)))
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
-            else if (SharedBalance < definition.Price)
+            else if (SharedBalance < EquipmentPurchasePrice(definition.Price))
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
             else
             {
                 var previousBalance = SharedBalance;
                 var previousRevision = Revision;
                 var createdSet = false;
-                SharedBalance -= definition.Price;
+                SharedBalance -= EquipmentPurchasePrice(definition.Price);
                 if (!_loadout.TryGetValue(player, out var set))
                 {
                     set = new HashSet<string>();
@@ -708,7 +719,7 @@ namespace DeepDive.Economy
                 else
                 {
                     result = TransactionResult.Ok(requestId, Revision);
-                    OnSpent?.Invoke("equip-" + equipmentId + "-" + player.Value, definition.Price);
+                    OnSpent?.Invoke("equip-" + equipmentId + "-" + player.Value, EquipmentPurchasePrice(definition.Price));
                 }
             }
 
@@ -825,13 +836,13 @@ namespace DeepDive.Economy
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
             else if (definition.Class == VehicleClass.ResearchBoat && !HasDiscoveredCellInBand(DepthBandIds.Reef))
                 result = TransactionResult.Reject(requestId, "RequirementMissing", Revision);
-            else if (SharedBalance < definition.Price)
+            else if (SharedBalance < VehiclePurchasePrice(definition.Price))
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
             else
             {
                 var previousBalance = SharedBalance;
                 var previousRevision = Revision;
-                SharedBalance -= definition.Price;
+                SharedBalance -= VehiclePurchasePrice(definition.Price);
                 _purchasedVehicles.Add(boatId);
                 Revision++;
                 if (!Persist())
@@ -842,7 +853,7 @@ namespace DeepDive.Economy
                     return TransactionResult.Reject(requestId, "SaveFailed", Revision);
                 }
                 result = TransactionResult.Ok(requestId, Revision);
-                OnSpent?.Invoke("vehicle-" + boatId, definition.Price);
+                OnSpent?.Invoke("vehicle-" + boatId, VehiclePurchasePrice(definition.Price));
             }
 
             _processedRequests[requestKey] = result;
