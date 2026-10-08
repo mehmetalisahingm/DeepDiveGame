@@ -1,6 +1,6 @@
 # Güncel durum ve görev takibi
 
-Plan **3.0 — 15 Eylül 2026**. Son durum güncellemesi: **1 Ekim 2026**.
+Plan **3.0 — 15 Eylül 2026**. Son durum güncellemesi: **8 Ekim 2026**.
 
 Aktif faz: **P4**. P0–P3 kapalıdır. P4 kendi içinde sıralı ilerler: **P4.1 → P4.2 → P4.3 → P4.4 → P4.5 → P4.6**. Bir ara teslim birleşik kabul kapısını geçmeden sıradaki özellik işi tamamlanmış sayılmaz.
 
@@ -91,43 +91,32 @@ P4.2 acceptance tamamlandığı için **P4.3 aktif geliştirmeye açıldı**.
 
 ## P4.3 — Kamera ve büyük tekneler
 
-**Durum: AKTİF.**
+**Durum: TAMAMLANDI / entegrasyonda.** PR #129, kabul edilen head `60e6306`, merge `515f5b6`. Merge sonrası kaynak ağacı aynı.
 
-Alan dağılımı:
+Gerçek iki süreçli filo satın alma/gerçek Reef/aktif seçim/restore; motorlu-resif ve araştırma-derin rota için binme → gidiş → demirleme → iniş/yeniden binme → dönüş → boş dock geçti. İki süreçte doğru gövde ve harita doğrulandı. #107/#108 kapalı; #109 önceden tamamlanmıştı. Eski PR #127, #129 tarafından karşılandı.
 
-| Sahip | Kapsam |
-|---|---|
-| Mehmet | İki üst kamera modelinin oyuncu/presentation etkisi; palet/çanta/zıpkın yükseltmelerinin player bağlantısı; sandal/motorlu/araştırma teknesi için koltuk, host-authoritative hareket ve harita konum seam'i |
-| Utku | Kamera menzil/düşük ışık doğrulaması; yakın/resif/derin demirleme rotaları; route/world geometry ve çevre okunurluğu |
-| Mert | Liman tekne satıcısı; sandal → motorlu → araştırma teknesi satın alma/sahiplik/aktif araç seçimi; katalog/tahsis/emanet/save ve tek aktif araç progression'ı |
+## P4.4 — Derin keşif ve boss
 
-P4.3 kabulünde:
-- üç kamera kademesi somut yetenek farkı üretmeli,
-- motorlu ve araştırma teknesi ayrı gövde/model olmalı; eski sandal yalnız ölçeklenmiş gibi olmamalı,
-- tüm araçlar dört kişilik olmalı,
-- aynı anda yalnız bir aktif araç denizde olmalı,
-- satın alma/save/reload duplicate tekne veya para üretmemeli,
-- sabit rotalı seyahat korunmalı; serbest dümen/fizik simülasyonu eklenmemeli,
-- gerçek en az iki süreçli araç satın alma → seçim → binme → rota → dönüş smoke'u kaydedilmeli.
+**Durum: TAMAMLANDI / entegrasyonda.** #124 final kabulü PR #129 ile geçti; #121/#122/#123 kapalı.
 
-Mehmet'in P4.3-A foundation'ı PR `#111` ile merge edildi. Utku `#108` ve Mert `#109` kapsamları ile final cross-owner binding/smoke tamamlanmadan P4.3 kapanmaz.
+Gerçek iki süreçli akış: ansiklopedi → gerçek Reef → üç fiziksel iz → arena → iki ayrı oyuncunun zıpkın vuruşu → kuru güvenli dönüş → tek kalıcı boss completion → ikinci host açılışında restore. Aktif transient karşılaşma geri yüklenmiyor.
 
-## Sonraki P4 teslimleri
+CI `37699987867` ve `37699982093`: Unity/EditMode + Windows build, P4.3 filo/rota ve P4.4 boss/restore kontrolleri SUCCESS. [Kapanış kanıtı](../reports/P4-3-P4-4-ACCEPTANCE.md).
 
-| Ara teslim | Durum |
-|---|---|
-| P4.4 — Derin keşif ve boss | KİLİTLİ |
-| P4.5 — Sponsor/sipariş, hava/gece/akıntı, ev-kasaba gelişimi | KİLİTLİ |
-| P4.6 — Tam dünya ve üç ardışık gün kabulü | KİLİTLİ |
+Bu kanıt iki gerçek yerel/CI sürecidir; ayrı bilgisayar/internet, nihai sanat ve P4.6 üç günlük ortak kabul yerine geçmez. Başkaları adına manuel oynanış onayı üretilmedi. Kullanıcı iki ara teslimin kapanışını ve sonraki görevlerin açılışını istedi.
 
-## Bilinen ayrı takip
+## P4.5 — Yaşayan dünya
 
-- `#86`: eski P3.4 oyun testlerinden bağımsız GitHub Actions / workflow follow-up. Oyun feature ilerlemesinin otoritesi değildir; CI katmanı ayrıca yeşile döndürülmelidir.
+**Durum: AKTİF.** P4.3/P4.4 kabul kapıları kapandı; uygulama görevleri açıldı.
 
-## Şu an sıradaki tek ortak kapı
+| Sahip | GitHub | Teslim |
+|---|---|---|
+| Mehmet | [#130](https://github.com/mehmetalisahingm/DeepDiveGame/issues/130) | Hafif rol etkileri, akıntı/hareket bağlantısı, ekip uyarıları ve pingler |
+| Utku | [#131](https://github.com/mehmetalisahingm/DeepDiveGame/issues/131) | Sakin/rüzgarlı hava, gece davranışı, bir akıntı alanı, görev world uygunluğu |
+| Mert | [#132](https://github.com/mehmetalisahingm/DeepDiveGame/issues/132) | Üç sipariş/üç sponsor, iki ev seviyesi/üç kasaba iyileştirmesi, rol UI/save ve dar denge turu |
 
-**P4.3 birleşik entegrasyon ve araç acceptance:**
+Koordinatör Utku; hedef `codex/p4-integration`. Herkes kendi gerçek co-op davranışını ve görsel bağlantısını teslim eder. P4.6, P5 ve P6 kapalıdır.
 
-`kamera tier/world doğrulaması + tekne sahipliği/aktif seçim + Mehmet'in araç network seam'i -> gerçek 2-process board -> outbound -> anchor -> disembark/reboard -> inbound -> dock`
+## Sıradaki ortak kapı
 
-Bu zincir fixture'sız ve aynı integration build'inde geçince P4.3 kapanır ve P4.4 açılabilir.
+P4.5 birleşik kabulü: erişilebilir günlük hedefler → doğrulanmış av/çekim → tek ödül → görünür ev/kasaba ilerlemesi → rol/hava/akıntı → save/load/replay. Bu kabul sonrası P4.6 üç ardışık oyun günü ve gerçek ortak görsel/oynanış değerlendirmesine geçilir.

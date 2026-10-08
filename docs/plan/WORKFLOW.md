@@ -1,6 +1,6 @@
 # Birlikte çalışma düzeni
 
-Plan 3.0 — 15 Eylül 2026. P3 açık, P4–P6 kilitli. Yeni plan kapsamı uygulama veya faz kapanışı değildir; önceki test/ekip onayları yeni özelliklere taşınmaz.
+Plan 3.0 — güncel durum 8 Ekim 2026. P0–P3 kapalı; aktif ara teslim P4.5. P4.3/P4.4 kabulü PR #129 ile geçti. P4.6, P5 ve P6 kapalıdır; önceki test/ekip onayları yeni özelliklere taşınmaz.
 
 Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazın incelemesine, testine veya devredilen alt işine destek olur.
 
@@ -19,7 +19,7 @@ Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazı
 ## Branch ve inceleme
 
 - main, ortak doğrulanmış sürümdür; başlangıç plan commit'i oyun fazını tamamlamaz.
-- Mevcut ortak faz dalı: `codex/p3-integration`.
+- Mevcut ortak faz dalı: `codex/p4-integration`.
 - Küçük özellik dalları o faz dalından açılır; örnek isimler: `codex/p3-mehmet-avatar`, `codex/p3-utku-coast`, `codex/p3-mert-npc`. Bunlar oluşturulmuş dal iddiası değildir.
 - Özellik PR'ı aynı faz dalına, faz kapanış PR'ı main'e gider.
 - Ayrı kişi branch'lerinde haftalarca birikim yapılmaz; küçük birleşmeler yapılır.
