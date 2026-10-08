@@ -46,6 +46,7 @@ namespace DeepDive.Trip
         private Func<string> _activeBoatId;
         private IBoatTripRouteCatalog _routeCatalog;
         private ISessionRoster _roster;
+        private Func<string, bool> _outboundWeatherAllowed;
 
         // Kept as a thin interface rather than a direct EconomyManager/NetworkSession reference so
         // this class - and its tests - never need either component to exist.
@@ -67,12 +68,14 @@ namespace DeepDive.Trip
         // Awake alone. Composition and every test call Configure explicitly, so binding here is the
         // one path that actually runs in both contexts.
         public void Configure(Func<BoatRepairStatus> repairStatus, ISessionRoster roster,
-            Func<string> activeBoatId = null, IBoatTripRouteCatalog routeCatalog = null)
+            Func<string> activeBoatId = null, IBoatTripRouteCatalog routeCatalog = null,
+            Func<string, bool> outboundWeatherAllowed = null)
         {
             _repairStatus = repairStatus;
             _roster = roster;
             _activeBoatId = activeBoatId;
             _routeCatalog = routeCatalog;
+            _outboundWeatherAllowed = outboundWeatherAllowed;
             BoatBoarding.Bind(TryBoard, TryDisembark);
             BoatRouteProgress.Bind(ReportArrival);
             VehicleSwitchGate.Bind(SwitchBlockedReason);
@@ -90,6 +93,7 @@ namespace DeepDive.Trip
             BoatBoarding.Unbind(TryBoard, TryDisembark);
             BoatRouteProgress.Unbind(ReportArrival);
             VehicleSwitchGate.Unbind(SwitchBlockedReason);
+            _outboundWeatherAllowed = null;
         }
 
         private List<BoatSeatAssignment> SnapshotSeats()
@@ -213,6 +217,9 @@ namespace DeepDive.Trip
             else if (route.RequiredVehicleClass == VehicleClass.None ||
                      (byte)VehicleCatalog.ClassOf(ActiveBoatId) < (byte)route.RequiredVehicleClass)
                 result = TransactionResult.Reject(requestId, "RequirementMissing", _revision);
+            else if (_outboundWeatherAllowed != null && !_outboundWeatherAllowed(route.RouteId))
+                // Only new departure. Inbound/return can never be denied by weather.
+                result = TransactionResult.Reject(requestId, "WeatherRestricted", _revision);
             else
             {
                 _tripSequence++;
