@@ -69,6 +69,9 @@ namespace DeepDive.P1.Lab
                 acceptReplayPaysNothing, acceptSavedOnDisk, acceptReloadClean, acceptHostDone, acceptReloadPass, acceptReloadPlayable;
             public string acceptClipId = "", acceptRecordingId = "", acceptHash = "", acceptSubject = "", acceptRegion = "", acceptCell = "", acceptBand = "";
             public long acceptBytes;
+            public string acceptSponsorTemplate = "";
+            public int acceptSponsorBonus;
+            public bool acceptSponsorOk;
             public int acceptQuality, acceptDayBefore, acceptDayAfter, acceptIncome, acceptViews, acceptFollowers, acceptBalance, acceptExploreObs;
             public string acceptReloadClipId = "", acceptReloadRecordingId = "", acceptReloadHash = "";
             public long acceptReloadBytes;
@@ -80,6 +83,12 @@ namespace DeepDive.P1.Lab
             public int fleetBalance, fleetReloadBalance, fleetReloadOwned;
             public string fleetReloadActive = "", fleetReloadTripBoat = "";
             public List<string> fleetTrace = new List<string>();
+            public bool livingSeeded, livingFarRefused, livingBuildOk, livingDuplicateRefused, livingRolesOk, livingMirrorDev, livingEffectsMirrored, livingHomeVisual,
+                livingSold, livingTownVisuals, livingOrderMirrored, livingSpendOk, livingEffectsHost, livingOrderPaidOnce, livingSavedOnDisk, livingReloadClean,
+                livingHostLobbyDone, livingHostDone, livingReloadPass;
+            public int livingBalanceAfterBuild, livingFinalBalance, livingReloadBalance, livingSaleAmount, livingDay, livingReloadDay;
+            public string livingOrderTemplate = "", livingReloadOrderStatus = "";
+            public List<string> livingTrace = new List<string>();
             public bool deepOrderRefused, deepSightingCounted, deepEncyclopedia, deepRumor, deepFailClosed, deepContextRefused, deepTracesOk, deepTraceStage,
                 deepDiscoveryRefused, deepUnlocked, deepCompletedOnce, deepSavedOnDisk, deepReloadClean, deepHostDone, deepReloadPass;
             public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
@@ -128,6 +137,10 @@ namespace DeepDive.P1.Lab
         // fixture world validator (Utku's #122 world rule does not exist yet), then a second host launch on the same campaign file.
         private bool Deep => Arg("-p4-deep") == "1";
         private bool DeepReload => Arg("-p4-deep-reload") == "1";
+        // #132 living world: REAL walking to the home PC (builds + roles, requests decided by the host), a real dive and a real fish hand-in at the
+        // fish buyer that completes the day's order once, then a second host launch on the same campaign file. Labelled: the start money.
+        private bool Living => Arg("-p4-living") == "1";
+        private bool LivingReload => Arg("-p4-living-reload") == "1";
         private bool BossAcceptance => Arg("-p4-boss-acceptance") == "1";
         private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
         private bool RoleEffects => Arg("-p45-role-effects") == "1";
@@ -200,7 +213,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -251,7 +264,7 @@ namespace DeepDive.P1.Lab
                 { reconnectSent = true; adapter.JoinRoom("127.0.0.1", port); }
                 if (reconnectSent && connection.Status == ConnectionStatus.Connected && connection.Players.Count == expected)
                     result.clientRejoined = true;
-                if (host && elapsed > (Home ? 40 : 19) && !prepSent && allReady && (!Home || result.dayNumbers.Contains(2)))
+                if (host && elapsed > (Home ? 40 : 19) && !prepSent && allReady && (!Home || result.dayNumbers.Contains(2)) && (!Living || result.livingHostLobbyDone))
                 { prepSent = true; GameObject.Find("BeginPrepButton").GetComponent<Button>().onClick.Invoke(); }
                 result.prep |= state.Phase == SessionPhase.Prep && !connection.IsSceneLoading;
                 if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep && !connection.IsSceneLoading)
@@ -273,6 +286,7 @@ namespace DeepDive.P1.Lab
                 }
                 if (state.Phase == SessionPhase.Return && returnPhaseAt == 0) returnPhaseAt = Time.realtimeSinceStartup;
                 if (BossAcceptanceReload) { if (host && HostBossAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
+                if (LivingReload) { if (host && HostLivingReload()) { Finish(); yield break; } yield return null; continue; }
                 if (DeepReload) { if (host && HostDeepReload()) { Finish(); yield break; } yield return null; continue; }
                 if (FleetReload) { if (host && HostFleetReload()) { Finish(); yield break; } yield return null; continue; }
                 if (AcceptanceReload) { if (host && HostAcceptanceReload()) { Finish(); yield break; } yield return null; continue; }
@@ -284,6 +298,7 @@ namespace DeepDive.P1.Lab
                 if (Acceptance && host) HostAcceptance(state);
                 if (Fleet && host) HostFleet(state);
                 if (Deep) { ObserveDeep(); if (host) HostDeep(state); }
+                if (Living) { ObserveLiving(); if (host) HostLiving(state); }
                 if (BossAcceptance) ObserveBossAcceptance();
                 if (host && Storage) { HostInjectStorageCatches(state); HostStorageChecks(); }
                 if (host && Day) HostDay(state);
@@ -297,7 +312,7 @@ namespace DeepDive.P1.Lab
                 // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
                 var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
-                var returnCeiling = Fleet || Deep ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
+                var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
                 if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
                     !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
@@ -306,7 +321,7 @@ namespace DeepDive.P1.Lab
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -315,7 +330,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
@@ -339,7 +354,7 @@ namespace DeepDive.P1.Lab
                 (!result.acceptOwner || (result.acceptFarRefused && result.acceptPublished && result.acceptDuplicateRefused)) &&
                 (result.acceptOwner || result.acceptNotOwnerRefused) &&
                 (!host || (result.acceptPlayable && result.acceptNpcQueuedBefore && result.acceptNpcWithdrawn && result.acceptNpcRefused && result.acceptNoNpcPay &&
-                    result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone));
+                    result.acceptPaidOnce && result.acceptReplayPaysNothing && result.acceptSavedOnDisk && result.acceptReloadClean && result.acceptHostDone && result.acceptSponsorOk));
             if (Fleet) result.passed &= result.fleetShopOpened && result.fleetTierGateRefused && result.fleetTiersBought && result.fleetVendorOpened &&
                 result.fleetMirrorOwned && result.fleetMirrorActive && result.fleetActiveSeam &&
                 (!host || (result.fleetSeeded && result.fleetMotorSeeded && result.fleetReefGateRefused && result.fleetReefSwum && result.fleetReefOnDisk && result.fleetHostSeated && result.fleetParkedRefused && result.fleetHostChecks &&
@@ -353,6 +368,10 @@ namespace DeepDive.P1.Lab
                 result.bossActiveSeen && result.bossShotSent && result.bossDefeatedPending && result.bossCompletedSeen &&
                 (!host || (result.bossSighting && result.bossDamageSeen && result.bossTwoAttackers && result.bossPartySafe &&
                     result.bossSaved && result.bossHostDone));
+            if (Living) result.passed &= result.livingFarRefused && result.livingBuildOk && (host || result.livingDuplicateRefused) && result.livingRolesOk && result.livingMirrorDev &&
+                result.livingEffectsMirrored && result.livingHomeVisual && result.livingSold && result.livingTownVisuals && result.livingOrderMirrored &&
+                (!host || (result.livingSeeded && result.livingSpendOk && result.livingEffectsHost && result.livingOrderPaidOnce && result.livingSavedOnDisk &&
+                    result.livingReloadClean && result.livingHostDone));
             if (WorldConditions) result.passed &= result.p45WorldWeatherMirror &&
                 result.p45WorldBuoyVisible && result.p45WorldCurrentSeen && result.p45WorldCurrentCleared;
             if (RoleEffects) result.passed &= result.p45RolesSeen && result.p45PingSeen && result.p45PingOnMap &&
@@ -461,6 +480,7 @@ namespace DeepDive.P1.Lab
                 local.CurrentDriftVelocity.Value.sqrMagnitude < 0.0001f)
                 result.p45WorldCurrentCleared = true;
         }
+
 
         private void ObserveP45RoleEffects(bool host, int expected, SessionState state)
         {
@@ -604,6 +624,8 @@ namespace DeepDive.P1.Lab
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
                 else if (BossAcceptance && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBossAcceptance(local);
                 else if ((Fleet || Deep) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
+                else if (Living && !result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && livingStage < 90) ProbeLivingLobby(local);
+                else if (Living && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeLivingTown(local);
                 else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeFleet(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
@@ -1725,6 +1747,330 @@ namespace DeepDive.P1.Lab
             return true;
         }
 
+        // ---- #132 living world smoke ---------------------------------------------------------------------------------------
+        // Lobby (before any dive): both players walk to the home PC; the far request is refused by the HOST; the guest buys the fisherman's stall, the
+        // host the home level 2, the shop and the dock; a duplicate is refused; each player picks a role (the guest changes its mind once). Then a real
+        // dive (the host injects two 1 kg catches per player like -Town), a real hand-in at the fish buyer (the stall pays +10%) completes the day's
+        // order exactly once, the town props are really built, and a second host launch restores everything without paying or buying again.
+        private int livingStage, livingHostStage;
+        private float livingStageAt, livingHostAt, livingDoneAt, livingTraceAt;
+        private const int LivingSeedBalance = 5000;
+        private bool livingCaptured, livingTownCaptured, livingInjected;
+        private float livingVantageAt;
+
+        private static CrewRole RealRole(ulong clientId)
+        {
+            var p = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(x => x.IsSpawned && x.OwnerClientId == clientId);
+            return p != null ? p.CurrentCrewRole : CrewRole.None;
+        }
+
+        private static bool VisualBuilt(string id)
+        {
+            var root = GameObject.Find("P45_Development_" + id);
+            if (root == null) return false;
+            var built = root.transform.Find("Built");
+            return built != null && built.gameObject.activeSelf;
+        }
+
+        // Every process: what its OWN mirror and read seams show.
+        private void ObserveLiving()
+        {
+            if (!LivingWorldNetworkBinding.HasMirror) return;
+            var board = LivingWorldNetworkBinding.Board;
+            var dev = LivingWorldNetworkBinding.Development;
+            result.livingDay = board.Day;
+            result.livingOrderTemplate = board.Order.TemplateId;
+            result.livingMirrorDev |= DevelopmentIds.All.All(dev.Owns);
+            result.livingEffectsMirrored |= DevelopmentEffects.StorageBonusSlots == DevelopmentCatalog.HomeStorageBonusSlots &&
+                DevelopmentEffects.FishPricePercentBonus == DevelopmentCatalog.FisherPricePercent &&
+                DevelopmentEffects.VehiclePriceDiscountPercent == DevelopmentCatalog.DockVehicleDiscountPercent && DevelopmentEffects.ShopStockUnlocked;
+            result.livingOrderMirrored |= result.livingSold && board.Order.HasContract && board.Order.Status == ContractStatus.Completed;
+            if (SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene) result.livingHomeVisual |= dev.Owns(DevelopmentIds.Home2) && VisualBuilt(DevelopmentIds.Home2);
+        }
+
+        private bool LivingAnswered(ulong awaiting, out bool accepted, out string reason)
+        {
+            accepted = LivingWorldNetworkBinding.LastResultAccepted;
+            reason = LivingWorldNetworkBinding.LastResultReason;
+            var answered = awaiting != 0 && LivingWorldNetworkBinding.LastResultRequest == awaiting;
+            if (answered) result.livingTrace.Add($"answer stage={livingStage} ok={accepted} reason={reason}");
+            return answered;
+        }
+
+        private ulong livingAwait;
+
+        private void LivingStep(int next) { result.livingTrace.Add($"stage {livingStage}->{next} t={Time.realtimeSinceStartup - sceneStarted:F1}"); livingStage = next; livingStageAt = Time.realtimeSinceStartup; livingAwait = 0; }
+
+        private void ProbeLivingLobby(NetworkPlayer local)
+        {
+            local.SubmitLocalInput(Vector3.zero, 0);
+            if (!LivingWorldNetworkBinding.HasMirror) return;
+            var now = Time.realtimeSinceStartup;
+            if (now - sceneStarted < 2.5f) return;   // like every other probe: the spawn must have settled before the first move
+            if (livingStageAt == 0) livingStageAt = now;
+            if (livingStage < 90 && now - livingStageAt > 60f)
+            {
+                result.errors.Add($"living lobby stage {livingStage} timeout dev={LivingWorldNetworkBinding.Mirrored.Development.Count} last={LivingWorldNetworkBinding.LastResultReason}");
+                livingStage = 99;
+                return;
+            }
+            var pc = FindFirstObjectByType<HomePcAnchor>();
+            if (pc == null) return;
+            var host = adapter.IsAuthority;
+            var me = local.OwnerClientId;
+            var dev = LivingWorldNetworkBinding.Development;
+            if (now >= livingTraceAt && result.livingTrace.Count < 60)
+            {
+                livingTraceAt = now + 3f;
+                var q = local.transform.position;
+                result.livingTrace.Add($"lobby stage={livingStage} pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) pc=({pc.transform.position.x:0.0},{pc.transform.position.y:0.0},{pc.transform.position.z:0.0}) d={(new Vector3(pc.transform.position.x - q.x, 0f, pc.transform.position.z - q.z)).magnitude:0.00} host={adapter.IsAuthority} dev={LivingWorldNetworkBinding.Mirrored.Development.Count}");
+            }
+            bool ok; string reason;
+
+            switch (livingStage)
+            {
+                case 0:   // still away from the PC: the HOST must refuse
+                {
+                    var away = local.transform.position - pc.transform.position; away.y = 0;
+                    if (away.magnitude < 6f)
+                    {
+                        if (away.sqrMagnitude < 0.01f) away = Vector3.back;
+                        local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(away.x, away.z) * Mathf.Rad2Deg, 0);
+                        return;
+                    }
+                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownFisher);
+                    livingStage = 1; return;
+                }
+                case 1:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    result.livingFarRefused = !ok && reason == "NotAtPc";
+                    LivingStep(2); return;
+                case 2:   // walk to the PC
+                {
+                    // Each player walks to its OWN standing spot beside the PC (host west, guest east, 2 m from it: inside the host's 3.25 m range). Two bodies cannot
+                    // share the spot in front of the PC, and a straight walk to the PC let the first player block the second.
+                    var stand = pc.transform.position + (host ? new Vector3(-1.3f, 0f, 1.6f) : new Vector3(0.4f, 0f, 1.9f));   // the east wall stands at x=5: the guest spot stays inside the room
+                    var to = stand - local.transform.position; to.y = 0;
+                    if (to.magnitude > 0.45f) { local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg, 0); return; }
+                    LivingStep(host ? 5 : 3); return;
+                }
+                case 3:   // guest: the fisherman's stall first (the host waits for it), then the same again, then a role and a changed mind
+                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownFisher); livingStage = 31; return;
+                case 31:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    result.livingBuildOk = ok;
+                    if (!ok) result.errors.Add("guest build refused: " + reason);
+                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownFisher); livingStage = 32; return;
+                case 32:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    result.livingDuplicateRefused = !ok && reason == "AlreadyProcessed";
+                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.CameraOperator); livingStage = 33; return;
+                case 33:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    if (!ok) result.errors.Add("guest role refused: " + reason);
+                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.Carrier); livingStage = 34; return;
+                case 34:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    if (!ok) result.errors.Add("guest role change refused: " + reason);
+                    LivingStep(8); return;
+                case 5:   // host: wait for the guest's stall, then home 2, shop, dock, and its own role
+                    if (!dev.Owns(DevelopmentIds.TownFisher)) return;
+                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.Home2); livingStage = 51; return;
+                case 51:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    if (!ok) result.errors.Add("host home-2 refused: " + reason);
+                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownShop); livingStage = 52; return;
+                case 52:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    if (!ok) result.errors.Add("host shop refused: " + reason);
+                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownDock); livingStage = 53; return;
+                case 53:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    result.livingBuildOk = ok;
+                    if (!ok) result.errors.Add("host dock refused: " + reason);
+                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.Hunter); livingStage = 54; return;
+                case 54:
+                    if (!LivingAnswered(livingAwait, out ok, out reason)) return;
+                    if (!ok) result.errors.Add("host role refused: " + reason);
+                    LivingStep(8); return;
+                case 8:   // everybody: all four are built and BOTH roles are what the players asked for, seen through this process's mirror
+                {
+                    var guestId = adapter.Session.Roster.Keys.Where(k => k.Value != 0).Select(k => k.Value).DefaultIfEmpty(1UL).First();
+                    if (!DevelopmentIds.All.All(dev.Owns)) return;
+                    var hostRole = LivingWorldNetworkBinding.RoleOfClient(0);
+                    var guestRole = LivingWorldNetworkBinding.RoleOfClient(adapter.IsAuthority ? guestId : me);
+                    if (hostRole != CrewRole.Hunter || guestRole != CrewRole.Carrier) return;
+                    result.livingRolesOk = true;
+                    LivingStep(90); return;
+                }
+            }
+        }
+
+        // Host: the labelled start money, the spend checks, the dive injection, the order/pay/persist/reload checks.
+        private void HostLiving(SessionState state)
+        {
+            var binding = adapter.GetComponent<LivingWorldNetworkBinding>();
+            var economy = adapter.GetComponent<EconomyManager>();
+            var store = adapter.GetComponent<EconomySaveStore>();
+            var living = binding != null ? binding.Authority : null;
+            if (living == null || economy == null || store == null) return;
+            var now = Time.realtimeSinceStartup;
+
+            switch (livingHostStage)
+            {
+                case 0:   // lobby, before anything: seed the money (labelled), then wait for the builds and roles
+                {
+                    if (state.Phase != SessionPhase.Lobby || adapter.Connection.IsSceneLoading || now - sceneStarted < 3f) return;
+                    var seed = economy.ExportSaveData("smoke", "smoke");
+                    seed.SharedBalance = LivingSeedBalance;
+                    result.livingSeeded = economy.TryRestore(seed) && economy.SharedBalance == LivingSeedBalance;
+                    livingHostStage = 1; return;
+                }
+                case 1:
+                {
+                    if (!DevelopmentIds.All.All(living.Development.Owns) || living.RoleOf(new PlayerId(0)) != CrewRole.Hunter) return;
+                    var guest = adapter.Session.Roster.Keys.FirstOrDefault(k => k.Value != 0);
+                    if (living.RoleOf(guest) != CrewRole.Carrier) return;
+                    var spent = 0;
+                    foreach (var d in DevelopmentCatalog.All) spent += d.Price;
+                    result.livingBalanceAfterBuild = economy.SharedBalance;
+                    result.livingSpendOk = economy.SharedBalance == LivingSeedBalance - spent;
+                    result.livingEffectsHost = EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&
+                        DevelopmentEffects.FishPricePercentBonus == DevelopmentCatalog.FisherPricePercent && DevelopmentEffects.VehiclePriceDiscountPercent == DevelopmentCatalog.DockVehicleDiscountPercent && DevelopmentEffects.ShopStockUnlocked &&
+                        // The role really reached each player's body through Mehmet's effect layer, not only the record.
+                        RealRole(0) == CrewRole.Hunter && RealRole(guest.Value) == CrewRole.Carrier;
+                    if (!result.livingSpendOk) result.errors.Add($"living spend balance={economy.SharedBalance} expected={LivingSeedBalance - spent}");
+                    livingHostAt = now;
+                    livingHostStage = 2; return;
+                }
+                case 2:   // every mirror gets a moment to show the builds; with screenshots asked for, the host also aims at the home shelf for a picture
+                {
+                    var me = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsOwner && p.IsSpawned);
+                    if (me == null || Arg("-p1-screenshot").Length == 0)
+                    {
+                        if (now - livingHostAt > 3f) { result.livingHostLobbyDone = true; livingHostStage = 3; }
+                        return;
+                    }
+                    var shelf = new Vector3(0f, 1f, -3.55f);
+                    var toShelf = shelf - me.transform.position; toShelf.y = 0;
+                    me.SubmitLocalInput(Vector3.zero, Mathf.Atan2(toShelf.x, toShelf.z) * Mathf.Rad2Deg, 0);
+                    if (now - livingHostAt > 1.5f && !livingCaptured) { livingCaptured = true; CaptureRoom("-home"); }
+                    if (now - livingHostAt > 2.5f) { result.livingHostLobbyDone = true; livingHostStage = 3; }
+                    return;
+                }
+                case 3:   // dive: two 1 kg catches per player, safely returned (the pickup path itself is -p2-hunt's)
+                    if (state.Phase == SessionPhase.Dive && !livingInjected && !adapter.Connection.IsSceneLoading &&
+                        SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene && Time.realtimeSinceStartup - sceneStarted > 6f)
+                    {
+                        livingInjected = true;
+                        var inventory = adapter.GetComponent<InventoryManager>();
+                        foreach (var id in adapter.Session.Roster.Keys)
+                        {
+                            for (var i = 0; i < 2; i++) inventory.TryAddCatch(id, new CaptureResult($"living-{id.Value}-{i}", state.DiveId, "sea_bass", 1000, 1));
+                            inventory.TryMarkSafeReturn(id);
+                        }
+                        livingHostStage = 4; livingHostAt = now;
+                    }
+                    return;
+                case 4:   // town: both hand-ins done -> the day's order is complete and paid ONCE (sale + stall bonus + order reward)
+                {
+                    if (state.Phase != SessionPhase.Return || economy.PendingTurnIns().Count != 0) return;
+                    var board = living.Board;
+                    if (!board.Order.HasContract || board.Order.Status != ContractStatus.Completed) return;
+                    ContractCatalog.TryGet(board.Order.TemplateId, out var template);
+                    var expected = result.livingBalanceAfterBuild + 4 * (120 + 12) + template.Reward;
+                    result.livingFinalBalance = economy.SharedBalance;
+                    result.livingOrderPaidOnce = economy.SharedBalance == expected && economy.IsRewardPaid(ContractIds.RewardId(board.Day, template.Id));
+                    if (!result.livingOrderPaidOnce) result.errors.Add($"living order pay balance={economy.SharedBalance} expected={expected} template={template.Id}");
+
+                    var disk = JsonUtility.FromJson<EconomySaveData>(File.ReadAllText(store.SavePath));
+                    result.livingSavedOnDisk = disk.HasLiving && disk.SchemaVersion == EconomySaveData.CurrentSchemaVersion && disk.Living.DevelopmentIds.Count == 4 &&
+                        disk.Living.HostRole == (byte)CrewRole.Hunter && disk.Living.OrderStatus == (byte)ContractStatus.Completed && disk.RewardIds.Contains(ContractIds.RewardId(board.Day, template.Id)) &&
+                        disk.SharedBalance == economy.SharedBalance;
+                    var balance = economy.SharedBalance;
+                    result.livingReloadClean = store.LoadNow() && living.Development.OwnedIds.Count == 4 && living.Board.Order.Status == ContractStatus.Completed &&
+                        economy.SharedBalance == balance && !living.EnsureDay(board.Day, 7) && living.RoleOf(new PlayerId(0)) == CrewRole.Hunter;
+                    livingDoneAt = now; result.livingHostDone = true; livingHostStage = 90; return;
+                }
+            }
+        }
+
+        // Town (Return phase), every process: walk to the fish buyer and hand in; the sale shows the stall bonus; the town props are really built.
+        private void ProbeLivingTown(NetworkPlayer local)
+        {
+            var sync = local.GetComponent<EconomyPlayerSync>();
+            var cam = local.GetComponentInChildren<Camera>(true);
+            if (sync == null || cam == null) return;
+            var now = Time.realtimeSinceStartup;
+            if (livingStageAt == 0 || livingStage < 100) { livingStageAt = now; livingStage = 100; }
+            if (now >= livingTraceAt && result.livingTrace.Count < 60)
+            {
+                livingTraceAt = now + 3f;
+                var q = local.transform.position;
+                result.livingTrace.Add($"town pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) sw={local.Swimming.Value} pending={sync.PendingCatches.Value} svc={sync.LastServiceRequestId.Value}/{sync.LastServiceAccepted.Value}/{sync.LastServiceReason.Value} bal={sync.SharedBalance.Value}");
+            }
+            if (!result.livingSold)
+            {
+                if (GoToService(local, cam, TownServiceCatalog.FishBuyerId)) InteractEvery(local, 1.2f);
+                if (sync.LastServiceRequestId.Value != 0 && (ServicePointType)sync.LastServiceType.Value == ServicePointType.FishBuyer && sync.LastServiceAccepted.Value)
+                {
+                    result.livingSaleAmount = sync.LastServiceAmount.Value;
+                    result.livingSold = sync.LastServiceItems.Value == 2 && sync.LastServiceAmount.Value == 2 * (120 + 12);
+                    if (!result.livingSold) result.errors.Add($"living sale amount={sync.LastServiceAmount.Value} items={sync.LastServiceItems.Value}");
+                    livingStageAt = now;
+                }
+                return;
+            }
+            result.livingTownVisuals |= VisualBuilt(DevelopmentIds.TownFisher) && VisualBuilt(DevelopmentIds.TownShop) && VisualBuilt(DevelopmentIds.TownDock);
+            if (!(adapter.IsAuthority && !livingTownCaptured && Arg("-p1-screenshot").Length > 0 && result.livingTownVisuals)) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            // Picture of the town row for the evidence: the host steps back from the buyer to the platform's north edge and looks at the two stalls.
+            var fisherNpc = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).FirstOrDefault(x => x.Definition.ServiceId == TownServiceCatalog.FishBuyerId);
+            var shopNpc = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).FirstOrDefault(x => x.Definition.ServiceId == TownServiceCatalog.EquipmentShopId);
+            if (fisherNpc == null || shopNpc == null) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+            var mid = (fisherNpc.WorldPosition + shopNpc.WorldPosition) * 0.5f;
+            var vantage = new Vector3(mid.x, local.transform.position.y, mid.z + 3.4f);
+            var toVantage = vantage - local.transform.position; toVantage.y = 0;
+            if (toVantage.magnitude > 0.35f && now - livingStageAt < 12f)
+            {
+                local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(toVantage.x, toVantage.z) * Mathf.Rad2Deg, 0);
+                livingVantageAt = now;
+                return;
+            }
+            AimAt(local, cam, mid + new Vector3(0f, 1.6f, 0f), out var shotYaw, out var shotPitch);
+            local.SubmitLocalInput(Vector3.zero, shotYaw, shotPitch);
+            if (now - livingVantageAt > 1.5f) { livingTownCaptured = true; CaptureRoom("-town"); }
+        }
+
+        // Second launch of the host on the SAME campaign file: the board, the builds and the host's role come back; nothing is paid or bought again.
+        private float started0 = -1f;
+
+        private bool HostLivingReload()
+        {
+            if (started0 < 0f) started0 = Time.realtimeSinceStartup;
+            var binding = adapter.GetComponent<LivingWorldNetworkBinding>();
+            var economy = adapter.GetComponent<EconomyManager>();
+            var living = binding != null ? binding.Authority : null;
+            if (living == null || economy == null || adapter.Connection.Status != ConnectionStatus.Connected || DayLock.StateProvider == null) return false;
+            var board = living.Board;
+            if (board.Day == 0) return false;
+            var host = new PlayerId(0);
+            // The restored role must reach the reopened player's body through the effect layer (a respawned player starts without one).
+            if (RealRole(0) != CrewRole.Hunter && Time.realtimeSinceStartup - started0 < 12f) return false;
+            result.livingReloadDay = board.Day;
+            result.livingReloadBalance = economy.SharedBalance;
+            result.livingReloadOrderStatus = board.Order.Status.ToString();
+            var before = economy.SharedBalance;
+            // The reopened session is on day 1 again only if the file said so: the board for THAT day must be exactly what was saved (not re-rolled).
+            var dayState = DayLock.StateProvider();
+            result.livingReloadPass = DevelopmentIds.All.All(living.Development.Owns) && living.RoleOf(host) == CrewRole.Hunter &&
+                board.Order.Status == ContractStatus.Completed && dayState.DayNumber == board.Day && RealRole(0) == CrewRole.Hunter &&
+                EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&
+                living.TryBuildDevelopment(host, DevelopmentIds.TownFisher, 99001).ReasonCode == "AlreadyProcessed" && !living.EnsureDay(board.Day, 7) &&
+                economy.SharedBalance == before && living.RoleOf(new PlayerId(1)) == CrewRole.None;
+            result.passed = result.livingReloadPass && result.errors.Count == 0;
+            return true;
+        }
+
         // ---- #123 deep progression smoke -------------------------------------------------------------------------
         // LABELLED FIXTURE: the world rule that says which trace/arena contexts count (Utku's #122). The progression authority, the exploration
         // evidence (a real sighting + a real swim to the reef), the save file, the mirrors and the read seam are all the product's.
@@ -1793,8 +2139,10 @@ namespace DeepDive.P1.Lab
                     return;
                 case 3:   // back at the beach (Return phase): with NO world validator bound a trace is refused (fail-closed)
                     if (state.Phase != SessionPhase.Return || now - deepAt < 2f) return;
-                    result.deepFailClosed = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode == "WorldUnavailable" &&
-                        BossProgression.State.TracesFound == 0;
+                    // Fail-closed either way: with no validator bound the answer is WorldUnavailable; since #128 the real deep world binds its own validator, which refuses
+                    // this made-up context (InvalidContext). Nothing is counted in both cases.
+                    var closedReason = DeepProgressionEvidence.TrySubmitTrace(host, "smoke-trace-1", "smoke-cell", DepthBandIds.Deep, deepRequest++).ReasonCode;
+                    result.deepFailClosed = (closedReason == "WorldUnavailable" || closedReason == "InvalidContext") && BossProgression.State.TracesFound == 0;
                     DeepProgressionWorld.Bind(deepWorld);
                     DeepNext(4); return;
                 case 4:   // the world validator decides the context; three DISTINCT traces (any player) open the trace stage; a duplicate counts once
@@ -2264,7 +2612,22 @@ namespace DeepDive.P1.Lab
                     result.acceptNpcWithdrawn = economy.PendingCountFor(owner, TurnInKind.Recording) == 0 && economy.IsChannelClaimed(clip.RecordingId);
                     result.acceptNpcRefused = economy.TryQueueRecordingTurnIn(new RecordingResult(clip.RecordingId, clip.DiveId, owner, clip.SubjectId,
                         clip.Quality, clip.DurationSeconds)) == PlayerActionResult.DuplicateRequest;
-                    result.acceptNoNpcPay = economy.SharedBalance == acceptBalanceBase && economy.PendingCountFor(owner, TurnInKind.Recording) == 0;
+                    // #132: the day's video sponsor reads the REAL published clip's verified manifest. Whether it completes depends on which template today's
+                    // deterministic roll picked, so the check is conditional both ways: the matching clip completes and pays once, any other leaves it open.
+                    var living = adapter.GetComponent<LivingWorldNetworkBinding>()?.Authority;
+                    if (living != null && living.Board.Sponsor.HasContract && ContractCatalog.TryGet(living.Board.Sponsor.TemplateId, out var sponsor))
+                    {
+                        var manifest = clip.ToManifest();
+                        var matches = sponsor.Measure == ContractMeasure.PublishNewSpecies ? manifest.WorldContext.FirstRecordingOfSubject
+                            : sponsor.Measure == ContractMeasure.PublishEvent ? manifest.WorldContext.Kind == RecordingSubjectKind.Event
+                            : sponsor.Measure == ContractMeasure.PublishQuality && manifest.Quality >= sponsor.Target;
+                        var done = living.Board.Sponsor.Status == ContractStatus.Completed;
+                        result.acceptSponsorTemplate = sponsor.Id;
+                        result.acceptSponsorBonus = done ? sponsor.Reward : 0;
+                        result.acceptSponsorOk = done == matches && (!done || economy.IsRewardPaid(ContractIds.RewardId(living.Board.Day, sponsor.Id)));
+                    }
+                    else result.acceptSponsorOk = true;   // no sponsor today (nothing eligible): nothing to check
+                    result.acceptNoNpcPay = economy.SharedBalance == acceptBalanceBase + result.acceptSponsorBonus && economy.PendingCountFor(owner, TurnInKind.Recording) == 0;
                     acceptHostAt = now; acceptHostStage = 2; return;
                 }
                 case 2:   // let the owner's duplicate request land, then everybody sleeps: the real gate closes the day
@@ -2287,7 +2650,7 @@ namespace DeepDive.P1.Lab
                     var income = 0;
                     foreach (var p in pubs) income += p.Income;
                     result.acceptBalance = economy.SharedBalance;
-                    result.acceptPaidOnce = pubs.Count == 1 && income > 0 && economy.SharedBalance - acceptBalanceBase == income &&
+                    result.acceptPaidOnce = pubs.Count == 1 && income > 0 && economy.SharedBalance - acceptBalanceBase == income + result.acceptSponsorBonus &&
                         engine.DayNumber == result.acceptDayBefore + 1 && !string.IsNullOrEmpty(pubs[0].SettledId);
                     result.acceptReplayPaysNothing = binding.Channel.SettleThrough(result.acceptDayBefore) == 0 && economy.SharedBalance == result.acceptBalance;
 
@@ -3033,8 +3396,11 @@ namespace DeepDive.P1.Lab
 
             result.townBalance = economy.SharedBalance;
             // 2 players x 2 catches x 120 = 480; two cameras (300) and one boat part (120) leave 60.
-            result.townHostChecks = economy.SharedBalance == 60;
-            if (!result.townHostChecks) result.errors.Add($"town balance={economy.SharedBalance} expected=60");
+            // #132: the day's fish order is met by these very hand-ins (4 bass, 3.2 kg), so its bonus is part of the balance - exactly once.
+            var dayBoard = adapter.GetComponent<LivingWorldNetworkBinding>()?.Authority?.Board;
+            var orderBonus = dayBoard.HasValue && dayBoard.Value.Order.Status == ContractStatus.Completed ? dayBoard.Value.Order.Reward : 0;
+            result.townHostChecks = economy.SharedBalance == 60 + orderBonus;
+            if (!result.townHostChecks) result.errors.Add($"town balance={economy.SharedBalance} expected={60 + orderBonus} (order bonus {orderBonus})");
 
             var store = adapter.GetComponent<EconomySaveStore>();
             var balance = economy.SharedBalance;

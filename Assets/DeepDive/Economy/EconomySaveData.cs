@@ -14,7 +14,8 @@ namespace DeepDive.Economy
         // v6 (P4.3-C) adds the vehicle fleet (purchased boats + active boat). Older files load as HasFleet=false: only the repaired rowboat, if any.
         // v7 (P4.4-C) adds the deep progression chain (encyclopedia -> rumor -> trace -> discovery -> boss unlock). Older files load as
         // HasProgression=false, which means the closed default: Locked, nothing counted.
-        public const int CurrentSchemaVersion = 7;
+        // v8 (P4.5-C) adds the living-world record (orders/sponsors, home/town development, host role) and the paid reward ids.
+        public const int CurrentSchemaVersion = 8;
         public const int OldestSupportedSchemaVersion = 1;
 
         public int SchemaVersion = CurrentSchemaVersion;
@@ -38,6 +39,10 @@ namespace DeepDive.Economy
         public bool HasMedia;
         public bool HasFleet;
         public bool HasProgression;
+        public bool HasLiving;
+        public DeepDive.Core.Contracts.LivingWorldSaveData Living = new DeepDive.Core.Contracts.LivingWorldSaveData();
+        // Order/sponsor rewards already credited (one payment per reward id, whatever replays or reloads).
+        public List<string> RewardIds = new List<string>();
         public DeepDive.Core.Contracts.DeepProgressionSaveData Progression = new DeepDive.Core.Contracts.DeepProgressionSaveData();
         // Only PURCHASED boats are stored: the rowboat's ownership is the P3 repair state (BoatPartIds), a single source.
         public List<string> FleetPurchasedBoatIds = new List<string>();

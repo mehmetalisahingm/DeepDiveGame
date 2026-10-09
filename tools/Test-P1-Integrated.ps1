@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1IsWindows = $env:OS -eq 'Windows_NT'
@@ -52,6 +52,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($HomeSleep) { $p1Args += @('-p4-home', '1') }
         if ($Explore) { $p1Args += @('-p4-explore', '1') }
         if ($Media) { $p1Args += @('-p4-media', '1') }
+        if ($Living) { $p1Args += @('-p4-living', '1') }   # #132: real PC builds/roles, real fish hand-in completes the order once, host reload
         if ($Deep) { $p1Args += @('-p4-deep', '1') }
         if ($RoleEffects) { $p1Args += @('-p45-role-effects', '1') }
         if ($WorldConditions) { $p1Args += @('-p45-world', '1') }
@@ -85,7 +86,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $seconds = if ($Unified) { 360 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
+    $seconds = if ($Unified) { 360 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
 
@@ -150,7 +151,7 @@ try {
         }
     }
 
-    if (($Day -or $Media -or $Acceptance -or $Fleet -or $Deep) -and $p1Failures.Count -eq 0) {
+    if (($Day -or $Media -or $Acceptance -or $Fleet -or $Deep -or $Living) -and $p1Failures.Count -eq 0) {
         # A real second launch of the host on the campaign file the first run left behind.
         $p1Campaign = Join-Path $p1Run 'host.json.campaign.json'
         $p1Reload = Join-Path $p1Run 'host-reload.json'
@@ -158,7 +159,7 @@ try {
         $p1ReloadGraphics = if ($Acceptance) { @('-screen-width', '960', '-screen-height', '540', '-screen-fullscreen', '0') } elseif ($p1IsWindows) { @('-nographics') } else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
         $p1ReloadArgs = (@('-batchmode') + $p1ReloadGraphics + @(
             '-p1-integrated', 'host', '-p1-count', 1, '-p1-port', ($Port + 1), '-p1-report', ('"{0}"' -f $p1Reload),
-            '-logFile', ('"{0}"' -f (Join-Path $p1Run 'host-reload.log')), $(if ($Deep) { '-p4-deep-reload' } elseif ($Fleet) { '-p4-fleet-reload' } elseif ($Acceptance) { '-p4-acceptance-reload' } elseif ($Media) { '-p4-media-reload' } else { '-p4-day-reload' }), '1'))
+            '-logFile', ('"{0}"' -f (Join-Path $p1Run 'host-reload.log')), $(if ($Living) { '-p4-living-reload' } elseif ($Deep) { '-p4-deep-reload' } elseif ($Fleet) { '-p4-fleet-reload' } elseif ($Acceptance) { '-p4-acceptance-reload' } elseif ($Media) { '-p4-media-reload' } else { '-p4-day-reload' }), '1'))
         if ($p1IsWindows) { $p1ReloadProcess = Start-Process -FilePath $p1Build -WindowStyle Hidden -PassThru -ArgumentList $p1ReloadArgs }
         else { $p1ReloadProcess = Start-Process -FilePath $p1Build -PassThru -ArgumentList $p1ReloadArgs }
         $p1ReloadProcess.WaitForExit(60000) | Out-Null
