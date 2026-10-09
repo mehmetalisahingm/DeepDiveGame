@@ -220,7 +220,7 @@ namespace DeepDive.Composition
                 var sync = syncs[i];
                 if (!sync.IsSpawned || !sync.IsServer) continue;
                 sync.PublishTripState(state, new PlayerId(sync.OwnerClientId));
-                sync.PublishWeather(P45WorldConditions.Today'sWeather == P45WeatherKind.Windy);
+                sync.PublishWeather(P45WorldConditions.TodaysWeather == P45WeatherKind.Windy);
                 sync.PublishBoatPose(position, rotation, visible, boatController.HullKind);
             }
         }
