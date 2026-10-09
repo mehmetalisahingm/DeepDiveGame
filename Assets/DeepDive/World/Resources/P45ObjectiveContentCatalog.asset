@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e65b7eac02114320bb9d1e2dccb237f9, type: 3}
+  m_Name: P45ObjectiveContentCatalog
+  m_EditorClassIdentifier: DeepDive.World::DeepDive.World.P45ObjectiveContentCatalog
+  targets:
+  - Species: {fileID: 11400000, guid: 750b706e952c16949a28adfe230f8f5a, type: 2}
+    Event: {fileID: 0}
+    HabitatBandId: shallow
+    RouteId: route-near-1
+  - Species: {fileID: 0}
+    Event: {fileID: 11400000, guid: f03099dab390aad4d8d4eed4d19cb71c, type: 2}
+    HabitatBandId: shallow
+    RouteId: route-near-1

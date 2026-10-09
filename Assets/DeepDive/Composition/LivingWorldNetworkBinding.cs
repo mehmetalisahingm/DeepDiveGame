@@ -445,42 +445,34 @@ namespace DeepDive.Composition
         {
             private readonly MediaNetworkBinding media;
             private readonly EconomyManager economy;
+            private readonly P45ObjectiveContentCatalog content;
             public DefaultOrderWorld(MediaNetworkBinding media, EconomyManager economy)
-            { this.media = media; this.economy = economy; }
+            { this.media = media; this.economy = economy; content = Resources.Load<P45ObjectiveContentCatalog>(P45ObjectiveContentCatalog.ResourceName); }
             public bool NightCaptureAvailable => false;
 
             public bool CanOffer(in ContractTemplate template)
             {
-                if (DayLock.StateProvider == null) return false;
+                if (DayLock.StateProvider == null || content == null) return false;
                 var day = DayLock.StateProvider();
-                if (template.Measure == ContractMeasure.PublishEvent &&
-                    !Resources.FindObjectsOfTypeAll<RecordingEventDefinition>().Any(x => !string.IsNullOrEmpty(x.EventId))) return false;
-                var species = Resources.FindObjectsOfTypeAll<SpeciesDefinition>()
-                    .Where(x => x != null && x.IsValid(out _)).Select(x => x.SpeciesId).Distinct().ToArray();
-                // The loaded network prefab/definition is the authored content source, not a guessed species list.
-                // Sea bass lives in the authored near/shore habitat. Other targets need observed habitat evidence.
+                var subjects = content.Targets.Where(x => x != null && x.IsValid).Select(x => x.SubjectId).Distinct().ToArray();
                 var snapshot = ExplorationFeed.Current != null ? ExplorationFeed.Current.Snapshot() : default;
                 var reef = snapshot.Cells != null && snapshot.Cells.Any(x => x.Discovered && x.DepthBandId == DepthBandIds.Reef);
                 var fleet = economy.Fleet;
                 var vessel = VehicleClass.None;
                 foreach (var boat in fleet.OwnedBoatIds)
                     if ((int)VehicleCatalog.ClassOf(boat) > (int)vessel) vessel = VehicleCatalog.ClassOf(boat);
-                foreach (var id in species)
+                foreach (var entry in content.Targets)
                 {
+                    if (entry == null || !entry.IsValid) continue;
+                    if (template.Kind == ContractKind.FishOrder && entry.Species == null) continue;
+                    if (template.Measure == ContractMeasure.PublishEvent && entry.Event == null) continue;
+                    if (template.Measure == ContractMeasure.PublishNewSpecies && entry.Species == null) continue;
+                    var id = entry.SubjectId;
                     if (template.SpeciesId.Length > 0 && template.SpeciesId != id) continue;
                     if (template.Measure == ContractMeasure.PublishNewSpecies && AlreadyPublished(id)) continue;
-                    var bands = id == P45WorldRules.NightActiveSpeciesId
-                        ? new[] { DepthBandIds.Shallow }
-                        : snapshot.Species?.FirstOrDefault(x => x.SpeciesId == id).ObservedDepthBandIds;
-                    if (bands == null) continue;
-                    foreach (var band in bands)
-                    {
-                        var route = band == DepthBandIds.Shallow ? BoatTripIds.NearRouteId
-                            : band == DepthBandIds.Reef ? BoatTripIds.ReefRouteId : BoatTripIds.DeepRouteId;
-                        var target = new P45ObjectiveTarget(id, band, route, template.RequiresNight);
-                        if (P45WorldObjectiveEligibility.CanOffer(target, species, vessel, reef,
-                            P45WorldRules.Weather(day.DayNumber, day.WeatherSeed), day.ClockMinute, day.Phase)) return true;
-                    }
+                    var target = new P45ObjectiveTarget(id, entry.HabitatBandId, entry.RouteId, template.RequiresNight);
+                    if (P45WorldObjectiveEligibility.CanOffer(target, subjects, vessel, reef,
+                        P45WorldRules.Weather(day.DayNumber, day.WeatherSeed), day.ClockMinute, day.Phase)) return true;
                 }
                 return false;
             }
@@ -496,8 +488,8 @@ namespace DeepDive.Composition
             {
                 get
                 {
-                    return Resources.FindObjectsOfTypeAll<SpeciesDefinition>()
-                        .Any(x => x != null && x.IsValid(out _) && !AlreadyPublished(x.SpeciesId));
+                    return content != null && content.Targets.Any(x => x != null && x.IsValid &&
+                        x.Species != null && !AlreadyPublished(x.SubjectId));
                 }
             }
         }

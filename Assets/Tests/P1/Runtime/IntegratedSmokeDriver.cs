@@ -328,7 +328,7 @@ namespace DeepDive.P1.Lab
                 // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
                 // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
-                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : WorldConditions ? 46 : Hunt || Record ? 44 : 33;
+                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : WorldConditions ? 65 : Hunt || Record ? 44 : 33;
                 var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : WorldConditions ? 65f : returnAfter;
                 if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
                     !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)

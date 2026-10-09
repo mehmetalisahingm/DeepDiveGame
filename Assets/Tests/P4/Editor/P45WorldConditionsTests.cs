@@ -140,5 +140,23 @@ namespace DeepDive.P4.Tests
             Assert.IsFalse(P45WorldObjectiveEligibility.CanOffer(bogus, species, VehicleClass.ResearchBoat,
                 true, P45WeatherKind.Calm));
         }
+
+        [Test]
+        public void AuthoredObjectiveContentResolvesInTownBeforeTheDiveSceneLoads()
+        {
+            var content = Resources.Load<P45ObjectiveContentCatalog>(P45ObjectiveContentCatalog.ResourceName);
+            Assert.IsNotNull(content);
+            var subjects = new HashSet<string>();
+            foreach (var entry in content.Targets)
+            {
+                Assert.IsTrue(entry.IsValid, "A missing definition must not silently erase the daily board");
+                subjects.Add(entry.SubjectId);
+                var target = new P45ObjectiveTarget(entry.SubjectId, entry.HabitatBandId, entry.RouteId, false);
+                Assert.IsTrue(P45WorldObjectiveEligibility.CanOffer(target, new[] { entry.SubjectId },
+                    VehicleClass.None, false, P45WeatherKind.Windy), "Authored shore targets keep the free coastal path");
+            }
+            Assert.Contains("sea_bass", new System.Collections.Generic.List<string>(subjects));
+            Assert.Contains("event_bioluminescence", new System.Collections.Generic.List<string>(subjects));
+        }
     }
 }
