@@ -68,7 +68,7 @@ namespace DeepDive.Composition
             var rows = Mathf.Max(Mathf.Min(sync.CarriedCatchIds.Count, VisibleRows), Mathf.Min(sync.StoredCatchIdList.Count, VisibleRows));
             var height = 56f + Mathf.Max(1, rows) * 24f + 28f;
             var box = new Rect(Screen.width - 350f, 210f, 330f, height);
-            GUI.Box(box, $"ORTAK DEPO  ({sync.StoredCatches.Value}/{EconomyManager.StorageCapacityItems})");
+            GUI.Box(box, $"ORTAK DEPO  ({sync.StoredCatches.Value}/{EconomyManager.StorageCapacity})");
             GUI.Label(new Rect(box.x + 8, box.y + 24, 150, 20), "Tasidigin av");
             GUI.Label(new Rect(box.x + 170, box.y + 24, 150, 20), "Depodaki av");
 

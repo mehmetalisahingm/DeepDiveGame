@@ -1,0 +1,5 @@
+{
+  "name": "DeepDive.Living",
+  "rootNamespace": "DeepDive.Living",
+  "references": ["DeepDive.Core.Contracts"]
+}
