@@ -231,9 +231,8 @@ namespace DeepDive.P1.Lab
                     var view = FindFirstObjectByType<LivingBoardView>();
                     if (view != null)
                     {
-                        view.SetVisible(true);
-                        ScreenCapture.CaptureScreenshot(System.IO.Path.ChangeExtension(Arg("-p1-screenshot"), null) + "-board.png");
-                        livingBoardCaptured = true;
+                        if (!LivingBoardView.PanelVisible) view.SetVisible(true);
+                        else { CaptureRoom("-board"); livingBoardCaptured = true; }
                     }
                 }
                 if (host && !screenshot && elapsed > 5 && Arg("-p1-screenshot").Length > 0)
@@ -1923,7 +1922,9 @@ namespace DeepDive.P1.Lab
                     LivingStep(host ? 5 : 3); return;
                 }
                 case 3:   // guest: the fisherman's stall first (the host waits for it), then the same again, then a role and a changed mind
-                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownFisher); livingStage = 31; return;
+                    livingAwait = ClickLivingButton(DevelopmentIds.TownFisher);
+                    if (livingAwait != 0) livingStage = 31;
+                    return;
                 case 31:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     result.livingBuildOk = ok;
@@ -1956,7 +1957,11 @@ namespace DeepDive.P1.Lab
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     result.livingBuildOk = ok;
                     if (!ok) result.errors.Add("host dock refused: " + reason);
-                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.Hunter); livingStage = 54; return;
+                    livingStage = 55; return;
+                case 55:
+                    livingAwait = ClickLivingButton("Role-" + CrewRole.Hunter);
+                    if (livingAwait != 0) livingStage = 54;
+                    return;
                 case 54:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     if (!ok) result.errors.Add("host role refused: " + reason);
@@ -1972,6 +1977,17 @@ namespace DeepDive.P1.Lab
                     LivingStep(90); return;
                 }
             }
+        }
+
+        private ulong ClickLivingButton(string name)
+        {
+            var view = FindFirstObjectByType<LivingBoardView>();
+            if (view == null) return 0;
+            view.SetVisible(true);
+            var button = view.GetComponentsInChildren<Button>(true).FirstOrDefault(x => x.name == name);
+            if (button == null || !button.isActiveAndEnabled || !button.interactable) return 0;
+            button.onClick.Invoke();
+            return view.LastRequestId;
         }
 
         // Host: the labelled start money, the spend checks, the dive injection, the order/pay/persist/reload checks.
@@ -3488,11 +3504,9 @@ namespace DeepDive.P1.Lab
             // A hidden Windows player can skip presenting its backbuffer. Render explicitly
             // into a texture so the capture still contains the real camera and uGUI layout.
             var camera = Camera.allCameras.First(c => c.enabled);
-            var canvas = adapter.GetComponentInChildren<Canvas>();
-            var previousMode = canvas.renderMode;
-            var previousCamera = canvas.worldCamera;
+            var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None).Where(c => c.isActiveAndEnabled).ToArray();
+            var previousCanvases = canvases.Select(c => (c.renderMode, c.worldCamera, c.planeDistance)).ToArray();
             var previousCameraTarget = camera.targetTexture;
-            var previousPlane = canvas.planeDistance;
             var previousTarget = RenderTexture.active;
             var target = new RenderTexture(1280, 720, 24);
             var pixels = new Texture2D(1280, 720, TextureFormat.RGB24, false);
@@ -3500,8 +3514,11 @@ namespace DeepDive.P1.Lab
             {
                 target.Create();
                 camera.targetTexture = target;
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = camera; canvas.planeDistance = camera.nearClipPlane + 0.01f;
+                foreach (var canvas in canvases)
+                {
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = camera; canvas.planeDistance = camera.nearClipPlane + 0.01f;
+                }
                 Canvas.ForceUpdateCanvases();
                 RenderPipeline.SubmitRenderRequest(camera, new RenderPipeline.StandardRequest { destination = target });
                 RenderTexture.active = target;
@@ -3515,7 +3532,8 @@ namespace DeepDive.P1.Lab
             {
                 RenderTexture.active = previousTarget;
                 camera.targetTexture = previousCameraTarget;
-                canvas.renderMode = previousMode; canvas.worldCamera = previousCamera; canvas.planeDistance = previousPlane;
+                for (var i = 0; i < canvases.Length; i++)
+                { canvases[i].renderMode = previousCanvases[i].renderMode; canvases[i].worldCamera = previousCanvases[i].worldCamera; canvases[i].planeDistance = previousCanvases[i].planeDistance; }
                 target.Release(); Destroy(target); Destroy(pixels);
             }
         }

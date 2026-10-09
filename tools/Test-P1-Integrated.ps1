@@ -6,7 +6,7 @@ if ($BuildPath) { $p1Build = $BuildPath }
 elseif ($p1IsWindows) { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe' }
 else { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.x86_64' }
 if (-not (Test-Path -LiteralPath $p1Build)) { throw "Integrated build bulunamadi: $p1Build" }
-$p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
+$p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players + '-' + $Port)
 New-Item -ItemType Directory -Path $p1Run | Out-Null
 if ($CampaignSeed) {
     if (-not [System.IO.Path]::IsPathRooted($CampaignSeed)) { $CampaignSeed = Join-Path $p1Root $CampaignSeed }
@@ -60,8 +60,6 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($Acceptance) { $p1Args += @('-p4-acceptance', '1', '-p3-record', '1', '-p4-media-product', '1') }   # #106: no fixture, real capture -> PC -> channel -> day -> reload
         if ($Storage) { $p1Args += @('-p4-storage', '1') }
     }
-    # Capture host renders the actual IMGUI frame as well as the camera (batch mode has no backbuffer).
-    if ($Capture -and $Name -eq 'host') { $p1Args = @($p1Args | Where-Object { $_ -ne '-batchmode' }) }
     if ($p1IsWindows) { $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -WindowStyle Hidden -PassThru }
     else { $p1Process = Start-Process -FilePath $p1Build -ArgumentList $p1Args -PassThru }
     $p1Processes.Add([pscustomobject]@{Name=$Name; Process=$p1Process; Report=$p1Report})
