@@ -1,5 +1,7 @@
 # P4.5-C: sipariş/sponsor, ev-kasaba gelişimi, rol seçimi ve dar denge turu (#132)
 
+Bu belge #137 tesliminin tarihsel raporudur. Güncel world/UI/save kabulü: [P4-5-ACCEPTANCE.md](P4-5-ACCEPTANCE.md).
+
 Tarih: 2026-10-09. Taban: `codex/p4-integration` @ `8be9c75` (#134 dahil). Dal: `p4/mert-orders-town-roles`.
 
 ## Ne var

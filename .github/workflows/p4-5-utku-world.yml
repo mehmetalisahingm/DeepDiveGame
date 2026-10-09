@@ -58,6 +58,11 @@ jobs:
         shell: pwsh
         run: |
           & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 19477 -Acceptance -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Solo and four-process role effects
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 1 -Port 19577 -RoleEffects -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 4 -Port 19677 -RoleEffects -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
       - name: Upload runtime JSON, logs and images
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

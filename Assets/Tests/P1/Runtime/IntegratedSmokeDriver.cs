@@ -570,6 +570,7 @@ namespace DeepDive.P1.Lab
                     if (player.OwnerClientId != NetworkManager.ServerClientId) guest = player;
                 }
 
+                if (expected == 1) guest = players[0];
                 if (guest != null && inventory != null)
                 {
                     var id = new PlayerId(guest.OwnerClientId);
@@ -581,6 +582,7 @@ namespace DeepDive.P1.Lab
                     result.p45CarrierCapacity |= before ==
                         CrewRoleEffectRules.ResolveBagCapacityGrams(InventoryManager.CapacityGrams, CrewRole.Carrier);
                     result.p45NoStack |= before == after;
+                    if (expected == 1) roleBinding.TryApplyRoleServer(id, CrewRole.Explorer);
                 }
             }
             else if (!host && state.Phase == SessionPhase.Lobby && roleBinding != null)
@@ -602,7 +604,7 @@ namespace DeepDive.P1.Lab
                 else
                     // The script deliberately reconnects client1. Only evidence observed after
                     // reconnect proves the role was safely re-applied and mirrored.
-                    result.p45RolesSeen |= result.clientRejoined && hostRoleOk && guestRoleOk;
+                    result.p45RolesSeen |= (Arg("-p1-integrated") != "rejoin" || result.clientRejoined) && hostRoleOk && guestRoleOk;
             }
 
             if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading)
