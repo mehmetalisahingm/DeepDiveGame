@@ -14,7 +14,7 @@ namespace DeepDive.World
         private Material markerMaterial;
         private float nextLookup;
 
-        public static P45WeatherKind Today'sWeather
+        public static P45WeatherKind TodaysWeather
         {
             get
             {
@@ -26,16 +26,16 @@ namespace DeepDive.World
         }
 
         public static bool CanDepart(string routeId) =>
-            P45WorldRules.CanDepart(routeId, Today'sWeather);
+            P45WorldRules.CanDepart(routeId, TodaysWeather);
 
-        public CrewEnvironmentAdvisory CurrentAdvisory => P45WorldRules.Advisory(Today'sWeather);
+        public CrewEnvironmentAdvisory CurrentAdvisory => P45WorldRules.Advisory(TodaysWeather);
 
         public bool TrySampleCurrent(Vector3 worldPosition, out CrewCurrentSample sample)
         {
             sample = default;
             if (region == null || depth == null) return false;
             var underwater = depth.DepthAt(worldPosition.y) > 0.3f;
-            return P45WorldRules.TryCurrent(region.Bounds, worldPosition, underwater, Today'sWeather, out sample);
+            return P45WorldRules.TryCurrent(region.Bounds, worldPosition, underwater, TodaysWeather, out sample);
         }
 
         private void Update()
