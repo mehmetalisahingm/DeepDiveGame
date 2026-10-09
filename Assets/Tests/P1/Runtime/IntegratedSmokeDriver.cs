@@ -96,6 +96,11 @@ namespace DeepDive.P1.Lab
                 bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
             public bool p45RolesSeen, p45CarrierCapacity, p45NoStack, p45GuestCrossWriteRefused,
                 p45PingSeen, p45PingOnMap, p45PingServerStamped, p45CurrentSeen, p45CurrentCleared;
+            public bool p45WorldWeatherMirror, p45WorldBuoyVisible, p45WorldCurrentSeen, p45WorldCurrentCleared;
+            public bool p45NightReplicated, p45NightGlow, p45NightMoved, p45DayRestored, p45BoardEligible;
+            public int livingWeatherSeed;
+            public float p45NightPeakSpeed, p45DayPeakSpeed;
+            public string livingWeatherKind = "";
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -143,6 +148,7 @@ namespace DeepDive.P1.Lab
         private bool BossAcceptance => Arg("-p4-boss-acceptance") == "1";
         private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
         private bool RoleEffects => Arg("-p45-role-effects") == "1";
+        private bool WorldConditions => Arg("-p45-world") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -168,6 +174,11 @@ namespace DeepDive.P1.Lab
         private float bossNextShot, bossTraceAt;
         private bool p45PingSent;
         private P45CurrentSmokeSource p45CurrentSource;
+        private readonly Dictionary<ulong, Pose> p45WorldOriginalPoses = new Dictionary<ulong, Pose>();
+        private bool p45WorldWarped, p45WorldRestored;
+        private bool p45NightSet, p45DaySet, p45NightCaptured, p45DayCaptured, livingBoardCaptured;
+        private Vector3 p45NightPosition;
+        private bool p45NightPositionSet;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -209,12 +220,21 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : WorldConditions ? 85f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
                 var connection = adapter.Connection;
                 var state = adapter.Session.State;
+                if (host && Living && !livingBoardCaptured && elapsed > 9 && Arg("-p1-screenshot").Length > 0)
+                {
+                    var view = FindFirstObjectByType<LivingBoardView>();
+                    if (view != null)
+                    {
+                        if (!LivingBoardView.PanelVisible) view.SetVisible(true);
+                        else { CaptureRoom("-board"); livingBoardCaptured = true; }
+                    }
+                }
                 if (host && !screenshot && elapsed > 5 && Arg("-p1-screenshot").Length > 0)
                 { screenshot = true; CaptureRoom(); }
                 if (host && Arg("-p1-screenshot").Length > 0 && !connection.IsSceneLoading)
@@ -245,6 +265,7 @@ namespace DeepDive.P1.Lab
                 {
                     Probe(expected);
                     if (RoleEffects) ObserveP45RoleEffects(host, expected, state);
+                    if (WorldConditions) ObserveP45WorldConditions(host, expected, state);
                     if (state.Phase == SessionPhase.Lobby && connection.LocalPlayerId.HasValue &&
                         adapter.Session.Roster.TryGetValue(connection.LocalPlayerId.Value, out var ready) && !ready && state.Revision == 0)
                         GameObject.Find("ReadyButton").GetComponent<Button>().onClick.Invoke();
@@ -306,8 +327,8 @@ namespace DeepDive.P1.Lab
                 // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
                 // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
-                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : Hunt || Record ? 44 : 33;
-                var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : returnAfter;
+                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : WorldConditions ? 65 : Hunt || Record ? 44 : 33;
+                var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : WorldConditions ? 65f : returnAfter;
                 if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
                     !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
@@ -325,7 +346,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : 41);
+                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : WorldConditions ? 78 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
@@ -367,6 +388,10 @@ namespace DeepDive.P1.Lab
                 result.livingEffectsMirrored && result.livingHomeVisual && result.livingSold && result.livingTownVisuals && result.livingOrderMirrored &&
                 (!host || (result.livingSeeded && result.livingSpendOk && result.livingEffectsHost && result.livingOrderPaidOnce && result.livingSavedOnDisk &&
                     result.livingReloadClean && result.livingHostDone));
+            if (WorldConditions) result.passed &= result.p45WorldWeatherMirror &&
+                result.p45WorldBuoyVisible && result.p45WorldCurrentSeen && result.p45WorldCurrentCleared &&
+                result.p45NightReplicated && result.p45NightGlow && result.p45NightMoved && result.p45DayRestored &&
+                (!host || result.p45BoardEligible);
             if (RoleEffects) result.passed &= result.p45RolesSeen && result.p45PingSeen && result.p45PingOnMap &&
                 result.p45CurrentSeen && result.p45CurrentCleared &&
                 (host ? (result.p45CarrierCapacity && result.p45NoStack && result.p45PingServerStamped)
@@ -412,6 +437,118 @@ namespace DeepDive.P1.Lab
             Finish();
         }
 
+        // Real World source, no synthetic current fixture: host moves players in/out of the marked area.
+        private void ObserveP45WorldConditions(bool host, int expected, SessionState state)
+        {
+            var syncs = FindObjectsByType<EconomyPlayerSync>(FindObjectsSortMode.None)
+                .Where(x => x.IsSpawned).ToArray();
+            var boats = FindObjectsByType<BoatTripPlayerSync>(FindObjectsSortMode.None)
+                .Where(x => x.IsSpawned).ToArray();
+            if (syncs.Length == expected && boats.Length == expected)
+            {
+                var first = syncs[0];
+                var weather = P45WorldRules.Weather(first.DayNumber.Value, first.DayWeatherSeed.Value);
+                result.p45WorldWeatherMirror |= syncs.All(x => x.DayNumber.Value == first.DayNumber.Value &&
+                    x.DayWeatherSeed.Value == first.DayWeatherSeed.Value) &&
+                    boats.All(x => x.WindyDay.Value == (weather == P45WeatherKind.Windy));
+            }
+            if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading) return;
+            if (adapter.GetComponent<P45WorldConditions>() == null ||
+                !DiveRegionField.TryFind(out var region)) return;
+            var depth = FindFirstObjectByType<DiveDepthBandSet>();
+            if (depth == null || !region.TryMapToWorld(P45WorldRules.CurrentMapPosition, out var xz)) return;
+            var marker = GameObject.Find("P45MarkedCurrentBuoy");
+            result.p45WorldBuoyVisible |= marker != null &&
+                region.TryWorldToMap(marker.transform.position, out var markerMap) &&
+                (markerMap - P45WorldRules.CurrentMapPosition).sqrMagnitude < 0.0025f;
+
+            var t = Time.realtimeSinceStartup - sceneStarted;
+            var engine = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (host && !p45NightSet && t > 15f && engine != null)
+            {
+                // LABELLED clock fixture: real fish AI, replication, daylight and lights stay active.
+                var saved = engine.ExportDay(); saved.ClockMinute = 22 * 60;
+                p45NightSet = engine.RestoreDay(saved);
+                var board = adapter.GetComponent<LivingWorldNetworkBinding>()?.Authority?.Board;
+                if (board.HasValue && OrderWorld.Current is IOrderTargetWorld world)
+                    result.p45BoardEligible = ContractCatalog.TryGet(board.Value.Order.TemplateId, out var order) && world.CanOffer(order) &&
+                        ContractCatalog.TryGet(board.Value.Sponsor.TemplateId, out var sponsor) && world.CanOffer(sponsor);
+            }
+            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None)
+                .FirstOrDefault(x => x.IsSpawned && x.Species != null && x.Species.SpeciesId == P45WorldRules.NightActiveSpeciesId);
+            if (fish != null && fish.NightActive && t > 16f && t < 28f)
+            {
+                result.p45NightReplicated = true;
+                result.p45NightGlow |= fish.NightGlowVisible;
+                if (host && !fish.IsFleeing) result.p45NightPeakSpeed = Mathf.Max(result.p45NightPeakSpeed, fish.LastSwimSpeed);
+                if (!p45NightPositionSet) { p45NightPosition = fish.transform.position; p45NightPositionSet = true; }
+                else result.p45NightMoved |= Vector3.Distance(p45NightPosition, fish.transform.position) > 0.1f;
+                if (host && !p45NightCaptured && t > 23f && Arg("-p1-screenshot").Length > 0)
+                { p45NightCaptured = true; CaptureP45Fish(fish, "-night"); }
+            }
+            if (host && !p45DaySet && t > 29f && engine != null)
+            {
+                var saved = engine.ExportDay(); saved.ClockMinute = 12 * 60;
+                p45DaySet = engine.RestoreDay(saved);
+            }
+            if (t > 31f && fish != null && result.p45NightReplicated && !fish.NightActive && !fish.NightGlowVisible)
+            {
+                result.p45DayRestored = true;
+                if (host && !fish.IsFleeing) result.p45DayPeakSpeed = Mathf.Max(result.p45DayPeakSpeed, fish.LastSwimSpeed);
+                if (host && !p45DayCaptured && t > 34f && Arg("-p1-screenshot").Length > 0)
+                { p45DayCaptured = true; CaptureP45Fish(fish, "-day"); }
+            }
+            if (host && !p45WorldWarped && t > 5f)
+            {
+                var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                    .Where(x => x.IsSpawned && x.IsServer).ToArray();
+                if (players.Length == expected)
+                {
+                    p45WorldWarped = true;
+                    for (var i = 0; i < players.Length; i++)
+                    {
+                        var player = players[i];
+                        p45WorldOriginalPoses[player.OwnerClientId] = new Pose(player.transform.position, player.transform.rotation);
+                        player.Teleport(new Pose(new Vector3(xz.x + i * 0.3f, depth.SurfaceY - 1.4f, xz.y),
+                            player.transform.rotation));
+                    }
+                }
+            }
+            var local = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .FirstOrDefault(x => x.IsSpawned && x.IsOwner);
+            if (local != null && local.CurrentWarning == CrewWarningKind.LocalCurrent &&
+                local.CurrentDriftVelocity.Value.magnitude > 0.1f)
+                result.p45WorldCurrentSeen = true;
+            if (host && p45WorldWarped && !p45WorldRestored && t > 10f)
+            {
+                p45WorldRestored = true;
+                var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+                for (var i = 0; i < players.Length; i++)
+                    if (players[i].IsSpawned && players[i].IsServer &&
+                        p45WorldOriginalPoses.TryGetValue(players[i].OwnerClientId, out var pose))
+                        players[i].Teleport(pose);
+            }
+            if (t > 11f && result.p45WorldCurrentSeen && local != null &&
+                local.CurrentWarning != CrewWarningKind.LocalCurrent &&
+                local.CurrentDriftVelocity.Value.sqrMagnitude < 0.0001f)
+                result.p45WorldCurrentCleared = true;
+        }
+
+        private void CaptureP45Fish(FishActor fish, string suffix)
+        {
+            // Camera pose fixture for inspection only; the live fish, water and lighting are rendered unchanged.
+            var camera = Camera.allCameras.First(c => c.enabled);
+            var pose = new Pose(camera.transform.position, camera.transform.rotation);
+            try
+            {
+                camera.transform.position = fish.transform.position + new Vector3(0f, 0.6f, -3f);
+                camera.transform.LookAt(fish.transform.position);
+                CaptureRoom(suffix);
+            }
+            finally { camera.transform.SetPositionAndRotation(pose.position, pose.rotation); }
+        }
+
+
         private void ObserveP45RoleEffects(bool host, int expected, SessionState state)
         {
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
@@ -433,6 +570,7 @@ namespace DeepDive.P1.Lab
                     if (player.OwnerClientId != NetworkManager.ServerClientId) guest = player;
                 }
 
+                if (expected == 1) guest = players[0];
                 if (guest != null && inventory != null)
                 {
                     var id = new PlayerId(guest.OwnerClientId);
@@ -444,6 +582,7 @@ namespace DeepDive.P1.Lab
                     result.p45CarrierCapacity |= before ==
                         CrewRoleEffectRules.ResolveBagCapacityGrams(InventoryManager.CapacityGrams, CrewRole.Carrier);
                     result.p45NoStack |= before == after;
+                    if (expected == 1) roleBinding.TryApplyRoleServer(id, CrewRole.Explorer);
                 }
             }
             else if (!host && state.Phase == SessionPhase.Lobby && roleBinding != null)
@@ -465,7 +604,7 @@ namespace DeepDive.P1.Lab
                 else
                     // The script deliberately reconnects client1. Only evidence observed after
                     // reconnect proves the role was safely re-applied and mirrored.
-                    result.p45RolesSeen |= result.clientRejoined && hostRoleOk && guestRoleOk;
+                    result.p45RolesSeen |= (Arg("-p1-integrated") != "rejoin" || result.clientRejoined) && hostRoleOk && guestRoleOk;
             }
 
             if (state.Phase != SessionPhase.Dive || adapter.Connection.IsSceneLoading)
@@ -1785,7 +1924,9 @@ namespace DeepDive.P1.Lab
                     LivingStep(host ? 5 : 3); return;
                 }
                 case 3:   // guest: the fisherman's stall first (the host waits for it), then the same again, then a role and a changed mind
-                    livingAwait = LivingWorldNetworkBinding.RequestBuild(DevelopmentIds.TownFisher); livingStage = 31; return;
+                    livingAwait = ClickLivingButton(DevelopmentIds.TownFisher);
+                    if (livingAwait != 0) livingStage = 31;
+                    return;
                 case 31:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     result.livingBuildOk = ok;
@@ -1818,7 +1959,11 @@ namespace DeepDive.P1.Lab
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     result.livingBuildOk = ok;
                     if (!ok) result.errors.Add("host dock refused: " + reason);
-                    livingAwait = LivingWorldNetworkBinding.RequestRole(CrewRole.Hunter); livingStage = 54; return;
+                    livingStage = 55; return;
+                case 55:
+                    livingAwait = ClickLivingButton("Role-" + CrewRole.Hunter);
+                    if (livingAwait != 0) livingStage = 54;
+                    return;
                 case 54:
                     if (!LivingAnswered(livingAwait, out ok, out reason)) return;
                     if (!ok) result.errors.Add("host role refused: " + reason);
@@ -1834,6 +1979,17 @@ namespace DeepDive.P1.Lab
                     LivingStep(90); return;
                 }
             }
+        }
+
+        private ulong ClickLivingButton(string name)
+        {
+            var view = FindFirstObjectByType<LivingBoardView>();
+            if (view == null) return 0;
+            view.SetVisible(true);
+            var button = view.GetComponentsInChildren<Button>(true).FirstOrDefault(x => x.name == name);
+            if (button == null || !button.isActiveAndEnabled || !button.interactable) return 0;
+            button.onClick.Invoke();
+            return view.LastRequestId;
         }
 
         // Host: the labelled start money, the spend checks, the dive injection, the order/pay/persist/reload checks.
@@ -1853,6 +2009,9 @@ namespace DeepDive.P1.Lab
                     if (state.Phase != SessionPhase.Lobby || adapter.Connection.IsSceneLoading || now - sceneStarted < 3f) return;
                     var seed = economy.ExportSaveData("smoke", "smoke");
                     seed.SharedBalance = LivingSeedBalance;
+                    var weatherDay = DayLock.StateProvider();
+                    result.livingWeatherSeed = weatherDay.WeatherSeed;
+                    result.livingWeatherKind = P45WorldRules.Weather(weatherDay.DayNumber, weatherDay.WeatherSeed).ToString();
                     result.livingSeeded = economy.TryRestore(seed) && economy.SharedBalance == LivingSeedBalance;
                     livingHostStage = 1; return;
                 }
@@ -1992,6 +2151,8 @@ namespace DeepDive.P1.Lab
             var before = economy.SharedBalance;
             // The reopened session is on day 1 again only if the file said so: the board for THAT day must be exactly what was saved (not re-rolled).
             var dayState = DayLock.StateProvider();
+            result.livingWeatherSeed = dayState.WeatherSeed;
+            result.livingWeatherKind = P45WorldRules.Weather(dayState.DayNumber, dayState.WeatherSeed).ToString();
             result.livingReloadPass = DevelopmentIds.All.All(living.Development.Owns) && living.RoleOf(host) == CrewRole.Hunter &&
                 board.Order.Status == ContractStatus.Completed && dayState.DayNumber == board.Day && RealRole(0) == CrewRole.Hunter &&
                 EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&
@@ -3345,11 +3506,9 @@ namespace DeepDive.P1.Lab
             // A hidden Windows player can skip presenting its backbuffer. Render explicitly
             // into a texture so the capture still contains the real camera and uGUI layout.
             var camera = Camera.allCameras.First(c => c.enabled);
-            var canvas = adapter.GetComponentInChildren<Canvas>();
-            var previousMode = canvas.renderMode;
-            var previousCamera = canvas.worldCamera;
+            var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None).Where(c => c.isActiveAndEnabled).ToArray();
+            var previousCanvases = canvases.Select(c => (c.renderMode, c.worldCamera, c.planeDistance)).ToArray();
             var previousCameraTarget = camera.targetTexture;
-            var previousPlane = canvas.planeDistance;
             var previousTarget = RenderTexture.active;
             var target = new RenderTexture(1280, 720, 24);
             var pixels = new Texture2D(1280, 720, TextureFormat.RGB24, false);
@@ -3357,8 +3516,11 @@ namespace DeepDive.P1.Lab
             {
                 target.Create();
                 camera.targetTexture = target;
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = camera; canvas.planeDistance = camera.nearClipPlane + 0.01f;
+                foreach (var canvas in canvases)
+                {
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = camera; canvas.planeDistance = camera.nearClipPlane + 0.01f;
+                }
                 Canvas.ForceUpdateCanvases();
                 RenderPipeline.SubmitRenderRequest(camera, new RenderPipeline.StandardRequest { destination = target });
                 RenderTexture.active = target;
@@ -3372,7 +3534,8 @@ namespace DeepDive.P1.Lab
             {
                 RenderTexture.active = previousTarget;
                 camera.targetTexture = previousCameraTarget;
-                canvas.renderMode = previousMode; canvas.worldCamera = previousCamera; canvas.planeDistance = previousPlane;
+                for (var i = 0; i < canvases.Length; i++)
+                { canvases[i].renderMode = previousCanvases[i].renderMode; canvases[i].worldCamera = previousCanvases[i].worldCamera; canvases[i].planeDistance = previousCanvases[i].planeDistance; }
                 target.Release(); Destroy(target); Destroy(pixels);
             }
         }

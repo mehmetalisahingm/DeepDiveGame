@@ -120,7 +120,8 @@ namespace DeepDive.Composition
             if (bound || economy == null || tripManager == null || boatController == null) return;
 
             activeVehicleProvider = () => economy.ActiveVehicleId;
-            tripManager.Configure(() => economy.BoatRepair.Status, this, activeVehicleProvider, this);
+            tripManager.Configure(() => economy.BoatRepair.Status, this, activeVehicleProvider, this,
+                P45WorldConditions.CanDepart);
             ActiveVehicle.Bind(activeVehicleProvider);
             tripManager.OnTripChanged += PublishStateAndPose;
             economy.OnFleetChanged += HandleFleetChanged;
@@ -219,6 +220,7 @@ namespace DeepDive.Composition
                 var sync = syncs[i];
                 if (!sync.IsSpawned || !sync.IsServer) continue;
                 sync.PublishTripState(state, new PlayerId(sync.OwnerClientId));
+                sync.PublishWeather(P45WorldConditions.TodaysWeather == P45WeatherKind.Windy);
                 sync.PublishBoatPose(position, rotation, visible, boatController.HullKind);
             }
         }

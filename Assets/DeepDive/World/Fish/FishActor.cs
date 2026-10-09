@@ -28,6 +28,10 @@ namespace DeepDive.World
 
         // Replicated for client-side hit feedback later; the host is the only writer.
         private readonly NetworkVariable<float> health = new NetworkVariable<float>();
+        // Night behavior is decided only by the shared host clock; guests observe the
+        // replicated state and the host-moved transform. No client-side fish AI.
+        private readonly NetworkVariable<bool> nightActive = new NetworkVariable<bool>();
+        private Light nightGlow;
 
         private readonly List<Vector3> threats = new List<Vector3>();
         private readonly Collider[] threatBuffer = new Collider[16];
@@ -44,9 +48,22 @@ namespace DeepDive.World
         public float Health => health.Value;
         public int WeightGrams => weightGrams;
         public bool IsDead => state != null && state.IsDead;
+        public bool NightActive => nightActive.Value;
+        public bool NightGlowVisible => nightGlow != null && nightGlow.enabled;
+        public bool IsFleeing => motion != null && motion.IsFleeing;
+        public float LastSwimSpeed { get; private set; }
 
         public override void OnNetworkSpawn()
         {
+            if (species != null && species.SpeciesId == P45WorldRules.NightActiveSpeciesId)
+            {
+                nightGlow = gameObject.AddComponent<Light>();
+                nightGlow.type = LightType.Point;
+                nightGlow.color = new Color(0.25f, 0.80f, 0.88f);
+                nightGlow.range = 2f;
+                nightGlow.intensity = 0.6f;
+                nightGlow.enabled = false;
+            }
             if (!IsServer) return;
             if (species == null)
             {
@@ -74,9 +91,18 @@ namespace DeepDive.World
         {
             if (!IsSpawned || !IsServer || motion == null || state == null || state.IsDead) return;
 
+            var activity = 1f;
+            if (species != null && species.SpeciesId == P45WorldRules.NightActiveSpeciesId &&
+                DayLock.StateProvider != null)
+            {
+                var day = DayLock.StateProvider();
+                activity = P45WorldRules.SpeciesActivity(species.SpeciesId, day.ClockMinute, day.Phase);
+            }
+            nightActive.Value = activity > 1f;
             GatherThreats();
             var position = transform.position;
-            var next = motion.Step(position, threats, Time.fixedDeltaTime, SwimVolumeBounds.Instance);
+            var next = motion.Step(position, threats, Time.fixedDeltaTime, SwimVolumeBounds.Instance, activity);
+            LastSwimSpeed = Vector3.Distance(position, next) / Time.fixedDeltaTime;
             if (next == position) return;
 
             var heading = next - position;
@@ -86,6 +112,18 @@ namespace DeepDive.World
             var flat = new Vector3(heading.x, 0f, heading.z);
             if (flat.sqrMagnitude > 0.0001f)
                 transform.rotation = Quaternion.LookRotation(heading.normalized, Vector3.up);
+        }
+
+        private void LateUpdate()
+        {
+            if (nightGlow != null) nightGlow.enabled = IsSpawned && nightActive.Value && !IsDead;
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (nightGlow != null) Destroy(nightGlow);
+            nightGlow = null;
+            base.OnNetworkDespawn();
         }
 
         // Divers are found by their CharacterController rather than by Mehmet's NetworkPlayer
@@ -135,6 +173,9 @@ namespace DeepDive.World
 
         private void Die(PlayerId killer)
         {
+            // The same NetworkObject becomes a catch on death. Clear the replicated night
+            // indicator immediately so clients never render a glowing dead fish.
+            nightActive.Value = false;
             var catchObject = GetComponent<CatchObject>();
             if (catchObject == null)
             {

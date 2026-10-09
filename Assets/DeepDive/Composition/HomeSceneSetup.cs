@@ -40,6 +40,8 @@ namespace DeepDive.Composition
                 bed.transform.position = new Vector3(bedXs[i], 0.3f, 3.45f);
                 bed.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
                 bed.transform.localScale = new Vector3(1.25f, 0.35f, 2.05f);
+                var bedMaterial = Resources.Load<Material>("DevVisuals/Dev_Blue");
+                if (bedMaterial != null) bed.GetComponent<Renderer>().sharedMaterial = bedMaterial;
                 var anchor = bed.AddComponent<HomeInteractionAnchor>();
                 anchor.ConfigureBed(DayIds.Beds[i], new Vector3(0f, 0.7f, 0f), new Vector3(0f, 0.15f, 1.45f));
             }
@@ -49,6 +51,8 @@ namespace DeepDive.Composition
             storage.transform.SetParent(root.transform, false);
             storage.transform.position = new Vector3(-3.9f, 0.8f, -3.55f);
             storage.transform.localScale = new Vector3(1.35f, 1.6f, 0.75f);
+            var storageMaterial = Resources.Load<Material>("DevVisuals/Dev_Crate");
+            if (storageMaterial != null) storage.GetComponent<Renderer>().sharedMaterial = storageMaterial;
             storage.AddComponent<HomeInteractionAnchor>().ConfigureStorage();
         }
     }

@@ -30,6 +30,8 @@ namespace DeepDive.Trip
         public readonly NetworkVariable<FixedString32Bytes> LastReasonCode = new NetworkVariable<FixedString32Bytes>();
 
         public readonly NetworkVariable<byte> HullKind = new NetworkVariable<byte>();
+        // Host-derived, persistent-day weather mirror. UI cannot choose or write this.
+        public readonly NetworkVariable<bool> WindyDay = new NetworkVariable<bool>();
 
         private BoatHullPresentation hullPresentation;
         private ulong localRequestId;
@@ -96,6 +98,11 @@ namespace DeepDive.Trip
             BoatYaw.Value = rotation.eulerAngles.y;
             BoatVisible.Value = visible;
             HullKind.Value = (byte)hull;
+        }
+
+        public void PublishWeather(bool windy)
+        {
+            if (IsServer) WindyDay.Value = windy;
         }
 
         public void PublishResult(TransactionResult result)
@@ -215,6 +222,8 @@ namespace DeepDive.Trip
             GUI.Box(new Rect(20, 362, 300, 24), "B: bin | G: in | O: rotaya cik | R: donus");
             if (LastRequestId.Value > 0 && !LastAccepted.Value)
                 GUI.Box(new Rect(20, 390, 300, 24), $"SANDAL RED: {LastReasonCode.Value}");
+            if (WindyDay.Value && phase == BoatTripPhase.Docked)
+                GUI.Box(new Rect(20, 418, 440, 24), "RUZGAR: DERIN ROTA KAPALI - DONUS HER ZAMAN ACIK");
         }
     }
 }

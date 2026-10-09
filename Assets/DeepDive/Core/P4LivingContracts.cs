@@ -155,6 +155,12 @@ namespace DeepDive.Core.Contracts
         bool UnrecordedSpeciesRemain { get; }
     }
 
+    // Optional richer read seam; legacy providers remain valid for isolated rule tests.
+    public interface IOrderTargetWorld : IOrderWorld
+    {
+        bool CanOffer(in ContractTemplate template);
+    }
+
     public static class OrderWorld
     {
         public static IOrderWorld Current { get; private set; }

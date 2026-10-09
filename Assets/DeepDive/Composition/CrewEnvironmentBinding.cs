@@ -38,7 +38,10 @@ namespace DeepDive.Composition
         {
             adapter = GetComponent<SessionNetworkAdapter>();
             manager = GetComponent<NetworkManager>();
-            if (adapter == null || manager == null) enabled = false;
+            if (adapter == null || manager == null) { enabled = false; return; }
+            // World provides one read-only, scene-aware weather/current source.
+            if (GetComponent<DeepDive.World.P45WorldConditions>() == null)
+                gameObject.AddComponent<DeepDive.World.P45WorldConditions>();
         }
 
         private void Update()

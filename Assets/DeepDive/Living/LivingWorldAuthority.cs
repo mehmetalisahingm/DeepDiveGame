@@ -141,6 +141,7 @@ namespace DeepDive.Living
         private static bool IsEligibleToday(in ContractTemplate template)
         {
             var world = OrderWorld.Current;
+            if (world is IOrderTargetWorld targets && !targets.CanOffer(template)) return false;
             if (template.RequiresNight && (world == null || !world.NightCaptureAvailable)) return false;
             if (template.Measure == ContractMeasure.PublishNewSpecies && world != null && !world.UnrecordedSpeciesRemain) return false;
             return true;

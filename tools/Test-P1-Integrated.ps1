@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
 $ErrorActionPreference = 'Stop'
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1IsWindows = $env:OS -eq 'Windows_NT'
@@ -6,7 +6,7 @@ if ($BuildPath) { $p1Build = $BuildPath }
 elseif ($p1IsWindows) { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.exe' }
 else { $p1Build = Join-Path $p1Root 'Builds/P1-Integrated/DeepDiveGame-P1.x86_64' }
 if (-not (Test-Path -LiteralPath $p1Build)) { throw "Integrated build bulunamadi: $p1Build" }
-$p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
+$p1Run = Join-Path $p1Root ('Logs/P1-integrated-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players + '-' + $Port)
 New-Item -ItemType Directory -Path $p1Run | Out-Null
 if ($CampaignSeed) {
     if (-not [System.IO.Path]::IsPathRooted($CampaignSeed)) { $CampaignSeed = Join-Path $p1Root $CampaignSeed }
@@ -55,6 +55,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($Living) { $p1Args += @('-p4-living', '1') }   # #132: real PC builds/roles, real fish hand-in completes the order once, host reload
         if ($Deep) { $p1Args += @('-p4-deep', '1') }
         if ($RoleEffects) { $p1Args += @('-p45-role-effects', '1') }
+        if ($WorldConditions) { $p1Args += @('-p45-world', '1') }
         if ($Fleet) { $p1Args += @('-p4-fleet', '1') }   # #109: real walk to shop + harbor vendor, real purchase/select RPCs, host reload
         if ($Acceptance) { $p1Args += @('-p4-acceptance', '1', '-p3-record', '1', '-p4-media-product', '1') }   # #106: no fixture, real capture -> PC -> channel -> day -> reload
         if ($Storage) { $p1Args += @('-p4-storage', '1') }
@@ -85,7 +86,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $seconds = if ($Unified) { 360 } elseif ($RoleEffects) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
+    $seconds = if ($Unified) { 360 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
 
@@ -167,6 +168,13 @@ try {
             $p1ReloadResult = Get-Content -Raw -LiteralPath $p1Reload | ConvertFrom-Json
             [pscustomobject]@{Process='host-reload'; Passed=$p1ReloadResult.passed; Day=$p1ReloadResult.dayReloadNumber; History=$p1ReloadResult.dayReloadHistory; Minute=$p1ReloadResult.dayReloadMinute}
             if (-not $p1ReloadResult.passed) { $p1Failures += "host-reload: $($p1ReloadResult.errors -join ', ')" }
+            if ($Living) {
+                $p45First = Get-Content -Raw -LiteralPath (Join-Path $p1Run 'host.json') | ConvertFrom-Json
+                $p45Same = $p45First.livingWeatherSeed -eq $p1ReloadResult.livingWeatherSeed -and
+                    $p45First.livingWeatherKind -eq $p1ReloadResult.livingWeatherKind
+                [pscustomobject]@{Process='living-weather-reload'; Same=$p45Same; Weather=$p1ReloadResult.livingWeatherKind}
+                if (-not $p45Same) { $p1Failures += 'living: hava diskten farkli dondu' }
+            }
             if ($Acceptance) {
                 # The reload must hand back exactly what the first run left: same real clip (id/recording/hash/size), same post and result, same balance.
                 $p1First = ($p1Parsed | Where-Object { $_.Entry.Name -eq 'host' } | Select-Object -First 1).Result
@@ -179,7 +187,8 @@ try {
                     Day="$($p1First.acceptDayAfter) -> $($p1ReloadResult.acceptReloadDay)"; ExploreObs="$($p1First.acceptExploreObs) -> $($p1ReloadResult.acceptReloadExploreObs)"; Playable=$p1ReloadResult.acceptReloadPlayable}
                 if (-not $p1Same) { $p1Failures += 'acceptance: reload farkli klip/yayin/bakiye/gun dondurdu' }
                 # The clip file itself: its real bytes must match the manifest's size and SHA-256 (the smoke only proves the manifest + playability).
-                $p1ClipFile = Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE 'AppData/LocalLow') -Recurse -Filter ($p1First.acceptClipId + '.ddclip') -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+                $p1LocalLow = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE 'AppData/LocalLow' } elseif ($env:HOME) { Join-Path $env:HOME '.config/unity3d' } else { $null }
+                $p1ClipFile = if ($p1LocalLow -and (Test-Path -LiteralPath $p1LocalLow)) { Get-ChildItem -LiteralPath $p1LocalLow -Recurse -Filter ($p1First.acceptClipId + '.ddclip') -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1 } else { $null }
                 if ($null -eq $p1ClipFile) { $p1Failures += 'acceptance: klip dosyasi bulunamadi' }
                 else {
                     $p1FileHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $p1ClipFile.FullName).Hash.ToLowerInvariant()
