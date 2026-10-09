@@ -48,6 +48,10 @@ namespace DeepDive.World
         public float Health => health.Value;
         public int WeightGrams => weightGrams;
         public bool IsDead => state != null && state.IsDead;
+        public bool NightActive => nightActive.Value;
+        public bool NightGlowVisible => nightGlow != null && nightGlow.enabled;
+        public bool IsFleeing => motion != null && motion.IsFleeing;
+        public float LastSwimSpeed { get; private set; }
 
         public override void OnNetworkSpawn()
         {
@@ -98,6 +102,7 @@ namespace DeepDive.World
             GatherThreats();
             var position = transform.position;
             var next = motion.Step(position, threats, Time.fixedDeltaTime, SwimVolumeBounds.Instance, activity);
+            LastSwimSpeed = Vector3.Distance(position, next) / Time.fixedDeltaTime;
             if (next == position) return;
 
             var heading = next - position;

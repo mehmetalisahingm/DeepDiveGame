@@ -97,6 +97,10 @@ namespace DeepDive.P1.Lab
             public bool p45RolesSeen, p45CarrierCapacity, p45NoStack, p45GuestCrossWriteRefused,
                 p45PingSeen, p45PingOnMap, p45PingServerStamped, p45CurrentSeen, p45CurrentCleared;
             public bool p45WorldWeatherMirror, p45WorldBuoyVisible, p45WorldCurrentSeen, p45WorldCurrentCleared;
+            public bool p45NightReplicated, p45NightGlow, p45NightMoved, p45DayRestored, p45BoardEligible;
+            public int livingWeatherSeed;
+            public float p45NightPeakSpeed, p45DayPeakSpeed;
+            public string livingWeatherKind = "";
             public string deepReloadStage = "";
             public int deepReloadTraces, deepReloadCompleted;
             public List<int> deepStagesSeen = new List<int>();
@@ -172,6 +176,9 @@ namespace DeepDive.P1.Lab
         private P45CurrentSmokeSource p45CurrentSource;
         private readonly Dictionary<ulong, Pose> p45WorldOriginalPoses = new Dictionary<ulong, Pose>();
         private bool p45WorldWarped, p45WorldRestored;
+        private bool p45NightSet, p45DaySet, p45NightCaptured, p45DayCaptured, livingBoardCaptured;
+        private Vector3 p45NightPosition;
+        private bool p45NightPositionSet;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
@@ -219,6 +226,16 @@ namespace DeepDive.P1.Lab
                 var elapsed = Time.realtimeSinceStartup - started;
                 var connection = adapter.Connection;
                 var state = adapter.Session.State;
+                if (host && Living && !livingBoardCaptured && elapsed > 9 && Arg("-p1-screenshot").Length > 0)
+                {
+                    var view = FindFirstObjectByType<LivingBoardView>();
+                    if (view != null)
+                    {
+                        view.SetVisible(true);
+                        ScreenCapture.CaptureScreenshot(System.IO.Path.ChangeExtension(Arg("-p1-screenshot"), null) + "-board.png");
+                        livingBoardCaptured = true;
+                    }
+                }
                 if (host && !screenshot && elapsed > 5 && Arg("-p1-screenshot").Length > 0)
                 { screenshot = true; CaptureRoom(); }
                 if (host && Arg("-p1-screenshot").Length > 0 && !connection.IsSceneLoading)
@@ -373,7 +390,9 @@ namespace DeepDive.P1.Lab
                 (!host || (result.livingSeeded && result.livingSpendOk && result.livingEffectsHost && result.livingOrderPaidOnce && result.livingSavedOnDisk &&
                     result.livingReloadClean && result.livingHostDone));
             if (WorldConditions) result.passed &= result.p45WorldWeatherMirror &&
-                result.p45WorldBuoyVisible && result.p45WorldCurrentSeen && result.p45WorldCurrentCleared;
+                result.p45WorldBuoyVisible && result.p45WorldCurrentSeen && result.p45WorldCurrentCleared &&
+                result.p45NightReplicated && result.p45NightGlow && result.p45NightMoved && result.p45DayRestored &&
+                (!host || result.p45BoardEligible);
             if (RoleEffects) result.passed &= result.p45RolesSeen && result.p45PingSeen && result.p45PingOnMap &&
                 result.p45CurrentSeen && result.p45CurrentCleared &&
                 (host ? (result.p45CarrierCapacity && result.p45NoStack && result.p45PingServerStamped)
@@ -445,6 +464,41 @@ namespace DeepDive.P1.Lab
                 (markerMap - P45WorldRules.CurrentMapPosition).sqrMagnitude < 0.0025f;
 
             var t = Time.realtimeSinceStartup - sceneStarted;
+            var engine = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (host && !p45NightSet && t > 15f && engine != null)
+            {
+                // LABELLED clock fixture: real fish AI, replication, daylight and lights stay active.
+                var saved = engine.ExportDay(); saved.ClockMinute = 22 * 60;
+                p45NightSet = engine.RestoreDay(saved);
+                var board = adapter.GetComponent<LivingWorldNetworkBinding>()?.Authority?.Board;
+                if (board.HasValue && OrderWorld.Current is IOrderTargetWorld world)
+                    result.p45BoardEligible = ContractCatalog.TryGet(board.Value.Order.TemplateId, out var order) && world.CanOffer(order) &&
+                        ContractCatalog.TryGet(board.Value.Sponsor.TemplateId, out var sponsor) && world.CanOffer(sponsor);
+            }
+            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None)
+                .FirstOrDefault(x => x.IsSpawned && x.Species != null && x.Species.SpeciesId == P45WorldRules.NightActiveSpeciesId);
+            if (fish != null && fish.NightActive && t > 16f && t < 28f)
+            {
+                result.p45NightReplicated = true;
+                result.p45NightGlow |= fish.NightGlowVisible;
+                if (host && !fish.IsFleeing) result.p45NightPeakSpeed = Mathf.Max(result.p45NightPeakSpeed, fish.LastSwimSpeed);
+                if (!p45NightPositionSet) { p45NightPosition = fish.transform.position; p45NightPositionSet = true; }
+                else result.p45NightMoved |= Vector3.Distance(p45NightPosition, fish.transform.position) > 0.1f;
+                if (host && !p45NightCaptured && t > 23f && Arg("-p1-screenshot").Length > 0)
+                { p45NightCaptured = true; CaptureP45Fish(fish, "-night"); }
+            }
+            if (host && !p45DaySet && t > 29f && engine != null)
+            {
+                var saved = engine.ExportDay(); saved.ClockMinute = 12 * 60;
+                p45DaySet = engine.RestoreDay(saved);
+            }
+            if (t > 31f && fish != null && result.p45NightReplicated && !fish.NightActive && !fish.NightGlowVisible)
+            {
+                result.p45DayRestored = true;
+                if (host && !fish.IsFleeing) result.p45DayPeakSpeed = Mathf.Max(result.p45DayPeakSpeed, fish.LastSwimSpeed);
+                if (host && !p45DayCaptured && t > 34f && Arg("-p1-screenshot").Length > 0)
+                { p45DayCaptured = true; CaptureP45Fish(fish, "-day"); }
+            }
             if (host && !p45WorldWarped && t > 5f)
             {
                 var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
@@ -479,6 +533,20 @@ namespace DeepDive.P1.Lab
                 local.CurrentWarning != CrewWarningKind.LocalCurrent &&
                 local.CurrentDriftVelocity.Value.sqrMagnitude < 0.0001f)
                 result.p45WorldCurrentCleared = true;
+        }
+
+        private void CaptureP45Fish(FishActor fish, string suffix)
+        {
+            // Camera pose fixture for inspection only; the live fish, water and lighting are rendered unchanged.
+            var camera = Camera.allCameras.First(c => c.enabled);
+            var pose = new Pose(camera.transform.position, camera.transform.rotation);
+            try
+            {
+                camera.transform.position = fish.transform.position + new Vector3(0f, 0.6f, -3f);
+                camera.transform.LookAt(fish.transform.position);
+                CaptureRoom(suffix);
+            }
+            finally { camera.transform.SetPositionAndRotation(pose.position, pose.rotation); }
         }
 
 
@@ -1923,6 +1991,9 @@ namespace DeepDive.P1.Lab
                     if (state.Phase != SessionPhase.Lobby || adapter.Connection.IsSceneLoading || now - sceneStarted < 3f) return;
                     var seed = economy.ExportSaveData("smoke", "smoke");
                     seed.SharedBalance = LivingSeedBalance;
+                    var weatherDay = DayLock.StateProvider();
+                    result.livingWeatherSeed = weatherDay.WeatherSeed;
+                    result.livingWeatherKind = P45WorldRules.Weather(weatherDay.DayNumber, weatherDay.WeatherSeed).ToString();
                     result.livingSeeded = economy.TryRestore(seed) && economy.SharedBalance == LivingSeedBalance;
                     livingHostStage = 1; return;
                 }
@@ -2062,6 +2133,8 @@ namespace DeepDive.P1.Lab
             var before = economy.SharedBalance;
             // The reopened session is on day 1 again only if the file said so: the board for THAT day must be exactly what was saved (not re-rolled).
             var dayState = DayLock.StateProvider();
+            result.livingWeatherSeed = dayState.WeatherSeed;
+            result.livingWeatherKind = P45WorldRules.Weather(dayState.DayNumber, dayState.WeatherSeed).ToString();
             result.livingReloadPass = DevelopmentIds.All.All(living.Development.Owns) && living.RoleOf(host) == CrewRole.Hunter &&
                 board.Order.Status == ContractStatus.Completed && dayState.DayNumber == board.Day && RealRole(0) == CrewRole.Hunter &&
                 EconomyManager.StorageCapacity == EconomyManager.StorageCapacityItems + DevelopmentCatalog.HomeStorageBonusSlots &&

@@ -7,6 +7,7 @@ using DeepDive.Living;
 using DeepDive.Media;
 using DeepDive.Network;
 using DeepDive.Session;
+using DeepDive.World;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -162,7 +163,7 @@ namespace DeepDive.Composition
             DevelopmentEffects.Bind(developmentProvider);
             if (OrderWorld.Current == null)
             {
-                defaultWorld = new DefaultOrderWorld(media);
+                defaultWorld = new DefaultOrderWorld(media, economy);
                 OrderWorld.Bind(defaultWorld);
             }
             economy.OnCatchesSold += OnCatchesSold;
@@ -440,22 +441,63 @@ namespace DeepDive.Composition
 
         // The conservative default until Utku's world binds its own (#131): no night capture, and an unrecorded species remains only while
         // no published clip has been the first recording of its species (the only species content this build has is a single fish).
-        private sealed class DefaultOrderWorld : IOrderWorld
+        private sealed class DefaultOrderWorld : IOrderTargetWorld
         {
             private readonly MediaNetworkBinding media;
-            public DefaultOrderWorld(MediaNetworkBinding media) => this.media = media;
+            private readonly EconomyManager economy;
+            public DefaultOrderWorld(MediaNetworkBinding media, EconomyManager economy)
+            { this.media = media; this.economy = economy; }
             public bool NightCaptureAvailable => false;
+
+            public bool CanOffer(in ContractTemplate template)
+            {
+                if (DayLock.StateProvider == null) return false;
+                var day = DayLock.StateProvider();
+                if (template.Measure == ContractMeasure.PublishEvent &&
+                    !Resources.FindObjectsOfTypeAll<RecordingEventDefinition>().Any(x => !string.IsNullOrEmpty(x.EventId))) return false;
+                var species = Resources.FindObjectsOfTypeAll<SpeciesDefinition>()
+                    .Where(x => x != null && x.IsValid(out _)).Select(x => x.SpeciesId).Distinct().ToArray();
+                // The loaded network prefab/definition is the authored content source, not a guessed species list.
+                // Sea bass lives in the authored near/shore habitat. Other targets need observed habitat evidence.
+                var snapshot = ExplorationFeed.Current != null ? ExplorationFeed.Current.Snapshot() : default;
+                var reef = snapshot.Cells != null && snapshot.Cells.Any(x => x.Discovered && x.DepthBandId == DepthBandIds.Reef);
+                var fleet = economy.Fleet;
+                var vessel = VehicleClass.None;
+                foreach (var boat in fleet.OwnedBoatIds)
+                    if ((int)VehicleCatalog.ClassOf(boat) > (int)vessel) vessel = VehicleCatalog.ClassOf(boat);
+                foreach (var id in species)
+                {
+                    if (template.SpeciesId.Length > 0 && template.SpeciesId != id) continue;
+                    if (template.Measure == ContractMeasure.PublishNewSpecies && AlreadyPublished(id)) continue;
+                    var bands = id == P45WorldRules.NightActiveSpeciesId
+                        ? new[] { DepthBandIds.Shallow }
+                        : snapshot.Species?.FirstOrDefault(x => x.SpeciesId == id).ObservedDepthBandIds;
+                    if (bands == null) continue;
+                    foreach (var band in bands)
+                    {
+                        var route = band == DepthBandIds.Shallow ? BoatTripIds.NearRouteId
+                            : band == DepthBandIds.Reef ? BoatTripIds.ReefRouteId : BoatTripIds.DeepRouteId;
+                        var target = new P45ObjectiveTarget(id, band, route, template.RequiresNight);
+                        if (P45WorldObjectiveEligibility.CanOffer(target, species, vessel, reef,
+                            P45WorldRules.Weather(day.DayNumber, day.WeatherSeed), day.ClockMinute, day.Phase)) return true;
+                    }
+                }
+                return false;
+            }
+
+            private bool AlreadyPublished(string speciesId)
+            {
+                var clips = media.Channel.Clips();
+                return media.Channel.Publications().Any(p => clips.Any(c => c.ClipId == p.ClipId &&
+                    c.SubjectId == speciesId && c.WorldContext.FirstRecordingOfSubject));
+            }
 
             public bool UnrecordedSpeciesRemain
             {
                 get
                 {
-                    var channel = media.Channel;
-                    var clips = channel.Clips();
-                    foreach (var publication in channel.Publications())
-                        foreach (var clip in clips)
-                            if (clip.ClipId == publication.ClipId && clip.WorldContext.FirstRecordingOfSubject) return false;
-                    return true;
+                    return Resources.FindObjectsOfTypeAll<SpeciesDefinition>()
+                        .Any(x => x != null && x.IsValid(out _) && !AlreadyPublished(x.SpeciesId));
                 }
             }
         }

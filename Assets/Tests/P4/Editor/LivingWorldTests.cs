@@ -6,6 +6,7 @@ using DeepDive.Economy;
 using DeepDive.Inventory;
 using DeepDive.Living;
 using DeepDive.Media;
+using DeepDive.World;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -30,9 +31,11 @@ namespace DeepDive.P4.Tests
             public void AnnounceSpend(string spendId, int amount) => economy.AnnounceSpend(spendId, amount);
         }
 
-        private sealed class FakeWorld : IOrderWorld
+        private sealed class FakeWorld : IOrderTargetWorld
         {
             public bool Night, Unrecorded = true;
+            public Func<ContractTemplate, bool> Filter;
+            public bool CanOffer(in ContractTemplate template) => Filter == null || Filter(template);
             public bool NightCaptureAvailable => Night;
             public bool UnrecordedSpeciesRemain => Unrecorded;
         }
@@ -67,7 +70,7 @@ namespace DeepDive.P4.Tests
             economy.SetPersistenceHandler(store.SaveNow);
             living = new LivingWorldAuthority(new Money(economy), store.SaveNow);
             store.Living = living;
-            world.Night = false; world.Unrecorded = true;   // one fixture instance serves every test
+            world.Night = false; world.Unrecorded = true; world.Filter = null;
             OrderWorld.Bind(world);
         }
 
@@ -120,6 +123,38 @@ namespace DeepDive.P4.Tests
                 new string('a', 64), 1000, true, true, new RecordingWorldContext(kind, "region-near-1", "region-near-1:gx0:gz0", DepthBandIds.Shallow, first));
 
         // ---- the daily board ------------------------------------------------------------------------------------------
+
+        [Test]
+        public void DailySelectionConsumesWorldReachabilityAndRestoreDoesNotReroll()
+        {
+            world.Filter = t => t.Id == ContractIds.OrderBass || t.Id == ContractIds.SponsorQuality;
+            Assert.IsTrue(living.EnsureDay(1, 42));
+            Assert.AreEqual(ContractIds.OrderBass, living.Board.Order.TemplateId);
+            Assert.AreEqual(ContractIds.SponsorQuality, living.Board.Sponsor.TemplateId);
+            Assert.IsTrue(store.SaveNow());
+            world.Filter = t => false;
+            Assert.IsTrue(store.LoadNow());
+            Assert.IsFalse(living.EnsureDay(1, 42));
+            Assert.AreEqual(ContractIds.OrderBass, living.Board.Order.TemplateId);
+            Assert.IsTrue(living.EnsureDay(2, 42));
+            Assert.IsFalse(living.Board.Order.HasContract);
+            Assert.IsFalse(living.Board.Sponsor.HasContract);
+        }
+
+        [TestCase(VehicleClass.Rowboat, true, P45WeatherKind.Calm, false)]
+        [TestCase(VehicleClass.ResearchBoat, false, P45WeatherKind.Calm, false)]
+        [TestCase(VehicleClass.ResearchBoat, true, P45WeatherKind.Windy, false)]
+        [TestCase(VehicleClass.ResearchBoat, true, P45WeatherKind.Calm, true)]
+        public void DailyGeneratorUsesWorldHabitatFleetDiscoveryAndWeather(VehicleClass vessel, bool reef,
+            P45WeatherKind weather, bool expected)
+        {
+            var target = new P45ObjectiveTarget("sea_bass", DepthBandIds.Deep, BoatTripIds.DeepRouteId, false);
+            world.Filter = t => (t.Id == ContractIds.OrderBass || t.Id == ContractIds.SponsorQuality) &&
+                P45WorldObjectiveEligibility.CanOffer(target, new[] { "sea_bass" }, vessel, reef, weather);
+            living.EnsureDay(1, 42);
+            Assert.AreEqual(expected, living.Board.Order.HasContract);
+            Assert.AreEqual(expected, living.Board.Sponsor.HasContract);
+        }
 
         [Test]
         public void EachDayHasOneFishOrderAndOneSponsorPickedDeterministicallyAndNeverReRolled()

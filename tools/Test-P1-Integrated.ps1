@@ -168,6 +168,13 @@ try {
             $p1ReloadResult = Get-Content -Raw -LiteralPath $p1Reload | ConvertFrom-Json
             [pscustomobject]@{Process='host-reload'; Passed=$p1ReloadResult.passed; Day=$p1ReloadResult.dayReloadNumber; History=$p1ReloadResult.dayReloadHistory; Minute=$p1ReloadResult.dayReloadMinute}
             if (-not $p1ReloadResult.passed) { $p1Failures += "host-reload: $($p1ReloadResult.errors -join ', ')" }
+            if ($Living) {
+                $p45First = Get-Content -Raw -LiteralPath (Join-Path $p1Run 'host.json') | ConvertFrom-Json
+                $p45Same = $p45First.livingWeatherSeed -eq $p1ReloadResult.livingWeatherSeed -and
+                    $p45First.livingWeatherKind -eq $p1ReloadResult.livingWeatherKind
+                [pscustomobject]@{Process='living-weather-reload'; Same=$p45Same; Weather=$p1ReloadResult.livingWeatherKind}
+                if (-not $p45Same) { $p1Failures += 'living: hava diskten farkli dondu' }
+            }
             if ($Acceptance) {
                 # The reload must hand back exactly what the first run left: same real clip (id/recording/hash/size), same post and result, same balance.
                 $p1First = ($p1Parsed | Where-Object { $_.Entry.Name -eq 'host' } | Select-Object -First 1).Result

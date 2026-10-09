@@ -2,7 +2,7 @@ name: P4.5 Utku living world acceptance
 
 on:
   push:
-    branches: ['p45/utku-world-weather-current']
+    branches: ['p45/utku-world-weather-current', 'codex/p4-integration']
   workflow_dispatch:
 
 permissions:
@@ -50,6 +50,14 @@ jobs:
         shell: pwsh
         run: |
           & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 19277 -WorldConditions -Capture -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Real living-world rewards, roles, developments and disk restart
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 19377 -Living -Capture -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Real clip sponsor and single-payment regression
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P1-Integrated.ps1 -Players 2 -Port 19477 -Acceptance -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
       - name: Upload runtime JSON, logs and images
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

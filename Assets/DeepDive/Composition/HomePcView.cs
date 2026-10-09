@@ -29,6 +29,8 @@ namespace DeepDive.Composition
             pc.name = PcName;
             pc.transform.position = new Vector3(3.9f, 0.6f, -3.55f);
             pc.transform.localScale = new Vector3(1.4f, 1.2f, 0.7f);
+            var material = Resources.Load<Material>("DevVisuals/Dev_Wood");
+            if (material != null) pc.GetComponent<Renderer>().sharedMaterial = material;
             pc.AddComponent<HomePcAnchor>();
         }
     }

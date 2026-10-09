@@ -111,7 +111,8 @@ namespace DeepDive.World
             {
                 case DepthBandIds.Shallow:
                     if (target.RouteId != BoatTripIds.NearRouteId) return false;
-                    return activeClass == VehicleClass.Rowboat ||
+                    // The authored near habitat is also reachable by the free shore dive.
+                    return activeClass == VehicleClass.None || activeClass == VehicleClass.Rowboat ||
                            activeClass == VehicleClass.Motorboat ||
                            activeClass == VehicleClass.ResearchBoat;
                 case DepthBandIds.Reef:

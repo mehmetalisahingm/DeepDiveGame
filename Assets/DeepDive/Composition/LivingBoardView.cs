@@ -12,7 +12,7 @@ namespace DeepDive.Composition
     public sealed class LivingBoardView : MonoBehaviour
     {
         public const KeyCode ToggleKey = KeyCode.B;
-        private const float Width = 330f;
+        private const float Width = 420f;
 
         private bool visible;
         private string status = "";
@@ -20,6 +20,8 @@ namespace DeepDive.Composition
         private ulong awaiting;
 
         public static bool PanelVisible { get; private set; }
+
+        public void SetVisible(bool value) { visible = value; PanelVisible = value; }
 
         private void Update()
         {
@@ -44,7 +46,7 @@ namespace DeepDive.Composition
             var me = manager != null ? manager.LocalClientId : 0UL;
             var atPc = HomePcView.PanelOpen;
 
-            var rect = new Rect(Screen.width - Width - 20f, 290f, Width, 330f);
+            var rect = new Rect(Screen.width - Width - 20f, Mathf.Max(10f, Mathf.Min(290f, Screen.height - 400f)), Width, 390f);
             GUI.Box(rect, $"GUNLUK HEDEFLER [{ToggleKey}]   gun {board.Day}");
             var x = rect.x + 10f;
             var y = rect.y + 24f;
@@ -58,9 +60,9 @@ namespace DeepDive.Composition
             {
                 var d = DevelopmentCatalog.All[i];
                 var owned = development.Owns(d.Id);
-                GUI.Label(new Rect(x, y, 210f, 18f), $"{d.Title}: {d.Effect}");
-                if (owned) GUI.Label(new Rect(x + 214f, y, 100f, 18f), "SAHIPSIN");
-                else if (GUI.Button(new Rect(x + 214f, y, 100f, 18f), d.Price.ToString())) awaiting = LivingWorldNetworkBinding.RequestBuild(d.Id);
+                GUI.Label(new Rect(x, y, Width - 134f, 18f), $"{d.Title}: {d.Effect}");
+                if (owned) GUI.Label(new Rect(x + Width - 124f, y, 100f, 18f), "SAHIPSIN");
+                else if (GUI.Button(new Rect(x + Width - 124f, y, 100f, 18f), d.Price.ToString())) awaiting = LivingWorldNetworkBinding.RequestBuild(d.Id);
                 y += 20f;
             }
 
@@ -86,8 +88,9 @@ namespace DeepDive.Composition
             }
             var done = state.Status == ContractStatus.Completed;
             GUI.Label(new Rect(x, y, Width - 20f, 18f), $"{label}: {template.Title}  (+{template.Reward})  {(done ? "TAMAM" : "acik")}");
-            GUI.Label(new Rect(x + 8f, y + 16f, Width - 28f, 18f), $"{template.Hint}  [{Format(template, state.Progress)}/{Format(template, template.Target)}]");
-            return y + 40f;
+            var hintStyle = new GUIStyle(GUI.skin.label) { wordWrap = true };
+            GUI.Label(new Rect(x + 8f, y + 18f, Width - 28f, 36f), $"{template.Hint}  [{Format(template, state.Progress)}/{Format(template, template.Target)}]", hintStyle);
+            return y + 58f;
         }
 
         private static string Format(in ContractTemplate template, int value) =>
