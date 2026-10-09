@@ -187,7 +187,8 @@ try {
                     Day="$($p1First.acceptDayAfter) -> $($p1ReloadResult.acceptReloadDay)"; ExploreObs="$($p1First.acceptExploreObs) -> $($p1ReloadResult.acceptReloadExploreObs)"; Playable=$p1ReloadResult.acceptReloadPlayable}
                 if (-not $p1Same) { $p1Failures += 'acceptance: reload farkli klip/yayin/bakiye/gun dondurdu' }
                 # The clip file itself: its real bytes must match the manifest's size and SHA-256 (the smoke only proves the manifest + playability).
-                $p1ClipFile = Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE 'AppData/LocalLow') -Recurse -Filter ($p1First.acceptClipId + '.ddclip') -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+                $p1LocalLow = if ($env:USERPROFILE) { Join-Path $env:USERPROFILE 'AppData/LocalLow' } elseif ($env:HOME) { Join-Path $env:HOME '.config/unity3d' } else { $null }
+                $p1ClipFile = if ($p1LocalLow -and (Test-Path -LiteralPath $p1LocalLow)) { Get-ChildItem -LiteralPath $p1LocalLow -Recurse -Filter ($p1First.acceptClipId + '.ddclip') -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1 } else { $null }
                 if ($null -eq $p1ClipFile) { $p1Failures += 'acceptance: klip dosyasi bulunamadi' }
                 else {
                     $p1FileHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $p1ClipFile.FullName).Hash.ToLowerInvariant()
