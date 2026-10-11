@@ -114,7 +114,7 @@ namespace DeepDive.Composition
             root.AddComponent<DevelopmentVisual>().Init(DevelopmentIds.TownDock, built, plot);
         }
 
-        public enum Tint { Wood, ShelfWood, Gold, Cyan, Rose, Rug, Plot, Orange, DarkWood, Crate, Blue, Butter, Steel, Banner, Pole, Lamp }
+        public enum Tint { Wood, ShelfWood, Gold, Cyan, Rose, Rug, Plot, Orange, DarkWood, Crate, Blue, Butter, Steel, Banner, Pole, Lamp, Green, Purple, Cream, Charcoal, Red, Sand }
 
         public static readonly Color[] Palette =
         {
@@ -133,7 +133,14 @@ namespace DeepDive.Composition
             new Color(0.75f, 0.8f, 0.85f),
             new Color(0.15f, 0.35f, 0.85f),
             new Color(0.35f, 0.25f, 0.15f),
-            new Color(1f, 0.92f, 0.45f)
+            new Color(1f, 0.92f, 0.45f),
+            // P4.6-B (#139) storefronts
+            new Color(0.25f, 0.68f, 0.38f),
+            new Color(0.58f, 0.34f, 0.78f),
+            new Color(0.96f, 0.93f, 0.82f),
+            new Color(0.12f, 0.13f, 0.16f),
+            new Color(0.82f, 0.22f, 0.2f),
+            new Color(0.82f, 0.72f, 0.52f)
         };
 
         public static string MaterialPath(Tint tint) => "DevVisuals/Dev_" + tint;
