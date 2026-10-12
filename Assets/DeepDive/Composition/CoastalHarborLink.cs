@@ -91,7 +91,7 @@ namespace DeepDive.Composition
                 var mark = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 mark.name = "ToPier_" + z.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
                 mark.transform.SetParent(root.transform, false);
-                mark.transform.position = new Vector3(12f, ContinuousTownLayout.WalkSurfaceY + 0.04f, z);
+                mark.transform.position = new Vector3(8f, ContinuousTownLayout.WalkSurfaceY + 0.04f, z);
                 mark.transform.localScale = new Vector3(0.28f, 0.04f, 0.28f);
                 if (source != null) mark.GetComponent<Renderer>().sharedMaterial = source;
                 var col = mark.GetComponent<Collider>();
