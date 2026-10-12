@@ -54,11 +54,11 @@ namespace DeepDive.Composition
             var sand = MaterialFromScene(scene, "Beach_Platform");
             var building = MaterialFromScene(scene, "Wall_S") ?? sand;
 
-            Slab(parent, "CoastWalk", new Vector3(0f, -16.25f), new Vector2(7.5f, 7.0f), sand);
-            Slab(parent, "MainStreet", new Vector3(0f, -22f), new Vector2(7.5f, 13f), sand);
-            Slab(parent, "TownSquare", new Vector3(0f, -29f), new Vector2(28f, 14f), sand);
-            Slab(parent, "HouseApproach", new Vector3(0f, -40f), new Vector2(7.5f, 12f), sand);
-            Slab(parent, "HomePlot", new Vector3(0f, -49f), new Vector2(15f, 13f), sand);
+            Slab(parent, "CoastWalk", new Vector2(0f, -16.25f), new Vector2(7.5f, 7.0f), sand);
+            Slab(parent, "MainStreet", new Vector2(0f, -22f), new Vector2(7.5f, 13f), sand);
+            Slab(parent, "TownSquare", new Vector2(0f, -29f), new Vector2(28f, 14f), sand);
+            Slab(parent, "HouseApproach", new Vector2(0f, -40f), new Vector2(7.5f, 12f), sand);
+            Slab(parent, "HomePlot", new Vector2(0f, -49f), new Vector2(15f, 13f), sand);
 
             // Physical facades outside the square's pedestrian area. No collider is placed
             // over the paths or shop customer marks; service range remains host-validated.
