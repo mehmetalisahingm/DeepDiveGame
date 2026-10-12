@@ -3321,6 +3321,17 @@ namespace DeepDive.P1.Lab
             var northEdge = strip.bounds.max.z;
             if (position.z <= northEdge + 0.2f) return stand;   // already on the platform: walk to the NPC
 
+            // The boss safe-return pad is on Shore_Ledge itself. When BOTH player
+            // and goal are on that ledge, walk directly to the goal: routing through
+            // the south Beach_Platform edge makes a diver oscillate at z~-11.
+            // The old 2-process boss trace showed players stopped there for minutes.
+            var ledge = GameObject.Find("Shore_Ledge")?.GetComponent<Collider>();
+            if (ledge != null &&
+                position.y >= ledge.bounds.max.y - 0.35f &&
+                ledge.bounds.Contains(new Vector3(position.x, ledge.bounds.center.y, position.z)) &&
+                ledge.bounds.Contains(new Vector3(stand.x, ledge.bounds.center.y, stand.z)))
+                return stand;
+
             // Standing on dry ground that is flush with the platform but is not it - the return pad on Shore_Ledge, z -11..-7 - the
             // next step is straight onto the platform (north, -z). Sending it to the wade lane instead walks it WEST along the ledge
             // and off the ramp into the water beside the shelf, where it pressed against the shelf's side wall for the rest of the
