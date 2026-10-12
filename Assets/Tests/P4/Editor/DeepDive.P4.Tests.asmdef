@@ -1,6 +1,24 @@
 {
   "name": "DeepDive.P4.Tests",
-  "references": ["DeepDive.Core.Contracts", "DeepDive.Inventory", "DeepDive.Economy", "DeepDive.Trip", "DeepDive.Day", "DeepDive.Progression", "DeepDive.Living", "DeepDive.World", "DeepDive.MapUI", "DeepDive.Composition", "DeepDive.Media", "DeepDive.Network"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"]
+  "references": [
+    "DeepDive.Core.Contracts",
+    "DeepDive.Inventory",
+    "DeepDive.Economy",
+    "DeepDive.Trip",
+    "DeepDive.Day",
+    "DeepDive.Progression",
+    "DeepDive.Living",
+    "DeepDive.World",
+    "DeepDive.MapUI",
+    "DeepDive.Composition",
+    "DeepDive.Media",
+    "DeepDive.Network",
+    "Unity.Netcode.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
 }
