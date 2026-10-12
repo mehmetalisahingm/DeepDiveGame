@@ -142,7 +142,11 @@ namespace DeepDive.Composition
             if (!keepCollider)
             {
                 var collider = go.GetComponent<Collider>();
-                if (collider != null) UnityEngine.Object.Destroy(collider);
+                if (collider != null)
+                {
+                    if (Application.isPlaying) UnityEngine.Object.Destroy(collider);
+                    else UnityEngine.Object.DestroyImmediate(collider);
+                }
             }
         }
     }
