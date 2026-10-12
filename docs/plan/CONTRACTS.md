@@ -228,6 +228,11 @@ Bu bölüm taslak değil, kodda olanı yazar; doğrulanan/doğrulanmayan ayrım�
 7. **Kayıt şeması v2.** `EconomySaveData` v2: bekleyen ürünler + tamamlanmış parça kimlikleri. v1 dosyalar yüklenir (bekleyen boş, sandal bozuk); gelecekteki/bilinmeyen sürüm reddedilir ve mevcut durum korunur. Diskteki ödenmiş kimlik asla bekleyen olarak geri gelmez. Host dışındaki taşıyıcıların ürünü kayıtta ortak emanete çevrilir (guest bağlantı ID'si kalıcı kimlik değildir).
 8. **Bilinen sınırlar (karar gerektirir).** (a) Bekleyen ürün çantada tutulmaz: kapasite tüketmez ve sonraki dalışa risk olarak taşınmaz — yukarıdaki taslaktaki "taşınan satılmamış av kapasite tüketir" maddesinden bilinçli sadeleştirme, ekiple netleşmeli. (b) Kayıt yalnız host'un loadout'unu saklar (D06): guest'in satın aldığı kamera oturum içinde geçerlidir, yeniden açmada geri gelmez. (c) Dükkân arayüzü IMGUI yer tutucudur.
 
+
+### P4.6-B uygulama notu — fiziksel dükkânlar (#139)
+
+Rapor: `docs/reports/P4-6-SHOPS.md`. Dört hizmet noktasının (`ServicePointAnchor`) her biri çalışma anında `Composition/TownStorefront` ile bir dükkân alır: tezgâh (tek collider), tabela, müşteri noktası (anchor'dan 1,7 m önde), gece feneri. Dükkân anchor'ın **çocuğudur**, sahne dosyası değişmez; World anchor'ı taşırsa dükkân onunla gider, anchor altında `Storefront` adlı yazılmış bir bina varsa yer tutucu çekilir. Hizmet kimliği/mesafe/kural değişmez (host `TownServiceHandler` + `ServiceInteractionRules`); dükkân yalnız fiziksel yüzdür. Fener, `CoastalAtmosphere` ile aynı ortak gün kaynağından okur.
+
 ### P3.3-C uygulama notu — sefer state machine, kayıt, harita (#66)
 
 Bu bölüm taslak değil, kodda olanı yazar; doğrulanan/doğrulanmayan ayrımı PR açıklamasındadır. Şekiller `Assets/DeepDive/Core/P3BoatTripContracts.cs`, kurallar `Assets/DeepDive/Trip/`. Mehmet'in #75'i (koltuk/binme/hareket) ve Utku'nun #76'sı (iskele/rota/world↔map) bu commit'te henüz yok; bu not yalnız Mert'in bağımsız tamamladığı katmanı kapsar.

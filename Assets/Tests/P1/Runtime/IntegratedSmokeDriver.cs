@@ -112,6 +112,11 @@ namespace DeepDive.P1.Lab
                 storageDuplicateRefused, storageRetrieved, storageAllStored, storageHostChecked, storageHostFinal, storageReloadKept;
             public float returnToPendingSeconds, returnToTurnInSeconds;
             public List<string> townTrace = new List<string>();
+            public bool shopsBuilt, shopsDayDark, shopsFarPurchaseRefused, shopsFarSelectRefused, shopsShopOpened, shopsShopNearReached, shopsVendorOpened,
+                shopsLeftShopRefused, shopsVendorNearReached, shopsPeerSeen, shopsNightLit, shopsLeftVendorRefused, shopsDayAgain, shopsDone;
+            public int shopsStorefronts;
+            public string shopsShopNearReason = "", shopsVendorNearReason = "";
+            public List<string> shopsTrace = new List<string>();
             public float recordingValidSeconds;
             public int recordingQuality;
             public int maxPlayers;
@@ -149,6 +154,8 @@ namespace DeepDive.P1.Lab
         private bool BossAcceptanceReload => Arg("-p4-boss-acceptance-reload") == "1";
         private bool RoleEffects => Arg("-p45-role-effects") == "1";
         private bool WorldConditions => Arg("-p45-world") == "1";
+        // #139 physical storefronts: both players REALLY walk to the equipment shop and the harbor vendor; range is decided by the host from real positions; day/night lanterns (LABELLED clock fixture).
+        private bool Shops => Arg("-p46-shops") == "1";
         private bool MediaFlow => Arg("-p4-media") == "1";
         private bool MediaReload => Arg("-p4-media-reload") == "1";
         private bool Explore => Arg("-p4-explore") == "1";
@@ -220,7 +227,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : WorldConditions ? 85f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = Shops ? 125f : LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : WorldConditions ? 85f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -327,7 +334,7 @@ namespace DeepDive.P1.Lab
                 // second: how long the climb takes depends on machine load, and a fixed budget made -Record flaky (3 of 4
                 // runs failed on an idle-looking machine even at the P3 close commit). The ceiling still bounds a real failure.
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
-                var returnAfter = MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : WorldConditions ? 65 : Hunt || Record ? 44 : 33;
+                var returnAfter = Shops ? 34 : MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : WorldConditions ? 65 : Hunt || Record ? 44 : 33;
                 var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : WorldConditions ? 65f : returnAfter;
                 if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
                     !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
@@ -337,7 +344,7 @@ namespace DeepDive.P1.Lab
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (Shops ? 98 : MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -346,7 +353,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : WorldConditions ? 78 : 41);
+                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (Shops ? 106 : MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : WorldConditions ? 78 : 41);
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
@@ -397,6 +404,9 @@ namespace DeepDive.P1.Lab
                 (host ? (result.p45CarrierCapacity && result.p45NoStack && result.p45PingServerStamped)
                       : result.p45GuestCrossWriteRefused);
             if (Event) result.passed &= result.eventOpened && result.eventClosed && (!host || (result.tubePurchased && result.saveLoaded));
+            if (Shops) result.passed &= result.shopsBuilt && result.shopsDayDark && result.shopsFarPurchaseRefused && result.shopsFarSelectRefused && result.shopsShopOpened &&
+                result.shopsShopNearReached && result.shopsVendorOpened && result.shopsLeftShopRefused && result.shopsVendorNearReached && result.shopsPeerSeen &&
+                result.shopsNightLit && (!host || result.shopsLeftVendorRefused) && result.shopsDayAgain && result.shopsDone;
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
             if (Boat && !FleetRoute) result.passed &= result.boatRepaired && result.boatPartsHidden &&
@@ -695,6 +705,7 @@ namespace DeepDive.P1.Lab
                 else if ((Fleet || Deep) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
                 else if (Living && !result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && livingStage < 90) ProbeLivingLobby(local);
                 else if (Living && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeLivingTown(local);
+                else if (Shops && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeShops(local);
                 else if (Fleet && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeFleet(local);
                 else if ((Town || Record) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTown(local);
                 else local.SubmitLocalInput(move, 0);
@@ -3344,6 +3355,198 @@ namespace DeepDive.P1.Lab
 
         private bool PurchaseAnswered(EconomyPlayerSync sync) =>
             townAwaiting && (int)sync.LastRequestId.Value != townBefore;
+
+        // ---- #139 storefronts ---------------------------------------------------------------------------------------------
+
+        private int shopsStep;
+        private float shopsStepAt, shopsTraceAt, shopsPeerAt, shopsVantageAt;
+        private bool shopsClockSent, shopsShot;
+
+        private void ShopsStep(int step) { shopsStep = step; shopsStepAt = Time.realtimeSinceStartup; shopsVantageAt = shopsStepAt; townAwaiting = false; townSettleAt = 0; shopsClockSent = false; shopsShot = false; }
+
+        private static bool RendererSane(Renderer r) =>
+            r.sharedMaterial != null && r.sharedMaterial.shader != null && r.sharedMaterial.shader.name != "Hidden/InternalErrorShader";
+
+        // The host day clock, through the real engine (LABELLED fixture: only the minute is set; replication, daylight and the lanterns are the product).
+        private bool SetShopsClock(int minute)
+        {
+            var engine = adapter.GetComponent<DayNetworkBinding>()?.Engine;
+            if (engine == null) return false;
+            var saved = engine.ExportDay(); saved.ClockMinute = minute;
+            return engine.RestoreDay(saved);
+        }
+
+        // The other player body is within a customer spot of the vendor counter (co-op visibility of the storefront).
+        private void ShopsPeer(TownStorefront[] fronts)
+        {
+            var vendorFront = fronts.FirstOrDefault(f => f.ServiceType == ServicePointType.VehicleVendor);
+            var peer = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p => p.IsSpawned && !p.IsOwner);
+            if (vendorFront != null && peer != null && Vector3.Distance(peer.transform.position, vendorFront.CustomerPoint.position) < 3.5f)
+                result.shopsPeerSeen = true;
+        }
+
+        // Host: stand back from the middle of the row and look at it (picture for the evidence). True once there and settled.
+        private bool ShopsVantage(NetworkPlayer local, Camera cam, float now)
+        {
+            var anchors = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None);
+            var shop = anchors.FirstOrDefault(a => a.Definition.ServiceId == TownServiceCatalog.EquipmentShopId);
+            var vendor = anchors.FirstOrDefault(a => a.Definition.ServiceId == TownServiceCatalog.VehicleVendorId);
+            if (shop == null || vendor == null) { local.SubmitLocalInput(Vector3.zero, 0); return true; }
+            var mid = (shop.WorldPosition + vendor.WorldPosition) * 0.5f;
+            var vantage = new Vector3(mid.x, local.transform.position.y, mid.z + 4.6f);
+            var toVantage = vantage - local.transform.position; toVantage.y = 0;
+            if (toVantage.magnitude > 0.35f && now - shopsStepAt < 14f)
+            {
+                local.SubmitLocalInput(Vector3.forward, Mathf.Atan2(toVantage.x, toVantage.z) * Mathf.Rad2Deg, 0);
+                shopsVantageAt = now;
+                return false;
+            }
+            AimAt(local, cam, mid + new Vector3(0f, 1.9f, 0f), out var yaw, out var pitch);
+            local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+            return now - shopsVantageAt > 1.5f;
+        }
+
+        private void ProbeShops(NetworkPlayer local)
+        {
+            var sync = local.GetComponent<EconomyPlayerSync>();
+            var cam = local.GetComponentInChildren<Camera>(true);
+            if (sync == null || cam == null) return;
+            var host = adapter.IsAuthority;
+            var now = Time.realtimeSinceStartup;
+            if (shopsStepAt == 0) shopsStepAt = now;
+            if (now >= shopsTraceAt && result.shopsTrace.Count < 60)
+            {
+                shopsTraceAt = now + 3f;
+                var q = local.transform.position;
+                result.shopsTrace.Add($"step={shopsStep} pos=({q.x:0.0},{q.y:0.0},{q.z:0.0}) shop={sync.ShopOpen} vendor={sync.VendorOpen} svc={sync.ActiveServiceId.Value} clock={sync.DayClockMinute.Value}");
+            }
+            if (shopsStep < 90 && now - shopsStepAt > 40f)
+            {
+                result.errors.Add($"shops step {shopsStep} timeout reason={sync.LastReasonCode.Value}");
+                ShopsStep(99);
+            }
+            var fronts = FindObjectsByType<TownStorefront>(FindObjectsSortMode.None);
+            bool ok; string reason;
+            switch (shopsStep)
+            {
+                case 0:   // the four storefronts stand in this player's own scene: sign, lantern, real materials, an aimable counter
+                {
+                    var good = fronts.Length == TownServiceCatalog.All.Count;
+                    result.shopsStorefronts = fronts.Length;
+                    foreach (var f in fronts)
+                    {
+                        var sign = f.Root != null ? f.Root.Find("SignText") : null;
+                        var counter = f.Root != null ? f.Root.Find("Counter") : null;
+                        good &= sign != null && sign.GetComponent<TextMesh>().text == f.Label && f.Label.Length > 0 && f.Lamp != null &&
+                            f.Root.GetComponentsInChildren<Renderer>().All(RendererSane) &&
+                            counter != null && counter.GetComponent<Collider>() != null && counter.GetComponentInParent<ServicePointAnchor>() != null;
+                    }
+                    var anchors = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None);
+                    var shop = anchors.FirstOrDefault(a => a.Definition.ServiceId == TownServiceCatalog.EquipmentShopId);
+                    var vendor = anchors.FirstOrDefault(a => a.Definition.ServiceId == TownServiceCatalog.VehicleVendorId);
+                    good &= shop != null && vendor != null && Vector3.Distance(shop.WorldPosition, vendor.WorldPosition) > 4.5f * 1.1f;   // the two shops are out of each other's range
+                    result.shopsBuilt = good;
+                    if (!good) result.errors.Add($"storefronts incomplete count={fronts.Length}");
+                    if (host) SetShopsClock(12 * 60);
+                    ShopsStep(1);
+                    return;
+                }
+                case 1:   // noon: every lantern is dark
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (fronts.Length > 0 && fronts.All(f => f.Lamp != null && !f.Lamp.enabled)) { result.shopsDayDark = true; ShopsStep(2); }
+                    else if (host && !shopsClockSent) shopsClockSent = SetShopsClock(12 * 60);
+                    return;
+                case 2:   // no shop session yet: a purchase is refused
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    result.shopsFarPurchaseRefused = !ok && reason == "NotAtShop";
+                    if (!result.shopsFarPurchaseRefused) result.errors.Add($"far purchase answer ok={ok} reason={reason}");
+                    ShopsStep(3); return;
+                case 3:   // the harbor vendor does not sell from afar either
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestSelectVehicle(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.shopsFarSelectRefused = !ok && reason == "NotAtShop";
+                    if (!result.shopsFarSelectRefused) result.errors.Add($"far select answer ok={ok} reason={reason}");
+                    ShopsStep(4); return;
+                case 4:   // really walk to the equipment storefront and open the shop by interacting
+                    if (GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) InteractEvery(local, 1.2f);
+                    if (sync.ShopOpen) { result.shopsShopOpened = true; ShopsStep(5); }
+                    return;
+                case 5:   // standing at its counter the request reaches the rules (no money: refused, but NOT for distance)
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    result.shopsShopNearReason = reason;
+                    result.shopsShopNearReached = reason != "NotAtShop";
+                    if (!result.shopsShopNearReached) result.errors.Add($"near purchase still out of range reason={reason}");
+                    ShopsStep(6); return;
+                case 6:   // walk to the harbor vendor, the far end of the row, and open it
+                    if (GoToService(local, cam, TownServiceCatalog.VehicleVendorId)) InteractEvery(local, 1.2f);
+                    if (sync.VendorOpen) { result.shopsVendorOpened = true; ShopsStep(7); }
+                    return;
+                case 7:   // the equipment shop is now out of range: its purchase is refused
+                    ShopsPeer(fronts);
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    result.shopsLeftShopRefused = !ok && reason == "NotAtShop";
+                    if (!result.shopsLeftShopRefused) result.errors.Add($"left-shop purchase answer ok={ok} reason={reason}");
+                    ShopsStep(8); return;
+                case 8:   // at the vendor counter the vehicle request reaches the rules (not owned: refused, but NOT for distance)
+                    ShopsPeer(fronts);
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    if (!FleetCall(sync, () => sync.RequestSelectVehicle(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.shopsVendorNearReason = reason;
+                    result.shopsVendorNearReached = reason != "NotAtShop";
+                    if (!result.shopsVendorNearReached) result.errors.Add($"near select still out of range reason={reason}");
+                    ShopsStep(9);
+                    shopsPeerAt = now;
+                    return;
+                case 9:   // co-op: the OTHER player body is visible at this counter (both walked here). The host then steps back for the daytime picture of the row.
+                {
+                    ShopsPeer(fronts);
+                    if (!host)
+                    {
+                        // The guest keeps looking at the vendor until the host has moved the clock to night.
+                        GoToService(local, cam, TownServiceCatalog.VehicleVendorId);
+                        if (sync.DayClockMinute.Value >= 20 * 60) ShopsStep(10);
+                        return;
+                    }
+                    if (now - shopsPeerAt < 3f) { local.SubmitLocalInput(Vector3.zero, 0); return; }
+                    if (!ShopsVantage(local, cam, now))
+                        return;
+                    if (Arg("-p1-screenshot").Length > 0 && !shopsShot) { shopsShot = true; CaptureRoom("-shops-day"); }
+                    SetShopsClock(22 * 60);
+                    ShopsStep(10); return;
+                }
+                case 10:  // night: the lanterns come on on both machines
+                    if (host) ShopsVantage(local, cam, now); else GoToService(local, cam, TownServiceCatalog.VehicleVendorId);
+                    if (fronts.Length > 0 && fronts.All(f => f.Lamp != null && f.Lamp.enabled && f.Lamp.intensity > 1f))
+                    {
+                        result.shopsNightLit = true;
+                        if (now - shopsStepAt > 2.5f)
+                        {
+                            if (host && Arg("-p1-screenshot").Length > 0) CaptureRoom("-shops-night");
+                            ShopsStep(host ? 11 : 12);
+                        }
+                    }
+                    else if (host && !shopsClockSent) shopsClockSent = SetShopsClock(22 * 60);
+                    return;
+                case 11:  // host only: walk back to the equipment end (the guest stays at the vendor, so nobody blocks the path); the vendor session is out of range now
+                    if (!GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) return;
+                    if (!FleetCall(sync, () => sync.RequestSelectVehicle(VehicleIds.Motorboat), out ok, out reason)) return;
+                    result.shopsLeftVendorRefused = !ok && reason == "NotAtShop";
+                    if (!result.shopsLeftVendorRefused) result.errors.Add($"left-vendor select answer ok={ok} reason={reason}");
+                    SetShopsClock(12 * 60);
+                    ShopsStep(12); return;
+                case 12:  // day again: the lanterns go out
+                    if (host) local.SubmitLocalInput(Vector3.zero, 0); else GoToService(local, cam, TownServiceCatalog.VehicleVendorId);
+                    if (fronts.Length > 0 && fronts.All(f => f.Lamp != null && !f.Lamp.enabled)) { result.shopsDayAgain = true; result.shopsDone = true; ShopsStep(90); }
+                    else if (host && !shopsClockSent) shopsClockSent = SetShopsClock(12 * 60);
+                    return;
+                default:
+                    local.SubmitLocalInput(Vector3.zero, 0);
+                    return;
+            }
+        }
 
         private void ProbeTown(NetworkPlayer local)
         {
