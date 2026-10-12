@@ -60,7 +60,7 @@ namespace DeepDive.Composition
         private const byte OpInteract = 1;
         private const byte OpPing = 2;
         private const byte NoBed = byte.MaxValue;
-        private const string HomeSceneName = "PrepArea";
+        private const string HomeSceneName = ContinuousTownLayout.SceneName;
         private const ulong MorningSceneRequestBase = 0xF400000000000000UL;
 
         private static HomePlayerInteractionBinding current;
