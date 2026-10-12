@@ -25,6 +25,12 @@ namespace DeepDive.P4.Tests
                 {
                     new Vector3(0f, 0f, -13.5f),
                     new Vector3(0f, 0f, -18f),
+                    // The real two-player shops smoke takes diagonal paths from
+                    // the beach toward +/-10m plots; these MUST stay on dry ground.
+                    new Vector3(-8f, 0f, -18f),
+                    new Vector3(8f, 0f, -18f),
+                    new Vector3(-9f, 0f, -21f),
+                    new Vector3(9f, 0f, -21f),
                     new Vector3(0f, 0f, -24f),
                     new Vector3(0f, 0f, -29f),
                     new Vector3(0f, 0f, -35f),
