@@ -318,7 +318,11 @@ namespace DeepDive.P1.Lab
                 if (Day || Home) ObserveDay();
                 if (Explore) { if (host) HostExplore(state); ObserveExplore(); }
                 if (MediaFlow && host) { HostSubmitMediaClips(state); HostMediaChecks(); }
-                if (Acceptance && host) HostAcceptance(state);
+                if (Acceptance)
+                {
+                    ObserveAcceptanceSettlement();
+                    if (host) HostAcceptance(state);
+                }
                 if (Fleet && host) HostFleet(state);
                 if (Deep) { ObserveDeep(); if (host) HostDeep(state); }
                 if (Living) { ObserveLiving(); if (host) HostLiving(state); }
@@ -349,7 +353,8 @@ namespace DeepDive.P1.Lab
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
-                    result.returned = SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene;
+                    result.returned |= SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene ||
+                        (Acceptance && result.acceptResultSeen && SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName);
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
@@ -2675,15 +2680,23 @@ namespace DeepDive.P1.Lab
                     if (!AcceptAnswered(out ok, out reason)) return;
                     result.acceptNotOwnerRefused = !ok && reason == "NotOwner";
                     acceptStage = 7; return;
-                case 7:   // after the day closes the owner's post carries its result, in MY mirror as well
-                {
-                    var pub = MediaNetworkBinding.Mirrored.Publications.Find(p => p.ClipId == clip.ClipId);
-                    if (pub == null || string.IsNullOrEmpty(pub.SettledId)) return;
-                    result.acceptResultSeen = pub.Views > 0 && pub.Income > 0;
-                    result.acceptViews = pub.Views; result.acceptIncome = pub.Income; result.acceptFollowers = MediaNetworkBinding.Mirrored.Followers;
-                    acceptStage = 90; return;
-                }
+                case 7:
+                    ObserveAcceptanceSettlement(); return;
             }
+        }
+
+        // Morning moves the crew into the continuous town scene. Read the replicated
+        // settlement independently of the old lobby scene and its PC anchor.
+        private void ObserveAcceptanceSettlement()
+        {
+            if (acceptStage != 7 || string.IsNullOrEmpty(result.acceptClipId)) return;
+            var pub = MediaNetworkBinding.Mirrored.Publications.Find(p => p.ClipId == result.acceptClipId);
+            if (pub == null || string.IsNullOrEmpty(pub.SettledId)) return;
+            result.acceptResultSeen = pub.Views > 0 && pub.Income > 0;
+            result.acceptViews = pub.Views;
+            result.acceptIncome = pub.Income;
+            result.acceptFollowers = MediaNetworkBinding.Mirrored.Followers;
+            acceptStage = 90;
         }
 
         // Host: the one real clip is archived; the NPC still holds the real recording; the owner publishes; the right moves to the
