@@ -82,7 +82,11 @@ namespace DeepDive.Composition
 
             LastHadRegion = true;
             if (!TryAnchor(DiveRouteAnchors.Dock, region, out var dock)) return;
-            var hasAnchor = TryAnchor(DiveRouteAnchors.AnchorPoint, region, out var anchor);
+            // Read the selected route from the host-replicated trip, not the default
+            // near-water anchorage. Motorboat/Research trips have DIFFERENT world anchors.
+            var activeRouteId = localSync.RouteId.Value.ToString();
+            var activeAnchorId = ResolveAnchorForRoute(activeRouteId);
+            var hasAnchor = TryAnchor(activeAnchorId, region, out var anchor);
 
             (float X, float Z)? live = null;
             if (localSync.BoatVisible.Value && region.TryWorldToMap(localSync.BoatWorldPosition.Value, out var boatMap))
@@ -141,6 +145,16 @@ namespace DeepDive.Composition
                 return true;
             }
             return false;
+        }
+
+        // The map does not own route progression. Use the authored World route definition
+        // that the authoritative trip already selected. Unknown routes display no guessed
+        // destination; empty route before the first trip preserves the P3 near-route map.
+        public static string ResolveAnchorForRoute(string routeId)
+        {
+            if (string.IsNullOrEmpty(routeId)) return DiveRouteAnchors.AnchorPoint;
+            return DiveRoutePath.TryGetDefinition(routeId, out var definition)
+                ? definition.AnchorPointAnchor : string.Empty;
         }
 
         private static bool TryAnchor(string anchorId, DiveRegionField region, out (float X, float Z) map)
