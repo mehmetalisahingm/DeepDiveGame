@@ -2912,6 +2912,15 @@ namespace DeepDive.P1.Lab
                     if (engine.Phase != DayPhase.Running || engine.State.ActivePlayers.Count < result.maxPlayers) return;
                     var host = adapter.Connection.LocalPlayerId ?? new PlayerId(0);
                     result.dayBedAccepted = HomeBedInteraction.TryEnterBed(host, DayIds.Bed0, dayRequest++).Accepted;
+                    // A solo host has no awake teammate to wait for. Entering the only bed
+                    // may immediately close day 2, so the multi-player "held gate" stage
+                    // is vacuous. The day-3 history/close checks in stage 4 still apply.
+                    if (result.maxPlayers == 1)
+                    {
+                        result.dayEarlyGateHeld = result.dayBedAccepted;
+                        dayStage = 4; dayStageAt = now;
+                        return;
+                    }
                     dayStage = 3; dayStageAt = now;
                     return;
                 case 3:
