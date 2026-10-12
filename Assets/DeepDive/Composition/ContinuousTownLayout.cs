@@ -18,6 +18,10 @@ namespace DeepDive.Composition
         public static readonly Vector3 HomeOrigin = new Vector3(0f, 8.4f, -48f);
         public const float WalkSurfaceY = 8.4f;
         private const float SlabThickness = 0.6f;
+        // #138 fills stop 5cm above SwimVolume's top (8.0) and 1.05m above the arena walls (7.0).
+        private const float FillThickness = 0.35f;
+        // Taller than stepOffset (0.3) and nobody can jump, so an edge fence cannot be climbed.
+        private const float EdgeHeight = 1.2f;
 
         public static readonly Vector3[] StorefrontPositions =
         {
@@ -133,6 +137,31 @@ namespace DeepDive.Composition
             Block(parent, "HomeRoof", HomeOrigin + new Vector3(0f, 3.1f, -0.2f),
                 new Vector3(12f, 0.3f, 12f), sand, false);
 
+            // #138 (plan section 4): close the 0.75m strip behind the beach, the street's missing
+            // shoulders and the strip in front of the home plot, then fence every outer town edge that
+            // drops into the void. Additions only: no existing slab, house, anchor or locked value moves.
+            // The water-side edges (beach north, wade/ramp sides, dock, ledge) stay open on purpose:
+            // they step down into the sea.
+            Fill(parent, "Fill_BeachBack", new Vector2(0f, -15.125f), new Vector2(29.5f, 0.75f), sand);
+            Fill(parent, "Fill_StreetWest", new Vector2(-12.5f, -18.75f), new Vector2(3f, 6.5f), sand);
+            Fill(parent, "Fill_StreetEast", new Vector2(12.5f, -18.75f), new Vector2(3f, 6.5f), sand);
+            // HomePlot ends at z -42.5 but the house walls and open facade run to -42: floor that strip.
+            Fill(parent, "Fill_HomeFront", new Vector2(0f, -42.25f), new Vector2(15f, 0.5f), sand);
+            // Written for the west side as (minX, maxX, minZ, maxZ); mirror -1 is the east side.
+            foreach (var mirror in new[] { 1f, -1f })
+            {
+                var side = mirror > 0 ? "West" : "East";
+                Edge(parent, "Edge_Beach" + side, mirror, -15.05f, -14.75f, -15.8f, -11.0f, building);
+                Edge(parent, "Edge_BackFillSouth" + side, mirror, -14.75f, -14.0f, -15.8f, -15.5f, building);
+                Edge(parent, "Edge_Town" + side, mirror, -14.3f, -14.0f, -36.3f, -15.5f, building);
+                Edge(parent, "Edge_SquareSouth" + side, mirror, -14.3f, -3.75f, -36.3f, -36.0f, building);
+                Edge(parent, "Edge_Approach" + side, mirror, -4.05f, -3.75f, -42.0f, -36.0f, building);
+                // Outside the facade line (z -42), so the house front stays open between the walls.
+                Edge(parent, "Edge_PlotNorth" + side, mirror, -7.8f, -3.75f, -42.0f, -41.7f, building);
+                Edge(parent, "Edge_Plot" + side, mirror, -7.8f, -7.5f, -55.8f, -41.7f, building);
+            }
+            Edge(parent, "Edge_PlotSouth", 1f, -7.8f, 7.8f, -55.8f, -55.5f, building);
+
             BuildAnchors(parent);
             BuildZones(scene, parent);
 
@@ -244,6 +273,22 @@ namespace DeepDive.Composition
             Block(parent, name,
                 new Vector3(xz.x, WalkSurfaceY - SlabThickness / 2f, xz.y),
                 new Vector3(size.x, SlabThickness, size.y), material, true);
+        }
+
+        private static void Fill(Transform parent, string name, Vector2 xz, Vector2 size, Material material)
+        {
+            Block(parent, name,
+                new Vector3(xz.x, WalkSurfaceY - FillThickness / 2f, xz.y),
+                new Vector3(size.x, FillThickness, size.y), material, true);
+        }
+
+        // Stands on the void side of a walk edge, from the walk surface up EdgeHeight.
+        private static void Edge(Transform parent, string name, float mirror, float minX, float maxX,
+            float minZ, float maxZ, Material material)
+        {
+            Block(parent, name,
+                new Vector3(mirror * (minX + maxX) / 2f, WalkSurfaceY + EdgeHeight / 2f, (minZ + maxZ) / 2f),
+                new Vector3(maxX - minX, EdgeHeight, maxZ - minZ), material, true);
         }
 
         private static void Block(Transform parent, string name, Vector3 position, Vector3 scale,

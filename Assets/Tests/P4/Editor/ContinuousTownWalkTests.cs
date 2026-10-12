@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DeepDive.Composition;
 using DeepDive.Core.Contracts;
+using DeepDive.Network;
 using DeepDive.World;
 using NUnit.Framework;
 using UnityEditor;
@@ -37,15 +38,28 @@ namespace DeepDive.P4.Tests
         private static readonly string[] WalkSurfaces =
         {
             "Beach_Platform", "Beach_Wade", "Shore_Ledge", "Shore_Ramp", "Dock_Town",
-            "CoastWalk", "MainStreet", "TownSquare", "HouseApproach", "HomePlot"
+            "CoastWalk", "MainStreet", "TownSquare", "HouseApproach", "HomePlot",
+            "Fill_BeachBack", "Fill_StreetWest", "Fill_StreetEast", "Fill_HomeFront"
+        };
+
+        private static readonly string[] FillNames = { "Fill_BeachBack", "Fill_StreetWest", "Fill_StreetEast", "Fill_HomeFront" };
+
+        private static readonly string[] EdgeNames =
+        {
+            "Edge_BeachWest", "Edge_BackFillSouthWest", "Edge_TownWest", "Edge_SquareSouthWest",
+            "Edge_ApproachWest", "Edge_PlotNorthWest", "Edge_PlotWest",
+            "Edge_BeachEast", "Edge_BackFillSouthEast", "Edge_TownEast", "Edge_SquareSouthEast",
+            "Edge_ApproachEast", "Edge_PlotNorthEast", "Edge_PlotEast",
+            "Edge_PlotSouth"
         };
 
         private static readonly Vector2 HomeInside = new Vector2(0f, -50f);
         private static readonly Vector2 Square = new Vector2(0f, -24f);
         private const float CustomerZ = -27.3f;
 
-        // Rota 36: house -> side corridor -> door -> approach -> square -> street -> coast walk -> beach
-        // -> top of the wade -> down the wade into the sea.
+        // Rota 36: house -> side corridor -> along the bed ends -> door -> approach -> square -> street
+        // -> coast walk -> beach -> top of the wade -> down the wade into the sea.
+        private const int DoorWaypoint = 3;
         private static readonly Vector2[] HomeToWater =
         {
             HomeInside, new Vector2(-4.7f, -50f), new Vector2(-4.7f, -43f), new Vector2(0f, -42f),
@@ -80,7 +94,7 @@ namespace DeepDive.P4.Tests
             ContinuousTownScene.With(_ =>
             {
                 Assert.IsTrue(WorldAnchors.TryGetPose(WorldAnchorIds.HomeDoor, out var door));
-                Assert.AreEqual(HomeToWater[3], new Vector2(door.position.x, door.position.z), "route passes the door anchor");
+                Assert.AreEqual(HomeToWater[DoorWaypoint], new Vector2(door.position.x, door.position.z), "route passes the door anchor");
 
                 var main = Walk(HomeToWater);
                 Assert.IsEmpty(main.Failures, Report("home -> water", main));
@@ -145,6 +159,305 @@ namespace DeepDive.P4.Tests
                 }
             }, furnitureProxies: true);
         }
+
+        // ---- commit 5: the #143 gaps (plan section 2 a-d) and their fix ------------------------
+
+        [TestCase(-6.5f, -11.3f, 0, TestName = "DiagonalBeachToShopApproachesStayOnGround(wade->slot0)")]
+        [TestCase(-12f, -12.5f, 0, TestName = "DiagonalBeachToShopApproachesStayOnGround(hull->slot0)")]
+        [TestCase(12.5f, -12.5f, 3, TestName = "DiagonalBeachToShopApproachesStayOnGround(fueltank->slot3)")]
+        [TestCase(9f, -9f, 3, TestName = "DiagonalBeachToShopApproachesStayOnGround(ledge->slot3)")]
+        public void DiagonalBeachToShopApproachesStayOnGround(float fromX, float fromZ, int slot)
+        {
+            ContinuousTownScene.With(_ =>
+            {
+                var shop = ContinuousTownLayout.StorefrontPositions[slot];
+                var walk = Walk(new Vector2(fromX, fromZ), new Vector2(shop.x, CustomerZ));
+                Assert.IsEmpty(walk.Failures, Report($"({fromX}, {fromZ}) -> slot {slot}", walk));
+                Assert.IsFalse(walk.ReachedSea);
+            }, furnitureProxies: true);
+        }
+
+        [Test]
+        public void TheOldFallPointAndItsApproachFromTheWadeAreOnGround()
+        {
+            ContinuousTownScene.With(_ =>
+            {
+                Assert.IsTrue(Physics.Raycast(new Vector3(-8.4f, RayStartY, -19.7f), Vector3.down, out var hit,
+                    RayLength, ~0, QueryTriggerInteraction.Ignore), "the old fall point has no ground");
+                Assert.AreEqual(WalkY, hit.point.y, 0.03f);
+                var walk = Walk(new Vector2(-6.5f, -11.3f), new Vector2(-8.4f, -19.7f));
+                Assert.IsEmpty(walk.Failures, Report("wade -> old fall point", walk));
+            });
+        }
+
+        [Test]
+        public void TheBeachBackEdgeIsClosedWallToWall()
+        {
+            ContinuousTownScene.With(_ =>
+            {
+                var failures = new List<string>();
+                foreach (var z in new[] { -14.75f, -14.8f, -15.0f, -15.25f, -15.5f, -15.6f })
+                {
+                    var open = new List<float>();
+                    for (var i = 0; i <= 118; i++)
+                    {
+                        var x = Mathf.Min(-14.7f + i * 0.25f, 14.7f);
+                        var hasHit = Physics.Raycast(new Vector3(x, RayStartY, z), Vector3.down, out var hit,
+                            RayLength, ~0, QueryTriggerInteraction.Ignore);
+                        if (hasHit && Mathf.Abs(hit.point.y - WalkY) <= 0.03f) continue;
+                        // South of (or on) the fill's back face a fence counts as closed too.
+                        if (hasHit && z <= -15.5f && hit.collider.name.StartsWith("Edge_")) continue;
+                        open.Add(x);
+                    }
+                    if (open.Count > 0)
+                        failures.Add($"z {z}: {open.Count} open samples, x {open.First():0.##}..{open.Last():0.##}");
+                }
+                Assert.IsEmpty(failures, string.Join("\n", failures));
+            });
+        }
+
+        [Test]
+        public void EveryOuterSlabEdgeIsFencedOrDropsIntoWater()
+        {
+            ContinuousTownScene.With(_ =>
+            {
+                var failures = new List<string>();
+                var samples = 0;
+                foreach (var edge in OuterEdges())
+                {
+                    var count = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(edge.From, edge.To) / SampleSpacing));
+                    var open = new List<Vector2>();
+                    for (var i = 0; i <= count; i++)
+                    {
+                        samples++;
+                        var onEdge = Vector2.Lerp(edge.From, edge.To, (float)i / count);
+                        var outside = onEdge + edge.Outward * 0.1f;
+                        if (HasWalkGround(outside)) continue;
+                        if (edge.Water ? DropsIntoSwimVolume(outside) : FencedAt(onEdge + edge.Outward * 0.5f)) continue;
+                        open.Add(outside);
+                    }
+                    if (open.Count > 0)
+                        failures.Add($"{edge.Name} ({(edge.Water ? "water" : "fenced")}): {open.Count}/{count + 1} open, " +
+                                     $"first ({open.First().x:0.##}, {open.First().y:0.##}) last ({open.Last().x:0.##}, {open.Last().y:0.##})");
+                }
+                Assert.Greater(samples, 500);
+                Assert.IsEmpty(failures, failures.Count + " open edges\n" + string.Join("\n", failures));
+            });
+        }
+
+        [Test]
+        public void FillsAndEdgesStayOutOfSwimVolumeAndClearOfTheArenaWalls()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var added = AddedPieces(scene);
+                Assert.AreEqual(FillNames.Length + EdgeNames.Length, added.Count, "4 fills + 15 edges");
+                CollectionAssert.AreEquivalent(FillNames.Concat(EdgeNames), added.Select(c => c.name));
+                var swim = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<SwimVolume>(true))
+                    .Single().GetComponent<Collider>().bounds;
+                var walls = new[] { "Wall_S", "Wall_W", "Wall_E" }
+                    .Select(n => scene.GetRootGameObjects().Single(r => r.name == n).GetComponent<Collider>().bounds)
+                    .ToArray();
+                foreach (var piece in added)
+                {
+                    var b = piece.bounds;
+                    Assert.IsFalse(piece.isTrigger, piece.name);
+                    if (OverlapXZ(b, swim) > 0f)
+                        Assert.GreaterOrEqual(b.min.y - swim.max.y, 0.05f - 1e-3f, piece.name + " vs SwimVolume");
+                    foreach (var wall in walls)
+                        if (OverlapXZ(b, wall) > 0f)
+                            Assert.GreaterOrEqual(b.min.y - wall.max.y, 1.0f, piece.name + " vs arena wall");
+                }
+            });
+        }
+
+        [Test]
+        public void FillsAreFlushAt8_4WithEveryNeighbourSeam()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                foreach (var name in FillNames)
+                {
+                    var fill = Piece(scene, name);
+                    Assert.AreEqual(WalkY, fill.bounds.max.y, 1e-3f, name + " top");
+                    Assert.AreEqual(WalkY - 0.35f, fill.bounds.min.y, 1e-3f, name + " bottom");
+                }
+                // Each seam sampled 0.1m either side; both sides must read the same 8.4.
+                var seams = new List<(Vector2 a, Vector2 b, Vector2 across)>
+                {
+                    (new Vector2(-14.7f, -14.75f), new Vector2(14.7f, -14.75f), Vector2.up),   // beach | back fill
+                    (new Vector2(-13.9f, -15.5f), new Vector2(13.9f, -15.5f), Vector2.up),     // back fill | street + street fills
+                    (new Vector2(-11f, -21.9f), new Vector2(-11f, -15.6f), Vector2.right),     // west fill | main street
+                    (new Vector2(11f, -21.9f), new Vector2(11f, -15.6f), Vector2.right),       // main street | east fill
+                    (new Vector2(-13.9f, -22f), new Vector2(-11.1f, -22f), Vector2.up),        // square | west fill
+                    (new Vector2(11.1f, -22f), new Vector2(13.9f, -22f), Vector2.up),          // square | east fill
+                    (new Vector2(-7.4f, -42.5f), new Vector2(7.4f, -42.5f), Vector2.up),       // home plot | home front fill
+                    (new Vector2(-3.65f, -42f), new Vector2(3.65f, -42f), Vector2.up)          // home front fill | approach
+                };
+                foreach (var seam in seams)
+                {
+                    var count = Mathf.CeilToInt(Vector2.Distance(seam.a, seam.b) / SampleSpacing);
+                    for (var i = 0; i <= count; i++)
+                    {
+                        var p = Vector2.Lerp(seam.a, seam.b, (float)i / count);
+                        foreach (var side in new[] { -0.1f, 0.1f })
+                        {
+                            var q = p + seam.across * side;
+                            Assert.IsTrue(Physics.Raycast(new Vector3(q.x, RayStartY, q.y), Vector3.down, out var hit,
+                                RayLength, ~0, QueryTriggerInteraction.Ignore), $"no ground at seam ({q.x:0.##}, {q.y:0.##})");
+                            Assert.AreEqual(WalkY, hit.point.y, 1e-3f, $"seam step at ({q.x:0.##}, {q.y:0.##}) on {hit.collider.name}");
+                        }
+                    }
+                }
+            });
+        }
+
+        [Test]
+        public void NoEdgeSitsOnAWalkableSurfaceOrACustomerPoint()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var root = scene.GetRootGameObjects().Single(r => r.name == ContinuousTownLayout.RootName);
+                var surfaces = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Collider>(true))
+                    .Where(c => !c.isTrigger && IsWalkSurface(c)).ToArray();
+                Assert.AreEqual(WalkSurfaces.Length, surfaces.Length, "every walk surface present once");
+                foreach (var name in EdgeNames)
+                {
+                    var edge = Piece(scene, name);
+                    Assert.AreSame(root.transform, edge.transform.parent, name + " parent");
+                    Assert.AreEqual(WalkY, edge.bounds.min.y, 1e-3f, name + " bottom");
+                    Assert.AreEqual(WalkY + 1.2f, edge.bounds.max.y, 1e-3f, name + " top");
+                    if (name.EndsWith("West")) Assert.Less(edge.bounds.center.x, 0f, name + " is not on the west side");
+                    if (name.EndsWith("East")) Assert.Greater(edge.bounds.center.x, 0f, name + " is not on the east side");
+                    foreach (var surface in surfaces)
+                        Assert.LessOrEqual(OverlapXZ(edge.bounds, surface.bounds), 1e-3f,
+                            name + " stands on " + surface.name);
+                    foreach (var shop in ContinuousTownLayout.StorefrontPositions)
+                    {
+                        var customer = new Vector3(shop.x, edge.bounds.center.y, CustomerZ);
+                        Assert.GreaterOrEqual(Vector3.Distance(edge.bounds.ClosestPoint(customer), customer), 1f,
+                            name + " crowds the customer point at x " + shop.x);
+                    }
+                }
+            });
+        }
+
+        // HomePlot stops at z -42.5 while the house walls and the open facade reach -42.
+        [Test]
+        public void TheHouseFrontHasFloorAndNoEdgeTouchesTheHouse()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var open = new List<string>();
+                var xs = Mathf.CeilToInt(11.4f / SampleSpacing);
+                var zs = Mathf.CeilToInt(0.35f / SampleSpacing);
+                for (var i = 0; i <= xs; i++)
+                for (var j = 0; j <= zs; j++)
+                {
+                    var x = Mathf.Lerp(-5.7f, 5.7f, (float)i / xs);
+                    var z = Mathf.Lerp(-42.1f, -42.45f, (float)j / zs);
+                    if (!HasWalkGround(new Vector2(x, z))) open.Add($"({x:0.##}, {z:0.##})");
+                }
+                Assert.IsEmpty(open, open.Count + " samples inside the house front have no floor");
+
+                var root = scene.GetRootGameObjects().Single(r => r.name == ContinuousTownLayout.RootName);
+                var house = new List<(string name, Bounds bounds)>();
+                var home = new Bounds();
+                home.SetMinMax(ContinuousTownLayout.ZoneVolumes.HomeMin, ContinuousTownLayout.ZoneVolumes.HomeMax);
+                house.Add(("Zone_Home", home));
+                foreach (var wall in new[] { "HomeBack", "HomeLeft", "HomeRight" })
+                    house.Add((wall, root.GetComponentsInChildren<Collider>(true).Single(c => c.name == wall).bounds));
+                foreach (var name in EdgeNames)
+                {
+                    var edge = Piece(scene, name).bounds;
+                    foreach (var (houseName, bounds) in house)
+                        Assert.LessOrEqual(Overlap3D(edge, bounds), 1e-3f, name + " touches " + houseName);
+                }
+            });
+        }
+
+        private readonly struct OuterEdge
+        {
+            public readonly string Name;
+            public readonly Vector2 From;
+            public readonly Vector2 To;
+            public readonly Vector2 Outward;
+            public readonly bool Water;
+
+            public OuterEdge(string name, Vector2 from, Vector2 to, Vector2 outward, bool water)
+            {
+                Name = name;
+                From = from;
+                To = to;
+                Outward = outward;
+                Water = water;
+            }
+        }
+
+        // Plan section 2(c), as written: the fenced class mirrored west/east, then the water class.
+        private static IEnumerable<OuterEdge> OuterEdges()
+        {
+            foreach (var s in new[] { -1f, 1f })
+            {
+                var side = s < 0 ? "West" : "East";
+                var outX = new Vector2(s, 0f);
+                yield return new OuterEdge("BeachEnd" + side, new Vector2(14.75f * s, -15.5f), new Vector2(14.75f * s, -11f), outX, false);
+                yield return new OuterEdge("MainStreet" + side, new Vector2(11f * s, -22f), new Vector2(11f * s, -15.5f), outX, false);
+                yield return new OuterEdge("TownSquareNorth" + side, new Vector2(11f * s, -22f), new Vector2(14f * s, -22f), Vector2.up, false);
+                yield return new OuterEdge("TownSquare" + side, new Vector2(14f * s, -36f), new Vector2(14f * s, -15.5f), outX, false);
+                yield return new OuterEdge("HouseApproach" + side, new Vector2(3.75f * s, -42f), new Vector2(3.75f * s, -36f), outX, false);
+                yield return new OuterEdge("HomePlotNorth" + side, new Vector2(7.5f * s, -42f), new Vector2(3.75f * s, -42f), Vector2.up, false);
+                yield return new OuterEdge("HomePlot" + side, new Vector2(7.5f * s, -55.5f), new Vector2(7.5f * s, -42f), outX, false);
+            }
+            yield return new OuterEdge("BeachBackStrip", new Vector2(-14.75f, -15.5f), new Vector2(14.75f, -15.5f), Vector2.down, false);
+            yield return new OuterEdge("TownSquareSouth", new Vector2(-14f, -36f), new Vector2(14f, -36f), Vector2.down, false);
+            yield return new OuterEdge("HomePlotSouth", new Vector2(-7.5f, -55.5f), new Vector2(7.5f, -55.5f), Vector2.down, false);
+
+            yield return new OuterEdge("BeachNorth", new Vector2(-14.75f, -11f), new Vector2(14.75f, -11f), Vector2.up, true);
+            yield return new OuterEdge("DockNorth", new Vector2(8f, -3.5f), new Vector2(10f, -3.5f), Vector2.up, true);
+            yield return new OuterEdge("DockWest", new Vector2(8f, -7f), new Vector2(8f, -3.5f), Vector2.left, true);
+            yield return new OuterEdge("DockEast", new Vector2(10f, -7f), new Vector2(10f, -3.5f), Vector2.right, true);
+            yield return new OuterEdge("LedgeEast", new Vector2(11f, -11f), new Vector2(11f, -7f), Vector2.right, true);
+        }
+
+        private static bool HasWalkGround(Vector2 p) =>
+            Physics.Raycast(new Vector3(p.x, RayStartY, p.y), Vector3.down, out var hit, RayLength, ~0,
+                QueryTriggerInteraction.Ignore) && Mathf.Abs(hit.point.y - WalkY) <= 0.03f;
+
+        private static bool FencedAt(Vector2 p)
+        {
+            var feet = new Vector3(p.x, WalkY, p.y);
+            var lift = Skin + 0.01f;
+            return Physics.OverlapCapsule(feet + Vector3.up * (lift + Radius), feet + Vector3.up * (lift + Height - Radius),
+                    Radius, ~0, QueryTriggerInteraction.Ignore)
+                .Any(c => c.name.StartsWith("Edge_"));
+        }
+
+        private static bool DropsIntoSwimVolume(Vector2 p) =>
+            Physics.RaycastAll(new Vector3(p.x, RayStartY, p.y), Vector3.down, 40f, ~0, QueryTriggerInteraction.Collide)
+                .Any(h => h.collider.GetComponent<SwimVolume>() != null);
+
+        private static List<Collider> AddedPieces(Scene scene)
+        {
+            var root = scene.GetRootGameObjects().Single(r => r.name == ContinuousTownLayout.RootName);
+            return root.GetComponentsInChildren<Collider>(true)
+                .Where(c => c.name.StartsWith("Fill_") || c.name.StartsWith("Edge_")).ToList();
+        }
+
+        private static Collider Piece(Scene scene, string name)
+        {
+            var piece = AddedPieces(scene).SingleOrDefault(c => c.name == name);
+            Assert.IsNotNull(piece, name + " missing");
+            return piece;
+        }
+
+        private static float OverlapXZ(Bounds a, Bounds b) =>
+            Mathf.Min(Mathf.Min(a.max.x, b.max.x) - Mathf.Max(a.min.x, b.min.x),
+                Mathf.Min(a.max.z, b.max.z) - Mathf.Max(a.min.z, b.min.z));
+
+        // Shared faces read 0; only a real interpenetration is positive.
+        private static float Overlap3D(Bounds a, Bounds b) =>
+            Mathf.Min(OverlapXZ(a, b), Mathf.Min(a.max.y, b.max.y) - Mathf.Max(a.min.y, b.min.y));
 
         // ---- shared walk criterion -------------------------------------------------------------
 
