@@ -55,7 +55,9 @@ namespace DeepDive.Composition
             var building = MaterialFromScene(scene, "Wall_S") ?? sand;
 
             Slab(parent, "CoastWalk", new Vector2(0f, -16.25f), new Vector2(7.5f, 7.0f), sand);
-            Slab(parent, "MainStreet", new Vector2(0f, -22f), new Vector2(7.5f, 13f), sand);
+            // Players approach the west/east shop plots diagonally from the beach. The
+            // narrow old street left both approaches above empty space at z=-18..-22.
+            Slab(parent, "MainStreet", new Vector2(0f, -22f), new Vector2(22f, 13f), sand);
             Slab(parent, "TownSquare", new Vector2(0f, -29f), new Vector2(28f, 14f), sand);
             Slab(parent, "HouseApproach", new Vector2(0f, -40f), new Vector2(7.5f, 12f), sand);
             Slab(parent, "HomePlot", new Vector2(0f, -49f), new Vector2(15f, 13f), sand);
