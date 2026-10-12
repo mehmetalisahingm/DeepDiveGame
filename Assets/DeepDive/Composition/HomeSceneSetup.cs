@@ -22,7 +22,7 @@ namespace DeepDive.Composition
 
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (scene.name != HomeSceneName) return;
+            if (scene.name != HomeSceneName && scene.name != ContinuousTownLayout.SceneName) return;
             EnsureRig();
         }
 
@@ -31,13 +31,15 @@ namespace DeepDive.Composition
             if (GameObject.Find(RootName) != null) return;
 
             var root = new GameObject(RootName);
+            if (SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName)
+                root.transform.position = ContinuousTownLayout.HomeOrigin;
             var bedXs = new[] { -3f, -1f, 1f, 3f };
             for (var i = 0; i < DayIds.BedCount; i++)
             {
                 var bed = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 bed.name = "HomeBed_" + i;
                 bed.transform.SetParent(root.transform, false);
-                bed.transform.position = new Vector3(bedXs[i], 0.3f, 3.45f);
+                bed.transform.localPosition = new Vector3(bedXs[i], 0.3f, 3.45f);
                 bed.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
                 bed.transform.localScale = new Vector3(1.25f, 0.35f, 2.05f);
                 var bedMaterial = Resources.Load<Material>("DevVisuals/Dev_Blue");
@@ -49,7 +51,7 @@ namespace DeepDive.Composition
             var storage = GameObject.CreatePrimitive(PrimitiveType.Cube);
             storage.name = "HomeSharedStorage";
             storage.transform.SetParent(root.transform, false);
-            storage.transform.position = new Vector3(-3.9f, 0.8f, -3.55f);
+            storage.transform.localPosition = new Vector3(-3.9f, 0.8f, -3.55f);
             storage.transform.localScale = new Vector3(1.35f, 1.6f, 0.75f);
             var storageMaterial = Resources.Load<Material>("DevVisuals/Dev_Crate");
             if (storageMaterial != null) storage.GetComponent<Renderer>().sharedMaterial = storageMaterial;

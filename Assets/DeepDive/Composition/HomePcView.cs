@@ -24,10 +24,10 @@ namespace DeepDive.Composition
         // the storage at -3.9,-3.55); primitive until the home art replaces it, like the rest of the P4 rig.
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (scene.name != HomeSceneName || GameObject.Find(PcName) != null) return;
+            if ((scene.name != HomeSceneName && scene.name != ContinuousTownLayout.SceneName) || GameObject.Find(PcName) != null) return;
             var pc = GameObject.CreatePrimitive(PrimitiveType.Cube);
             pc.name = PcName;
-            pc.transform.position = new Vector3(3.9f, 0.6f, -3.55f);
+            pc.transform.position = (scene.name == ContinuousTownLayout.SceneName ? ContinuousTownLayout.HomeOrigin : Vector3.zero) + new Vector3(3.9f, 0.6f, -3.55f);
             pc.transform.localScale = new Vector3(1.4f, 1.2f, 0.7f);
             var material = Resources.Load<Material>("DevVisuals/Dev_Wood");
             if (material != null) pc.GetComponent<Renderer>().sharedMaterial = material;
