@@ -15,8 +15,8 @@ using Object = UnityEngine.Object;
 namespace DeepDive.P4.Tests
 {
     // DiveTestArea opened additively with the #143 town built on top, exactly as the layout tests do.
-    // Optionally adds stand-in colliders for the runtime-built furniture (home rig beds/storage/PC and
-    // the four storefront counters), because those only appear on a real scene load.
+    // Optionally adds the runtime-built furniture: the REAL home rig (HomeSceneSetup.EnsureRig on the anchors,
+    // #138 PR-2) and stand-in colliders for the four storefront counters, which only appear on a real scene load.
     internal static class ContinuousTownScene
     {
         public const string ScenePath = "Assets/DeepDive/World/Scenes/DiveTestArea.unity";
@@ -45,6 +45,9 @@ namespace DeepDive.P4.Tests
             finally
             {
                 if (proxies != null) Object.DestroyImmediate(proxies);
+                foreach (var name in new[] { HomeSceneSetup.RootName, HomePcAnchor.PcName })
+                foreach (var leftover in scene.GetRootGameObjects().Where(r => r.name == name).ToArray())
+                    Object.DestroyImmediate(leftover);
                 foreach (var item in positions)
                     if (item.Key != null)
                         item.Key.transform.SetPositionAndRotation(item.Value.position, item.Value.rotation);
@@ -56,16 +59,13 @@ namespace DeepDive.P4.Tests
             }
         }
 
-        // Written values: HomeSceneSetup / HomePcAnchor / TownStorefront counter, not read from them.
+        // The home rig is the real one (its placement is locked by HomeRigAnchorTests); the counters are
+        // written TownStorefront values, not read from it.
         private static GameObject BuildFurnitureProxies(Scene scene)
         {
+            HomeSceneSetup.EnsureRig(scene);
             var root = new GameObject(ProxyRootName);
             SceneManager.MoveGameObjectToScene(root, scene);
-            var bedXs = new[] { -3f, -1f, 1f, 3f };
-            for (var i = 0; i < bedXs.Length; i++)
-                Proxy(root, "HomeBed_" + i, new Vector3(bedXs[i], 8.7f, -44.55f), new Vector3(1.25f, 0.35f, 2.05f));
-            Proxy(root, "HomeSharedStorage", new Vector3(-3.9f, 9.2f, -51.55f), new Vector3(1.35f, 1.6f, 0.75f));
-            Proxy(root, "HomeSharedPc", new Vector3(3.9f, 9.0f, -51.55f), new Vector3(1.4f, 1.2f, 0.7f));
             foreach (var shop in ContinuousTownLayout.StorefrontPositions)
                 Proxy(root, "Counter_" + shop.x, shop + new Vector3(0f, 0.5f, 0.65f), new Vector3(1.8f, 1.0f, 0.5f));
             return root;
@@ -126,14 +126,18 @@ namespace DeepDive.P4.Tests
             });
         }
 
+        // #138 PR-2: the beds moved apart for the corridors ({-3,-1,1,3} -> {-3.45,-1.15,1.15,3.45}). The old
+        // block that locked HomeRig to the copies inside HomeSceneSetup/HomePcAnchor is gone: the DiveTestArea rig
+        // has no copy any more, it reads these anchors (locked by HomeRigAnchorTests), and PrepArea's legacy
+        // values are now deliberately different (locked by PrepAreaKeepsItsLegacyRig).
         [Test]
-        public void HomeAnchorsMatchTheExistingRigPlacement()
+        public void HomeAnchorsSitOnTheWrittenRigPlacement()
         {
             ContinuousTownScene.With(_ =>
             {
                 AssertPose(WorldAnchorIds.HomeRoot, new Vector3(0f, 8.4f, -48f), 0f);
                 AssertPose(WorldAnchorIds.HomeDoor, new Vector3(0f, 8.4f, -42f), 0f);
-                var bedXs = new[] { -3f, -1f, 1f, 3f };
+                var bedXs = new[] { -3.45f, -1.15f, 1.15f, 3.45f };
                 for (var i = 0; i < bedXs.Length; i++)
                     AssertPose(WorldAnchorIds.HomeBed(i), new Vector3(bedXs[i], 8.7f, -44.55f), 180f);
                 AssertPose(WorldAnchorIds.HomeStorage, new Vector3(-3.9f, 9.2f, -51.55f), 0f);
@@ -143,16 +147,6 @@ namespace DeepDive.P4.Tests
                 AssertPose(WorldAnchorIds.HomeSpawn(2), new Vector3(-1.5f, 8.4f, -47.5f), 0f);
                 AssertPose(WorldAnchorIds.HomeSpawn(3), new Vector3(1.5f, 8.4f, -47.5f), 0f);
                 AssertPose(WorldAnchorIds.TownSquare, new Vector3(0f, 8.4f, -29f), 0f);
-
-                // The gathered rig constants are the values HomeSceneSetup/HomePcAnchor author today.
-                CollectionAssert.AreEqual(bedXs, ContinuousTownLayout.HomeRig.BedXs);
-                Assert.AreEqual(0.3f, ContinuousTownLayout.HomeRig.BedLocalY, Tolerance);
-                Assert.AreEqual(3.45f, ContinuousTownLayout.HomeRig.BedLocalZ, Tolerance);
-                AssertNear(new Vector3(1.25f, 0.35f, 2.05f), ContinuousTownLayout.HomeRig.BedSize, "bed size");
-                AssertNear(new Vector3(-3.9f, 0.8f, -3.55f), ContinuousTownLayout.HomeRig.StorageLocal, "storage local");
-                AssertNear(new Vector3(1.35f, 1.6f, 0.75f), ContinuousTownLayout.HomeRig.StorageSize, "storage size");
-                AssertNear(new Vector3(3.9f, 0.6f, -3.55f), ContinuousTownLayout.HomeRig.PcLocal, "pc local");
-                AssertNear(new Vector3(1.4f, 1.2f, 0.7f), ContinuousTownLayout.HomeRig.PcSize, "pc size");
             });
         }
 
