@@ -468,7 +468,11 @@ namespace DeepDive.P4.Tests
             public int Samples;
         }
 
-        internal static WalkResult Walk(params Vector2[] waypoints)
+        internal static WalkResult Walk(params Vector2[] waypoints) => WalkWithRadius(Radius, waypoints);
+
+        // #138 PR-2: the home corridors are checked with Radius + Skin, the clearance a real CharacterController
+        // needs, because a bare-radius capsule still fits through a gap the controller cannot pass.
+        internal static WalkResult WalkWithRadius(float radius, params Vector2[] waypoints)
         {
             Assert.IsTrue(WorldZoneField.TryFind(out var zones), "zone field missing");
             var result = new WalkResult();
@@ -508,7 +512,7 @@ namespace DeepDive.P4.Tests
                         result.Failures.Add($"step ({p.x:0.##}, {p.y:0.##}) dy={y - previous.Value:0.###}");
                     previous = y;
 
-                    var blockers = CapsuleBlockers(hit.point);
+                    var blockers = CapsuleBlockers(hit.point, radius);
                     if (blockers.Count > 0)
                         result.Failures.Add($"capsule ({p.x:0.##}, {p.y:0.##}) hits {string.Join(",", blockers)}");
                 }
@@ -516,13 +520,15 @@ namespace DeepDive.P4.Tests
             return result;
         }
 
-        internal static List<string> CapsuleBlockers(Vector3 feet)
+        internal static List<string> CapsuleBlockers(Vector3 feet) => CapsuleBlockers(feet, Radius);
+
+        internal static List<string> CapsuleBlockers(Vector3 feet, float radius)
         {
             var lift = Skin + 0.01f;
             var hits = Physics.OverlapCapsule(
-                feet + Vector3.up * (lift + Radius),
-                feet + Vector3.up * (lift + Height - Radius),
-                Radius, ~0, QueryTriggerInteraction.Ignore);
+                feet + Vector3.up * (lift + radius),
+                feet + Vector3.up * (lift + Height - radius),
+                radius, ~0, QueryTriggerInteraction.Ignore);
             return hits.Where(c => !IsWalkSurface(c)).Select(c => c.name).Distinct().OrderBy(n => n).ToList();
         }
 
@@ -532,7 +538,7 @@ namespace DeepDive.P4.Tests
             $"{label}: {walk.Failures.Count} bad of {walk.Samples} samples\n" + string.Join("\n", walk.Failures.Take(30));
 
         // Steers a real CharacterController through the waypoints with Move(step + gravity*dt).
-        private static void Drive(CharacterController cc, IPlayerZoneSource zones, Vector2[] waypoints,
+        internal static void Drive(CharacterController cc, IPlayerZoneSource zones, Vector2[] waypoints,
             List<string> failures, out bool reachedSea)
         {
             const float dt = 0.02f;

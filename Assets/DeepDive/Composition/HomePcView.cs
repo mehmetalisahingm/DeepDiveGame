@@ -11,7 +11,7 @@ namespace DeepDive.Composition
     public sealed class HomePcAnchor : MonoBehaviour
     {
         private const string HomeSceneName = "PrepArea";
-        private const string PcName = "HomeSharedPc";
+        public const string PcName = "HomeSharedPc";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -20,14 +20,25 @@ namespace DeepDive.Composition
             SceneManager.sceneLoaded += SceneLoaded;
         }
 
-        // Placed in the home room opposite the shared storage (Mehmet's rig keeps the beds on the far wall and
-        // the storage at -3.9,-3.55); primitive until the home art replaces it, like the rest of the P4 rig.
+        // DiveTestArea's PC is built by HomeSceneSetup.EnsureRig on the home-pc anchor (#138 PR-2), so it shares
+        // the rig's single all-or-nothing anchor decision. Only PrepArea's legacy PC is still authored here.
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if ((scene.name != HomeSceneName && scene.name != ContinuousTownLayout.SceneName) || GameObject.Find(PcName) != null) return;
+            if (scene.name == HomeSceneName) EnsureLegacyPc(scene);
+        }
+
+        // PrepArea: placed opposite the shared storage (Mehmet's rig keeps the beds on the far wall and the
+        // storage at -3.9,-3.55); primitive until the home art replaces it, like the rest of the P4 rig.
+        public static void EnsureLegacyPc(Scene scene) =>
+            EnsurePc(scene, new Pose(new Vector3(3.9f, 0.6f, -3.55f), Quaternion.identity));
+
+        public static void EnsurePc(Scene scene, Pose pose)
+        {
+            if (!scene.IsValid() || !scene.isLoaded || HomeSceneSetup.FindRoot(scene, PcName) != null) return;
             var pc = GameObject.CreatePrimitive(PrimitiveType.Cube);
             pc.name = PcName;
-            pc.transform.position = (scene.name == ContinuousTownLayout.SceneName ? ContinuousTownLayout.HomeOrigin : Vector3.zero) + new Vector3(3.9f, 0.6f, -3.55f);
+            SceneManager.MoveGameObjectToScene(pc, scene);
+            pc.transform.SetPositionAndRotation(pose.position, pose.rotation);
             pc.transform.localScale = new Vector3(1.4f, 1.2f, 0.7f);
             var material = Resources.Load<Material>("DevVisuals/Dev_Wood");
             if (material != null) pc.GetComponent<Renderer>().sharedMaterial = material;

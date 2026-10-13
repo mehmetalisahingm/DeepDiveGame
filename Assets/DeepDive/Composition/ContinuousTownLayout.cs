@@ -35,12 +35,13 @@ namespace DeepDive.Composition
         public const string ZonesName = "Zones";
         public static readonly Vector3 TownSquareCenter = new Vector3(0f, WalkSurfaceY, -29f);
 
-        // #138: the home rig's placement, gathered in one place. HomeSceneSetup/HomePcView still carry
-        // their own copies until PR-2 binds them to the anchors; ContinuousTownWorldContractTests locks
-        // the two together. Positions are local to HomeOrigin.
+        // #138: the home rig's placement, the single source of the home anchors. Since PR-2 the DiveTestArea
+        // rig (HomeSceneSetup beds/storage, HomePcAnchor PC) reads those anchors and keeps no copy; PrepArea
+        // keeps its own legacy values. Positions are local to HomeOrigin.
         public static class HomeRig
         {
-            public static readonly float[] BedXs = { -3f, -1f, 1f, 3f };
+            // #138 PR-2: 1.05m between beds (>= 2 x (radius + skin) = 0.86) and 1.75m side corridors.
+            public static readonly float[] BedXs = { -3.45f, -1.15f, 1.15f, 3.45f };
             public const float BedLocalY = 0.3f;
             public const float BedLocalZ = 3.45f;
             public const float BedYaw = 180f;
@@ -128,7 +129,7 @@ namespace DeepDive.Composition
             }
 
             // Home has an open front so the player can enter from the square on foot.
-            // All home targets (beds/storage/PC) are positioned by their existing bindings.
+            // All home targets (beds/storage/PC) stand on the anchors built below (HomeSceneSetup).
             Block(parent, "HomeBack", HomeOrigin + new Vector3(0f, 1.5f, -6f),
                 new Vector3(12f, 3f, 0.35f), building, true);
             foreach (var x in new[] { -6f, 6f })
@@ -194,7 +195,8 @@ namespace DeepDive.Composition
             Debug.Log($"P46_CONTINUOUS_TOWN_READY shops={moved} home={HomeOrigin} scene={scene.name}");
         }
 
-        // Empty transforms: no collider, renderer or NetworkObject. Nothing consumes them yet (PR-2/3).
+        // Empty transforms: no collider, renderer or NetworkObject. Home beds/storage/PC are consumed by
+        // HomeSceneSetup (PR-2); door and spawns are still waiting for PR-3.
         private static void BuildAnchors(Transform parent)
         {
             var anchors = new GameObject(AnchorsName).transform;
