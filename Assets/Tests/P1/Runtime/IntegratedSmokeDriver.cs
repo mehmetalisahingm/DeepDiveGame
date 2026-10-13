@@ -40,6 +40,7 @@ namespace DeepDive.P1.Lab
             public int townBalance;
             public List<int> boatPartsSequence = new List<int>();
             public bool boatHullFound, boatEngineFound, boatFuelTankFound, boatDuplicateRejected, boatRepaired;
+            public bool boatHintInitial, boatHintPartial, boatHintGone;
             public string boatStatusFinal;
             public bool boatPartsHidden;
             public List<string> tripPhases = new List<string>();
@@ -414,7 +415,7 @@ namespace DeepDive.P1.Lab
                 result.shopsNightLit && (!host || result.shopsLeftVendorRefused) && result.shopsDayAgain && result.shopsDone;
             if (Town) result.passed &= result.townSold && result.townDenied && result.townShopOpened && result.townCameraBought &&
                 result.townProgress && (!host || (result.townNoAutoPay && result.townPartBought && result.townHostChecks && result.townSaveRoundTrip));
-            if (Boat && !FleetRoute) result.passed &= result.boatRepaired && result.boatPartsHidden &&
+            if (Boat && !FleetRoute) result.passed &= result.boatRepaired && result.boatPartsHidden && result.boatHintInitial && result.boatHintPartial && result.boatHintGone &&
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
@@ -917,6 +918,8 @@ namespace DeepDive.P1.Lab
         // the Engine, which sits on the wade slope itself. Both parts on the platform need the same climb out
         // of the water the beach fix (previous commits) proved works, so this reuses GoToService's waypoint
         // logic rather than walking a straight line at the target.
+        private bool boatHintShot;
+
         private void ProbeBoatParts(NetworkPlayer local)
         {
             var host = adapter.IsAuthority;
@@ -925,6 +928,21 @@ namespace DeepDive.P1.Lab
             // guest can confirm Repaired from its own replicated state without any host-only access.
             var sync = local.GetComponent<EconomyPlayerSync>();
             if (sync != null && sync.BoatPartsDone.Value >= BoatRepairParts.All.Count) result.boatRepaired = true;
+            // #156: the quest line names exactly the missing parts at 0/3, at a partial count and (nothing left) once repaired.
+            var hint = FindFirstObjectByType<BoatRepairHintView>();
+            if (sync != null && sync.IsSpawned && hint != null)
+            {
+                var missingNames = BoatRepairGuide.Missing(sync.BoatPartsMask.Value).Select(BoatRepairGuide.PartName).ToArray();
+                var consistent = hint.Lines.Count == missingNames.Length && missingNames.All(n => hint.Lines.Any(l => l.StartsWith(n + ":")));
+                var done = sync.BoatPartsDone.Value;
+                if (done == 0) result.boatHintInitial |= consistent && hint.Lines.Count == BoatRepairParts.All.Count && hint.PanelVisible;
+                else if (done < BoatRepairParts.All.Count)
+                {
+                    result.boatHintPartial |= consistent && hint.PanelVisible;
+                    if (host && result.boatHintPartial && !boatHintShot && Arg("-p1-screenshot").Length > 0) { boatHintShot = true; CaptureRoom("-boathint"); }
+                }
+                else result.boatHintGone |= hint.Lines.Count == 0 && !hint.PanelVisible;
+            }
             if (sync != null && sync.BoatPartsMask.Value == 7)
             {
                 var anchors = FindObjectsByType<BoatPartAnchor>(FindObjectsSortMode.None);
