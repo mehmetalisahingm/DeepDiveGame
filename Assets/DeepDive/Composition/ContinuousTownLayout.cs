@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
 using DeepDive.World;
@@ -17,11 +19,11 @@ namespace DeepDive.Composition
         public const string RootName = "P46_ContinuousTown";
         public static readonly Vector3 HomeOrigin = new Vector3(0f, 8.4f, -48f);
         public const float WalkSurfaceY = 8.4f;
-        private const float SlabThickness = 0.6f;
+        public const float SlabThickness = 0.6f;
         // #138 fills stop 5cm above SwimVolume's top (8.0) and 1.05m above the arena walls (7.0).
-        private const float FillThickness = 0.35f;
+        public const float FillThickness = 0.35f;
         // Taller than stepOffset (0.3) and nobody can jump, so an edge fence cannot be climbed.
-        private const float EdgeHeight = 1.2f;
+        public const float EdgeHeight = 1.2f;
 
         public static readonly Vector3[] StorefrontPositions =
         {
@@ -81,6 +83,122 @@ namespace DeepDive.Composition
             public static readonly Vector3 CoastMax = new Vector3(15f, 13f, -3.5f);
         }
 
+        public enum BlockMaterial { Sand, Building }
+
+        // #153: one built cube, world center and size. Build() creates exactly these rows in list order;
+        // tests derive their walk surfaces, edges and seams from them instead of keeping a second copy.
+        public readonly struct TownBlock
+        {
+            public readonly string Name;
+            public readonly Vector3 Center;
+            public readonly Vector3 Size;
+            public readonly BlockMaterial Material;
+            public readonly bool HasCollider;
+
+            public TownBlock(string name, Vector3 center, Vector3 size, BlockMaterial material, bool hasCollider)
+            {
+                Name = name;
+                Center = center;
+                Size = size;
+                Material = material;
+                HasCollider = hasCollider;
+            }
+
+            public Vector3 Min => Center - Size * 0.5f;
+            public Vector3 Max => Center + Size * 0.5f;
+        }
+
+        // Walk slabs. The old south wall ends at y=7 while dry beach is y=8.4, so the sidewalk crosses
+        // ABOVE the wall without touching it or altering arena physics. A 0.6m-thick slab has top exactly
+        // at 8.4, flush with Beach_Platform.
+        public static readonly IReadOnlyList<TownBlock> Slabs = new[]
+        {
+            Slab("CoastWalk", new Vector2(0f, -16.25f), new Vector2(7.5f, 7.0f)),
+            // Players approach the west/east shop plots diagonally from the beach. The
+            // narrow old street left both approaches above empty space at z=-18..-22.
+            Slab("MainStreet", new Vector2(0f, -22f), new Vector2(22f, 13f)),
+            Slab("TownSquare", new Vector2(0f, -29f), new Vector2(28f, 14f)),
+            Slab("HouseApproach", new Vector2(0f, -40f), new Vector2(7.5f, 12f)),
+            Slab("HomePlot", new Vector2(0f, -49f), new Vector2(15f, 13f))
+        };
+
+        // Physical facades outside the square's pedestrian area. No collider is placed over the paths or
+        // shop customer marks; service range remains host-validated. Home has an open front so the player
+        // can enter from the square on foot; all home targets (beds/storage/PC) stand on the anchors built
+        // below (HomeSceneSetup).
+        public static readonly IReadOnlyList<TownBlock> Structures = new[]
+        {
+            new TownBlock("MainBuilding_West", new Vector3(-18f, 11.0f, -28f), new Vector3(7f, 5.2f, 8f), BlockMaterial.Building, true),
+            new TownBlock("TownRoof_West", new Vector3(-18f, 13.65f, -28f), new Vector3(8f, 0.4f, 9f), BlockMaterial.Sand, false),
+            new TownBlock("MainBuilding_East", new Vector3(18f, 11.0f, -28f), new Vector3(7f, 5.2f, 8f), BlockMaterial.Building, true),
+            new TownBlock("TownRoof_East", new Vector3(18f, 13.65f, -28f), new Vector3(8f, 0.4f, 9f), BlockMaterial.Sand, false),
+            new TownBlock("HomeBack", HomeOrigin + new Vector3(0f, 1.5f, -6f), new Vector3(12f, 3f, 0.35f), BlockMaterial.Building, true),
+            new TownBlock("HomeLeft", HomeOrigin + new Vector3(-6f, 1.5f, 0f), new Vector3(0.35f, 3f, 12f), BlockMaterial.Building, true),
+            new TownBlock("HomeRight", HomeOrigin + new Vector3(6f, 1.5f, 0f), new Vector3(0.35f, 3f, 12f), BlockMaterial.Building, true),
+            new TownBlock("HomeRoof", HomeOrigin + new Vector3(0f, 3.1f, -0.2f), new Vector3(12f, 0.3f, 12f), BlockMaterial.Sand, false)
+        };
+
+        // #138 (plan section 4): close the 0.75m strip behind the beach, the street's missing shoulders and
+        // the strip in front of the home plot. Additions only: no slab, house, anchor or locked value moves.
+        public static readonly IReadOnlyList<TownBlock> Fills = new[]
+        {
+            Fill("Fill_BeachBack", new Vector2(0f, -15.125f), new Vector2(29.5f, 0.75f)),
+            Fill("Fill_StreetWest", new Vector2(-12.5f, -18.75f), new Vector2(3f, 6.5f)),
+            Fill("Fill_StreetEast", new Vector2(12.5f, -18.75f), new Vector2(3f, 6.5f)),
+            // HomePlot ends at z -42.5 but the house walls and open facade run to -42: floor that strip.
+            Fill("Fill_HomeFront", new Vector2(0f, -42.25f), new Vector2(15f, 0.5f))
+        };
+
+        // Fences on every outer town edge that drops into the void. The water-side edges (beach north,
+        // wade/ramp sides, dock, ledge) stay open on purpose: they step down into the sea.
+        public static readonly IReadOnlyList<TownBlock> Edges = BuildEdges();
+
+        private static TownBlock[] BuildEdges()
+        {
+            var edges = new List<TownBlock>();
+            // Written for the west side as (minX, maxX, minZ, maxZ); mirror -1 is the east side.
+            foreach (var mirror in new[] { 1f, -1f })
+            {
+                var side = mirror > 0 ? "West" : "East";
+                edges.Add(Edge("Edge_Beach" + side, mirror, -15.05f, -14.75f, -15.8f, -11.0f));
+                edges.Add(Edge("Edge_BackFillSouth" + side, mirror, -14.75f, -14.0f, -15.8f, -15.5f));
+                edges.Add(Edge("Edge_Town" + side, mirror, -14.3f, -14.0f, -36.3f, -15.5f));
+                edges.Add(Edge("Edge_SquareSouth" + side, mirror, -14.3f, -3.75f, -36.3f, -36.0f));
+                edges.Add(Edge("Edge_Approach" + side, mirror, -4.05f, -3.75f, -42.0f, -36.0f));
+                // Outside the facade line (z -42), so the house front stays open between the walls.
+                edges.Add(Edge("Edge_PlotNorth" + side, mirror, -7.8f, -3.75f, -42.0f, -41.7f));
+                edges.Add(Edge("Edge_Plot" + side, mirror, -7.8f, -7.5f, -55.8f, -41.7f));
+            }
+            edges.Add(Edge("Edge_PlotSouth", 1f, -7.8f, 7.8f, -55.8f, -55.5f));
+            return edges.ToArray();
+        }
+
+        // Build order: slabs, structures, fills, edges.
+        public static IEnumerable<TownBlock> AllBlocks => Slabs.Concat(Structures).Concat(Fills).Concat(Edges);
+
+        public static TownBlock FindBlock(string name)
+        {
+            foreach (var block in AllBlocks)
+                if (block.Name == name) return block;
+            throw new ArgumentException("no town block " + name, nameof(name));
+        }
+
+        private static TownBlock Slab(string name, Vector2 xz, Vector2 size) =>
+            new TownBlock(name,
+                new Vector3(xz.x, WalkSurfaceY - SlabThickness / 2f, xz.y),
+                new Vector3(size.x, SlabThickness, size.y), BlockMaterial.Sand, true);
+
+        private static TownBlock Fill(string name, Vector2 xz, Vector2 size) =>
+            new TownBlock(name,
+                new Vector3(xz.x, WalkSurfaceY - FillThickness / 2f, xz.y),
+                new Vector3(size.x, FillThickness, size.y), BlockMaterial.Sand, true);
+
+        // Stands on the void side of a walk edge, from the walk surface up EdgeHeight.
+        private static TownBlock Edge(string name, float mirror, float minX, float maxX, float minZ, float maxZ) =>
+            new TownBlock(name,
+                new Vector3(mirror * (minX + maxX) / 2f, WalkSurfaceY + EdgeHeight / 2f, (minZ + maxZ) / 2f),
+                new Vector3(maxX - minX, EdgeHeight, maxZ - minZ), BlockMaterial.Building, true);
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
         {
@@ -101,67 +219,15 @@ namespace DeepDive.Composition
             var root = FindRoot(scene, RootName);
             if (root != null) return;
 
-            // The old south wall ends at y=7 while dry beach is y=8.4, so the
-            // sidewalk crosses ABOVE the wall without touching it or altering arena physics.
-            // A 0.6m-thick slab has top exactly at 8.4, flush with Beach_Platform.
             root = new GameObject(RootName);
             SceneManager.MoveGameObjectToScene(root, scene);
             var parent = root.transform;
             var sand = MaterialFromScene(scene, "Beach_Platform");
             var building = MaterialFromScene(scene, "Wall_S") ?? sand;
 
-            Slab(parent, "CoastWalk", new Vector2(0f, -16.25f), new Vector2(7.5f, 7.0f), sand);
-            // Players approach the west/east shop plots diagonally from the beach. The
-            // narrow old street left both approaches above empty space at z=-18..-22.
-            Slab(parent, "MainStreet", new Vector2(0f, -22f), new Vector2(22f, 13f), sand);
-            Slab(parent, "TownSquare", new Vector2(0f, -29f), new Vector2(28f, 14f), sand);
-            Slab(parent, "HouseApproach", new Vector2(0f, -40f), new Vector2(7.5f, 12f), sand);
-            Slab(parent, "HomePlot", new Vector2(0f, -49f), new Vector2(15f, 13f), sand);
-
-            // Physical facades outside the square's pedestrian area. No collider is placed
-            // over the paths or shop customer marks; service range remains host-validated.
-            foreach (var x in new[] { -18f, 18f })
-            {
-                Block(parent, "MainBuilding_" + (x < 0 ? "West" : "East"),
-                    new Vector3(x, 11.0f, -28f), new Vector3(7f, 5.2f, 8f), building, true);
-                Block(parent, "TownRoof_" + (x < 0 ? "West" : "East"),
-                    new Vector3(x, 13.65f, -28f), new Vector3(8f, 0.4f, 9f), sand, false);
-            }
-
-            // Home has an open front so the player can enter from the square on foot.
-            // All home targets (beds/storage/PC) stand on the anchors built below (HomeSceneSetup).
-            Block(parent, "HomeBack", HomeOrigin + new Vector3(0f, 1.5f, -6f),
-                new Vector3(12f, 3f, 0.35f), building, true);
-            foreach (var x in new[] { -6f, 6f })
-                Block(parent, x < 0 ? "HomeLeft" : "HomeRight",
-                    HomeOrigin + new Vector3(x, 1.5f, 0f), new Vector3(0.35f, 3f, 12f), building, true);
-            Block(parent, "HomeRoof", HomeOrigin + new Vector3(0f, 3.1f, -0.2f),
-                new Vector3(12f, 0.3f, 12f), sand, false);
-
-            // #138 (plan section 4): close the 0.75m strip behind the beach, the street's missing
-            // shoulders and the strip in front of the home plot, then fence every outer town edge that
-            // drops into the void. Additions only: no existing slab, house, anchor or locked value moves.
-            // The water-side edges (beach north, wade/ramp sides, dock, ledge) stay open on purpose:
-            // they step down into the sea.
-            Fill(parent, "Fill_BeachBack", new Vector2(0f, -15.125f), new Vector2(29.5f, 0.75f), sand);
-            Fill(parent, "Fill_StreetWest", new Vector2(-12.5f, -18.75f), new Vector2(3f, 6.5f), sand);
-            Fill(parent, "Fill_StreetEast", new Vector2(12.5f, -18.75f), new Vector2(3f, 6.5f), sand);
-            // HomePlot ends at z -42.5 but the house walls and open facade run to -42: floor that strip.
-            Fill(parent, "Fill_HomeFront", new Vector2(0f, -42.25f), new Vector2(15f, 0.5f), sand);
-            // Written for the west side as (minX, maxX, minZ, maxZ); mirror -1 is the east side.
-            foreach (var mirror in new[] { 1f, -1f })
-            {
-                var side = mirror > 0 ? "West" : "East";
-                Edge(parent, "Edge_Beach" + side, mirror, -15.05f, -14.75f, -15.8f, -11.0f, building);
-                Edge(parent, "Edge_BackFillSouth" + side, mirror, -14.75f, -14.0f, -15.8f, -15.5f, building);
-                Edge(parent, "Edge_Town" + side, mirror, -14.3f, -14.0f, -36.3f, -15.5f, building);
-                Edge(parent, "Edge_SquareSouth" + side, mirror, -14.3f, -3.75f, -36.3f, -36.0f, building);
-                Edge(parent, "Edge_Approach" + side, mirror, -4.05f, -3.75f, -42.0f, -36.0f, building);
-                // Outside the facade line (z -42), so the house front stays open between the walls.
-                Edge(parent, "Edge_PlotNorth" + side, mirror, -7.8f, -3.75f, -42.0f, -41.7f, building);
-                Edge(parent, "Edge_Plot" + side, mirror, -7.8f, -7.5f, -55.8f, -41.7f, building);
-            }
-            Edge(parent, "Edge_PlotSouth", 1f, -7.8f, 7.8f, -55.8f, -55.5f, building);
+            foreach (var block in AllBlocks)
+                Block(parent, block.Name, block.Center, block.Size,
+                    block.Material == BlockMaterial.Building ? building : sand, block.HasCollider);
 
             BuildAnchors(parent);
             BuildZones(scene, parent);
@@ -268,29 +334,6 @@ namespace DeepDive.Composition
         {
             var go = FindRoot(scene, objectName);
             return go == null ? null : go.GetComponent<Renderer>()?.sharedMaterial;
-        }
-
-        private static void Slab(Transform parent, string name, Vector2 xz, Vector2 size, Material material)
-        {
-            Block(parent, name,
-                new Vector3(xz.x, WalkSurfaceY - SlabThickness / 2f, xz.y),
-                new Vector3(size.x, SlabThickness, size.y), material, true);
-        }
-
-        private static void Fill(Transform parent, string name, Vector2 xz, Vector2 size, Material material)
-        {
-            Block(parent, name,
-                new Vector3(xz.x, WalkSurfaceY - FillThickness / 2f, xz.y),
-                new Vector3(size.x, FillThickness, size.y), material, true);
-        }
-
-        // Stands on the void side of a walk edge, from the walk surface up EdgeHeight.
-        private static void Edge(Transform parent, string name, float mirror, float minX, float maxX,
-            float minZ, float maxZ, Material material)
-        {
-            Block(parent, name,
-                new Vector3(mirror * (minX + maxX) / 2f, WalkSurfaceY + EdgeHeight / 2f, (minZ + maxZ) / 2f),
-                new Vector3(maxX - minX, EdgeHeight, maxZ - minZ), material, true);
         }
 
         private static void Block(Transform parent, string name, Vector3 position, Vector3 scale,

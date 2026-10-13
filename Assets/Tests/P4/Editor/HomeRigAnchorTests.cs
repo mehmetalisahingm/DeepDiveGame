@@ -15,7 +15,7 @@ namespace DeepDive.P4.Tests
 {
     // #138 PR-2: the DiveTestArea home rig stands on the world anchors, fails closed without them, keeps PrepArea's
     // legacy rig untouched, and leaves a corridor a real diver can walk to every bed, the storage and the PC.
-    // Expectations are written numbers; only the anchors themselves are read from the layout.
+    // Expectations are written numbers local to HomeOrigin (#153); only the anchors themselves are read from the layout.
     public sealed class HomeRigAnchorTests
     {
         private const string PrepAreaPath = "Assets/DeepDive/World/Scenes/PrepArea.unity";
@@ -40,9 +40,13 @@ namespace DeepDive.P4.Tests
         private static readonly Vector3 StorageScale = new Vector3(1.35f, 1.6f, 0.75f);
         private static readonly Vector3 PcScale = new Vector3(1.4f, 1.2f, 0.7f);
 
+        private static Vector3 Home(float x, float y, float z) => ContinuousTownLayout.HomeOrigin + new Vector3(x, y, z);
+        private static Vector2 HomeXZ(float x, float z) =>
+            new Vector2(ContinuousTownLayout.HomeOrigin.x + x, ContinuousTownLayout.HomeOrigin.z + z);
+
         // Where a diver stands to use the storage / PC: 0.675 / 0.7m in front of the face looking into the room.
-        private static readonly Vector2 StorageStand = new Vector2(-3.9f, -50.5f);
-        private static readonly Vector2 PcStand = new Vector2(3.9f, -50.5f);
+        private static readonly Vector2 StorageStand = HomeXZ(-3.9f, -2.5f);
+        private static readonly Vector2 PcStand = HomeXZ(3.9f, -2.5f);
         private const float SideCorridorX = 4.95f;
         private const float PcRange = 3.25f;
 
@@ -77,21 +81,21 @@ namespace DeepDive.P4.Tests
                     Assert.AreEqual("HomeBed_" + i, bed.name);
                     Assert.AreEqual(scene, bed.gameObject.scene, bed.name + " scene");
                     AssertOnPose(bed.transform, poses.Beds[i], bed.name);
-                    AssertPose(bed.transform, new Vector3(BedXs[i], 8.7f, -44.55f), 180f, bed.name);
+                    AssertPose(bed.transform, Home(BedXs[i], 0.3f, 3.45f), 180f, bed.name);
                     AssertNear(BedScale, bed.transform.lossyScale, bed.name + " scale");
                 }
 
                 var storage = anchors.Single(a => a.Kind == HomeInteractionKind.Storage);
                 Assert.AreEqual(scene, storage.gameObject.scene);
                 AssertOnPose(storage.transform, poses.Storage, "storage");
-                AssertPose(storage.transform, new Vector3(-3.9f, 9.2f, -51.55f), 0f, "storage");
+                AssertPose(storage.transform, Home(-3.9f, 0.8f, -3.55f), 0f, "storage");
                 AssertNear(StorageScale, storage.transform.lossyScale, "storage scale");
 
                 var pcs = Object.FindObjectsByType<HomePcAnchor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
                 Assert.AreEqual(1, pcs.Length, "exactly one PC across all scenes");
                 Assert.AreEqual(scene, pcs[0].gameObject.scene, "PC scene");
                 AssertOnPose(pcs[0].transform, poses.Pc, "pc");
-                AssertPose(pcs[0].transform, new Vector3(3.9f, 9.0f, -51.55f), 0f, "pc");
+                AssertPose(pcs[0].transform, Home(3.9f, 0.6f, -3.55f), 0f, "pc");
                 AssertNear(PcScale, pcs[0].transform.lossyScale, "pc scale");
             });
         }
@@ -276,7 +280,7 @@ namespace DeepDive.P4.Tests
             ContinuousTownScene.With(scene =>
             {
                 var exit = BedExit(bed);
-                var route = new[] { Door(), new Vector2(0f, -43f), new Vector2(0f, exit.y), exit };
+                var route = new[] { Door(), HomeXZ(0f, 5f), new Vector2(HomeXZ(0f, 0f).x, exit.y), exit };
                 AssertWalkable(scene, "door -> middle corridor -> bed " + bed, route);
                 AssertBedInRange(bed);
             }, furnitureProxies: true);
@@ -304,7 +308,7 @@ namespace DeepDive.P4.Tests
                         var bed = target == "bed0-west" ? 0 : 3;
                         var side = bed == 0 ? -1f : 1f;
                         var exit = BedExit(bed);
-                        route = new[] { door, new Vector2(side * SideCorridorX, -42.8f), new Vector2(side * SideCorridorX, exit.y), exit };
+                        route = new[] { door, HomeXZ(side * SideCorridorX, 5.2f), new Vector2(HomeXZ(side * SideCorridorX, 0f).x, exit.y), exit };
                         AssertBedInRange(bed);
                         break;
                     }
@@ -313,10 +317,10 @@ namespace DeepDive.P4.Tests
                     {
                         var stand = target == "storage" ? StorageStand : PcStand;
                         var side = Mathf.Sign(stand.x);
-                        route = new[] { door, new Vector2(side * SideCorridorX, -42.8f), new Vector2(side * SideCorridorX, -49.5f), stand };
+                        route = new[] { door, HomeXZ(side * SideCorridorX, 5.2f), HomeXZ(side * SideCorridorX, -1.5f), stand };
                         var anchorId = target == "storage" ? WorldAnchorIds.HomeStorage : WorldAnchorIds.HomePc;
                         Assert.IsTrue(WorldAnchors.TryGetPose(anchorId, out var pose));
-                        Assert.LessOrEqual(Vector3.Distance(new Vector3(stand.x, 8.4f, stand.y), pose.position),
+                        Assert.LessOrEqual(Vector3.Distance(new Vector3(stand.x, ContinuousTownLayout.HomeOrigin.y, stand.y), pose.position),
                             target == "storage" ? HomePlayerInteractionBinding.InteractionRange : PcRange, target + " out of range");
                         break;
                     }
@@ -324,7 +328,7 @@ namespace DeepDive.P4.Tests
                     {
                         var index = int.Parse(target.Substring("spawn".Length));
                         Assert.IsTrue(WorldAnchors.TryGetPose(WorldAnchorIds.HomeSpawn(index), out var spawn));
-                        route = new[] { new Vector2(spawn.position.x, spawn.position.z), new Vector2(0f, -47f), new Vector2(0f, -43f), door };
+                        route = new[] { new Vector2(spawn.position.x, spawn.position.z), HomeXZ(0f, 1f), HomeXZ(0f, 5f), door };
                         break;
                     }
                 }
@@ -382,7 +386,7 @@ namespace DeepDive.P4.Tests
         private static Vector2 BedExit(int index)
         {
             var exit = RealBed(index).ExitPose.position;
-            Assert.AreEqual(-47.5225f, exit.z, Tolerance, "bed " + index + " exit z");
+            Assert.AreEqual(ContinuousTownLayout.HomeOrigin.z + 0.4775f, exit.z, Tolerance, "bed " + index + " exit z");
             return new Vector2(exit.x, exit.z);
         }
 
@@ -390,7 +394,7 @@ namespace DeepDive.P4.Tests
         {
             var bed = RealBed(index);
             var exit = bed.ExitPose.position;
-            var feet = new Vector3(exit.x, 8.4f, exit.z);
+            var feet = new Vector3(exit.x, ContinuousTownLayout.HomeOrigin.y, exit.z);
             Assert.LessOrEqual(Vector3.Distance(feet, bed.WorldPosition), HomePlayerInteractionBinding.InteractionRange,
                 "bed " + index + " exit out of interaction range");
         }
