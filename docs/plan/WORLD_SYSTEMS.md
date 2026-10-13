@@ -8,6 +8,8 @@ P4.7–P4.12'nin bağlayıcı yeni planı [PLAYER_EXPERIENCE_EXPANSION](PLAYER_E
 
 ## Oyunun iki gelir yolu
 
+Yerleşim, her eylemin dünya/beden/ses karşılığı, beş türün gerçek erişimi ve günler boyunca ilerleme [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md) içinde ayrıntılıdır. İlk sürüm sınırları korunur; ileri seçenekler ayrı [FUTURE_ROADMAP](FUTURE_ROADMAP.md) kararıdır.
+
 **Balıkçılık:** Kıyıdan veya tekneyle git → avı çantada taşı → güvenle dön → balıkçıda seçip sat → hemen gelir.
 
 **İçerik üretimi:** Kamera satın al/tahsis et → kendi elindeki kamerayla çek → güvenle dön → ev PC'sinde gerçek klibi izle → başlık/kapak seç → ortak oyun içi kanalda yayınla → ertesi sabah izlenme/takipçi/gelir.

@@ -8,6 +8,8 @@ Plan 3.0 — 15 Eylül 2026. İnsan karakter, fiziksel kıyı dünyası, ev/gün
 
 ## Hangi özellik ne zaman gelecek?
 
+İlk on dakika, ilerleyen günler, günlük seçimler, her eylemin yerel/uzak karşılığı ve ürün kabul ölçümleri [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md) içinde ayrıntılıdır. Gelecek ada/serbest sürüş/kişiselleştirme seçenekleri [FUTURE_ROADMAP](FUTURE_ROADMAP.md) içinde adaydır; bu ilk sürümün zorunlu zincirine eklenmez.
+
 | Oyuncunun göreceği değişiklik | İlk zorunlu teslim | Daha sonra |
 |---|---|---|
 | İnsan karakter ve insan gibi yürüme/yüzme | **P3.1**: insan gövdesi, su üstü/sualtı animasyonları, dalma/çıkma geçişleri | P4.6 son kalite; temel hareket ertelenmez |

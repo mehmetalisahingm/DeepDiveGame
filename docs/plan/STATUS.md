@@ -128,3 +128,5 @@ Kullanıcı üç kişi birlikte oynandığını ve genel oynanabilirliği onayla
 **Yeni sıra:** P4.6 teknik temel → P4.7 kısa görsel örnek → P4.8 fiziksel sandal tamiri → P4.9 ortak el/beden eylemleri → P4.10 kasaba/ev → P4.11 canlı deniz → P4.12 gerçek nihai kabul. Hazırlıklar paralel; uygulama faz kapılarına bağlı. [Detaylı plan](PLAYER_EXPERIENCE_EXPANSION.md).
 
 P4.7–P4.12 görevleri GitHub #159–#164 olarak açık; ayrıntılı sahiplik/başlama kapısı ilgili issue ve plan tablosundadır.
+
+13 Ekim ayrıntılı planı: [oyuncu deneyimi](EXPERIENCE_DESIGN.md), [üretim/iş parçaları](PRODUCTION_BLUEPRINT.md), [ileriye dönük yol haritası](FUTURE_ROADMAP.md). R01/R02 gibi açık tasarım kararları kayıtlıdır; kalıcı onarım şeması seçilmiş veya gelecek P7–P10 açılmış sayılmaz.

@@ -8,6 +8,8 @@
 
 ## Sanat yönü
 
+Ana oyuncu yolunda varlık/eylem kalite ölçütleri ve ses tetikleme matrisi [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md), paket/alan entegrasyon listesi [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md) içindedir. İlk görsel örnek onayından sonra üretim genişler. Tamir sanatında kürekli sandal/motor-tank uyumsuzluğu R01 çözülmeden motor/tank model seti üretilmez.
+
 **İnsan oranlı stilize kıyı kasabası ve atmosferik sualtı.** Sıcak kum, güneşte solmuş ahşap, açık taş ve küçük renkli dükkânlar; suya girince turkuazdan koyu maviye geçen, derinliği ışıkla anlatan bir dünya. Karakter, balık, bina ve ekipmanda benzer ayrıntı düzeyi/material dili kullanılır. Farklı gerçekçilikte hazır paketlerin yan yana bırakılması kabul değildir.
 
 - **İnsan:** Anatomisi okunur tam vücut, eklemli kol/bacak, el ve yüz silueti; wetsuit, maske, tüp, palet ve çanta. Bir ana insan iskeleti ve dört ayırt edilir giysi/renk varyantı yeterlidir. NPC'ler aynı uyumlu insan setini kıyafet/aksesuarla paylaşabilir.

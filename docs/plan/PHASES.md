@@ -217,6 +217,8 @@ Kapalı kapsam: ikinci ada/harita, ikinci boss, sınırsız filo, aynı anda bir
 
 Kullanıcı, küçük dünya/zayıf görsel kalite ve fiziksel sandal tamiri beklentisi nedeniyle yeni aşamalar istedi. Ayrıntılı davranış, rol, transaction sınırları ve kabul: [PLAYER_EXPERIENCE_EXPANSION.md](PLAYER_EXPERIENCE_EXPANSION.md).
 
+Derin tasarım: [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md); uygulanabilir iş parçaları: [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md). P5/P6 ayrıntısı ve yalnız aday olan P7–P10 seçenekleri: [FUTURE_ROADMAP](FUTURE_ROADMAP.md). P7–P10 aktif kapsam değildir; bu belge oyun uygulamasını açmaz.
+
 | Aşama | Görünen teslim | Mehmet | Utku | Mert |
 |---|---|---|---|---|
 | P4.7 | Hedef görsel örnek ve daha dolu dünya yerleşimi | İnsan ölçeği, kamera/eller, co-op | Yerleşim/zemin/anchor | Model, malzeme, sanat ve ses seti |

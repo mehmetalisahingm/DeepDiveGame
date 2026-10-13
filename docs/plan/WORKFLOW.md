@@ -44,6 +44,8 @@ P4.3 tekne sahipliği/aktif gövde/envanter/harita, P4.4 boss/hasar/ödül, P4.5
 
 ## Günlük kısa kontrol
 
+Yeni deneyim işleri [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md) alan/parça sırasına bölünür. R01/R02/R11 ve diğer [tasarım kararları](EXPERIENCE_DESIGN.md) uygulama öncesinde kaydedilir. Oyuncu hedefi, eylemin yerel/uzak görünümü, iptal/ret ve kayıt sonucu PR tesliminde birlikte belirtilir.
+
 1. Aktif fazdaki kendi görevini ve bağımlılığını kontrol et.
 2. Güncel faz dalını al; ortak sözleşme değişiyorsa etkilenen kişiyle anlaş.
 3. Küçük işi yapıp test et; diğer sistem hazır değilse sözleşmeye uyan örnek veri kullan.

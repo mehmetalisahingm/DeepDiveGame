@@ -10,6 +10,8 @@ P4.6 teknik ve fiziksel temel kabulü açık kalır. Yeni ürün teslimleri P4.7
 
 ## Her etkileşimin tasarım kontrolü
 
+Ayrıntılı oyuncu yolculuğu, yerleşim/tempo, eylem tabloları, ekonomi, UI, kayıt ve tasarım kararları: [EXPERIENCE_DESIGN.md](EXPERIENCE_DESIGN.md). Aşama bazında alan işleri, üretim envanteri, kritik yol ve kanıt paketleri: [PRODUCTION_BLUEPRINT.md](PRODUCTION_BLUEPRINT.md). P5/P6 ayrıntıları ve P6 sonrası aday aşamalar: [FUTURE_ROADMAP.md](FUTURE_ROADMAP.md).
+
 Her teslim aşağıdaki soruları gerçek Windows build üzerinden cevaplar:
 1. Oyuncu hedefi dünyada nasıl fark ediyor; adını/yerini yalnız debug metninden mi öğreniyor?
 2. Elleri, bedeni, taşıdığı nesne ve çevre ne yapıyor? Arkadaşı ne görüyor?
@@ -38,6 +40,8 @@ Bu kontrolü alan sahibi PR'da doldurur. Her özellik için yeni mekanik icat ed
 **Görünen sonuç:** kıyıda tahtayı/onarım parçasını bul, elde taşı, hasarlı sandala yaklaştır, belirlenmiş yerine tak ve keserle çivileri çak. Her tamamlanan katkıda sandal gerçekten düzelir.
 
 Mevcut üç onarım kimliği korunur: gövde, motor, yakıt tankı. Gövde katkısı tahta yamaları/çivi; motor katkısı bağlantı ve oturma; yakıt tankı katkısı tank/bağlantı sunumudur. Motor/tank sessizce tahta sayılmaz. Genel crafting, serbest çivi fiziği veya sürekli tekne bakım borcu eklenmez.
+
+**Ayrıntılı incelemede açık karar:** kürekli sandal ile motor/tank kimlikleri arasında tasarım uyumsuzluğu var. EXPERIENCE_DESIGN R01 başlangıçta üç ahşap/bağlantı tamir grubunu, eski kimlikleri kayıpsız katalog eşlemesiyle korumayı önerir. Karar kesinleşene kadar mevcut onarım semantiği değişmez. Her tahtada görünür/kalıcı ilerlemenin grup veya alt-slot olacağı R02 ile kararlaştırılır; bunlar alınmış ekip kararları değildir.
 
 - Mert: kırık gövde ve her katkı için mesh parçaları; taşıma nesnesi, keser, çivi ve darbe sesleri. Başlangıç model görünümü yamalı, eksik ve kullanılmaz; son görünüm sağlam ama aynı sandal kimliğini korur.
 - Mehmet: yerel iki el tutuşu, kaldırma/taşıma/yerleştirme/darbe/bırakma, uzak oyuncu sunumu ve host doğrulaması. Kısa basılı tutma/tekrarlı eylem; başlangıç taslağı katkı başına 2–3 kontrollü darbe, hissi oynama testiyle ayarlanır. Serbest fizik simülasyonu gerekmez.

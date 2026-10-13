@@ -191,9 +191,13 @@ Kabul: uzaktan istek, yanlış NPC, iki oyuncunun aynı av/kaydı satması, eski
 
 ### Fiziksel onarım sunumu — P4.8 uygulama öncesi sözleşme
 
+Ayrıntılı eylem akışı [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md) bölüm 4'tedir. R01 eski onarım kimliklerinin görünür anlamı, R02 her tamamlanan tahtanın ana grup veya kalıcı alt-slot karşılığı için açık kararlardır. Aşağıdaki tek ana katkı transaction'ı mevcut varsayımdır; R02 alt-slot seçilirse şema ve eski mask göçü uygulamadan önce yeniden yazılır. Tamamlanan tahtanın kayıttan kaybolması veya yeniden katkı/para yaratması kabul değildir.
+
 13 Ekim 2026 kullanıcı kapsamı: üç mevcut onarım kimliği ve kampanya maskesi korunur; gövde tahta/çivi, motor/tank kendi parçalarıyla sunulur. [Deneyim planındaki](PLAYER_EXPERIENCE_EXPANSION.md) taşıma/yerleştirme/darbe eylemi yeni bir onarım veya ekonomi otoritesi kurmaz.
 
 Host parça kimliği/tek taşıyıcı, yakınlık, etkin oyuncu, Closing kapısı ve tek çalışma yuvasını doğrular. Son kabul edilen darbe tek tüketim + katkı + kayıt sınırıdır; iptal/kopma öncesi sunum parçayı tüketmez. Tamamlanmamış eylemin nesnesi mevcut emanet/yeniden erişim kuralına döner; kaybolmaz veya ikinci kopya yaratmaz. Önceden tamamlanan katkı eski 2/3 kampanyada aynı mesh durumunu üretir. İki oyuncu aynı parçayı veya yuvayı kullanınca tek katkı; request replay ikinci tüketim yaratmaz.
+
+R11 açık geçiştir: mevcut Found/Purchased yolları edinme anında `TryContributeBoatPart` çağırır. Fiziksel onarım için tekil malzeme edinimi ve final katkı ayrılmalı; öneri satın alımda tek fiyat, final tamirde yalnız tüketim/katkıdır. Kullanılmamış malzeme/save göçü ve iki farklı replay alanı Mert/Mehmet/Utku tarafından uygulama öncesi kesinleşir; bu plan mevcut ödeme zamanını kodda değiştirmez.
 
 Mehmet hareket/el/uzak sunum ve host etkileşimi, Utku nesne/yuva/collider, Mert model/ses ve kalıcı katkı bağlantısı sahibidir. API ve geçici eylem şeması uygulamadan önce üç alan için kaydedilir; bu plan geleceğin API'sini mevcut kodda uygulamaz. Görsel mesh, ses ve animasyon ticari/ilerleme otoritesi değildir. Prep/Return toplama kararı #157'de, fiziksel tamir P4.8'de takip edilir.
 
