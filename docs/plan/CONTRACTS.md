@@ -189,6 +189,14 @@ Mert servis/ekonomi/envanter sahibi; Mehmet yaklaşma/etkileşim üreticisi; Utk
 
 Kabul: uzaktan istek, yanlış NPC, iki oyuncunun aynı av/kaydı satması, eski UI teklifi, disk hatası ve yeniden açma denenir. P3'te NPC'ye gitmeden doğrudan kredi hata sayılır; P4.2 kanal ödemesi yalnız doğrulanmış PC yayınının günlük sonucudur.
 
+### Fiziksel onarım sunumu — P4.8 uygulama öncesi sözleşme
+
+13 Ekim 2026 kullanıcı kapsamı: üç mevcut onarım kimliği ve kampanya maskesi korunur; gövde tahta/çivi, motor/tank kendi parçalarıyla sunulur. [Deneyim planındaki](PLAYER_EXPERIENCE_EXPANSION.md) taşıma/yerleştirme/darbe eylemi yeni bir onarım veya ekonomi otoritesi kurmaz.
+
+Host parça kimliği/tek taşıyıcı, yakınlık, etkin oyuncu, Closing kapısı ve tek çalışma yuvasını doğrular. Son kabul edilen darbe tek tüketim + katkı + kayıt sınırıdır; iptal/kopma öncesi sunum parçayı tüketmez. Tamamlanmamış eylemin nesnesi mevcut emanet/yeniden erişim kuralına döner; kaybolmaz veya ikinci kopya yaratmaz. Önceden tamamlanan katkı eski 2/3 kampanyada aynı mesh durumunu üretir. İki oyuncu aynı parçayı veya yuvayı kullanınca tek katkı; request replay ikinci tüketim yaratmaz.
+
+Mehmet hareket/el/uzak sunum ve host etkileşimi, Utku nesne/yuva/collider, Mert model/ses ve kalıcı katkı bağlantısı sahibidir. API ve geçici eylem şeması uygulamadan önce üç alan için kaydedilir; bu plan geleceğin API'sini mevcut kodda uygulamaz. Görsel mesh, ses ve animasyon ticari/ilerleme otoritesi değildir. Prep/Return toplama kararı #157'de, fiziksel tamir P4.8'de takip edilir.
+
 ### Sandal tamiri ve yolculuk — P3 taslak
 
 Mehmet hareket/koltuk, Utku rota/çevre, Mert onarım/envanter/sefer/kayıt sahibidir. Aynı sandal prefabı ve sahneye sırayla bağlanırlar; üç ayrı sandal otoritesi kurulmaz.

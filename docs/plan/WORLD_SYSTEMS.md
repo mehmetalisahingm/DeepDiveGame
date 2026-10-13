@@ -2,6 +2,10 @@
 
 **Plan 3.0 — 15 Eylül 2026.** Kullanıcının yeni kapsamı ve onu tamamlayan sınırlı tasarım ekleridir. Tamamlanmış sistem veya teknik başarı iddiası değildir. Ana kapsam/sahiplik/kabul [PHASES](PHASES.md), başlangıç yolculuğu [GAMEPLAY_LOOP](GAMEPLAY_LOOP.md), bağlantılar [CONTRACTS](CONTRACTS.md), sanat [ASSET_PLAN](ASSET_PLAN.md) içindedir.
 
+## 13 Ekim 2026 oyuncu deneyimi revizyonu
+
+P4.7–P4.12'nin bağlayıcı yeni planı [PLAYER_EXPERIENCE_EXPANSION](PLAYER_EXPERIENCE_EXPANSION.md) içindedir. Tek kasaba büyütülür; sanat kısa gerçek oyun örneğiyle kabul edilir. Sandalın üç sabit katkısı elde taşıma, yerleştirme ve kısa keser/çivi eylemiyle görünür hâle gelir; her katkıda model değişir. Gövde tahta yamalarıyla, motor/tank kendi parça sunumuyla düzelir. Genel crafting, ikinci ada veya serbest dümen eklenmez. P4.6 açık temel kabulü korunur; nihai genişletilmiş dünya kabulü P4.12'dedir.
+
 ## Oyunun iki gelir yolu
 
 **Balıkçılık:** Kıyıdan veya tekneyle git → avı çantada taşı → güvenle dön → balıkçıda seçip sat → hemen gelir.

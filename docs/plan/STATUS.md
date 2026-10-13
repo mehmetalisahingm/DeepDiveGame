@@ -1,8 +1,8 @@
 # Güncel durum ve görev takibi
 
-Plan **3.0 — 15 Eylül 2026**. Son durum güncellemesi: **8 Ekim 2026**.
+Plan **3.1 — 13 Ekim 2026**. Temel plan 3.0 korunur; oyuncu deneyimi ve sanat teslimleri genişletildi.
 
-Aktif faz: **P4**. P0–P3 kapalıdır. P4 kendi içinde sıralı ilerler: **P4.1 → P4.2 → P4.3 → P4.4 → P4.5 → P4.6**. Bir ara teslim birleşik kabul kapısını geçmeden sıradaki özellik işi tamamlanmış sayılmaz.
+Aktif faz: **P4**. P0–P3 kapalıdır. P4.5 PR #135 ile birleşti; P4.6 kabulü açık. Yeni P4.7–P4.12 planı [oyuncu deneyimi genişletmesinde](PLAYER_EXPERIENCE_EXPANSION.md) kayıtlıdır. P5/P6 kilitlidir; yeni plan uygulama veya tamam kaydı değildir.
 
 Unity sürümü: `6000.3.23f1`.
 
@@ -107,7 +107,7 @@ Bu kanıt iki gerçek yerel/CI sürecidir; ayrı bilgisayar/internet, nihai sana
 
 ## P4.5 — Yaşayan dünya
 
-**Durum: AKTİF.** P4.3/P4.4 kabul kapıları kapandı; uygulama görevleri açıldı.
+**Durum: ARA TESLİM BİRLEŞTİ.** PR #135 merge `a1dc5c6`; Unity ve gerçek dünya CI #37922626883/#37922621369 SUCCESS; #130/#131/#132 kapalı. Ayrı bilgisayar ve nihai sanat kabulü bu sonuçtan türetilmez.
 
 | Sahip | GitHub | Teslim |
 |---|---|---|
@@ -115,8 +115,16 @@ Bu kanıt iki gerçek yerel/CI sürecidir; ayrı bilgisayar/internet, nihai sana
 | Utku | [#131](https://github.com/mehmetalisahingm/DeepDiveGame/issues/131) | Sakin/rüzgarlı hava, gece davranışı, bir akıntı alanı, görev world uygunluğu |
 | Mert | [#132](https://github.com/mehmetalisahingm/DeepDiveGame/issues/132) | Üç sipariş/üç sponsor, iki ev seviyesi/üç kasaba iyileştirmesi, rol UI/save ve dar denge turu |
 
-Koordinatör Utku; hedef `codex/p4-integration`. Herkes kendi gerçek co-op davranışını ve görsel bağlantısını teslim eder. P4.6, P5 ve P6 kapalıdır.
+Koordinatör Utku; hedef `codex/p4-integration`. P4.6 çalışması sürer; P5/P6 kilitlidir.
 
 ## Sıradaki ortak kapı
 
-P4.5 birleşik kabulü: erişilebilir günlük hedefler → doğrulanmış av/çekim → tek ödül → görünür ev/kasaba ilerlemesi → rol/hava/akıntı → save/load/replay. Bu kabul sonrası P4.6 üç ardışık oyun günü ve gerçek ortak görsel/oynanış değerlendirmesine geçilir.
+P4.6 #138/#140/#141 açık. PR #146 teknik kabul senaryoları merge edildi; `587cd17` başındaki Unity ve üç gün/mağaza/tekne/medya CI SUCCESS. PR #151/#152/#158 integration'a birleşti; son birleşim `a5acf2a`. Birleşim sonucu bütün ürün kabulü anlamına gelmez.
+
+Kullanıcı üç kişi birlikte oynandığını ve genel oynanabilirliği onayladı. Dünya küçük, görsel kalite zayıf, yalnız tek balık gözlenmiş ve sandal 2/3 kalmış. Kullanıcının bildiriminden dört oyuncu/ayrı bilgisayar/üç gün veya nihai görsel kabulü üretilmez.
+
+#153 dünya ölçeği, #154 görsel kalite, #155 tür görünürlüğü, #156 sandal yönlendirmesi ve #157 Mehmet hareket/ağ işleri açık ürün teslimleridir. #156'nın paneli elle keser/çivi tamiri sayılmaz.
+
+**Yeni sıra:** P4.6 teknik temel → P4.7 kısa görsel örnek → P4.8 fiziksel sandal tamiri → P4.9 ortak el/beden eylemleri → P4.10 kasaba/ev → P4.11 canlı deniz → P4.12 gerçek nihai kabul. Hazırlıklar paralel; uygulama faz kapılarına bağlı. [Detaylı plan](PLAYER_EXPERIENCE_EXPANSION.md).
+
+P4.7–P4.12 görevleri GitHub #159–#164 olarak açık; ayrıntılı sahiplik/başlama kapısı ilgili issue ve plan tablosundadır.
