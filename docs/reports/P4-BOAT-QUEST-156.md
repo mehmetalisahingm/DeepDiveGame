@@ -23,7 +23,7 @@ Kullanıcı üç kişi oynarken 2/3'e ulaştı, üçüncü parçayı bulamadı. 
 - Aynı build'de regresyon: `-Trip`, `-Town`, `-Boat` host + guest PASS.
 
 ## Karar / açık
-- **Mehmet:** ücretsiz parça Prep/Return aşamalarında da toplanabilsin mi? Şimdi yalnız dalışta; ipucu metni bunu dürüstçe söylüyor ama sahilde parçayı görüp alamamak kafa karıştırıcı kalır. (`NetworkPlayer.HandlePickup` kapısı + `DiveActive` kontrolü.)
+- **Tasarım kararı (kullanıcı, 13 Ekim):** ücretsiz parçalar Prep/Return aşamasında da fiziksel yakınlık ve E etkileşimiyle toplanabilsin; sahilde gördüğü parçayı almak için dalış başlatmak gerekmesin. Host doğrulaması, tek katkı ve kayıt kuralları korunur. Bu etkileşim kapısını (`NetworkPlayer.HandlePickup` / `DiveActive`) **Mehmet #157 kapsamında** üstlenecek; bu PR'da değiştirilmedi. O değişiklik girince `BoatRepairGuide.OutsideDiveNote` ("dalista E ile toplanir") yanlış olur ve kaldırılmalı/güncellenmeli.
 - **Utku:** parçaların fiziksel ipucu (görünür işaret/ışık, daha büyük model) ve dağılımı onun; motorun suyun altındaki konumu gözden geçirilebilir.
-- Hangi parçanın eksik kaldığı ve kullanıcının kayıtlı 2/3 kampanyasıyla denenmesi kullanıcıdan teyit ister; 3 kişilik/ayrı bilgisayar oturumu yapılmadı (2 süreç).
+- Hangi parçanın eksik kaldığı bilinmiyor (kullanıcı da bilmiyor): **kesin neden bulundu denmiyor**. Panel ve 2/3 kayıt testleri sorunu çözmeye yönelik kanıttır, yeniden üretim değildir. 3 kişilik/ayrı bilgisayar oturumu yapılmadı (2 süreç).
 - Yeni panel IMGUI kutu yığınının altında (y=306) ve dev oturum panelini örter; asıl HUD yerleşimi #154'e bırakıldı.
