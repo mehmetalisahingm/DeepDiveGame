@@ -11,6 +11,12 @@ namespace DeepDive.Network
     /// </summary>
     public static class PickupRaycastRules
     {
+        // Repair parts are campaign/world interactions; catches still belong to an active dive.
+        // Both paths retain the common host-side activity/scene/day gates.
+        public static bool CanPickup(bool connected, bool sceneLoading, bool passive, bool dayClosing,
+            bool diveActive, bool repairPart) =>
+            connected && !sceneLoading && !passive && !dayClosing && (diveActive || repairPart);
+
         public static Collider SelectFirstPickupOrBlocker(RaycastHit[] hits)
         {
             if (hits == null || hits.Length == 0) return null;

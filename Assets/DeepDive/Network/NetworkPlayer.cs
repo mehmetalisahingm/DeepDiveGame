@@ -538,7 +538,8 @@ namespace DeepDive.Network
                 PublishAction(requestId, kind, result);
                 return;
             }
-            if (session == null || !session.DiveActive || Passive.Value)
+            if (session == null || !PickupRaycastRules.CanPickup(session.Status == ConnectionStatus.Connected,
+                    session.IsSceneLoading, Passive.Value, DayLock.IsLocked, session.DiveActive, repairPart: true))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidState);
                 return;
@@ -562,7 +563,10 @@ namespace DeepDive.Network
             var catchTarget = FindTarget<ICatchPickupTarget>(pickupCollider);
             if (catchTarget != null)
             {
-                result = catchTarget.TryPickup(playerId, requestId);
+                result = PickupRaycastRules.CanPickup(session.Status == ConnectionStatus.Connected,
+                    session.IsSceneLoading, Passive.Value, DayLock.IsLocked, session.DiveActive, repairPart: false)
+                    ? catchTarget.TryPickup(playerId, requestId)
+                    : PlayerActionResult.InvalidState;
             }
             else
             {

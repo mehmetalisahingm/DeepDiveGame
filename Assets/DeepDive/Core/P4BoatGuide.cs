@@ -54,9 +54,9 @@ namespace DeepDive.Core.Contracts
             return where == "burada" ? $"{PartName(partId)}: burada" : $"{PartName(partId)}: {where}, {(int)Math.Round(distance)} m";
         }
 
-        // Free parts are picked up with E by the host's dive pickup path, which only runs while the dive phase is active (NetworkPlayer.HandlePickup);
-        // outside the dive the shop's part (120 each) is the way. The hint says so instead of letting an E press fail silently.
-        public const string OutsideDiveNote = "Parcalar dalista E ile toplanir; dukkandan da alinir";
+        // Repair parts can be collected on the physical coast before/after a dive as well.
+        // The host still validates range, aim, player activity and the day-closing lock.
+        public const string OutsideDiveNote = "E: parcayi topla; dukkandan da alinir";
         public const string DiveNote = "E: parcayi topla";
     }
 }
