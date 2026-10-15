@@ -1,6 +1,6 @@
 # Birlikte çalışma düzeni
 
-Plan 3.0 — güncel durum 8 Ekim 2026. P0–P3 kapalı; aktif ara teslim P4.5. P4.3/P4.4 kabulü PR #129 ile geçti. P4.6, P5 ve P6 kapalıdır; önceki test/ekip onayları yeni özelliklere taşınmaz.
+Plan 3.1 — güncel durum 13 Ekim 2026. P0–P3 kapalı; P4.5 birleşti, P4.6 kabulü açık. Kullanıcı isteğiyle P4.7–P4.12 oyuncu deneyimi/sanat planı eklendi. P5/P6 kilitli; yeni teslimlerin uygulaması önceki kabul kapısına bağlıdır. Önceki test/ekip onayları yeni özelliklere taşınmaz.
 
 Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazın incelemesine, testine veya devredilen alt işine destek olur.
 
@@ -36,13 +36,15 @@ Mert V01–V03 insan/animasyon/ekipman setini küçük paket olarak sağlar; Meh
 
 P3.2'de eski otomatik ödeme yolu ile yeni NPC teslim yolu aynı anda aktif bırakılamaz. Şema göçü, bekleyen av/kayıt ve tek ödeme regresyonu aynı teslimde tamamlanır. P3.3'te tek sandal otoritesi, onarım/koltuk/rota ve kopma davranışı birlikte doğrulanır.
 
-P4 ayrıca açıldıktan sonra P4.1 ev/gün/keşif → P4.2 klip/PC/kanal → P4.3 ekipman/büyük tekneler → P4.4 tür/boss → P4.5 günlük dünya/gelişim/roller → P4.6 tam kabul. Önceki ara teslim kabul edilmeden sonraki özellik başlamaz; aynı teslimin bağımsız A/B/C işleri beraber hazırlanabilir. Alt ajan kullanımı ayrıca yetki ister.
+P4 sırası: P4.1 ev/gün/keşif → P4.2 klip/PC/kanal → P4.3 ekipman/büyük tekneler → P4.4 tür/boss → P4.5 günlük dünya/gelişim/roller → P4.6 teknik temel kabulü → P4.7 görsel örnek → P4.8 fiziksel sandal tamiri → P4.9 ortak eylemler → P4.10 kasaba/ev → P4.11 canlı deniz → P4.12 nihai deneyim kabulü. Önceki ara teslim kabul edilmeden sonraki özellik başlamaz; aynı teslimin bağımsız A/B/C işleri beraber hazırlanabilir. Alt ajan kullanımı ayrıca yetki ister.
 
 Medya P4.2'de önce hedef Windows build'inde gerçek kayıt/aktarım/oynatma denemesiyle doğrulanır. Teknik sorun çözülmeden PC'de stok video/puan kartını başarı diye sunmayın. Gün sonu, yayın hakları/ödeme ve klip dosyası ayrı durumlar olarak tek kampanya kaydına bağlanır; sonraki görevlerde sahte veriyle kapatılmaz.
 
 P4.3 tekne sahipliği/aktif gövde/envanter/harita, P4.4 boss/hasar/ödül, P4.5 uygun görev/hava/rol birlikte test edilir. Mert kaynakları küçük paketle sağlar; her kişi kendi sanat ve co-op bağlantısını teslim eder. Faz/ara teslim başına gerçek build/kanıt ve kısa sonuç yeterlidir; yeni imza matrisi yoktur.
 
 ## Günlük kısa kontrol
+
+Yeni deneyim işleri [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md) alan/parça sırasına bölünür. R01/R02/R11 ve diğer [tasarım kararları](EXPERIENCE_DESIGN.md) uygulama öncesinde kaydedilir. Oyuncu hedefi, eylemin yerel/uzak görünümü, iptal/ret ve kayıt sonucu PR tesliminde birlikte belirtilir.
 
 1. Aktif fazdaki kendi görevini ve bağımlılığını kontrol et.
 2. Güncel faz dalını al; ortak sözleşme değişiyorsa etkilenen kişiyle anlaş.

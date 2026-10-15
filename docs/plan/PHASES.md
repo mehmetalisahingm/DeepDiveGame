@@ -2,7 +2,7 @@
 
 Plan sürümü: **3.0 — 15 Eylül 2026**. Kullanıcının yeni isteği: yaşayan kıyı dünyası; ilk sandal görevi ve alternatif kıyı avı; ayrı satın alınan kamera; canlı tekne konumlu keşif haritası; ortak ev, yataklar, gün/saat ve gün özeti; gerçekten izlenebilir klipler ve ev PC'sinden oyun içi kanal; daha büyük tekneler; ansiklopedi, boss, sponsorlar, kasaba gelişimi ve günlük çeşitlilik.
 
-**P3 açık; P4–P6 kilitli.** Bu revizyon plan değişikliğidir; uygulama başlangıcı, ekip onayı veya faz kapanışı değildir. P0/P1/P2'nin tarihsel kabul kayıtları değiştirilmez. P3'ün eski teknik kapanış adayı yeni kapsamı tamamlamış sayılmaz.
+**13 Ekim 2026 revizyonu 3.1:** P0–P3 kapalı, P4 açık; P4.6 kabulü ve kullanıcı oynama geri bildiriminden çıkan ürün eksikleri açık. P5/P6 kilitli. P4.7–P4.12 yeni plan teslimleridir; bu düzenleme oyun uygulamasını veya faz kapanışını ilan etmez.
 
 Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md), bağlantılar [CONTRACTS.md](CONTRACTS.md), birleştirme düzeni [WORKFLOW.md](WORKFLOW.md) içindedir.
 
@@ -213,9 +213,26 @@ Mert bütün model/animasyon/sesi tek başına sıfırdan üretmez. Ortak kaynak
 
 Kapalı kapsam: ikinci ada/harita, ikinci boss, sınırsız filo, aynı anda birden çok aktif tekne, serbest dümen/dalga simülasyonu, bina inşa sistemi, zorunlu sınıf ağacı, gerçek sosyal medya yükleme, sesli sohbet kaydı ve bulut kampanya. Ek fikir listesi zorunlu teslimlerin önüne alınmaz.
 
+### P4.7–P4.12 — Oyuncu deneyimi ve sanat genişletmesi
+
+Kullanıcı, küçük dünya/zayıf görsel kalite ve fiziksel sandal tamiri beklentisi nedeniyle yeni aşamalar istedi. Ayrıntılı davranış, rol, transaction sınırları ve kabul: [PLAYER_EXPERIENCE_EXPANSION.md](PLAYER_EXPERIENCE_EXPANSION.md).
+
+Derin tasarım: [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md); uygulanabilir iş parçaları: [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md). P5/P6 ayrıntısı ve yalnız aday olan P7–P10 seçenekleri: [FUTURE_ROADMAP](FUTURE_ROADMAP.md). P7–P10 aktif kapsam değildir; bu belge oyun uygulamasını açmaz.
+
+| Aşama | Görünen teslim | Mehmet | Utku | Mert |
+|---|---|---|---|---|
+| P4.7 | Hedef görsel örnek ve daha dolu dünya yerleşimi | İnsan ölçeği, kamera/eller, co-op | Yerleşim/zemin/anchor | Model, malzeme, sanat ve ses seti |
+| P4.8 | Taşıma, keser/çivi ve aşamalı sandal onarımı | Eylem, el/beden, ağ doğrulaması | Parça ve çalışma noktaları | Kırık/onarılmış modeller, ses, kayıt bağlantısı |
+| P4.9 | Ekipman, av, satış ve tekne eylemleri | Yerel/uzak animasyon ve etkileşim | Dünya hedefleri/çarpışmalar | Rig, nesne ve ses |
+| P4.10 | Yaşanan kasaba ve ortak ev | Fiziksel erişim/co-op | Dolu yollar/kıyı/iskele | NPC çalışma, tezgâh, ev gelişimi, UI/ses |
+| P4.11 | Canlı deniz ve görünür keşif/yolculuk | Kamera/zıpkın/tekne sunumu | Beş tür, habitat, boss ve sualtı | Uyumlu varlık/ışık/efekt/ses |
+| P4.12 | Tek buildde nihai dünya/deneyim kabulü | Oyuncu/ağ/medya | Dünya/rota/boss | Kayıt/ekonomi/sanat; ortak gerçek kabul |
+
+P4.6 teknik temel kabulü, P4.7 uygulamasından önce tamamlanır; hazırlık paralel yürüyebilir. Sonraki uygulama her küçük teslimin kabulüne bağlıdır. Grafik gelişiminin ilk görünür kanıtı P4.7'dir; sanat P5'e ertelenmez. Genişletilmiş P4'ün nihai kapısı P4.12'dir.
+
 ## P5 — Hataları ve performansı düzelt
 
-Yeni özellik ve içerik yok.
+Yeni özellik ve içerik yok. Başlama kapısı: P4.6 temel kabulü ve yeni P4.7–P4.12 teslimlerinin kabulü; P4'ün main/build kapanışı. #147–#150 hazırlık görevleri bu kapıya bağlıdır.
 
 | Görev | Sorumlu | Yapacağı iş |
 |---|---|---|

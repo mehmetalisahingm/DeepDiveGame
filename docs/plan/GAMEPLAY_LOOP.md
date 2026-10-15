@@ -2,7 +2,13 @@
 
 Plan 3.0 — 15 Eylül 2026. İnsan karakter, fiziksel kıyı dünyası, ev/gün/PC, balıkçılık/kanal ve ileri keşif döngüsüdür. **Planlanan davranıştır; uygulanmış özellik listesi değildir.** Ana plan [PHASES](PHASES.md), güncel kanıt [STATUS](STATUS.md), bağlantılar [CONTRACTS](CONTRACTS.md); yeni sistem ayrıntıları [WORLD_SYSTEMS](WORLD_SYSTEMS.md) içindedir.
 
+## 13 Ekim 2026 yeni deneyim teslimleri
+
+[Oyuncu deneyimi planı](PLAYER_EXPERIENCE_EXPANSION.md) P4.7'de hedef grafik örneğini, P4.8'de elde parça taşıma/keser/çivi ve değişen sandal gövdesini, P4.9'da ortak el/beden eylemlerini, P4.10'da dolu kasaba/ev ve sesleri, P4.11'de canlı deniz sunumunu teslim eder. P4.12 bütün yolculuğun aynı gerçek build'de kabulüdür. Bunlar planlanan davranışlardır; kod/test PASS iddiası değildir.
+
 ## Hangi özellik ne zaman gelecek?
+
+İlk on dakika, ilerleyen günler, günlük seçimler, her eylemin yerel/uzak karşılığı ve ürün kabul ölçümleri [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md) içinde ayrıntılıdır. Gelecek ada/serbest sürüş/kişiselleştirme seçenekleri [FUTURE_ROADMAP](FUTURE_ROADMAP.md) içinde adaydır; bu ilk sürümün zorunlu zincirine eklenmez.
 
 | Oyuncunun göreceği değişiklik | İlk zorunlu teslim | Daha sonra |
 |---|---|---|
@@ -19,7 +25,7 @@ Plan 3.0 — 15 Eylül 2026. İnsan karakter, fiziksel kıyı dünyası, ev/gün
 | Günlük çeşitlilik | **P4.5**: hava/gece/akıntı, sipariş/sponsor, ev-kasaba gelişimi, hafif roller | Küçük içerik bütçesi; yeni sistemler sınırsız eklenmez |
 | Belirgin grafik gelişimi | **P3.1'den itibaren her ara teslimde**, P3.4 görsel kapısı | P4.6 tam dünya/sanat kabulü; P5 hata/performans düzeltmesi |
 
-Bunlar teslim sırasıdır, takvim taahhüdü değildir. Süre ve ekip kapasitesi uydurulmaz. Mevcut P3 açık kalır; kullanıcı yalnızca planı düzenletmiştir.
+Bunlar teslim sırasıdır, takvim taahhüdü değildir. Süre ve ekip kapasitesi uydurulmaz. Güncel faz durumu STATUS'tadır; yeni plan düzenlemesi oyun uygulamasını veya kabulü tamamlamaz.
 
 ## Bir oyun oturumu
 
