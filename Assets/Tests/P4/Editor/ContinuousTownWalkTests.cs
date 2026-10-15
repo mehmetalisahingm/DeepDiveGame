@@ -180,7 +180,7 @@ namespace DeepDive.P4.Tests
                     var failures = new List<string>();
                     Drive(controller, zones, waypoints, failures, out var reachedSea);
                     Assert.IsFalse(reachedSea, "spawn " + slot + " fell into sea");
-                    Assert.IsEmpty(failures, "spawn " + slot + ": " + string.Join("\\n", failures.Take(20)));
+                    Assert.IsEmpty(failures, "spawn " + slot + ": " + string.Join("\n", failures.Take(20)));
                     Assert.Less(Vector2.Distance(XZ(diver.transform.position), start), 0.2f,
                         "spawn " + slot + " did not physically return home");
                 }
