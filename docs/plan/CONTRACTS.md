@@ -358,6 +358,14 @@ Sponsor/sipariş, keşif/ödeme/rol/geliştirme olaylarını kimlikleriyle tüke
 
 Bu teslim fiziksel taşıma/keser/çivi sistemini uygulamaz; mevcut found-part yolu hâlâ doğrudan katkıdır. Yeni fiziksel tamirin edinme/contribution ayrımı ayrıca planlanır. Yerel iki süreçli test, ayrı bilgisayar veya bütün #157 kabulü değildir.
 
+## 15 Ekim 2026 — kesintisiz dünya oturumu (#157)
+
+`PrepArea` yalnız çevrimdışı/oda giriş sahnesidir. İlk `Lobby → Prep` dünyaya girer; bundan sonra `Prep`, `Dive`, `Return` ve yeniden `Lobby` aynı `DiveTestArea` içinde kalır. `CompleteReturn` eve taşımaz ve sahneyi yeniden yüklemez. Ev/PC/depo için fiziksel yol yürünür. Faz geçişinde mevcut konum korunur; ilk dünya girişi ve D07 yeni-gün sabah yerleşimi bunun dışında açık yerleşim sınırlarıdır.
+
+Network katmanı world assembly'sine bağımlı olmaz: oturumun `SpawnPoseProvider` bağını Composition sağlar. Dünya içinde dört `WorldAnchorIds.HomeSpawn` anchor'ı kullanılır; eksik/çift anchor deniz başlangıcına düşmez. Network lab bağ yokken yazılı `PlayerSpawnPoint` kullanır. Sabah yerleşimi client id sırasına değil `AdmissionPolicy` slotuna göre yapılır; bütün hedefler çözülmeden kısmi yerleşim yapılmaz. Evdeki iki kuzey spawn'ın z'si `0.5 → -0.25` alınır; yataktan kalkış ile kapsül çakışması engellenir. Ağ uyumluluk token'ı `DeepDive-P4-1` olur; aynı oturumdaki build'ler eşleşmelidir.
+
+`ContinuousWorldSmokeDriver` ve `tools/Test-P46-ContinuousWorld.ps1` yalnız development build'de açık komutla kurulur. Ürün spawn sağlayıcısı değiştirilmez, test oyuncusu teleport edilmez; hareket RPC'si, F hizmet isteği, fiziksel H/yatak isteği ve gerçek erken-uyku özeti kullanılır. Eski P1/P3 alt sistem smoke'ları deniz fixture yerleşimini açıkça loglar ve dünya turu kanıtı sayılmaz. Bu teslim yeni sanat, beş tür, fiziksel keser/çivi tamiri veya ayrı bilgisayar/üç gün kabulü değildir.
+
 ## Ortak red sonuçları
 
 En az şu nedenler ayrıştırılmalıdır: `WrongPhase`, `InvalidTarget`, `OutOfRange`, `NotVisible`, `InventoryFull`, `AlreadyClaimed`, `AlreadyProcessed`, `InsufficientFunds`, `PlayerInactive`, `SaveFailed`, `SessionClosed`.

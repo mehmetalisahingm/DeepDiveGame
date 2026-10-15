@@ -60,6 +60,39 @@ namespace DeepDive.P4.Tests
         // ---- placement ----------------------------------------------------------------------------------
 
         [Test]
+        public void SessionSpawnsUseFourClearHomeAnchorsAndFailClosedOnDuplicates()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var prior = SceneManager.GetActiveScene();
+                SceneManager.SetActiveScene(scene);
+                try
+                {
+                    HomeSceneSetup.EnsureRig(scene);
+                    var beds = Object.FindObjectsByType<HomeInteractionAnchor>(FindObjectsSortMode.None)
+                        .Where(b => b.Kind == HomeInteractionKind.Bed).ToArray();
+                    for (var slot = 0; slot < 4; slot++)
+                    {
+                        var spawn = SessionNetworkAdapter.ResolveSpawnPose(slot);
+                        Assert.IsTrue(spawn.HasValue, "slot " + slot);
+                        AssertNear(ContinuousTownLayout.HomeRig.Spawn(slot), spawn.Value.position, "home spawn");
+                        foreach (var bed in beds)
+                            Assert.GreaterOrEqual(Vector2.Distance(
+                                new Vector2(spawn.Value.position.x, spawn.Value.position.z),
+                                new Vector2(bed.ExitPose.position.x, bed.ExitPose.position.z)), 2f * Radius,
+                                "spawn overlaps bed exit: " + slot + " / " + bed.BedId);
+                    }
+                    Assert.IsNull(SessionNetworkAdapter.ResolveSpawnPose(-1));
+                    Assert.IsNull(SessionNetworkAdapter.ResolveSpawnPose(4));
+                    Assert.IsTrue(WorldAnchors.TryFind(WorldAnchorIds.HomeSpawn(2), out var anchor));
+                    Object.Instantiate(anchor.gameObject, anchor.transform.parent);
+                    Assert.IsNull(SessionNetworkAdapter.ResolveSpawnPose(2), "duplicate must not fall back to sea spawn");
+                }
+                finally { SceneManager.SetActiveScene(prior); }
+            });
+        }
+
+        [Test]
         public void RigIsBuiltInTheGivenAdditiveSceneOnTheAnchorPoses()
         {
             ContinuousTownScene.With(scene =>

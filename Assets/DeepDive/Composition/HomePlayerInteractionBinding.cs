@@ -419,10 +419,16 @@ namespace DeepDive.Composition
             var players = new List<NetworkPlayer>(FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None));
             players.RemoveAll(p => p == null || !p.IsSpawned);
             players.Sort((a, b) => a.OwnerClientId.CompareTo(b.OwnerClientId));
+            var poses = new Pose[players.Count];
             for (var i = 0; i < players.Count && i < AdmissionPolicy.MaxPlayers; i++)
             {
+                // Admission slots survive a peer leaving; sorted client ids are not slot ids.
+                if (!networkSession.TryGetPlayerSpawnPose(players[i].OwnerClientId, out poses[i])) return;
+            }
+            for (var i = 0; i < players.Count; i++)
+            {
                 players[i].SetSeatedServer(false);
-                if (PlayerSpawnPoint.TryGet(i, out var pose)) players[i].Teleport(pose);
+                players[i].Teleport(poses[i]);
             }
             pendingMorningDay = 0;
         }

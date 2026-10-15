@@ -4,6 +4,7 @@ using System.Linq;
 using DeepDive.Core.Contracts;
 using DeepDive.Inventory;
 using DeepDive.Network;
+using DeepDive.World;
 using DeepDive.Session;
 using DeepDive.Session.UI;
 using Unity.Collections;
@@ -41,6 +42,7 @@ namespace DeepDive.Composition
             if (NetworkManager.Singleton != null && NetworkManager.Singleton != manager)
             { enabled = false; Destroy(gameObject); return; }
             network = GetComponent<NetworkSession>();
+            network.SpawnPoseProvider = ResolveSpawnPose;
             Session = GetComponent<SessionManager>();
             Session.Bridge = this;
             GetComponent<SessionRoomUI>().Controls = this;
@@ -155,8 +157,21 @@ namespace DeepDive.Composition
             Changed?.Invoke();
         }
 
-        public static string SceneForPhase(SessionPhase phase) =>
-            phase == SessionPhase.Lobby ? PrepScene : DiveScene;
+        // PrepArea is the offline/room entry scene only. Completing a dive must never
+        // reload it and transport the party away from the town/coast/home they walked to.
+        public static string SceneForPhase(SessionPhase phase) => DiveScene;
+
+        public static Pose? ResolveSpawnPose(int slot)
+        {
+            if (slot < 0 || slot >= AdmissionPolicy.MaxPlayers) return null;
+            var scene = SceneManager.GetActiveScene();
+            if (scene.name != ContinuousTownLayout.SceneName)
+                return PlayerSpawnPoint.TryGet(slot, out var entry) ? entry : (Pose?)null;
+            ContinuousTownLayout.Build(scene);
+            if (!WorldAnchors.TryFind(WorldAnchorIds.HomeSpawn(slot), out var anchor) || anchor.gameObject.scene != scene)
+                return null;
+            return new Pose(anchor.transform.position, anchor.transform.rotation);
+        }
 
         public bool RequestSceneLoad(SessionState next)
         {
@@ -289,6 +304,7 @@ namespace DeepDive.Composition
             diveInventory?.Dispose();
             UnregisterMessages();
             if (network == null) return;
+            if (network.SpawnPoseProvider == ResolveSpawnPose) network.SpawnPoseProvider = null;
             network.Changed -= ConnectionChanged; network.SceneLoaded -= Loaded;
             Session.OnSessionStateChanged -= StateChanged; Session.OnRosterChanged -= RosterChanged;
         }

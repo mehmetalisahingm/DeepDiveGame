@@ -59,8 +59,9 @@ namespace DeepDive.Composition
             {
                 new Vector3(-1.5f, 0f, -1.5f),
                 new Vector3(1.5f, 0f, -1.5f),
-                new Vector3(-1.5f, 0f, 0.5f),
-                new Vector3(1.5f, 0f, 0.5f)
+                // Keep >= one diver diameter from the middle beds' exit poses.
+                new Vector3(-1.5f, 0f, -0.25f),
+                new Vector3(1.5f, 0f, -0.25f)
             };
 
             public static Vector3 Bed(int index) => HomeOrigin + new Vector3(BedXs[index], BedLocalY, BedLocalZ);
@@ -261,8 +262,8 @@ namespace DeepDive.Composition
             Debug.Log($"P46_CONTINUOUS_TOWN_READY shops={moved} home={HomeOrigin} scene={scene.name}");
         }
 
-        // Empty transforms: no collider, renderer or NetworkObject. Home beds/storage/PC are consumed by
-        // HomeSceneSetup (PR-2); door and spawns are still waiting for PR-3.
+        // Empty transforms: no collider, renderer or NetworkObject. HomeSceneSetup consumes
+        // beds/storage/PC; SessionNetworkAdapter consumes the home spawns for entry and mornings.
         private static void BuildAnchors(Transform parent)
         {
             var anchors = new GameObject(AnchorsName).transform;

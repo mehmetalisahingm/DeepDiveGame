@@ -19,7 +19,8 @@ namespace DeepDive.Network
         // connect and then fail during NGO in-scene NetworkObject synchronization.
         // P3-5 adds replicated locomotion/equipment/recording presentation to NetworkPlayer.
         // P3-6 adds the per-part completion mask so collected repair parts disappear for everyone.
-        public const string Protocol = "DeepDive-P3-6";
+        // P4-1 keeps the daily session in one world and uses its home spawn contract.
+        public const string Protocol = "DeepDive-P4-1";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;
@@ -46,6 +47,23 @@ namespace DeepDive.Network
         public IReadOnlyList<PlayerId> Players => players.Keys.OrderBy(id => id).Select(id => new PlayerId(id)).ToArray();
         public event Action Changed;
         public event Action<SceneLoadResult> SceneLoaded;
+        // Scene policy belongs to composition. A bound provider fails closed; the network lab
+        // keeps its authored points when no world composition is installed.
+        public Func<int, Pose?> SpawnPoseProvider { get; set; }
+
+        public bool TryGetSpawnPose(int slot, out Pose pose)
+        {
+            pose = default;
+            if (slot < 0 || slot >= AdmissionPolicy.MaxPlayers) return false;
+            if (SpawnPoseProvider == null) return PlayerSpawnPoint.TryGet(slot, out pose);
+            var candidate = SpawnPoseProvider(slot);
+            if (!candidate.HasValue) return false;
+            pose = candidate.Value;
+            return true;
+        }
+
+        public bool TryGetPlayerSpawnPose(ulong clientId, out Pose pose) =>
+            TryGetSpawnPose(admission.SlotOf(clientId), out pose);
 
         private void Awake()
         {
@@ -83,7 +101,7 @@ namespace DeepDive.Network
             if (port == 0 || !IPAddress.TryParse(listenAddress, out _)) return Fail("InvalidAddress");
             // NGO cannot decline its own host, so validate spawn setup before starting it.
             for (var slot = 0; slot < AdmissionPolicy.MaxPlayers; slot++)
-                if (!PlayerSpawnPoint.TryGet(slot, out _)) return Fail("SpawnPointMissing");
+                if (!TryGetSpawnPose(slot, out _)) return Fail("SpawnPointMissing");
             if (manager.NetworkConfig.PlayerPrefab == null) return Fail("PlayerPrefabMissing");
             if (!Prepare(ConnectionStatus.StartingHost)) return false;
             transport.SetConnectionData("127.0.0.1", port, listenAddress);
@@ -133,7 +151,7 @@ namespace DeepDive.Network
                 protocolMatches, out var slot, out var reason);
             if (response.Approved)
             {
-                if (PlayerSpawnPoint.TryGet(slot, out var pose))
+                if (TryGetSpawnPose(slot, out var pose))
                 {
                     response.Position = pose.position; response.Rotation = pose.rotation;
                     pendingConnections[request.ClientNetworkId] = Time.realtimeSinceStartupAsDouble + 15;
@@ -258,7 +276,7 @@ namespace DeepDive.Network
                 var error = sceneEvent.ClientsThatTimedOut != null && sceneEvent.ClientsThatTimedOut.Count > 0 ? "SceneLoadTimeout" : "";
                 foreach (var pair in players)
                 {
-                    if (PlayerSpawnPoint.TryGet(admission.SlotOf(pair.Key), out var pose)) pair.Value.Teleport(pose);
+                    if (TryGetPlayerSpawnPose(pair.Key, out var pose)) pair.Value.Teleport(pose);
                     else error = "SpawnPointMissing";
                 }
                 var result = new SceneLoadResult(activeRequest, activeScene, error.Length == 0, error);
