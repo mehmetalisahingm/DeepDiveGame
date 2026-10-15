@@ -118,6 +118,79 @@ namespace DeepDive.P4.Tests
             }, furnitureProxies: true);
         }
 
+        // #157: each of the four actual home spawn anchors must be able to leave the house,
+        // visit every physical service counter, reach the real dock and return to its own bed area.
+        // Unlike an anchor-only assertion this uses the real floor, obstacle capsule and
+        // CharacterController.Move. It is an EditMode geometry/locomotion gate, NOT 4-process proof.
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void EveryHomeSpawnCanWalkShopsDockAndReturnWithoutTeleport(int slot)
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                Assert.IsTrue(WorldAnchors.TryFind(WorldAnchorIds.HomeSpawn(slot), out var anchor), "home spawn " + slot);
+                Assert.IsTrue(WorldZoneField.TryFind(out var zones));
+                Assert.AreEqual(PlayerZone.Home, zones.ResolveZone(anchor.transform.position));
+
+                var start = XZ(anchor.transform.position);
+                var route = new List<Vector2> { start, HomeInside };
+                route.AddRange(HomeToWater.Skip(1).Take(5)); // room corridor -> home door -> town square
+                for (var shop = 0; shop < ContinuousTownLayout.StorefrontPositions.Length; shop++)
+                {
+                    route.Add(Customer(ContinuousTownLayout.StorefrontPositions[shop]));
+                    route.Add(Square); // no jumps between distant customer points
+                }
+                route.Add(HomeToWater[6]); // main street -> coast
+                route.Add(HomeToWater[7]); // physical beach
+                route.AddRange(BeachToDock.Skip(1)); // authored ledge -> pier
+                route.AddRange(BeachToDock.Reverse().Skip(1)); // walk back, not a scene teleport
+                route.Add(HomeToWater[6]);
+                route.AddRange(HomeToWater.Take(6).Reverse()); // square -> door -> room
+                route.Add(start);
+
+                Assert.AreEqual(PlayerZone.Town, zones.ResolveZone(ContinuousTownLayout.TownSquareCenter));
+                Assert.AreEqual(PlayerZone.Coast, zones.ResolveZone(new Vector3(0f, WalkY, -12.5f)));
+                Assert.AreEqual(PlayerZone.Dock, zones.ResolveZone(new Vector3(9f, WalkY, -9f)));
+                foreach (var point in route)
+                    Assert.AreNotEqual(PlayerZone.Unknown,
+                        zones.ResolveZone(new Vector3(point.x, WalkY, point.y)),
+                        "zone not bound at waypoint " + point);
+
+                var waypoints = route.ToArray();
+                var sampled = WalkWithRadius(Radius + Skin, waypoints);
+                Assert.IsEmpty(sampled.Failures, Report("spawn " + slot + " dry full roundtrip", sampled));
+                Assert.IsFalse(sampled.ReachedSea, "dock service loop should remain on dry ground");
+                Assert.Greater(sampled.Samples, 300, "roundtrip must really traverse the town");
+
+                var diver = new GameObject("Test_P157_Spawn" + slot + "_Roundtrip");
+                SceneManager.MoveGameObjectToScene(diver, scene);
+                try
+                {
+                    var controller = diver.AddComponent<CharacterController>();
+                    controller.height = Height;
+                    controller.radius = Radius;
+                    controller.center = new Vector3(0f, CenterY, 0f);
+                    controller.slopeLimit = SlopeLimit;
+                    controller.stepOffset = StepOffset;
+                    controller.skinWidth = Skin;
+                    Physics.SyncTransforms();
+
+                    var failures = new List<string>();
+                    Drive(controller, zones, waypoints, failures, out var reachedSea);
+                    Assert.IsFalse(reachedSea, "spawn " + slot + " fell into sea");
+                    Assert.IsEmpty(failures, "spawn " + slot + ": " + string.Join("\\n", failures.Take(20)));
+                    Assert.Less(Vector2.Distance(XZ(diver.transform.position), start), 0.2f,
+                        "spawn " + slot + " did not physically return home");
+                }
+                finally
+                {
+                    Object.DestroyImmediate(diver);
+                }
+            }, furnitureProxies: true);
+        }
+
         [Test]
         public void CharacterControllerMovedAlongTheRouteNeverDropsBelowTheWalkSurface()
         {
