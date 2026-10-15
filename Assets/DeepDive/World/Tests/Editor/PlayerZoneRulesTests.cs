@@ -7,11 +7,13 @@ using UnityEngine;
 
 namespace DeepDive.World.Tests
 {
-    // #138: the pure zone rule against plain numbers. The boxes are the plan's written #143 volumes
-    // and the water is SwimVolume's footprint; the scene that actually carries them is pinned in P4.
+    // #138: the pure zone rule against SYNTHETIC boxes. They are deliberately written numbers (a frozen copy of
+    // the #143 volumes and SwimVolume's footprint) so the rule is tested on its own; they are NOT the live world
+    // and do not follow ContinuousTownLayout. The real scene volumes are pinned by the P4
+    // ContinuousTownWorldContractTests, which read them from the layout (#153).
     public class PlayerZoneRulesTests
     {
-        private static readonly WaterBody[] SwimVolume = { new WaterBody(-15f, 15f, -15f, 65f, 8f) };
+        private static readonly WaterBody[] SyntheticSwimVolume = { new WaterBody(-15f, 15f, -15f, 65f, 8f) };
 
         private static ZoneVolumeEntry Box(PlayerZone zone, Vector3 min, Vector3 max)
         {
@@ -19,18 +21,18 @@ namespace DeepDive.World.Tests
             return new ZoneVolumeEntry(zone, box);
         }
 
-        private static readonly ZoneVolumeEntry Home =
+        private static readonly ZoneVolumeEntry SyntheticHome =
             Box(PlayerZone.Home, new Vector3(-5.825f, 7.9f, -53.825f), new Vector3(5.825f, 11.4f, -42f));
-        private static readonly ZoneVolumeEntry Dock =
+        private static readonly ZoneVolumeEntry SyntheticDock =
             Box(PlayerZone.Dock, new Vector3(7f, 7.9f, -11f), new Vector3(11f, 13f, -3.5f));
-        private static readonly ZoneVolumeEntry Town =
+        private static readonly ZoneVolumeEntry SyntheticTown =
             Box(PlayerZone.Town, new Vector3(-14.75f, 7.9f, -55.8f), new Vector3(14.75f, 13f, -14.75f));
-        private static readonly ZoneVolumeEntry Coast =
+        private static readonly ZoneVolumeEntry SyntheticCoast =
             Box(PlayerZone.Coast, new Vector3(-15f, 4.5f, -14.75f), new Vector3(15f, 13f, -3.5f));
 
-        private static readonly ZoneVolumeEntry[] World = { Coast, Town, Dock, Home };
+        private static readonly ZoneVolumeEntry[] SyntheticWorld = { SyntheticCoast, SyntheticTown, SyntheticDock, SyntheticHome };
 
-        private static PlayerZone Resolve(Vector3 feet) => PlayerZoneRules.Resolve(feet, SwimVolume, World);
+        private static PlayerZone Resolve(Vector3 feet) => PlayerZoneRules.Resolve(feet, SyntheticSwimVolume, SyntheticWorld);
 
         [TestCase(PlayerZone.Home, 0f, 8.4f, -48f)]
         [TestCase(PlayerZone.Town, 0f, 8.4f, -29f)]
@@ -47,13 +49,13 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(PlayerZone.Unknown, Resolve(new Vector3(0f, 8.4f, -70f)));
             Assert.AreEqual(PlayerZone.Unknown, Resolve(new Vector3(30f, 8.4f, -29f)));
             Assert.AreEqual(PlayerZone.Unknown, Resolve(new Vector3(0f, 20f, -29f)));
-            Assert.AreEqual(PlayerZone.Unknown, PlayerZoneRules.Resolve(new Vector3(0f, 8.4f, -29f), SwimVolume, null));
+            Assert.AreEqual(PlayerZone.Unknown, PlayerZoneRules.Resolve(new Vector3(0f, 8.4f, -29f), SyntheticSwimVolume, null));
         }
 
         [Test]
         public void BoxFacesAreInclusive()
         {
-            var only = new[] { Town };
+            var only = new[] { SyntheticTown };
             Assert.AreEqual(PlayerZone.Town, PlayerZoneRules.Resolve(new Vector3(-14.75f, 7.9f, -55.8f), null, only));
             Assert.AreEqual(PlayerZone.Town, PlayerZoneRules.Resolve(new Vector3(14.75f, 13f, -14.75f), null, only));
             Assert.AreEqual(PlayerZone.Unknown, PlayerZoneRules.Resolve(new Vector3(14.76f, 8.4f, -20f), null, only));
@@ -64,9 +66,9 @@ namespace DeepDive.World.Tests
         public void HomeWinsInsideTown()
         {
             var feet = new Vector3(0f, 8.4f, -48f);
-            Assert.IsTrue(Town.Box.Contains(feet));
-            Assert.AreEqual(PlayerZone.Home, PlayerZoneRules.Resolve(feet, null, new[] { Town, Home }));
-            Assert.AreEqual(PlayerZone.Home, PlayerZoneRules.Resolve(feet, null, new[] { Home, Town }));
+            Assert.IsTrue(SyntheticTown.Box.Contains(feet));
+            Assert.AreEqual(PlayerZone.Home, PlayerZoneRules.Resolve(feet, null, new[] { SyntheticTown, SyntheticHome }));
+            Assert.AreEqual(PlayerZone.Home, PlayerZoneRules.Resolve(feet, null, new[] { SyntheticHome, SyntheticTown }));
             // The door line itself belongs to Home; half a metre outside it is the town.
             Assert.AreEqual(PlayerZone.Home, Resolve(new Vector3(0f, 8.4f, -42f)));
             Assert.AreEqual(PlayerZone.Town, Resolve(new Vector3(0f, 8.4f, -41.5f)));
@@ -76,29 +78,29 @@ namespace DeepDive.World.Tests
         public void DockWinsInsideCoast()
         {
             var feet = new Vector3(9f, 8.4f, -5f);
-            Assert.IsTrue(Coast.Box.Contains(feet));
-            Assert.AreEqual(PlayerZone.Dock, PlayerZoneRules.Resolve(feet, null, new[] { Coast, Dock }));
-            Assert.AreEqual(PlayerZone.Dock, PlayerZoneRules.Resolve(feet, null, new[] { Dock, Coast }));
+            Assert.IsTrue(SyntheticCoast.Box.Contains(feet));
+            Assert.AreEqual(PlayerZone.Dock, PlayerZoneRules.Resolve(feet, null, new[] { SyntheticCoast, SyntheticDock }));
+            Assert.AreEqual(PlayerZone.Dock, PlayerZoneRules.Resolve(feet, null, new[] { SyntheticDock, SyntheticCoast }));
         }
 
         [Test]
         public void TownWinsOnTheSharedFaceWithCoast()
         {
             var feet = new Vector3(0f, 8.4f, -14.75f);
-            Assert.IsTrue(Town.Box.Contains(feet) && Coast.Box.Contains(feet));
-            Assert.AreEqual(PlayerZone.Town, PlayerZoneRules.Resolve(feet, null, new[] { Coast, Town }));
-            Assert.AreEqual(PlayerZone.Town, PlayerZoneRules.Resolve(feet, null, new[] { Town, Coast }));
+            Assert.IsTrue(SyntheticTown.Box.Contains(feet) && SyntheticCoast.Box.Contains(feet));
+            Assert.AreEqual(PlayerZone.Town, PlayerZoneRules.Resolve(feet, null, new[] { SyntheticCoast, SyntheticTown }));
+            Assert.AreEqual(PlayerZone.Town, PlayerZoneRules.Resolve(feet, null, new[] { SyntheticTown, SyntheticCoast }));
             Assert.AreEqual(PlayerZone.Coast, Resolve(new Vector3(0f, 8.4f, -14.7f)));
         }
 
-        // Feet inside the Coast and Dock boxes but in the water: the water answers first.
+        // Feet inside the SyntheticCoast and SyntheticDock boxes but in the water: the water answers first.
         [TestCase(-6.5f, 5.0f, -5f, EnvironmentLocomotion.Underwater)]
         [TestCase(9f, 7.5f, -5f, EnvironmentLocomotion.Surface)]
         public void WaterIsSeaBeforeAnyBox(float x, float y, float z, EnvironmentLocomotion expectedWater)
         {
             var feet = new Vector3(x, y, z);
-            Assert.AreEqual(expectedWater, WaterRules.ClassifyRaw(SwimVolume, ZoneProbeCapsule.Diver(feet)));
-            Assert.IsTrue(World.Any(v => v.Box.Contains(feet)), "the point must sit inside a box");
+            Assert.AreEqual(expectedWater, WaterRules.ClassifyRaw(SyntheticSwimVolume, ZoneProbeCapsule.Diver(feet)));
+            Assert.IsTrue(SyntheticWorld.Any(v => v.Box.Contains(feet)), "the point must sit inside a box");
             Assert.AreEqual(PlayerZone.Sea, Resolve(feet));
         }
 
@@ -111,7 +113,7 @@ namespace DeepDive.World.Tests
             for (var y = 5.5f; y <= 9.5f; y += 0.25f)
             {
                 var feet = new Vector3(x, y, z);
-                var wet = WaterRules.ClassifyRaw(SwimVolume, ZoneProbeCapsule.Diver(feet)) != EnvironmentLocomotion.Land;
+                var wet = WaterRules.ClassifyRaw(SyntheticSwimVolume, ZoneProbeCapsule.Diver(feet)) != EnvironmentLocomotion.Land;
                 Assert.AreEqual(wet, Resolve(feet) == PlayerZone.Sea, "at " + feet);
                 checkedPoints++;
             }
@@ -124,9 +126,9 @@ namespace DeepDive.World.Tests
         public void WithoutWaterBodiesNothingIsSea()
         {
             var underwater = new Vector3(-6.5f, 5.0f, -5f);
-            Assert.AreEqual(PlayerZone.Coast, PlayerZoneRules.Resolve(underwater, null, World));
-            Assert.AreEqual(PlayerZone.Coast, PlayerZoneRules.Resolve(underwater, new WaterBody[0], World));
-            Assert.AreEqual(PlayerZone.Unknown, PlayerZoneRules.Resolve(new Vector3(0f, -10f, 20f), null, World));
+            Assert.AreEqual(PlayerZone.Coast, PlayerZoneRules.Resolve(underwater, null, SyntheticWorld));
+            Assert.AreEqual(PlayerZone.Coast, PlayerZoneRules.Resolve(underwater, new WaterBody[0], SyntheticWorld));
+            Assert.AreEqual(PlayerZone.Unknown, PlayerZoneRules.Resolve(new Vector3(0f, -10f, 20f), null, SyntheticWorld));
         }
 
         [Test]

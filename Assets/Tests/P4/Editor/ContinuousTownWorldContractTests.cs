@@ -88,8 +88,9 @@ namespace DeepDive.P4.Tests
         }
     }
 
-    // #138 PR-1: the anchors and zone volumes bound into the #143 town. Expectations are written
-    // numbers; only HomeOrigin and StorefrontPositions are deliberately shared with the layout.
+    // #138 PR-1: the anchors and zone volumes bound into the #143 town. #153: world positions come from the
+    // layout (HomeOrigin, TownSquareCenter, StorefrontPositions, ZoneVolumes); the home rig's local placement
+    // stays written. The beach, dock and SwimVolume belong to the authored scene and stay written too.
     public sealed class ContinuousTownWorldContractTests
     {
         private const float Tolerance = 0.001f;
@@ -135,18 +136,20 @@ namespace DeepDive.P4.Tests
         {
             ContinuousTownScene.With(_ =>
             {
-                AssertPose(WorldAnchorIds.HomeRoot, new Vector3(0f, 8.4f, -48f), 0f);
-                AssertPose(WorldAnchorIds.HomeDoor, new Vector3(0f, 8.4f, -42f), 0f);
+                // #153: written local placement on top of HomeOrigin, so moving the house moves no expectation.
+                var home = ContinuousTownLayout.HomeOrigin;
+                AssertPose(WorldAnchorIds.HomeRoot, home, 0f);
+                AssertPose(WorldAnchorIds.HomeDoor, home + new Vector3(0f, 0f, 6f), 0f);
                 var bedXs = new[] { -3.45f, -1.15f, 1.15f, 3.45f };
                 for (var i = 0; i < bedXs.Length; i++)
-                    AssertPose(WorldAnchorIds.HomeBed(i), new Vector3(bedXs[i], 8.7f, -44.55f), 180f);
-                AssertPose(WorldAnchorIds.HomeStorage, new Vector3(-3.9f, 9.2f, -51.55f), 0f);
-                AssertPose(WorldAnchorIds.HomePc, new Vector3(3.9f, 9.0f, -51.55f), 0f);
-                AssertPose(WorldAnchorIds.HomeSpawn(0), new Vector3(-1.5f, 8.4f, -49.5f), 0f);
-                AssertPose(WorldAnchorIds.HomeSpawn(1), new Vector3(1.5f, 8.4f, -49.5f), 0f);
-                AssertPose(WorldAnchorIds.HomeSpawn(2), new Vector3(-1.5f, 8.4f, -47.5f), 0f);
-                AssertPose(WorldAnchorIds.HomeSpawn(3), new Vector3(1.5f, 8.4f, -47.5f), 0f);
-                AssertPose(WorldAnchorIds.TownSquare, new Vector3(0f, 8.4f, -29f), 0f);
+                    AssertPose(WorldAnchorIds.HomeBed(i), home + new Vector3(bedXs[i], 0.3f, 3.45f), 180f);
+                AssertPose(WorldAnchorIds.HomeStorage, home + new Vector3(-3.9f, 0.8f, -3.55f), 0f);
+                AssertPose(WorldAnchorIds.HomePc, home + new Vector3(3.9f, 0.6f, -3.55f), 0f);
+                AssertPose(WorldAnchorIds.HomeSpawn(0), home + new Vector3(-1.5f, 0f, -1.5f), 0f);
+                AssertPose(WorldAnchorIds.HomeSpawn(1), home + new Vector3(1.5f, 0f, -1.5f), 0f);
+                AssertPose(WorldAnchorIds.HomeSpawn(2), home + new Vector3(-1.5f, 0f, 0.5f), 0f);
+                AssertPose(WorldAnchorIds.HomeSpawn(3), home + new Vector3(1.5f, 0f, 0.5f), 0f);
+                AssertPose(WorldAnchorIds.TownSquare, ContinuousTownLayout.TownSquareCenter, 0f);
             });
         }
 
@@ -163,7 +166,7 @@ namespace DeepDive.P4.Tests
                     var feet = pose.position;
                     Assert.IsTrue(Physics.Raycast(new Vector3(feet.x, 9.8f, feet.z), Vector3.down, out var hit, 2.0f,
                         ~0, QueryTriggerInteraction.Ignore), "no floor under " + id);
-                    Assert.AreEqual(8.4f, hit.point.y, 0.03f, "floor height under " + id);
+                    Assert.AreEqual(ContinuousTownLayout.WalkSurfaceY, hit.point.y, 0.03f, "floor height under " + id);
                     var lift = DiverSkin + 0.01f;
                     Assert.IsFalse(Physics.CheckCapsule(
                             feet + Vector3.up * (lift + DiverRadius),
@@ -183,12 +186,13 @@ namespace DeepDive.P4.Tests
                 {
                     Assert.IsTrue(WorldAnchors.TryGetPose(WorldAnchorIds.TownServiceSlot(i), out var pose));
                     Assert.AreEqual(ContinuousTownLayout.StorefrontPositions[i], pose.position, "slot " + i);
-                    Assert.AreEqual(-29f, pose.position.z, Tolerance);
+                    // The storefront row stands on the square's centre line.
+                    Assert.AreEqual(ContinuousTownLayout.TownSquareCenter.z, pose.position.z, Tolerance);
                     var customer = pose.position + new Vector3(0f, 0f, TownStorefront.CustomerSpot);
-                    Assert.AreEqual(-27.3f, customer.z, Tolerance);
+                    Assert.AreEqual(ContinuousTownLayout.TownSquareCenter.z + TownStorefront.CustomerSpot, customer.z, Tolerance);
                     Assert.IsTrue(Physics.Raycast(new Vector3(customer.x, 9.8f, customer.z), Vector3.down,
                         out var hit, 2.0f, ~0, QueryTriggerInteraction.Ignore), "no ground at customer point " + i);
-                    Assert.AreEqual(8.4f, hit.point.y, 0.03f, "customer point " + i);
+                    Assert.AreEqual(ContinuousTownLayout.WalkSurfaceY, hit.point.y, 0.03f, "customer point " + i);
                 }
             });
         }
@@ -203,10 +207,10 @@ namespace DeepDive.P4.Tests
                 var volumes = zones.GetComponentsInChildren<WorldZoneVolume>(true);
                 CollectionAssert.AreEquivalent(new[] { "Zone_Home", "Zone_Dock", "Zone_Town", "Zone_Coast" },
                     volumes.Select(v => v.name));
-                AssertZone(volumes, "Zone_Home", PlayerZone.Home, new Vector3(-5.825f, 7.9f, -53.825f), new Vector3(5.825f, 11.4f, -42f));
-                AssertZone(volumes, "Zone_Dock", PlayerZone.Dock, new Vector3(7f, 7.9f, -11f), new Vector3(11f, 13f, -3.5f));
-                AssertZone(volumes, "Zone_Town", PlayerZone.Town, new Vector3(-14.75f, 7.9f, -55.8f), new Vector3(14.75f, 13f, -14.75f));
-                AssertZone(volumes, "Zone_Coast", PlayerZone.Coast, new Vector3(-15f, 4.5f, -14.75f), new Vector3(15f, 13f, -3.5f));
+                AssertZone(volumes, "Zone_Home", PlayerZone.Home, ContinuousTownLayout.ZoneVolumes.HomeMin, ContinuousTownLayout.ZoneVolumes.HomeMax);
+                AssertZone(volumes, "Zone_Dock", PlayerZone.Dock, ContinuousTownLayout.ZoneVolumes.DockMin, ContinuousTownLayout.ZoneVolumes.DockMax);
+                AssertZone(volumes, "Zone_Town", PlayerZone.Town, ContinuousTownLayout.ZoneVolumes.TownMin, ContinuousTownLayout.ZoneVolumes.TownMax);
+                AssertZone(volumes, "Zone_Coast", PlayerZone.Coast, ContinuousTownLayout.ZoneVolumes.CoastMin, ContinuousTownLayout.ZoneVolumes.CoastMax);
 
                 var waterFields = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<WaterField>(true)).ToArray();
                 Assert.AreEqual(1, waterFields.Length, "one WaterField");
@@ -236,12 +240,16 @@ namespace DeepDive.P4.Tests
                     Assert.AreEqual(PlayerZone.Sea, zones.ResolveZone(spawn.transform.position), "dive spawn " + spawn.Slot);
                 Assert.AreEqual(PlayerZone.Coast, zones.ResolveZone(new Vector3(0f, 8.4f, -12.5f)), "beach");
                 Assert.AreEqual(PlayerZone.Dock, zones.ResolveZone(new Vector3(9f, 8.4f, -9f)), "DiveExit base");
-                Assert.AreEqual(PlayerZone.Town, zones.ResolveZone(new Vector3(0f, 8.4f, -29f)), "square");
+                Assert.AreEqual(PlayerZone.Town, zones.ResolveZone(ContinuousTownLayout.TownSquareCenter), "square");
                 Assert.IsTrue(WorldAnchors.TryGetPose(WorldAnchorIds.HomeSpawn(0), out var homeSpawn));
                 Assert.AreEqual(PlayerZone.Home, zones.ResolveZone(homeSpawn.position), "home-spawn-0");
                 Assert.IsTrue(WorldAnchors.TryGetPose(WorldAnchorIds.HomeDoor, out var door));
                 Assert.AreEqual(PlayerZone.Town, zones.ResolveZone(door.position + new Vector3(0f, 0f, 0.5f)), "outside the door");
-                Assert.AreEqual(PlayerZone.Unknown, zones.ResolveZone(new Vector3(0f, 8.4f, -70f)), "beyond the plot");
+                // 5m south of the southernmost zone box (the town's back edge), on the walk height.
+                var southmost = Mathf.Min(ContinuousTownLayout.ZoneVolumes.TownMin.z, ContinuousTownLayout.ZoneVolumes.HomeMin.z,
+                    ContinuousTownLayout.ZoneVolumes.DockMin.z, ContinuousTownLayout.ZoneVolumes.CoastMin.z);
+                Assert.AreEqual(PlayerZone.Unknown,
+                    zones.ResolveZone(new Vector3(0f, ContinuousTownLayout.WalkSurfaceY, southmost - 5f)), "beyond the plot");
             });
         }
 
@@ -257,7 +265,7 @@ namespace DeepDive.P4.Tests
                 var divers = new[]
                 {
                     (feet: home.position, zone: PlayerZone.Home),
-                    (feet: new Vector3(0f, 8.4f, -29f), zone: PlayerZone.Town),
+                    (feet: ContinuousTownLayout.TownSquareCenter, zone: PlayerZone.Town),
                     (feet: new Vector3(0f, 8.4f, -12.5f), zone: PlayerZone.Coast),
                     (feet: sea, zone: PlayerZone.Sea)
                 };
@@ -267,6 +275,36 @@ namespace DeepDive.P4.Tests
                     foreach (var i in order) results[i] = zones.ResolveZone(divers[i].feet);
                     for (var i = 0; i < divers.Length; i++)
                         Assert.AreEqual(divers[i].zone, results[i], "diver " + i + " order " + string.Join(",", order));
+                }
+            });
+        }
+
+        // #153: the tests derive walk surfaces, edges and seams from ContinuousTownLayout's block lists, so the
+        // built town must be exactly those rows: same order, centre, size, collider, and nothing else beside them.
+        [Test]
+        public void EveryLayoutBlockIsBuiltOnceInListOrder()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var root = scene.GetRootGameObjects().Single(r => r.name == ContinuousTownLayout.RootName).transform;
+                var blocks = ContinuousTownLayout.AllBlocks.ToArray();
+                CollectionAssert.AllItemsAreUnique(blocks.Select(b => b.Name));
+                var children = Enumerable.Range(0, root.childCount).Select(root.GetChild).ToArray();
+                CollectionAssert.AreEqual(
+                    blocks.Select(b => b.Name).Concat(new[] { ContinuousTownLayout.AnchorsName, ContinuousTownLayout.ZonesName }),
+                    children.Select(c => c.name));
+                for (var i = 0; i < blocks.Length; i++)
+                {
+                    var block = blocks[i];
+                    var built = children[i];
+                    AssertNear(block.Center, built.position, block.Name + " centre");
+                    AssertNear(block.Size, built.localScale, block.Name + " size");
+                    var collider = built.GetComponent<Collider>();
+                    Assert.AreEqual(block.HasCollider, collider != null, block.Name + " collider");
+                    if (collider == null) continue;
+                    Assert.IsFalse(collider.isTrigger, block.Name);
+                    AssertNear(block.Min, collider.bounds.min, block.Name + " min");
+                    AssertNear(block.Max, collider.bounds.max, block.Name + " max");
                 }
             });
         }
