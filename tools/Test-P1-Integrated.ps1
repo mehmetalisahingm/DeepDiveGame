@@ -1,5 +1,6 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Shops, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$CoastParts, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Shops, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
 $ErrorActionPreference = 'Stop'
+if ($CoastParts -and $Players -ne 2) { throw 'CoastParts senaryosu host + guest (Players 2) gerektirir.' }
 $p1Root = Split-Path -Parent $PSScriptRoot
 $p1IsWindows = $env:OS -eq 'Windows_NT'
 if ($BuildPath) { $p1Build = $BuildPath }
@@ -44,6 +45,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
         if ($Town) { $p1Args += @('-p3-town', '1') }
         if ($Shops) { $p1Args += @('-p46-shops', '1') }
         if ($Boat) { $p1Args += @('-p3-boat', '1') }
+        if ($CoastParts) { $p1Args += @('-p46-coast-parts', '1') }
         if ($Trip) {
             $p1Args += @('-p3-trip', '1')
             if ($TripVehicle) { $p1Args += @('-p4-trip-vehicle', $TripVehicle) }
@@ -88,6 +90,7 @@ try {
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
     $seconds = if ($Unified) { 360 } elseif ($Shops) { 150 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
+    if ($CoastParts) { $seconds = 210 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
 

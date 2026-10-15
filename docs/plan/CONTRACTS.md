@@ -340,6 +340,12 @@ Utku hostta boss hedef/evre/sağlık ve tek encounterId; Mehmet hasar/oyuncu/eki
 
 Sponsor/sipariş, keşif/ödeme/rol/geliştirme olaylarını kimlikleriyle tüketir; erişilmeyen hedefi görev olarak üretmez. Rol bonusları loadout gibi temel değerden yeniden hesaplanır; ücretsiz rol değişimi bonus katlamaz. Gün/kanal/tekne/ansiklopedi/boss/ev için şema göçü, eski kaydı geri yükleme ve tekrarlı sonuç testi ilgili ara teslimin işidir.
 
+## 14 Ekim 2026 — kıyıda parça toplama (#157)
+
+`NetworkPlayer.HandlePickup` gerçek host raycast/mesafe/görüş doğrulamasından sonra hedef türünü ayırır. Ücretsiz sandal parçası bağlı, etkin oyuncu için Prep/Dive/Return sırasında fiziksel E etkileşimiyle alınabilir; balık/catch toplama yalnız aktif dalışta kalır. Offline oturum, sahne yükleme, pasif oyuncu ve `DayLock.IsLocked` iki yolu da `InvalidState` ile reddeder. Parça kimliği, request replay, tek contribution, ekonomi/save ve kayıtta 2/3 devam davranışı değişmez. UI notu artık kıyıda E toplamasını açıklar.
+
+Bu teslim fiziksel taşıma/keser/çivi sistemini uygulamaz; mevcut found-part yolu hâlâ doğrudan katkıdır. Yeni fiziksel tamirin edinme/contribution ayrımı ayrıca planlanır. Yerel iki süreçli test, ayrı bilgisayar veya bütün #157 kabulü değildir.
+
 ## Ortak red sonuçları
 
 En az şu nedenler ayrıştırılmalıdır: `WrongPhase`, `InvalidTarget`, `OutOfRange`, `NotVisible`, `InventoryFull`, `AlreadyClaimed`, `AlreadyProcessed`, `InsufficientFunds`, `PlayerInactive`, `SaveFailed`, `SessionClosed`.

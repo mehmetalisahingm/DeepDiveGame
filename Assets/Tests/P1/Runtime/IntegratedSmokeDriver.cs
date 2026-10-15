@@ -167,7 +167,8 @@ namespace DeepDive.P1.Lab
         private string TripVehicleId => Arg("-p4-trip-vehicle");
         private bool FleetRoute => !string.IsNullOrEmpty(TripVehicleId);
         private string TripRouteId => FleetRoute ? Arg("-p4-trip-route", BoatTripIds.NearRouteId) : BoatTripIds.NearRouteId;
-        private bool Boat => Arg("-p3-boat") == "1" || Trip;
+        private bool CoastParts => Arg("-p46-coast-parts") == "1";
+        private bool Boat => Arg("-p3-boat") == "1" || Trip || CoastParts;
         private bool purchaseSent;
         private int townStep, townBefore;
         private float townNext, townSettleAt;
@@ -229,6 +230,7 @@ namespace DeepDive.P1.Lab
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
             var duration = Shops ? 125f : LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : WorldConditions ? 85f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            if (CoastParts) duration = 180f;
             while (Time.realtimeSinceStartup - started < duration)
             {
                 var elapsed = Time.realtimeSinceStartup - started;
@@ -291,7 +293,8 @@ namespace DeepDive.P1.Lab
                 if (host && elapsed > (Home ? 40 : 19) && !prepSent && allReady && (!Home || result.dayNumbers.Contains(2)) && (!Living || result.livingHostLobbyDone))
                 { prepSent = true; GameObject.Find("BeginPrepButton").GetComponent<Button>().onClick.Invoke(); }
                 result.prep |= state.Phase == SessionPhase.Prep && !connection.IsSceneLoading;
-                if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep && !connection.IsSceneLoading)
+                if (host && elapsed > 22 && !diveSent && state.Phase == SessionPhase.Prep && !connection.IsSceneLoading &&
+                    (!CoastParts || (result.boatHullFound && result.boatDuplicateRejected)))
                 { diveSent = true; GameObject.Find("BeginDiveButton").GetComponent<Button>().onClick.Invoke(); }
                 result.dive |= state.Phase == SessionPhase.Dive && SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene;
                 if (Record && host && state.Phase == SessionPhase.Return)
@@ -341,6 +344,11 @@ namespace DeepDive.P1.Lab
                 var recordingSettled = (!Record || MediaFlow || result.recordingSafe) && ((!Fleet && !Deep) || (result.fleetReefSwum && Time.realtimeSinceStartup - fleetBackAt > 6f));
                 var returnAfter = Shops ? 34 : MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : Boat ? 58 : WorldConditions ? 65 : Hunt || Record ? 44 : 33;
                 var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : WorldConditions ? 65f : returnAfter;
+                if (CoastParts)
+                {
+                    returnAfter = 0; returnCeiling = 170;
+                    recordingSettled = adapter.GetComponent<EconomyManager>().BoatRepair.CompletedPartIds.Count >= 2;
+                }
                 if (host && BossAcceptance && result.bossDefeatedPending && result.bossTwoAttackers && result.bossPartySafe &&
                     !returnSent && state.Phase == SessionPhase.Dive && !connection.IsSceneLoading)
                 { returnSent = true; GameObject.Find("BeginReturnButton").GetComponent<Button>().onClick.Invoke(); }
@@ -350,6 +358,8 @@ namespace DeepDive.P1.Lab
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
                 var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (Shops ? 98 : MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 66 : Record ? 56 : Hunt ? 48 : 36);
+                if (CoastParts) lobbyDue = result.boatRepaired && result.boatPartsHidden && result.boatHintGone &&
+                    boatFinalAt > 0 && Time.realtimeSinceStartup - boatFinalAt > 2f;
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
@@ -360,12 +370,13 @@ namespace DeepDive.P1.Lab
                         string.IsNullOrEmpty(state.DiveId);
                 }
                 var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (Shops ? 106 : MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 70 : Record ? 60 : Hunt ? 54 : WorldConditions ? 78 : 41);
+                if (CoastParts) leaveDue = (result.returned && Time.realtimeSinceStartup - returnPhaseAt > 8f) || elapsed > 175f;
                 if (host && leaveDue && !leaveSent) { leaveSent = true; adapter.LeaveRoom(); }
                 if (result.returned && connection.Status == ConnectionStatus.Offline)
                     result.stopped = adapter.Session.Roster.Count == 0 && connection.Players.Count == 0;
                 // Boss acceptance can finish as soon as the real session has returned and fully
                 // shut down. The longer ceiling is only a failure bound, not a mandatory wait.
-                if (BossAcceptance && result.stopped) break;
+                if ((BossAcceptance || CoastParts) && result.stopped) break;
                 yield return null;
             }
             result.reason = adapter.Connection.LastError;
@@ -419,6 +430,13 @@ namespace DeepDive.P1.Lab
                 (!host || (result.boatHullFound && result.boatFuelTankFound && result.boatDuplicateRejected &&
                     result.boatPartsSequence.Count >= 4 && result.boatPartsSequence[result.boatPartsSequence.Count - 1] == 3)) &&
                 (host || result.boatEngineFound);
+            if (CoastParts && host)
+            {
+                var phasesOk = boatHullPhase == nameof(SessionPhase.Prep) && boatFuelPhase == nameof(SessionPhase.Return);
+                if (!phasesOk) result.errors.Add($"coast parts: hull={boatHullPhase}, fuel={boatFuelPhase}");
+                result.passed &= phasesOk;
+                Debug.Log($"P46_COAST_PARTS hull={boatHullPhase} fuel={boatFuelPhase} repaired={result.boatRepaired}");
+            }
             if (Day) result.passed &= result.dayClockAdvanced &&
                 result.dayNumbers.SequenceEqual(new[] { 1, 2, 3 }) && result.daySummaries.SequenceEqual(new[] { 1, 2 }) &&
                 result.dayMirroredMidnightReason == (int)DayCloseReason.Midnight &&
@@ -700,6 +718,8 @@ namespace DeepDive.P1.Lab
                     (elapsed > 1 && elapsed < 5 ? Vector3.forward : Vector3.zero);
                 if (Hunt && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHunt(local, players);
                 else if (Record && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeRecording(local, players);
+                else if (CoastParts && scene == SessionNetworkAdapter.DiveScene &&
+                    (phase == SessionPhase.Prep || phase == SessionPhase.Dive || phase == SessionPhase.Return) && elapsed > 3) ProbeBoatParts(local);
                 else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
                 else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
                 else if (Home && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
@@ -919,6 +939,8 @@ namespace DeepDive.P1.Lab
         // of the water the beach fix (previous commits) proved works, so this reuses GoToService's waypoint
         // logic rather than walking a straight line at the target.
         private bool boatHintShot;
+        private string boatHullPhase = "", boatFuelPhase = "";
+        private float boatFinalAt;
 
         private void ProbeBoatParts(NetworkPlayer local)
         {
@@ -953,6 +975,13 @@ namespace DeepDive.P1.Lab
             // A fleet-route run loads a previously repaired/purchased campaign. Keep verifying
             // replicated repair/hidden parts, but do not attempt to collect already consumed parts.
             if (FleetRoute) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
+            if (CoastParts)
+            {
+                var phase = adapter.Session.State.Phase;
+                var allowed = host ? boatStep < 2 ? phase == SessionPhase.Prep : boatStep == 2 && phase == SessionPhase.Return
+                    : boatStep == 0 && phase == SessionPhase.Dive;
+                if (!allowed) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
+            }
             var partName = host ? boatStep == 0 || boatStep == 1 ? "BoatPart_Hull" : "BoatPart_FuelTank" : "BoatPart_Engine";
             var part = GameObject.Find(partName);
             var cam = local.GetComponentInChildren<Camera>(true);
@@ -980,7 +1009,7 @@ namespace DeepDive.P1.Lab
             switch (boatStep)
             {
                 case 0:   // host: claim the hull for real
-                    if (host && accepted) { result.boatHullFound = true; boatStep = 1; }
+                    if (host && accepted) { result.boatHullFound = true; boatHullPhase = adapter.Session.State.Phase.ToString(); boatStep = 1; }
                     else if (host && !accepted) result.errors.Add($"boat hull claim rejected={local.LastActionResult.Value}");
                     else if (!host && accepted) { result.boatEngineFound = true; boatStep = 2; }   // guest: engine claimed
                     else if (!host && !accepted) result.errors.Add($"boat engine claim rejected={local.LastActionResult.Value}");
@@ -999,7 +1028,7 @@ namespace DeepDive.P1.Lab
                 case 2:   // host: fuel tank; guest: already done, idles here
                     if (host)
                     {
-                        if (accepted) { result.boatFuelTankFound = true; boatStep = 3; }
+                        if (accepted) { result.boatFuelTankFound = true; boatFuelPhase = adapter.Session.State.Phase.ToString(); boatFinalAt = Time.realtimeSinceStartup; boatStep = 3; }
                         else result.errors.Add($"boat fuel tank claim rejected={local.LastActionResult.Value}");
                     }
                     break;

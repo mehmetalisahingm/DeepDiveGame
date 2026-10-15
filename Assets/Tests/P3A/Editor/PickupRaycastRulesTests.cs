@@ -18,6 +18,26 @@ namespace DeepDive.P3A.Tests
 
     public sealed class PickupRaycastRulesTests
     {
+        [TestCase(false, true, true)]  // Prep/Return: campaign part.
+        [TestCase(false, false, false)] // Prep/Return: no out-of-dive catch consumption.
+        [TestCase(true, true, true)]
+        [TestCase(true, false, true)]
+        public void TargetKindRetainsTheDiveBoundary(bool diving, bool repairPart, bool allowed)
+        {
+            Assert.AreEqual(allowed, PickupRaycastRules.CanPickup(true, false, false, false, diving, repairPart));
+        }
+
+        [TestCase(false, false, false, false)]
+        [TestCase(true, true, false, false)]
+        [TestCase(true, false, true, false)]
+        [TestCase(true, false, false, true)]
+        public void ActivitySceneAndDayGatesBlockBothTargets(bool connected, bool loading, bool passive, bool closing)
+        {
+            foreach (var diving in new[] { false, true })
+            foreach (var repairPart in new[] { false, true })
+                Assert.IsFalse(PickupRaycastRules.CanPickup(connected, loading, passive, closing, diving, repairPart));
+        }
+
         private readonly List<GameObject> created = new List<GameObject>();
 
         [TearDown]
