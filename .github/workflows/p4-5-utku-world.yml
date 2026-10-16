@@ -3,6 +3,15 @@ name: P4.5 Utku living world acceptance
 on:
   push:
     branches: ['p45/utku-world-weather-current', 'codex/p4-integration']
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - '.github/workflows/p4-5-utku-world.yml'
+      - 'Assets/Tests/P1/Runtime/**'
+      - 'Assets/DeepDive/Network/**'
+      - 'Assets/DeepDive/World/**'
+      - 'Assets/DeepDive/Composition/**'
+      - 'tools/Test-P1-Integrated.ps1'
   workflow_dispatch:
 
 permissions:
