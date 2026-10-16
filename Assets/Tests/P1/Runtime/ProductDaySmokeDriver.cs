@@ -1,0 +1,654 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using DeepDive.Composition;
+using DeepDive.Core.Contracts;
+using DeepDive.Economy;
+using DeepDive.Inventory;
+using DeepDive.Media;
+using DeepDive.Network;
+using DeepDive.Session;
+using DeepDive.Trip;
+using DeepDive.World;
+using Unity.Collections;
+using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace DeepDive.P1.Lab
+{
+    // Explicit development-player command only. All mutations below are owner input/RPCs;
+    // no stock, money, camera, clip, clock, sleep or position fixture is installed.
+    public sealed class ProductDaySmokeDriver : MonoBehaviour
+    {
+        private const string StateMessage = "test/p46/product-state";
+        private const string DoneMessage = "test/p46/product-done";
+        [Serializable] public sealed class Report
+        {
+            public bool passed, reload, initialClean, homeSpawn, repaired, cameraBought, realClip,
+                clipPlayed, clipAdvanced, published, duplicateRefused, slept, morningHome, reloadClean, mapMoved, mapDocked;
+            public int slot, players, step, worldLoads, diveCount, soldCount, day, balance, income, boatParts, mapPlayers;
+            public string clipId = "", recordingId = "", hash = "", position = "", failure = "";
+            public long clipBytes;
+            public float distance, maxTravelStep;
+            public List<string> trace = new List<string>(), tripPhases = new List<string>();
+            public List<ulong> fishIds = new List<ulong>();
+            public List<string> errors = new List<string>();
+        }
+        private readonly Report report = new Report();
+        private readonly HashSet<ulong> done = new HashSet<ulong>();
+        private readonly HashSet<string> diveIds = new HashSet<string>(), mapPositions = new HashSet<string>();
+        private SessionNetworkAdapter adapter;
+        private NetworkManager manager;
+        private CustomMessagingManager messages;
+        private NetworkPlayer local;
+        private EconomyPlayerSync sync;
+        private BoatTripPlayerSync trip;
+        private List<Vector3> route;
+        private string output;
+        private int expected, step, substep, waypoint, part, firstDay;
+        private bool localDone, finished, leaving, homeChecked, engineEntered, partRoute;
+        private float deadline, stageDeadline, nextBroadcast, nextAction, nextTrace, aimAt, recordingAt, finishAt, moveAfter, playbackAt;
+        private Vector3 previous;
+        private bool wasSeated, tracked;
+        private int previousDay;
+        private ulong publishRequest;
+        private Report baseline;
+
+        private bool Host => report.slot == 0;
+        private static string Arg(string key, string fallback = "")
+        {
+            var args = Environment.GetCommandLineArgs(); var index = Array.IndexOf(args, key);
+            return index >= 0 && index + 1 < args.Length ? args[index + 1] : fallback;
+        }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Install()
+        {
+            if (Arg("-p46-day-role").Length == 0) return;
+            var go = new GameObject(nameof(ProductDaySmokeDriver)); DontDestroyOnLoad(go);
+            go.AddComponent<ProductDaySmokeDriver>();
+        }
+        private IEnumerator Start()
+        {
+            output = Arg("-p1-report"); expected = int.Parse(Arg("-p46-day-count", "1"));
+            report.slot = int.Parse(Arg("-p46-day-slot", "0"));
+            report.reload = Arg("-p46-day-reload") == "1";
+            if (report.reload) baseline = JsonUtility.FromJson<Report>(File.ReadAllText(Arg("-p46-day-baseline")));
+            Application.runInBackground = true; QualitySettings.vSyncCount = 0; Application.targetFrameRate = 60;
+            deadline = Time.realtimeSinceStartup + 1000f;
+            SceneManager.sceneLoaded += SceneLoaded;
+            Application.logMessageReceived += Log;
+            yield return null; yield return null;
+            adapter = FindFirstObjectByType<SessionNetworkAdapter>(); manager = adapter.GetComponent<NetworkManager>();
+            var port = ushort.Parse(Arg("-p46-day-port", "24777"));
+            if (!(Host ? adapter.CreateRoom(port) : adapter.JoinRoom("127.0.0.1", port))) Fail("Could not start session");
+        }
+        private void SceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name == ContinuousTownLayout.SceneName) report.worldLoads++;
+        }
+        private void Update()
+        {
+            if (finished || adapter == null) return;
+            var now = Time.realtimeSinceStartup;
+            if (now > deadline || (step > 0 && now > stageDeadline))
+            { Fail($"Timeout step={step} sub={substep} waypoint={waypoint} position={report.position}"); return; }
+            if (leaving)
+            { if (adapter.Connection.Status == ConnectionStatus.Offline) Finish(); return; }
+            if (adapter.Connection.Status != ConnectionStatus.Connected || adapter.Connection.IsSceneLoading) return;
+            if (messages == null && manager.CustomMessagingManager != null)
+            {
+                messages = manager.CustomMessagingManager;
+                messages.RegisterNamedMessageHandler(StateMessage, ReceiveState);
+                if (Host) messages.RegisterNamedMessageHandler(DoneMessage, ReceiveDone);
+            }
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
+            report.players = Math.Max(report.players, players.Length);
+            local = players.FirstOrDefault(p => p.IsOwner);
+            if (local == null) return;
+            local.ReadKeyboard = false;
+            sync = local.GetComponent<EconomyPlayerSync>(); trip = local.GetComponent<BoatTripPlayerSync>();
+            if (adapter.Session.State.Phase == SessionPhase.Lobby && step < 14 &&
+                adapter.Session.Roster.TryGetValue(new PlayerId(local.OwnerClientId), out var ready) && !ready)
+                adapter.ToggleReady();
+            if (step == 0)
+            {
+                if (Host && adapter.Session.State.Phase == SessionPhase.Lobby && AllReady()) adapter.AdvancePhase();
+                if (SceneManager.GetActiveScene().name != ContinuousTownLayout.SceneName) return;
+                if (!homeChecked)
+                {
+                    if (Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) > 0.7f) return;
+                    homeChecked = true; report.homeSpawn = true; firstDay = sync.DayNumber.Value;
+                    previous = local.transform.position; tracked = true; previousDay = firstDay;
+                    if (Host)
+                    {
+                        var economy = adapter.GetComponent<EconomyManager>();
+                        report.initialClean = economy.SharedBalance == 0 && economy.BoatRepair.CompletedPartIds.Count == 0 &&
+                            !economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId);
+                        if (!report.reload && !report.initialClean) { Fail("Starting campaign is not fresh/zero"); return; }
+                    }
+                }
+                if (report.reload) { ReloadTick(); return; }
+                localDone = true;
+            }
+            Track(); Observe(); Broadcast(now);
+            if (now > nextTrace)
+            {
+                nextTrace = now + 5f;
+                Debug.Log($"P46_PRODUCT step={step} sub={substep} wp={waypoint} pos={local.transform.position} " +
+                    $"phase={adapter.Session.State.Phase} balance={sync.SharedBalance.Value} parts={sync.BoatPartsMask.Value} part={part} seated={trip.IsSeated} boat={trip.BoatWorldPosition.Value} boatResult={trip.LastReasonCode.Value}");
+                if (step == 8 && Host)
+                {
+                    var subject = FindObjectsByType<RecordingSubject>(FindObjectsSortMode.None).FirstOrDefault(s => s.IsSpawned && s.GetComponent<FishActor>() != null);
+                    var bridge = adapter.GetComponent<RecordingNetworkBridge>();
+                    var camera = local.GetComponentInChildren<Camera>(true);
+                    Physics.Raycast(camera.ViewportPointToRay(new Vector3(.5f, .5f)), out var hit, 35f, ~0, QueryTriggerInteraction.Ignore);
+                    Debug.Log($"P46_PRODUCT_REC active={bridge.IsRecordingLocal} held={local.CurrentHeldEquipment} tier={local.CurrentCameraTier} " +
+                        $"open={subject?.OpenTakeCount} valid={subject?.ValidSecondsFor(new PlayerId(0))} hit={hit.collider?.name} " +
+                        $"status={typeof(RecordingNetworkBridge).GetField("localStatus", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(bridge)}");
+                }
+            }
+            if (!localDone) Tick();
+            else if (step != 14) Stop();
+            if (Host) AdvanceHost();
+        }
+        private void LateUpdate()
+        {
+            if (!finished && step == 15 && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+        }
+        private void Broadcast(float now)
+        {
+            if (Host && localDone) done.Add(local.OwnerClientId);
+            if (now < nextBroadcast || messages == null) return;
+            nextBroadcast = now + 0.2f;
+            using var writer = new FastBufferWriter(8, Allocator.Temp);
+            writer.WriteValueSafe(step);
+            if (Host)
+            {
+                foreach (var id in manager.ConnectedClientsIds)
+                    if (id != 0) messages.SendNamedMessage(StateMessage, id, writer, NetworkDelivery.ReliableSequenced);
+            }
+            else
+            {
+                writer.WriteValueSafe(localDone);
+                messages.SendNamedMessage(DoneMessage, 0, writer, NetworkDelivery.ReliableSequenced);
+            }
+        }
+        private void ReceiveState(ulong sender, FastBufferReader reader)
+        {
+            reader.ReadValueSafe(out int value);
+            if (!Host && sender == 0 && value > step) SetStep(value);
+        }
+        private void ReceiveDone(ulong sender, FastBufferReader reader)
+        {
+            reader.ReadValueSafe(out int value); reader.ReadValueSafe(out bool completed);
+            if (value == step && completed && manager.ConnectedClients.ContainsKey(sender)) done.Add(sender);
+        }
+        private bool AllReady() => adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(x => x);
+        private bool AllDone() => manager.ConnectedClientsIds.Count == expected && manager.ConnectedClientsIds.All(id => done.Contains(id));
+        private void SetStep(int value)
+        {
+            step = value; report.step = value; localDone = false; substep = waypoint = 0;
+            route = null; aimAt = recordingAt = 0; publishRequest = 0; done.Clear();
+            stageDeadline = Time.realtimeSinceStartup + 170f;
+            nextAction = Time.realtimeSinceStartup + report.slot * 0.7f;
+            moveAfter = Time.realtimeSinceStartup + report.slot * 2f;
+            report.trace.Add($"{value}:{adapter.Session.State.Phase}:{local.transform.position}");
+            Debug.Log("P46_PRODUCT_STEP " + report.trace.Last());
+        }
+        private void AdvanceHost()
+        {
+            if (!AllDone()) return;
+            switch (step)
+            {
+                case 0: SetStep(1); break;
+                case 1: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Dive) SetStep(2); break;
+                case 2: SetStep(3); break;
+                case 3: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(4); break;
+                case 4: CycleDive(5); break;
+                case 5: SetStep(6); break;
+                case 6: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(7); break;
+                case 7: CycleDive(8); break;
+                case 8: SetStep(9); break;
+                case 9: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(10); break;
+                case 10: SetStep(11); break;
+                case 11: SetStep(12); break;
+                case 12: SetStep(13); break;
+                case 13:
+                    if (adapter.Session.State.Phase == SessionPhase.Return) adapter.AdvancePhase();
+                    if (adapter.Session.State.Phase == SessionPhase.Lobby) SetStep(14);
+                    break;
+                case 14: SetStep(15); finishAt = Time.realtimeSinceStartup + 2f; break;
+                case 15:
+                    if (Time.realtimeSinceStartup < finishAt) return;
+                    if (!File.Exists(adapter.GetComponent<EconomySaveStore>().SavePath)) { Fail("No automatic campaign save"); return; }
+                    leaving = true; adapter.LeaveRoom(); break;
+            }
+        }
+        private void CycleDive(int next)
+        {
+            var phase = adapter.Session.State.Phase;
+            if (phase == SessionPhase.Return || phase == SessionPhase.Prep || (phase == SessionPhase.Lobby && AllReady())) adapter.AdvancePhase();
+            if (adapter.Session.State.Phase == SessionPhase.Dive) SetStep(next);
+        }
+        private void Tick()
+        {
+            if ((step == 1 || step == 2 || step == 3 || step == 5 || step == 6 || step == 8 || step == 9 || step == 13) && Time.realtimeSinceStartup < moveAfter)
+            { Stop(); return; }
+            switch (step)
+            {
+                case 1:
+                    if (substep == 0)
+                    {
+                        if (route == null) SetRoute(Outward());
+                        if (!Follow()) return;
+                        substep = 1; route = null;
+                    }
+                    if (!Host) { localDone = true; return; }
+                    CollectParts(); break;
+                case 2: case 5:
+                    if (!Host) { WaitInWater(); return; }
+                    Hunt(); break;
+                case 3: case 6: case 9:
+                    if (route == null) SetRoute(new[] { P(-6.5f, -11.2f), P(0f, -12.5f), P(9f, -12.5f),
+                        P(8.2f + (report.slot % 2) * 1.6f, -9.8f + (report.slot / 2) * 1.6f) });
+                    if (!Follow()) return;
+                    if (!local.GetComponent<InventoryPlayerSync>().SafelyReturned.Value) return;
+                    localDone = !local.Swimming.Value; break;
+                case 4: case 7:
+                    if (!Host) { localDone = true; return; }
+                    SellAndBuy(); break;
+                case 8:
+                    if (!Host) { WaitInWater(); return; }
+                    Record(); break;
+                case 10: TripOut(); break;
+                case 11:
+                    Stop();
+                    if (trip.IsSeated) { Act(trip.RequestDisembarkLocal); return; }
+                    localDone = true; break;
+                case 12: TripBack(); break;
+                case 13: HomePc(); break;
+                case 14: Sleep(); break;
+                case 15: Snapshot(); localDone = report.income > 0; break;
+            }
+        }
+
+        private void CollectParts()
+        {
+            var names = new[] { "BoatPart_Hull", "BoatPart_Engine", "BoatPart_FuelTank" };
+            if (part >= names.Length) { localDone = sync.BoatPartsDone.Value == 3; return; }
+            if ((sync.BoatPartsMask.Value & (1 << part)) != 0) { part++; aimAt = 0; return; }
+            if (part == 1 && !engineEntered)
+            {
+                if (!partRoute)
+                {
+                    SetRoute(new[] { P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
+                    partRoute = true;
+                }
+                if (!Follow(true)) return;
+                engineEntered = true; route = null;
+            }
+            var target = GameObject.Find(names[part]).transform.position;
+            var surface = FindFirstObjectByType<SwimVolume>().GetComponent<Collider>().bounds.max.y;
+            var submerged = target.y < surface - 0.1f;
+            var stand = submerged ? target + Vector3.forward * 1.8f : target;
+            if (submerged)
+            {
+                var eyeHeight = local.GetComponentInChildren<Camera>(true).transform.position.y - local.transform.position.y;
+                stand.y = Mathf.Min(stand.y, surface - eyeHeight - 0.1f);
+            }
+            if (Vector3.Distance(local.transform.position, stand) > (submerged ? 0.45f : 1.3f))
+            { MoveToward(submerged ? stand : CoastTarget(stand)); aimAt = 0; return; }
+            Aim(target + Vector3.up * 0.3f);
+            if (Settled()) Act(local.SubmitPickupLocal);
+        }
+        private void WaitInWater()
+        {
+            if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f),
+                new Vector3(1f + report.slot * 1.2f, 5.3f, -4f) });
+            localDone = Follow(true);
+        }
+        private void Hunt()
+        {
+            var inventory = adapter.GetComponent<InventoryManager>();
+            if (inventory.Bags.TryGetValue(new PlayerId(0), out var bag) && bag.Items.Count > 0)
+            { HoldForShore(); return; }
+            if (substep == 0)
+            {
+                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
+                if (!Follow(true)) return;
+                substep = 1;
+            }
+            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.IsSpawned);
+            if (fish == null) { Stop(); return; }
+            local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
+            var available = fish.GetComponent<CatchObject>().IsAvailable;
+            var target = fish.GetComponent<Collider>().bounds.center;
+            var delta = target - local.GetComponentInChildren<Camera>(true).transform.position;
+            if (available && delta.magnitude > 1.7f) { MoveToward(target - Vector3.up * 1.4f); aimAt = 0; return; }
+            Aim(target);
+            if (Settled())
+            {
+                if (available) Act(local.SubmitPickupLocal);
+                else Act(local.SubmitHarpoonLocal);
+            }
+        }
+        private void SellAndBuy()
+        {
+            var economy = adapter.GetComponent<EconomyManager>();
+            if (substep == 0)
+            {
+                if (!GoToService(TownServiceCatalog.FishBuyerId)) return;
+                if (sync.PendingCatches.Value > 0) { Act(local.SubmitServiceInteractionLocal); return; }
+                var sold = economy.ExportSaveData("read-only", "read-only").SoldCaptureIds.Count;
+                if (sold < (step == 4 ? 1 : 2)) { Act(local.SubmitServiceInteractionLocal); return; }
+                report.soldCount = sold;
+                substep = 1; aimAt = 0;
+                if (step == 4) { localDone = true; return; }
+            }
+            if (!GoToService(TownServiceCatalog.EquipmentShopId)) return;
+            if (!sync.ShopOpen) { Act(local.SubmitServiceInteractionLocal); return; }
+            if (!economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId))
+            { Act(() => sync.RequestPurchase(EconomyManager.CameraBasicId)); return; }
+            report.cameraBought = true; localDone = true;
+        }
+        private void Record()
+        {
+            var bridge = adapter.GetComponent<RecordingNetworkBridge>();
+            if (recordingAt > 0 && !bridge.IsRecordingLocal &&
+                adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0)
+            { HoldForShore(); return; }
+            if (substep == 0)
+            {
+                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
+                if (!Follow(true)) return;
+                substep = 1;
+            }
+            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.IsSpawned && !f.IsDead);
+            if (fish == null) { Stop(); return; }
+            var delta = fish.transform.position - local.RecordingEyePosition;
+            if (delta.magnitude > 4.5f) { MoveToward(fish.transform.position - Vector3.up * 1.4f); aimAt = 0; return; }
+            Aim(fish.transform.position);
+            if (bridge.IsRecordingLocal)
+            {
+                if (recordingAt == 0) recordingAt = Time.realtimeSinceStartup;
+                if (Time.realtimeSinceStartup - recordingAt > 12f) Act(bridge.ToggleRecordingLocal);
+            }
+            else if (Settled()) { recordingAt = 0; Act(bridge.ToggleRecordingLocal); }
+        }
+        private void HoldForShore()
+        {
+            var stand = new Vector3(-7.6f, 5.5f, -5f);
+            if (Vector3.Distance(local.transform.position, stand) > 0.45f) { MoveToward(stand); return; }
+            Stop(); localDone = true;
+        }
+        private void TripOut()
+        {
+            if (substep == 0)
+            {
+                if (route == null) SetRoute(new[] { P(0f, -12.5f), P(9f, -12.5f), P(9f, -9f),
+                    P(8.6f + (report.slot % 2) * 0.8f, -3.6f) });
+                if (!Follow()) return;
+                substep = 1;
+            }
+            Stop();
+            var phase = (BoatTripPhase)trip.Phase.Value;
+            if (!trip.IsSeated) { Act(trip.RequestBoardNearestLocal); return; }
+            if (trip.SeatedCount.Value < expected) return;
+            if (phase == BoatTripPhase.Anchored) { localDone = true; return; }
+            if (phase == BoatTripPhase.Docked && trip.AmOwner.Value) Act(() => trip.RequestStartRouteLocal(BoatTripIds.NearRouteId));
+        }
+        private void TripBack()
+        {
+            Stop();
+            var phase = (BoatTripPhase)trip.Phase.Value;
+            if (phase == BoatTripPhase.Anchored)
+            {
+                if (!trip.IsSeated) { Act(trip.RequestBoardNearestLocal); return; }
+                if (trip.SeatedCount.Value == expected && trip.AmOwner.Value) Act(trip.RequestReturnLocal);
+                return;
+            }
+            if (phase == BoatTripPhase.Docked && report.tripPhases.Contains("Inbound"))
+            {
+                if (trip.IsSeated) { Act(trip.RequestDisembarkLocal); return; }
+                localDone = trip.SeatedCount.Value == 0;
+            }
+        }
+        private void HomePc()
+        {
+            if (route == null) SetRoute(new[] { P(9f, -9f), P(9f, -12.5f), P(0f, -12.5f), P(0f, -16f),
+                P(0f, -24f), P(0f, -36f), ContinuousTownLayout.HomeRig.Door, H(4.95f, 5f),
+                H(4.95f, -2.5f), H(2f + report.slot * 0.8f, -2.4f) });
+            if (!Follow()) return;
+            Stop();
+            if (!HomePcView.PanelOpen) return;
+            var clip = MediaNetworkBinding.Mirrored.Clips.FirstOrDefault(c => c != null && c.MediaReady && c.SafeReturned);
+            if (clip == null) return;
+            report.realClip = clip.SizeBytes > 0 && clip.ContentHash.Length == 64 && clip.RecordingId.Length > 0 &&
+                clip.ClipId == RecordingClipFile.ClipIdForRecording(clip.RecordingId);
+            report.clipId = clip.ClipId; report.recordingId = clip.RecordingId; report.hash = clip.ContentHash; report.clipBytes = clip.SizeBytes;
+            if (!Host) { localDone = report.realClip; return; }
+            if (!report.clipPlayed)
+            {
+                report.clipPlayed = ClipPlayback.CanPlay(clip.ClipId) && ClipPlayback.TryPlay(clip.ClipId);
+                if (report.clipPlayed) playbackAt = Time.realtimeSinceStartup;
+            }
+            if (!report.clipPlayed) return;
+            if (!PlaybackAdvanced()) return;
+            Publish(clip.ClipId);
+        }
+        private void Publish(string clipId)
+        {
+            if (substep == 0)
+            { publishRequest = MediaNetworkBinding.RequestPublish(clipId, "Ilk gercek gun"); substep = 1; return; }
+            if (MediaNetworkBinding.LastResultRequest != publishRequest) return;
+            if (substep == 1)
+            {
+                if (!MediaNetworkBinding.LastResultAccepted) { Fail("Publish: " + MediaNetworkBinding.LastResultReason); return; }
+                report.published = true;
+                publishRequest = MediaNetworkBinding.RequestPublish(clipId, "tekrar"); substep = 2; return;
+            }
+            report.duplicateRefused = !MediaNetworkBinding.LastResultAccepted && MediaNetworkBinding.LastResultReason == "PublicationAlreadyQueued";
+            localDone = report.duplicateRefused;
+        }
+        private void Sleep()
+        {
+            var bed = FindObjectsByType<HomeInteractionAnchor>(FindObjectsSortMode.None)
+                .Single(b => b.Kind == HomeInteractionKind.Bed && b.BedId == DayIds.Beds[report.slot]);
+            if (substep == 0)
+            {
+                if (route == null) SetRoute(new[] { H(4.95f, -2.5f), H(4.95f, 0f),
+                    new Vector3(bed.ExitPose.position.x, ContinuousTownLayout.WalkSurfaceY, bed.ExitPose.position.z) });
+                if (!Follow()) return;
+                Aim(bed.GetComponent<Collider>().bounds.center);
+                if (!Settled()) return;
+                typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                substep = 1;
+            }
+            if (sync.DayNumber.Value <= firstDay || local.Seated.Value || DayLock.IsLocked) return;
+            report.slept = sync.SummaryDayNumber.Value == firstDay && sync.SummaryReason.Value == (byte)DayCloseReason.EarlySleep;
+            report.morningHome = Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) < 0.7f;
+            localDone = report.slept && report.morningHome;
+        }
+
+        private void ReloadTick()
+        {
+            if (route == null) SetRoute(new[] { H(0f, -2.4f), H(2f, -2.4f) });
+            if (!Follow() || !HomePcView.PanelOpen) return;
+            var economy = adapter.GetComponent<EconomyManager>();
+            var channel = adapter.GetComponent<MediaNetworkBinding>().Channel;
+            var clip = MediaNetworkBinding.Mirrored.Clips.FirstOrDefault(c => c.ClipId == baseline.clipId);
+            if (clip == null) return;
+            if (substep == 0)
+            {
+                report.reloadClean = sync.DayNumber.Value == baseline.day && economy.SharedBalance == baseline.balance &&
+                    economy.BoatRepair.CompletedPartIds.Count == 3 && economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId) &&
+                    economy.ExportSaveData("read-only", "read-only").SoldCaptureIds.Count == baseline.soldCount &&
+                    clip.ContentHash == baseline.hash && clip.SizeBytes == baseline.clipBytes &&
+                    channel.Publications().Count == 1 && ClipPlayback.CanPlay(clip.ClipId) && ClipPlayback.TryPlay(clip.ClipId) &&
+                    adapter.GetComponent<BoatTripManager>().State.Phase == BoatTripPhase.Docked &&
+                    adapter.GetComponent<BoatTripManager>().State.Seats.Count == 0 &&
+                    adapter.GetComponent<BoatTripManager>().ActiveBoatId == BoatTripIds.BoatId;
+                playbackAt = Time.realtimeSinceStartup; substep = 1; return;
+            }
+            if (substep == 1)
+            {
+                if (!PlaybackAdvanced()) return;
+                publishRequest = MediaNetworkBinding.RequestPublish(clip.ClipId, "reload retry"); substep = 2; return;
+            }
+            if (MediaNetworkBinding.LastResultRequest != publishRequest) return;
+            report.reloadClean &= !MediaNetworkBinding.LastResultAccepted && MediaNetworkBinding.LastResultReason == "PublicationAlreadyQueued" &&
+                economy.SharedBalance == baseline.balance;
+            Snapshot(); Finish();
+        }
+        private bool PlaybackAdvanced()
+        {
+            if (Time.realtimeSinceStartup < playbackAt + 1f) return false;
+            var binding = adapter.GetComponent<RecordingMediaCaptureBinding>();
+            var playing = typeof(RecordingMediaCaptureBinding).GetField("playing", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(binding);
+            report.clipAdvanced = playing != null && (int)playing.GetType().GetField("Frame").GetValue(playing) >= 3;
+            return report.clipAdvanced;
+        }
+        private void Observe()
+        {
+            report.repaired |= sync.BoatPartsDone.Value == 3;
+            var dive = adapter.Session.State.DiveId;
+            if (!string.IsNullOrEmpty(dive)) diveIds.Add(dive);
+            report.diveCount = diveIds.Count;
+            foreach (var fish in FindObjectsByType<FishActor>(FindObjectsSortMode.None))
+                if (fish.IsSpawned && !report.fishIds.Contains(fish.NetworkObjectId)) report.fishIds.Add(fish.NetworkObjectId);
+            if (step < 10 || step > 13) return;
+            var phase = ((BoatTripPhase)trip.Phase.Value).ToString();
+            if (report.tripPhases.Count == 0 || report.tripPhases.Last() != phase) report.tripPhases.Add(phase);
+            var icons = BoatMapView.LastIcons;
+            if (icons == null) return;
+            report.mapPlayers = Math.Max(report.mapPlayers, icons.Count(i => i.IconId.StartsWith(BoatMapPresenter.PlayerIconPrefix, StringComparison.Ordinal)));
+            var boat = icons.FirstOrDefault(i => i.IconId == BoatTripIds.BoatId);
+            var dock = icons.FirstOrDefault(i => i.IconId == BoatMapPresenter.DockIconId);
+            if (boat.IconId == null || dock.IconId == null) return;
+            if (phase == "Outbound" || phase == "Inbound")
+            {
+                mapPositions.Add($"{Mathf.Round(boat.MapX * 50)}:{Mathf.Round(boat.MapZ * 50)}");
+                report.mapMoved |= mapPositions.Count >= 3;
+            }
+            if (phase == "Docked") report.mapDocked |= Vector2.Distance(new Vector2(boat.MapX, boat.MapZ), new Vector2(dock.MapX, dock.MapZ)) < 0.01f;
+        }
+        private void Snapshot()
+        {
+            report.day = sync.DayNumber.Value; report.balance = sync.SharedBalance.Value; report.boatParts = sync.BoatPartsMask.Value;
+            var publication = MediaNetworkBinding.Mirrored.Publications.FirstOrDefault();
+            report.income = publication != null ? publication.Income : 0;
+            if (Host) report.soldCount = adapter.GetComponent<EconomyManager>().ExportSaveData("read-only", "read-only").SoldCaptureIds.Count;
+        }
+        private void Track()
+        {
+            report.position = local.transform.position.ToString();
+            if (!tracked) return;
+            var distance = Vector3.Distance(previous, local.transform.position);
+            var seat = local.Seated.Value;
+            // Seat/bed pose and D07 morning are explicit body-placement boundaries.
+            if (!seat && !wasSeated && sync.DayNumber.Value == previousDay && step < 14)
+            {
+                report.distance += distance; report.maxTravelStep = Mathf.Max(report.maxTravelStep, distance);
+                if (distance > 1.5f) Fail("Unexpected travel discontinuity: " + distance);
+            }
+            previous = local.transform.position; wasSeated = seat; previousDay = sync.DayNumber.Value;
+            if (report.worldLoads != 1) Fail("World scene reloaded");
+        }
+        private void SetRoute(IEnumerable<Vector3> points) { route = points.ToList(); waypoint = 0; }
+        private static Vector3 P(float x, float z) => new Vector3(x, ContinuousTownLayout.WalkSurfaceY, z);
+        private static Vector3 H(float x, float z) => ContinuousTownLayout.HomeOrigin + new Vector3(x, 0f, z);
+        private IEnumerable<Vector3> Outward()
+        {
+            yield return H(-4.7f, -2f); yield return H(-4.7f, 5f); yield return ContinuousTownLayout.HomeRig.Door;
+            yield return P(0f, -36f); yield return P(0f, -24f);
+            yield return P(-1.8f + report.slot * 1.1f, -16f);
+            yield return P(-1.8f + report.slot * 1.1f, -13f);
+        }
+        private bool Follow(bool depth = false)
+        {
+            if (waypoint >= route.Count) { Stop(); return true; }
+            var target = route[waypoint]; var delta = target - local.transform.position;
+            var flat = new Vector2(delta.x, delta.z).magnitude;
+            var tolerance = step == 10 && waypoint == route.Count - 1 ? 0.08f : 0.3f;
+            if (flat < tolerance && (!depth || waypoint != route.Count - 1 || Mathf.Abs(delta.y) < 0.45f))
+            { waypoint++; return waypoint >= route.Count; }
+            MoveToward(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target);
+            return false;
+        }
+        private Vector3 CoastTarget(Vector3 stand)
+        {
+            var wade = GameObject.Find("Beach_Wade")?.GetComponent<Collider>();
+            var strip = GameObject.Find("Beach_Platform")?.GetComponent<Collider>();
+            var pos = local.transform.position;
+            if (wade == null || strip == null || pos.z <= strip.bounds.max.z + 0.2f) return stand;
+            if (pos.y >= strip.bounds.max.y - 0.35f) return new Vector3(pos.x, pos.y, strip.bounds.max.z - 0.6f);
+            var lane = wade.transform.position.x;
+            var ahead = Mathf.Max(pos.z - 1.2f, strip.bounds.max.z);
+            var origin = new Vector3(lane, wade.bounds.max.y + 5f, ahead);
+            var y = Mathf.Min(pos.y, wade.bounds.min.y - 0.3f);
+            if (Physics.Raycast(origin, Vector3.down, out var hit, 40f, ~0, QueryTriggerInteraction.Ignore) &&
+                (hit.collider == wade || hit.collider == strip)) y = hit.point.y - 0.05f;
+            return new Vector3(lane, y, ahead);
+        }
+        private bool GoToService(string id)
+        {
+            var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a => a.Definition.ServiceId == id);
+            var stand = anchor.WorldPosition + anchor.transform.forward * 1.6f;
+            var delta = stand - local.transform.position; delta.y = 0f;
+            if (delta.magnitude > 0.2f) { MoveToward(CoastTarget(stand)); aimAt = 0; return false; }
+            Aim(anchor.WorldPosition + Vector3.up);
+            return Settled();
+        }
+        private void MoveToward(Vector3 target)
+        {
+            var delta = target - local.transform.position;
+            var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
+            var move = Quaternion.Inverse(Quaternion.Euler(0f, yaw, 0f)) * delta.normalized;
+            if (!local.Swimming.Value) move.y = 0f;
+            local.SubmitLocalInput(move, yaw, 0f);
+        }
+        private void Aim(Vector3 target)
+        {
+            var delta = target - local.GetComponentInChildren<Camera>(true).transform.position;
+            local.SubmitLocalInput(Vector3.zero, Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg,
+                -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg);
+        }
+        private bool Settled()
+        {
+            if (aimAt == 0) aimAt = Time.realtimeSinceStartup + 0.65f;
+            return Time.realtimeSinceStartup >= aimAt;
+        }
+        private void Act(Action action)
+        {
+            if (Time.realtimeSinceStartup < nextAction) return;
+            nextAction = Time.realtimeSinceStartup + 0.8f; action();
+        }
+        private void Stop() => local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+        private void Log(string message, string stack, LogType type)
+        {
+            if ((type == LogType.Error || type == LogType.Exception) && !finished) Fail(message);
+        }
+        private void Fail(string reason) { report.failure = reason; report.errors.Add(reason); Finish(); }
+        private void Finish()
+        {
+            if (finished) return;
+            finished = true;
+            report.passed = step == 15 && report.players == expected && report.worldLoads == 1 && report.homeSpawn &&
+                report.repaired && report.diveCount == 3 && report.fishIds.Count >= 3 && report.realClip &&
+                report.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
+                report.mapPlayers >= expected && report.mapMoved && report.mapDocked && report.slept && report.morningHome &&
+                report.day == firstDay + 1 && report.income > 0 && report.errors.Count == 0;
+            if (Host) report.passed &= report.initialClean && report.cameraBought && report.soldCount == 2 &&
+                report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused;
+            if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
+            File.WriteAllText(output, JsonUtility.ToJson(report, true));
+            Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);
+            Application.Quit(report.passed ? 0 : 1);
+        }
+    }
+}
