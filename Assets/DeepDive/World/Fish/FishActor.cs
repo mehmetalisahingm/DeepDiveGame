@@ -40,6 +40,22 @@ namespace DeepDive.World
         private FishMotion motion;
         private SwimTuning tuning;
         private int weightGrams;
+        private Renderer[] visuals;
+        private Collider[] colliders;
+        private bool[] visualEnabled, colliderEnabled;
+
+        private void SetPresent(bool present)
+        {
+            if (visuals == null)
+            {
+                visuals = GetComponentsInChildren<Renderer>(true);
+                colliders = GetComponentsInChildren<Collider>(true);
+                visualEnabled = Array.ConvertAll(visuals, r => r.enabled);
+                colliderEnabled = Array.ConvertAll(colliders, c => c.enabled);
+            }
+            for (var i = 0; i < visuals.Length; i++) if (visuals[i] != null) visuals[i].enabled = present && visualEnabled[i];
+            for (var i = 0; i < colliders.Length; i++) if (colliders[i] != null) colliders[i].enabled = present && colliderEnabled[i];
+        }
 
         // Host-side notification. Raised once, only when a valid capture could be produced.
         public event Action<FishActor, CaptureResult> Died;
@@ -55,9 +71,10 @@ namespace DeepDive.World
 
         public override void OnNetworkSpawn()
         {
+            SetPresent(true);
             if (species != null && species.SpeciesId == P45WorldRules.NightActiveSpeciesId)
             {
-                nightGlow = gameObject.AddComponent<Light>();
+                if (nightGlow == null) nightGlow = gameObject.AddComponent<Light>();
                 nightGlow.type = LightType.Point;
                 nightGlow.color = new Color(0.25f, 0.80f, 0.88f);
                 nightGlow.range = 2f;
@@ -121,6 +138,7 @@ namespace DeepDive.World
 
         public override void OnNetworkDespawn()
         {
+            SetPresent(false);
             if (nightGlow != null) Destroy(nightGlow);
             nightGlow = null;
             base.OnNetworkDespawn();

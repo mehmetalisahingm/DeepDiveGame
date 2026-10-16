@@ -12,6 +12,8 @@ Unity sürümü: `6000.3.23f1`.
 
 ## Ekip
 
+16 Ekim Mehmet alan işi, PR #175: #170'in sıfır bakiyeden gerçek av/satış/kamera/klip/tekne/PC/uyku ve diskten açma zinciri `5cea97d` Windows build'inde aynı PC'de 1/2/4 gerçek süreçle PASS; üç kampanya da yeni host sürecinde doğru açıldı, tekrar yayın ikinci gelir üretmedi. İkinci avı engelleyen balık yaşam döngüsü ve arka koltuklar dolunca kuru iskeleden öndeki koltuklara binme sorunu düzeltildi. 1256/1256 EditMode ve Windows build PASS. [Rapor, klip ve süreç kanıtları](../reports/P4-PRODUCT-DAY-170.md). CI, Utku incelemesi, merge ve birleşmiş build kontrolü bekler; #170 açık kalır. #173 mevcut oyuncu/kamera/ev/tezgâh/iskele ölçüm hazırlığı [rapor ve ham ölçümle](../reports/P4-PLAYER-SCALE-173.md) teslim edildi; örnek kit, yakın görüntü ve görsel/dört kişi kabulü bekler. Ayrı PC/dört insan/üç gün ve #141 ölüm/00:00/host kaybı kabulü bu yerel koşularla kapanmaz. P4.6/P4.7 kapıları korunur.
+
 | Rol | Kişi | GitHub hesabı | Ana alan |
 |---|---|---|---|
 | A | Mehmet | `mehmetalisahingm` | Oyuncu, ağ, ekipman kullanımı, capture ve araç hareket bağlantıları |

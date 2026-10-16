@@ -102,5 +102,27 @@ namespace DeepDive.Tests.P3A
                 Object.DestroyImmediate(go);
             }
         }
+
+        [Test]
+        public void FourPassengersCanBoardFromTheSameDryDockWhenAftSeatsFillFirst()
+        {
+            var seats = new Vector3[4];
+            for (var i = 0; i < seats.Length; i++)
+            {
+                Assert.IsTrue(BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat, BoatSeatLayoutRules.SeatIds[i], out var offset));
+                seats[i] = new Vector3(9f, 8f, -0.4f) + offset;
+            }
+            var occupied = new bool[4];
+            for (var passenger = 0; passenger < 4; passenger++)
+            {
+                var chosen = BoatSeatLayoutRules.ResolveBoardingSeat(new Vector3(8.6f, 8.48f, -3.6f), seats, occupied, 2.75f);
+                Assert.That(chosen, Is.InRange(0, 3), "The same legitimate dock must serve all four seats");
+                Assert.IsFalse(occupied[chosen]);
+                occupied[chosen] = true;
+            }
+            Assert.AreEqual(-1, BoatSeatLayoutRules.ResolveBoardingSeat(new Vector3(8.6f, 8.48f, -3.6f), seats, occupied, 2.75f));
+            Assert.AreEqual(-1, BoatSeatLayoutRules.ResolveBoardingSeat(new Vector3(9f, 8.48f, -12f), seats, new bool[4], 2.75f),
+                "Being on the beach far from the boat still cannot board");
+        }
     }
 }

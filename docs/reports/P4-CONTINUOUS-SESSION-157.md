@@ -53,6 +53,8 @@ DeepDive.P1.Lab.dll      7eeaaf76a5a9c82c166bb6d6031a00607681a54a32598b43949af19
 
 ## Açık kalan kabul
 
+16 Ekim #170 inceleme notu: yukarıdaki ayrı `-Acceptance` medya regresyonu `SeedRecorderCamera` ile kamera/bakiye hazırlar. Gerçek klip üretimi/aktarımı kanıtıdır; kazanılan parayla kamera edinimi veya sıfırdan tam günlük ürün döngüsü kanıtı değildir. Bu ayrım ve sürekli dünya balık yaşam döngüsü engeli [#170 raporunda](P4-PRODUCT-DAY-170.md) izlenir.
+
 Yeni tur bir günlük teknik hareket/etkileşim/uyku turudur; bu turun içinde av, klip kaydı/yayın ve tekneye binme yapılmaz. Gerçek medya/av ayrı alt sistem koşularında doğrulanmıştır; bunlar tek bir tam ürün oturumuna birleştirilmiş veya üç güne yayılmış kabul sayılmaz. Yeni sanat/şehir ölçeği, beş tür, fiziksel taşıma/keser/çivi tamiri, görsel değerlendirme ve ayrı bilgisayar/internet dört oyuncu/üç gün kapıları açık kalır. #138/#140/#141 ve #153–#157'nin diğer kabul şartları kapanmış sayılmaz. Utku/Mert incelemesi, birleşmiş build ve gerçek ekip kabulü bu rapordan üretilmez. Önceden var olan beş FBX `.meta` silinmesi commit'e alınmadı.
 
 ## 16 Ekim — Birleşmiş kaynakta tekrar kontrol

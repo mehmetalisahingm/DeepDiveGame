@@ -1,0 +1,88 @@
+{
+  "source": "5cea97d9ad840cc69e5cffc0753662cc8e5c1d15",
+  "base": "1e8ef00bf0c4433893cb517ec8b98c6dffea0f11",
+  "unity": "6000.3.23f1",
+  "platform": "Windows x64 Mono",
+  "files": [
+    {
+      "sha256": "56c28afba054092826b7a8a80ba3767daa87967f182c0c562eb2f98799175b7a",
+      "path": "DeepDiveGame-P1.exe"
+    },
+    {
+      "sha256": "932e9ab5c9cdb78a07bc4dae5c052863f32ac8826128e39bd7f14e1238ced1ed",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Composition.dll"
+    },
+    {
+      "sha256": "8599425e2d0f1f032f0af45dec69b84716622e54bd5f85d908f33e6ae4bd98c5",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Core.Contracts.dll"
+    },
+    {
+      "sha256": "c29b64b653d5003ddc9a7be58e94a08e5cd47d5a3ccff56a9a5b8e5e94e4fcac",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Day.dll"
+    },
+    {
+      "sha256": "0cd29e0359bd29e8c9d97d5d67f1cf38daef0eb70d2904b579fa1f224f6ad5a2",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Economy.dll"
+    },
+    {
+      "sha256": "f0d6facab82bce458dde52ff3784830f4e53d87dbb91d9bc6f7f3bf184845748",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Inventory.dll"
+    },
+    {
+      "sha256": "63dffcddcddf5de86c02f4e031e25eaa3cfb3ce6c709adc5177d55912d654ebb",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Living.dll"
+    },
+    {
+      "sha256": "4cd2b2998e0d4afc8666774a8ffe139f3de51210666b9f962933d250be77e815",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.MapUI.dll"
+    },
+    {
+      "sha256": "ee6a1f890b3e00e203496245f2120daddc424ae4e4176f893442ec5b877144b9",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Media.dll"
+    },
+    {
+      "sha256": "2656987aacb48c053cb1dd8aca1caa02cf30777712f9e842a3a997a1d385887b",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Network.dll"
+    },
+    {
+      "sha256": "e5ed70b4e38eaf8e83aac89f24abf8574a0324b8e08b6baf09d0235ecc889724",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.P1.Lab.dll"
+    },
+    {
+      "sha256": "87bfc55fa79b5b920da00abc547771f76d8e1ae19fd48c17736ce94f135c4540",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Progression.dll"
+    },
+    {
+      "sha256": "fcc26632e9c75ed9c8dd0893a3d1eac4db45d178a677d94e1e7c13a954c5543a",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Session.dll"
+    },
+    {
+      "sha256": "5d72c267b88d4691561a90e18b28e240126976affa64f9a015e6c1b81339c692",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.Trip.dll"
+    },
+    {
+      "sha256": "7f08420796875acedd24b047ee9745ff18ff573451cb6cbe1842d0c38b69b6ce",
+      "path": "DeepDiveGame-P1_Data\\Managed\\DeepDive.World.dll"
+    },
+    {
+      "sha256": "47928c9eb638ec5b562c0e38b9f60a8243444d1218b16f396ecc404fee0deeea",
+      "path": "DeepDiveGame-P1_Data\\level0"
+    },
+    {
+      "sha256": "d158f4f919ffcee9734f490482b44f142a2d475d4b1f799003365f3951a331f9",
+      "path": "DeepDiveGame-P1_Data\\level1"
+    },
+    {
+      "sha256": "d313278a67d59e9d6cf9423baf0527efab1348d1cd188274d37ad46719123eb2",
+      "path": "DeepDiveGame-P1_Data\\resources.assets"
+    },
+    {
+      "sha256": "38d48418e07923a293566443c816f2c3c2b682311793da7dd019e91449167e87",
+      "path": "DeepDiveGame-P1_Data\\sharedassets0.assets"
+    },
+    {
+      "sha256": "714bd38fc455ced716c923b914d3896c2b72ff1dd22b73c806a2c5ef2231daf4",
+      "path": "DeepDiveGame-P1_Data\\sharedassets1.assets"
+    }
+  ]
+}

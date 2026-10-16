@@ -29,6 +29,13 @@ namespace DeepDive.World
         public bool IsClaimed => state.IsClaimed;
         public CaptureResult Capture => state.Capture;
 
+        public override void OnNetworkSpawn()
+        {
+            if (!IsServer) return;
+            state.Reset();
+            available.Value = false;
+        }
+
         // Called by FishActor on death. Builds the capture with this object's own network id so
         // CatchObjectId points at the thing a diver can actually pick up.
         public bool TryBecomeCatch(string speciesId, int weightGrams, out CaptureResult capture)
@@ -65,7 +72,9 @@ namespace DeepDive.World
             Debug.Log($"P2_CATCH_TAKEN capture={capture.CaptureId} dive={capture.DiveId} " +
                       $"species={capture.SpeciesId} grams={capture.WeightGrams} player={player}");
             Claimed?.Invoke(this, capture);
-            if (NetworkObject != null && NetworkObject.IsSpawned) NetworkObject.Despawn(true);
+            // Keep the authored scene object for the next dive. Destroying it used to work
+            // only because the whole world was reloaded between trips.
+            if (NetworkObject != null && NetworkObject.IsSpawned) NetworkObject.Despawn(NetworkObject.IsSceneObject != true);
         }
     }
 }

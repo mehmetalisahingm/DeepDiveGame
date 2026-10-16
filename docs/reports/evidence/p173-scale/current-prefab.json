@@ -1,0 +1,35 @@
+{
+    "playerHeight": 1.7999999523162842,
+    "radius": 0.3499999940395355,
+    "skin": 0.07999999821186066,
+    "stepOffset": 0.30000001192092898,
+    "slopeLimit": 45.0,
+    "walkSpeed": 4.0,
+    "cameraHeight": 1.5499999523162842,
+    "fov": 60.0,
+    "nearClip": 0.05000000074505806,
+    "effectiveWidth": 0.8600000143051148,
+    "twoPersonWidth": 1.7200000286102296,
+    "fourPersonWidth": 3.440000057220459,
+    "openFacadeWidth": 11.649999618530274,
+    "nearestBedExitToSpawn": 0.807314932346344,
+    "nearestSpawnPair": 1.25,
+    "dockSize": {
+        "x": 2.0,
+        "y": 0.39999961853027346,
+        "z": 3.5
+    },
+    "hasAuthoredDoor": false,
+    "cameraPrefab": "Assets/DeepDive/Network/Prefabs/NetworkDiver.prefab",
+    "scene": "Assets/DeepDive/World/Scenes/DiveTestArea.unity",
+    "furniture": [
+        "Npc_shop-equipment/Counter: center=(-10.00, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_shop-equipment/CounterTop: center=(-10.00, 9.43, -28.35), size=(1.95, 0.06, 0.64)",
+        "Npc_buyer-fish/Counter: center=(-3.30, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_buyer-fish/CounterTop: center=(-3.30, 9.43, -28.35), size=(1.95, 0.06, 0.64)",
+        "Npc_buyer-recording/Counter: center=(3.40, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_buyer-recording/CounterTop: center=(3.40, 9.43, -28.35), size=(1.95, 0.06, 0.64)",
+        "Npc_vendor-vehicle/Counter: center=(10.10, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_vendor-vehicle/CounterTop: center=(10.10, 9.43, -28.35), size=(1.95, 0.06, 0.64)"
+    ]
+}

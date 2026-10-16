@@ -1,0 +1,310 @@
+{
+    "SchemaVersion": 8,
+    "CampaignId": "local-host",
+    "CheckpointId": "504a23e7aedb4d3fa415e524772de5fa",
+    "SharedBalance": 455,
+    "Revision": 13,
+    "SoldCaptureIds": [
+        "b0b24f3e40fa4274824f8c3c6f60233b",
+        "01e6a7c836cb40cda5d510ec515b4edc"
+    ],
+    "PaidRecordingIds": [],
+    "Loadouts": [
+        {
+            "PlayerId": 0,
+            "EquipmentIds": [
+                "camera-basic"
+            ]
+        }
+    ],
+    "PendingTurnIns": [],
+    "BoatPartIds": [
+        "boat-part-hull",
+        "boat-part-engine",
+        "boat-part-fuel-tank"
+    ],
+    "StoredItems": [],
+    "HasDay": true,
+    "Day": {
+        "DayNumber": 2,
+        "ClockMinute": 480,
+        "ClosedCloseIds": [
+            "close-day-1"
+        ],
+        "SummaryHistory": [
+            {
+                "DayNumber": 1,
+                "DayId": "day-1",
+                "CloseId": "close-day-1",
+                "Reason": 0,
+                "FishSold": 2,
+                "FishSoldWeightGrams": 2413,
+                "Income": 240,
+                "Expenses": 150,
+                "DiscoveredSpeciesIds": [
+                    "sea_bass"
+                ],
+                "LostDivers": 0,
+                "LostCaptureIds": [],
+                "ProgressIds": [
+                    "boat-part-boat-part-hull",
+                    "boat-part-boat-part-engine",
+                    "boat-part-boat-part-fuel-tank",
+                    "boat-repaired"
+                ],
+                "PublicationsQueued": 1
+            }
+        ],
+        "Ledger": {
+            "FishSold": 0,
+            "FishSoldWeightGrams": 0,
+            "Income": 0,
+            "Expenses": 0,
+            "DiscoveredSpeciesIds": [],
+            "ProgressIds": [],
+            "EventIds": []
+        }
+    },
+    "HasExploration": true,
+    "Exploration": {
+        "RegionId": "region-near-1",
+        "DiscoveredCells": [
+            {
+                "CellId": "region-near-1:gx-3:gz-3",
+                "GridX": -3,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-3",
+                "GridX": -2,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz-3",
+                "GridX": -1,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx0:gz-3",
+                "GridX": 0,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-3",
+                "GridX": 1,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx2:gz-3",
+                "GridX": 2,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-2",
+                "GridX": -2,
+                "GridZ": -2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-2",
+                "GridX": 1,
+                "GridZ": -2,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-1",
+                "GridX": -2,
+                "GridZ": -1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz-1",
+                "GridX": -1,
+                "GridZ": -1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-1",
+                "GridX": 1,
+                "GridZ": -1,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz0",
+                "GridX": -1,
+                "GridZ": 0,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz0",
+                "GridX": 1,
+                "GridZ": 0,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz1",
+                "GridX": -1,
+                "GridZ": 1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx0:gz1",
+                "GridX": 0,
+                "GridZ": 1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz1",
+                "GridX": 1,
+                "GridZ": 1,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx2:gz1",
+                "GridX": 2,
+                "GridZ": 1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx0:gz2",
+                "GridX": 0,
+                "GridZ": 2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx0:gz3",
+                "GridX": 0,
+                "GridZ": 3,
+                "DepthBandId": "shallow"
+            }
+        ],
+        "Observations": [
+            {
+                "ObservationId": "sighting:sea_bass",
+                "SpeciesId": "sea_bass",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-2:gz-2",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "b0b24f3e40fa4274824f8c3c6f60233b",
+                "SpeciesId": "sea_bass",
+                "Evidence": 2,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-1:gz1",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "01e6a7c836cb40cda5d510ec515b4edc",
+                "SpeciesId": "sea_bass",
+                "Evidence": 2,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-1:gz0",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "141ad0e58c3c48efa86a8836f53140b8",
+                "SpeciesId": "sea_bass",
+                "Evidence": 1,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx0:gz2",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            }
+        ]
+    },
+    "ChannelRightIds": [
+        "141ad0e58c3c48efa86a8836f53140b8"
+    ],
+    "ChannelSettleIds": [
+        "settle-pub-clip-141ad0e58c3c48efa86a8836f53140b8"
+    ],
+    "HasMedia": true,
+    "HasFleet": true,
+    "HasProgression": true,
+    "HasLiving": true,
+    "Living": {
+        "Version": 1,
+        "BoardDay": 2,
+        "OrderTemplateId": "order-fish-heavy",
+        "OrderStatus": 1,
+        "OrderProgress": 0,
+        "SponsorTemplateId": "sponsor-event",
+        "SponsorStatus": 1,
+        "SponsorProgress": 0,
+        "LastOrderTemplateId": "order-fish-quick",
+        "LastSponsorTemplateId": "sponsor-new-species",
+        "UsedEvidenceIds": [
+            "b0b24f3e40fa4274824f8c3c6f60233b",
+            "01e6a7c836cb40cda5d510ec515b4edc",
+            "pub-clip-141ad0e58c3c48efa86a8836f53140b8"
+        ],
+        "DevelopmentIds": [],
+        "HostRole": 0
+    },
+    "RewardIds": [
+        "reward:day1:order-fish-quick",
+        "reward:day1:sponsor-new-species"
+    ],
+    "Progression": {
+        "Version": 1,
+        "Stage": 1,
+        "EncyclopediaEvidenceId": "enc:sighting:sea_bass",
+        "RumorEvidenceId": "",
+        "TraceIds": [],
+        "DiscoveryEvidenceId": "",
+        "CompletedBossIds": []
+    },
+    "FleetPurchasedBoatIds": [],
+    "FleetActiveBoatId": "",
+    "Media": {
+        "Clips": [
+            {
+                "ClipId": "clip-141ad0e58c3c48efa86a8836f53140b8",
+                "RecordingId": "141ad0e58c3c48efa86a8836f53140b8",
+                "DiveId": "5abe54f4f9a04ff4ada6a35a3f32119b",
+                "DayNumber": 1,
+                "OwnerPlayerId": 0,
+                "SubjectId": "sea_bass",
+                "Quality": 3,
+                "DurationSeconds": 12.324817657470704,
+                "ContentHash": "509f4f4fdfb638fdc19781d088ed61f89d50a3f8a16c10830e80f1717c52280b",
+                "SizeBytes": 168926,
+                "MediaReady": true,
+                "SafeReturned": true,
+                "SubjectKind": 1,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx0:gz2",
+                "DepthBandId": "shallow",
+                "FirstRecordingOfSubject": true
+            }
+        ],
+        "Publications": [
+            {
+                "PublicationId": "pub-clip-141ad0e58c3c48efa86a8836f53140b8",
+                "ClipId": "clip-141ad0e58c3c48efa86a8836f53140b8",
+                "RecordingId": "141ad0e58c3c48efa86a8836f53140b8",
+                "OwnerPlayerId": 0,
+                "SubjectId": "sea_bass",
+                "Title": "Ilk gercek gun",
+                "QueuedDay": 1,
+                "ResultDay": 2,
+                "Views": 540,
+                "FollowersGained": 27,
+                "Income": 135,
+                "SettledId": "settle-pub-clip-141ad0e58c3c48efa86a8836f53140b8"
+            }
+        ],
+        "Followers": 27
+    }
+}
