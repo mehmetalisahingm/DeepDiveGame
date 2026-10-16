@@ -29,3 +29,12 @@ Unity 6000.3.23f1 batch mode, `DeepDive.Editor.P4PlayerScaleAudit.Run`. Araç `N
 Mevcut prefab/kamera/kapsül/tezgâh/iskele ve ev açıklığı ölçüldü; tekrarlanabilir read-only audit aracı hazırlandı. Günlük döngü testi gerçek input ile dünya/tezgâh/iskele/yatak/PC yollarını kullanır; teknik hareket kanıtı görsel kit kabulü değildir.
 
 Mert'in #171 örnek rig/nesne/malzeme/ses kiti ve Utku'nun #172 kısa örnek alanı gelince: aynı kit üzerinde tutuş/near clipping, yerel ve arkadaş bakışı videosu, gündüz/gece hedef okunurluğu, kamera rahatsızlığı ve kare süresi ölçümü yapılır; kullanıcının hedef kalite değerlendirmesi #159'a bağlanır. Tahta/alet için taşıma veya contribution sistemi bu ölçüm aracıyla eklenmez; #160 sınırı korunur. #173 açık kalır, başkaları adına kabul yazılmaz.
+
+## Otomatik tekrar kontrolü (Mehmet)
+
+Yeni `Assets/Tests/P4/Editor/P4PlayerScaleBaselineTests.cs` dosyasında iki EditMode regresyonu eklendi:
+
+1. Var olan `NetworkDiver` karakter kapsülü, perspektif kamera göz yüksekliği, FOV ve near-clip temel sınırları oyun prefab'ından okunur. Kamera/rig değişirse yeni görüntü kabulü gerekmesi görünür hale gelir.
+2. Gerçek sahne/kasaba yerleşiminde dört ev spawn'ı için fiziksel kapsül çapı çakışması ve 2 m iskelede sırayla geçiş geometrisi kontrol edilir. İskele **dört kişinin yan yana durması için yeterli diye onaylanmaz**.
+
+Bunlar CI tamamlanmadan PASS diye işaretlenmez. Yakın nesne/ellerin görüntüde kırpılması, yeni Mert rig'i ve Utku yerleşimi, 1/2/4 gerçek oyuncu kadrajı ile kullanıcı sanat kabulü için yine gerçek Windows görüntüsü gerekir. P4.7 uygulaması bu testle açılmaz.
