@@ -147,8 +147,8 @@ namespace DeepDive.P4.Tests
                 AssertPose(WorldAnchorIds.HomePc, home + new Vector3(3.9f, 0.6f, -3.55f), 0f);
                 AssertPose(WorldAnchorIds.HomeSpawn(0), home + new Vector3(-1.5f, 0f, -1.5f), 0f);
                 AssertPose(WorldAnchorIds.HomeSpawn(1), home + new Vector3(1.5f, 0f, -1.5f), 0f);
-                AssertPose(WorldAnchorIds.HomeSpawn(2), home + new Vector3(-1.5f, 0f, 0.5f), 0f);
-                AssertPose(WorldAnchorIds.HomeSpawn(3), home + new Vector3(1.5f, 0f, 0.5f), 0f);
+                AssertPose(WorldAnchorIds.HomeSpawn(2), home + new Vector3(-1.5f, 0f, -0.25f), 0f);
+                AssertPose(WorldAnchorIds.HomeSpawn(3), home + new Vector3(1.5f, 0f, -0.25f), 0f);
                 AssertPose(WorldAnchorIds.TownSquare, ContinuousTownLayout.TownSquareCenter, 0f);
             });
         }

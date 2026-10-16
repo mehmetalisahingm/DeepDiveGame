@@ -43,9 +43,9 @@ namespace DeepDive.P1.Tests
             Assert.IsFalse(SessionCommand.TryRead(reader, out _, out _, out _, out _));
         }
 
-        [Test] public void P3WorldScenePersistsAcrossPrepDiveAndReturn()
+        [Test] public void WorldScenePersistsAcrossTheWholeDailySessionIncludingLobby()
         {
-            Assert.AreEqual(SessionNetworkAdapter.PrepScene,
+            Assert.AreEqual(SessionNetworkAdapter.DiveScene,
                 SessionNetworkAdapter.SceneForPhase(SessionPhase.Lobby));
             Assert.AreEqual(SessionNetworkAdapter.DiveScene,
                 SessionNetworkAdapter.SceneForPhase(SessionPhase.Prep));

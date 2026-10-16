@@ -178,6 +178,9 @@ namespace DeepDive.P1.Lab
         private bool townAwaiting;
         private float townTraceAt;
         private bool townInjected, townSampledReturn, cameraSeeded;
+        private bool legacySeaFixturePlaced;
+        private int homeTransferStep = -1;
+        private bool homeTransferComplete;
         private float returnPhaseAt, pendingSeenAt, turnInAt;
         private float recordingStartTime;
         private float bossNextShot, bossTraceAt;
@@ -189,6 +192,8 @@ namespace DeepDive.P1.Lab
         private Vector3 p45NightPosition;
         private bool p45NightPositionSet;
         private readonly Dictionary<ulong, Vector3> starts = new Dictionary<ulong, Vector3>();
+        private readonly Dictionary<ulong, Vector3> previousSwimSamples = new Dictionary<ulong, Vector3>();
+        private readonly Dictionary<ulong, float> lowestSwimSamples = new Dictionary<ulong, float>();
         private readonly HashSet<ulong> walked = new HashSet<ulong>(), swam = new HashSet<ulong>();
 
         private static string Arg(string key, string fallback = "")
@@ -216,6 +221,9 @@ namespace DeepDive.P1.Lab
             yield return null; yield return null;
             adapter = FindFirstObjectByType<SessionNetworkAdapter>();
             if (adapter == null) { result.errors.Add("No integrated adapter in real scene"); Finish(); yield break; }
+            // These older subsystem regressions deliberately start in the authored sea lab.
+            // They do not certify the physical home/world journey. ContinuousWorldSmokeDriver
+            // exercises the unmodified product spawn provider and walks the whole route.
             if (RoleEffects && host)
             {
                 var source = new GameObject("P45CurrentSmokeSource");
@@ -364,8 +372,7 @@ namespace DeepDive.P1.Lab
                 { lobbySent = true; GameObject.Find("CompleteReturnButton").GetComponent<Button>().onClick.Invoke(); }
                 if (result.dive && state.Phase == SessionPhase.Lobby && state.Revision >= 4 && !connection.IsSceneLoading)
                 {
-                    result.returned |= SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene ||
-                        (Acceptance && result.acceptResultSeen && SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName);
+                    result.returned |= SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName;
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
@@ -695,12 +702,21 @@ namespace DeepDive.P1.Lab
         {
             var scene = SceneManager.GetActiveScene().name;
             var phase = adapter.Session.State.Phase;
-            // Only Lobby lives in PrepArea; Prep, Dive and Return all run in DiveTestArea (SceneForPhase), so a
-            // scene change alone no longer marks the start of a stage. Key the stage on scene and phase.
+            // PrepArea is room entry only; after world entry every phase stays in DiveTestArea.
+            // A scene change alone no longer marks a stage. Key the clock on scene and phase.
             var stage = scene + ":" + phase;
             if (observedScene != stage)
             { observedScene = stage; sceneStarted = Time.realtimeSinceStartup; starts.Clear(); }
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
+            if (adapter.IsAuthority && !legacySeaFixturePlaced && scene == SessionNetworkAdapter.DiveScene &&
+                phase == SessionPhase.Prep && players.Length == expected)
+            {
+                legacySeaFixturePlaced = true;
+                var ordered = players.OrderBy(p => p.OwnerClientId).ToArray();
+                for (var i = 0; i < ordered.Length; i++)
+                    if (PlayerSpawnPoint.TryGet(i, out var pose)) ordered[i].Teleport(pose);
+                Debug.Log("P1_LEGACY_SEA_SPAWN_FIXTURE enabled=True worldJourneyEvidence=False");
+            }
             foreach (var player in players)
             {
                 player.ReadKeyboard = false;
@@ -711,6 +727,8 @@ namespace DeepDive.P1.Lab
             if (local != null && Time.realtimeSinceStartupAsDouble >= nextInput)
             {
                 nextInput = Time.realtimeSinceStartupAsDouble + 1.0 / 30;
+                if (result.dive && phase == SessionPhase.Lobby && (MediaFlow || Acceptance || Storage) &&
+                    !WalkHomeAfterDive(local, players)) return;
                 var move = scene == SessionNetworkAdapter.DiveScene ?
                     // A long upward probe reaches the y=6 surface-return zone and permanently
                     // marks the diver safe before the hunt/recording test even starts.
@@ -722,10 +740,10 @@ namespace DeepDive.P1.Lab
                     (phase == SessionPhase.Prep || phase == SessionPhase.Dive || phase == SessionPhase.Return) && elapsed > 3) ProbeBoatParts(local);
                 else if (Boat && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBoatParts(local);
                 else if (Trip && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Return) ProbeTrip(local, expected);
-                else if (Home && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
-                else if (MediaFlow && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && mediaStage < 90) ProbeMedia(local);
-                else if (Acceptance && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
-                else if (Storage && result.dive && scene == SessionNetworkAdapter.PrepScene && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
+                else if (Home && phase == SessionPhase.Lobby && homeStage < 90) ProbeHome(local);
+                else if (MediaFlow && result.dive && phase == SessionPhase.Lobby && mediaStage < 90) ProbeMedia(local);
+                else if (Acceptance && result.dive && phase == SessionPhase.Lobby && acceptStage < 90) ProbeAcceptance(local);
+                else if (Storage && result.dive && phase == SessionPhase.Lobby && storageStage < 90) ProbeStorage(local);
                 else if (Home && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeHomePing(local);
                 else if (BossAcceptance && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeBossAcceptance(local);
                 else if ((Fleet || Deep) && scene == SessionNetworkAdapter.DiveScene && phase == SessionPhase.Dive && elapsed > 3) ProbeFleetDive(local);
@@ -740,7 +758,24 @@ namespace DeepDive.P1.Lab
             {
                 var delta = player.transform.position - starts[player.OwnerClientId];
                 if (scene == SessionNetworkAdapter.PrepScene && delta.z > 0.5f) walked.Add(player.OwnerClientId);
-                if (scene == SessionNetworkAdapter.DiveScene && player.Swimming.Value && delta.y > 0.7f) swam.Add(player.OwnerClientId);
+                if (scene == SessionNetworkAdapter.DiveScene && player.Swimming.Value)
+                {
+                    var id = player.OwnerClientId;
+                    var position = player.transform.position;
+                    // Sample continuous water movement across phase snapshots. A delayed client
+                    // snapshot must not discard a real rise that began during Prep. Teleports
+                    // and scene placement restart the sample instead of counting as swimming.
+                    if (!previousSwimSamples.TryGetValue(id, out var previous) || Vector3.Distance(previous, position) > 0.5f)
+                        lowestSwimSamples[id] = position.y;
+                    else lowestSwimSamples[id] = Mathf.Min(lowestSwimSamples[id], position.y);
+                    previousSwimSamples[id] = position;
+                    if (position.y - lowestSwimSamples[id] > 0.7f) swam.Add(id);
+                }
+                else
+                {
+                    previousSwimSamples.Remove(player.OwnerClientId);
+                    lowestSwimSamples.Remove(player.OwnerClientId);
+                }
             }
             result.walk |= walked.Count >= expected;
             result.swim |= swam.Count >= expected;
@@ -749,6 +784,37 @@ namespace DeepDive.P1.Lab
             if (players.Length == expected && local != null && elapsed > 1)
                 result.cameras = Camera.allCamerasCount == 1 && players.All(p =>
                     p.GetComponentInChildren<Camera>(true).enabled == p.IsOwner && p.GetComponentInChildren<AudioListener>(true).enabled == p.IsOwner);
+        }
+
+        // Completing Return no longer reloads a small home scene. The older PC/storage
+        // regressions must now cover the physical coast -> house approach as well.
+        private bool WalkHomeAfterDive(NetworkPlayer local, NetworkPlayer[] players)
+        {
+            if (homeTransferComplete) return true;
+            var origin = ContinuousTownLayout.HomeOrigin;
+            var rank = Array.IndexOf(players.OrderBy(p => p.OwnerClientId).ToArray(), local);
+            var waypoints = new[]
+            {
+                new Vector3(0f, 8.4f, -12.5f), new Vector3(0f, 8.4f, -16f),
+                new Vector3(0f, 8.4f, -24f), new Vector3(0f, 8.4f, -36f),
+                ContinuousTownLayout.HomeRig.Door, origin + new Vector3(4.95f, 0f, 5f),
+                origin + new Vector3(4.95f, 0f, -2.5f), origin + new Vector3(2f + rank * 0.8f, 0f, -2.4f)
+            };
+            if (homeTransferStep < 0)
+            {
+                var z = local.transform.position.z;
+                homeTransferStep = z < -42f ? 6 : z < -25f ? 3 : z < -17f ? 2 : z < -14f ? 1 : 0;
+            }
+            if (homeTransferStep >= waypoints.Length)
+            { homeTransferComplete = true; local.SubmitLocalInput(Vector3.zero, 0f); return true; }
+            var stand = waypoints[homeTransferStep];
+            var flat = stand - local.transform.position; flat.y = 0f;
+            if (flat.magnitude < 0.35f) { homeTransferStep++; return false; }
+            var target = homeTransferStep == 0 ? NextBeachWaypoint(local.transform.position, stand) : stand;
+            var to = target - local.transform.position;
+            var yaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
+            local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0f, yaw, 0f)) * to.normalized, yaw, 0f);
+            return false;
         }
 
         private void ProbeRecording(NetworkPlayer local, NetworkPlayer[] players)
@@ -1174,7 +1240,7 @@ namespace DeepDive.P1.Lab
                     // The sleep mirror is a named message; give it a moment to arrive after the day advanced.
                     if (homeCleanSince == 0) homeCleanSince = now;
                     var clean = !local.Seated.Value && HomePlayerInteractionBinding.SnapshotSleepers().Count == 0 &&
-                        SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene;
+                        SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName;
                     if (clean) { result.homeMorningClean = true; homeStage = 90; return; }
                     if (now - homeCleanSince > 8f)
                     {

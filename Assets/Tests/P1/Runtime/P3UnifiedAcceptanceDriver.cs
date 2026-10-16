@@ -55,7 +55,7 @@ namespace DeepDive.P1.Lab
         private int boatStep, serviceStep, tripStep, lastBoatCount = -1;
         private ulong serviceRequestBefore;
         private int duplicateBalanceBefore;
-        private bool fixtureSeeded, purchaseSent, duplicatePurchaseSent, returnSent, completeSent, leaveSent;
+        private bool fixtureSeeded, purchaseSent, duplicatePurchaseSent, returnSent, completeSent, leaveSent, legacySeaFixturePlaced;
         private bool tripDuplicateSent, tripDropSeen, tripOnBeach, tripMarkerErrored;
         private string tripLastPhase = "", tripSeatBefore = "";
         private Vector3? firstFishPosition;
@@ -135,6 +135,20 @@ namespace DeepDive.P1.Lab
 
                     if (state.Phase == SessionPhase.Prep)
                     {
+                        // This historical subsystem scenario starts at the authored sea lab.
+                        // The physical product spawn/journey is covered by ContinuousWorldSmokeDriver.
+                        if (host && !legacySeaFixturePlaced)
+                        {
+                            var actors = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                                .Where(p => p.IsSpawned).OrderBy(p => p.OwnerClientId).ToArray();
+                            if (actors.Length == expected)
+                            {
+                                for (var i = 0; i < actors.Length; i++)
+                                    if (PlayerSpawnPoint.TryGet(i, out var pose)) actors[i].Teleport(pose);
+                                legacySeaFixturePlaced = true;
+                                Debug.Log("P3_LEGACY_SEA_SPAWN_FIXTURE enabled=True worldJourneyEvidence=False");
+                            }
+                        }
                         result.prep = true;
                         TickPrep(local, expected);
                         if (host && !diveSent && HostCameraReady() && phaseStarted > 0 && Time.realtimeSinceStartup - phaseStarted > 7f)
@@ -154,7 +168,7 @@ namespace DeepDive.P1.Lab
                     }
                     else if (state.Phase == SessionPhase.Lobby && result.dive && state.Revision >= 4)
                     {
-                        result.returned = SceneManager.GetActiveScene().name == SessionNetworkAdapter.PrepScene;
+                        result.returned = SceneManager.GetActiveScene().name == SessionNetworkAdapter.DiveScene;
                         result.readyReset = adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(v => !v) &&
                             string.IsNullOrEmpty(state.DiveId);
                         if (host && result.readyReset && !leaveSent)

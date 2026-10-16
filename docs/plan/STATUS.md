@@ -6,6 +6,8 @@ Aktif faz: **P4**. P0–P3 kapalıdır. P4.5 PR #135 ile birleşti; P4.6 kabulü
 
 Unity sürümü: `6000.3.23f1`.
 
+15 Ekim #157 teknik ilerleme: günlük Prep/Dive/Return/Lobby tek dünyada kalır; ilk dünya girişi ve yeni gün başlangıcı ev anchor'larını kullanır. `989b556`: 1254/1254 EditMode, Windows build, aynı bilgisayarda gerçek 1/2/4 süreçli ev→dükkân→iskele→su→ev PC→uyku turu ve her koşudan sonra yeni süreçte kayıt açma PASS. [Rapor](../reports/P4-CONTINUOUS-SESSION-157.md). Faz/issue kapanışı değildir; birleşmiş build, yeni sanat/içerik ve ayrı bilgisayar/üç gün kabulü kalır.
+
 ## Ekip
 
 | Rol | Kişi | GitHub hesabı | Ana alan |
