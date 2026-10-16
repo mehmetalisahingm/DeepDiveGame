@@ -12,6 +12,8 @@ Unity sürümü: `6000.3.23f1`.
 
 ## Ekip
 
+16 Ekim Mehmet alan işi: #170 için sıfır bakiyeden gerçek av/satış/kamera/klip/tekne/PC/uyku ve diskten açmayı tek kampanyada sınayan opt-in Windows koşusu hazırlanıyor. Sürekli dünya sonrası ikinci avı engelleyen sahne balığının yaşam döngüsü düzeltildi; 1255/1255 EditMode ve Windows build PASS. Birleşik koşunun son kabul kaydı [#170 raporunda](../reports/P4-PRODUCT-DAY-170.md) tutulur. #173 mevcut oyuncu/kamera/ev/tezgâh/iskele ölçüm hazırlığı [rapor ve ham ölçümle](../reports/P4-PLAYER-SCALE-173.md) teslim edildi; örnek kit, yakın görüntü ve görsel/dört kişi kabulü bekler. Bu kayıt iki issue'yu veya P4.6/P4.7'yi kapatmaz.
+
 | Rol | Kişi | GitHub hesabı | Ana alan |
 |---|---|---|---|
 | A | Mehmet | `mehmetalisahingm` | Oyuncu, ağ, ekipman kullanımı, capture ve araç hareket bağlantıları |
