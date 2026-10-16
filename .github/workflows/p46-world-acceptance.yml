@@ -1,0 +1,75 @@
+name: P4.6 true continuous-world 1-2-4 process regression
+
+on:
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - '.github/workflows/p46-world-acceptance.yml'
+      - 'tools/Test-P46-ContinuousWorld.ps1'
+      - 'Assets/Tests/P1/Runtime/ContinuousWorldSmokeDriver.cs'
+      - 'Assets/DeepDive/**'
+  push:
+    branches: ['codex/p4-integration']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p46-physical-world-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-world:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Require Unity credentials
+        shell: bash
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
+            echo '::error::Unity license not available, P4.6 real-world acceptance cannot run.'
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Build real Linux integrated player
+        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          targetPlatform: StandaloneLinux64
+          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildLinux
+          versioning: None
+      - name: Prepare native runner
+        shell: bash
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" Builds Logs 2>/dev/null || true
+          mkdir -p Logs
+          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Solo physical home-town-shops-dock-water-home-PC-bed and disk reload
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P46-ContinuousWorld.ps1 -Players 1 -Port 26177 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Host and guest physical world and disk reload
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P46-ContinuousWorld.ps1 -Players 2 -Port 26277 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Four real processes physical world and disk reload
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P46-ContinuousWorld.ps1 -Players 4 -Port 26477 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Archive reports and native process logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p46-physical-world-${{ github.sha }}
+          path: Logs/P46-world-*
+          if-no-files-found: warn
+          retention-days: 7
