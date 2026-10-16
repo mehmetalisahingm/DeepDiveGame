@@ -1,0 +1,3214 @@
+{
+    "branchBase": "codex/p4-integration @ c7b2449",
+    "unity": "6000.3.23f1",
+    "scene": "Assets/DeepDive/World/Scenes/DiveTestArea.unity",
+    "prefab": "Assets/DeepDive/Network/Prefabs/NetworkDiver.prefab",
+    "coordinates": "Unity world, metres, y up, +z north (sea), +x east",
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "skin": 0.07999999821186066,
+    "stepOffset": 0.30000001192092898,
+    "slopeLimit": 45.0,
+    "walkSpeed": 4.0,
+    "eyeHeight": 1.5499999523162842,
+    "verticalFov": 60.0,
+    "horizontalFov16x9": 91.49284362792969,
+    "dt": 0.019999999552965165,
+    "bounds": [
+        {
+            "name": "Beach_Platform",
+            "kind": "walk",
+            "min": {
+                "x": -14.75,
+                "y": 0.0,
+                "z": -14.75
+            },
+            "max": {
+                "x": 14.75,
+                "y": 8.399999618530274,
+                "z": -11.0
+            }
+        },
+        {
+            "name": "Beach_Wade",
+            "kind": "walk",
+            "min": {
+                "x": -9.5,
+                "y": 4.836999893188477,
+                "z": -11.168999671936036
+            },
+            "max": {
+                "x": -3.5,
+                "y": 8.399999618530274,
+                "z": -4.138000011444092
+            }
+        },
+        {
+            "name": "BioluminescenceEvent",
+            "kind": "solid",
+            "min": {
+                "x": -10.5,
+                "y": 2.0,
+                "z": -3.5
+            },
+            "max": {
+                "x": -7.5,
+                "y": 5.0,
+                "z": -0.5
+            }
+        },
+        {
+            "name": "Body",
+            "kind": "solid",
+            "min": {
+                "x": -10.399999618530274,
+                "y": 8.399999618530274,
+                "z": -29.399999618530275
+            },
+            "max": {
+                "x": -9.600000381469727,
+                "y": 10.399999618530274,
+                "z": -28.600000381469728
+            }
+        },
+        {
+            "name": "Body",
+            "kind": "solid",
+            "min": {
+                "x": -3.700000047683716,
+                "y": 8.399999618530274,
+                "z": -29.399999618530275
+            },
+            "max": {
+                "x": -2.9000000953674318,
+                "y": 10.399999618530274,
+                "z": -28.600000381469728
+            }
+        },
+        {
+            "name": "Body",
+            "kind": "solid",
+            "min": {
+                "x": 3.0,
+                "y": 8.399999618530274,
+                "z": -29.399999618530275
+            },
+            "max": {
+                "x": 3.799999952316284,
+                "y": 10.399999618530274,
+                "z": -28.600000381469728
+            }
+        },
+        {
+            "name": "Body",
+            "kind": "solid",
+            "min": {
+                "x": 9.699999809265137,
+                "y": 8.399999618530274,
+                "z": -29.399999618530275
+            },
+            "max": {
+                "x": 10.5,
+                "y": 10.399999618530274,
+                "z": -28.600000381469728
+            }
+        },
+        {
+            "name": "CoastWalk",
+            "kind": "walk",
+            "min": {
+                "x": -3.75,
+                "y": 7.800000190734863,
+                "z": -19.75
+            },
+            "max": {
+                "x": 3.75,
+                "y": 8.399999618530274,
+                "z": -12.75
+            }
+        },
+        {
+            "name": "Counter",
+            "kind": "counter:Npc_shop-equipment",
+            "min": {
+                "x": -10.899999618530274,
+                "y": 8.399999618530274,
+                "z": -28.600000381469728
+            },
+            "max": {
+                "x": -9.100000381469727,
+                "y": 9.399999618530274,
+                "z": -28.100000381469728
+            }
+        },
+        {
+            "name": "Counter",
+            "kind": "counter:Npc_buyer-fish",
+            "min": {
+                "x": -4.199999809265137,
+                "y": 8.399999618530274,
+                "z": -28.600000381469728
+            },
+            "max": {
+                "x": -2.4000000953674318,
+                "y": 9.399999618530274,
+                "z": -28.100000381469728
+            }
+        },
+        {
+            "name": "Counter",
+            "kind": "counter:Npc_buyer-recording",
+            "min": {
+                "x": 2.5,
+                "y": 8.399999618530274,
+                "z": -28.600000381469728
+            },
+            "max": {
+                "x": 4.300000190734863,
+                "y": 9.399999618530274,
+                "z": -28.100000381469728
+            }
+        },
+        {
+            "name": "Counter",
+            "kind": "counter:Npc_vendor-vehicle",
+            "min": {
+                "x": 9.199999809265137,
+                "y": 8.399999618530274,
+                "z": -28.600000381469728
+            },
+            "max": {
+                "x": 11.0,
+                "y": 9.399999618530274,
+                "z": -28.100000381469728
+            }
+        },
+        {
+            "name": "DiveExit",
+            "kind": "trigger.DiveExit",
+            "min": {
+                "x": 7.25,
+                "y": 8.300000190734864,
+                "z": -10.75
+            },
+            "max": {
+                "x": 10.75,
+                "y": 10.300000190734864,
+                "z": -7.25
+            }
+        },
+        {
+            "name": "Dock_Town",
+            "kind": "walk",
+            "min": {
+                "x": 8.0,
+                "y": 8.0,
+                "z": -7.0
+            },
+            "max": {
+                "x": 10.0,
+                "y": 8.399999618530274,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "Edge_ApproachEast",
+            "kind": "edge",
+            "min": {
+                "x": 3.75,
+                "y": 8.399999618530274,
+                "z": -42.0
+            },
+            "max": {
+                "x": 4.050000190734863,
+                "y": 9.600000381469727,
+                "z": -36.0
+            }
+        },
+        {
+            "name": "Edge_ApproachWest",
+            "kind": "edge",
+            "min": {
+                "x": -4.050000190734863,
+                "y": 8.399999618530274,
+                "z": -42.0
+            },
+            "max": {
+                "x": -3.75,
+                "y": 9.600000381469727,
+                "z": -36.0
+            }
+        },
+        {
+            "name": "Edge_BackFillSouthEast",
+            "kind": "edge",
+            "min": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": 14.75,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Edge_BackFillSouthWest",
+            "kind": "edge",
+            "min": {
+                "x": -14.75,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": -14.0,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Edge_BeachEast",
+            "kind": "edge",
+            "min": {
+                "x": 14.75,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": 15.050000190734864,
+                "y": 9.600000381469727,
+                "z": -11.0
+            }
+        },
+        {
+            "name": "Edge_BeachWest",
+            "kind": "edge",
+            "min": {
+                "x": -15.050000190734864,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": -14.75,
+                "y": 9.600000381469727,
+                "z": -11.0
+            }
+        },
+        {
+            "name": "Edge_PlotEast",
+            "kind": "edge",
+            "min": {
+                "x": 7.5,
+                "y": 8.399999618530274,
+                "z": -55.79999923706055
+            },
+            "max": {
+                "x": 7.800000190734863,
+                "y": 9.600000381469727,
+                "z": -41.70000076293945
+            }
+        },
+        {
+            "name": "Edge_PlotNorthEast",
+            "kind": "edge",
+            "min": {
+                "x": 3.75,
+                "y": 8.399999618530274,
+                "z": -42.0
+            },
+            "max": {
+                "x": 7.800000190734863,
+                "y": 9.600000381469727,
+                "z": -41.70000076293945
+            }
+        },
+        {
+            "name": "Edge_PlotNorthWest",
+            "kind": "edge",
+            "min": {
+                "x": -7.800000190734863,
+                "y": 8.399999618530274,
+                "z": -42.0
+            },
+            "max": {
+                "x": -3.75,
+                "y": 9.600000381469727,
+                "z": -41.70000076293945
+            }
+        },
+        {
+            "name": "Edge_PlotSouth",
+            "kind": "edge",
+            "min": {
+                "x": -7.800000190734863,
+                "y": 8.399999618530274,
+                "z": -55.79999923706055
+            },
+            "max": {
+                "x": 7.800000190734863,
+                "y": 9.600000381469727,
+                "z": -55.5
+            }
+        },
+        {
+            "name": "Edge_PlotWest",
+            "kind": "edge",
+            "min": {
+                "x": -7.800000190734863,
+                "y": 8.399999618530274,
+                "z": -55.79999923706055
+            },
+            "max": {
+                "x": -7.5,
+                "y": 9.600000381469727,
+                "z": -41.70000076293945
+            }
+        },
+        {
+            "name": "Edge_SquareSouthEast",
+            "kind": "edge",
+            "min": {
+                "x": 3.75,
+                "y": 8.399999618530274,
+                "z": -36.29999923706055
+            },
+            "max": {
+                "x": 14.300000190734864,
+                "y": 9.600000381469727,
+                "z": -36.0
+            }
+        },
+        {
+            "name": "Edge_SquareSouthWest",
+            "kind": "edge",
+            "min": {
+                "x": -14.300000190734864,
+                "y": 8.399999618530274,
+                "z": -36.29999923706055
+            },
+            "max": {
+                "x": -3.75,
+                "y": 9.600000381469727,
+                "z": -36.0
+            }
+        },
+        {
+            "name": "Edge_TownEast",
+            "kind": "edge",
+            "min": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -36.29999923706055
+            },
+            "max": {
+                "x": 14.300000190734864,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Edge_TownWest",
+            "kind": "edge",
+            "min": {
+                "x": -14.300000190734864,
+                "y": 8.399999618530274,
+                "z": -36.29999923706055
+            },
+            "max": {
+                "x": -14.0,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Fill_BeachBack",
+            "kind": "walk",
+            "min": {
+                "x": -14.75,
+                "y": 8.050000190734864,
+                "z": -15.5
+            },
+            "max": {
+                "x": 14.75,
+                "y": 8.399999618530274,
+                "z": -14.75
+            }
+        },
+        {
+            "name": "Fill_HomeFront",
+            "kind": "walk",
+            "min": {
+                "x": -7.5,
+                "y": 8.050000190734864,
+                "z": -42.5
+            },
+            "max": {
+                "x": 7.5,
+                "y": 8.399999618530274,
+                "z": -42.0
+            }
+        },
+        {
+            "name": "Fill_StreetEast",
+            "kind": "walk",
+            "min": {
+                "x": 11.0,
+                "y": 8.050000190734864,
+                "z": -22.0
+            },
+            "max": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Fill_StreetWest",
+            "kind": "walk",
+            "min": {
+                "x": -14.0,
+                "y": 8.050000190734864,
+                "z": -22.0
+            },
+            "max": {
+                "x": -11.0,
+                "y": 8.399999618530274,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Fish_SeaBass",
+            "kind": "solid",
+            "min": {
+                "x": -0.1599999964237213,
+                "y": 3.8399999141693117,
+                "z": 7.449999809265137
+            },
+            "max": {
+                "x": 0.1599999964237213,
+                "y": 4.159999847412109,
+                "z": 8.550000190734864
+            }
+        },
+        {
+            "name": "HomeBack",
+            "kind": "structure",
+            "min": {
+                "x": -6.0,
+                "y": 8.399999618530274,
+                "z": -54.17499923706055
+            },
+            "max": {
+                "x": 6.0,
+                "y": 11.399999618530274,
+                "z": -53.82500076293945
+            }
+        },
+        {
+            "name": "HomeBed_0",
+            "kind": "structure",
+            "min": {
+                "x": -4.074999809265137,
+                "y": 8.524999618530274,
+                "z": -45.57500076293945
+            },
+            "max": {
+                "x": -2.825000047683716,
+                "y": 8.875,
+                "z": -43.525001525878909
+            }
+        },
+        {
+            "name": "HomeBed_1",
+            "kind": "structure",
+            "min": {
+                "x": -1.774999976158142,
+                "y": 8.524999618530274,
+                "z": -45.57500076293945
+            },
+            "max": {
+                "x": -0.5249999761581421,
+                "y": 8.875,
+                "z": -43.525001525878909
+            }
+        },
+        {
+            "name": "HomeBed_2",
+            "kind": "structure",
+            "min": {
+                "x": 0.5249999761581421,
+                "y": 8.524999618530274,
+                "z": -45.57500076293945
+            },
+            "max": {
+                "x": 1.774999976158142,
+                "y": 8.875,
+                "z": -43.525001525878909
+            }
+        },
+        {
+            "name": "HomeBed_3",
+            "kind": "structure",
+            "min": {
+                "x": 2.825000047683716,
+                "y": 8.524999618530274,
+                "z": -45.57500076293945
+            },
+            "max": {
+                "x": 4.074999809265137,
+                "y": 8.875,
+                "z": -43.525001525878909
+            }
+        },
+        {
+            "name": "HomeLeft",
+            "kind": "structure",
+            "min": {
+                "x": -6.175000190734863,
+                "y": 8.399999618530274,
+                "z": -54.0
+            },
+            "max": {
+                "x": -5.824999809265137,
+                "y": 11.399999618530274,
+                "z": -42.0
+            }
+        },
+        {
+            "name": "HomePlot",
+            "kind": "walk",
+            "min": {
+                "x": -7.5,
+                "y": 7.800000190734863,
+                "z": -55.5
+            },
+            "max": {
+                "x": 7.5,
+                "y": 8.399999618530274,
+                "z": -42.5
+            }
+        },
+        {
+            "name": "HomeRight",
+            "kind": "structure",
+            "min": {
+                "x": 5.824999809265137,
+                "y": 8.399999618530274,
+                "z": -54.0
+            },
+            "max": {
+                "x": 6.175000190734863,
+                "y": 11.399999618530274,
+                "z": -42.0
+            }
+        },
+        {
+            "name": "HomeSharedPc",
+            "kind": "structure",
+            "min": {
+                "x": 3.200000047683716,
+                "y": 8.399999618530274,
+                "z": -51.900001525878909
+            },
+            "max": {
+                "x": 4.599999904632568,
+                "y": 9.600000381469727,
+                "z": -51.20000076293945
+            }
+        },
+        {
+            "name": "HomeSharedStorage",
+            "kind": "structure",
+            "min": {
+                "x": -4.574999809265137,
+                "y": 8.399999618530274,
+                "z": -51.92499923706055
+            },
+            "max": {
+                "x": -3.2249999046325685,
+                "y": 10.0,
+                "z": -51.17499923706055
+            }
+        },
+        {
+            "name": "HouseApproach",
+            "kind": "walk",
+            "min": {
+                "x": -3.75,
+                "y": 7.800000190734863,
+                "z": -46.0
+            },
+            "max": {
+                "x": 3.75,
+                "y": 8.399999618530274,
+                "z": -34.0
+            }
+        },
+        {
+            "name": "MainBuilding_East",
+            "kind": "structure",
+            "min": {
+                "x": 14.5,
+                "y": 8.399999618530274,
+                "z": -32.0
+            },
+            "max": {
+                "x": 21.5,
+                "y": 13.600000381469727,
+                "z": -24.0
+            }
+        },
+        {
+            "name": "MainBuilding_West",
+            "kind": "structure",
+            "min": {
+                "x": -21.5,
+                "y": 8.399999618530274,
+                "z": -32.0
+            },
+            "max": {
+                "x": -14.5,
+                "y": 13.600000381469727,
+                "z": -24.0
+            }
+        },
+        {
+            "name": "MainStreet",
+            "kind": "walk",
+            "min": {
+                "x": -11.0,
+                "y": 7.800000190734863,
+                "z": -28.5
+            },
+            "max": {
+                "x": 11.0,
+                "y": 8.399999618530274,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Shore_Ledge",
+            "kind": "walk",
+            "min": {
+                "x": 7.0,
+                "y": 7.400000095367432,
+                "z": -11.0
+            },
+            "max": {
+                "x": 11.0,
+                "y": 8.399999618530274,
+                "z": -7.0
+            }
+        },
+        {
+            "name": "Shore_Ramp",
+            "kind": "walk",
+            "min": {
+                "x": 0.1379999965429306,
+                "y": 4.836999893188477,
+                "z": -11.0
+            },
+            "max": {
+                "x": 7.169000148773193,
+                "y": 8.399999618530274,
+                "z": -7.0
+            }
+        },
+        {
+            "name": "SwimVolume",
+            "kind": "water.SwimVolume",
+            "min": {
+                "x": -15.0,
+                "y": -27.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": 15.0,
+                "y": 8.0,
+                "z": 65.0
+            }
+        },
+        {
+            "name": "TownSquare",
+            "kind": "walk",
+            "min": {
+                "x": -14.0,
+                "y": 7.800000190734863,
+                "z": -36.0
+            },
+            "max": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -22.0
+            }
+        },
+        {
+            "name": "Wall_E",
+            "kind": "arenaWall",
+            "min": {
+                "x": 14.75,
+                "y": -27.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": 15.25,
+                "y": 7.0,
+                "z": 65.0
+            }
+        },
+        {
+            "name": "Wall_N",
+            "kind": "arenaWall",
+            "min": {
+                "x": -15.0,
+                "y": -27.0,
+                "z": 64.75
+            },
+            "max": {
+                "x": 15.0,
+                "y": 7.0,
+                "z": 65.25
+            }
+        },
+        {
+            "name": "Wall_S",
+            "kind": "arenaWall",
+            "min": {
+                "x": -15.0,
+                "y": -1.0,
+                "z": -15.25
+            },
+            "max": {
+                "x": 15.0,
+                "y": 7.0,
+                "z": -14.75
+            }
+        },
+        {
+            "name": "Wall_W",
+            "kind": "arenaWall",
+            "min": {
+                "x": -15.25,
+                "y": -27.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": -14.75,
+                "y": 7.0,
+                "z": 65.0
+            }
+        },
+        {
+            "name": "WaterSurface",
+            "kind": "visual.water",
+            "min": {
+                "x": -30.0,
+                "y": 8.100000381469727,
+                "z": -30.0
+            },
+            "max": {
+                "x": 30.0,
+                "y": 8.100000381469727,
+                "z": 30.0
+            }
+        },
+        {
+            "name": "WaterSurface_North",
+            "kind": "visual.water",
+            "min": {
+                "x": -30.0,
+                "y": 8.100000381469727,
+                "z": 30.0
+            },
+            "max": {
+                "x": 30.0,
+                "y": 8.100000381469727,
+                "z": 70.0
+            }
+        },
+        {
+            "name": "DiveRegionField:region-near-1",
+            "kind": "map",
+            "min": {
+                "x": -15.0,
+                "y": 0.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": 15.0,
+                "y": 0.0,
+                "z": 65.0
+            }
+        },
+        {
+            "name": "Zone_Home",
+            "kind": "zone.Home",
+            "min": {
+                "x": -5.824999809265137,
+                "y": 7.900000095367432,
+                "z": -53.82500076293945
+            },
+            "max": {
+                "x": 5.824999809265137,
+                "y": 11.399999618530274,
+                "z": -42.0
+            }
+        },
+        {
+            "name": "Zone_Dock",
+            "kind": "zone.Dock",
+            "min": {
+                "x": 7.0,
+                "y": 7.900000095367432,
+                "z": -11.0
+            },
+            "max": {
+                "x": 11.0,
+                "y": 13.0,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "Zone_Town",
+            "kind": "zone.Town",
+            "min": {
+                "x": -14.75,
+                "y": 7.900000095367432,
+                "z": -55.79999923706055
+            },
+            "max": {
+                "x": 14.75,
+                "y": 13.0,
+                "z": -14.75
+            }
+        },
+        {
+            "name": "Zone_Coast",
+            "kind": "zone.Coast",
+            "min": {
+                "x": -15.0,
+                "y": 4.5,
+                "z": -14.75
+            },
+            "max": {
+                "x": 15.0,
+                "y": 13.0,
+                "z": -3.5
+            }
+        }
+    ],
+    "anchors": [
+        {
+            "id": "home-root",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 0.0,
+                "y": 8.399999618530274,
+                "z": -48.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-door",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 0.0,
+                "y": 8.399999618530274,
+                "z": -42.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-bed-0",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": -3.450000047683716,
+                "y": 8.699999809265137,
+                "z": -44.54999923706055
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-bed-1",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": -1.149999976158142,
+                "y": 8.699999809265137,
+                "z": -44.54999923706055
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-bed-2",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 1.149999976158142,
+                "y": 8.699999809265137,
+                "z": -44.54999923706055
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-bed-3",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 3.450000047683716,
+                "y": 8.699999809265137,
+                "z": -44.54999923706055
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-storage",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": -3.9000000953674318,
+                "y": 9.199999809265137,
+                "z": -51.54999923706055
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-pc",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 3.9000000953674318,
+                "y": 9.0,
+                "z": -51.54999923706055
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-spawn-0",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": -1.5,
+                "y": 8.399999618530274,
+                "z": -49.5
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-spawn-1",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 1.5,
+                "y": 8.399999618530274,
+                "z": -49.5
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-spawn-2",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": -1.5,
+                "y": 8.399999618530274,
+                "z": -48.25
+            },
+            "inMap": false
+        },
+        {
+            "id": "home-spawn-3",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Home",
+            "position": {
+                "x": 1.5,
+                "y": 8.399999618530274,
+                "z": -48.25
+            },
+            "inMap": false
+        },
+        {
+            "id": "town-square",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Town",
+            "position": {
+                "x": 0.0,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "town-service-slot-0",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Town",
+            "position": {
+                "x": -10.0,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "town-service-slot-1",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Town",
+            "position": {
+                "x": -3.299999952316284,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "town-service-slot-2",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Town",
+            "position": {
+                "x": 3.4000000953674318,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "town-service-slot-3",
+            "kind": "worldAnchor",
+            "source": "ContinuousTownLayout",
+            "zone": "Town",
+            "position": {
+                "x": 10.100000381469727,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "shop-equipment",
+            "kind": "service",
+            "source": "TownServices (moved by ContinuousTownLayout)",
+            "zone": "Town",
+            "position": {
+                "x": -10.0,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "shop-equipment:customer",
+            "kind": "serviceCustomer",
+            "source": "TownStorefront.CustomerSpot",
+            "zone": "Town",
+            "position": {
+                "x": -10.0,
+                "y": 8.399999618530274,
+                "z": -27.299999237060548
+            },
+            "inMap": false
+        },
+        {
+            "id": "buyer-fish",
+            "kind": "service",
+            "source": "TownServices (moved by ContinuousTownLayout)",
+            "zone": "Town",
+            "position": {
+                "x": -3.299999952316284,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "buyer-fish:customer",
+            "kind": "serviceCustomer",
+            "source": "TownStorefront.CustomerSpot",
+            "zone": "Town",
+            "position": {
+                "x": -3.299999952316284,
+                "y": 8.399999618530274,
+                "z": -27.299999237060548
+            },
+            "inMap": false
+        },
+        {
+            "id": "buyer-recording",
+            "kind": "service",
+            "source": "TownServices (moved by ContinuousTownLayout)",
+            "zone": "Town",
+            "position": {
+                "x": 3.4000000953674318,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "buyer-recording:customer",
+            "kind": "serviceCustomer",
+            "source": "TownStorefront.CustomerSpot",
+            "zone": "Town",
+            "position": {
+                "x": 3.4000000953674318,
+                "y": 8.399999618530274,
+                "z": -27.299999237060548
+            },
+            "inMap": false
+        },
+        {
+            "id": "vendor-vehicle",
+            "kind": "service",
+            "source": "TownServices (moved by ContinuousTownLayout)",
+            "zone": "Town",
+            "position": {
+                "x": 10.100000381469727,
+                "y": 8.399999618530274,
+                "z": -29.0
+            },
+            "inMap": false
+        },
+        {
+            "id": "vendor-vehicle:customer",
+            "kind": "serviceCustomer",
+            "source": "TownStorefront.CustomerSpot",
+            "zone": "Town",
+            "position": {
+                "x": 10.100000381469727,
+                "y": 8.399999618530274,
+                "z": -27.299999237060548
+            },
+            "inMap": false
+        },
+        {
+            "id": "Dock_Town_Anchor",
+            "kind": "coast",
+            "source": "scene",
+            "zone": "Dock",
+            "position": {
+                "x": 9.0,
+                "y": 8.399999618530274,
+                "z": -3.700000047683716
+            },
+            "inMap": true
+        },
+        {
+            "id": "DiveExit",
+            "kind": "coast",
+            "source": "scene",
+            "zone": "Dock",
+            "position": {
+                "x": 9.0,
+                "y": 9.300000190734864,
+                "z": -9.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "Beach_TownGate",
+            "kind": "coast",
+            "source": "scene",
+            "zone": "Coast",
+            "position": {
+                "x": 0.0,
+                "y": 8.399999618530274,
+                "z": -13.5
+            },
+            "inMap": true
+        },
+        {
+            "id": "Beach_Wade:dryTop",
+            "kind": "coast",
+            "source": "scene, raycast along centre line",
+            "zone": "Coast",
+            "position": {
+                "x": -6.5,
+                "y": 8.38599967956543,
+                "z": -10.970000267028809
+            },
+            "inMap": true
+        },
+        {
+            "id": "Beach_Wade:waterline",
+            "kind": "coast",
+            "source": "first sample whose zone is not Sea",
+            "zone": "Coast",
+            "position": {
+                "x": -6.5,
+                "y": 8.013999938964844,
+                "z": -10.17199993133545
+            },
+            "inMap": true
+        },
+        {
+            "id": "Shore_Ramp:dryTop",
+            "kind": "coast",
+            "source": "scene, raycast along centre line",
+            "zone": "Coast",
+            "position": {
+                "x": 6.96999979019165,
+                "y": 8.38599967956543,
+                "z": -9.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "Shore_Ramp:waterline",
+            "kind": "coast",
+            "source": "first sample whose zone is not Sea",
+            "zone": "Coast",
+            "position": {
+                "x": 6.171999931335449,
+                "y": 8.013999938964844,
+                "z": -9.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "boat-part-hull",
+            "kind": "boatPart",
+            "source": "scene BoatPartAnchor BoatPart_Hull",
+            "zone": "Coast",
+            "position": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "inMap": true
+        },
+        {
+            "id": "boat-part-engine",
+            "kind": "boatPart",
+            "source": "scene BoatPartAnchor BoatPart_Engine",
+            "zone": "Sea",
+            "position": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "boat-part-fuel-tank",
+            "kind": "boatPart",
+            "source": "scene BoatPartAnchor BoatPart_FuelTank",
+            "zone": "Coast",
+            "position": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "inMap": true
+        },
+        {
+            "id": "dock-town-1",
+            "kind": "routeAnchor",
+            "source": "scene Dock_Town_Anchor",
+            "zone": "Dock",
+            "position": {
+                "x": 9.0,
+                "y": 8.399999618530274,
+                "z": -3.700000047683716
+            },
+            "inMap": true
+        },
+        {
+            "id": "dock-town-1:boarding",
+            "kind": "routeBoarding",
+            "source": "scene Dock_Town_Anchor",
+            "zone": "Dock",
+            "position": {
+                "x": 9.0,
+                "y": 8.399999618530274,
+                "z": -3.700000047683716
+            },
+            "inMap": true
+        },
+        {
+            "id": "anchor-near-1",
+            "kind": "routeAnchor",
+            "source": "scene Anchor_Near",
+            "zone": "Sea",
+            "position": {
+                "x": 9.0,
+                "y": 8.0,
+                "z": 8.5
+            },
+            "inMap": true
+        },
+        {
+            "id": "anchor-near-1:boarding",
+            "kind": "routeBoarding",
+            "source": "scene Anchor_Near",
+            "zone": "Sea",
+            "position": {
+                "x": 11.0,
+                "y": 8.0,
+                "z": 8.5
+            },
+            "inMap": true
+        },
+        {
+            "id": "anchor-reef-1",
+            "kind": "routeAnchor",
+            "source": "scene Anchor_Reef",
+            "zone": "Sea",
+            "position": {
+                "x": 3.0,
+                "y": 8.0,
+                "z": 30.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "anchor-reef-1:boarding",
+            "kind": "routeBoarding",
+            "source": "scene Anchor_Reef",
+            "zone": "Sea",
+            "position": {
+                "x": 6.0,
+                "y": 8.0,
+                "z": 30.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "anchor-deep-1",
+            "kind": "routeAnchor",
+            "source": "scene Anchor_Deep",
+            "zone": "Sea",
+            "position": {
+                "x": 0.0,
+                "y": 8.0,
+                "z": 56.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "anchor-deep-1:boarding",
+            "kind": "routeBoarding",
+            "source": "scene Anchor_Deep",
+            "zone": "Sea",
+            "position": {
+                "x": 3.0,
+                "y": 8.0,
+                "z": 56.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "route-near-1:wp0",
+            "kind": "routeStart",
+            "source": "scene Route_Near",
+            "zone": "Sea",
+            "position": {
+                "x": 9.0,
+                "y": 8.0,
+                "z": -0.4000000059604645
+            },
+            "inMap": true
+        },
+        {
+            "id": "broken-rowboat-berth",
+            "kind": "boat",
+            "source": "near route wp0 + Rowboat DockOffsetMeters along wp0->wp1",
+            "zone": "Sea",
+            "position": {
+                "x": 9.0,
+                "y": 8.0,
+                "z": -0.4000000059604645
+            },
+            "inMap": true
+        },
+        {
+            "id": "route-reef-1:wp0",
+            "kind": "routeStart",
+            "source": "scene Route_Reef",
+            "zone": "Sea",
+            "position": {
+                "x": 9.0,
+                "y": 8.0,
+                "z": -0.4000000059604645
+            },
+            "inMap": true
+        },
+        {
+            "id": "route-deep-1:wp0",
+            "kind": "routeStart",
+            "source": "scene Route_Deep",
+            "zone": "Sea",
+            "position": {
+                "x": 9.0,
+                "y": 8.0,
+                "z": -0.4000000059604645
+            },
+            "inMap": true
+        },
+        {
+            "id": "Spawn_0",
+            "kind": "legacySpawn",
+            "source": "scene PlayerSpawnPoint",
+            "zone": "Sea",
+            "position": {
+                "x": -3.0,
+                "y": 1.0,
+                "z": -3.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "Spawn_1",
+            "kind": "legacySpawn",
+            "source": "scene PlayerSpawnPoint",
+            "zone": "Sea",
+            "position": {
+                "x": 3.0,
+                "y": 1.0,
+                "z": -3.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "Spawn_2",
+            "kind": "legacySpawn",
+            "source": "scene PlayerSpawnPoint",
+            "zone": "Sea",
+            "position": {
+                "x": -3.0,
+                "y": 1.0,
+                "z": 3.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "Spawn_3",
+            "kind": "legacySpawn",
+            "source": "scene PlayerSpawnPoint",
+            "zone": "Sea",
+            "position": {
+                "x": 3.0,
+                "y": 1.0,
+                "z": 3.0
+            },
+            "inMap": true
+        },
+        {
+            "id": "bed-0:exit",
+            "kind": "bedExit",
+            "source": "HomeSceneSetup ExitPose",
+            "zone": "Home",
+            "position": {
+                "x": -3.450000047683716,
+                "y": 8.751999855041504,
+                "z": -47.52199935913086
+            },
+            "inMap": false
+        },
+        {
+            "id": "bed-1:exit",
+            "kind": "bedExit",
+            "source": "HomeSceneSetup ExitPose",
+            "zone": "Home",
+            "position": {
+                "x": -1.149999976158142,
+                "y": 8.751999855041504,
+                "z": -47.52199935913086
+            },
+            "inMap": false
+        },
+        {
+            "id": "bed-2:exit",
+            "kind": "bedExit",
+            "source": "HomeSceneSetup ExitPose",
+            "zone": "Home",
+            "position": {
+                "x": 1.149999976158142,
+                "y": 8.751999855041504,
+                "z": -47.52199935913086
+            },
+            "inMap": false
+        },
+        {
+            "id": "bed-3:exit",
+            "kind": "bedExit",
+            "source": "HomeSceneSetup ExitPose",
+            "zone": "Home",
+            "position": {
+                "x": 3.450000047683716,
+                "y": 8.751999855041504,
+                "z": -47.52199935913086
+            },
+            "inMap": false
+        }
+    ],
+    "worldAnchorCount": 17,
+    "brokenBoatNote": "No static boat in DiveTestArea. The runtime NetworkBoatController snaps to the near route's wp0 (+DockOffsetMeters, 0 m for the rowboat) and is hidden until BoatRepair is Repaired; its three parts are the BoatPartAnchors.",
+    "routes": [
+        {
+            "id": "a0",
+            "label": "direct: home-spawn-0 -> pier/boat",
+            "start": "(-1.5, -49.5)",
+            "end": "(9, -4)",
+            "waypoints": [
+                {
+                    "x": -1.5,
+                    "y": -49.5
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -49.5
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                }
+            ],
+            "plannedLength": 58.68199920654297,
+            "drivenLength": 58.597999572753909,
+            "simSeconds": 14.65999984741211,
+            "secondsAtWalkSpeed": 14.64900016784668,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 733,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": -3.994999885559082,
+                "y": -42.82899856567383
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -6.75
+            },
+            "narrowestBetween": "P46_ContinuousTown/Edge_PlotNorthWest | P4_HomeInteractionRig/HomeBed_0",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 9.0,
+                "y": -4.039999961853027
+            },
+            "failures": []
+        },
+        {
+            "id": "a1",
+            "label": "direct: home-spawn-1 -> pier/boat",
+            "start": "(1.5, -49.5)",
+            "end": "(9, -4)",
+            "waypoints": [
+                {
+                    "x": 1.5,
+                    "y": -49.5
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -49.5
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                }
+            ],
+            "plannedLength": 58.68199920654297,
+            "drivenLength": 58.597999572753909,
+            "simSeconds": 14.65999984741211,
+            "secondsAtWalkSpeed": 14.64900016784668,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 733,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": 3.994999885559082,
+                "y": -42.82899856567383
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -6.75
+            },
+            "narrowestBetween": "P4_HomeInteractionRig/HomeBed_3 | P46_ContinuousTown/Edge_PlotNorthEast",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 9.0,
+                "y": -4.039999961853027
+            },
+            "failures": []
+        },
+        {
+            "id": "a2",
+            "label": "direct: home-spawn-2 -> pier/boat",
+            "start": "(-1.5, -48.25)",
+            "end": "(9, -4)",
+            "waypoints": [
+                {
+                    "x": -1.5,
+                    "y": -48.25
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -48.25
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                }
+            ],
+            "plannedLength": 57.43199920654297,
+            "drivenLength": 57.391998291015628,
+            "simSeconds": 14.359999656677246,
+            "secondsAtWalkSpeed": 14.347999572753907,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 718,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": -3.994999885559082,
+                "y": -42.82899856567383
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -6.75
+            },
+            "narrowestBetween": "P46_ContinuousTown/Edge_PlotNorthWest | P4_HomeInteractionRig/HomeBed_0",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 9.0,
+                "y": -4.039999961853027
+            },
+            "failures": []
+        },
+        {
+            "id": "a3",
+            "label": "direct: home-spawn-3 -> pier/boat",
+            "start": "(1.5, -48.25)",
+            "end": "(9, -4)",
+            "waypoints": [
+                {
+                    "x": 1.5,
+                    "y": -48.25
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -48.25
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                }
+            ],
+            "plannedLength": 57.43199920654297,
+            "drivenLength": 57.391998291015628,
+            "simSeconds": 14.359999656677246,
+            "secondsAtWalkSpeed": 14.347999572753907,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 718,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": 3.994999885559082,
+                "y": -42.82899856567383
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -6.75
+            },
+            "narrowestBetween": "P4_HomeInteractionRig/HomeBed_3 | P46_ContinuousTown/Edge_PlotNorthEast",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 9.0,
+                "y": -4.039999961853027
+            },
+            "failures": []
+        },
+        {
+            "id": "b",
+            "label": "shopping: home -> equipment -> pier",
+            "start": "(-1.5, -49.5)",
+            "end": "(9, -4)",
+            "waypoints": [
+                {
+                    "x": -1.5,
+                    "y": -49.5
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -49.5
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": -10.0,
+                    "y": -27.299999237060548
+                },
+                {
+                    "x": -6.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                }
+            ],
+            "plannedLength": 69.66999816894531,
+            "drivenLength": 69.74500274658203,
+            "simSeconds": 17.520000457763673,
+            "secondsAtWalkSpeed": 17.43600082397461,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 876,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": -3.994999885559082,
+                "y": -42.82899856567383
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -6.75
+            },
+            "narrowestBetween": "P46_ContinuousTown/Edge_PlotNorthWest | P4_HomeInteractionRig/HomeBed_0",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 9.0,
+                "y": -4.039999961853027
+            },
+            "failures": []
+        },
+        {
+            "id": "c",
+            "label": "selling: pier/DiveExit -> fish -> recording -> home PC -> bed",
+            "start": "(9, -4)",
+            "end": "(3.45, -47.52)",
+            "waypoints": [
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": -3.299999952316284,
+                    "y": -27.299999237060548
+                },
+                {
+                    "x": 3.4000000953674318,
+                    "y": -27.299999237060548
+                },
+                {
+                    "x": 0.5,
+                    "y": -27.299999237060548
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -50.400001525878909
+                },
+                {
+                    "x": 3.9000000953674318,
+                    "y": -50.400001525878909
+                },
+                {
+                    "x": 3.450000047683716,
+                    "y": -47.52199935913086
+                }
+            ],
+            "plannedLength": 67.99600219726563,
+            "drivenLength": 67.94000244140625,
+            "simSeconds": 17.0,
+            "secondsAtWalkSpeed": 16.985000610351564,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 850,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": 3.759999990463257,
+                "y": -42.779998779296878
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -4.0
+            },
+            "narrowestBetween": "P46_ContinuousTown/Edge_ApproachEast | P4_HomeInteractionRig/HomeBed_3",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 3.4549999237060549,
+                "y": -47.55500030517578
+            },
+            "failures": []
+        },
+        {
+            "id": "d1",
+            "label": "water in: home -> wade -> sea",
+            "start": "(-1.5, -49.5)",
+            "end": "(-6.5, -5)",
+            "waypoints": [
+                {
+                    "x": -1.5,
+                    "y": -49.5
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -49.5
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -12.5
+                },
+                {
+                    "x": -6.5,
+                    "y": -11.199999809265137
+                },
+                {
+                    "x": -6.5,
+                    "y": -5.0
+                }
+            ],
+            "plannedLength": 56.854000091552737,
+            "drivenLength": 52.05099868774414,
+            "simSeconds": 13.020000457763672,
+            "secondsAtWalkSpeed": 13.012999534606934,
+            "expectsSea": true,
+            "reachedSea": true,
+            "fell": false,
+            "stuck": false,
+            "frames": 651,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 4.800000190734863,
+            "narrowestAt": {
+                "x": -3.994999885559082,
+                "y": -42.82899856567383
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 0.0,
+                "y": -28.25
+            },
+            "narrowestBetween": "P46_ContinuousTown/Edge_PlotNorthWest | P4_HomeInteractionRig/HomeBed_0",
+            "narrowestOutsideHomeBetween": "Storefront/Counter | Storefront/Counter",
+            "endPosition": {
+                "x": -6.5,
+                "y": -9.760000228881836
+            },
+            "failures": []
+        },
+        {
+            "id": "d2",
+            "label": "water out: ramp waterline -> DiveExit -> home",
+            "start": "(6.17, -9)",
+            "end": "(-1.5, -49.5)",
+            "waypoints": [
+                {
+                    "x": 6.171999931335449,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 0.0,
+                    "y": -16.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -36.0
+                },
+                {
+                    "x": 0.0,
+                    "y": -42.0
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -42.974998474121097
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -49.5
+                },
+                {
+                    "x": -1.5,
+                    "y": -49.5
+                }
+            ],
+            "plannedLength": 56.5099983215332,
+            "drivenLength": 56.4370002746582,
+            "simSeconds": 14.119999885559082,
+            "secondsAtWalkSpeed": 14.109000205993653,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 706,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5570000410079957,
+            "narrowestMargin": 0.6970000267028809,
+            "narrowestOutsideHomeWidth": 3.950000047683716,
+            "narrowestAt": {
+                "x": -3.759999990463257,
+                "y": -42.779998779296878
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 6.171999931335449,
+                "y": -9.0
+            },
+            "narrowestBetween": "P4_HomeInteractionRig/HomeBed_0 | P46_ContinuousTown/Edge_ApproachWest",
+            "narrowestOutsideHomeBetween": "ground ends | step",
+            "endPosition": {
+                "x": -1.5,
+                "y": -49.5
+            },
+            "failures": []
+        },
+        {
+            "id": "e",
+            "label": "optional walk: reachable town perimeter + pier spur",
+            "start": "(0, -12.5)",
+            "end": "(0, -12.5)",
+            "waypoints": [
+                {
+                    "x": 0.0,
+                    "y": -12.5
+                },
+                {
+                    "x": -13.800000190734864,
+                    "y": -13.800000190734864
+                },
+                {
+                    "x": -13.399999618530274,
+                    "y": -15.199999809265137
+                },
+                {
+                    "x": -13.399999618530274,
+                    "y": -35.400001525878909
+                },
+                {
+                    "x": -3.200000047683716,
+                    "y": -35.400001525878909
+                },
+                {
+                    "x": -3.200000047683716,
+                    "y": -42.599998474121097
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -43.0
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -50.5
+                },
+                {
+                    "x": -2.5,
+                    "y": -50.5
+                },
+                {
+                    "x": -2.5,
+                    "y": -53.0
+                },
+                {
+                    "x": 2.5,
+                    "y": -53.0
+                },
+                {
+                    "x": 2.5,
+                    "y": -50.5
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -50.5
+                },
+                {
+                    "x": 4.699999809265137,
+                    "y": -43.0
+                },
+                {
+                    "x": 3.200000047683716,
+                    "y": -42.599998474121097
+                },
+                {
+                    "x": 3.200000047683716,
+                    "y": -35.400001525878909
+                },
+                {
+                    "x": 13.399999618530274,
+                    "y": -35.400001525878909
+                },
+                {
+                    "x": 13.399999618530274,
+                    "y": -15.199999809265137
+                },
+                {
+                    "x": 13.800000190734864,
+                    "y": -13.800000190734864
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -4.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -9.0
+                },
+                {
+                    "x": 9.0,
+                    "y": -12.5
+                },
+                {
+                    "x": 0.0,
+                    "y": -12.5
+                }
+            ],
+            "plannedLength": 155.4510040283203,
+            "drivenLength": 155.00100708007813,
+            "simSeconds": 38.779998779296878,
+            "secondsAtWalkSpeed": 38.75,
+            "expectsSea": false,
+            "reachedSea": false,
+            "fell": false,
+            "stuck": false,
+            "frames": 1939,
+            "blockedFrames": 0,
+            "narrowestWidth": 1.5779999494552613,
+            "narrowestMargin": 0.7179999947547913,
+            "narrowestOutsideHomeWidth": 2.0,
+            "narrowestAt": {
+                "x": -3.628999948501587,
+                "y": -42.7140007019043
+            },
+            "narrowestOutsideHomeAt": {
+                "x": 9.0,
+                "y": -6.75
+            },
+            "narrowestBetween": "P4_HomeInteractionRig/HomeBed_0 | P46_ContinuousTown/Edge_ApproachWest",
+            "narrowestOutsideHomeBetween": "ground ends | ground ends",
+            "endPosition": {
+                "x": 0.03999999910593033,
+                "y": -12.5
+            },
+            "failures": []
+        }
+    ],
+    "pinches": [
+        {
+            "at": "bed row",
+            "between": "P46_ContinuousTown/HomeLeft | P4_HomeInteractionRig/HomeBed_0",
+            "width": 1.7480000257492066,
+            "margin": 0.8880000114440918,
+            "center": {
+                "x": -4.948999881744385,
+                "y": -44.54999923706055
+            }
+        },
+        {
+            "at": "bed row",
+            "between": "P4_HomeInteractionRig/HomeBed_0 | P4_HomeInteractionRig/HomeBed_1",
+            "width": 1.0479999780654908,
+            "margin": 0.18799999356269837,
+            "center": {
+                "x": -2.2990000247955324,
+                "y": -44.54999923706055
+            }
+        },
+        {
+            "at": "bed row",
+            "between": "P4_HomeInteractionRig/HomeBed_1 | P4_HomeInteractionRig/HomeBed_2",
+            "width": 1.0479999780654908,
+            "margin": 0.18799999356269837,
+            "center": {
+                "x": 0.0010000000474974514,
+                "y": -44.54999923706055
+            }
+        },
+        {
+            "at": "bed row",
+            "between": "P4_HomeInteractionRig/HomeBed_2 | P4_HomeInteractionRig/HomeBed_3",
+            "width": 1.0479999780654908,
+            "margin": 0.18799999356269837,
+            "center": {
+                "x": 2.3010001182556154,
+                "y": -44.54999923706055
+            }
+        },
+        {
+            "at": "bed row",
+            "between": "P4_HomeInteractionRig/HomeBed_3 | P46_ContinuousTown/HomeRight",
+            "width": 1.7480000257492066,
+            "margin": 0.8880000114440918,
+            "center": {
+                "x": 4.951000213623047,
+                "y": -44.54999923706055
+            }
+        },
+        {
+            "at": "door line (0.2m inside the facade)",
+            "between": "P46_ContinuousTown/HomeLeft | P46_ContinuousTown/HomeRight",
+            "width": 11.64799976348877,
+            "margin": 10.788000106811524,
+            "center": {
+                "x": 0.0010000000474974514,
+                "y": -42.20000076293945
+            }
+        }
+    ],
+    "spawnToNearestBedExit": [
+        2.007999897003174,
+        2.007999897003174,
+        0.8069999814033508,
+        0.8069999814033508
+    ],
+    "spawnNearestBed": [
+        "bed-1",
+        "bed-2",
+        "bed-1",
+        "bed-2"
+    ],
+    "sightlines": [
+        {
+            "from": "home door",
+            "target": "shop shop-equipment",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -10.0,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 16.68000030517578,
+            "horizontalAngle": -36.834999084472659,
+            "verticalAngle": 0.35199999809265139,
+            "projectedHeightPx1080": 185.31900024414063,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "shop buyer-fish",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -3.299999952316284,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 13.751999855041504,
+            "horizontalAngle": -13.885000228881836,
+            "verticalAngle": 0.4269999861717224,
+            "projectedHeightPx1080": 224.7760009765625,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "shop buyer-recording",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 3.4000000953674318,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 13.776000022888184,
+            "horizontalAngle": 14.288000106811524,
+            "verticalAngle": 0.4259999990463257,
+            "projectedHeightPx1080": 224.37899780273438,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "shop vendor-vehicle",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 10.100000381469727,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 16.739999771118165,
+            "horizontalAngle": 37.10900115966797,
+            "verticalAngle": 0.35100001096725466,
+            "projectedHeightPx1080": 184.6529998779297,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "pier (Dock_Town)",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.199999809265137,
+                "z": -5.25
+            },
+            "headingYaw": 0.0,
+            "distance": 37.54499816894531,
+            "horizontalAngle": 13.869999885559082,
+            "verticalAngle": -2.6689999103546144,
+            "projectedHeightPx1080": 9.954000473022461,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "Npc_buyer-recording/Body"
+        },
+        {
+            "from": "home door",
+            "target": "broken-rowboat-berth",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.5,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 0.0,
+            "distance": 42.26900100708008,
+            "horizontalAngle": 12.293999671936036,
+            "verticalAngle": -1.965000033378601,
+            "projectedHeightPx1080": 22.11400032043457,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "boat part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 31.56999969482422,
+            "horizontalAngle": -22.340999603271486,
+            "verticalAngle": -2.811000108718872,
+            "projectedHeightPx1080": 17.7549991607666,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "boat part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 0.0,
+            "distance": 34.32099914550781,
+            "horizontalAngle": -10.916999816894532,
+            "verticalAngle": -4.910999774932861,
+            "projectedHeightPx1080": 16.291000366210939,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "Storefront/Counter"
+        },
+        {
+            "from": "home door",
+            "target": "boat part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 31.76300048828125,
+            "horizontalAngle": 23.174999237060548,
+            "verticalAngle": -2.7939999103546144,
+            "projectedHeightPx1080": 17.64699935913086,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "shop shop-equipment",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -10.0,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 10.020999908447266,
+            "horizontalAngle": -86.27999877929688,
+            "verticalAngle": 0.5860000252723694,
+            "projectedHeightPx1080": 308.4519958496094,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "shop buyer-fish",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -3.299999952316284,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 3.36299991607666,
+            "horizontalAngle": -78.8550033569336,
+            "verticalAngle": 1.746000051498413,
+            "projectedHeightPx1080": 918.6329956054688,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "shop buyer-recording",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 3.4000000953674318,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 3.4619998931884767,
+            "horizontalAngle": 79.17500305175781,
+            "verticalAngle": 1.6959999799728394,
+            "projectedHeightPx1080": 892.60400390625,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "shop vendor-vehicle",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 10.100000381469727,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 0.0,
+            "distance": 10.121000289916993,
+            "horizontalAngle": 86.31700134277344,
+            "verticalAngle": 0.5799999833106995,
+            "projectedHeightPx1080": 305.4110107421875,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "pier (Dock_Town)",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.199999809265137,
+                "z": -5.25
+            },
+            "headingYaw": 0.0,
+            "distance": 25.398000717163087,
+            "horizontalAngle": 20.753999710083009,
+            "verticalAngle": -3.941999912261963,
+            "projectedHeightPx1080": 14.696000099182129,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "broken-rowboat-berth",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.5,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 0.0,
+            "distance": 29.982999801635743,
+            "horizontalAngle": 17.468000411987306,
+            "verticalAngle": -2.7690000534057619,
+            "projectedHeightPx1080": 31.159000396728517,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "boat part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 20.402000427246095,
+            "horizontalAngle": -36.027000427246097,
+            "verticalAngle": -4.34499979019165,
+            "projectedHeightPx1080": 27.427000045776368,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "boat part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 0.0,
+            "distance": 21.982999801635743,
+            "horizontalAngle": -17.198999404907228,
+            "verticalAngle": -7.639999866485596,
+            "projectedHeightPx1080": 25.302000045776368,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "P46_ContinuousTown/MainStreet"
+        },
+        {
+            "from": "town square",
+            "target": "boat part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 20.700000762939454,
+            "horizontalAngle": 37.14699935913086,
+            "verticalAngle": -4.2820000648498539,
+            "projectedHeightPx1080": 27.034000396728517,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "home door",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 0.0,
+                "y": 9.899999618530274,
+                "z": -42.0
+            },
+            "headingYaw": 0.0,
+            "distance": 13.0,
+            "horizontalAngle": 180.0,
+            "verticalAngle": -0.2199999988079071,
+            "projectedHeightPx1080": 215.83900451660157,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "shop shop-equipment",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -10.0,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 18.740999221801759,
+            "horizontalAngle": 32.249000549316409,
+            "verticalAngle": 0.31299999356269839,
+            "projectedHeightPx1080": 164.94200134277345,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "shop buyer-fish",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -3.299999952316284,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 16.190000534057618,
+            "horizontalAngle": 11.76099967956543,
+            "verticalAngle": 0.3630000054836273,
+            "projectedHeightPx1080": 190.93099975585938,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "shop buyer-recording",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 3.4000000953674318,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 16.209999084472658,
+            "horizontalAngle": -12.107000350952149,
+            "verticalAngle": 0.3619999885559082,
+            "projectedHeightPx1080": 190.68800354003907,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "shop vendor-vehicle",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 10.100000381469727,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 18.79400062561035,
+            "horizontalAngle": -32.50600051879883,
+            "verticalAngle": 0.31200000643730166,
+            "projectedHeightPx1080": 164.4720001220703,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "pier (Dock_Town)",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.199999809265137,
+                "z": -5.25
+            },
+            "headingYaw": 180.0,
+            "distance": 11.557000160217286,
+            "horizontalAngle": -128.85299682617188,
+            "verticalAngle": -8.611000061035157,
+            "projectedHeightPx1080": 32.00699996948242,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "broken-rowboat-berth",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.5,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 180.0,
+            "distance": 15.079999923706055,
+            "horizontalAngle": -143.35800170898438,
+            "verticalAngle": -5.492000102996826,
+            "projectedHeightPx1080": 61.737998962402347,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "boat part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 180.0,
+            "distance": 12.0,
+            "horizontalAngle": 90.0,
+            "verticalAngle": -7.360000133514404,
+            "projectedHeightPx1080": 46.380001068115237,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "boat part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 180.0,
+            "distance": 7.906000137329102,
+            "horizontalAngle": 124.69499969482422,
+            "verticalAngle": -20.45599937438965,
+            "projectedHeightPx1080": 66.50900268554688,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "boat part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 180.0,
+            "distance": 12.5,
+            "horizontalAngle": -90.0,
+            "verticalAngle": -7.068999767303467,
+            "projectedHeightPx1080": 44.55400085449219,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "coast (beach middle)",
+            "target": "home door",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 0.0,
+                "y": 9.899999618530274,
+                "z": -42.0
+            },
+            "headingYaw": 180.0,
+            "distance": 29.5,
+            "horizontalAngle": 0.0,
+            "verticalAngle": -0.09700000286102295,
+            "projectedHeightPx1080": 95.11599731445313,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "shop shop-equipment",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -10.0,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 30.493000030517579,
+            "horizontalAngle": 38.542999267578128,
+            "verticalAngle": 0.19300000369548798,
+            "projectedHeightPx1080": 101.3740005493164,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "shop buyer-fish",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -3.299999952316284,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 26.834999084472658,
+            "horizontalAngle": 27.2810001373291,
+            "verticalAngle": 0.21899999678134919,
+            "projectedHeightPx1080": 115.19300079345703,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "shop buyer-recording",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 3.4000000953674318,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 24.49799919128418,
+            "horizontalAngle": 13.21399974822998,
+            "verticalAngle": 0.23999999463558198,
+            "projectedHeightPx1080": 126.1780014038086,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "shop vendor-vehicle",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 10.100000381469727,
+                "y": 10.052000045776368,
+                "z": -28.350000381469728
+            },
+            "headingYaw": 180.0,
+            "distance": 23.875,
+            "horizontalAngle": -2.6410000324249269,
+            "verticalAngle": 0.2460000067949295,
+            "projectedHeightPx1080": 129.4720001220703,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "broken-rowboat-berth",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.5,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 180.0,
+            "distance": 4.099999904632568,
+            "horizontalAngle": 180.0,
+            "verticalAngle": -19.476999282836915,
+            "projectedHeightPx1080": 215.07000732421876,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "boat part boat-part-hull",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 180.0,
+            "distance": 22.472000122070314,
+            "horizontalAngle": 69.14600372314453,
+            "verticalAngle": -3.946000099182129,
+            "projectedHeightPx1080": 24.913000106811525,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "boat part boat-part-engine",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 180.0,
+            "distance": 15.890000343322754,
+            "horizontalAngle": 77.2760009765625,
+            "verticalAngle": -10.512999534606934,
+            "projectedHeightPx1080": 34.722999572753909,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "boat part boat-part-fuel-tank",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 180.0,
+            "distance": 8.732000350952149,
+            "horizontalAngle": -23.628999710083009,
+            "verticalAngle": -10.0649995803833,
+            "projectedHeightPx1080": 63.27799987792969,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "home door",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 0.0,
+                "y": 9.899999618530274,
+                "z": -42.0
+            },
+            "headingYaw": 180.0,
+            "distance": 38.564998626708987,
+            "horizontalAngle": 13.496000289916993,
+            "verticalAngle": -0.07400000095367432,
+            "projectedHeightPx1080": 72.75800323486328,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        }
+    ],
+    "notMeasured": [
+        "swimming legs (sea part of the wade/ramp routes): swim speed and buoyancy are not the walk controller",
+        "real 1/2/4-process walks, network latency, build frame time",
+        "fog/day-night readability: sight lines are geometric only (no fog, light or contrast)",
+        "turning, stopping at counters and UI time: times are pure locomotion at walkSpeed",
+        "P4.5 DevelopmentVisuals props (collider-less by design) and the runtime boat hull itself"
+    ]
+}
