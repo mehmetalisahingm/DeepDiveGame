@@ -1,0 +1,73 @@
+P46_PRODUCT step=0 sub=0 wp=0 pos=(-1.50, 8.48, -49.50) phase=Prep balance=0 parts=0 part=0 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 1:Prep:(-1.50, 8.48, -49.50)
+P46_PRODUCT step=1 sub=0 wp=3 pos=(-0.03, 8.48, -36.78) phase=Prep balance=0 parts=0 part=0 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=1 sub=0 wp=5 pos=(-1.58, 8.48, -16.98) phase=Prep balance=0 parts=0 part=0 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=1 sub=1 wp=0 pos=(-6.79, 8.48, -11.29) phase=Prep balance=0 parts=1 part=1 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=1 sub=1 wp=2 pos=(-5.07, 8.48, -10.98) phase=Prep balance=0 parts=3 part=2 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 2:Dive:(11.27, 8.48, -12.39)
+P46_PRODUCT step=2 sub=0 wp=0 pos=(11.27, 8.48, -12.39) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=2 sub=0 wp=2 pos=(-6.39, 7.75, -9.27) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=2 sub=1 wp=3 pos=(-5.20, 5.70, -1.68) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P2_CATCH_TAKEN capture=cf60de4554b04d828f58e275111ed3e4 dive=d5c9040a80aa4d7e8cd67df2660442d7 species=sea_bass grams=1437 player=0
+P46_PRODUCT step=2 sub=1 wp=3 pos=(-2.74, 4.75, 5.74) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 3:Dive:(-7.43, 5.49, -4.62)
+P46_PRODUCT step=3 sub=0 wp=0 pos=(-6.56, 6.99, -7.73) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=3 sub=0 wp=3 pos=(8.69, 8.48, -12.19) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=3 sub=0 wp=4 pos=(8.24, 8.48, -10.00) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=3 sub=0 wp=4 pos=(8.24, 8.48, -10.00) phase=Dive balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 4:Return:(8.24, 8.48, -10.00)
+P46_PRODUCT step=4 sub=0 wp=0 pos=(-1.26, 8.48, -24.46) phase=Return balance=0 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_FISH_NEXT_DIVE id=7 dive=934564b1ed8d4911adc01c823c98088d
+P46_PRODUCT_STEP 5:Dive:(-3.21, 8.48, -27.27)
+P46_PRODUCT step=5 sub=0 wp=0 pos=(5.04, 8.48, -17.29) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=5 sub=0 wp=1 pos=(-5.07, 8.48, -11.34) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=5 sub=1 wp=3 pos=(-6.15, 5.93, -4.14) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P2_CATCH_TAKEN capture=6916f447e9dd49ebad09c6066ab43de1 dive=934564b1ed8d4911adc01c823c98088d species=sea_bass grams=1236 player=0
+P46_PRODUCT step=5 sub=1 wp=3 pos=(-5.03, 4.89, 1.03) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 6:Dive:(-7.44, 5.49, -4.62)
+P46_PRODUCT step=6 sub=0 wp=1 pos=(-3.78, 8.48, -11.58) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=6 sub=0 wp=4 pos=(8.26, 8.48, -10.09) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=6 sub=0 wp=4 pos=(8.26, 8.48, -10.09) phase=Dive balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 7:Return:(8.26, 8.48, -10.09)
+P46_PRODUCT step=7 sub=0 wp=0 pos=(6.02, 8.48, -14.02) phase=Return balance=120 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=7 sub=1 wp=0 pos=(-3.53, 8.48, -27.27) phase=Return balance=320 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_FISH_NEXT_DIVE id=8 dive=de6ebc13bc4f4aecb5bc656883a8e2b1
+P46_PRODUCT_STEP 8:Dive:(-9.83, 8.48, -27.40)
+P46_PRODUCT step=8 sub=0 wp=0 pos=(-4.06, 8.48, -22.83) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=False held=Harpoon tier=Basic open=0 valid=0 hit= status=
+P46_PRODUCT step=8 sub=0 wp=1 pos=(5.46, 8.48, -12.29) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=False held=Harpoon tier=Basic open=0 valid=0 hit=NetworkDiver(Clone) status=
+P46_PRODUCT step=8 sub=1 wp=3 pos=(-6.44, 6.10, -5.17) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=False held=Harpoon tier=Basic open=0 valid=0 hit= status=
+P46_PRODUCT step=8 sub=1 wp=3 pos=(-1.96, 2.01, 8.45) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=False held=Harpoon tier=Basic open=0 valid=0 hit= status=
+P46_PRODUCT step=8 sub=1 wp=3 pos=(-0.41, 2.29, 14.94) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=True held=Camera tier=Basic open=1 valid=1,939998 hit=Fish_SeaBass status=RECORDING STARTED
+P46_PRODUCT step=8 sub=1 wp=3 pos=(-0.41, 2.29, 14.94) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=True held=Camera tier=Basic open=1 valid=6,939994 hit=Fish_SeaBass status=RECORDING STARTED
+P46_PRODUCT step=8 sub=1 wp=3 pos=(-0.42, 3.55, 12.56) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=True held=Camera tier=Basic open=1 valid=11,28007 hit=Fish_SeaBass status=RECORDING STARTED
+P46_PRODUCT step=8 sub=1 wp=3 pos=(-5.71, 5.03, -0.46) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_REC active=False held=Camera tier=Basic open=0 valid=0 hit=Beach_Wade status=RECORDING STOPPED
+P46_PRODUCT_STEP 9:Dive:(-7.45, 5.50, -4.63)
+P46_PRODUCT step=9 sub=0 wp=1 pos=(-1.75, 8.48, -12.10) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=9 sub=0 wp=4 pos=(8.25, 8.48, -10.02) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=9 sub=0 wp=4 pos=(8.25, 8.48, -10.02) phase=Dive balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 10:Return:(8.25, 8.48, -10.02)
+P46_PRODUCT step=10 sub=0 wp=1 pos=(8.54, 8.48, -11.36) phase=Return balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=10 sub=1 wp=3 pos=(8.45, 8.35, 0.97) phase=Return balance=170 parts=7 part=3 seated=True boat=(9.00, 8.00, 1.85) boatResult=
+P46_PRODUCT step=10 sub=1 wp=3 pos=(8.45, 8.35, 6.52) phase=Return balance=170 parts=7 part=3 seated=True boat=(9.00, 8.00, 7.42) boatResult=
+P46_PRODUCT_STEP 11:Return:(8.45, 8.35, 7.60)
+P46_PRODUCT_STEP 12:Return:(10.75, 8.00, 9.00)
+P46_PRODUCT step=12 sub=0 wp=0 pos=(9.55, 8.35, 9.30) phase=Return balance=170 parts=7 part=3 seated=True boat=(9.00, 8.00, 8.50) boatResult=
+P46_PRODUCT step=12 sub=0 wp=0 pos=(8.45, 8.35, 3.21) phase=Return balance=170 parts=7 part=3 seated=True boat=(9.00, 8.00, 4.09) boatResult=
+P46_PRODUCT_STEP 13:Return:(9.00, 8.48, -3.70)
+P46_PRODUCT step=13 sub=0 wp=0 pos=(9.00, 8.48, -6.74) phase=Return balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=13 sub=0 wp=4 pos=(0.01, 8.48, -18.08) phase=Return balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=13 sub=0 wp=6 pos=(0.00, 8.48, -38.05) phase=Return balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=13 sub=0 wp=10 pos=(2.24, 8.48, -50.39) phase=Return balance=170 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT step=13 sub=2 wp=10 pos=(2.24, 8.48, -50.39) phase=Return balance=320 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 14:Lobby:(2.24, 8.48, -50.39)
+P46_PRODUCT step=14 sub=0 wp=3 pos=(-3.21, 8.48, -47.56) phase=Lobby balance=320 parts=7 part=3 seated=False boat=(9.00, 8.00, -0.40) boatResult=
+P46_PRODUCT_STEP 15:Lobby:(-1.50, 8.48, -49.50)
+P46_PRODUCT_RESULT passed=True failure=
