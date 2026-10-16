@@ -1,8 +1,11 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='')
 $ErrorActionPreference='Stop'
 $productRoot=Split-Path -Parent $PSScriptRoot
-$productBuild=Join-Path $productRoot 'Builds/P1-Integrated/DeepDiveGame-P1.exe'
-if (-not (Test-Path -LiteralPath $productBuild)) { throw 'Build the integrated Windows player first.' }
+$productIsWindows=$env:OS -eq 'Windows_NT'
+if ($BuildPath) { $productBuild=$BuildPath }
+elseif ($productIsWindows) { $productBuild=Join-Path $productRoot 'Builds/P1-Integrated/DeepDiveGame-P1.exe' }
+else { $productBuild=Join-Path $productRoot 'Builds/P1-Integrated/DeepDiveGame-P1.x86_64' }
+if (-not (Test-Path -LiteralPath $productBuild)) { throw "Integrated build not found: $productBuild" }
 $productRun=Join-Path $productRoot ('Logs/P46-product-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + $Players)
 New-Item -ItemType Directory -Path $productRun | Out-Null
 $productProcesses=@()
@@ -14,8 +17,13 @@ try {
             '-p46-day-count',$Players,'-p46-day-slot',$productSlot,'-p46-day-port',$Port,
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
-        else { $productArgs+='-nographics' }
-        $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru
+        elseif ($productIsWindows) { $productArgs+='-nographics' }
+        else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
+        if ($productIsWindows) {
+            $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru
+        } else {
+            $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -PassThru
+        }
         $productProcesses += [pscustomobject]@{Slot=$productSlot;Process=$productProcess;Report=$productReport}
         $productConnectLimit=(Get-Date).AddSeconds(20)
         do {
@@ -49,7 +57,11 @@ try {
         '-p46-day-role','host','-p46-day-count',1,'-p46-day-slot',0,'-p46-day-port',($Port+1),
         '-p46-day-reload',1,'-p46-day-baseline',('"{0}"' -f (Join-Path $productRun 'player0.json')),
         '-p1-report',('"{0}"' -f $productReload),'-logFile',('"{0}"' -f (Join-Path $productRun 'reload.log')))
-    $productReloadProcess=Start-Process -FilePath $productBuild -ArgumentList $productReloadArgs -WindowStyle Hidden -PassThru
+    if ($productIsWindows) {
+        $productReloadProcess=Start-Process -FilePath $productBuild -ArgumentList $productReloadArgs -WindowStyle Hidden -PassThru
+    } else {
+        $productReloadProcess=Start-Process -FilePath $productBuild -ArgumentList $productReloadArgs -PassThru
+    }
     $productProcesses += [pscustomobject]@{Slot='reload';Process=$productReloadProcess;Report=$productReload}
     if (-not $productReloadProcess.WaitForExit(45000)) { throw 'Reload timed out.' }
     if (-not (Test-Path -LiteralPath $productReload)) { throw 'Missing reload report.' }
