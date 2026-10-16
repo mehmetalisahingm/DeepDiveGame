@@ -729,7 +729,15 @@ namespace DeepDive.P1.Lab
                 nextInput = Time.realtimeSinceStartupAsDouble + 1.0 / 30;
                 if (result.dive && phase == SessionPhase.Lobby && (MediaFlow || Acceptance || Storage) &&
                     !WalkHomeAfterDive(local, players)) return;
-                var move = scene == SessionNetworkAdapter.DiveScene ?
+                // Legacy P4.5 role-effects room smoke: actual clients can spawn facing a
+                // forward-obstructed wall while the host can still travel +Z. Exercise a
+                // real owner-input lateral walk toward the ROOM CENTER before diving.
+                // Actual movement is measured below; no teleport or test-result seeding.
+                var roleRoomWalk = RoleEffects && scene == SessionNetworkAdapter.PrepScene &&
+                    elapsed > 1f && elapsed < 9f;
+                var roomDirection = starts.TryGetValue(local.OwnerClientId, out var startPosition) &&
+                    startPosition.x > 0.1f ? Vector3.left : Vector3.right;
+                var move = roleRoomWalk ? roomDirection : scene == SessionNetworkAdapter.DiveScene ?
                     // A long upward probe reaches the y=6 surface-return zone and permanently
                     // marks the diver safe before the hunt/recording test even starts.
                     (elapsed > 1 && elapsed < 1.6f ? Vector3.up : Vector3.zero) :
@@ -757,7 +765,12 @@ namespace DeepDive.P1.Lab
             foreach (var player in players)
             {
                 var delta = player.transform.position - starts[player.OwnerClientId];
-                if (scene == SessionNetworkAdapter.PrepScene && delta.z > 0.5f) walked.Add(player.OwnerClientId);
+                // Count actual dry horizontal displacement in the room. Direction is
+                // not part of the locomotion contract; a client spawned near a north
+                // collider can walk sideways but have zero net positive Z displacement.
+                if (scene == SessionNetworkAdapter.PrepScene &&
+                    new Vector2(delta.x, delta.z).magnitude > 0.5f && Mathf.Abs(delta.y) < 0.25f)
+                    walked.Add(player.OwnerClientId);
                 if (scene == SessionNetworkAdapter.DiveScene && player.Swimming.Value)
                 {
                     var id = player.OwnerClientId;
