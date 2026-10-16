@@ -2,7 +2,13 @@ name: P4.6 three-day and integrated-world candidate (NOT final team acceptance)
 
 on:
   push:
-    branches: ['codex/p46-three-day-acceptance']
+    branches: ['codex/p4-integration']
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - '.github/workflows/p46-three-day-candidate.yml'
+      - 'tools/Test-P1-Integrated.ps1'
+      - 'Assets/Tests/P1/Runtime/IntegratedSmokeDriver.cs'
   workflow_dispatch:
 
 permissions:
