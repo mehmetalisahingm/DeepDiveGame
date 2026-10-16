@@ -54,3 +54,11 @@ DeepDive.P1.Lab.dll      7eeaaf76a5a9c82c166bb6d6031a00607681a54a32598b43949af19
 ## Açık kalan kabul
 
 Yeni tur bir günlük teknik hareket/etkileşim/uyku turudur; bu turun içinde av, klip kaydı/yayın ve tekneye binme yapılmaz. Gerçek medya/av ayrı alt sistem koşularında doğrulanmıştır; bunlar tek bir tam ürün oturumuna birleştirilmiş veya üç güne yayılmış kabul sayılmaz. Yeni sanat/şehir ölçeği, beş tür, fiziksel taşıma/keser/çivi tamiri, görsel değerlendirme ve ayrı bilgisayar/internet dört oyuncu/üç gün kapıları açık kalır. #138/#140/#141 ve #153–#157'nin diğer kabul şartları kapanmış sayılmaz. Utku/Mert incelemesi, birleşmiş build ve gerçek ekip kabulü bu rapordan üretilmez. Önceden var olan beş FBX `.meta` silinmesi commit'e alınmadı.
+
+## 16 Ekim — Birleşmiş kaynakta tekrar kontrol
+
+Kullanıcının doğrudan birleşim talimatıyla PR #169, `72c5bbc79451ddcacdd6ad567a1e75b83e80010b` olarak `codex/p4-integration` dalına birleşti. `git diff a7b36b0 72c5bbc` boş: kaynak ağacı aynı, çakışma çözümüyle ürün değişikliği yok. PR'ın çalışan iki EditMode/Windows CI koşusu SUCCESS; eski iptal edilmiş koşu ve atlanan fleet/boss CI işleri geçmiş test sayılmaz.
+
+Bu birleşmiş commit'ten `Build-P1.ps1 -Integrated` yeniden Windows build aldı (PASS). `Test-P46-ContinuousWorld.ps1 -Players 2 -Port 24677` aynı PC'de host+guest turunu yeniden tamamladı: her iki oyuncu PASS, worldLoads=1, ev/dükkân/kuru iskele/su/PC/H/erken uyku/gün 2 doğru. Aynı kampanya yeni host sürecinde açıldı; gün 2, erken-uyku özeti ve ev spawn'ı korundu. Koşu `P46-world-20261016-134318-2`; [host](evidence/p157-world/merged-player0.json), [guest](evidence/p157-world/merged-player1.json), [yeni süreç](evidence/p157-world/merged-reload.json).
+
+Birleşmiş build için önceki açık kontrol bu dar kapsamda tamamlandı. Tam ürün döngüsü, sanat/tür ve ayrı bilgisayar/üç gün kapıları açık. Yeni #170, bu turda olmayan av/tekne/gerçek klip/yayın adımlarını tek oturumda birleştirir. #171/#172/#173, #159'un kişi bazında örnek kalite alt işleridir; P4.7 uygulaması başlamış veya kullanıcı görsel kabulü alınmış sayılmaz. Bu talimat başka kişiler adına inceleme/kabul oluşturmaz.

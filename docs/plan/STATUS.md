@@ -6,7 +6,9 @@ Aktif faz: **P4**. P0–P3 kapalıdır. P4.5 PR #135 ile birleşti; P4.6 kabulü
 
 Unity sürümü: `6000.3.23f1`.
 
-15 Ekim #157 teknik ilerleme: günlük Prep/Dive/Return/Lobby tek dünyada kalır; ilk dünya girişi ve yeni gün başlangıcı ev anchor'larını kullanır. `989b556`: 1254/1254 EditMode, Windows build, aynı bilgisayarda gerçek 1/2/4 süreçli ev→dükkân→iskele→su→ev PC→uyku turu ve her koşudan sonra yeni süreçte kayıt açma PASS. [Rapor](../reports/P4-CONTINUOUS-SESSION-157.md). Faz/issue kapanışı değildir; birleşmiş build, yeni sanat/içerik ve ayrı bilgisayar/üç gün kabulü kalır.
+16 Ekim #157 teknik ilerleme: PR #169, kullanıcının doğrudan birleşim talimatıyla `72c5bbc` olarak `codex/p4-integration` dalına birleşti. Günlük Prep/Dive/Return/Lobby tek dünyada kalır; ilk dünya girişi ve yeni gün başlangıcı ev anchor'larını kullanır. Kaynak `989b556`: 1254/1254 EditMode, Windows build, aynı bilgisayarda gerçek 1/2/4 süreçli ev→dükkân→iskele→su→ev PC→uyku turu ve her koşudan sonra yeni süreçte kayıt açma PASS; PR CI test/Windows build kontrolleri de geçti. [Rapor](../reports/P4-CONTINUOUS-SESSION-157.md). Bu işlem diğer ekip üyeleri adına inceleme/kabul veya faz/issue kapanışı değildir.
+
+16 Ekim birleşim sonrası kontrol: `72c5bbc` üstünde yeniden alınan Windows build ve iki gerçek süreçli fiziksel dünya turu PASS; aynı kampanya yeni host sürecinde gün 2/önceki özet/ev başlangıcıyla açıldı. Yeni alan görevleri: #170 Mehmet — tek oturumda tam günlük ürün döngüsü (#157 alt işi); #171 Mert — görsel örnek kiti; #172 Utku — yol ölçümü/örnek yerleşim; #173 Mehmet — yakın kamera/insan ölçeği/dört kişi geçişi (#159 alt işleri). [İş sırası ve kapılar](P4_NEXT_WORK_ORDERS.md). P4.7 araştırma/ölçüm/kaynak hazırlığı yapılabilir; oyun uygulaması #138/#140/#141 teknik temel kabulünü bekler. Yeni sanat/içerik ve ayrı bilgisayar/üç gün kabulü açık kalır.
 
 ## Ekip
 
