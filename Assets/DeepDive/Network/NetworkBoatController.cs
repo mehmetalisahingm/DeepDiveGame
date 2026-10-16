@@ -72,6 +72,26 @@ namespace DeepDive.Network
                 if (!BoatTripIds.IsSeat(SeatIds[i]) || !seen.Add(SeatIds[i])) return false;
             return seen.Count == 4;
         }
+
+        // Hull proximity must not depend on which seats are occupied: two aft passengers
+        // cannot prevent the next divers on the same dock from using the free fore seats.
+        public static int ResolveBoardingSeat(Vector3 player, IReadOnlyList<Vector3> seats,
+            IReadOnlyList<bool> occupied, float range)
+        {
+            if (seats == null || occupied == null || seats.Count != occupied.Count || range <= 0f) return -1;
+            var nearHull = false;
+            var best = -1;
+            var bestDistance = float.PositiveInfinity;
+            for (var i = 0; i < seats.Count; i++)
+            {
+                var distance = Vector3.Distance(player, seats[i]);
+                nearHull |= distance <= range;
+                if (occupied[i] || distance >= bestDistance) continue;
+                best = i;
+                bestDistance = distance;
+            }
+            return nearHull ? best : -1;
+        }
     }
 
     // Host-only physical authority for whichever progression vehicle Mert selects. The GameObject
@@ -197,20 +217,17 @@ namespace DeepDive.Network
             if (!TryGetPlayer(player, out var networkPlayer))
                 return TransactionResult.Reject(requestId, "InvalidTarget", state.Revision);
 
-            var bestIndex = -1;
-            var bestDistance = float.PositiveInfinity;
+            var positions = new Vector3[BoatSeatLayoutRules.SeatIds.Count];
+            var occupied = new bool[positions.Length];
             for (var i = 0; i < BoatSeatLayoutRules.SeatIds.Count; i++)
             {
                 var seatId = BoatSeatLayoutRules.SeatIds[i];
-                if (IsSeatOccupied(seatId) || !BoatHullSeatRules.TryResolveLocalOffset(hullKind, seatId, out var localOffset))
-                    continue;
-                var seatPosition = transform.TransformPoint(localOffset);
-                var distance = Vector3.Distance(networkPlayer.transform.position, seatPosition);
-                if (distance > boardingRange || distance >= bestDistance) continue;
-                bestIndex = i;
-                bestDistance = distance;
+                if (!BoatHullSeatRules.TryResolveLocalOffset(hullKind, seatId, out var localOffset))
+                    return TransactionResult.Reject(requestId, "InvalidTarget", state.Revision);
+                positions[i] = transform.TransformPoint(localOffset);
+                occupied[i] = IsSeatOccupied(seatId);
             }
-
+            var bestIndex = BoatSeatLayoutRules.ResolveBoardingSeat(networkPlayer.transform.position, positions, occupied, boardingRange);
             if (bestIndex < 0) return TransactionResult.Reject(requestId, "OutOfRange", state.Revision);
             return BoatBoarding.TryBoard(player, activeBoatId, BoatSeatLayoutRules.SeatIds[bestIndex], requestId);
         }

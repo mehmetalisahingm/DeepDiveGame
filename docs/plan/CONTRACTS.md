@@ -276,6 +276,12 @@ Kod: `Assets/DeepDive/Trip/BoatMapPresenter.cs` (saf), `Assets/DeepDive/Composit
 3. **Girdiler.** Faz + sandal pozu: `BoatTripPlayerSync` aynası (Mehmet); oyuncu konumu: host-otoriter `NetworkPlayer` transformu; dönüşüm: `DiveRegionField.TryWorldToMap` (Utku). Bölge dışı konum çizilmez (kenara sıkıştırılmaz); `Outbound/Inbound`'da yayımlanmış canlı poz yoksa sandal çizilmez.
 4. **Kayıt.** Yeni alan yok; sefer serialize edilmez, yeniden açılışta sandal iskelede ve koltuklar boş.
 
+### P4.6-A sürekli dünya günlük döngü düzeltmeleri — #170
+
+`FishDiveLifecycleBinding`, dünya yeniden yüklenmediği için önceki sahne-yükleme yaşam döngüsünü mevcut authored balıklar üzerinde sürdürür: host, ilk dalışın başlangıç nüfusundan sonraki benzersiz DiveId'de sahne balıklarını yeniden spawn eder. Aynı dalışta av hemen yenilenmez. Sahne avı despawn'da saklanır/görünmez/çarpışmaz; sonraki spawn claim/sağlık/hareketi sıfırlar. Dinamik avın silinmesi korunur. Yeni tür/habitat/spawner otoritesi veya oyuncu seyahat teleport'u eklenmez. Ağ uyumu `DeepDive-P4-2` gerektirir.
+
+`NetworkBoatController.TryBoardNearest` fiziksel binmede 2,75 m yakınlık kapısını herhangi bir authored koltuk noktasına göre kontrol eder; ardından host en yakın **boş** koltuğu seçer. Yakındaki koltuğun dolu olması oyuncuyu tekneden uzak saymaz; böylece aynı kuru iskeleden dört koltuğa da binilebilir. Menzil, onarım, sabit koltuklar, Docked/Anchored kapısı ve `BoatTripManager` otoritesi korunur. İstemci koltuk veya yakınlık sonucu seçmez.
+
 ### Kamera, derinlik ve rota gelişimi — P4.3 taslak
 
 1. Mert equipmentId/seviye/fiyat/görünüm/yeteneği tek katalogda tanımlar. Mehmet kuşanma/elde model ve tüp/palet/çanta etkisini, Utku kamera menzil/düşük ışık doğrulamasını uygular.
