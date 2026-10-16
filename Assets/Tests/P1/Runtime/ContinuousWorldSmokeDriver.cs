@@ -69,7 +69,10 @@ namespace DeepDive.P1.Lab
             adapter = FindFirstObjectByType<SessionNetworkAdapter>();
             manager = adapter.GetComponent<NetworkManager>();
             var port = ushort.Parse(Arg("-p46-world-port", "19777"));
-            var started = slot == 0 ? adapter.CreateRoom(port) : adapter.JoinRoom("127.0.0.1", port);
+            // Optional explicit host is for *actual separate-computer* regression.
+            // Default remains localhost for existing 1/2/4 runner; no network authority changes.
+            var started = slot == 0 ? adapter.CreateRoom(port) :
+                adapter.JoinRoom(Arg("-p46-world-host", "127.0.0.1"), port);
             if (!started) Fail("Could not start session: " + adapter.Connection.LastError);
         }
 
