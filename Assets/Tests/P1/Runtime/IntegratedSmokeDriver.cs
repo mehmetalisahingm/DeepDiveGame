@@ -729,7 +729,16 @@ namespace DeepDive.P1.Lab
                 nextInput = Time.realtimeSinceStartupAsDouble + 1.0 / 30;
                 if (result.dive && phase == SessionPhase.Lobby && (MediaFlow || Acceptance || Storage) &&
                     !WalkHomeAfterDive(local, players)) return;
-                var move = scene == SessionNetworkAdapter.DiveScene ?
+                // P4.6 no longer reloads the small Prep scene for each phase. In the older
+                // P4.5 role test, late-arriving guests could miss the brief initial walk
+                // before the roster converged. Extend REAL owner-input walking only for
+                // that legacy role regression; oscillation stays within the room/hub.
+                // Never set walk evidence directly or count a spawn/fixture teleport.
+                var roleLobbyWalk = RoleEffects && !result.dive && phase == SessionPhase.Lobby;
+                var roleWalkInput = elapsed > 1f && elapsed < 16f
+                    ? (Mathf.FloorToInt(elapsed / 3f) % 2 == 0 ? Vector3.forward : Vector3.back)
+                    : Vector3.zero;
+                var move = roleLobbyWalk ? roleWalkInput : scene == SessionNetworkAdapter.DiveScene ?
                     // A long upward probe reaches the y=6 surface-return zone and permanently
                     // marks the diver safe before the hunt/recording test even starts.
                     (elapsed > 1 && elapsed < 1.6f ? Vector3.up : Vector3.zero) :
@@ -757,7 +766,12 @@ namespace DeepDive.P1.Lab
             foreach (var player in players)
             {
                 var delta = player.transform.position - starts[player.OwnerClientId];
-                if (scene == SessionNetworkAdapter.PrepScene && delta.z > 0.5f) walked.Add(player.OwnerClientId);
+                // Only measured horizontal displacement counts; new one-world Lobby is
+                // a valid dry walk stage for the legacy role probe, too.
+                var dryWalkStage = scene == SessionNetworkAdapter.PrepScene ||
+                    (RoleEffects && !result.dive && scene == SessionNetworkAdapter.DiveScene &&
+                     phase == SessionPhase.Lobby && !player.Swimming.Value);
+                if (dryWalkStage && delta.z > 0.5f) walked.Add(player.OwnerClientId);
                 if (scene == SessionNetworkAdapter.DiveScene && player.Swimming.Value)
                 {
                     var id = player.OwnerClientId;
