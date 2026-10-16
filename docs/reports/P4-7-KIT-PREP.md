@@ -48,6 +48,31 @@ Hiçbiri indirilmedi. Ücretli satın alma yoktur. Doğrulanan, sayfa düzeyinde
 ## 5. Ses ihtiyacı (seçim hazırlığı)
 İhtiyaç: taş/ahşap/kum adımı, iskele tahtası, kapı/tezgâh, dalga ve kıyı ambiyansı, rüzgâr, gece cırcır/dalga, tekne gövdesi (cıvata/ahşap), mevcut `PickupConfirm`/`HitConfirmSplash` ile uyum. Mevcut kaynak: Mixkit (kayıtlı, atıf zorunlu değil). Ek aday kaynaklar (Kenney ses paketleri, Mixkit kategorileri) **henüz lisans/içerik açısından doğrulanmadı**. Bağlama listesi: yüzey adımı → Mehmet (oyuncu/zone), dalga/ambiyans → Utku (zone), UI/dükkân sesi → Mert.
 
+## 5b. Quaternius Pirate Kit incelemesi (izole Unity projesi, 16 Ekim)
+İndirilen: resmî Drive klasöründen **FBX klasörü**, 71 dosya (10,8 MB sıkıştırılmış, ~30 MB açık), CC0 (paket sayfası). Oyun reposuna **eklenmedi**; ayrı bir boş Unity 6000.3.23f1 projesine (repo dışı) varsayılan ayarlarla içe aktarıldı. Ölçümler: [piratekit-measurements.tsv](evidence/p47/piratekit-measurements.tsv); kontak sayfaları (gri malzeme, kırmızı kutu = 1,8 m insan, ikisi de y=0 pivot düzleminde): [çevre](media/p47-piratekit-environment.png), [propler](media/p47-piratekit-props.png), [gemiler](media/p47-piratekit-ships.png).
+
+**Eksik: `Atlas_Pirate.png`.** Kitin tek dokusu (9 KB düz renk paleti) Drive "kota aşıldı" hatası yüzünden inmedi; modeller dokusuz gri görünüyor, gerçek renkler henüz görülmedi. Atlas gelmeden malzeme/palet uyumu kararı verilemez.
+
+Ölçülen (Unity birimi = 1 m, `useFileScale`, ölçek 1,0 — yeniden ölçekleme gerekmedi):
+| Model | Boyut (x × y × z, m) | Pivot / not |
+|---|---|---|
+| `Environment_Dock` / `Dock_Broken` | 2,18 × 3,01 × 2,66 / 2,38 × 3,01 × 2,66 | Pivot kutunun ~2 m üstünde (altı −2,0, üstü +1,0): su çizgisinde duran kazıklı iskele modülü; kırık varyant da var |
+| `Environment_Dock_Pole` | 0,37 × 3,01 × 0,38 | aynı pivot kuralı |
+| `Environment_House1/2/3` | 13,5 × 6,8 × 4,6 / 3,8 × 9,4 × 3,7 / 8,5 × 10,6 × 3,8 | Pivot tabanda; **tam binalar** (12–15 bin köşe), modüler cephe parçası değil |
+| `Ship_Small` / `Ship_Large` | 5,15 × 2,0 × 3,6 / 15,4 × 11,5 × 5,3 | `Ship_Small` pivot ≈ taban; tek mesh, **kırık varyantı yok** |
+| `Environment_Rock_1..5` | 0,6–0,8 m | küçük kaya, kıyı dolgusu için uygun; `Cliff1..4` 5–8 m |
+| `Environment_PalmTree_1..3` | 2,6–2,9 × 2,7–3,6 | küçük palmiye |
+| `Environment_Sawmill` | 2,1 × 0,6 × 2,1 | kütük yığını (bina değil) |
+| `Prop_Barrel/Bucket/Bucket_Fishes/Chest/Anchor…` | 0,7 / 0,7 / 0,9×1,2 / 1,4×0,9 / 0,8×0,95 | pivot tabanda, abartılı "sevimli" ölçek (ör. `Prop_Fish_Tuna` 2,1 m) |
+| `Weapon_Axe` | 0,45 × 1,05 × 0,12 | keser mevcut (çivi/tahta yok) |
+
+**İhtiyaçlarla uyum (dürüst değerlendirme):**
+- **Kıyı:** iyi uyum: iskele modülü (kırık dahil), kazık, kaya, palmiye, uçurum, fıçı/kova/balık sandığı. Düşük poligon, tek dokulu paletli stil; mevcut Quaternius karakteriyle aynı aile.
+- **Ev cephesi:** zayıf uyum: üç ev de büyük korsan-tema **tam bina**; mütevazı bir balıkçı evi veya kapı/pencere/çatı **modüler parçaları yok**. Cephe için başka paket (Simple Buildings / Medieval Village MegaKit; lisansları henüz doğrulanmadı) ya da bu evlerin arka plan olarak kullanımı gerekir.
+- **Ekipman dükkânı:** tezgâh/raf/tabela yok; yalnız sergi propları (fıçı, kova, şişe, sandık, çapa) var. Tezgâhı/rafı biz yapmalıyız (palet uyumuyla).
+- **Kırık sandal:** `Ship_Small` (5 m) dört kişilik ölçek için kabul edilebilir ama **kırık/parçalı değil**; üç montaj noktasını ve kırık görünümü ayırmak için kitin `Blends` klasöründeki kaynak dosya Blender'da düzenlenmeli (CC0 türev serbest) ya da `Dock_Broken` dili referans alınarak parça parça yapılmalı. `Blends` indirilmedi.
+- **Ölçek sorunu:** modeller stilize/abartılı; 1,8 m insanla yan yana okunurluk iyi, ama ev/gemi ölçüleri oyuncu kapsülüne göre ayrıca sınanmalı (#173).
+
 ## 6. Açık kararlar ve sonraki adımlar
 - **Kullanıcı kararı:** stil yönü/palet onayı ve hangi kaynak ailesi (yukarıdaki öneri). R01/R02/R11 açık tasarım kararlarına dokunulmadı.
 - Paket indirme onayı (dosya/kaynak/boyut) → içerik/ölçek denetimi → kit manifesti (kaynak, atıf, sürüm/tarih, dosya/.meta, ölçek/pivot, shader/malzeme, anchor, collider).
