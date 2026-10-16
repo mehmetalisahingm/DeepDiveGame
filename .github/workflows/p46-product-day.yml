@@ -1,0 +1,71 @@
+name: P4.6 earned product day acceptance
+
+on:
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - '.github/workflows/p46-product-day.yml'
+      - 'tools/Test-P46-ProductDay.ps1'
+      - 'Assets/Tests/P1/Runtime/ProductDaySmokeDriver.cs'
+      - 'Assets/DeepDive/**'
+  push:
+    branches: ['codex/p4-integration']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p46-product-day-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  product-day:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Require Unity CI credentials
+        shell: bash
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
+            echo '::error::Unity CI licensing is not configured.'
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Build Linux integrated Unity player
+        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          targetPlatform: StandaloneLinux64
+          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildLinux
+          versioning: None
+      - name: Normalize executable and output folders
+        shell: bash
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" Builds Logs 2>/dev/null || true
+          mkdir -p Logs
+          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Earned solo product day and disk reload
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P46-ProductDay.ps1 -Players 1 -Port 24777 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Earned two-process co-op product day and disk reload
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P46-ProductDay.ps1 -Players 2 -Port 24877 -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Upload product day reports and raw logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p46-product-day-${{ github.sha }}
+          path: Logs/P46-product-*
+          if-no-files-found: warn
+          retention-days: 7
