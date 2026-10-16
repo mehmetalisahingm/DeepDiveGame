@@ -49,6 +49,7 @@ try {
     $report = Get-Content -Raw -LiteralPath $reportPath | ConvertFrom-Json
     $manifest = [pscustomobject]@{
         RunId=$RunId; Players=$Players; Slot=$Slot; Role=$role; Port=$Port
+        Machine=[Environment]::MachineName
         StartedUtc=$startedUtc; FinishedUtc=[DateTime]::UtcNow.ToString('o')
         ExitCode=$p.ExitCode; Passed=($report.passed -eq $true)
         WorldLoads=$report.worldLoads; Meters=$report.distance
