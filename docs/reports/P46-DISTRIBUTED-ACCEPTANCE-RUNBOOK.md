@@ -34,6 +34,40 @@ Her makinede `Logs/P46-distributed-<run-id>-slotN/` klasörü, ham oyun `playerN
 
 Doğrulayıcı dört **farklı makine adı**, 0–3 tekil slot, aynı `RunId`, UDP portu, eksiksiz aynı EXE/DLL SHA-256, her oyuncuda gerçek 120m+ yürüyüş, `worldLoads=1`, dört oyuncu ağ aynası, evden PC/yatak, gün 2 ve sıfır hata bekler. MachineName yalnız rapor ayırt etmek içindir; bağımsız üçüncü taraf kimlik ispatı değildir.
 
+## İki PC ile 2+2 teknik prova
+
+Dört ayrı bilgisayar yoksa ağ yolunu **iki Windows bilgisayarda, her birinde iki gerçek Unity süreci** ile deneyebilirsin. Bu ayrı bir moddur; yukarıdaki dört ayrı PC komutları ve varsayılan doğrulama **değişmez**.
+
+> **Bu mod dört gerçek insan kabulünü KAPATMAZ.** Sonuç yalnız "2 makine × 2 süreç: teknik ağ testi" olarak #141'e yazılır; dört kişi/dört bilgisayar insan kabulü ve aşağıdaki tam ürün kabulü açık kalır.
+
+Her iki bilgisayara aynı `Builds/P1-Integrated/` klasörünü kur; aynı `RunId` ve `Port` kullan.
+
+1. Host bilgisayarda (slot 0 host + slot 1 aynı makineden `127.0.0.1` ile bağlanır):
+
+   ```powershell
+   ./tools/Test-P46-DistributedWorld.ps1 -Players 4 -Slot 0 -ProcessesPerMachine 2 -Port 27677 -RunId okt17-2x2
+   ```
+
+2. Ekranda `Host computer ready (slots 0+1)` yazınca diğer bilgisayarda (slot 2 ve 3 host IP'sine bağlanır):
+
+   ```powershell
+   ./tools/Test-P46-DistributedWorld.ps1 -Players 4 -Slot 2 -ProcessesPerMachine 2 -Port 27677 -HostIp <HOST_LAN_IP> -RunId okt17-2x2
+   ```
+
+Araç aynı makinedeki ikinci süreci, birincisi `P1_CONNECTED` ile kendi ağ kimliğini aldıktan sonra başlatır (en fazla 30 s). Ev spawn slotu bağlanma sırasına bağlıdır; bir süreç yanlış kimlikle kabul edilirse (ör. ikinci bilgisayar erken başlatıldıysa) araç hata verir — host bilgisayar hazır mesajını beklemeden ikinci bilgisayarı başlatma. İki süreç paralel beklenir; ikisi de raporlanır, biri düşerse komut hata verir ve kalan süreçler kapatılır. `-ProcessesPerMachine 2` yalnız `-Players 4` ve çift `-Slot` (0 veya 2) ile kabul edilir.
+
+Her slot yine kendi `Logs/P46-distributed-<run-id>-slotN/` klasörünü yazar; `machine-evidence.json` içinde `ProcessesPerMachine=2` ve `Mode=two-per-pc` bulunur. Dört klasörü değerlendirme bilgisayarına kopyala:
+
+```powershell
+./tools/Verify-P46-DistributedWorld.ps1 -MinMachines 2 -EvidenceDirs @(
+  './evidence/slot0','./evidence/slot1','./evidence/slot2','./evidence/slot3'
+)
+```
+
+`-MinMachines 2` en az iki farklı makine, makine başına en fazla iki slot, slot 0 ve 1'in aynı (host) makinede olmasını, bütün manifestlerde `two-per-pc` ve aynı `ProcessesPerMachine` değerini ister; diğer bütün kontroller (aynı build hash, RunId/port, 120m+, `worldLoads=1`, gün 2, sıfır hata) aynıdır. `-MinMachines` verilmezse 2+2 kanıtı reddedilir; `separate-pc` ve `two-per-pc` klasörleri karışırsa da reddedilir. Başarı satırı açıkça "NOT four-real-human acceptance" yazar.
+
+Doğrulayıcı testi (Unity gerektirmez): `powershell -NoProfile -ExecutionPolicy Bypass -File tools/tests/Verify-P46-DistributedWorld.Tests.ps1`.
+
 ## Tam insan ürün/ekip kabulü — otomatik testten bağımsız
 
 Utku koordinatörlüğünde Mehmet (hareket/ağ), Mert (görsel/kayıt) ve dördüncü oyuncu **gerçek klavye/fareyle** aynı Windows sürümünde birlikte oynamalı. Aşağıdaki her satır ayrı kanıt ister:
