@@ -1,0 +1,202 @@
+using System;
+using System.IO;
+using System.Linq;
+using Unity.Netcode;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+namespace DeepDive.World.Editor
+{
+    public static class SuppliedKitImport
+    {
+        private const string Output = "Assets/DeepDive/Art/Resources/SuppliedKit";
+        public static void AuditFish()
+        {
+            foreach (var key in new[] { "CoastalFish", "Tuna", "RedSnapper" })
+            {
+                var root = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(Output + "/" + key + ".prefab"));
+                try
+                {
+                    foreach (var skin in root.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    {
+                        var baked = new Mesh(); skin.BakeMesh(baked);
+                        Debug.Log($"FISH_AUDIT {key} bounds={skin.bounds} local={skin.localBounds} baked={baked.bounds} lossy={skin.transform.lossyScale}");
+                        Object.DestroyImmediate(baked);
+                    }
+                    var animation = root.GetComponentInChildren<Animation>();
+                    animation.clip.SampleAnimation(animation.gameObject, 0.5f);
+                    foreach (var skin in root.GetComponentsInChildren<SkinnedMeshRenderer>())
+                        Debug.Log($"FISH_AUDIT_SAMPLED {key} bounds={skin.bounds} lossy={skin.transform.lossyScale}");
+                }
+                finally { Object.DestroyImmediate(root); }
+            }
+        }
+        public static void Apply()
+        {
+            Directory.CreateDirectory(Output);
+            Directory.CreateDirectory(Output + "/Materials");
+            AssetDatabase.Refresh();
+            Make("Fish/Boat", "Rowboat", new Vector3(2.4f, 1.3f, 5f), false, true);
+            Make("Fish/CoralGrouper", "CoastalFish", new Vector3(0.3f, 0.5f, 1.05f), true);
+            Make("Fish/Tuna", "Tuna", new Vector3(0.3f, 0.5f, 1.05f), true);
+            Make("Fish/RedSnapper", "RedSnapper", new Vector3(0.3f, 0.5f, 1.05f), true);
+            Make("Buildings/1Story_Sign_Mat", "ShopBuilding", new Vector3(4.3f, 4.5f, 4.3f));
+            Make("Buildings/2Story_Balcony_Mat", "TownBuilding", new Vector3(7f, 5.2f, 8f));
+            Make("Interior/Bed_Single", "Bed", new Vector3(1.25f, 0.6f, 2.05f));
+            Make("Interior/Drawer_1", "Storage", new Vector3(1.35f, 1.6f, 0.75f));
+            Make("Interior/Bookshelf", "Bookshelf", new Vector3(1.6f, 2f, 0.5f));
+            Make("Interior/Couch_Medium1", "Couch", new Vector3(2.2f, 1.15f, 0.9f));
+            Make("Interior/Houseplant_1", "Plant", new Vector3(0.55f, 1.2f, 0.55f));
+            Make("Interior/Light_Desk", "DeskLight", new Vector3(0.3f, 0.5f, 0.3f));
+            var scene = EditorSceneManager.OpenScene("Assets/DeepDive/World/Scenes/DiveTestArea.unity");
+            var fishes = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FishActor>(true)).OrderBy(f => f.name).ToArray();
+            var tuna = Species("Tuna", "tuna", "Ton baligi");
+            var snapper = Species("RedSnapper", "red_snapper", "Kirmizi mercan");
+            for (var index = 0; index < fishes.Length; index++)
+            {
+                var fish = fishes[index];
+                for (var c = fish.transform.childCount - 1; c >= 0; c--) Object.DestroyImmediate(fish.transform.GetChild(c).gameObject);
+                var key = index < 5 ? "CoastalFish" : index < 10 ? "Tuna" : "RedSnapper";
+                var visual = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(Output + "/" + key + ".prefab"));
+                visual.transform.SetParent(fish.transform, false);
+                if (index >= 5)
+                {
+                    var serialized = new SerializedObject(fish);
+                    serialized.FindProperty("species").objectReferenceValue = index < 10 ? tuna : snapper;
+                    serialized.ApplyModifiedPropertiesWithoutUndo();
+                }
+                EditorUtility.SetDirty(fish);
+            }
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            Debug.Log("SUPPLIED_KIT_READY prefabs=12 fish=15 species=3");
+        }
+
+        private static SpeciesDefinition Species(string file, string id, string display)
+        {
+            var path = "Assets/DeepDive/World/Fish/Species/" + file + ".asset";
+            var species = AssetDatabase.LoadAssetAtPath<SpeciesDefinition>(path);
+            if (species == null)
+            {
+                species = Object.Instantiate(AssetDatabase.LoadAssetAtPath<SpeciesDefinition>("Assets/DeepDive/World/Fish/Species/SeaBass.asset"));
+                AssetDatabase.CreateAsset(species, path);
+            }
+            var serialized = new SerializedObject(species);
+            serialized.FindProperty("speciesId").stringValue = id;
+            serialized.FindProperty("displayName").stringValue = display;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(species);
+            return species;
+        }
+
+        private static void Make(string source, string name, Vector3 size, bool fish = false, bool boat = false)
+        {
+            var sourcePath = "Assets/DeepDive/Art/Supplied/" + source + ".fbx";
+            var importer = (ModelImporter)AssetImporter.GetAtPath(sourcePath);
+            importer.importCameras = importer.importLights = importer.addCollider = false;
+            importer.importAnimation = fish;
+            if (fish) importer.animationType = ModelImporterAnimationType.Legacy;
+            importer.SaveAndReimport();
+            var root = new GameObject(name);
+            try
+            {
+                var model = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath));
+                var metres = new GameObject("MetreScale").transform;
+                metres.SetParent(root.transform, false);
+                model.transform.SetParent(metres, false);
+                var renderers = model.GetComponentsInChildren<Renderer>(true);
+                if (renderers.Length == 0) throw new InvalidOperationException(source + " has no visible mesh");
+                foreach (var renderer in renderers)
+                {
+                    renderer.sharedMaterials = renderer.sharedMaterials.Select(m => Material(m, name)).ToArray();
+                }
+                var bounds = Bounds(renderers);
+                if ((fish || boat) && bounds.size.x > bounds.size.z)
+                {
+                    model.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+                    bounds = Bounds(renderers);
+                }
+                var factor = fish ? size.z / bounds.size.z : Mathf.Min(size.x / bounds.size.x, size.y / bounds.size.y, size.z / bounds.size.z);
+                var scale = fish || boat ? Vector3.one * factor : new Vector3(size.x / bounds.size.x, size.y / bounds.size.y, size.z / bounds.size.z);
+                metres.localScale = scale;
+                metres.localPosition = new Vector3(-bounds.center.x * scale.x,
+                    -(fish ? bounds.center.y : bounds.min.y) * scale.y - (boat ? 0.3f : 0f), -bounds.center.z * scale.z);
+                if (fish)
+                {
+                    var animation = model.GetComponent<Animation>();
+                    var clips = AssetDatabase.LoadAllAssetsAtPath(sourcePath).OfType<AnimationClip>().Where(c => !c.name.StartsWith("__")).ToArray();
+                    if (animation != null && clips.Length > 0)
+                    {
+                        var clip = clips.FirstOrDefault(c => c.name.IndexOf("swim", StringComparison.OrdinalIgnoreCase) >= 0) ?? clips[0];
+                        animation.clip = clip;
+                        animation.wrapMode = WrapMode.Loop;
+                        animation.playAutomatically = true;
+                    }
+                    // Keep the FBX's own rig root untouched. Calibrate the wrapper against
+                    // actual skinned vertices; some legacy FBX rigs include scale twice.
+                    metres.localPosition = Vector3.zero;
+                    var measured = Bounds(renderers);
+                    var length = measured.size.z;
+                    metres.localScale *= 2f;
+                    var doubled = Bounds(renderers).size.z;
+                    metres.localScale *= 0.5f;
+                    var exponent = Mathf.Clamp(Mathf.Log(doubled / length, 2f), 0.5f, 2f);
+                    metres.localScale *= Mathf.Pow(size.z / length, 1f / exponent);
+                    measured = Bounds(renderers);
+                    metres.localPosition -= measured.center;
+                    Debug.Log($"FISH_METRES {name} length={measured.size.z} exponent={exponent}");
+                }
+                PrefabUtility.SaveAsPrefabAsset(root, Output + "/" + name + ".prefab");
+                Debug.Log($"SUPPLIED_MODEL {name} source={source} bounds={bounds.size} scale={scale}");
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
+
+        private static Bounds Bounds(Renderer[] renderers)
+        {
+            // These Blender FBXs carry oversized imported skin bounds. Normalising that
+            // box would make the actual animated fish microscopic. Measure baked vertices.
+            Bounds? result = null;
+            foreach (var renderer in renderers)
+            {
+                if (renderer is SkinnedMeshRenderer skin)
+                {
+                    var baked = new Mesh();
+                    skin.BakeMesh(baked);
+                    skin.localBounds = baked.bounds;
+                    skin.updateWhenOffscreen = true;
+                    foreach (var vertex in baked.vertices)
+                    {
+                        var point = skin.transform.TransformPoint(vertex);
+                        if (!result.HasValue) result = new Bounds(point, Vector3.zero);
+                        else { var b = result.Value; b.Encapsulate(point); result = b; }
+                    }
+                    Object.DestroyImmediate(baked);
+                }
+                else if (!result.HasValue) result = renderer.bounds;
+                else { var b = result.Value; b.Encapsulate(renderer.bounds); result = b; }
+            }
+            return result ?? throw new InvalidOperationException("No mesh bounds");
+        }
+
+        private static Material Material(Material source, string model)
+        {
+            var name = model + "_" + (source != null ? source.name : "default");
+            var path = Output + "/Materials/" + name + ".mat";
+            var result = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (result == null)
+            {
+                result = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                AssetDatabase.CreateAsset(result, path);
+            }
+            var color = source != null && source.HasProperty("_Color") ? source.GetColor("_Color") : Color.white;
+            result.SetColor("_BaseColor", color);
+            result.SetFloat("_Smoothness", 0.25f);
+            EditorUtility.SetDirty(result);
+            return result;
+        }
+    }
+}

@@ -4,7 +4,11 @@ Plan **3.1 — 13 Ekim 2026**. Temel plan 3.0 korunur; oyuncu deneyimi ve sanat 
 
 Aktif faz: **P4**. P0–P3 kapalıdır. P4.5 PR #135 ile birleşti; P4.6 kabulü açık. Yeni P4.7–P4.12 planı [oyuncu deneyimi genişletmesinde](PLAYER_EXPERIENCE_EXPANSION.md) kayıtlıdır. P5/P6 kilitlidir; yeni plan uygulama veya tamam kaydı değildir.
 
+18 Ekim kullanıcı kapsam kararı: mevcut faz kabulünü kapatmadan **15 avlanabilir kıyı balığı** ve kullanıcının sağladığı **Tripo motorbotunun görsel entegrasyonu** ayrıca istendi. Bu iki dar içerik işi şimdi uygulanır; P4.7–P4.12'nin bütünü açılmaz. Balıklar mevcut levrek modeli/türünden 15 ayrı sahne nesnesidir; beş tür/gelişmiş ekosistem veya fiziksel sandal onarımı teslimi değildir. Motorbot `boat-2` görünümüdür; başlangıç sandalı `boat-1` ve satın alma zinciri korunur. Dünya sahnesi/balık yazımında Utku, görsel kaynak/uyumda Mert inceleme sahibidir; onların onayı üretilmez. Kanıt ve kalanlar [teslim raporunda](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) tutulur.
+
 Unity sürümü: `6000.3.23f1`.
+
+18 Ekim ek kullanıcı talebi: sağlanan üç FBX arşivinden uygun bina, sandal, ev eşyası ve balık görselleri şimdi oyuna bağlanır. 15 balığın beşi levrek, beşi ton balığı, beşi kırmızı mercan olur; önceki tek tür notu bu dar teslimle genişletilir. Yeni türlerde av/çekim/satış fiyatı ve ansiklopedi bağlantısı eklenir; tür başına yeni görev veya boss üretilmez. Kasaba yolları, ev etkileşimleri, dört koltuk ve satın alma otoriteleri korunur. P4.6/faz/insan kabulü kapanmaz; World değişiklikleri Utku, kasaba/kaynak/materyal değişiklikleri Mert incelemesine gider.
 
 16 Ekim #157 teknik ilerleme: PR #169, kullanıcının doğrudan birleşim talimatıyla `72c5bbc` olarak `codex/p4-integration` dalına birleşti. Günlük Prep/Dive/Return/Lobby tek dünyada kalır; ilk dünya girişi ve yeni gün başlangıcı ev anchor'larını kullanır. Kaynak `989b556`: 1254/1254 EditMode, Windows build, aynı bilgisayarda gerçek 1/2/4 süreçli ev→dükkân→iskele→su→ev PC→uyku turu ve her koşudan sonra yeni süreçte kayıt açma PASS; PR CI test/Windows build kontrolleri de geçti. [Rapor](../reports/P4-CONTINUOUS-SESSION-157.md). Bu işlem diğer ekip üyeleri adına inceleme/kabul veya faz/issue kapanışı değildir.
 

@@ -36,6 +36,8 @@ namespace DeepDive.P1.Lab
             public float distance, maxTravelStep;
             public List<string> trace = new List<string>(), tripPhases = new List<string>();
             public List<ulong> fishIds = new List<ulong>();
+            public List<ulong> primaryFishIds = new List<ulong>();
+            public List<string> fullyPopulatedDives = new List<string>();
             public List<string> errors = new List<string>();
         }
         private readonly Report report = new Report();
@@ -520,7 +522,14 @@ namespace DeepDive.P1.Lab
             if (!string.IsNullOrEmpty(dive)) diveIds.Add(dive);
             report.diveCount = diveIds.Count;
             foreach (var fish in FindObjectsByType<FishActor>(FindObjectsSortMode.None))
+            {
                 if (fish.IsSpawned && !report.fishIds.Contains(fish.NetworkObjectId)) report.fishIds.Add(fish.NetworkObjectId);
+                if (fish.IsSpawned && fish.name == "Fish_SeaBass" && !report.primaryFishIds.Contains(fish.NetworkObjectId))
+                    report.primaryFishIds.Add(fish.NetworkObjectId);
+            }
+            if (!string.IsNullOrEmpty(dive) && !report.fullyPopulatedDives.Contains(dive) &&
+                FindObjectsByType<FishActor>(FindObjectsSortMode.None).Count(f => f.IsSpawned && !f.IsDead) == 15)
+                report.fullyPopulatedDives.Add(dive);
             if (step < 10 || step > 13) return;
             var phase = ((BoatTripPhase)trip.Phase.Value).ToString();
             if (report.tripPhases.Count == 0 || report.tripPhases.Last() != phase) report.tripPhases.Add(phase);
@@ -639,7 +648,8 @@ namespace DeepDive.P1.Lab
             if (finished) return;
             finished = true;
             report.passed = step == 15 && report.players == expected && report.worldLoads == 1 && report.homeSpawn &&
-                report.repaired && report.diveCount == 3 && report.fishIds.Count >= 3 && report.realClip &&
+                report.repaired && report.diveCount == 3 && report.primaryFishIds.Count >= 3 &&
+                report.fullyPopulatedDives.Count == 3 && report.realClip &&
                 report.tripPhases.SequenceEqual(new[] { "Docked", "Outbound", "Anchored", "Inbound", "Docked" }) &&
                 report.mapPlayers >= expected && report.mapMoved && report.mapDocked && report.slept && report.morningHome &&
                 report.day == firstDay + 1 && report.income > 0 && report.errors.Count == 0;

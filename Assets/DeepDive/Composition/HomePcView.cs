@@ -154,6 +154,7 @@ namespace DeepDive.Composition
         }
 
         private static string Label(string subjectId) => subjectId == "sea_bass" ? "Levrek"
+            : subjectId == "tuna" ? "Ton baligi" : subjectId == "red_snapper" ? "Kirmizi mercan"
             : subjectId == "event_bioluminescence" ? "Biyoluminesans" : string.IsNullOrEmpty(subjectId) ? "bos kadraj" : subjectId;
 
         private static string Friendly(string reason) => reason switch

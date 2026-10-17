@@ -1,0 +1,40 @@
+{
+  "source": "8e7e360e69e6749afd313cc99f60982a096a0e46",
+  "unity": "6000.3.23f1",
+  "protocol": "DeepDive-P4-3",
+  "editMode": {
+    "total": 1273,
+    "passed": 1273,
+    "result": "Passed",
+    "failed": 0
+  },
+  "windowsBuildExeSha256": "56C28AFBA054092826B7A8A80BA3767DAA87967F182C0C562EB2F98799175B7A",
+  "archiveSha256": "1A4451AD12BC7B317C602A5DA19E0F45D7099171B9150C3762ECCFA37A0ABA65",
+  "runtimeTestSource": "3202dbf8fbdd03c0e93268ce7def9c60c71d98c2",
+  "savedSceneSha256": "F6FC38A16E201A3BAFB7A86B10AC3348361B4AB6AB3725E841693B34F459F9D2",
+  "authoringIdempotent": true,
+  "rebuiltPlayerScenes": [
+    {
+      "Name": "level0",
+      "Unchanged": true,
+      "Before": "47928C9EB638EC5B562C0E38B9F60A8243444D1218B16F396ECC404FEE0DEEEA",
+      "After": "47928C9EB638EC5B562C0E38B9F60A8243444D1218B16F396ECC404FEE0DEEEA"
+    },
+    {
+      "Name": "level1",
+      "Unchanged": true,
+      "Before": "82A4E6BCCE7C6D2276992EB9325458E3DDBA6C417CEC7691FF39E4F6D3A90019",
+      "After": "82A4E6BCCE7C6D2276992EB9325458E3DDBA6C417CEC7691FF39E4F6D3A90019"
+    }
+  ],
+  "managedAssembliesUnchanged": true,
+  "productDay": {
+    "fullPopulationPerDive": 15,
+    "reloadPassed": true,
+    "dives": 3,
+    "distinctFishLifetimes": 45,
+    "passed": 4,
+    "players": 4,
+    "worldLoads": 1
+  }
+}

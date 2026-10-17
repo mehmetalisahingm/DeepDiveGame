@@ -282,7 +282,11 @@ Kod: `Assets/DeepDive/Trip/BoatMapPresenter.cs` (saf), `Assets/DeepDive/Composit
 
 `NetworkBoatController.TryBoardNearest` fiziksel binmede 2,75 m yakınlık kapısını herhangi bir authored koltuk noktasına göre kontrol eder; ardından host en yakın **boş** koltuğu seçer. Yakındaki koltuğun dolu olması oyuncuyu tekneden uzak saymaz; böylece aynı kuru iskeleden dört koltuğa da binilebilir. Menzil, onarım, sabit koltuklar, Docked/Anchored kapısı ve `BoatTripManager` otoritesi korunur. İstemci koltuk veya yakınlık sonucu seçmez.
 
+18 Ekim nüfus/görsel eklemesi: `CoastalFishPopulationSetup` mevcut `Fish_SeaBass` nesnesini koruyup 14 ayrı levrek sahne nesnesi yazar. Her birinin Unity tarafından üretilmiş ayrı NGO hash'i, mevcut host AI/sağlık/av/çekim yolu vardır; `FishDiveLifecycleBinding` hepsini sonraki dalışta yeniler, aynı dalışta tüketilen avı geri getirmez. Sahne düzeni değiştiği için protokol **DeepDive-P4-3** oldu; önceki build'ler birlikte bağlanamaz. `BoatHullPresentation` yalnız Motorboat kökünde `BoatArt/TripoMotorboat/MotorboatVisual` prefabını kullanır; koltuk, rota, hareket, satın alma ve save otoriteleri değişmez. Model collider/NetworkObject içermez. Başlangıç sandalı ve araştırma teknesi ayrı görünümlerini korur.
+
 ### Kamera, derinlik ve rota gelişimi — P4.3 taslak
+
+18 Ekim FBX kiti: beşer `sea_bass`/`tuna`/`red_snapper`, toplam 15 authored balık. İki yeni tür mevcut zıpkın/av/çekim/ansiklopedi yolundan geçer; başlangıç fiyatları mevcut levrekle aynı 120/av ve aynı kalite tarifesidir. Save şeması değişmez, sabit tür kimliği kullanılır. Yeni ağ protokolü `DeepDive-P4-4` aynı sahne düzeninde farklı tür tanımlarını eski build ile karıştırmayı engeller. `SuppliedTownArt` yalnız görsel çocuklar ekler; mevcut hizmet/yatak/depo/PC collider ve host mesafe/onay kuralları korunur. Başlangıç ahşap sandalının görseli `SuppliedKit/Rowboat`, motorbot Tripo görseli ve araştırma teknesi ayrıdır.
 
 1. Mert equipmentId/seviye/fiyat/görünüm/yeteneği tek katalogda tanımlar. Mehmet kuşanma/elde model ve tüp/palet/çanta etkisini, Utku kamera menzil/düşük ışık doğrulamasını uygular.
 2. Kamera 1 menzil artışı, kamera 2 düşük ışık yeteneği verir. İstemci kendi ekipman seviyesini, ışık gücünü veya kaliteyi seçemez; host tahsis edilmiş ekipmandan çözer. Işık açısı/mesafesi/görüş denetimi diğer kayıt koşullarıyla birlikte çalışır.

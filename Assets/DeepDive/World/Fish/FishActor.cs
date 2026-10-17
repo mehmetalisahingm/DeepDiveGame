@@ -139,8 +139,10 @@ namespace DeepDive.World
         public override void OnNetworkDespawn()
         {
             SetPresent(false);
-            if (nightGlow != null) Destroy(nightGlow);
-            nightGlow = null;
+            // A living scene fish can despawn and respawn in the same frame at next dive.
+            // Destroy is deferred; adding another Light then fails (only one is allowed).
+            // Retain its component just like the renderer/collider, but never leave it lit.
+            if (nightGlow != null) nightGlow.enabled = false;
             base.OnNetworkDespawn();
         }
 
