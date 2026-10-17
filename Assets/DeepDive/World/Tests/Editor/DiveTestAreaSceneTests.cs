@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 using DeepDive.Network;
 using NUnit.Framework;
 using Unity.Netcode;
@@ -122,6 +124,20 @@ namespace DeepDive.World.Tests
                     Assert.IsTrue(Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.y) <= half.y && Mathf.Abs(local.z) <= half.z,
                         fish.name + " wander envelope leaves water: " + point);
                 }
+            }
+        }
+
+        [Test]
+        public void SavedSceneAlreadyContainsUniqueNgoHashesBeforeUnityCanRepairThem()
+        {
+            var hashes = Regex.Matches(File.ReadAllText(ScenePath), @"(?m)^  GlobalObjectIdHash: (\d+)");
+            Assert.GreaterOrEqual(hashes.Count, 15);
+            var unique = new HashSet<uint>();
+            foreach (Match hash in hashes)
+            {
+                var value = uint.Parse(hash.Groups[1].Value);
+                Assert.AreNotEqual(0u, value);
+                Assert.IsTrue(unique.Add(value), "Saved scene contains a copied NGO identity: " + value);
             }
         }
 

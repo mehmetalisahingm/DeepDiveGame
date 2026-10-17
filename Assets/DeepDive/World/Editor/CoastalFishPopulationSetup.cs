@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Unity.Netcode;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -37,6 +38,15 @@ namespace DeepDive.World.Editor
             }
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Fish population scene save failed");
+            // Clones initially inherit the source hash. Only after their first save do they
+            // have durable GlobalObjectIds. Reload lets NGO OnValidate generate their hashes;
+            // save these component values too, rather than relying on a build-time repair.
+            scene = EditorSceneManager.OpenScene(ScenePath);
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var networkObject in root.GetComponentsInChildren<NetworkObject>(true))
+                    EditorUtility.SetDirty(networkObject);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene)) throw new InvalidOperationException("Fish NGO identity save failed");
             AssetDatabase.SaveAssets();
             Debug.Log("P4_COAST_POPULATION authored=15 species=sea_bass");
         }
