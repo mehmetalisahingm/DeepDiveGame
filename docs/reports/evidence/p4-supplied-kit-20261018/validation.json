@@ -1,0 +1,24 @@
+{
+  "Source": "26f1a185e53adcf0d2412639381b54d002c039c4",
+  "GameplaySource": "0f6d052aadf2844a9d26606d290129584741abb3",
+  "Unity": "6000.3.23f1",
+  "Protocol": "DeepDive-P4-4",
+  "EditMode": {
+    "Passed": 1291,
+    "Failed": 0
+  },
+  "Prefabs": 12,
+  "Fish": {
+    "red_snapper": 5,
+    "sea_bass": 5,
+    "tuna": 5
+  },
+  "WindowsExeSha256": "56C28AFBA054092826B7A8A80BA3767DAA87967F182C0C562EB2F98799175B7A",
+  "Package": {
+    "Bytes": 84092387,
+    "Sha256": "81605A88163DBF8B3CCA14DDBB854459F6D542B169E6F7102DC486FD60C95CBB",
+    "Readable": true,
+    "Entries": 304
+  },
+  "DistributionExeMatches": true
+}

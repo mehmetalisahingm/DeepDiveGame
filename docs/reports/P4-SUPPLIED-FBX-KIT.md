@@ -23,6 +23,11 @@ Windows build PASS (`Logs/P1-build.log`). Gerçek iki süreçli av, sandal gidi�
 
 İlk son kamera denemesinde gerçek klip/arşiv/ödeme PASS olmasına rağmen host'un `recordingStarted` test alanı eksik kaldı: sırasız Unity nesne listesi, 15 hayvanlı sahnede iki süreçte farklı hedef seçiyordu. İsteğe bağlı smoke sürücüsü kararlı nesne adıyla aynı balığı seçer; normal oyunun raycast/çekim/ödeme yolu değiştirilmedi. Yakın balık görsel çekimi yalnız render sırasında kamera gözlem açısıdır, oyuncu veya hayvan taşınmaz. Kamera denemesi tekrar edilir.
 
+Son kamera tekrarı `Logs/P1-integrated-20261018-004247-164-2-27677`: **host + guest PASS**; kayıt başlama/durma, gerçek 41 karelik klip, arşiv, güvenli dönüş ve ödeme doğrulandı. Son kaynak `26f1a18`; runtime oyun/rig kaynağı `0f6d052`. Ham sonuçlar ve gerçek Windows görüntüleri [kanıt klasöründe](evidence/p4-supplied-kit-20261018/validation.json). Kullanıcının ana checkout'unda `Builds/DeepDive-FBX-Kit-Windows.zip` hazırdır; ZIP'in bütün girdileri okunabildi, içindeki EXE build ile aynı hash'e sahiptir. Herkes aynı `DeepDive-P4-4` paketini kullanır.
+
+![Kasaba ve dükkân modelleri](evidence/p4-supplied-kit-20261018/town.png)
+![Ahşap başlangıç sandalı](evidence/p4-supplied-kit-20261018/rowboat.png)
+
 ## Tekrar üretme
 
 Unity batch method: `DeepDive.World.Editor.SuppliedKitImport.Apply`. Mevcut 15 sahne balığının kökleri/NGO kimlikleri korunur; yalnız görsel çocukları ve iki tür ataması değişir. `DeepDive/P4/Coast: author 15 huntable fish` yerleşimini yeniden kurmak gerekirse ardından kit method'u çalıştırılır.
