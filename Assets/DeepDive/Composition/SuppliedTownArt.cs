@@ -40,9 +40,10 @@ namespace DeepDive.Composition
             var decor = new GameObject("SuppliedHomeDecor").transform;
             decor.SetParent(root, false);
             decor.position = floor;
-            Attach(decor, "Bookshelf", new Vector3(-5.2f, 0f, -4.8f), Quaternion.identity);
+            Attach(decor, "Bookshelf", new Vector3(-4.9f, 0f, -4.8f), Quaternion.identity);
             Attach(decor, "Couch", new Vector3(0f, 0f, -5f), Quaternion.identity);
             Attach(decor, "Plant", new Vector3(5.3f, 0f, 4.8f), Quaternion.identity);
+            Attach(decor, "DeskLight", new Vector3(4.35f, 1.2f, -3.55f), Quaternion.identity);
         }
     }
 }

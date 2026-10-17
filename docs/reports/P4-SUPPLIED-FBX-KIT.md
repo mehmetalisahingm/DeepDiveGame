@@ -13,7 +13,9 @@ Kullanıcı üç arşivden gereken modellerin hızlıca oyuna eklenmesini istedi
 
 ## Doğrulama
 
-Tam EditMode **1288/1288 PASS** (`Logs/supplied-kit-final-tests.xml`). Üç türden beşer hayvan, ayrı NGO kimlikleri, av/çekim bileşenleri, 12 modelin URP materyalleri/collider içermemesi, üç gerçek yüzme klibi ve mevcut yol/ev/servis sözleşmeleri doğrulandı. İlk denemede eski dar sahil sınırı testi büyük binaları reddetti; üretimde sürekli kasaba kurulumu öne alındı, dar fixture ayrı bırakıldı, tam test yeniden geçti.
+Tam EditMode **1291/1291 PASS** (`Logs/supplied-kit-ready-tests.xml`). Üç türden beşer hayvan, ayrı NGO kimlikleri, av/çekim bileşenleri, 12 modelin URP materyalleri/collider içermemesi, üç gerçek yüzme klibi ve mevcut yol/ev/servis sözleşmeleri doğrulandı. İlk denemede eski dar sahil sınırı testi büyük binaları reddetti; üretimde sürekli kasaba kurulumu öne alındı, dar fixture ayrı bırakıldı, tam test yeniden geçti.
+
+FBX eski iskelet ölçeği ayrıca gerçek bake edilmiş vertex ölçümüyle düzeltildi; yalnız renderer kutusuna göre normalize edilince hayvanlar çok küçük kalıyordu. FBX rig kökü korunur, ayrı metre parent'ı gerçek skinned vertex ölçümüne göre ayarlanır. Üç modelin başlangıç ve yarım klip anındaki gerçek mesh boyutu 0,7–1,6 m kontrolünden geçer; hedef uzunluk yaklaşık 1,05 m'dir. Aynı düzeltme skinned culling sınırlarını da gerçek mesh'e bağlar.
 
 Windows build PASS (`Logs/P1-build.log`). Gerçek iki süreçli av, sandal gidiş/dönüş, dükkân görseli ve ev→dükkân→iskele→su→PC→uyku/diskten açma kontrolleri bu build üzerinde çalıştırılır; sonuçlar aşağıda kaydedilir. Teknik test, nihai sanat veya ayrı PC/dört insan kabulü sayılmaz. Mert model/materyal/kasaba ve Utku balık/world incelemesi sahibidir; onların onayı üretilmez.
 

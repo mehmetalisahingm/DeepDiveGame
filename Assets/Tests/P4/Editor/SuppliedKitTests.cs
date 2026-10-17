@@ -43,5 +43,28 @@ namespace DeepDive.P4.Tests
             Assert.Greater(animation.clip.length, 0f, key);
             Assert.AreEqual(WrapMode.Loop, animation.wrapMode, key);
         }
+
+        [TestCase("CoastalFish")]
+        [TestCase("Tuna")]
+        [TestCase("RedSnapper")]
+        public void AnimatedFishActualVerticesHaveReadableMetreScale(string key)
+        {
+            var root = Object.Instantiate(Resources.Load<GameObject>("SuppliedKit/" + key));
+            var baked = new Mesh();
+            try
+            {
+                var animation = root.GetComponentInChildren<Animation>();
+                foreach (var time in new[] { 0f, animation.clip.length * 0.5f })
+                {
+                    animation.clip.SampleAnimation(animation.gameObject, time);
+                    var skin = root.GetComponentInChildren<SkinnedMeshRenderer>();
+                    skin.BakeMesh(baked);
+                    var size = Vector3.Scale(baked.bounds.size, skin.transform.lossyScale);
+                    var largest = Mathf.Max(size.x, size.y, size.z);
+                    Assert.That(largest, Is.InRange(0.7f, 1.6f), key + " actual animated mesh size " + size);
+                }
+            }
+            finally { Object.DestroyImmediate(baked); Object.DestroyImmediate(root); }
+        }
     }
 }

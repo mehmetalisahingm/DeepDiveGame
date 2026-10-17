@@ -12,6 +12,27 @@ namespace DeepDive.World.Editor
     public static class SuppliedKitImport
     {
         private const string Output = "Assets/DeepDive/Art/Resources/SuppliedKit";
+        public static void AuditFish()
+        {
+            foreach (var key in new[] { "CoastalFish", "Tuna", "RedSnapper" })
+            {
+                var root = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(Output + "/" + key + ".prefab"));
+                try
+                {
+                    foreach (var skin in root.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    {
+                        var baked = new Mesh(); skin.BakeMesh(baked);
+                        Debug.Log($"FISH_AUDIT {key} bounds={skin.bounds} local={skin.localBounds} baked={baked.bounds} lossy={skin.transform.lossyScale}");
+                        Object.DestroyImmediate(baked);
+                    }
+                    var animation = root.GetComponentInChildren<Animation>();
+                    animation.clip.SampleAnimation(animation.gameObject, 0.5f);
+                    foreach (var skin in root.GetComponentsInChildren<SkinnedMeshRenderer>())
+                        Debug.Log($"FISH_AUDIT_SAMPLED {key} bounds={skin.bounds} lossy={skin.transform.lossyScale}");
+                }
+                finally { Object.DestroyImmediate(root); }
+            }
+        }
         public static void Apply()
         {
             Directory.CreateDirectory(Output);
@@ -83,7 +104,9 @@ namespace DeepDive.World.Editor
             try
             {
                 var model = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath));
-                model.transform.SetParent(root.transform, false);
+                var metres = new GameObject("MetreScale").transform;
+                metres.SetParent(root.transform, false);
+                model.transform.SetParent(metres, false);
                 var renderers = model.GetComponentsInChildren<Renderer>(true);
                 if (renderers.Length == 0) throw new InvalidOperationException(source + " has no visible mesh");
                 foreach (var renderer in renderers)
@@ -98,8 +121,8 @@ namespace DeepDive.World.Editor
                 }
                 var factor = fish ? size.z / bounds.size.z : Mathf.Min(size.x / bounds.size.x, size.y / bounds.size.y, size.z / bounds.size.z);
                 var scale = fish || boat ? Vector3.one * factor : new Vector3(size.x / bounds.size.x, size.y / bounds.size.y, size.z / bounds.size.z);
-                model.transform.localScale = Vector3.Scale(model.transform.localScale, scale);
-                model.transform.localPosition = new Vector3(-bounds.center.x * scale.x,
+                metres.localScale = scale;
+                metres.localPosition = new Vector3(-bounds.center.x * scale.x,
                     -(fish ? bounds.center.y : bounds.min.y) * scale.y - (boat ? 0.3f : 0f), -bounds.center.z * scale.z);
                 if (fish)
                 {
@@ -112,6 +135,19 @@ namespace DeepDive.World.Editor
                         animation.wrapMode = WrapMode.Loop;
                         animation.playAutomatically = true;
                     }
+                    // Keep the FBX's own rig root untouched. Calibrate the wrapper against
+                    // actual skinned vertices; some legacy FBX rigs include scale twice.
+                    metres.localPosition = Vector3.zero;
+                    var measured = Bounds(renderers);
+                    var length = measured.size.z;
+                    metres.localScale *= 2f;
+                    var doubled = Bounds(renderers).size.z;
+                    metres.localScale *= 0.5f;
+                    var exponent = Mathf.Clamp(Mathf.Log(doubled / length, 2f), 0.5f, 2f);
+                    metres.localScale *= Mathf.Pow(size.z / length, 1f / exponent);
+                    measured = Bounds(renderers);
+                    metres.localPosition -= measured.center;
+                    Debug.Log($"FISH_METRES {name} length={measured.size.z} exponent={exponent}");
                 }
                 PrefabUtility.SaveAsPrefabAsset(root, Output + "/" + name + ".prefab");
                 Debug.Log($"SUPPLIED_MODEL {name} source={source} bounds={bounds.size} scale={scale}");
@@ -121,9 +157,29 @@ namespace DeepDive.World.Editor
 
         private static Bounds Bounds(Renderer[] renderers)
         {
-            var bounds = renderers[0].bounds;
-            foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
-            return bounds;
+            // These Blender FBXs carry oversized imported skin bounds. Normalising that
+            // box would make the actual animated fish microscopic. Measure baked vertices.
+            Bounds? result = null;
+            foreach (var renderer in renderers)
+            {
+                if (renderer is SkinnedMeshRenderer skin)
+                {
+                    var baked = new Mesh();
+                    skin.BakeMesh(baked);
+                    skin.localBounds = baked.bounds;
+                    skin.updateWhenOffscreen = true;
+                    foreach (var vertex in baked.vertices)
+                    {
+                        var point = skin.transform.TransformPoint(vertex);
+                        if (!result.HasValue) result = new Bounds(point, Vector3.zero);
+                        else { var b = result.Value; b.Encapsulate(point); result = b; }
+                    }
+                    Object.DestroyImmediate(baked);
+                }
+                else if (!result.HasValue) result = renderer.bounds;
+                else { var b = result.Value; b.Encapsulate(renderer.bounds); result = b; }
+            }
+            return result ?? throw new InvalidOperationException("No mesh bounds");
         }
 
         private static Material Material(Material source, string model)
