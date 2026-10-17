@@ -12,7 +12,7 @@
 
 ## Kaynak ve inceleme sınırı
 
-Arşiv `luxury+motorboat+3d+model.zip`, SHA-256 `1A445AD12BC7B317C602A5DA19E0F45D7099171B9150C3762ECCFA37A0ABA65`. FBX ve beş doku kullanıcı tarafından sağlandı. Kullanıcı kendi Tripo üretimi olduğunu ve public GitHub'a ekleme iznini açıkça bildirdi. Hesap planı/üretim tarihi arşivde yoktur; kayıt [CREDITS](../assets/CREDITS.md) içindedir. Kaynak doku setinin tamamı korunur; mevcut URP materyali renk ve normal dokusunu kullanır, metaliklik/pürüzlülük çalışma değeridir. Yeni servis çağrısı veya satın alma yoktur.
+Arşiv `luxury+motorboat+3d+model.zip`, SHA-256 `1A4451AD12BC7B317C602A5DA19E0F45D7099171B9150C3762ECCFA37A0ABA65`. FBX ve beş doku kullanıcı tarafından sağlandı. Kullanıcı kendi Tripo üretimi olduğunu ve public GitHub'a ekleme iznini açıkça bildirdi. Hesap planı/üretim tarihi arşivde yoktur; kayıt [CREDITS](../assets/CREDITS.md) içindedir. Kaynak doku setinin tamamı korunur; mevcut URP materyali renk ve normal dokusunu kullanır, metaliklik/pürüzlülük çalışma değeridir. Yeni servis çağrısı veya satın alma yoktur.
 
 Dünya/canlı/sahne kısmı Utku, görsel kaynak/tutarlılık kısmı Mert incelemesi gerektirir. Bu teslim onların onayı veya faz kapanışı değildir. İlk sandalın fiziksel tahta/keser/çivi tamiri, beş tür, kasaba grafikleri ve genel sanat/performans kabulü bu işte tamamlandı sayılmaz.
 
@@ -20,11 +20,22 @@ Sahne blokları dosya kimliğiyle karşılaştırıldı: eski 310 bloğun yalnı
 
 ## Doğrulama
 
-- Tam EditMode: **1272/1272 PASS**, `Logs/fish15-final-editmode.xml`. Tüm balıklarda ayrı ve sıfır olmayan NGO hash'i, av/çekim bileşenleri, host transform otoritesi ve su içi wander hacmi kontrol edilir. Yaşayan gece balığı üç anlık yeniden kullanımda tek ışığı güvenle korur. Motorbot prefabı, doku/URP, gövde değiştirme ve collider sınırları kontrol edilir.
-- Windows build: ilk içerik build'i PASS; yaşam döngüsü düzeltmesini içeren son build ve uzun koşu sonucu aşağıda güncellenir.
+- Tam EditMode: **1273/1273 PASS**, `Logs/fish15-serialized-editmode.xml`. Tüm balıklarda ayrı ve sıfır olmayan NGO hash'i (ham kayıt dosyası dahil), av/çekim bileşenleri, host transform otoritesi ve su içi wander hacmi kontrol edilir. Yaşayan gece balığı üç anlık yeniden kullanımda tek ışığı güvenle korur. Motorbot prefabı, doku/URP, gövde değiştirme ve collider sınırları kontrol edilir.
+- Windows build: ilk içerik build'i ve yaşam döngüsü düzeltmesini içeren build PASS.
 - Gerçek iki süreçli av: **host + guest PASS**, `Logs/P1-integrated-20261018-000959-380-2-26577`. Her iki süreç 15 canlı balık görür; misafirin gerçek zıpkın/E girdisiyle bir av toplanır ve çantaya yansır; diğer 14 hayvan canlı kalır.
 - Gerçek iki süreçli Tripo motorbot yolculuğu: **host + guest PASS**, `Logs/P1-integrated-20261018-000959-378-2-26677`; doğru gövde, gerçek binme/gidiş/demirleme/inme/yeniden binme/dönüş ve save kontrolü. Bu dar rota denemesi daha önce kazanılmış filo kampanyasının kopyasını kullanır; sıfır bakiyeden ürün kabulü olarak sunulmaz.
-- İlk dört süreçli uzun koşu ikinci dalışa geçişte `FishActor.OnNetworkSpawn` gece ışığı hatasını yakaladı; PASS sayılmadı. Hata düzeltildi, regresyon testi eklendi. Son koşu ve diskten açma sonucu bekleniyor.
+- İlk dört süreçli uzun koşu ikinci dalışa geçişte `FishActor.OnNetworkSpawn` gece ışığı hatasını yakaladı; PASS sayılmadı. Hata düzeltildi, regresyon testi eklendi; yeniden koşu aşağıda kayıtlıdır.
+
+18 Ekim son uzun koşu: **4/4 gerçek süreç PASS**, `Logs/P46-product-20261018-001808-4`. Tek dünya yüklemesi, **üç ayrı dalışta 15'er canlı balık**, 45 farklı balık ağ yaşam kimliği ve ilk balığın üç ayrı yaşam kimliği her dört süreçte gözlendi. Gerçek av/satış, kamera alımı, gerçek klip/oynatma/yayın, dört kişilik sandal turu, uyku, gün 2 ve 135 kanal geliri doğrulandı. Yeni host sürecinde diskten açma/klip oynatma/ikinci yayın reddi PASS. Bu aynı PC'de dört süreçle bir günlük ürün döngüsüdür; dört insan/ayrı PC/üç oyun günü değildir. Son iki süreçli av tekrarı da `Logs/P1-integrated-20261018-001808-197-2-26977` altında host + guest PASS.
+
+Yazar scriptinin tekrar çalıştırılması ayrıca kontrol edildi. İlk klonlamada Unity'nin bellekte düzelttiği NGO kimliklerinin diskte de kalması için ilk kayıttan sonra sahne yeniden açılıp NetworkObject değerleri tekrar kaydedilir. Ham YAML kimliklerini Unity'nin açılış onarımından önce kontrol eden ayrı test eklendi. Bu son düzeltme yalnız editör/yazılmış sahne kimlikleridir; aynı oyuncu sahne içeriği yeniden build edilerek karşılaştırılır.
+
+Son kaynak `8e7e360`; uzun koşu kaynağı `3202dbf`. Yazar tekrar çalıştırıldığında sahne hash'i aynı kaldı. Son Windows rebuild PASS; hem `level0` hem `level1` byte hash'leri uzun koşuda kullanılan build ile **aynı** çıktı. Runtime managed DLL'leri de aynı kaldı. Böylece ham sahne yazım düzeltmesi sonrası test edilen oyun davranışının değişmediği ayrıca doğrulandı; 1273/1273 son EditMode bu kaynağı kapsar.
+
+Ham süreç sonuçları ve görüntüler [kanıt klasöründe](evidence/p4-fish15-tripo-20261018/validation.json) saklanır. Oynanabilir yerel ZIP `Builds/DeepDive-15Balik-TripoMotorbot-Windows.zip`; ana kullanıcı checkout'unda bulunur. Bütün klasör çıkarılıp `DeepDiveGame-P1.exe` çalıştırılır; herkes aynı yeni protokolü kullanmalıdır. Dağıtım paketi okunabilirlik, EXE/veri/runtime içeriği ve dosya hash'iyle kontrol edildi.
+
+![Tripo motorbot gerçek runtime genel çekimi](evidence/p4-fish15-tripo-20261018/tripo-motorboat.png)
+![15 balıklı kıyıdan gerçek oyuncu kamerası](evidence/p4-fish15-tripo-20261018/coastal-fish.png)
 
 Görüntüler gerçek Windows build'inden; genel tekne çekimi yalnız gözlem kamerası açısıdır. Yapay görsel veya hedef tasarım resmi değildir.
 
