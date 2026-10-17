@@ -260,7 +260,14 @@ namespace DeepDive.P1.Lab
                 if (host && Arg("-p1-screenshot").Length > 0 && !connection.IsSceneLoading)
                 {
                     if (!diveScreenshot && state.Phase == SessionPhase.Dive && elapsed > 28)
-                    { diveScreenshot = true; CaptureRoom("-dive"); }
+                    {
+                        diveScreenshot = true; CaptureRoom("-dive");
+                        if (Record)
+                        {
+                            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.name == "Fish_SeaBass");
+                            if (fish != null) CaptureP45Fish(fish, "-fish-detail");
+                        }
+                    }
                     if (!shoreScreenshot && state.Phase == SessionPhase.Return && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 15)
                     { shoreScreenshot = true; CaptureRoom("-shore"); if (Trip) CaptureRoom("-boat-overview", true); }
                 }
@@ -836,6 +843,7 @@ namespace DeepDive.P1.Lab
         private void ProbeRecording(NetworkPlayer local, NetworkPlayer[] players)
         {
             var subject = FindObjectsByType<RecordingSubject>(FindObjectsSortMode.None)
+                .OrderBy(x => x.name, StringComparer.Ordinal)
                 .FirstOrDefault(x => Event ? x.GetComponent<SpecialEventRunner>() != null : x.GetComponent<FishActor>() != null);
             if (subject == null || !subject.IsSpawned) return;
             if (Event)

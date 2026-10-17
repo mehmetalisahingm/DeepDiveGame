@@ -19,6 +19,10 @@ FBX eski iskelet ölçeği ayrıca gerçek bake edilmiş vertex ölçümüyle d�
 
 Windows build PASS (`Logs/P1-build.log`). Gerçek iki süreçli av, sandal gidiş/dönüş, dükkân görseli ve ev→dükkân→iskele→su→PC→uyku/diskten açma kontrolleri bu build üzerinde çalıştırılır; sonuçlar aşağıda kaydedilir. Teknik test, nihai sanat veya ayrı PC/dört insan kabulü sayılmaz. Mert model/materyal/kasaba ve Utku balık/world incelemesi sahibidir; onların onayı üretilmez.
 
+İki süreçli kontroller: av `Logs/P1-integrated-20261018-004001-120-2-27577` host + guest PASS. Sandal `Logs/P1-integrated-20261018-003441-370-2-27077`, dükkân `Logs/P1-integrated-20261018-003441-423-2-27377` host + guest PASS. Sürekli dünya `Logs/P46-world-20261018-003441-2` iki süreçte tek yükleme, evden sahile gerçek yürüme/yüzme, PC/uyku ve yeni host'ta gün 2 açılışı PASS. Sonraki rig görsel ölçek düzeltmesi collider/anchor/rota değiştirmedi; gerçek av o düzeltmeden sonra tekrar geçti.
+
+İlk son kamera denemesinde gerçek klip/arşiv/ödeme PASS olmasına rağmen host'un `recordingStarted` test alanı eksik kaldı: sırasız Unity nesne listesi, 15 hayvanlı sahnede iki süreçte farklı hedef seçiyordu. İsteğe bağlı smoke sürücüsü kararlı nesne adıyla aynı balığı seçer; normal oyunun raycast/çekim/ödeme yolu değiştirilmedi. Yakın balık görsel çekimi yalnız render sırasında kamera gözlem açısıdır, oyuncu veya hayvan taşınmaz. Kamera denemesi tekrar edilir.
+
 ## Tekrar üretme
 
 Unity batch method: `DeepDive.World.Editor.SuppliedKitImport.Apply`. Mevcut 15 sahne balığının kökleri/NGO kimlikleri korunur; yalnız görsel çocukları ve iki tür ataması değişir. `DeepDive/P4/Coast: author 15 huntable fish` yerleşimini yeniden kurmak gerekirse ardından kit method'u çalıştırılır.
