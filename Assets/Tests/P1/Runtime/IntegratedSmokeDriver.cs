@@ -31,6 +31,8 @@ namespace DeepDive.P1.Lab
             public bool walk, swim, collisions, cameras, stopped, clientRejoined;
             public bool fishMoved, catchObserved, catchDespawned, inventoryAdded;
             public bool huntShooter, inventoryReplicated;
+            public int huntPopulationObserved;
+            public bool huntOtherFishRemain;
             public bool recordingStarted, recordingStopped, recordingClaimed, recordingViews, recordingPending;
             public bool recordingViewActive, recordingSafe;
             public bool recordingRoleResolved, recordingRecorder;
@@ -260,7 +262,7 @@ namespace DeepDive.P1.Lab
                     if (!diveScreenshot && state.Phase == SessionPhase.Dive && elapsed > 28)
                     { diveScreenshot = true; CaptureRoom("-dive"); }
                     if (!shoreScreenshot && state.Phase == SessionPhase.Return && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 15)
-                    { shoreScreenshot = true; CaptureRoom("-shore"); }
+                    { shoreScreenshot = true; CaptureRoom("-shore"); if (Trip) CaptureRoom("-boat-overview", true); }
                 }
                 if (reject)
                 {
@@ -390,7 +392,8 @@ namespace DeepDive.P1.Lab
             result.passed = result.connected && result.roster && result.ready && result.prep && result.dive && result.returned &&
                 result.readyReset && result.walk && result.swim && result.collisions && result.cameras && result.stopped &&
                 (!rejoin || result.clientRejoined) && result.errors.Count == 0;
-            if (Hunt) result.passed &= result.fishMoved && result.catchObserved && result.catchDespawned &&
+            if (Hunt) result.passed &= result.huntPopulationObserved == 15 && result.huntOtherFishRemain &&
+                result.fishMoved && result.catchObserved && result.catchDespawned &&
                 (!host || result.inventoryAdded) && (!result.huntShooter || result.inventoryReplicated);
             // This scenario assigns ONE guest to record. Bystanders still must pass every
             // roster/movement/scene assertion, but must not be required to send recording input.
@@ -984,10 +987,14 @@ namespace DeepDive.P1.Lab
             }
             if (adapter.IsAuthority && adapter.GetComponent<InventoryManager>().Bags.TryGetValue(new PlayerId(shooter), out var bag))
                 result.inventoryAdded |= bag.Items.Count == 1;
-            var fish = FindFirstObjectByType<FishActor>();
+            var population = FindObjectsByType<FishActor>(FindObjectsSortMode.None);
+            result.huntPopulationObserved = Math.Max(result.huntPopulationObserved, population.Count(f => f.IsSpawned));
+            // Scene identity is stable across processes; Unity instance/enumeration order is not.
+            var fish = population.FirstOrDefault(f => f.name == "Fish_SeaBass");
             if (fish == null || !fish.IsSpawned)
             {
                 result.catchDespawned |= result.catchObserved;
+                result.huntOtherFishRemain |= result.catchDespawned && population.Count(f => f.IsSpawned && !f.IsDead) == 14;
                 local.SubmitLocalInput(Vector3.zero, 0); return;
             }
             if (!firstFishPosition.HasValue) firstFishPosition = fish.transform.position;
@@ -3863,11 +3870,22 @@ namespace DeepDive.P1.Lab
             if (!result.townSaveRoundTrip) result.errors.Add("town save/load round trip failed: " + store.LastError);
         }
 
-        private void CaptureRoom(string suffix = "")
+        private void CaptureRoom(string suffix = "", bool boatOverview = false)
         {
             // A hidden Windows player can skip presenting its backbuffer. Render explicitly
             // into a texture so the capture still contains the real camera and uGUI layout.
             var camera = Camera.allCameras.First(c => c.enabled);
+            var capturePose = new Pose(camera.transform.position, camera.transform.rotation);
+            if (boatOverview)
+            {
+                var boat = FindFirstObjectByType<NetworkBoatController>();
+                if (boat != null)
+                {
+                    var eye = boat.transform.position + new Vector3(7f, 5f, -8f);
+                    camera.transform.SetPositionAndRotation(eye,
+                        Quaternion.LookRotation(boat.transform.position + Vector3.up * 0.5f - eye));
+                }
+            }
             var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None).Where(c => c.isActiveAndEnabled).ToArray();
             var previousCanvases = canvases.Select(c => (c.renderMode, c.worldCamera, c.planeDistance)).ToArray();
             var previousCameraTarget = camera.targetTexture;
@@ -3896,6 +3914,7 @@ namespace DeepDive.P1.Lab
             {
                 RenderTexture.active = previousTarget;
                 camera.targetTexture = previousCameraTarget;
+                camera.transform.SetPositionAndRotation(capturePose.position, capturePose.rotation);
                 for (var i = 0; i < canvases.Length; i++)
                 { canvases[i].renderMode = previousCanvases[i].renderMode; canvases[i].worldCamera = previousCanvases[i].worldCamera; canvases[i].planeDistance = previousCanvases[i].planeDistance; }
                 target.Release(); Destroy(target); Destroy(pixels);

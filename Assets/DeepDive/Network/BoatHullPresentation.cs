@@ -19,6 +19,14 @@ namespace DeepDive.Network
                 model.transform.SetParent(transform, false);
                 models[i] = model;
                 BoatHullSeatRules.TryGetDimensions(kind, out var size);
+                // Optional authored visual only: the host-approved pose, four seat ids and
+                // fleet ownership are unchanged. Clean checkouts retain the blockout fallback.
+                var art = kind == BoatHullKind.Motorboat ? Resources.Load<GameObject>("BoatArt/TripoMotorboat/MotorboatVisual") : null;
+                if (art != null)
+                {
+                    Instantiate(art, model.transform, false);
+                    continue;
+                }
                 Part(model, material, "Deck", Vector3.zero, new Vector3(size.Width, 0.4f, size.Length));
                 Part(model, material, "PortRail", new Vector3(-size.Width / 2, 0.3f, 0), new Vector3(0.16f, 0.6f, size.Length));
                 Part(model, material, "StarboardRail", new Vector3(size.Width / 2, 0.3f, 0), new Vector3(0.16f, 0.6f, size.Length));

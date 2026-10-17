@@ -230,6 +230,8 @@ Derin tasarım: [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md); uygulanabilir iş par
 
 P4.6 teknik temel kabulü, P4.7 uygulamasından önce tamamlanır; hazırlık paralel yürüyebilir. Sonraki uygulama her küçük teslimin kabulüne bağlıdır. Grafik gelişiminin ilk görünür kanıtı P4.7'dir; sanat P5'e ertelenmez. Genişletilmiş P4'ün nihai kapısı P4.12'dir.
 
+18 Ekim açık kullanıcı istisnası: 15 avlanabilir kıyı balığı ve sağlanan Tripo motorbot görseli mevcut kabul devam ederken uygulanır. Bu talep yalnız bu iki içerik parçasının sırasını öne alır; diğer faz/insan/ayrı bilgisayar kabul koşullarını kaldırmaz. Tür sayısı bu işte birden beşe yükseltilmez. Kaynak ve doğrulama [P4-FISH15-TRIPO-MOTORBOAT](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) içindedir.
+
 ## P5 — Hataları ve performansı düzelt
 
 Yeni özellik ve içerik yok. Başlama kapısı: P4.6 temel kabulü ve yeni P4.7–P4.12 teslimlerinin kabulü; P4'ün main/build kapanışı. #147–#150 hazırlık görevleri bu kapıya bağlıdır.

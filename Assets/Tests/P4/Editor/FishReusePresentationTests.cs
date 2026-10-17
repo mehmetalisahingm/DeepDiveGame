@@ -1,11 +1,40 @@
 using DeepDive.World;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace DeepDive.P4.Tests
 {
     public sealed class FishReusePresentationTests
     {
+        [Test]
+        public void LivingNightFishReusesOneDisabledLightAcrossImmediateDiveRespawns()
+        {
+            var root = new GameObject("living-fish-reuse");
+            try
+            {
+                var fish = root.AddComponent<FishActor>();
+                var serialized = new SerializedObject(fish);
+                serialized.FindProperty("species").objectReferenceValue = AssetDatabase.LoadAssetAtPath<SpeciesDefinition>(
+                    "Assets/DeepDive/World/Fish/Species/SeaBass.asset");
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                fish.OnNetworkSpawn();
+                var glow = root.GetComponent<Light>();
+                Assert.NotNull(glow);
+                for (var dive = 0; dive < 3; dive++)
+                {
+                    glow.enabled = true;
+                    fish.OnNetworkDespawn();
+                    Assert.IsFalse(glow.enabled, "a retained fish must not glow while despawned");
+                    fish.OnNetworkSpawn();
+                    Assert.AreSame(glow, root.GetComponent<Light>());
+                    Assert.AreEqual(1, root.GetComponents<Light>().Length);
+                    Assert.IsFalse(glow.enabled, "night state must be resolved again by the host");
+                }
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
+
         [Test]
         public void RetainedFishHidesWhileDespawnedAndRestoresOnlyAuthoredEnabledParts()
         {

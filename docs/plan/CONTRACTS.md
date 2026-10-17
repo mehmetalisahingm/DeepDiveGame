@@ -282,6 +282,8 @@ Kod: `Assets/DeepDive/Trip/BoatMapPresenter.cs` (saf), `Assets/DeepDive/Composit
 
 `NetworkBoatController.TryBoardNearest` fiziksel binmede 2,75 m yakınlık kapısını herhangi bir authored koltuk noktasına göre kontrol eder; ardından host en yakın **boş** koltuğu seçer. Yakındaki koltuğun dolu olması oyuncuyu tekneden uzak saymaz; böylece aynı kuru iskeleden dört koltuğa da binilebilir. Menzil, onarım, sabit koltuklar, Docked/Anchored kapısı ve `BoatTripManager` otoritesi korunur. İstemci koltuk veya yakınlık sonucu seçmez.
 
+18 Ekim nüfus/görsel eklemesi: `CoastalFishPopulationSetup` mevcut `Fish_SeaBass` nesnesini koruyup 14 ayrı levrek sahne nesnesi yazar. Her birinin Unity tarafından üretilmiş ayrı NGO hash'i, mevcut host AI/sağlık/av/çekim yolu vardır; `FishDiveLifecycleBinding` hepsini sonraki dalışta yeniler, aynı dalışta tüketilen avı geri getirmez. Sahne düzeni değiştiği için protokol **DeepDive-P4-3** oldu; önceki build'ler birlikte bağlanamaz. `BoatHullPresentation` yalnız Motorboat kökünde `BoatArt/TripoMotorboat/MotorboatVisual` prefabını kullanır; koltuk, rota, hareket, satın alma ve save otoriteleri değişmez. Model collider/NetworkObject içermez. Başlangıç sandalı ve araştırma teknesi ayrı görünümlerini korur.
+
 ### Kamera, derinlik ve rota gelişimi — P4.3 taslak
 
 1. Mert equipmentId/seviye/fiyat/görünüm/yeteneği tek katalogda tanımlar. Mehmet kuşanma/elde model ve tüp/palet/çanta etkisini, Utku kamera menzil/düşük ışık doğrulamasını uygular.

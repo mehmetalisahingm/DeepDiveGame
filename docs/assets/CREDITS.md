@@ -1,5 +1,11 @@
 # Varlık kaynak kaydı
 
+## Kullanıcının Tripo motorbotu — 18 Ekim 2026
+
+Kaynak arşiv: `luxury+motorboat+3d+model.zip`; FBX kimliği `tripo_convert_7888c55b-2cb4-455c-804a-c9ae75a50e4e`. Kullanıcı bu sohbette **"Biz ürettik, GitHub'a da koyabilirsin"** diyerek kendi üretimi olduğunu ve kaynak paylaşım iznini bildirdi. Üretim tarihi/hesap planı arşivde bulunmuyor; bunlar uydurulmaz. [Tripo şartları](https://www.tripo3d.ai/terms) §5.2 ve [resmî kullanım açıklaması](https://www.tripo3d.ai/help/privacy-policy/how-to-use-tripo-models-commercially) 18 Ekim'de okundu; haklar hesap planına bağlıdır. Bu kayıt CC0 veya bağımsız bir üçüncü kişi lisans doğrulaması iddiası değildir; ticari yayın bu görev kapsamında değildir.
+
+`Assets/DeepDive/Network/Resources/BoatArt/TripoMotorboat/` içinde kaynak FBX, beş özgün doku, Unity `.meta` dosyaları, yerel URP materyali ve ölçek/pivotu düzenlenmiş görsel prefab tutulur. Model/dokular Git LFS ile taşınır. Kullanım: satın alınan `boat-2` motorbotunun görseli; dört koltuk/host hareketi/rota otoritesi yeniden yazılmaz. Başlangıç sandalı veya fiziksel tamir animasyonu değildir. Yeni Tripo çağrısı, kredi harcaması veya satın alma yapılmadı.
+
 ## Ortak build karakteri — 23 Eylül 2026
 
 `CoastalDiver` ve `CoastalArms`, Quaternius **Ultimate Modular Characters / Humanoid Rig / Beach** modelinden üretildi. Kaynak: [resmî paket sayfası](https://quaternius.com/packs/ultimatemodularcharacters.html), buradan bağlı [resmî dosya klasörü](https://drive.google.com/drive/folders/1USAAquX2JJWuA2m6zol0KUkFe3UkZ8zX). Lisans **CC0 1.0**, atıf zorunlu değil; Quaternius'a teşekkürler. İndirme: 22 Eylül 2026.
