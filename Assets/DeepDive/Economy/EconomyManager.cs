@@ -138,7 +138,9 @@ namespace DeepDive.Economy
             _recordingRewardByQuality[3] = 100;  // Gold
             _recordingRewardByQuality[4] = 200;  // Platinum
             _priceBySpeciesId["sea_bass"] = 120;
-            foreach (var subject in new[] { "sea_bass", "event_bioluminescence" })
+            _priceBySpeciesId["tuna"] = 120;
+            _priceBySpeciesId["red_snapper"] = 120;
+            foreach (var subject in new[] { "sea_bass", "tuna", "red_snapper", "event_bioluminescence" })
                 foreach (var price in _recordingRewardByQuality) _subjectRewards[(subject, price.Key)] = price.Value;
 
             _catalog["tube-1"] = new EquipmentDefinition("tube-1", "tube", 1, 100);
@@ -197,7 +199,7 @@ namespace DeepDive.Economy
             ConfigureDefaults();
             if (quality < 1 || quality > 4) throw new ArgumentOutOfRangeException(nameof(quality));
             _recordingRewardByQuality[quality] = Math.Max(0, credits);
-            foreach (var subject in new[] { "sea_bass", "event_bioluminescence" })
+            foreach (var subject in new[] { "sea_bass", "tuna", "red_snapper", "event_bioluminescence" })
                 _subjectRewards[(subject, quality)] = Math.Max(0, credits);
         }
 

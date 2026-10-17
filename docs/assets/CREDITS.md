@@ -1,5 +1,13 @@
 # Varlık kaynak kaydı
 
+## Kullanıcının sağladığı Quaternius FBX paketleri — 18 Ekim 2026
+
+- `FBX-20261017T212443Z-1-001.zip`: [Ultimate Buildings](https://quaternius.com/packs/ultimatetexturedbuildings.html), bina FBX/materyal sürümü.
+- `FBX-20261017T212451Z-1-001.zip`: [Animated Cute Fish](https://quaternius.com/packs/cutefish.html), balıklar/ahşap sandal/iskele.
+- `FBX-20261017T212537Z-1-001.zip`: [Ultimate House Interior](https://quaternius.com/packs/ultimatehomeinterior.html), ev eşyaları. İçindeki tekrar balık ZIP'i kullanılmadı.
+
+Üç resmî Quaternius paket sayfasındaki **CC0** kaydı 18 Ekim 2026'da okundu. Kaynak FBX'ler `Assets/DeepDive/Art/Supplied/`, yerel URP materyalleri ve metreye uyarlanmış prefablar `Assets/DeepDive/Art/Resources/SuppliedKit/` içindedir; model dosyaları Git LFS'tedir. Arşivlerde harici atlas dokuları yoktur; FBX materyal renkleri URP'ye taşındı, eksik atlas varmış gibi davranılmadı. Levrek için CoralGrouper modeli geçici görsel vekildir; bunun yeni biyolojik tür kabulü olduğu iddia edilmez. Tuna ve RedSnapper kendi kimlikleriyle oyundadır. Atıf zorunlu olmamakla birlikte Quaternius'a teşekkürler.
+
 ## Kullanıcının Tripo motorbotu — 18 Ekim 2026
 
 Kaynak arşiv: `luxury+motorboat+3d+model.zip`; FBX kimliği `tripo_convert_7888c55b-2cb4-455c-804a-c9ae75a50e4e`. Kullanıcı bu sohbette **"Biz ürettik, GitHub'a da koyabilirsin"** diyerek kendi üretimi olduğunu ve kaynak paylaşım iznini bildirdi. Üretim tarihi/hesap planı arşivde bulunmuyor; bunlar uydurulmaz. [Tripo şartları](https://www.tripo3d.ai/terms) §5.2 ve [resmî kullanım açıklaması](https://www.tripo3d.ai/help/privacy-policy/how-to-use-tripo-models-commercially) 18 Ekim'de okundu; haklar hesap planına bağlıdır. Bu kayıt CC0 veya bağımsız bir üçüncü kişi lisans doğrulaması iddiası değildir; ticari yayın bu görev kapsamında değildir.

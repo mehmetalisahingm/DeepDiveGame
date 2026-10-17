@@ -286,6 +286,8 @@ Kod: `Assets/DeepDive/Trip/BoatMapPresenter.cs` (saf), `Assets/DeepDive/Composit
 
 ### Kamera, derinlik ve rota gelişimi — P4.3 taslak
 
+18 Ekim FBX kiti: beşer `sea_bass`/`tuna`/`red_snapper`, toplam 15 authored balık. İki yeni tür mevcut zıpkın/av/çekim/ansiklopedi yolundan geçer; başlangıç fiyatları mevcut levrekle aynı 120/av ve aynı kalite tarifesidir. Save şeması değişmez, sabit tür kimliği kullanılır. Yeni ağ protokolü `DeepDive-P4-4` aynı sahne düzeninde farklı tür tanımlarını eski build ile karıştırmayı engeller. `SuppliedTownArt` yalnız görsel çocuklar ekler; mevcut hizmet/yatak/depo/PC collider ve host mesafe/onay kuralları korunur. Başlangıç ahşap sandalının görseli `SuppliedKit/Rowboat`, motorbot Tripo görseli ve araştırma teknesi ayrıdır.
+
 1. Mert equipmentId/seviye/fiyat/görünüm/yeteneği tek katalogda tanımlar. Mehmet kuşanma/elde model ve tüp/palet/çanta etkisini, Utku kamera menzil/düşük ışık doğrulamasını uygular.
 2. Kamera 1 menzil artışı, kamera 2 düşük ışık yeteneği verir. İstemci kendi ekipman seviyesini, ışık gücünü veya kaliteyi seçemez; host tahsis edilmiş ekipmandan çözer. Işık açısı/mesafesi/görüş denetimi diğer kayıt koşullarıyla birlikte çalışır.
 3. Utku aynı regionId altında kıyı/resif/derin kesim ve toplam üç deniz demirlemesi sağlar. Mert sandal/motorlu/araştırma teknesi sahipliğiyle rotayı açar; Mehmet aktif gövdeyle yolculuğu yürütür. İkinci bölge açılma sistemi kurulmaz.

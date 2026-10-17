@@ -21,7 +21,8 @@ namespace DeepDive.Network
                 BoatHullSeatRules.TryGetDimensions(kind, out var size);
                 // Optional authored visual only: the host-approved pose, four seat ids and
                 // fleet ownership are unchanged. Clean checkouts retain the blockout fallback.
-                var art = kind == BoatHullKind.Motorboat ? Resources.Load<GameObject>("BoatArt/TripoMotorboat/MotorboatVisual") : null;
+                var art = kind == BoatHullKind.Motorboat ? Resources.Load<GameObject>("BoatArt/TripoMotorboat/MotorboatVisual") :
+                    kind == BoatHullKind.Rowboat ? Resources.Load<GameObject>("SuppliedKit/Rowboat") : null;
                 if (art != null)
                 {
                     Instantiate(art, model.transform, false);

@@ -234,6 +234,8 @@ P4.6 teknik temel kabulü, P4.7 uygulamasından önce tamamlanır; hazırlık pa
 
 ## P5 — Hataları ve performansı düzelt
 
+18 Ekim ek sıra istisnası: kullanıcının üç FBX paketinden istediği bina/ev/sandal/balık görselleri mevcut P4 kabulü sürerken entegre edilir. Bu yalnız sağlanan kitin küçük içerik teslimidir; yeni faz kapısı veya tamam kaydı değildir. Tür sayısı bu teslimde üçe çıkar; planın beş tür/boss/nihai sanat bütçesinin tamamlandığı anlamına gelmez.
+
 Yeni özellik ve içerik yok. Başlama kapısı: P4.6 temel kabulü ve yeni P4.7–P4.12 teslimlerinin kabulü; P4'ün main/build kapanışı. #147–#150 hazırlık görevleri bu kapıya bağlıdır.
 
 | Görev | Sorumlu | Yapacağı iş |

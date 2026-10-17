@@ -231,6 +231,7 @@ namespace DeepDive.Composition
                     block.Material == BlockMaterial.Building ? building : sand, block.HasCollider);
 
             BuildAnchors(parent);
+            SuppliedTownArt.Town(parent);
             BuildZones(scene, parent);
 
             var services = FindRoot(scene, "TownServices");

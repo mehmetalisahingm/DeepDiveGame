@@ -8,6 +8,8 @@
 
 ## Sanat yönü
 
+18 Ekim ek FBX teslimi: kullanıcının Quaternius bina/balık/ev paketinden 12 model; başlangıç sandalı, üç balık görseli, kasaba binaları ve ev eşyaları bağlanır. URP materyal renkleri ve gerçek yüzme klipleri korunur. Bu sınırlı teslim bütün sanat veya fiziksel tamir kabulü değildir; [uygulama/kanıt](../reports/P4-SUPPLIED-FBX-KIT.md).
+
 18 Ekim dar teslim: kullanıcı kendi ürettiğini belirttiği Tripo `luxury motorboat 3d model` FBX ve beş dokuyu sağladı, kaynakların public GitHub'da paylaşılmasına açık izin verdi. Motorlu teknenin görseline bağlanır; başlangıç sandalı veya kırık/aşamalı tamir seti sayılmaz. Kaynak ve izin kaydı [CREDITS](../assets/CREDITS.md), doğrulama [rapor](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) içindedir. Ücretli servis veya yeni üretim çağrısı yapılmaz.
 
 Ana oyuncu yolunda varlık/eylem kalite ölçütleri ve ses tetikleme matrisi [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md), paket/alan entegrasyon listesi [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md) içindedir. İlk görsel örnek onayından sonra üretim genişler. Tamir sanatında kürekli sandal/motor-tank uyumsuzluğu R01 çözülmeden motor/tank model seti üretilmez.

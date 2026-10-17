@@ -56,6 +56,7 @@ namespace DeepDive.Composition
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (scene.name != SceneName) return;
+            ContinuousTownLayout.Build(scene);
             foreach (var anchor in FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None))
                 if (anchor.gameObject.scene == scene) Build(anchor);
         }
@@ -76,6 +77,17 @@ namespace DeepDive.Composition
             front.label = LabelFor(type);
             front.Root = root;
             front.Construct(root);
+            // The old authored beach fixture is only a narrow strip. Full buildings belong
+            // on the continuous town plots, after the existing anchors have moved there.
+            if (anchor.transform.position.z < -20f &&
+                SuppliedTownArt.Attach(root, "ShopBuilding", new Vector3(0f, 0f, -2.8f), Quaternion.identity))
+            {
+                foreach (var name in new[] { "BackWall", "Roof", "PostL", "PostR" })
+                {
+                    var part = root.Find(name);
+                    if (part != null && part.TryGetComponent<Renderer>(out var renderer)) renderer.enabled = false;
+                }
+            }
             // The clerk's old colour plate hung at 2.9 m, right where the roof and the sign are now.
             var oldSign = anchor.transform.Find("Sign");
             if (oldSign != null) foreach (var r in oldSign.GetComponentsInChildren<Renderer>(true)) r.enabled = false;

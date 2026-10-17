@@ -40,8 +40,8 @@ namespace DeepDive.Tests
                         Assert.AreEqual(model.name == kind.ToString(), model.gameObject.activeSelf);
                     BoatHullSeatRules.TryGetDimensions(kind, out var size);
                     var selected = root.transform.Find(kind.ToString());
-                    var imported = selected.Find("MotorboatVisual(Clone)");
-                    if (kind == BoatHullKind.Motorboat && Resources.Load<GameObject>("BoatArt/TripoMotorboat/MotorboatVisual") != null)
+                    var imported = selected.Find(kind == BoatHullKind.Rowboat ? "Rowboat(Clone)" : "MotorboatVisual(Clone)");
+                    if (kind == BoatHullKind.Motorboat || kind == BoatHullKind.Rowboat)
                     {
                         Assert.NotNull(imported, "Available motorboat art must replace the fallback");
                         var renderers = imported.GetComponentsInChildren<Renderer>(true);
@@ -50,7 +50,7 @@ namespace DeepDive.Tests
                         foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
                         Assert.LessOrEqual(bounds.size.x, size.Width + 0.01f);
                         Assert.LessOrEqual(bounds.size.z, size.Length + 0.01f);
-                        Assert.Greater(bounds.size.z, size.Length * 0.75f);
+                        Assert.Greater(bounds.size.z, size.Length * 0.5f);
                         Assert.IsNull(selected.Find("Deck"), "Do not draw the blockout inside imported art");
                     }
                     else

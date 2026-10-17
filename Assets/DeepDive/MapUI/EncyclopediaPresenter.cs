@@ -46,7 +46,9 @@ namespace DeepDive.MapUI
         private static readonly Dictionary<string, (string Name, string Category)> Texts =
             new Dictionary<string, (string, string)>(StringComparer.Ordinal)
             {
-                ["sea_bass"] = ("Levrek", "Kiyi baligi")
+                ["sea_bass"] = ("Levrek", "Kiyi baligi"),
+                ["tuna"] = ("Ton baligi", "Deniz baligi"),
+                ["red_snapper"] = ("Kirmizi mercan", "Deniz baligi")
             };
 
         public static IReadOnlyList<EncyclopediaEntry> Build(in ExplorationSnapshot snapshot)

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using DeepDive.Network;
 using NUnit.Framework;
@@ -102,12 +103,12 @@ namespace DeepDive.World.Tests
             {
                 Assert.NotNull(fish.Species, fish.name);
                 Assert.IsTrue(fish.Species.IsValid(out var error), error);
-                Assert.AreEqual("sea_bass", fish.Species.SpeciesId);
+                Assert.Contains(fish.Species.SpeciesId, new[] { "sea_bass", "tuna", "red_snapper" });
                 Assert.IsTrue(hashes.Add(fish.GetComponent<NetworkObject>().PrefabIdHash), fish.name + " duplicate NGO hash");
                 Assert.AreNotEqual(0u, fish.GetComponent<NetworkObject>().PrefabIdHash, fish.name);
                 Assert.IsTrue(homes.Add(fish.transform.position), fish.name + " overlaps another home");
                 Assert.NotNull(fish.GetComponent<CatchObject>(), fish.name);
-                Assert.AreEqual("sea_bass", fish.GetComponent<RecordingSubject>().ExpectedSubjectId, fish.name);
+                Assert.AreEqual(fish.Species.SpeciesId, fish.GetComponent<RecordingSubject>().ExpectedSubjectId, fish.name);
                 var collider = fish.GetComponent<CapsuleCollider>();
                 Assert.IsTrue(collider.enabled && !collider.isTrigger, fish.name);
                 var sync = fish.GetComponent<NetworkTransform>();
@@ -125,6 +126,8 @@ namespace DeepDive.World.Tests
                         fish.name + " wander envelope leaves water: " + point);
                 }
             }
+            foreach (var id in new[] { "sea_bass", "tuna", "red_snapper" })
+                Assert.AreEqual(5, fishes.Count(f => f.Species.SpeciesId == id), id);
         }
 
         [Test]
