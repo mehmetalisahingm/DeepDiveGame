@@ -409,7 +409,12 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 substep = 1;
             }
-            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.IsSpawned);
+            var eye=local.RecordingEyePosition;
+            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None)
+                .Where(f=>f.IsSpawned && (!f.IsDead || f.GetComponent<CatchObject>().IsAvailable))
+                .Where(f=>!Physics.Linecast(eye,f.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
+                    blocker.collider.GetComponentInParent<FishActor>()==f)
+                .OrderBy(f=>(f.transform.position-eye).sqrMagnitude).FirstOrDefault();
             if (fish == null) { Stop(); return; }
             local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
             var available = fish.GetComponent<CatchObject>().IsAvailable;

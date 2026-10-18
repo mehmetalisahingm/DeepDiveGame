@@ -1064,10 +1064,25 @@ namespace DeepDive.P1.Lab
         private bool WalkRepair(NetworkPlayer local, Camera cam, Vector3 target, bool toDock)
         {
             var pos=local.transform.position; var next=target;
-            if(local.Swimming.Value) next=NextBeachWaypoint(pos,new Vector3(9f,8.4f,-12.5f));
+            if(pos.z > -11.25f && (local.Swimming.Value || pos.x < 7f))
+            {
+                var wade=GameObject.Find("Beach_Wade")?.GetComponent<Collider>();
+                var strip=GameObject.Find("Beach_Platform")?.GetComponent<Collider>();
+                if(wade==null||strip==null)return false;
+                var edge=strip.bounds.max.z;
+                if(pos.y>=strip.bounds.max.y-.05f)next=new Vector3(pos.x,strip.bounds.max.y+.08f,edge-.6f);
+                else
+                {
+                    var lane=wade.transform.position.x;var ahead=Mathf.Max(pos.z-1f,edge-.3f);
+                    var y=pos.y;
+                    if(Physics.Raycast(new Vector3(lane,wade.bounds.max.y+5,ahead),Vector3.down,out var hit,40f,~0,QueryTriggerInteraction.Ignore) &&
+                        (hit.collider==wade||hit.collider==strip))y=hit.point.y+.08f;
+                    next=new Vector3(lane,y,ahead);
+                }
+            }
             else if(toDock && pos.z < -11f && Mathf.Abs(pos.x-9f)>.2f)next=new Vector3(9f,8.4f,-12.5f);
             else if(toDock && pos.z < -7.5f)next=new Vector3(9f,8.4f,-7.3f);
-            else if(!toDock && pos.z > -11.8f)next=new Vector3(9f,8.4f,-12.5f);
+            else if(!toDock && pos.z > -11.8f)next=new Vector3(8.35f,8.4f,-12.5f);
             var delta=next-pos;delta.y=0;
             if(delta.magnitude>.18f)
             {

@@ -128,7 +128,7 @@ namespace DeepDive.Composition
                 var label = new GameObject("SlotLabel-" + i); label.transform.SetParent(site.transform,false);
                 label.transform.localPosition=slot.transform.localPosition+Vector3.up*.65f;
                 var text=label.AddComponent<TextMesh>();text.text=BoatRepairGuide.PartName(BoatRepairParts.All[i]);
-                text.anchor=TextAnchor.MiddleCenter;text.fontSize=48;text.characterSize=.021f;text.color=new Color(1,.88f,.55f);labels.Add(text);
+                text.anchor=TextAnchor.MiddleCenter;text.fontSize=48;text.characterSize=.012f;text.color=new Color(1,.88f,.55f);labels.Add(text);
                 boards[i] = Box("RepairPlank-" + i, slot.transform.localPosition, new Vector3(.58f,.7f,.1f),fresh);
                 for (int n=0;n<3;n++) nails.Add(Box("Nail-"+i+"-"+n,slot.transform.localPosition+new Vector3((n-1)*.15f,.23f,-.075f),new Vector3(.035f,.035f,.05f),iron));
                 racks[i] = Box("RecoveredMaterial-"+i,new Vector3(-.65f,.65f,-4.1f-i*.8f),new Vector3(.6f,.14f,.45f),fresh);
@@ -147,14 +147,29 @@ namespace DeepDive.Composition
         private void RefreshSite(EconomyPlayerSync progress)
         {
             if(progress==null)return;
+            var players=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+            var local=progress.GetComponent<NetworkPlayer>();
+            var camera=local!=null?local.GetComponentInChildren<Camera>(true):null;
+            var selected=local!=null?local.RepairPartIndex.Value:-1;
+            if(selected<0 && camera!=null)
+            {
+                var best=.9f;
+                for(int i=0;i<3;i++)
+                {
+                    var direction=SlotPosition(i)-camera.transform.position;
+                    var alignment=Vector3.Dot(direction.normalized,camera.transform.forward);
+                    if(direction.magnitude<4f && alignment>best && (progress.BoatPartsMask.Value&(1<<i))==0)
+                    {best=alignment;selected=i;}
+                }
+            }
             for(int i=0;i<3;i++)
             {
                 bool reserved=false,placed=false; int hits=0;
-                foreach(var player in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
+                foreach(var player in players)
                     if(player.IsSpawned && player.RepairPartIndex.Value==i){reserved=true;placed=player.RepairPlaced.Value;hits=player.RepairHits.Value;break;}
                 bool done=(progress.BoatPartsMask.Value&(1<<i))!=0;
                 labels[i].text=BoatRepairGuide.PartName(BoatRepairParts.All[i])+(done?" - TAMAM":placed?$" - {hits}/3":" - E");
-                var camera=Camera.main;
+                labels[i].gameObject.SetActive(!done && i==selected && camera!=null && Vector3.Distance(camera.transform.position,SlotPosition(i))<4f);
                 if(camera!=null)labels[i].transform.rotation=camera.transform.rotation;
                 boards[i].SetActive(done||placed);
                 for(int n=0;n<3;n++) nails[i*3+n].SetActive(done||(placed&&n<hits));
