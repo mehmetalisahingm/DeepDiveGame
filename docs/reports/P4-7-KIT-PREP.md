@@ -73,6 +73,30 @@ Hiçbiri indirilmedi. Ücretli satın alma yoktur. Doğrulanan, sayfa düzeyinde
 - **Kırık sandal:** `Ship_Small` (5 m) dört kişilik ölçek için kabul edilebilir ama **kırık/parçalı değil**; üç montaj noktasını ve kırık görünümü ayırmak için kitin `Blends` klasöründeki kaynak dosya Blender'da düzenlenmeli (CC0 türev serbest) ya da `Dock_Broken` dili referans alınarak parça parça yapılmalı. `Blends` indirilmedi.
 - **Ölçek sorunu:** modeller stilize/abartılı; 1,8 m insanla yan yana okunurluk iyi, ama ev/gemi ölçüleri oyuncu kapsülüne göre ayrıca sınanmalı (#173).
 
+## 5c. İkinci tur: üç paket daha, izole inceleme (18 Ekim)
+Kullanıcı kararıyla ev/dükkân/sandal için ikinci bir Quaternius paketi arandı. Üçü de repo **dışına** indirildi (kullanıcı onayıyla), §5b'deki izole Unity projesine **özgün malzemeleriyle** içe aktarıldı (ölçekleme yok). Repoya model/doku **eklenmedi**; yalnız ölçüm tablosu ve kontak sayfaları (kırmızı kutu = 1,8 m insan) eklendi. Lisans ve içerik denetimi:
+
+| Paket | Kaynak / lisans | Boyut | Sonuç |
+|---|---|---|---|
+| Ultimate Textured Building Pack (Dec 2019) | [OpenGameArt](https://opengameart.org/content/lowpoly-buildings-pack), CC0; resmî `quaternius.com/packs/ultimatebuildings.html` 404 verdi, **resmî sayfayla doğrulanamadı** | 30 MB, 102 model | **Elendi**: modern şehir kiti (klima, boru, kumarhane tabelası, 4–6 katlı apartmanlar). Yalnız adından incelendi, Unity'de ölçülmedi. İleride gable çatılı 1–2 katlı gövde ve `Sign_Hardware` aday olabilir |
+| [Medieval Village MegaKit, Standard](https://quaternius.com/packs/medievalvillagemegakit.html) | CC0 (paket içi `License_Standard.txt`; [OpenGameArt aynası](https://opengameart.org/node/174568) kullanıldı), ücretsiz katman | zip 100 MB, 176 model, 1024² PBR dokular ~37 MB | **Ev cephesi için en iyi aday** (aşağıda) |
+| [LowPoly Ship Pack](https://opengameart.org/node/82831) | CC0 (`License.txt`) | 3,9 MB, 6 model | `Boat` sandal adayı; diğerleri uygun değil |
+
+Pro/Source katmanları ücretli; **indirilmedi**.
+
+**MegaKit ölçümleri** ([tablo](evidence/p47/medieval-megakit-measurements.tsv); kontak sayfaları: [duvar](media/p47-megakit-wall.png), [çatı](media/p47-megakit-roof.png), [kapı](media/p47-megakit-door.png), [pencere](media/p47-megakit-window.png), [prop](media/p47-megakit-prop.png)):
+- Ölçek 1 birim = 1 m, yeniden ölçek gerekmedi; modül 2 m genişlik. Duvar 2,00 × 3,12 × 0,41 m (sıvalı/düzensiz tuğla; düz, kapılı, pencereli, kemerli varyantlar), kapı kanadı 1,12 × 2,10 m, zemin 2 × 2 m, dış merdiven 2 m genişlik/1,2 m yükseklik, kiremit çatı 4×4…8×14 boyları (ör. 6×6: 8,25 × 5,67 × 8,03 m), ahşap çatı 2×1 modülleri, baca, sandık (1,08 m), el arabası, ahşap çit.
+- Parçalar modüler ve düşük poligon: ortalama ~670 üçgen, en ağırı `Roof_RoundTiles_8x12` 6356; duvar/zemin parçaları 30–200 üçgen. Pivotların çoğu tabanda; çatılar ve pencere kasaları kayık (ör. `Roof_RoundTiles_6x6` alt −0,78 m, `Window_Wide_Flat1` alt +0,94 m): modül bazında pivot düzeltmesi/prefab sarmalayıcı gerekir.
+- **Dükkân için yok:** tabela, tezgâh, raf. Kapı, kepenk, sandık, el arabası, çit ve çatı var; tezgâh/raf/tabelayı kendimiz yapmalıyız.
+- **Stil riski:** Pirate Kit düz renkli/yumuşak cartoon; MegaKit PBR dokulu (sıvadaki leke, kiremit, ahşap damarı), daha gerçekçi. Aynı sahnede yan yana durunca uyumsuzluk görülebilir: ya MegaKit dokuları düz renge/atlas paletine indirgenmeli ya da kıyı parçaları (iskele, kaya) bu stille uyumlandırılmalı. Palet kararı kullanıcıda.
+- **Teknik not:** 8/176 modelin dokusu yok; saydam malzemeler (sarmaşık, metal çit, pencere camı) izole projede Standard gölgelendiriciyle beyaz/delik göründü; oyunda kesim/saydam malzeme kurulumu gerekir. Dokular 1024², normal haritaları Unity için ayrı klasörde. Oyundaki render hattıyla (URP/Built-in) malzeme uyumu henüz sınanmadı.
+
+**Ship Pack ölçümleri** ([tablo](evidence/p47/ships-pack-measurements.tsv); [Boat](media/p47-ships-boat.png), [Lifeboat](media/p47-ships-lifeboat.png), [Viking](media/p47-ships-viking.png)):
+- `Boat`: 0,36 × 0,16 × 0,67 m ham ölçü (300 köşe), koyu kahverengi küçük kürek tekne; dört kişilik için yaklaşık ×5 büyütme gerekir ve stil olarak "kırık sandal" için kabul edilebilir. Kırık/parçalı değil; üç montaj noktası için düzenleme gerekir.
+- `Lifeboat`: kırmızı-beyaz modern şişme bot (uyumsuz). `Viking boat` (1,57 × 2,51 × 4,20 m) yelkenli uzun tekne: sandal için fazla; farklı bir teknenin (P4.3) adayı olabilir. `Sail ship`/`CruiseShip` çok büyük/modern.
+
+**Özet öneri (karar kullanıcıda):** ev cephesi için MegaKit (dükkân için ek tezgâh/raf/tabela üretimi), kıyı için Pirate Kit, sandal için ya `Boat`'ı büyütüp parçalamak ya da Pirate `Ship_Small`'ı Blender'da bölmek. Stil birliği için palet/doku kararı (düz renk mi dokulu mu) önce verilmeli. Repoya içe aktarma ve `CREDITS.md` kaydı hâlâ uygulama kapısına ve onaya bağlı.
+
 ## 6. Açık kararlar ve sonraki adımlar
 - **Kullanıcı kararı:** stil yönü/palet onayı ve hangi kaynak ailesi (yukarıdaki öneri). R01/R02/R11 açık tasarım kararlarına dokunulmadı.
 - Paket indirme onayı (dosya/kaynak/boyut) → içerik/ölçek denetimi → kit manifesti (kaynak, atıf, sürüm/tarih, dosya/.meta, ölçek/pivot, shader/malzeme, anchor, collider).
