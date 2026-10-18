@@ -97,8 +97,38 @@ Pro/Source katmanları ücretli; **indirilmedi**.
 
 **Özet öneri (karar kullanıcıda):** ev cephesi için MegaKit (dükkân için ek tezgâh/raf/tabela üretimi), kıyı için Pirate Kit, sandal için ya `Boat`'ı büyütüp parçalamak ya da Pirate `Ship_Small`'ı Blender'da bölmek. Stil birliği için palet/doku kararı (düz renk mi dokulu mu) önce verilmeli. Repoya içe aktarma ve `CREDITS.md` kaydı hâlâ uygulama kapısına ve onaya bağlı.
 
+## 5d. Stil kararı (18 Ekim): MegaKit dokulu stil, palet güncellemesi
+**Karar (kullanıcı, 18 Ekim):** ev cephesi ve dükkân Medieval Village MegaKit'in dokulu stilinde; kıyı Pirate Kit'ten, sandal §5e. Bu §2'deki hex önerilerini aşağıdaki **MegaKit ölçülmüş ortalama renkleriyle** değiştirir (dokuların alfa>200 piksellerinden 1024² örneklemeyle ortalama; gerçek oyun ışığında kayar, taslaktır, onay bekler):
+
+| Rol | MegaKit dokusu | Ortalama renk | Not |
+|---|---|---|---|
+| Duvar sıva | `T_Plaster_BaseColor` | `#AE9E7F` | §2 "taş/duvar açık" `#C9C2B2`'den daha sıcak/koyu |
+| Duvar düzensiz tuğla | `T_UnevenBrick_BaseColor` | `#877866` | temel/taban |
+| Kırmızı tuğla | `T_RedBrick_BaseColor` | `#B77343` | baca/zemin vurgusu |
+| Kiremit çatı | `T_RoundTiles_BaseColor` | `#B25330` | §2 hizmet renkleriyle (mavi/yeşil/turuncu/mor) çakışmasın diye hizmet vurgusu **tabelada/tentede**, çatıda değil |
+| Ahşap | `T_WoodTrim_BaseColor` | `#8A6749` | §2 `#B98B55`/`#6B4A2B` aralığında; tezgâh/raf/tabela bu dokuyla |
+| Taş kenar | `T_RockTrim_BaseColor` | `#90877B` | temel taşı, kıyı kenarı |
+
+Pirate Kit kıyı parçaları (iskele ahşabı `#885E38`/`#C09A77`/`#57412C`, taş `#83775E`/`#A79DA4`) MegaKit ahşabıyla (`#8A6749`) sıcaklıkça yakın; **ana risk doku farkı** (Pirate düz renk, MegaKit leke/damar). Önerilen yaklaşım: kıyı parçalarını MegaKit ahşap/taş dokusuyla yeniden malzemelemek (UV atlas olduğundan doğrudan değil, malzeme değişimiyle deneyerek) ya da kıyıda yalnız MegaKit ahşap/taş parçalarını kullanmak; ikisi de #154 kapısında önce/sonra kadrajla sınanır. Mevcut ışık/URP gölgelendirici uyumu sınanmadı.
+
+Dükkân üretimi (MegaKit'te yok): tezgâh, raf, tabela panosu, tente: ahşap dokuyla, 2 m modül ve 1,0 m tezgâh yüksekliğiyle (§1) kurulur.
+
+## 5e. #189 için sanat hazırlığı (yalnız envanter, uygulama yok)
+Kaynak: repodaki `Assets/DeepDive/Art/Supplied/Fish/Boat.fbx` ve `Resources/SuppliedKit/Rowboat.prefab` (#185 kullanıcı teslimi; Git LFS işaretçisi, `git lfs smudge` ile açıldı), izole projede içe aktarılıp ölçüldü. #189 R01/R02/R11 kararı Mert onayıyla [#186 yorumu](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6250071136) altında ilerler; Utku/Mehmet kabulü ayrı.
+
+**Mevcut tekne:** `Boat`: 4,67 × 2,01 × 9,01 m ham ölçü (376 köşe, 224 üçgen), **tek mesh, 2 alt mesh/2 malzeme, dokusuz** (koyu kahverengi düz malzeme), pivot tabana yakın (−0,03 m). Yani bugünkü gövdede ayrı tahta, oturak veya kürek yok; kontak sayfası: [sandal](media/p47-sandal-boat.png). Ölçüm: [tablo](evidence/p47/sandal-boat-measurements.tsv).
+
+**Sonuç:** sekiz tamamlanma kombinasyonunu göstermek için mevcut meshin bölünmesi gerekmez; en düşük riskli yol **tek gövde + üç ayrı sunum parçası** (gövde yaması, oturak/destek, kürek bağlantısı) ve kırık görünüm için ayrı bir "hasar" katmanı:
+- Sağlam gövde = mevcut `Boat` (kimlik/`boat-1` aynı kalır, #185 modeli yeniden kullanılır).
+- Üç parça birbirinden bağımsız açılıp kapanan alt nesne: tamamlandıkça görünür/tamamlanmamışken boşluk veya kırık kenar görünür. Her parça kendi malzemesi ve kendi pivotuyla (yuva: Utku'nun #188 anchor'ı, kimlik `boat-part-hull|engine|fuel-tank`; görünür adlar R01: gövde yaması / oturak-destek / kürek bağlantısı).
+- Kırık durumda gövdenin kendisi için iki yol (karar #189'da): (a) üç parçanın **eksik** hali delik/boşluk olarak gövde meshine bakılarak ayrı "hasar" meshiyle (kırık tahta kenarı) kapatılır; (b) Blender'da gövde parçalara bölünür. (a) daha ucuz ve R02'nin "tek sabit görünür parça" kararına uygun.
+- Sekiz kombinasyon: bit maskesi 0..7 doğrudan görünür kombinasyona çevrilir (mevcut `BoatPartPresentation` kalıbı: `BoatPartsMask` bit → görünürlük). Test: sekiz maskenin her biri için beklenen görünür parça kümesi (EditMode) + gündüz/gece görüntüsü.
+- **Yapılmayacak (R01):** motor/yakıt tankı görünümü sandala eklenmez; Tripo motorbot ayrı araç olarak kalır.
+
+**Alet/ses/ölçek envanteri (taslak, henüz yapılmadı):** keser (Pirate Kit `Weapon_Axe` 0,45 × 1,05 × 0,12 m adayı, atlas dokusu; MegaKit ile stil uyumu sınanmalı), çivi/bağlantı parçası ve tahta için MegaKit `Prop_*`/ahşap duvar dokusuyla küçük parçalar (kaldırma, bırakma, yerleştirme, darbe sesi ayrı; ses kaynağı lisansı doğrulanmadan seçilmez). Taşınan tahta ölçeği: 1,8 m insana göre 1,5–2 m uzunluk, el tutuş noktası Mehmet #187'nin elinde. **Mehmet'in #190 prototipi** (geçici tahta/çivi/keser/ses) nihai sanat değildir ve bu işle değiştirilir.
+
 ## 6. Açık kararlar ve sonraki adımlar
-- **Kullanıcı kararı:** stil yönü/palet onayı ve hangi kaynak ailesi (yukarıdaki öneri). R01/R02/R11 açık tasarım kararlarına dokunulmadı.
+- **Karar verildi (18 Ekim):** MegaKit dokulu stil (§5d). Palet hex değerleri taslak, Utku/Mehmet görüşü bekler. R01/R02/R11 için Mert onayı #186 yorumunda; Utku/Mehmet kabulü ayrı.
 - Paket indirme onayı (dosya/kaynak/boyut) → içerik/ölçek denetimi → kit manifesti (kaynak, atıf, sürüm/tarih, dosya/.meta, ölçek/pivot, shader/malzeme, anchor, collider).
 - Kapı geçilince: önce **bir** ev cephesi + **bir** ekipman dükkânı + kıyı + kırık sandal, Utku'nun yerleşimiyle, #151/#152 sırasına uyarak; gündüz/gece üç sabit kadraj önce/sonra, aynı build'de fiziksel yürüyüş ve kare süresi ölçümü.
 - Bu hazırlık #154 veya #153'ün kapanışı değildir.
