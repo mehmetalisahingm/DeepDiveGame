@@ -57,8 +57,8 @@ namespace DeepDive.World.Tests
         {
             var subjects = FindAll<RecordingSubject>(scene);
             subjects.RemoveAll(subject => subject.GetComponent<FishActor>() == null);
-            Assert.AreEqual(1, subjects.Count, "DiveTestArea must hold exactly one fish RecordingSubject");
-            return subjects[0];
+            Assert.AreEqual(15, subjects.Count, "Every coastal fish must remain filmable");
+            return subjects.Find(s => s.name == "Fish_SeaBass");
         }
 
         private static SerializedProperty Property(Object target, string propertyName)

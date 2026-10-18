@@ -21,7 +21,7 @@ namespace DeepDive.Network
         // P3-6 adds the per-part completion mask so collected repair parts disappear for everyone.
         // P4-1 keeps the daily session in one world and uses its home spawn contract.
         // P4-2 retains authored fish across dives; older clients would leave despawned visuals active.
-        public const string Protocol = "DeepDive-P4-2";
+        public const string Protocol = "DeepDive-P4-4";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;

@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using DeepDive.Network;
 using NUnit.Framework;
 using Unity.Netcode;
@@ -56,8 +59,8 @@ namespace DeepDive.World.Tests
         private static FishActor SingleFish(Scene scene)
         {
             var fish = FindAll<FishActor>(scene);
-            Assert.AreEqual(1, fish.Count, "DiveTestArea must hold exactly one FishActor");
-            return fish[0];
+            Assert.AreEqual(15, fish.Count, "The coast must hold 15 huntable fish");
+            return fish.Find(f => f.name == "Fish_SeaBass");
         }
 
         private static NetworkPlayer LoadDiverPrefab(out Camera viewCamera)
@@ -80,12 +83,65 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
-        public void SceneHasOneFishWithAValidSpecies()
+        public void SceneHasFifteenFishWithAValidSpecies()
         {
             var fish = SingleFish(scene);
             Assert.IsNotNull(fish.Species, "FishActor.species is not assigned");
             Assert.IsTrue(fish.Species.IsValid(out var error), error);
             Assert.AreEqual("sea_bass", fish.Species.SpeciesId);
+        }
+
+        [Test]
+        public void EntirePopulationHasUniqueNetworkIdentityAndHuntRecordingComponents()
+        {
+            var fishes = FindAll<FishActor>(scene);
+            Assert.AreEqual(15, fishes.Count);
+            var hashes = new HashSet<uint>();
+            var homes = new HashSet<Vector3>();
+            var water = FindAll<SwimVolume>(scene)[0].GetComponent<BoxCollider>();
+            foreach (var fish in fishes)
+            {
+                Assert.NotNull(fish.Species, fish.name);
+                Assert.IsTrue(fish.Species.IsValid(out var error), error);
+                Assert.Contains(fish.Species.SpeciesId, new[] { "sea_bass", "tuna", "red_snapper" });
+                Assert.IsTrue(hashes.Add(fish.GetComponent<NetworkObject>().PrefabIdHash), fish.name + " duplicate NGO hash");
+                Assert.AreNotEqual(0u, fish.GetComponent<NetworkObject>().PrefabIdHash, fish.name);
+                Assert.IsTrue(homes.Add(fish.transform.position), fish.name + " overlaps another home");
+                Assert.NotNull(fish.GetComponent<CatchObject>(), fish.name);
+                Assert.AreEqual(fish.Species.SpeciesId, fish.GetComponent<RecordingSubject>().ExpectedSubjectId, fish.name);
+                var collider = fish.GetComponent<CapsuleCollider>();
+                Assert.IsTrue(collider.enabled && !collider.isTrigger, fish.name);
+                var sync = fish.GetComponent<NetworkTransform>();
+                Assert.AreEqual(NetworkTransform.AuthorityModes.Server, sync.AuthorityMode, fish.name);
+                var radius = fish.Species.Swim.WanderRadius;
+                for (var corner = 0; corner < 8; corner++)
+                {
+                    var point = fish.transform.position + new Vector3(
+                        (corner & 1) == 0 ? -radius : radius,
+                        (corner & 2) == 0 ? -radius * 0.5f : radius * 0.5f,
+                        (corner & 4) == 0 ? -radius : radius);
+                    var local = water.transform.InverseTransformPoint(point) - water.center;
+                    var half = water.size * 0.5f;
+                    Assert.IsTrue(Mathf.Abs(local.x) <= half.x && Mathf.Abs(local.y) <= half.y && Mathf.Abs(local.z) <= half.z,
+                        fish.name + " wander envelope leaves water: " + point);
+                }
+            }
+            foreach (var id in new[] { "sea_bass", "tuna", "red_snapper" })
+                Assert.AreEqual(5, fishes.Count(f => f.Species.SpeciesId == id), id);
+        }
+
+        [Test]
+        public void SavedSceneAlreadyContainsUniqueNgoHashesBeforeUnityCanRepairThem()
+        {
+            var hashes = Regex.Matches(File.ReadAllText(ScenePath), @"(?m)^  GlobalObjectIdHash: (\d+)");
+            Assert.GreaterOrEqual(hashes.Count, 15);
+            var unique = new HashSet<uint>();
+            foreach (Match hash in hashes)
+            {
+                var value = uint.Parse(hash.Groups[1].Value);
+                Assert.AreNotEqual(0u, value);
+                Assert.IsTrue(unique.Add(value), "Saved scene contains a copied NGO identity: " + value);
+            }
         }
 
         // The whole reason the scene is authored by a script: an in-scene placed NetworkObject

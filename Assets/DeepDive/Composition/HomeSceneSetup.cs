@@ -69,6 +69,7 @@ namespace DeepDive.Composition
                 Bed(root, i, poses.Beds[i].position, poses.Beds[i].rotation);
             Storage(root, poses.Storage.position, poses.Storage.rotation);
             HomePcAnchor.EnsurePc(scene, poses.Pc);
+            SuppliedTownArt.Home(root);
         }
 
         private static void EnsureLegacyRig(Scene scene)
@@ -97,6 +98,7 @@ namespace DeepDive.Composition
             bed.transform.localScale = BedScale;
             var bedMaterial = Resources.Load<Material>("DevVisuals/Dev_Blue");
             if (bedMaterial != null) bed.GetComponent<Renderer>().sharedMaterial = bedMaterial;
+            SuppliedTownArt.Attach(bed.transform, "Bed", new Vector3(0f, -0.5f, 0f), Quaternion.identity, true);
             var anchor = bed.AddComponent<HomeInteractionAnchor>();
             anchor.ConfigureBed(DayIds.Beds[index], new Vector3(0f, 0.7f, 0f), new Vector3(0f, 0.15f, 1.45f));
         }
@@ -110,6 +112,7 @@ namespace DeepDive.Composition
             storage.transform.localScale = StorageScale;
             var storageMaterial = Resources.Load<Material>("DevVisuals/Dev_Crate");
             if (storageMaterial != null) storage.GetComponent<Renderer>().sharedMaterial = storageMaterial;
+            SuppliedTownArt.Attach(storage.transform, "Storage", new Vector3(0f, -0.5f, 0f), Quaternion.identity, true);
             storage.AddComponent<HomeInteractionAnchor>().ConfigureStorage();
         }
 

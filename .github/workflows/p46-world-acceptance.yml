@@ -7,6 +7,7 @@ on:
       - '.github/workflows/p46-world-acceptance.yml'
       - 'tools/Test-P46-ContinuousWorld.ps1'
       - 'Assets/Tests/P1/Runtime/ContinuousWorldSmokeDriver.cs'
+      - 'Assets/Tests/P1/Runtime/IntegratedSmokeDriver.cs'
       - 'Assets/DeepDive/**'
   push:
     branches: ['codex/p4-integration']
