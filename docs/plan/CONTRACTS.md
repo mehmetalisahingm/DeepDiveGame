@@ -409,3 +409,7 @@ Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişi
 Bağlantının iki tarafını yazacak kişiler kısa bir görüşmede alanları ve örnek sonucu netleştirir. Ayrı imza matrisi gerekmez; değişiklik bu belgeye ve ilgili göreve yazılır. Hiç kimse diğer tarafın beklediği veri tipini sessizce değiştirmez.
 
 P2 başlangıcı: Mehmet, Utku ve Mert av/vuruş/çanta istek ve sonuçlarını bağımlı koddan önce netleştirir. Bu açılış kaydı sözleşme uzlaşısı değildir.
+
+## P4.8 / #186 — Fiziksel tamir sözleşmesi önerisi
+
+[Somut öneri ve sekiz eski kayıt geçişi](P48_REPAIR_CONTRACT_PROPOSAL.md), mevcut pickup/purchase katkısından edinme–taşıma–son darbe ayrımına geçişi açıklar. R01/R02/R11 kesinleşmiş karar veya uygulanmış ürün API'si değildir. `BoatPartClaim`, `TryContributeBoatPart`, v8 kayıt ve mevcut üç teknik ID bu hazırlıkla değiştirilmez. #187 Mehmet, #188 Utku ve #189 Mert aynı dar sözleşmeyi tüketir; #141/#159 başlama ve gerçek ekip kabulü sınırları korunur.

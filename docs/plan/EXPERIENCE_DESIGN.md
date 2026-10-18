@@ -308,6 +308,8 @@ Görsel animasyon/partikül öncelikle presentation state'tir. Dünya/ekonomi ot
 
 Çalışma önerileri alınmış ekip kararı diye raporlanmaz. Karar kaydında tarih, seçilen seçenek, alternatifin bedeli ve etkilenen kayıt/varlık bulunur. Uygulama bu karar gerçekten alındığında başlar; varsayılan fikir ile imzalanmış sözleşme karışmaz.
 
+18 Ekim #186 hazırlığı: [fiziksel tamir sözleşme önerisi](P48_REPAIR_CONTRACT_PROPOSAL.md), üç görünür tamir grubu, edinme/son darbe ayrımı, sekiz eski maskenin geçişi ve #187/#188/#189 dosya sınırlarını somutlaştırır. Bu belge R01/R02/R11'i tek başına kapatmaz veya #141/#159 kabulünü üretmez.
+
 ## 13. Oyuncu kabul ölçümü
 
 Her testte aynı commit/build, host kampanya, oyuncu sayısı/donanım, yapılan tur, video/JSON ve yapılmayan sınırlar kaydedilir. Test fixture'ı ve gerçek kullanıcı girdisi ayrılır.

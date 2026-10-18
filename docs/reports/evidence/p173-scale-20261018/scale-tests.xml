@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0,221593">
+  <test-suite type="TestSuite" id="1000" name="DeepDiveGame-P0" fullname="DeepDiveGame-P0" runstate="Runnable" testcasecount="1291" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.221593" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1658" name="DeepDive.P4.Tests.dll" fullname="C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame/Library/ScriptAssemblies/DeepDive.P4.Tests.dll" runstate="Runnable" testcasecount="307" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.195792" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="20228" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1659" name="DeepDive" fullname="DeepDive" runstate="Runnable" testcasecount="307" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.189658" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1662" name="P4" fullname="DeepDive.P4" runstate="Runnable" testcasecount="304" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.160053" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1663" name="Tests" fullname="DeepDive.P4.Tests" runstate="Runnable" testcasecount="304" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.154043" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1578" name="P4PlayerScaleBaselineTests" fullname="DeepDive.P4.Tests.P4PlayerScaleBaselineTests" classname="DeepDive.P4.Tests.P4PlayerScaleBaselineTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.147375" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1580" name="CurrentHomeAndDockPermitSequentialFourPlayerMovementWithoutClaimingFourAbreast" fullname="DeepDive.P4.Tests.P4PlayerScaleBaselineTests.CurrentHomeAndDockPermitSequentialFourPlayerMovementWithoutClaimingFourAbreast" methodname="CurrentHomeAndDockPermitSequentialFourPlayerMovementWithoutClaimingFourAbreast" classname="DeepDive.P4.Tests.P4PlayerScaleBaselineTests" runstate="Runnable" seed="1745701735" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.129285" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[P46_CONTINUOUS_TOWN_READY shops=4 home=(0.00, 8.40, -48.00) scene=DiveTestArea
+]]></output>
+              </test-case>
+              <test-case id="1579" name="ExistingCameraMaintainsHumanEyeHeightAndUsefulNearClip" fullname="DeepDive.P4.Tests.P4PlayerScaleBaselineTests.ExistingCameraMaintainsHumanEyeHeightAndUsefulNearClip" methodname="ExistingCameraMaintainsHumanEyeHeightAndUsefulNearClip" classname="DeepDive.P4.Tests.P4PlayerScaleBaselineTests" runstate="Runnable" seed="1611274934" result="Passed" start-time="2026-10-18 09:57:04Z" end-time="2026-10-18 09:57:04Z" duration="0.005462" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/mehmet/AppData/LocalLow/DeepDiveTeam/DeepDiveGame-P0\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

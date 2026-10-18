@@ -1,0 +1,274 @@
+{
+    "playerHeight": 1.7999999523162842,
+    "radius": 0.3499999940395355,
+    "skin": 0.07999999821186066,
+    "stepOffset": 0.30000001192092898,
+    "slopeLimit": 45.0,
+    "walkSpeed": 4.0,
+    "cameraHeight": 1.5499999523162842,
+    "fov": 60.0,
+    "nearClip": 0.05000000074505806,
+    "effectiveWidth": 0.8600000143051148,
+    "twoPersonWidth": 1.7200000286102296,
+    "fourPersonWidth": 3.440000057220459,
+    "openFacadeWidth": 11.649999618530274,
+    "nearestBedExitToSpawn": 0.807314932346344,
+    "nearestSpawnPair": 1.25,
+    "dockSize": {
+        "x": 2.0,
+        "y": 0.39999961853027346,
+        "z": 3.5
+    },
+    "hasAuthoredDoor": false,
+    "cameraPrefab": "Assets/DeepDive/Network/Prefabs/NetworkDiver.prefab",
+    "scene": "Assets/DeepDive/World/Scenes/DiveTestArea.unity",
+    "furniture": [
+        "Npc_shop-equipment/Counter: center=(-10.00, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_shop-equipment/CounterTop: center=(-10.00, 9.43, -28.35), size=(1.95, 0.06, 0.64)",
+        "Npc_buyer-fish/Counter: center=(-3.30, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_buyer-fish/CounterTop: center=(-3.30, 9.43, -28.35), size=(1.95, 0.06, 0.64)",
+        "Npc_buyer-recording/Counter: center=(3.40, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_buyer-recording/CounterTop: center=(3.40, 9.43, -28.35), size=(1.95, 0.06, 0.64)",
+        "Npc_vendor-vehicle/Counter: center=(10.10, 8.90, -28.35), size=(1.80, 1.00, 0.50)",
+        "Npc_vendor-vehicle/CounterTop: center=(10.10, 9.43, -28.35), size=(1.95, 0.06, 0.64)"
+    ],
+    "equipmentFrames": [
+        {
+            "equipment": "Harpoon",
+            "tier": "Basic",
+            "presentationRoot": "P3_FirstPersonHarpoon",
+            "owner": true,
+            "crossesNearPlane": true,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 2,
+            "nearestDepth": 0.0,
+            "farthestDepth": 1.2500001192092896,
+            "viewportMin": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "viewportMax": {
+                "x": 0.6273713111877441,
+                "y": 0.3164025545120239
+            }
+        },
+        {
+            "equipment": "Camera",
+            "tier": "Basic",
+            "presentationRoot": "P3_FirstPersonCamera",
+            "owner": true,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 9,
+            "nearestDepth": 0.3399999737739563,
+            "farthestDepth": 0.5910000205039978,
+            "viewportMin": {
+                "x": 0.2609688937664032,
+                "y": -0.09384584426879883
+            },
+            "viewportMax": {
+                "x": 0.7390310764312744,
+                "y": 0.38123103976249697
+            }
+        },
+        {
+            "equipment": "Camera",
+            "tier": "Advanced",
+            "presentationRoot": "P3_FirstPersonCamera",
+            "owner": true,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 9,
+            "nearestDepth": 0.3399999737739563,
+            "farthestDepth": 0.5910000205039978,
+            "viewportMin": {
+                "x": 0.2609688937664032,
+                "y": -0.09384584426879883
+            },
+            "viewportMax": {
+                "x": 0.7390310764312744,
+                "y": 0.38123103976249697
+            }
+        },
+        {
+            "equipment": "Camera",
+            "tier": "Professional",
+            "presentationRoot": "P3_FirstPersonCamera",
+            "owner": true,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 9,
+            "nearestDepth": 0.3399999737739563,
+            "farthestDepth": 0.5910000205039978,
+            "viewportMin": {
+                "x": 0.2609688937664032,
+                "y": -0.09384584426879883
+            },
+            "viewportMax": {
+                "x": 0.7390310764312744,
+                "y": 0.38123103976249697
+            }
+        },
+        {
+            "equipment": "Harpoon",
+            "tier": "Basic",
+            "presentationRoot": "P3_ThirdPersonHarpoon",
+            "owner": false,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 2,
+            "nearestDepth": 2.771904945373535,
+            "farthestDepth": 2.941587448120117,
+            "viewportMin": {
+                "x": 0.3975711464881897,
+                "y": 0.5061700344085693
+            },
+            "viewportMax": {
+                "x": 0.40761977434158327,
+                "y": 0.8942285180091858
+            }
+        },
+        {
+            "equipment": "Camera",
+            "tier": "Basic",
+            "presentationRoot": "P3_ThirdPersonCamera",
+            "owner": false,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 9,
+            "nearestDepth": 2.7306926250457765,
+            "farthestDepth": 2.9914162158966066,
+            "viewportMin": {
+                "x": 0.4010952413082123,
+                "y": 0.5445291996002197
+            },
+            "viewportMax": {
+                "x": 0.4683975279331207,
+                "y": 0.6031897068023682
+            }
+        },
+        {
+            "equipment": "Camera",
+            "tier": "Advanced",
+            "presentationRoot": "P3_ThirdPersonCamera",
+            "owner": false,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 9,
+            "nearestDepth": 2.7306926250457765,
+            "farthestDepth": 2.9914162158966066,
+            "viewportMin": {
+                "x": 0.4010952413082123,
+                "y": 0.5445291996002197
+            },
+            "viewportMax": {
+                "x": 0.4683975279331207,
+                "y": 0.6031897068023682
+            }
+        },
+        {
+            "equipment": "Camera",
+            "tier": "Professional",
+            "presentationRoot": "P3_ThirdPersonCamera",
+            "owner": false,
+            "crossesNearPlane": false,
+            "nearPlaneBoundsTouchViewport": false,
+            "projectedBoundsContainReticle": false,
+            "visibleRenderers": 9,
+            "nearestDepth": 2.7306926250457765,
+            "farthestDepth": 2.9914162158966066,
+            "viewportMin": {
+                "x": 0.4010952413082123,
+                "y": 0.5445291996002197
+            },
+            "viewportMax": {
+                "x": 0.4683975279331207,
+                "y": 0.6031897068023682
+            }
+        }
+    ],
+    "suppliedKit": [
+        {
+            "resource": "SuppliedKit/Rowboat",
+            "centre": {
+                "x": 0.0,
+                "y": 0.21653786301612855,
+                "z": 1.4901161193847657e-8
+            },
+            "size": {
+                "x": 2.4000000953674318,
+                "y": 1.0330756902694703,
+                "z": 4.632006645202637
+            },
+            "renderers": 1,
+            "colliders": 0
+        },
+        {
+            "resource": "SuppliedKit/ShopBuilding",
+            "centre": {
+                "x": 0.0,
+                "y": 2.25,
+                "z": 0.0
+            },
+            "size": {
+                "x": 4.300000190734863,
+                "y": 4.5,
+                "z": 4.300000190734863
+            },
+            "renderers": 1,
+            "colliders": 0
+        },
+        {
+            "resource": "SuppliedKit/TownBuilding",
+            "centre": {
+                "x": 0.0,
+                "y": 2.5999996662139894,
+                "z": 0.0
+            },
+            "size": {
+                "x": 7.000000476837158,
+                "y": 5.199999809265137,
+                "z": 8.0
+            },
+            "renderers": 1,
+            "colliders": 0
+        },
+        {
+            "resource": "SuppliedKit/Bed",
+            "centre": {
+                "x": 0.0,
+                "y": 0.30000001192092898,
+                "z": 3.552713678800501e-15
+            },
+            "size": {
+                "x": 1.25,
+                "y": 0.5999999642372131,
+                "z": 2.049999713897705
+            },
+            "renderers": 1,
+            "colliders": 0
+        },
+        {
+            "resource": "SuppliedKit/Storage",
+            "centre": {
+                "x": 0.0,
+                "y": 0.8000000715255737,
+                "z": -2.9103830456733706e-11
+            },
+            "size": {
+                "x": 1.350000023841858,
+                "y": 1.600000023841858,
+                "z": 0.7500000596046448
+            },
+            "renderers": 1,
+            "colliders": 0
+        }
+    ]
+}
