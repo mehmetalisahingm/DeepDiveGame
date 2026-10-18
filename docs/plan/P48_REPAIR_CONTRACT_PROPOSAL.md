@@ -1,6 +1,6 @@
 # #186 — Fiziksel sandal tamiri için somut sözleşme önerisi
 
-18 Ekim 2026. Mehmet'in #186 hazırlığı; #187/#188/#189 için birlikte incelenecek dar tasarım. **Öneridir; R01/R02/R11 kararı, diğer kişilerin onayı veya P4.6/P4.7 kabulü değildir.** Oyun uygulamasının mevcut #141/#159 başlama kapısı korunur. Kaynak temel #185 birleşimi `6816fba`; mevcut ürün şeması v8 ve onarım semantiği bu belgeyle değişmez.
+18 Ekim 2026. Mehmet'in #186 hazırlığı; #187/#188/#189 için birlikte incelenecek dar tasarım. **Öneridir; R01/R02/R11 kararı, diğer kişilerin onayı veya P4.6/P4.7 kabulü değildir.** Sonraki açık kullanıcı talimatı (“Evet, benim tamir işimi şimdi uygula”) yalnız #187 için uygulama istisnası verir; #141/#159 kabulü açık kalır. Kaynak temel #185 birleşimi `6816fba`. Bu istisnadaki uygulama R01/R02/R11 seçimlerini dar teknik temel olarak kullanır: v9 `UnusedBoatPartIds`, mevcut tamamlanmış ID listesi ve `DeepDive-P4-5` protokolü. Diğer kişilerin onayı veya #188/#189 nihai teslimi değildir.
 
 ## Görünen sonuç ve önerilen kararlar
 
@@ -81,3 +81,9 @@ Ortak sahne sırası Utku anchor → Mehmet etkileşim → Mert sunum → ortak 
 - Gündüz/gece hedef okunurluğu ve birinci/üçüncü kişi gerçek video. Tek PC süreç kanıtı ayrı PC/dört insan/üç gün kabulü yerine yazılmaz.
 
 Bu belge sözleşme incelemesini somutlaştırır. #186'nın karar/onay satırları ve #187'nin uygulama kabulü henüz tamamlanmış sayılmaz.
+
+## #187 uygulama istisnasının somut sınırı
+
+E: gerçek parçayı al / eşleşen yuvaya yerleştir. Sol tık: üç kontrollü darbe (en az 0,45 sn aralık). Q: eldeki/yerleştirilmiş işi iptal et ve kullanılmamış malzemeyi iskeledeki ortak askıya döndür. Serbest fırlatma fiziği yok. Alım ve son darbe ayrı atomik save işlemidir. Satın alınmış malzeme askıdan alınır; yeniden alırken ücret kesilmez. Tamamlanmış eski bitler korunur; yarım darbeler ve bağlantıya özgü taşıyıcı kimliği kayda girmez.
+
+Mehmet'in etkileşim kanıtı için mevcut tekne pozunda geçici kırık gövde, üç yuva/tahta/çivi, elde keser ve kısa vuruş sesi üretilir. Bunlar #189 nihai sanat/ses seti veya #188 dört kişilik nihai yerleşim kabulü değildir. Ortak sahne dosyası değişmez. Economy/TownService ince seam değişiklikleri PR #190'da Mert'e; runtime iskele slot/askı koordinatları Utku'ya görünür kılınır. Ekip onayı varsayılmaz.

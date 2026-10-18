@@ -19,6 +19,7 @@ namespace DeepDive.Economy
         public readonly NetworkVariable<int> PendingRecordings = new NetworkVariable<int>();
         public readonly NetworkVariable<int> BoatPartsDone = new NetworkVariable<int>();
         public readonly NetworkVariable<int> BoatPartsMask = new NetworkVariable<int>();
+        public readonly NetworkVariable<int> BoatMaterialsMask = new NetworkVariable<int>();
         public readonly NetworkVariable<FixedString32Bytes> ActiveServiceId = new NetworkVariable<FixedString32Bytes>();
         public readonly NetworkVariable<ulong> LastServiceRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<byte> LastServiceType = new NetworkVariable<byte>();
@@ -365,9 +366,9 @@ namespace DeepDive.Economy
             ShopRow(50, "Palet I | 220", "PALET AL", EconomyManager.FinsId, 574);
             ShopRow(88, "Canta I | 260", "CANTA AL", EconomyManager.BagId, 574);
             ShopRow(126, "Zipkin I | 300", "ZIPKIN AL", EconomyManager.HarpoonId, 574);
-            ShopRow(164, "Sandal govdesi | 120", "GOVDE AL", BoatRepairParts.Hull, 574);
-            ShopRow(202, "Sandal motoru | 120", "MOTOR AL", BoatRepairParts.Engine, 574);
-            ShopRow(240, "Sandal yakit deposu | 120", "DEPO AL", BoatRepairParts.FuelTank, 574);
+            ShopRow(164, "Govde tahtasi | 120", "GOVDE AL", BoatRepairParts.Hull, 574);
+            ShopRow(202, "Oturak destegi | 120", "DESTEK AL", BoatRepairParts.Engine, 574);
+            ShopRow(240, "Kurek baglantisi | 120", "BAGLANTI AL", BoatRepairParts.FuelTank, 574);
         }
 
         // Harbor vendor: one row per vehicle. Buy (host checks money / chain / day), select (host checks owned, docked, empty).

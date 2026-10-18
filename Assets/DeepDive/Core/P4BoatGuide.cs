@@ -11,9 +11,9 @@ namespace DeepDive.Core.Contracts
         // Unaccented on purpose, like every other HUD string (the built-in IMGUI font has no Turkish letters).
         public static string PartName(string partId) => partId switch
         {
-            BoatRepairParts.Hull => "Govde",
-            BoatRepairParts.Engine => "Motor",
-            BoatRepairParts.FuelTank => "Yakit tanki",
+            BoatRepairParts.Hull => "Govde tahtasi",
+            BoatRepairParts.Engine => "Oturak destegi",
+            BoatRepairParts.FuelTank => "Kurek baglantisi",
             _ => string.Empty
         };
 
@@ -56,7 +56,7 @@ namespace DeepDive.Core.Contracts
 
         // Repair parts can be collected on the physical coast before/after a dive as well.
         // The host still validates range, aim, player activity and the day-closing lock.
-        public const string OutsideDiveNote = "E: parcayi topla; dukkandan da alinir";
-        public const string DiveNote = "E: parcayi topla";
+        public const string OutsideDiveNote = "E: malzemeyi al; iskelede yuvaya E, 3 kez sol tik";
+        public const string DiveNote = "E: malzemeyi al; iskelede yuvaya E, 3 kez sol tik";
     }
 }

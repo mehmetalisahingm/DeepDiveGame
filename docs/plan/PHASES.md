@@ -286,3 +286,5 @@ Kesin sürüm uyumluluğu kurulumda denenir:
 - [Unity co-op başlangıcı](https://docs.unity.com/en-us/multiplayer/quickstarts/casual-co-op-quickstart)
 - [Relay bağlantısı](https://docs.unity.com/en-us/mps-sdk/networking/relay-servers)
 - [Unity Smart Merge](https://docs.unity3d.com/6000.0/Documentation/Manual/SmartMerge.html)
+
+18 Ekim kullanıcı istisnası: #141/#159 açık tutulurken yalnız #187 Mehmet fiziksel tamir uygulaması şimdi yetkilendirildi. #188/#189 nihai world/model/ses teslimleri ve P4.6/P4.7 gerçek ekip kabulü bu istisnayla kapanmaz; P5/P6 açılmaz.

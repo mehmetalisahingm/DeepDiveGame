@@ -457,7 +457,8 @@ namespace DeepDive.P3.Tests
                 handler.HandlePurchase(alice, BoatRepairParts.Hull, NextRequest()).ReasonCode);
             handler.HandleInteraction(alice, Shop, NextRequest());
             Assert.IsTrue(handler.HandlePurchase(alice, BoatRepairParts.Hull, NextRequest()).Accepted);
-            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.AreEqual(0, economy.BoatRepair.CompletedPartIds.Count);
+            CollectionAssert.Contains(economy.UnusedBoatParts, BoatRepairParts.Hull);
         }
 
         [Test]
@@ -471,7 +472,8 @@ namespace DeepDive.P3.Tests
             try
             {
                 Assert.IsTrue(BoatPartClaim.TryClaimFound(alice, BoatRepairParts.Hull, 2).Accepted);
-                Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+                Assert.AreEqual(0, economy.BoatRepair.CompletedPartIds.Count);
+                CollectionAssert.Contains(economy.UnusedBoatParts, BoatRepairParts.Hull);
             }
             finally { BoatPartClaim.Unbind(bound); }
             Assert.IsFalse(BoatPartClaim.IsBound);

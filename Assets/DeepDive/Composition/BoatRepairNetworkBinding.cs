@@ -1,0 +1,171 @@
+using System.Collections.Generic;
+using System.Linq;
+using DeepDive.Core.Contracts;
+using DeepDive.Economy;
+using DeepDive.Network;
+using DeepDive.Session;
+using DeepDive.Trip;
+using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace DeepDive.Composition
+{
+    // Mechanical prototype at the existing berth. No scene asset, movement or trip authority is replaced.
+    public sealed class BoatRepairNetworkBinding : MonoBehaviour
+    {
+        private NetworkManager manager;
+        private SessionNetworkAdapter adapter;
+        private EconomyManager economy;
+        private BoatRepairWorkSession work;
+        private readonly HashSet<PlayerId> workers = new HashSet<PlayerId>();
+        private readonly List<PlayerId> released = new List<PlayerId>();
+        private GameObject site;
+        private readonly GameObject[] boards = new GameObject[3], racks = new GameObject[3];
+        private readonly List<Material> materials = new List<Material>();
+        private readonly List<GameObject> nails = new List<GameObject>();
+        private readonly List<TextMesh> labels = new List<TextMesh>();
+        private BoatTripPlayerSync trip;
+        public static BoatRepairNetworkBinding Instance { get; private set; }
+        public Vector3 SlotPosition(int i) => site.transform.TransformPoint(new Vector3((i - 1) * .65f, .75f, -2.15f));
+        public Vector3 RackPosition(int i) => site.transform.TransformPoint(new Vector3(-.65f, .65f, -4.1f - i * .8f));
+        public Vector3 StandPosition(int i) => site.transform.TransformPoint(new Vector3((i - 1) * .65f, 0, i == 1 ? -4.2f : -3.8f));
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Bootstrap()
+        {
+            SceneManager.sceneLoaded -= Loaded; SceneManager.sceneLoaded += Loaded;
+        }
+        private static void Loaded(Scene scene, LoadSceneMode mode)
+        {
+            var session = FindFirstObjectByType<SessionNetworkAdapter>();
+            if (session != null && session.GetComponent<BoatRepairNetworkBinding>() == null)
+                session.gameObject.AddComponent<BoatRepairNetworkBinding>();
+        }
+        private void Awake()
+        { Instance = this; manager = GetComponent<NetworkManager>(); adapter = GetComponent<SessionNetworkAdapter>(); }
+        private bool Host => manager != null && manager.IsListening && manager.IsServer && economy != null;
+        private bool Has(int index, bool done) => (done ? economy.BoatRepair.CompletedPartIds : economy.UnusedBoatParts).Contains(BoatRepairParts.All[index]);
+        private void Update()
+        {
+            if (economy == null) economy = GetComponent<EconomyManager>();
+            var local = manager != null ? manager.LocalClient?.PlayerObject : null;
+            if (local != null && trip == null) trip = local.GetComponent<BoatTripPlayerSync>();
+            var inWorld = SceneManager.GetSceneByName("DiveTestArea").isLoaded && trip != null && trip.IsSpawned;
+            if (inWorld)
+            {
+                if (site == null) BuildSite();
+                site.transform.SetPositionAndRotation(trip.BoatWorldPosition.Value, Quaternion.Euler(0, trip.BoatYaw.Value, 0));
+                var progress = local.GetComponent<EconomyPlayerSync>();
+                site.SetActive(!trip.BoatVisible.Value && progress != null && progress.BoatPartsMask.Value != 7);
+            }
+            else if (site != null) site.SetActive(false);
+            if (Host)
+            {
+                if (work == null) work = new BoatRepairWorkSession(i => Has(i, false), i => Has(i, true),
+                    (p, i, r) => BoatPartClaim.TryClaimFound(p, BoatRepairParts.All[i], r),
+                    (p, i, r) => economy.TryFinishBoatPart(p, BoatRepairParts.All[i], r));
+                BoatRepairActions.Bind(Handle);
+                released.Clear();
+                foreach (var id in workers)
+                {
+                    var player = Player(id);
+                    if (!inWorld || player == null || player.Passive.Value || player.Seated.Value || DayLock.IsLocked ||
+                        (work.TryGet(id, out var active) && active.Placed && Vector3.Distance(player.RecordingEyePosition, SlotPosition(active.PartIndex)) > 3f))
+                    { work.Release(id); released.Add(id); }
+                }
+                foreach (var id in released) workers.Remove(id);
+                foreach (var client in manager.ConnectedClientsList)
+                {
+                    var player = client.PlayerObject != null ? client.PlayerObject.GetComponent<NetworkPlayer>() : null;
+                    if (player == null) continue;
+                    var has = work.TryGet(new PlayerId(client.ClientId), out var state);
+                    player.PublishRepairWork(has ? state.PartIndex : -1, has && state.Placed, has ? state.Hits : 0);
+                }
+            }
+            else { BoatRepairActions.Unbind(Handle); work = null; workers.Clear(); }
+            if (inWorld) RefreshSite(local.GetComponent<EconomyPlayerSync>());
+        }
+        private NetworkPlayer Player(PlayerId id) => manager.ConnectedClients.TryGetValue(id.Value, out var client) && client.PlayerObject != null
+            ? client.PlayerObject.GetComponent<NetworkPlayer>() : null;
+        private TransactionResult Handle(PlayerId id, BoatRepairCommand command, int index, ulong request)
+        {
+            var p = Host ? Player(id) : null;
+            if (p == null || !p.IsSpawned || site == null || !site.activeSelf || p.Passive.Value || p.Seated.Value ||
+                p.RecordingPresentation.Value || DayLock.IsLocked || adapter.Session.State.Phase == SessionPhase.Lobby)
+                return TransactionResult.Reject(request, "InvalidState", 0);
+            if (command != BoatRepairCommand.Cancel && (index < 0 || index > 2)) return TransactionResult.Reject(request, "InvalidTarget", 0);
+            if ((command == BoatRepairCommand.Place || command == BoatRepairCommand.Hammer) &&
+                (p.Swimming.Value || Vector3.Distance(p.RecordingEyePosition, SlotPosition(index)) > 2.65f))
+                return TransactionResult.Reject(request, "OutOfRange", 0);
+            var result = work.Execute(id, command, index, request, Time.unscaledTimeAsDouble);
+            if (work.TryGet(id, out var state)) { workers.Add(id); p.PublishRepairWork(state.PartIndex, state.Placed, state.Hits); }
+            else { workers.Remove(id); p.PublishRepairWork(-1, false, 0); }
+            return result;
+        }
+        private void BuildSite()
+        {
+            labels.Clear(); nails.Clear();
+            foreach(var old in materials) if(old!=null)Destroy(old);
+            materials.Clear();
+            site = new GameObject("StarterBoatRepairWorksite");
+            var wood = MakeMaterial(new Color(.28f, .14f, .065f));
+            var fresh = MakeMaterial(new Color(.66f, .43f, .21f));
+            var iron = MakeMaterial(new Color(.13f, .15f, .17f));
+            for (int side = -1; side <= 1; side += 2)
+            {
+                Box("CrackedGunwale", new Vector3(side * 1.02f, .55f, .2f), new Vector3(.14f, .28f, 3.8f), wood);
+                Box("BowSide", new Vector3(side * .55f, .5f, 1.85f), new Vector3(.13f, .4f, 1.25f), wood).transform.localRotation = Quaternion.Euler(0, side * -47, 0);
+            }
+            for (int i = 0; i < 5; i++) Box("OldFloor", new Vector3((i-2)*.36f, .15f, .1f), new Vector3(.3f,.12f,3.4f-i%2*.4f), wood);
+            Box("OldSeat", new Vector3(0,.65f,.65f),new Vector3(1.9f,.13f,.4f),wood);
+            for (int i = 0; i < 3; i++)
+            {
+                var slot = new GameObject("RepairSlot-" + i); slot.transform.SetParent(site.transform,false);
+                slot.transform.localPosition = new Vector3((i-1)*.65f,.75f,-2.15f);
+                slot.AddComponent<BoatRepairSlotTarget>().Index = i;
+                var trigger = slot.AddComponent<BoxCollider>(); trigger.isTrigger=true; trigger.size=new Vector3(.59f,.8f,.15f);
+                var label = new GameObject("SlotLabel-" + i); label.transform.SetParent(site.transform,false);
+                label.transform.localPosition=slot.transform.localPosition+Vector3.up*.65f;
+                var text=label.AddComponent<TextMesh>();text.text=BoatRepairGuide.PartName(BoatRepairParts.All[i]);
+                text.anchor=TextAnchor.MiddleCenter;text.fontSize=48;text.characterSize=.021f;text.color=new Color(1,.88f,.55f);labels.Add(text);
+                boards[i] = Box("RepairPlank-" + i, slot.transform.localPosition, new Vector3(.58f,.7f,.1f),fresh);
+                for (int n=0;n<3;n++) nails.Add(Box("Nail-"+i+"-"+n,slot.transform.localPosition+new Vector3((n-1)*.15f,.23f,-.075f),new Vector3(.035f,.035f,.05f),iron));
+                racks[i] = Box("RecoveredMaterial-"+i,new Vector3(-.65f,.65f,-4.1f-i*.8f),new Vector3(.6f,.14f,.45f),fresh);
+                racks[i].AddComponent<BoatRepairRackTarget>().Index=i;
+                var pickup=racks[i].AddComponent<BoxCollider>(); pickup.isTrigger=true;
+            }
+        }
+        private Material MakeMaterial(Color color)
+        { var m=new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard")); m.color=color; materials.Add(m); return m; }
+        private GameObject Box(string name,Vector3 at,Vector3 size,Material material)
+        {
+            var obj=GameObject.CreatePrimitive(PrimitiveType.Cube); obj.name=name; obj.transform.SetParent(site.transform,false);
+            obj.transform.localPosition=at; obj.transform.localScale=size; Destroy(obj.GetComponent<Collider>());
+            obj.GetComponent<Renderer>().sharedMaterial=material; return obj;
+        }
+        private void RefreshSite(EconomyPlayerSync progress)
+        {
+            if(progress==null)return;
+            for(int i=0;i<3;i++)
+            {
+                bool reserved=false,placed=false; int hits=0;
+                foreach(var player in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
+                    if(player.IsSpawned && player.RepairPartIndex.Value==i){reserved=true;placed=player.RepairPlaced.Value;hits=player.RepairHits.Value;break;}
+                bool done=(progress.BoatPartsMask.Value&(1<<i))!=0;
+                labels[i].text=BoatRepairGuide.PartName(BoatRepairParts.All[i])+(done?" - TAMAM":placed?$" - {hits}/3":" - E");
+                var camera=Camera.main;
+                if(camera!=null)labels[i].transform.rotation=camera.transform.rotation;
+                boards[i].SetActive(done||placed);
+                for(int n=0;n<3;n++) nails[i*3+n].SetActive(done||(placed&&n<hits));
+                racks[i].SetActive(!done&&!reserved&&(progress.BoatMaterialsMask.Value&(1<<i))!=0);
+            }
+        }
+        private void OnDestroy()
+        { BoatRepairActions.Unbind(Handle); if(Instance==this)Instance=null; if(site!=null)Destroy(site); foreach(var m in materials)Destroy(m); }
+    }
+    public sealed class BoatRepairSlotTarget : MonoBehaviour, IBoatRepairSlot
+    { public int Index; public int PartIndex => Index; }
+    public sealed class BoatRepairRackTarget : MonoBehaviour, IBoatPartPickupTarget
+    { public int Index; public string PartId => BoatRepairParts.All[Index]; }
+}

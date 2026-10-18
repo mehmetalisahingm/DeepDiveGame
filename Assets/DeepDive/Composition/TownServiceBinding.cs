@@ -166,6 +166,13 @@ namespace DeepDive.Composition
                 SyncFor(player)?.PublishFleet(fleetMask, fleet.ActiveBoatId);
                 SyncFor(player)?.PublishTownProgress(economy.PendingCountFor(player, TurnInKind.Catch),
                     economy.PendingCountFor(player, TurnInKind.Recording), boatParts, mask);
+                var sync = SyncFor(player);
+                if (sync != null)
+                {
+                    var materials = 0;
+                    foreach (var part in economy.UnusedBoatParts) materials |= BoatRepairGuide.Bit(part);
+                    sync.BoatMaterialsMask.Value = materials;
+                }
             }
         }
 

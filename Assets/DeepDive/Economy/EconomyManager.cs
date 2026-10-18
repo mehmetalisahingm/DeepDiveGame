@@ -24,6 +24,8 @@ namespace DeepDive.Economy
         private const byte OpSellCatches = 2;
         private const byte OpTurnInRecordings = 3;
         private const byte OpBoatPart = 4;
+        private const byte OpBoatMaterial = 9;
+        private const byte OpBoatFinish = 10;
         private const byte OpStore = 5;
         private const byte OpRetrieve = 6;
         private const byte OpVehicleBuy = 7;
@@ -88,6 +90,9 @@ namespace DeepDive.Economy
         private readonly List<PendingItem> _pending = new List<PendingItem>();
         private readonly List<PendingItem> _stored = new List<PendingItem>();
         private readonly List<string> _boatParts = new List<string>();
+        private readonly List<string> _boatMaterials = new List<string>();
+        private readonly Dictionary<(PlayerId, ulong, byte), string> _repairTargets = new Dictionary<(PlayerId, ulong, byte), string>();
+        public IReadOnlyList<string> UnusedBoatParts => _boatMaterials;
         // P4.3-C fleet: only PURCHASED boats are stored here; the rowboat is owned when its repair is complete.
         private readonly List<string> _purchasedVehicles = new List<string>();
         private string _activeVehicleId = "";
@@ -691,7 +696,7 @@ namespace DeepDive.Economy
             var cost = source == BoatPartSource.Purchased ? BoatPartPrice : 0;
             if (!BoatRepairParts.IsPart(partId))
                 result = TransactionResult.Reject(requestId, "InvalidTarget", Revision);
-            else if (_boatParts.Contains(partId))
+            else if (_boatParts.Contains(partId) || _boatMaterials.Contains(partId))
                 result = TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
             else if (SharedBalance < cost)
                 result = TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
@@ -721,6 +726,52 @@ namespace DeepDive.Economy
                 OnBoatRepairChanged?.Invoke();
                 OnFleetChanged?.Invoke();   // the last part makes the rowboat owned (and active when nothing else is)
             }
+            return result;
+        }
+
+        // Acquisition and the final physical stroke are separate host transactions.
+        // Existing completed ids remain the only source of fleet ownership.
+        public TransactionResult TryAcquireBoatPart(PlayerId player, string partId, BoatPartSource source, ulong requestId)
+        {
+            EnsureSubscribed();
+            if (source != BoatPartSource.Found && source != BoatPartSource.Purchased) return TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            var key = (player, requestId, OpBoatMaterial);
+            if (_processedRequests.TryGetValue(key, out var old))
+                return _repairTargets.TryGetValue(key, out var target) && target == partId ? old : TransactionResult.Reject(requestId, "RequestMismatch", Revision);
+            if (requestId == 0) return TransactionResult.Reject(requestId, "InvalidState", Revision);
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
+            if (!BoatRepairParts.IsPart(partId)) return TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            if (_boatParts.Contains(partId) || _boatMaterials.Contains(partId))
+                return TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            var cost = source == BoatPartSource.Purchased ? BoatPartPrice : 0;
+            if (SharedBalance < cost) return TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
+            var balance = SharedBalance; var revision = Revision;
+            _boatMaterials.Add(partId); SharedBalance -= cost; Revision++;
+            if (!Persist())
+            { _boatMaterials.Remove(partId); SharedBalance = balance; Revision = revision; return TransactionResult.Reject(requestId, "SaveFailed", Revision); }
+            var result = TransactionResult.Ok(requestId, Revision); _processedRequests[key] = result; _repairTargets[key] = partId;
+            if (cost > 0) { OnSpent?.Invoke("boat-material-" + partId, cost); OnBalanceChanged?.Invoke(); }
+            OnBoatRepairChanged?.Invoke();
+            return result;
+        }
+
+        public TransactionResult TryFinishBoatPart(PlayerId player, string partId, ulong requestId)
+        {
+            EnsureSubscribed();
+            var key = (player, requestId, OpBoatFinish);
+            if (_processedRequests.TryGetValue(key, out var old))
+                return _repairTargets.TryGetValue(key, out var target) && target == partId ? old : TransactionResult.Reject(requestId, "RequestMismatch", Revision);
+            if (requestId == 0) return TransactionResult.Reject(requestId, "InvalidState", Revision);
+            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
+            if (!BoatRepairParts.IsPart(partId)) return TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            if (_boatParts.Contains(partId)) return TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+            if (!_boatMaterials.Contains(partId)) return TransactionResult.Reject(requestId, "MaterialMissing", Revision);
+            var revision = Revision;
+            _boatMaterials.Remove(partId); _boatParts.Add(partId); Revision++;
+            if (!Persist())
+            { _boatParts.Remove(partId); _boatMaterials.Add(partId); Revision = revision; return TransactionResult.Reject(requestId, "SaveFailed", Revision); }
+            var result = TransactionResult.Ok(requestId, Revision); _processedRequests[key] = result; _repairTargets[key] = partId;
+            OnBoatRepairChanged?.Invoke(); OnFleetChanged?.Invoke();
             return result;
         }
 
@@ -912,6 +963,7 @@ namespace DeepDive.Economy
                 SoldCaptureIds = new List<string>(_soldCaptureIds),
                 PaidRecordingIds = new List<string>(_paidRecordingIds),
                 BoatPartIds = new List<string>(_boatParts),
+                UnusedBoatPartIds = new List<string>(_boatMaterials),
                 ChannelRightIds = new List<string>(_channelRightIds),
                 ChannelSettleIds = new List<string>(_channelSettleIds),
                 RewardIds = new List<string>(_rewardIds),
@@ -974,6 +1026,15 @@ namespace DeepDive.Economy
                 data.SchemaVersion > EconomySaveData.CurrentSchemaVersion || data.SharedBalance < 0)
                 return false;
 
+            // Validate the new material domain before mutating any live economy.
+            if (data.SchemaVersion >= 9 && data.UnusedBoatPartIds != null)
+            {
+                var seen = new HashSet<string>();
+                foreach (var part in data.UnusedBoatPartIds)
+                    if (!BoatRepairParts.IsPart(part) || !seen.Add(part) ||
+                        (data.BoatPartIds != null && data.BoatPartIds.Contains(part))) return false;
+            }
+
             SharedBalance = data.SharedBalance;
             Revision = Math.Max(0, data.Revision);
             LastCheckpointId = data.CheckpointId ?? "";
@@ -987,7 +1048,9 @@ namespace DeepDive.Economy
             _pending.Clear();
             _stored.Clear();
             _boatParts.Clear();
+            _boatMaterials.Clear();
             _processedRequests.Clear();
+            _repairTargets.Clear();
             _processedTurnIns.Clear();
 
             if (data.SoldCaptureIds != null)
@@ -1027,6 +1090,7 @@ namespace DeepDive.Economy
             if (data.BoatPartIds != null)
                 foreach (var partId in data.BoatPartIds)
                     if (BoatRepairParts.IsPart(partId) && !_boatParts.Contains(partId)) _boatParts.Add(partId);
+            if (data.SchemaVersion >= 9 && data.UnusedBoatPartIds != null) _boatMaterials.AddRange(data.UnusedBoatPartIds);
             RestoreFleet(data);
 
             OnBalanceChanged?.Invoke();

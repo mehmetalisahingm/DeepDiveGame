@@ -216,6 +216,7 @@ namespace DeepDive.Network
                 return TransactionResult.Reject(requestId, "WrongPhase", state.Revision);
             if (!TryGetPlayer(player, out var networkPlayer))
                 return TransactionResult.Reject(requestId, "InvalidTarget", state.Revision);
+            if (networkPlayer.RepairHandsBusy) return TransactionResult.Reject(requestId, "HandsBusy", state.Revision);
 
             var positions = new Vector3[BoatSeatLayoutRules.SeatIds.Count];
             var occupied = new bool[positions.Length];

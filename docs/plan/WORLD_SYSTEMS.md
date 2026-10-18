@@ -141,3 +141,7 @@ Bu revizyonda küçük, mevcut sistemlere bağlı ekler: ekip ping'leri ve dön�
 ## Kabul için zor senaryolar
 
 Bir oyuncu uyurken diğerinin denizde kalması; 23:59'da yayın/alışveriş; 00:00'da yarım klip aktarımı; tekne satın alırken iki kişinin aynı isteği göndermesi; boss ödülünden önce host kopması; dolu disk; guest'in arşiv aktarımında ayrılması; kayıt açınca aynı gün/izlenme/para/harita ödülünün tekrarı. PHASES P4/P5 kabulünde bunlar gerçek build ve aynı kayıt üzerinden denenir; plan dosyası yazmak PASS değildir.
+
+## #187 dar fiziksel onarım uygulaması — 18 Ekim kullanıcı istisnası
+
+Başlangıç sandalı mevcut iskele tekne pozunda kırık gövde/üç eksik grup olarak görünür. Kıyıdaki üç stable parça bulunur veya dükkândan alınır; edinme onarım değildir. E ile taşınır ve eşleşen yuvaya yerleştirilir; üç kontrollü sol tık darbesinin sonuncusu katkıyı kalıcı yapar. Q/kopma/gün kapanışı kullanılmamış malzemeyi erişilebilir ortak askıya döndürür. Eski 2/3 kayıt korunur. Normal akışta oyuncuyu ışınlayan yeni yol yoktur; mevcut rota/tek aktif tekne/dört koltuk korunur. #188 nihai anchor/çalışma alanı ve #189 sanat/ses kabulü ayrıdır. Ayrıntı: [dar sözleşme](P48_REPAIR_CONTRACT_PROPOSAL.md).

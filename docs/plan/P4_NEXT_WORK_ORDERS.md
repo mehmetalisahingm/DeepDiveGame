@@ -36,3 +36,5 @@ R01/R02/R11 tamir semantiği/alt-slot/edinme-contribution kararları açık kal�
 | [#189](https://github.com/mehmetalisahingm/DeepDiveGame/issues/189) | Mert | Kırık/onarılmış kombinasyonlar, parça/alet/ses ve kayıt sunumu |
 
 Hepsi #160'ın gerçek GitHub alt işidir. Önce #186 hazırlığı, sonra kabul edilmiş ortak seam üzerinden alan uygulaması yapılır. [Somut sözleşme ve mask tablosu](P48_REPAIR_CONTRACT_PROPOSAL.md) inceleme içindir; karar veya tamam kaydı değildir. #141 P4.6 teknik temel ve #159 P4.7 görsel örnek uygulama kapısı korunur. Yeni issue açılması sonraki fazı açmaz.
+
+18 Ekim ek kullanıcı kararı: #141/#159 açıkken yalnız Mehmet'in #187 taşıma/yerleştirme/keser işi şimdi uygulanır. #186 önerisindeki dar ID/üç grup/edinme ayrımı bu uygulamanın teknik temelidir; ekip onayı veya diğer fazların açılması sayılmaz. Nihai model/ses ve world yerleşimi #189/#188'de kalır.

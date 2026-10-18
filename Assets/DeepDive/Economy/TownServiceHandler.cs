@@ -78,7 +78,7 @@ namespace DeepDive.Economy
             var result = isVehicle
                 ? economy.TryPurchaseVehicle(player, itemId, requestId)
                 : BoatRepairParts.IsPart(itemId)
-                    ? economy.TryContributeBoatPart(player, itemId, BoatPartSource.Purchased, requestId)
+                    ? economy.TryAcquireBoatPart(player, itemId, BoatPartSource.Purchased, requestId)
                     : economy.TryPurchase(player, itemId, requestId);
 
             Publish(player, new TownServiceOutcome(shop.ServiceId, shop.ServiceType, requestId, result.Accepted,
@@ -115,7 +115,7 @@ namespace DeepDive.Economy
         public TransactionResult HandleFoundPart(PlayerId player, string partId, ulong requestId)
         {
             if (!canServe(player)) return TransactionResult.Reject(requestId, "PlayerInactive", economy.Revision);
-            return economy.TryContributeBoatPart(player, partId, BoatPartSource.Found, requestId);
+            return economy.TryAcquireBoatPart(player, partId, BoatPartSource.Found, requestId);
         }
 
         // Called every host frame/tick: closes shops whose player walked away or when the dive starts.

@@ -30,7 +30,7 @@ namespace DeepDive.Composition
             var player = manager != null ? manager.LocalClient?.PlayerObject : null;
             var progress = player != null ? player.GetComponent<EconomyPlayerSync>() : null;
             if (progress == null || !progress.IsSpawned) return;
-            var visible = (progress.BoatPartsMask.Value & bit) == 0;
+            var visible = ((progress.BoatPartsMask.Value | progress.BoatMaterialsMask.Value) & bit) == 0;
             foreach (var visual in visuals) if (visual != null) visual.enabled = visible;
             foreach (var collider in colliders) if (collider != null) collider.enabled = visible;
         }

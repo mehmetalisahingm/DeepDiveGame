@@ -413,3 +413,7 @@ P2 başlangıcı: Mehmet, Utku ve Mert av/vuruş/çanta istek ve sonuçlarını 
 ## P4.8 / #186 — Fiziksel tamir sözleşmesi önerisi
 
 [Somut öneri ve sekiz eski kayıt geçişi](P48_REPAIR_CONTRACT_PROPOSAL.md), mevcut pickup/purchase katkısından edinme–taşıma–son darbe ayrımına geçişi açıklar. R01/R02/R11 kesinleşmiş karar veya uygulanmış ürün API'si değildir. `BoatPartClaim`, `TryContributeBoatPart`, v8 kayıt ve mevcut üç teknik ID bu hazırlıkla değiştirilmez. #187 Mehmet, #188 Utku ve #189 Mert aynı dar sözleşmeyi tüketir; #141/#159 başlama ve gerçek ekip kabulü sınırları korunur.
+
+### 18 Ekim #187 dar kullanıcı istisnası
+
+Kullanıcı #141/#159 açık kalırken #187 uygulamasını açıkça yetkilendirdi. Yukarıdaki hazırlık notunun ardından edinme/son darbe ayrımı uygulanır: v9 UnusedBoatPartIds yalnız edinilmiş ve kullanılmamış üç stable ID'yi tutar; BoatPartIds tamamlanmış katkıdır. Bir ID iki listede birden olamaz. v1-v8 tamamlanmış bitleri korunur, kullanılmamış malzeme verilmez. Son darbe kullanılmamış ID'yi çıkarıp tamamlanmışa ekler ve tek save yazar; save reddinde ikisi/revision geri alınır. Taşıyıcı/yuva rezervasyonu ve yarım darbe geçicidir. Kopma/pasiflik/gün kapanışı malzemeyi ortak askıya döndürür. Ağ değişkeni düzeni değiştiği için protokol DeepDive-P4-5; eski build kabul edilmez. #188/#189 ve gerçek ekip kabulü ayrıca kalır.

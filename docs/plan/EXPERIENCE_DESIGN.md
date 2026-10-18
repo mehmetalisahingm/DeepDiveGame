@@ -330,3 +330,5 @@ Başlangıç ürün ölçüm hedefleri: ilk hedefi çoğu yeni oyuncunun sözlü
 
 P4.12 tamamlandığında “oynanıyor” ve “görsel/içerik hedefi kabul edildi” ayrı sonuçlarıyla birlikte raporlanır. Yeni oyun tasarım açığı P5'e “küçük polish” diye devredilmez.
 
+
+18 Ekim #187 uygulama istisnası: kullanıcı yalnız fiziksel tamir işini şimdi yetkilendirdi. E ile kaldır/yerleştir, Q ile ortak askıya bırak, üç sol tık darbesiyle tek katkı; edinme tek başına onarım değildir. Geçici mekanik görünüm nihai #189 sanat teslimi sayılmaz; #141/#159 insan kabulü açık kalır.

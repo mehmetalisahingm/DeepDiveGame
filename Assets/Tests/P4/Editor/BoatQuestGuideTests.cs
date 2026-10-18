@@ -54,8 +54,8 @@ namespace DeepDive.P4.Tests
         [Test]
         public void TheLineReadsNameDirectionAndDistance()
         {
-            Assert.AreEqual("Motor: bati, 12 m", BoatRepairGuide.Line(BoatRepairParts.Engine, 0f, 0f, -12f, 0.2f));
-            Assert.AreEqual("Yakit tanki: burada", BoatRepairGuide.Line(BoatRepairParts.FuelTank, 3f, 3f, 3f, 3f));
+            Assert.AreEqual("Oturak destegi: bati, 12 m", BoatRepairGuide.Line(BoatRepairParts.Engine, 0f, 0f, -12f, 0.2f));
+            Assert.AreEqual("Kurek baglantisi: burada", BoatRepairGuide.Line(BoatRepairParts.FuelTank, 3f, 3f, 3f, 3f));
         }
 
         // ---- a campaign saved at 2/3 goes on ------------------------------------------------------------------------------
@@ -101,11 +101,13 @@ namespace DeepDive.P4.Tests
                 Assert.AreEqual(2, second.Economy.BoatRepair.CompletedPartIds.Count, "reopened at 2/3, nothing reset");
                 Assert.AreEqual(BoatRepairStatus.InProgress, second.Economy.BoatRepair.Status);
                 Assert.AreEqual(missingPart, BoatRepairGuide.Missing(Mask(second.Economy)).Single(), "the guide names exactly the missing part");
-                // Two players reach it in the same moment: one contribution, nothing paid, the loser is told AlreadyProcessed.
-                var a = second.Economy.TryContributeBoatPart(Alice, missingPart, BoatPartSource.Found, 1);
-                var b = second.Economy.TryContributeBoatPart(Bob, missingPart, BoatPartSource.Found, 1);
+                // Acquisition is durable but is not a contribution; only one material exists.
+                var a = second.Economy.TryAcquireBoatPart(Alice, missingPart, BoatPartSource.Found, 1);
+                var b = second.Economy.TryAcquireBoatPart(Bob, missingPart, BoatPartSource.Found, 1);
                 Assert.IsTrue(a.Accepted);
                 Assert.AreEqual("AlreadyProcessed", b.ReasonCode);
+                Assert.AreEqual(BoatRepairStatus.InProgress, second.Economy.BoatRepair.Status);
+                Assert.IsTrue(second.Economy.TryFinishBoatPart(Alice, missingPart, 2).Accepted);
                 Assert.AreEqual(BoatRepairStatus.Repaired, second.Economy.BoatRepair.Status);
                 Assert.AreEqual(0, second.Economy.SharedBalance, "a found part costs nothing");
             }
@@ -130,8 +132,10 @@ namespace DeepDive.P4.Tests
             {
                 var price = second.Economy.BoatPartPrice;
                 var before = second.Economy.SharedBalance;
-                Assert.IsTrue(second.Economy.TryContributeBoatPart(Bob, BoatRepairParts.FuelTank, BoatPartSource.Purchased, 1).Accepted);
+                Assert.IsTrue(second.Economy.TryAcquireBoatPart(Bob, BoatRepairParts.FuelTank, BoatPartSource.Purchased, 1).Accepted);
                 Assert.AreEqual(before - price, second.Economy.SharedBalance);
+                Assert.AreEqual(BoatRepairStatus.InProgress, second.Economy.BoatRepair.Status);
+                Assert.IsTrue(second.Economy.TryFinishBoatPart(Bob, BoatRepairParts.FuelTank, 2).Accepted);
                 Assert.AreEqual(BoatRepairStatus.Repaired, second.Economy.BoatRepair.Status);
                 // The same part found afterwards is not charged and not counted twice.
                 var again = second.Economy.TryContributeBoatPart(Alice, BoatRepairParts.FuelTank, BoatPartSource.Found, 5);

@@ -61,7 +61,9 @@ namespace DeepDive.Composition
             var at = player.transform.position;
             foreach (var part in missing)
             {
-                if (anchors.TryGetValue(part, out var anchor) && anchor != null)
+                if ((progress.BoatMaterialsMask.Value & BoatRepairGuide.Bit(part)) != 0)
+                    lines.Add(BoatRepairGuide.PartName(part) + ": hazir; iskeledeki ortak askida / elde");
+                else if (anchors.TryGetValue(part, out var anchor) && anchor != null)
                     lines.Add(BoatRepairGuide.Line(part, at.x, at.z, anchor.WorldPosition.x, anchor.WorldPosition.z));
                 else lines.Add(BoatRepairGuide.PartName(part) + ": kiyida");
             }
