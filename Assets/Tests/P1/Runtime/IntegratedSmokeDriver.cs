@@ -185,6 +185,7 @@ namespace DeepDive.P1.Lab
         private bool homeTransferComplete;
         private float returnPhaseAt, pendingSeenAt, turnInAt;
         private float recordingStartTime;
+        private float recordingTraceAt;
         private float bossNextShot, bossTraceAt;
         private bool p45PingSent;
         private P45CurrentSmokeSource p45CurrentSource;
@@ -858,6 +859,14 @@ namespace DeepDive.P1.Lab
             var world = adapter.GetComponent<RecordingWorldBinding>();
             if (adapter.IsAuthority)
             {
+                if (Time.realtimeSinceStartup >= recordingTraceAt && !result.recordingStopped)
+                {
+                    recordingTraceAt = Time.realtimeSinceStartup + 2f;
+                    var active = FindObjectsByType<RecordingSubject>(FindObjectsSortMode.None)
+                        .Where(x => x.IsRecording(new PlayerId(recorder)))
+                        .Select(x => $"{x.name}:{x.ValidSecondsFor(new PlayerId(recorder)):F2}");
+                    result.mediaTrace.Add($"record expected={subject.name} active=[{string.Join(",", active)}]");
+                }
                 result.recordingViews |= RecorderViews.Count == players.Length;
                 result.recordingStarted |= subject.OpenTakeCount > 0;
                 result.recordingClaimed |= world.Binding.Director.ClaimCount == 1;
@@ -910,6 +919,19 @@ namespace DeepDive.P1.Lab
             if (result.recordingStopped || Time.realtimeSinceStartup < nextAction) return;
             if (!bridge.IsRecordingLocal || Time.realtimeSinceStartup - recordingStartTime > 8f)
             {
+                // SubmitLocalInput applies the camera rotation in NetworkPlayer.LateUpdate.
+                // Starting in this same Update can raycast the previous frame's view and
+                // lock a neighbouring fish now that the scene contains fifteen of them.
+                // Use the actual owner-camera ray, exactly like the product bridge, and
+                // wait until it hits the subject this scenario will keep framing.
+                if (!bridge.IsRecordingLocal)
+                {
+                    var camera = local.GetComponentInChildren<Camera>(true);
+                    if (camera == null || !Physics.Raycast(camera.ViewportPointToRay(new Vector3(.5f, .5f, 0f)),
+                        out var hit, 35f, ~0, QueryTriggerInteraction.Ignore) ||
+                        hit.collider.GetComponentInParent<NetworkObject>() != subject.NetworkObject) return;
+                    result.mediaTrace.Add($"record start aimed={subject.name}");
+                }
                 nextAction = Time.realtimeSinceStartup + .75f;
                 bridge.ToggleRecordingLocal();
             }
