@@ -1,0 +1,14 @@
+{
+  "sourceCommit": "518dc052683a5b00c2fa895323af9017ef34b795",
+  "players": 4,
+  "schema": 9,
+  "completed": [
+    "boat-part-hull",
+    "boat-part-fuel-tank",
+    "boat-part-engine"
+  ],
+  "unused": [],
+  "balance": 0,
+  "localProcessesOnly": true,
+  "notes": "Three distinct owners each cancelled/recovered and finished one part. Fourth client observed carrying and placed/hit state. Same-part exclusion is a pure host-state test, not a four-process race claim."
+}
