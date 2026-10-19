@@ -105,7 +105,7 @@ namespace DeepDive.World.Tests
         private const float WadeAngleDegrees = 25f;
 
         private static readonly Vector3 HullPartPosition = new Vector3(-12f, 8.4f, -12.5f);
-        private static readonly Vector3 EnginePosition = new Vector3(-6.5f, 7.0010767f, -8f);
+        private static readonly Vector3 EnginePosition = new Vector3(-2.5f, 8.4f, -12.75f);   // #186: moved ashore
         private static readonly Vector3 FuelTankPosition = new Vector3(12.5f, 8.4f, -12.5f);
 
         // The spawn ring, the event and the fish wander box the route has to stay clear of.

@@ -127,18 +127,24 @@ namespace DeepDive.World.Editor
         public static float WadeTopZ => PlatformNorthZ;
         public static float WadeFootZ => WadeTopZ + WadeRun;
 
-        // Height of the walkable face at a point along it. Used for the engine anchor so the
-        // part sits on the slope instead of floating over it or sinking into it.
+        // Height of the walkable face at a point along it.
         public static float WadeSurfaceYAt(float z) =>
             PlatformTopY - WadeDrop * Mathf.Clamp01((z - WadeTopZ) / WadeRun);
 
         // --- The three free boat parts -------------------------------------------------------
 
-        // Spread along the coast so a co-op team has a reason to split up, and all three
-        // reachable on foot or by wading: no boat, no camera, no deep water, no equipment.
+        // Spread along the coast so a co-op team has a reason to split up, and all three on dry
+        // sand, reachable on foot: no swim, no boat, no camera, no equipment.
+        //
+        // The engine used to sit on the wade slope, 1 m under the water line (#156: a crew at 2/3
+        // could not find it). Mehmet's #186 decision moved it ashore with the same part id; the
+        // spot is measured, not chosen by eye (P4EngineShoreAudit, docs/reports/P4-ENGINE-SHORE.md):
+        // dry and collider-free with the town built, clear of the S1 repair cradle, its work and
+        // drop points and the pier/ramp/wade/DiveExit/gate corridors, >= 6 m from the other two
+        // parts and off their carry lines, and in frame from the beach entry, the town square and
+        // the home door.
         public static Vector3 HullPosition => new Vector3(-12f, PlatformTopY, -12.5f);
-        public const float EngineZ = -8f;
-        public static Vector3 EnginePosition => new Vector3(WadeCenterX, WadeSurfaceYAt(EngineZ), EngineZ);
+        public static Vector3 EnginePosition => new Vector3(-2.5f, PlatformTopY, -12.75f);
         public static Vector3 FuelTankPosition => new Vector3(12.5f, PlatformTopY, -12.5f);
 
         // Visible placeholder so a human walking the scene can find the parts. Small enough not
