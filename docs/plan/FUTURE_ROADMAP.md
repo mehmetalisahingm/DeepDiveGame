@@ -4,6 +4,8 @@
 
 ## 1. Ufuklar ve başlangıç şartları
 
+19 Ekim [dünya kalite teslimleri](WORLD_QUALITY_DELIVERIES.md) uzak sahilli şehir/ev/dükkân, hareketli su, mercan habitatı, balık animasyonu, derinlikte av değeri ve bulunabilir bossu mevcut P4 ürün borcu olarak ayrıntılandırır. Bu eksikler P7–P10 aday genişlemelerine veya P5'te genel polish işine ertelenmez. P4.9–P4.12 dört küçük iş veya kısa takvim anlamına gelmez.
+
 | Ufuk | Ürün amacı | Başlangıç kapısı | Tamamlanma sonucu |
 |---|---|---|---|
 | Şimdi: P4.6–P4.12 | Oynanabilir temeli dolu ve hissedilir oyuna dönüştür | Fazın mevcut teknik ve ürün kapıları | Gerçek fiziksel dünya, grafik/ses/eylem ve içerik kabulü |

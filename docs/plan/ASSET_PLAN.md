@@ -8,6 +8,8 @@
 
 ## Sanat yönü
 
+19 Ekim ek üretim ayrıntısı: [Q01–Q14 dünya kalite teslimleri](WORLD_QUALITY_DELIVERIES.md). Su yüzeyi ve kıyı köpüğü/hareketi, sualtı ışık/geçişleri, farklı mercan/bitki/kaya/batık setleri ve balık rig/yüzgeç/kuyruk klipleri ayrı varlık/entegrasyon paketidir. Şehir cephesi, girilebilir dört hizmet mekânı ve ev içi ayrı kabul edilir. İlk kara örneğine ek hareketli deniz/bir balık örneği görülmeden bütün denize aynı kit yayılmaz. Mevcut stilize yönü toptan fotogerçekçi motor değişimine çevirmeden tutarlı malzeme, ölçek ve canlı hareketi hedeflenir; mevcut kaynak hedefe yetmiyorsa eksik olarak kaydedilir.
+
 18 Ekim ek FBX teslimi: kullanıcının Quaternius bina/balık/ev paketinden 12 model; başlangıç sandalı, üç balık görseli, kasaba binaları ve ev eşyaları bağlanır. URP materyal renkleri ve gerçek yüzme klipleri korunur. Bu sınırlı teslim bütün sanat veya fiziksel tamir kabulü değildir; [uygulama/kanıt](../reports/P4-SUPPLIED-FBX-KIT.md).
 
 18 Ekim dar teslim: kullanıcı kendi ürettiğini belirttiği Tripo `luxury motorboat 3d model` FBX ve beş dokuyu sağladı, kaynakların public GitHub'da paylaşılmasına açık izin verdi. Motorlu teknenin görseline bağlanır; başlangıç sandalı veya kırık/aşamalı tamir seti sayılmaz. Kaynak ve izin kaydı [CREDITS](../assets/CREDITS.md), doğrulama [rapor](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) içindedir. Ücretli servis veya yeni üretim çağrısı yapılmaz.

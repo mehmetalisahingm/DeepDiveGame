@@ -8,6 +8,8 @@ Plan 3.0 — 15 Eylül 2026. İnsan karakter, fiziksel kıyı dünyası, ev/gün
 
 ## Hangi özellik ne zaman gelecek?
 
+19 Ekim [Q01–Q14 ayrıntısı](WORLD_QUALITY_DELIVERIES.md), bu döngünün gerçek mekân/mesafe, hareketli su, mercan habitatı, balık davranışı/değeri ve bulunabilir boss ürün karşılığını ayrı teslimlere bağlar. Ev şehrin içindedir; şehir merkezi ile sahil gerçek yaya yoluyla ayrılır. Ücretsiz kıyı avı korunurken derin türler yeni değer/risk kararı verir. Günlük tur süresi ve ilk kazanç gerçek yürüyüşle ölçülür; test fixture'ı veya teleport ile iyi tempo gösterilmez.
+
 İlk on dakika, ilerleyen günler, günlük seçimler, her eylemin yerel/uzak karşılığı ve ürün kabul ölçümleri [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md) içinde ayrıntılıdır. Gelecek ada/serbest sürüş/kişiselleştirme seçenekleri [FUTURE_ROADMAP](FUTURE_ROADMAP.md) içinde adaydır; bu ilk sürümün zorunlu zincirine eklenmez.
 
 | Oyuncunun göreceği değişiklik | İlk zorunlu teslim | Daha sonra |
