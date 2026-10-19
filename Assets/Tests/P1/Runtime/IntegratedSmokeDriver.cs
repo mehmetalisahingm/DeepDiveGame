@@ -1077,7 +1077,8 @@ namespace DeepDive.P1.Lab
         private bool boatWasAtDock;
         private ulong boatDuplicateRequest;
         private float boatRepairTraceAt;
-        private bool boatOwnWorkStarted;
+        private int boatOwnWorkMask;
+        private readonly string[] boatOwnWorkPhases = new string[3];
 
         private bool WalkRepair(NetworkPlayer local, Camera cam, Vector3 target, bool toDock)
         {
@@ -1123,9 +1124,19 @@ namespace DeepDive.P1.Lab
             if (sync != null && sync.BoatPartsDone.Value >= BoatRepairParts.All.Count) result.boatRepaired = true;
             // Completion can reach the guest in the same network tick as Return.
             // Observe its own acknowledged work before the phase gate stops new input.
-            boatOwnWorkStarted |= local.RepairPartIndex.Value == 1 && local.RepairPlaced.Value;
-            if (!host && boatOwnWorkStarted && sync != null && (sync.BoatPartsMask.Value & 2) != 0)
+            var working = local.RepairPartIndex.Value;
+            if (working >= 0 && working < 3 && local.RepairPlaced.Value)
+            {
+                boatOwnWorkMask |= 1 << working;
+                boatOwnWorkPhases[working] = adapter.Session.State.Phase.ToString();
+            }
+            if (!host && (boatOwnWorkMask & 2) != 0 && sync != null && (sync.BoatPartsMask.Value & 2) != 0)
             { result.boatEngineFound = true; boatStep = 2; }
+            if (host && (boatOwnWorkMask & 4) != 0 && sync != null && (sync.BoatPartsMask.Value & 4) != 0)
+            {
+                result.boatFuelTankFound = true; boatFuelPhase = boatOwnWorkPhases[2]; boatStep = 3;
+                if (boatFinalAt == 0) boatFinalAt = Time.realtimeSinceStartup;
+            }
             // #156: the quest line names exactly the missing parts at 0/3, at a partial count and (nothing left) once repaired.
             var hint = FindFirstObjectByType<BoatRepairHintView>();
             if (sync != null && sync.IsSpawned && hint != null)
