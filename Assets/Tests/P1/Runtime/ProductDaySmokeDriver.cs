@@ -468,7 +468,8 @@ namespace DeepDive.P1.Lab
             var fish=recordingFish;
             if (fish == null) { Stop(); return; }
             var delta = fish.transform.position - local.RecordingEyePosition;
-            if (delta.magnitude > 4.5f)
+            // Sea bass flee inside 5 m at 3.2 m/s; the real camera framing band is 5-12 m.
+            if (delta.magnitude > 8f)
             {
                 var stand=fish.transform.position-Vector3.up*1.4f;stand.y=Mathf.Max(.1f,stand.y);
                 MoveToward(stand);aimAt=0;return;

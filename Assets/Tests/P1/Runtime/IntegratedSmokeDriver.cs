@@ -749,6 +749,7 @@ namespace DeepDive.P1.Lab
                 if (!starts.ContainsKey(player.OwnerClientId)) starts[player.OwnerClientId] = player.transform.position;
             }
             var local = players.FirstOrDefault(p => p.IsOwner);
+            if (local != null && Boat && scene == SessionNetworkAdapter.DiveScene) ObserveBoatProgress(local);
             var elapsed = Time.realtimeSinceStartup - sceneStarted;
             if (local != null && Time.realtimeSinceStartupAsDouble >= nextInput)
             {
@@ -1112,10 +1113,9 @@ namespace DeepDive.P1.Lab
             local.SubmitLocalInput(Vector3.zero,0);return true;
         }
 
-        private void ProbeBoatParts(NetworkPlayer local)
+        private void ObserveBoatProgress(NetworkPlayer local)
         {
             var host = adapter.IsAuthority;
-            if(Time.realtimeSinceStartup>boatRepairTraceAt){boatRepairTraceAt=Time.realtimeSinceStartup+5;Debug.Log($"P187_BOAT step={boatStep} pos={local.transform.position} carry={local.RepairPartIndex.Value} placed={local.RepairPlaced.Value} hits={local.RepairHits.Value} phase={adapter.Session.State.Phase}");}
             // BoatPartsDone mirrors the same shared EconomyManager.BoatRepair count to every player's own sync
             // component (EconomyPlayerSync.cs: "host-written and only informational for the client UI"), so the
             // guest can confirm Repaired from its own replicated state without any host-only access.
@@ -1148,6 +1148,13 @@ namespace DeepDive.P1.Lab
                     a.GetComponentsInChildren<Renderer>().All(r => !r.enabled) &&
                     a.GetComponentsInChildren<Collider>().All(c => !c.enabled));
             }
+        }
+
+        private void ProbeBoatParts(NetworkPlayer local)
+        {
+            var host = adapter.IsAuthority;
+            if(Time.realtimeSinceStartup>boatRepairTraceAt){boatRepairTraceAt=Time.realtimeSinceStartup+5;Debug.Log($"P187_BOAT step={boatStep} pos={local.transform.position} carry={local.RepairPartIndex.Value} placed={local.RepairPlaced.Value} hits={local.RepairHits.Value} phase={adapter.Session.State.Phase}");}
+            var sync = local.GetComponent<EconomyPlayerSync>();
             // A fleet-route run loads a previously repaired/purchased campaign. Keep verifying
             // replicated repair/hidden parts, but do not attempt to collect already consumed parts.
             if (FleetRoute) { local.SubmitLocalInput(Vector3.zero, 0f); return; }
@@ -3321,6 +3328,8 @@ namespace DeepDive.P1.Lab
                 }
                 case 1:   // board: the HOST resolves the seat, the client never picks one
                     local.SubmitLocalInput(Vector3.zero, 0);
+                    // Keep the scenario roles explicit: the host boards first and becomes trip owner.
+                    if (!adapter.IsAuthority && sync.SeatedCount.Value == 0) return;
                     if (sync.IsSeated)
                     {
                         result.tripBoarded = true; result.tripSeatId = sync.MySeatId.Value.ToString();
