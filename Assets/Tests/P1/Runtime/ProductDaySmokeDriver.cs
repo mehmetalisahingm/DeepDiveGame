@@ -70,6 +70,7 @@ namespace DeepDive.P1.Lab
         private bool cancelObserved;
         private ulong repairObservedRequest;
         private FishActor recordingFish;
+        private float nextHuntTrace;
         private static string Arg(string key, string fallback = "")
         {
             var args = Environment.GetCommandLineArgs(); var index = Array.IndexOf(args, key);
@@ -415,13 +416,30 @@ namespace DeepDive.P1.Lab
                 .Where(f=>f.IsSpawned && (!f.IsDead || f.GetComponent<CatchObject>().IsAvailable))
                 .Where(f=>!Physics.Linecast(eye,f.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
                     blocker.collider.GetComponentInParent<FishActor>()==f)
-                .OrderBy(f=>(f.transform.position-eye).sqrMagnitude).FirstOrDefault();
+                .OrderByDescending(f=>f.GetComponent<CatchObject>().IsAvailable)
+                .ThenBy(f=>(f.transform.position-eye).sqrMagnitude).FirstOrDefault();
+            if (Time.realtimeSinceStartup >= nextHuntTrace)
+            {
+                nextHuntTrace = Time.realtimeSinceStartup + 5f;
+                Debug.Log($"P46_PRODUCT_HUNT fish={fish?.name} target={fish?.GetComponent<Collider>().bounds.center} " +
+                    $"available={fish?.GetComponent<CatchObject>().IsAvailable} eye={eye} " +
+                    $"lastAction={local.LastActionRequestId.Value}/{local.LastActionResult.Value} " +
+                    $"swimming={local.Swimming.Value} passive={local.Passive.Value}");
+            }
             if (fish == null) { Stop(); return; }
             local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
             var available = fish.GetComponent<CatchObject>().IsAvailable;
             var target = fish.GetComponent<Collider>().bounds.center;
             var delta = target - local.GetComponentInChildren<Camera>(true).transform.position;
-            if (available && delta.magnitude > 1.7f) { MoveToward(target - Vector3.up * 1.4f); aimAt = 0; return; }
+            // The real E ray reaches 2.5 m. Stop with a margin inside that range rather than
+            // forcing the body to swim underneath a low catch until its eye is only 1.7 m away.
+            // Match the actual eye offset and keep the root above the shallow seabed.
+            if (available && delta.magnitude > 2.2f)
+            {
+                var stand = target - (eye - local.transform.position);
+                stand.y = Mathf.Max(0.1f, stand.y);
+                MoveToward(stand); aimAt = 0; return;
+            }
             Aim(target);
             if (Settled())
             {
