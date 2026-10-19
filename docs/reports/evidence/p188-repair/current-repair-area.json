@@ -1,0 +1,4429 @@
+{
+    "branchBase": "codex/p4-integration @ 6816fba (#185 merged)",
+    "unity": "6000.3.23f1",
+    "scene": "Assets/DeepDive/World/Scenes/DiveTestArea.unity",
+    "prefab": "Assets/DeepDive/Network/Prefabs/NetworkDiver.prefab",
+    "coordinates": "Unity world, metres, y up, +z north (sea), +x east",
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "skin": 0.07999999821186066,
+    "stepOffset": 0.30000001192092898,
+    "slopeLimit": 45.0,
+    "walkSpeed": 4.0,
+    "swimSpeed": 3.0,
+    "eyeHeight": 1.5499999523162842,
+    "verticalFov": 60.0,
+    "horizontalFov16x9": 91.49284362792969,
+    "pickupRange": 2.5,
+    "capsuleCenter": {
+        "x": 0.0,
+        "y": 0.8999999761581421,
+        "z": 0.0
+    },
+    "dt": 0.019999999552965165,
+    "gridCell": 0.25,
+    "workBandMin": 0.44999998807907107,
+    "workBandMax": 1.5,
+    "waitBandMax": 4.0,
+    "workerSpacing": 1.059999942779541,
+    "passWidth": 0.8600000143051148,
+    "bounds": [
+        {
+            "name": "Beach_Platform",
+            "kind": "walk",
+            "min": {
+                "x": -14.75,
+                "y": 0.0,
+                "z": -14.75
+            },
+            "max": {
+                "x": 14.75,
+                "y": 8.399999618530274,
+                "z": -11.0
+            }
+        },
+        {
+            "name": "Beach_Wade",
+            "kind": "walk",
+            "min": {
+                "x": -9.5,
+                "y": 4.836999893188477,
+                "z": -11.168999671936036
+            },
+            "max": {
+                "x": -3.5,
+                "y": 8.399999618530274,
+                "z": -4.138000011444092
+            }
+        },
+        {
+            "name": "BioluminescenceEvent",
+            "kind": "solid",
+            "min": {
+                "x": -10.5,
+                "y": 2.0,
+                "z": -3.5
+            },
+            "max": {
+                "x": -7.5,
+                "y": 5.0,
+                "z": -0.5
+            }
+        },
+        {
+            "name": "BoatPart_Engine",
+            "kind": "trigger.BoatPart",
+            "min": {
+                "x": -6.800000190734863,
+                "y": 6.701000213623047,
+                "z": -8.300000190734864
+            },
+            "max": {
+                "x": -6.199999809265137,
+                "y": 7.301000118255615,
+                "z": -7.699999809265137
+            }
+        },
+        {
+            "name": "BoatPart_FuelTank",
+            "kind": "trigger.BoatPart",
+            "min": {
+                "x": 12.199999809265137,
+                "y": 8.100000381469727,
+                "z": -12.800000190734864
+            },
+            "max": {
+                "x": 12.800000190734864,
+                "y": 8.699999809265137,
+                "z": -12.199999809265137
+            }
+        },
+        {
+            "name": "BoatPart_Hull",
+            "kind": "trigger.BoatPart",
+            "min": {
+                "x": -12.300000190734864,
+                "y": 8.100000381469727,
+                "z": -12.800000190734864
+            },
+            "max": {
+                "x": -11.699999809265137,
+                "y": 8.699999809265137,
+                "z": -12.199999809265137
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/CoastWalk",
+            "kind": "walk",
+            "min": {
+                "x": -3.75,
+                "y": 7.800000190734863,
+                "z": -19.75
+            },
+            "max": {
+                "x": 3.75,
+                "y": 8.399999618530274,
+                "z": -12.75
+            }
+        },
+        {
+            "name": "DiveExit",
+            "kind": "trigger.DiveExit",
+            "min": {
+                "x": 7.25,
+                "y": 8.300000190734864,
+                "z": -10.75
+            },
+            "max": {
+                "x": 10.75,
+                "y": 10.300000190734864,
+                "z": -7.25
+            }
+        },
+        {
+            "name": "Dock_Town",
+            "kind": "walk",
+            "min": {
+                "x": 8.0,
+                "y": 8.0,
+                "z": -7.0
+            },
+            "max": {
+                "x": 10.0,
+                "y": 8.399999618530274,
+                "z": -3.5
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Edge_BackFillSouthEast",
+            "kind": "edge",
+            "min": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": 14.75,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Edge_BackFillSouthWest",
+            "kind": "edge",
+            "min": {
+                "x": -14.75,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": -14.0,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Edge_BeachEast",
+            "kind": "edge",
+            "min": {
+                "x": 14.75,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": 15.050000190734864,
+                "y": 9.600000381469727,
+                "z": -11.0
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Edge_BeachWest",
+            "kind": "edge",
+            "min": {
+                "x": -15.050000190734864,
+                "y": 8.399999618530274,
+                "z": -15.800000190734864
+            },
+            "max": {
+                "x": -14.75,
+                "y": 9.600000381469727,
+                "z": -11.0
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Edge_TownEast",
+            "kind": "edge",
+            "min": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -36.29999923706055
+            },
+            "max": {
+                "x": 14.300000190734864,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Edge_TownWest",
+            "kind": "edge",
+            "min": {
+                "x": -14.300000190734864,
+                "y": 8.399999618530274,
+                "z": -36.29999923706055
+            },
+            "max": {
+                "x": -14.0,
+                "y": 9.600000381469727,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Fill_BeachBack",
+            "kind": "walk",
+            "min": {
+                "x": -14.75,
+                "y": 8.050000190734864,
+                "z": -15.5
+            },
+            "max": {
+                "x": 14.75,
+                "y": 8.399999618530274,
+                "z": -14.75
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Fill_StreetEast",
+            "kind": "walk",
+            "min": {
+                "x": 11.0,
+                "y": 8.050000190734864,
+                "z": -22.0
+            },
+            "max": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/Fill_StreetWest",
+            "kind": "walk",
+            "min": {
+                "x": -14.0,
+                "y": 8.050000190734864,
+                "z": -22.0
+            },
+            "max": {
+                "x": -11.0,
+                "y": 8.399999618530274,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Fish_SeaBass_09",
+            "kind": "solid",
+            "min": {
+                "x": -8.267000198364258,
+                "y": 4.340000152587891,
+                "z": 2.4649999141693117
+            },
+            "max": {
+                "x": -7.732999801635742,
+                "y": 4.659999847412109,
+                "z": 3.5350000858306886
+            }
+        },
+        {
+            "name": "Fish_SeaBass_10",
+            "kind": "solid",
+            "min": {
+                "x": -5.670000076293945,
+                "y": 4.340000152587891,
+                "z": 2.493000030517578
+            },
+            "max": {
+                "x": -4.995999813079834,
+                "y": 4.659999847412109,
+                "z": 3.506999969482422
+            }
+        },
+        {
+            "name": "Fish_SeaBass_11",
+            "kind": "solid",
+            "min": {
+                "x": -3.193000078201294,
+                "y": 4.340000152587891,
+                "z": 2.7070000171661379
+            },
+            "max": {
+                "x": -2.140000104904175,
+                "y": 4.659999847412109,
+                "z": 3.2929999828338625
+            }
+        },
+        {
+            "name": "Fish_SeaBass_12",
+            "kind": "solid",
+            "min": {
+                "x": -0.5189999938011169,
+                "y": 4.340000152587891,
+                "z": 2.687999963760376
+            },
+            "max": {
+                "x": 0.5189999938011169,
+                "y": 4.659999847412109,
+                "z": 3.312000036239624
+            }
+        },
+        {
+            "name": "Fish_SeaBass_13",
+            "kind": "solid",
+            "min": {
+                "x": 2.3480000495910646,
+                "y": 4.340000152587891,
+                "z": 2.4839999675750734
+            },
+            "max": {
+                "x": 2.984999895095825,
+                "y": 4.659999847412109,
+                "z": 3.5160000324249269
+            }
+        },
+        {
+            "name": "Fish_SeaBass_14",
+            "kind": "solid",
+            "min": {
+                "x": 5.046000003814697,
+                "y": 4.340000152587891,
+                "z": 2.4709999561309816
+            },
+            "max": {
+                "x": 5.619999885559082,
+                "y": 4.659999847412109,
+                "z": 3.5290000438690187
+            }
+        },
+        {
+            "name": "Fish_SeaBass_15",
+            "kind": "solid",
+            "min": {
+                "x": 7.495999813079834,
+                "y": 4.340000152587891,
+                "z": 2.6570000648498537
+            },
+            "max": {
+                "x": 8.503999710083008,
+                "y": 4.659999847412109,
+                "z": 3.3429999351501467
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/MainBuilding_East",
+            "kind": "solid",
+            "min": {
+                "x": 14.5,
+                "y": 8.399999618530274,
+                "z": -32.0
+            },
+            "max": {
+                "x": 21.5,
+                "y": 13.600000381469727,
+                "z": -24.0
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/MainBuilding_West",
+            "kind": "solid",
+            "min": {
+                "x": -21.5,
+                "y": 8.399999618530274,
+                "z": -32.0
+            },
+            "max": {
+                "x": -14.5,
+                "y": 13.600000381469727,
+                "z": -24.0
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/MainStreet",
+            "kind": "walk",
+            "min": {
+                "x": -11.0,
+                "y": 7.800000190734863,
+                "z": -28.5
+            },
+            "max": {
+                "x": 11.0,
+                "y": 8.399999618530274,
+                "z": -15.5
+            }
+        },
+        {
+            "name": "Shore_Ledge",
+            "kind": "walk",
+            "min": {
+                "x": 7.0,
+                "y": 7.400000095367432,
+                "z": -11.0
+            },
+            "max": {
+                "x": 11.0,
+                "y": 8.399999618530274,
+                "z": -7.0
+            }
+        },
+        {
+            "name": "Shore_Ramp",
+            "kind": "walk",
+            "min": {
+                "x": 0.1379999965429306,
+                "y": 4.836999893188477,
+                "z": -11.0
+            },
+            "max": {
+                "x": 7.169000148773193,
+                "y": 8.399999618530274,
+                "z": -7.0
+            }
+        },
+        {
+            "name": "SwimVolume",
+            "kind": "water.SwimVolume",
+            "min": {
+                "x": -15.0,
+                "y": -27.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": 15.0,
+                "y": 8.0,
+                "z": 65.0
+            }
+        },
+        {
+            "name": "P46_ContinuousTown/TownSquare",
+            "kind": "walk",
+            "min": {
+                "x": -14.0,
+                "y": 7.800000190734863,
+                "z": -36.0
+            },
+            "max": {
+                "x": 14.0,
+                "y": 8.399999618530274,
+                "z": -22.0
+            }
+        },
+        {
+            "name": "Wall_E",
+            "kind": "solid",
+            "min": {
+                "x": 14.75,
+                "y": -27.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": 15.25,
+                "y": 7.0,
+                "z": 65.0
+            }
+        },
+        {
+            "name": "Wall_S",
+            "kind": "solid",
+            "min": {
+                "x": -15.0,
+                "y": -1.0,
+                "z": -15.25
+            },
+            "max": {
+                "x": 15.0,
+                "y": 7.0,
+                "z": -14.75
+            }
+        },
+        {
+            "name": "Wall_W",
+            "kind": "solid",
+            "min": {
+                "x": -15.25,
+                "y": -27.0,
+                "z": -15.0
+            },
+            "max": {
+                "x": -14.75,
+                "y": 7.0,
+                "z": 65.0
+            }
+        }
+    ],
+    "parts": [
+        {
+            "id": "boat-part-hull",
+            "anchorObject": "BoatPart_Hull",
+            "zone": "Coast",
+            "groundCollider": "Beach_Platform",
+            "waterAtPart": "Land (raw class of a diver standing on the ground at the part)",
+            "position": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "rendererSize": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579,
+                "z": 0.6000000238418579
+            },
+            "triggerSize": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579,
+                "z": 0.6000000238418579
+            },
+            "groundY": 8.399999618530274,
+            "depthBelowSurface": 0.0,
+            "nearestDryStandDistance": 0.0,
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "pickupFromDryLand": true,
+            "nearestDryStand": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "overlapping": []
+        },
+        {
+            "id": "boat-part-engine",
+            "anchorObject": "BoatPart_Engine",
+            "zone": "Sea",
+            "groundCollider": "Beach_Wade",
+            "waterAtPart": "Surface (raw class of a diver standing on the ground at the part)",
+            "position": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "rendererSize": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579,
+                "z": 0.6000000238418579
+            },
+            "triggerSize": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579,
+                "z": 0.6000000238418579
+            },
+            "groundY": 7.000999927520752,
+            "depthBelowSurface": 0.9990000128746033,
+            "nearestDryStandDistance": -1.0,
+            "onDryWalkSurface": false,
+            "insideSwimVolume": true,
+            "pickupFromDryLand": false,
+            "nearestDryStand": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "overlapping": []
+        },
+        {
+            "id": "boat-part-fuel-tank",
+            "anchorObject": "BoatPart_FuelTank",
+            "zone": "Coast",
+            "groundCollider": "Beach_Platform",
+            "waterAtPart": "Land (raw class of a diver standing on the ground at the part)",
+            "position": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "rendererSize": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579,
+                "z": 0.6000000238418579
+            },
+            "triggerSize": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579,
+                "z": 0.6000000238418579
+            },
+            "groundY": 8.399999618530274,
+            "depthBelowSurface": 0.0,
+            "nearestDryStandDistance": 0.0,
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "pickupFromDryLand": true,
+            "nearestDryStand": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "overlapping": []
+        }
+    ],
+    "pickupTargets": [
+        "BoatPart_Engine (BoatPartAnchor)",
+        "BoatPart_FuelTank (BoatPartAnchor)",
+        "BoatPart_Hull (BoatPartAnchor)"
+    ],
+    "boat": {
+        "source": "route-near-1 wp0 + BoatHullSeatRules.DockOffsetMeters(Rowboat) along wp0->wp1 (NetworkBoatController.SnapToDockRouteStart)",
+        "zone": "Sea",
+        "note": "No damaged boat exists in the scene; BoatTripNetworkBinding hides the runtime hull until BoatRepair is Repaired. PR #190 draws a temporary broken-hull worksite at this pose.",
+        "berth": {
+            "x": 9.0,
+            "y": 8.0,
+            "z": -0.4000000059604645
+        },
+        "yaw": 0.0,
+        "width": 2.4000000953674318,
+        "length": 5.0,
+        "seabedY": 0.0,
+        "waterDepth": 8.0,
+        "gapSternToPierEnd": 0.6000000238418579,
+        "staticBoatInScene": false,
+        "overSwimVolume": true,
+        "footprint": [
+            {
+                "x": 7.800000190734863,
+                "y": -2.9000000953674318
+            },
+            {
+                "x": 10.199999809265137,
+                "y": -2.9000000953674318
+            },
+            {
+                "x": 10.199999809265137,
+                "y": 2.0999999046325685
+            },
+            {
+                "x": 7.800000190734863,
+                "y": 2.0999999046325685
+            }
+        ],
+        "seats": [
+            {
+                "id": "seat-0",
+                "zone": "Unknown",
+                "position": {
+                    "x": 8.449999809265137,
+                    "y": 8.350000381469727,
+                    "z": -1.2999999523162842
+                },
+                "overSwimVolume": true
+            },
+            {
+                "id": "seat-1",
+                "zone": "Unknown",
+                "position": {
+                    "x": 9.550000190734864,
+                    "y": 8.350000381469727,
+                    "z": -1.2999999523162842
+                },
+                "overSwimVolume": true
+            },
+            {
+                "id": "seat-2",
+                "zone": "Unknown",
+                "position": {
+                    "x": 8.449999809265137,
+                    "y": 8.350000381469727,
+                    "z": 0.4000000059604645
+                },
+                "overSwimVolume": true
+            },
+            {
+                "id": "seat-3",
+                "zone": "Unknown",
+                "position": {
+                    "x": 9.550000190734864,
+                    "y": 8.350000381469727,
+                    "z": 0.4000000059604645
+                },
+                "overSwimVolume": true
+            }
+        ],
+        "boardingPoint": {
+            "x": 9.0,
+            "y": 8.399999618530274,
+            "z": -3.700000047683716
+        }
+    },
+    "pr190Worksite": [
+        {
+            "id": "pr190-slot-0",
+            "zone": "Unknown",
+            "groundCollider": "SeaFloor",
+            "note": "repair slot trigger (0.59 x 0.8 x 0.15)",
+            "position": {
+                "x": 8.350000381469727,
+                "y": 8.75,
+                "z": -2.549999952316284
+            },
+            "onDryWalkSurface": false,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 1.3209999799728394
+        },
+        {
+            "id": "pr190-slot-1",
+            "zone": "Unknown",
+            "groundCollider": "SeaFloor",
+            "note": "repair slot trigger (0.59 x 0.8 x 0.15)",
+            "position": {
+                "x": 9.0,
+                "y": 8.75,
+                "z": -2.549999952316284
+            },
+            "onDryWalkSurface": false,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 1.149999976158142
+        },
+        {
+            "id": "pr190-slot-2",
+            "zone": "Unknown",
+            "groundCollider": "SeaFloor",
+            "note": "repair slot trigger (0.59 x 0.8 x 0.15)",
+            "position": {
+                "x": 9.649999618530274,
+                "y": 8.75,
+                "z": -2.549999952316284
+            },
+            "onDryWalkSurface": false,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 1.3209999799728394
+        },
+        {
+            "id": "pr190-rack-0",
+            "zone": "Dock",
+            "groundCollider": "Dock_Town",
+            "note": "recovered material on the shared rack (0.6 x 0.14 x 0.45)",
+            "position": {
+                "x": 8.350000381469727,
+                "y": 8.649999618530274,
+                "z": -4.5
+            },
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 1.031000018119812
+        },
+        {
+            "id": "pr190-rack-1",
+            "zone": "Dock",
+            "groundCollider": "Dock_Town",
+            "note": "recovered material on the shared rack (0.6 x 0.14 x 0.45)",
+            "position": {
+                "x": 8.350000381469727,
+                "y": 8.649999618530274,
+                "z": -5.300000190734863
+            },
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 1.7269999980926514
+        },
+        {
+            "id": "pr190-rack-2",
+            "zone": "Dock",
+            "groundCollider": "Dock_Town",
+            "note": "recovered material on the shared rack (0.6 x 0.14 x 0.45)",
+            "position": {
+                "x": 8.350000381469727,
+                "y": 8.649999618530274,
+                "z": -6.099999904632568
+            },
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 2.4860000610351564
+        },
+        {
+            "id": "pr190-stand-0",
+            "zone": "Dock",
+            "groundCollider": "Dock_Town",
+            "note": "StandPosition(i) (smoke driver stand)",
+            "position": {
+                "x": 8.350000381469727,
+                "y": 8.399999618530274,
+                "z": -4.199999809265137
+            },
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 0.8199999928474426
+        },
+        {
+            "id": "pr190-stand-1",
+            "zone": "Dock",
+            "groundCollider": "Dock_Town",
+            "note": "StandPosition(i) (smoke driver stand)",
+            "position": {
+                "x": 9.0,
+                "y": 8.399999618530274,
+                "z": -4.599999904632568
+            },
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 0.8999999761581421
+        },
+        {
+            "id": "pr190-stand-2",
+            "zone": "Dock",
+            "groundCollider": "Dock_Town",
+            "note": "StandPosition(i) (smoke driver stand)",
+            "position": {
+                "x": 9.649999618530274,
+                "y": 8.399999618530274,
+                "z": -4.199999809265137
+            },
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "embedded": false,
+            "distanceToBoarding": 0.8199999928474426
+        }
+    ],
+    "carries": [
+        {
+            "id": "S0:boat-part-hull",
+            "part": "boat-part-hull",
+            "label": "walk boat-part-hull -> S0 work point 0",
+            "goal": "(8.25, 8.4, -3.75)",
+            "start": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "end": {
+                "x": 8.25,
+                "y": 8.479999542236329,
+                "z": -3.753000020980835
+            },
+            "path": [
+                {
+                    "x": -12.0,
+                    "y": 8.399999618530274,
+                    "z": -12.5
+                },
+                {
+                    "x": 6.5,
+                    "y": 8.399999618530274,
+                    "z": -11.25
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -7.0
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -3.75
+                }
+            ],
+            "drivenLength": 26.381999969482423,
+            "landLength": 26.381999969482423,
+            "swimLength": 0.0,
+            "simSeconds": 6.599999904632568,
+            "landSeconds": 6.599999904632568,
+            "swimSeconds": 0.0,
+            "straightLine": 22.059999465942384,
+            "reached": true,
+            "fell": false,
+            "stuck": false,
+            "frames": 330,
+            "blockedFrames": 0,
+            "waterTransitions": 0,
+            "modes": "walk",
+            "failures": []
+        },
+        {
+            "id": "S0:boat-part-engine:wade",
+            "part": "boat-part-engine",
+            "label": "swim boat-part-engine ashore via the wade, walk -> S0 work point 0",
+            "goal": "(8.25, 8.4, -3.75)",
+            "start": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "end": {
+                "x": 8.25,
+                "y": 8.479999542236329,
+                "z": -3.75
+            },
+            "path": [
+                {
+                    "x": -6.5,
+                    "y": 7.000999927520752,
+                    "z": -8.0
+                },
+                {
+                    "x": -6.5,
+                    "y": 7.75,
+                    "z": -10.0
+                },
+                {
+                    "x": -6.5,
+                    "y": 8.399999618530274,
+                    "z": -11.5
+                },
+                {
+                    "x": 6.5,
+                    "y": 8.399999618530274,
+                    "z": -11.25
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -7.0
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -3.75
+                }
+            ],
+            "drivenLength": 24.56800079345703,
+            "landLength": 22.160999298095704,
+            "swimLength": 2.4079999923706056,
+            "simSeconds": 6.300000190734863,
+            "landSeconds": 5.559999942779541,
+            "swimSeconds": 0.7400000095367432,
+            "straightLine": 15.350000381469727,
+            "reached": true,
+            "fell": false,
+            "stuck": false,
+            "frames": 315,
+            "blockedFrames": 0,
+            "waterTransitions": 1,
+            "modes": "surface > walk",
+            "failures": []
+        },
+        {
+            "id": "S0:boat-part-engine:ramp",
+            "part": "boat-part-engine",
+            "label": "swim boat-part-engine ashore via the ramp, walk -> S0 work point 0",
+            "goal": "(8.25, 8.4, -3.75)",
+            "start": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "end": {
+                "x": 8.25,
+                "y": 8.479999542236329,
+                "z": -3.75
+            },
+            "path": [
+                {
+                    "x": -6.5,
+                    "y": 7.000999927520752,
+                    "z": -8.0
+                },
+                {
+                    "x": 5.599999904632568,
+                    "y": 7.75,
+                    "z": -9.0
+                },
+                {
+                    "x": 7.25,
+                    "y": 8.399999618530274,
+                    "z": -9.0
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -7.0
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -3.75
+                }
+            ],
+            "drivenLength": 19.47599983215332,
+            "landLength": 6.611000061035156,
+            "swimLength": 12.864999771118164,
+            "simSeconds": 5.880000114440918,
+            "landSeconds": 1.659999966621399,
+            "swimSeconds": 4.21999979019165,
+            "straightLine": 15.350000381469727,
+            "reached": true,
+            "fell": false,
+            "stuck": false,
+            "frames": 294,
+            "blockedFrames": 0,
+            "waterTransitions": 1,
+            "modes": "surface > walk",
+            "failures": []
+        },
+        {
+            "id": "S0:boat-part-fuel-tank",
+            "part": "boat-part-fuel-tank",
+            "label": "walk boat-part-fuel-tank -> S0 work point 0",
+            "goal": "(8.25, 8.4, -3.75)",
+            "start": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "end": {
+                "x": 8.25,
+                "y": 8.479999542236329,
+                "z": -3.75
+            },
+            "path": [
+                {
+                    "x": 12.5,
+                    "y": 8.399999618530274,
+                    "z": -12.5
+                },
+                {
+                    "x": 10.25,
+                    "y": 8.399999618530274,
+                    "z": -10.5
+                },
+                {
+                    "x": 8.25,
+                    "y": 8.399999618530274,
+                    "z": -3.75
+                }
+            ],
+            "drivenLength": 10.050000190734864,
+            "landLength": 10.050000190734864,
+            "swimLength": 0.0,
+            "simSeconds": 2.5199999809265138,
+            "landSeconds": 2.5199999809265138,
+            "swimSeconds": 0.0,
+            "straightLine": 9.727999687194825,
+            "reached": true,
+            "fell": false,
+            "stuck": false,
+            "frames": 126,
+            "blockedFrames": 0,
+            "waterTransitions": 0,
+            "modes": "walk",
+            "failures": []
+        },
+        {
+            "id": "swim:boat-part-engine:berth",
+            "part": "boat-part-engine",
+            "label": "swim the submerged part straight to the boat's side in the water (placement from water is rejected in PR #190)",
+            "goal": "(7.4, 7.4, -2.5)",
+            "start": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "end": {
+                "x": 7.25600004196167,
+                "y": 7.089000225067139,
+                "z": -2.5380001068115236
+            },
+            "path": [
+                {
+                    "x": -6.5,
+                    "y": 7.000999927520752,
+                    "z": -8.0
+                },
+                {
+                    "x": -6.5,
+                    "y": 7.400000095367432,
+                    "z": -6.0
+                },
+                {
+                    "x": 7.400000095367432,
+                    "y": 7.400000095367432,
+                    "z": -2.5
+                }
+            ],
+            "drivenLength": 16.08099937438965,
+            "landLength": 0.0,
+            "swimLength": 16.08099937438965,
+            "simSeconds": 5.360000133514404,
+            "landSeconds": 0.0,
+            "swimSeconds": 5.360000133514404,
+            "straightLine": 14.949000358581543,
+            "reached": true,
+            "fell": false,
+            "stuck": false,
+            "frames": 268,
+            "blockedFrames": 0,
+            "waterTransitions": 0,
+            "modes": "surface",
+            "failures": []
+        }
+    ],
+    "sites": [
+        {
+            "id": "S0",
+            "label": "current runtime berth: route-near-1 wp0 (rowboat in the water at the pier end)",
+            "surface": "SeaFloor",
+            "center": {
+                "x": 9.0,
+                "y": 8.0,
+                "z": -0.4000000059604645
+            },
+            "yaw": 0.0,
+            "dryFraction": 0.0,
+            "waterFraction": 1.0,
+            "footprint": [
+                {
+                    "x": 7.800000190734863,
+                    "y": -2.9000000953674318
+                },
+                {
+                    "x": 10.199999809265137,
+                    "y": -2.9000000953674318
+                },
+                {
+                    "x": 10.199999809265137,
+                    "y": 2.0999999046325685
+                },
+                {
+                    "x": 7.800000190734863,
+                    "y": 2.0999999046325685
+                }
+            ],
+            "footprintObstacles": [],
+            "workCells": 21,
+            "workCellsOffCorridor": 0,
+            "waitCells": 70,
+            "waitCellsOffCorridor": 0,
+            "waitAreaOffCorridorM2": 0.0,
+            "workers": [
+                {
+                    "id": "S0-work-0",
+                    "zone": "Dock",
+                    "position": {
+                        "x": 8.25,
+                        "y": 8.399999618530274,
+                        "z": -3.75
+                    },
+                    "distanceToRim": 0.8500000238418579,
+                    "distanceToNearestCorridor": 0.7649999856948853,
+                    "distanceToBoarding": 0.7519999742507935,
+                    "nearestCorridor": "pier: ledge -> DiveExit -> dock-town-1"
+                },
+                {
+                    "id": "S0-work-1",
+                    "zone": "Dock",
+                    "position": {
+                        "x": 9.5,
+                        "y": 8.399999618530274,
+                        "z": -3.75
+                    },
+                    "distanceToRim": 0.8500000238418579,
+                    "distanceToNearestCorridor": 0.5220000147819519,
+                    "distanceToBoarding": 0.5019999742507935,
+                    "nearestCorridor": "pier: ledge -> DiveExit -> dock-town-1"
+                }
+            ],
+            "fourWorkersFit": false,
+            "fourWorkersFitOffCorridor": false,
+            "drop": {
+                "id": "S0-drop",
+                "zone": "Dock",
+                "groundCollider": "Shore_Ledge",
+                "note": "nearest dry free cell beyond the work band (<= 10 m), >= 1.31 m off every corridor; rim 4,36 m",
+                "position": {
+                    "x": 7.5,
+                    "y": 8.399999618530274,
+                    "z": -7.25
+                },
+                "onDryWalkSurface": true,
+                "insideSwimVolume": false,
+                "embedded": false,
+                "distanceToBoarding": 3.8540000915527345
+            },
+            "corridors": [
+                {
+                    "id": "pier: ledge -> DiveExit -> dock-town-1",
+                    "line": [
+                        {
+                            "x": 9.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -3.9000000953674318
+                        }
+                    ],
+                    "widthBefore": 2.0,
+                    "widthWithSite": 2.0,
+                    "widthWithSiteAndWorkers": 0.6179999709129334,
+                    "narrowestAt": {
+                        "x": 9.0,
+                        "y": -3.9000000953674318
+                    },
+                    "narrowestBetween": "Audit_P188_Worker_S0_0 | Audit_P188_Worker_S0_1",
+                    "stillPassable": false,
+                    "endpointsFreeWithWorkers": false,
+                    "pathBefore": 8.5,
+                    "pathWithSiteAndWorkers": 8.0
+                },
+                {
+                    "id": "ramp: waterline -> DiveExit",
+                    "line": [
+                        {
+                            "x": 6.300000190734863,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        }
+                    ],
+                    "widthBefore": 3.950000047683716,
+                    "widthWithSite": 3.950000047683716,
+                    "widthWithSiteAndWorkers": 3.950000047683716,
+                    "narrowestAt": {
+                        "x": 6.300000190734863,
+                        "y": -9.0
+                    },
+                    "narrowestBetween": "ground ends | step",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.75,
+                    "pathWithSiteAndWorkers": 2.75
+                },
+                {
+                    "id": "wade: waterline -> beach",
+                    "line": [
+                        {
+                            "x": -6.5,
+                            "y": -10.300000190734864
+                        },
+                        {
+                            "x": -6.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 6.0,
+                    "widthWithSite": 6.0,
+                    "widthWithSiteAndWorkers": 6.0,
+                    "narrowestAt": {
+                        "x": -6.5,
+                        "y": -10.788999557495118
+                    },
+                    "narrowestBetween": "ground ends | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.25,
+                    "pathWithSiteAndWorkers": 2.25
+                },
+                {
+                    "id": "gate: street -> beach",
+                    "line": [
+                        {
+                            "x": 0.0,
+                            "y": -18.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 28.0,
+                    "widthWithSite": 28.0,
+                    "widthWithSiteAndWorkers": 28.0,
+                    "narrowestAt": {
+                        "x": 0.0,
+                        "y": -18.0
+                    },
+                    "narrowestBetween": "P46_ContinuousTown/Edge_TownWest | P46_ContinuousTown/Edge_TownEast",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 5.5,
+                    "pathWithSiteAndWorkers": 5.5
+                },
+                {
+                    "id": "beach strip: hull part <-> fuel-tank part",
+                    "line": [
+                        {
+                            "x": -12.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 12.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 16.5,
+                    "widthWithSite": 16.5,
+                    "widthWithSiteAndWorkers": 16.5,
+                    "narrowestAt": {
+                        "x": -12.0,
+                        "y": -12.5
+                    },
+                    "narrowestBetween": "ground ends | probe 15m",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 24.5,
+                    "pathWithSiteAndWorkers": 24.5
+                }
+            ],
+            "carries": [
+                {
+                    "id": "S0:boat-part-hull",
+                    "part": "boat-part-hull",
+                    "label": "walk boat-part-hull -> S0 work point 0",
+                    "goal": "(8.25, 8.4, -3.75)",
+                    "start": {
+                        "x": -12.0,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": 8.25,
+                        "y": 8.479999542236329,
+                        "z": -3.753000020980835
+                    },
+                    "path": [
+                        {
+                            "x": -12.0,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.25
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -7.0
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -3.75
+                        }
+                    ],
+                    "drivenLength": 26.381999969482423,
+                    "landLength": 26.381999969482423,
+                    "swimLength": 0.0,
+                    "simSeconds": 6.599999904632568,
+                    "landSeconds": 6.599999904632568,
+                    "swimSeconds": 0.0,
+                    "straightLine": 22.059999465942384,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 330,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S0:boat-part-engine:wade",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the wade, walk -> S0 work point 0",
+                    "goal": "(8.25, 8.4, -3.75)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": 8.25,
+                        "y": 8.479999542236329,
+                        "z": -3.75
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 7.75,
+                            "z": -10.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": 6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.25
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -7.0
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -3.75
+                        }
+                    ],
+                    "drivenLength": 24.56800079345703,
+                    "landLength": 22.160999298095704,
+                    "swimLength": 2.4079999923706056,
+                    "simSeconds": 6.300000190734863,
+                    "landSeconds": 5.559999942779541,
+                    "swimSeconds": 0.7400000095367432,
+                    "straightLine": 15.350000381469727,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 315,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S0:boat-part-engine:ramp",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the ramp, walk -> S0 work point 0",
+                    "goal": "(8.25, 8.4, -3.75)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": 8.25,
+                        "y": 8.479999542236329,
+                        "z": -3.75
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": 5.599999904632568,
+                            "y": 7.75,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 7.25,
+                            "y": 8.399999618530274,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -7.0
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -3.75
+                        }
+                    ],
+                    "drivenLength": 19.47599983215332,
+                    "landLength": 6.611000061035156,
+                    "swimLength": 12.864999771118164,
+                    "simSeconds": 5.880000114440918,
+                    "landSeconds": 1.659999966621399,
+                    "swimSeconds": 4.21999979019165,
+                    "straightLine": 15.350000381469727,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 294,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S0:boat-part-fuel-tank",
+                    "part": "boat-part-fuel-tank",
+                    "label": "walk boat-part-fuel-tank -> S0 work point 0",
+                    "goal": "(8.25, 8.4, -3.75)",
+                    "start": {
+                        "x": 12.5,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": 8.25,
+                        "y": 8.479999542236329,
+                        "z": -3.75
+                    },
+                    "path": [
+                        {
+                            "x": 12.5,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 10.25,
+                            "y": 8.399999618530274,
+                            "z": -10.5
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -3.75
+                        }
+                    ],
+                    "drivenLength": 10.050000190734864,
+                    "landLength": 10.050000190734864,
+                    "swimLength": 0.0,
+                    "simSeconds": 2.5199999809265138,
+                    "landSeconds": 2.5199999809265138,
+                    "swimSeconds": 0.0,
+                    "straightLine": 9.727999687194825,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 126,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                }
+            ],
+            "dropCarries": [],
+            "fishWithin8m": 7,
+            "notes": [
+                "hull floats in the SwimVolume; work cells can only be on dry ground near the pier end"
+            ]
+        },
+        {
+            "id": "S1",
+            "label": "beach east, between the gate line and the ramp, hull parallel to the shore",
+            "surface": "Beach_Platform",
+            "center": {
+                "x": 3.5999999046325685,
+                "y": 8.399999618530274,
+                "z": -12.600000381469727
+            },
+            "yaw": 90.0,
+            "dryFraction": 1.0,
+            "waterFraction": 0.0,
+            "footprint": [
+                {
+                    "x": 1.100000023841858,
+                    "y": -11.399999618530274
+                },
+                {
+                    "x": 1.100000023841858,
+                    "y": -13.800000190734864
+                },
+                {
+                    "x": 6.099999904632568,
+                    "y": -13.800000190734864
+                },
+                {
+                    "x": 6.099999904632568,
+                    "y": -11.399999618530274
+                }
+            ],
+            "footprintObstacles": [],
+            "workCells": 240,
+            "workCellsOffCorridor": 155,
+            "waitCells": 919,
+            "waitCellsOffCorridor": 556,
+            "waitAreaOffCorridorM2": 34.75,
+            "workers": [
+                {
+                    "id": "S1-work-0",
+                    "zone": "Coast",
+                    "position": {
+                        "x": 0.5,
+                        "y": 8.399999618530274,
+                        "z": -11.5
+                    },
+                    "distanceToRim": 0.6000000238418579,
+                    "distanceToNearestCorridor": 1.0,
+                    "distanceToBoarding": 11.53600025177002,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                },
+                {
+                    "id": "S1-work-1",
+                    "zone": "Coast",
+                    "position": {
+                        "x": 1.0,
+                        "y": 8.399999618530274,
+                        "z": -14.25
+                    },
+                    "distanceToRim": 0.460999995470047,
+                    "distanceToNearestCorridor": 1.0,
+                    "distanceToBoarding": 13.239999771118164,
+                    "nearestCorridor": "gate: street -> beach"
+                },
+                {
+                    "id": "S1-work-2",
+                    "zone": "Coast",
+                    "position": {
+                        "x": 6.25,
+                        "y": 8.399999618530274,
+                        "z": -14.25
+                    },
+                    "distanceToRim": 0.4740000069141388,
+                    "distanceToNearestCorridor": 1.75,
+                    "distanceToBoarding": 10.902999877929688,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                },
+                {
+                    "id": "S1-work-3",
+                    "zone": "Coast",
+                    "position": {
+                        "x": 6.5,
+                        "y": 8.399999618530274,
+                        "z": -11.0
+                    },
+                    "distanceToRim": 0.5659999847412109,
+                    "distanceToNearestCorridor": 1.5,
+                    "distanceToBoarding": 7.716000080108643,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                }
+            ],
+            "fourWorkersFit": true,
+            "fourWorkersFitOffCorridor": true,
+            "drop": {
+                "id": "S1-drop",
+                "zone": "Coast",
+                "groundCollider": "Beach_Platform",
+                "note": "nearest dry free cell beyond the work band (<= 10 m), >= 1.31 m off every corridor; rim 1,565 m",
+                "position": {
+                    "x": 7.5,
+                    "y": 8.399999618530274,
+                    "z": -14.5
+                },
+                "onDryWalkSurface": true,
+                "insideSwimVolume": false,
+                "embedded": false,
+                "distanceToBoarding": 10.904000282287598
+            },
+            "corridors": [
+                {
+                    "id": "pier: ledge -> DiveExit -> dock-town-1",
+                    "line": [
+                        {
+                            "x": 9.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -3.9000000953674318
+                        }
+                    ],
+                    "widthBefore": 2.0,
+                    "widthWithSite": 2.0,
+                    "widthWithSiteAndWorkers": 2.0,
+                    "narrowestAt": {
+                        "x": 9.0,
+                        "y": -6.814000129699707
+                    },
+                    "narrowestBetween": "ground ends | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 8.5,
+                    "pathWithSiteAndWorkers": 8.5
+                },
+                {
+                    "id": "ramp: waterline -> DiveExit",
+                    "line": [
+                        {
+                            "x": 6.300000190734863,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        }
+                    ],
+                    "widthBefore": 3.950000047683716,
+                    "widthWithSite": 3.950000047683716,
+                    "widthWithSiteAndWorkers": 3.6530001163482668,
+                    "narrowestAt": {
+                        "x": 6.545000076293945,
+                        "y": -9.0
+                    },
+                    "narrowestBetween": "ground ends | Audit_P188_Worker_S1_3",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.75,
+                    "pathWithSiteAndWorkers": 2.75
+                },
+                {
+                    "id": "wade: waterline -> beach",
+                    "line": [
+                        {
+                            "x": -6.5,
+                            "y": -10.300000190734864
+                        },
+                        {
+                            "x": -6.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 6.0,
+                    "widthWithSite": 6.0,
+                    "widthWithSiteAndWorkers": 6.0,
+                    "narrowestAt": {
+                        "x": -6.5,
+                        "y": -10.788999557495118
+                    },
+                    "narrowestBetween": "ground ends | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.25,
+                    "pathWithSiteAndWorkers": 2.25
+                },
+                {
+                    "id": "gate: street -> beach",
+                    "line": [
+                        {
+                            "x": 0.0,
+                            "y": -18.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 28.0,
+                    "widthWithSite": 15.850000381469727,
+                    "widthWithSiteAndWorkers": 15.399999618530274,
+                    "narrowestAt": {
+                        "x": 0.0,
+                        "y": -14.25
+                    },
+                    "narrowestBetween": "P46_ContinuousTown/Edge_BeachWest | Audit_P188_Worker_S1_1",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 5.5,
+                    "pathWithSiteAndWorkers": 5.5
+                },
+                {
+                    "id": "beach strip: hull part <-> fuel-tank part",
+                    "line": [
+                        {
+                            "x": -12.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 12.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 16.5,
+                    "widthWithSite": 0.0,
+                    "widthWithSiteAndWorkers": 0.0,
+                    "narrowestAt": {
+                        "x": 1.25,
+                        "y": -12.5
+                    },
+                    "narrowestBetween": "blocked by Audit_P188_Wreck_S1",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 24.5,
+                    "pathWithSiteAndWorkers": 26.70199966430664
+                }
+            ],
+            "carries": [
+                {
+                    "id": "S1:boat-part-hull",
+                    "part": "boat-part-hull",
+                    "label": "walk boat-part-hull -> S1 work point 0",
+                    "goal": "(0.5, 8.4, -11.5)",
+                    "start": {
+                        "x": -12.0,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": 0.5,
+                        "y": 8.479999542236329,
+                        "z": -11.5
+                    },
+                    "path": [
+                        {
+                            "x": -12.0,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 0.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        }
+                    ],
+                    "drivenLength": 12.539999961853028,
+                    "landLength": 12.539999961853028,
+                    "swimLength": 0.0,
+                    "simSeconds": 3.140000104904175,
+                    "landSeconds": 3.140000104904175,
+                    "swimSeconds": 0.0,
+                    "straightLine": 12.539999961853028,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 157,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:boat-part-engine:wade",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the wade, walk -> S1 work point 0",
+                    "goal": "(0.5, 8.4, -11.5)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": 0.46000000834465029,
+                        "y": 8.479999542236329,
+                        "z": -11.5
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 7.75,
+                            "z": -10.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": 0.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        }
+                    ],
+                    "drivenLength": 10.704999923706055,
+                    "landLength": 8.29800033569336,
+                    "swimLength": 2.4079999923706056,
+                    "simSeconds": 2.819999933242798,
+                    "landSeconds": 2.0799999237060549,
+                    "swimSeconds": 0.7400000095367432,
+                    "straightLine": 7.826000213623047,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 141,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:boat-part-engine:ramp",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the ramp, walk -> S1 work point 0",
+                    "goal": "(0.5, 8.4, -11.5)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": 0.5,
+                        "y": 8.479999542236329,
+                        "z": -11.529999732971192
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": 5.599999904632568,
+                            "y": 7.75,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 7.25,
+                            "y": 8.399999618530274,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 6.5,
+                            "y": 8.399999618530274,
+                            "z": -14.25
+                        },
+                        {
+                            "x": 0.5,
+                            "y": 8.399999618530274,
+                            "z": -14.25
+                        },
+                        {
+                            "x": 0.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        }
+                    ],
+                    "drivenLength": 27.985000610351564,
+                    "landLength": 15.119999885559082,
+                    "swimLength": 12.864999771118164,
+                    "simSeconds": 8.0,
+                    "landSeconds": 3.7799999713897707,
+                    "swimSeconds": 4.21999979019165,
+                    "straightLine": 7.826000213623047,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 400,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:boat-part-fuel-tank",
+                    "part": "boat-part-fuel-tank",
+                    "label": "walk boat-part-fuel-tank -> S1 work point 0",
+                    "goal": "(0.5, 8.4, -11.5)",
+                    "start": {
+                        "x": 12.5,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": 0.5,
+                        "y": 8.479999542236329,
+                        "z": -11.5
+                    },
+                    "path": [
+                        {
+                            "x": 12.5,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 1.75,
+                            "y": 8.399999618530274,
+                            "z": -15.5
+                        },
+                        {
+                            "x": -0.5,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 0.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        }
+                    ],
+                    "drivenLength": 16.295000076293947,
+                    "landLength": 16.295000076293947,
+                    "swimLength": 0.0,
+                    "simSeconds": 4.079999923706055,
+                    "landSeconds": 4.079999923706055,
+                    "swimSeconds": 0.0,
+                    "straightLine": 12.041999816894532,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 204,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                }
+            ],
+            "dropCarries": [
+                {
+                    "id": "S1:work-0:drop",
+                    "part": "",
+                    "label": "walk S1 work point 0 -> drop (other workers standing)",
+                    "goal": "(7.5, 8.4, -14.5)",
+                    "start": {
+                        "x": 0.5,
+                        "y": 8.399999618530274,
+                        "z": -11.5
+                    },
+                    "end": {
+                        "x": 7.47599983215332,
+                        "y": 8.479999542236329,
+                        "z": -14.52400016784668
+                    },
+                    "path": [
+                        {
+                            "x": 0.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": 0.0,
+                            "y": 8.399999618530274,
+                            "z": -14.75
+                        },
+                        {
+                            "x": 5.5,
+                            "y": 8.399999618530274,
+                            "z": -16.5
+                        },
+                        {
+                            "x": 7.5,
+                            "y": 8.399999618530274,
+                            "z": -14.5
+                        }
+                    ],
+                    "drivenLength": 11.84000015258789,
+                    "landLength": 11.84000015258789,
+                    "swimLength": 0.0,
+                    "simSeconds": 2.9600000381469728,
+                    "landSeconds": 2.9600000381469728,
+                    "swimSeconds": 0.0,
+                    "straightLine": 7.616000175476074,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 148,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:work-1:drop",
+                    "part": "",
+                    "label": "walk S1 work point 1 -> drop (other workers standing)",
+                    "goal": "(7.5, 8.4, -14.5)",
+                    "start": {
+                        "x": 1.0,
+                        "y": 8.399999618530274,
+                        "z": -14.25
+                    },
+                    "end": {
+                        "x": 7.485000133514404,
+                        "y": 8.479999542236329,
+                        "z": -14.515000343322754
+                    },
+                    "path": [
+                        {
+                            "x": 1.0,
+                            "y": 8.399999618530274,
+                            "z": -14.25
+                        },
+                        {
+                            "x": 6.75,
+                            "y": 8.399999618530274,
+                            "z": -15.25
+                        },
+                        {
+                            "x": 7.5,
+                            "y": 8.399999618530274,
+                            "z": -14.5
+                        }
+                    ],
+                    "drivenLength": 6.875999927520752,
+                    "landLength": 6.875999927520752,
+                    "swimLength": 0.0,
+                    "simSeconds": 1.7200000286102296,
+                    "landSeconds": 1.7200000286102296,
+                    "swimSeconds": 0.0,
+                    "straightLine": 6.505000114440918,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 86,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:work-2:drop",
+                    "part": "",
+                    "label": "walk S1 work point 2 -> drop (other workers standing)",
+                    "goal": "(7.5, 8.4, -14.5)",
+                    "start": {
+                        "x": 6.25,
+                        "y": 8.399999618530274,
+                        "z": -14.25
+                    },
+                    "end": {
+                        "x": 7.5,
+                        "y": 8.479999542236329,
+                        "z": -14.5
+                    },
+                    "path": [
+                        {
+                            "x": 6.25,
+                            "y": 8.399999618530274,
+                            "z": -14.25
+                        },
+                        {
+                            "x": 7.5,
+                            "y": 8.399999618530274,
+                            "z": -14.5
+                        }
+                    ],
+                    "drivenLength": 1.274999976158142,
+                    "landLength": 1.274999976158142,
+                    "swimLength": 0.0,
+                    "simSeconds": 0.3199999928474426,
+                    "landSeconds": 0.3199999928474426,
+                    "swimSeconds": 0.0,
+                    "straightLine": 1.274999976158142,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 16,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:work-3:drop",
+                    "part": "",
+                    "label": "walk S1 work point 3 -> drop (other workers standing)",
+                    "goal": "(7.5, 8.4, -14.5)",
+                    "start": {
+                        "x": 6.5,
+                        "y": 8.399999618530274,
+                        "z": -11.0
+                    },
+                    "end": {
+                        "x": 7.488999843597412,
+                        "y": 8.479999542236329,
+                        "z": -14.461000442504883
+                    },
+                    "path": [
+                        {
+                            "x": 6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.0
+                        },
+                        {
+                            "x": 7.5,
+                            "y": 8.399999618530274,
+                            "z": -14.5
+                        }
+                    ],
+                    "drivenLength": 3.5999999046325685,
+                    "landLength": 3.5999999046325685,
+                    "swimLength": 0.0,
+                    "simSeconds": 0.8999999761581421,
+                    "landSeconds": 0.8999999761581421,
+                    "swimSeconds": 0.0,
+                    "straightLine": 3.640000104904175,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 45,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:cradle:drop",
+                    "part": "",
+                    "label": "walk S1 cradle rim -> drop (no workers)",
+                    "goal": "(7.5, 8.4, -14.5)",
+                    "start": {
+                        "x": 3.5,
+                        "y": 8.399999618530274,
+                        "z": -14.25
+                    },
+                    "end": {
+                        "x": 7.492000102996826,
+                        "y": 8.479999542236329,
+                        "z": -14.5
+                    },
+                    "path": [
+                        {
+                            "x": 3.5,
+                            "y": 8.399999618530274,
+                            "z": -14.25
+                        },
+                        {
+                            "x": 7.5,
+                            "y": 8.399999618530274,
+                            "z": -14.5
+                        }
+                    ],
+                    "drivenLength": 4.0,
+                    "landLength": 4.0,
+                    "swimLength": 0.0,
+                    "simSeconds": 1.0,
+                    "landSeconds": 1.0,
+                    "swimSeconds": 0.0,
+                    "straightLine": 4.007999897003174,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 50,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S1:drop:boarding",
+                    "part": "",
+                    "label": "walk S1 drop -> dock-town-1 boarding (workers 1-3 standing)",
+                    "goal": "(9, 8.4, -3.7)",
+                    "start": {
+                        "x": 7.5,
+                        "y": 8.399999618530274,
+                        "z": -14.5
+                    },
+                    "end": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -3.75
+                    },
+                    "path": [
+                        {
+                            "x": 7.5,
+                            "y": 8.399999618530274,
+                            "z": -14.5
+                        },
+                        {
+                            "x": 7.25,
+                            "y": 8.399999618530274,
+                            "z": -10.25
+                        },
+                        {
+                            "x": 8.25,
+                            "y": 8.399999618530274,
+                            "z": -7.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": 8.399999618530274,
+                            "z": -3.75
+                        }
+                    ],
+                    "drivenLength": 10.991999626159668,
+                    "landLength": 10.991999626159668,
+                    "swimLength": 0.0,
+                    "simSeconds": 2.759999990463257,
+                    "landSeconds": 2.759999990463257,
+                    "swimSeconds": 0.0,
+                    "straightLine": 10.854000091552735,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 138,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                }
+            ],
+            "fishWithin8m": 5,
+            "notes": []
+        },
+        {
+            "id": "S2",
+            "label": "beach west, between the hull part and the wade, hull parallel to the shore",
+            "surface": "Beach_Platform",
+            "center": {
+                "x": -2.200000047683716,
+                "y": 8.399999618530274,
+                "z": -12.600000381469727
+            },
+            "yaw": 90.0,
+            "dryFraction": 1.0,
+            "waterFraction": 0.0,
+            "footprint": [
+                {
+                    "x": -4.699999809265137,
+                    "y": -11.399999618530274
+                },
+                {
+                    "x": -4.699999809265137,
+                    "y": -13.800000190734864
+                },
+                {
+                    "x": 0.30000001192092898,
+                    "y": -13.800000190734864
+                },
+                {
+                    "x": 0.30000001192092898,
+                    "y": -11.399999618530274
+                }
+            ],
+            "footprintObstacles": [],
+            "workCells": 252,
+            "workCellsOffCorridor": 157,
+            "waitCells": 804,
+            "waitCellsOffCorridor": 560,
+            "waitAreaOffCorridorM2": 35.0,
+            "workers": [
+                {
+                    "id": "S2-work-0",
+                    "zone": "Coast",
+                    "position": {
+                        "x": -5.25,
+                        "y": 8.399999618530274,
+                        "z": -14.0
+                    },
+                    "distanceToRim": 0.5849999785423279,
+                    "distanceToNearestCorridor": 1.5,
+                    "distanceToBoarding": 17.58300018310547,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                },
+                {
+                    "id": "S2-work-1",
+                    "zone": "Coast",
+                    "position": {
+                        "x": -5.25,
+                        "y": 8.399999618530274,
+                        "z": -11.5
+                    },
+                    "distanceToRim": 0.550000011920929,
+                    "distanceToNearestCorridor": 1.0,
+                    "distanceToBoarding": 16.2450008392334,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                },
+                {
+                    "id": "S2-work-2",
+                    "zone": "Coast",
+                    "position": {
+                        "x": 0.75,
+                        "y": 8.399999618530274,
+                        "z": -11.5
+                    },
+                    "distanceToRim": 0.44999998807907107,
+                    "distanceToNearestCorridor": 1.0,
+                    "distanceToBoarding": 11.354000091552735,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                },
+                {
+                    "id": "S2-work-3",
+                    "zone": "Coast",
+                    "position": {
+                        "x": -4.5,
+                        "y": 8.282999992370606,
+                        "z": -10.75
+                    },
+                    "distanceToRim": 0.6499999761581421,
+                    "distanceToNearestCorridor": 1.75,
+                    "distanceToBoarding": 15.229999542236329,
+                    "nearestCorridor": "beach strip: hull part <-> fuel-tank part"
+                }
+            ],
+            "fourWorkersFit": true,
+            "fourWorkersFitOffCorridor": true,
+            "drop": {
+                "id": "S2-drop",
+                "zone": "Coast",
+                "groundCollider": "Beach_Platform",
+                "note": "nearest dry free cell beyond the work band (<= 10 m), >= 1.31 m off every corridor; rim 1,518 m",
+                "position": {
+                    "x": 1.75,
+                    "y": 8.399999618530274,
+                    "z": -14.25
+                },
+                "onDryWalkSurface": true,
+                "insideSwimVolume": false,
+                "embedded": false,
+                "distanceToBoarding": 12.800999641418457
+            },
+            "corridors": [
+                {
+                    "id": "pier: ledge -> DiveExit -> dock-town-1",
+                    "line": [
+                        {
+                            "x": 9.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -3.9000000953674318
+                        }
+                    ],
+                    "widthBefore": 2.0,
+                    "widthWithSite": 2.0,
+                    "widthWithSiteAndWorkers": 2.0,
+                    "narrowestAt": {
+                        "x": 9.0,
+                        "y": -6.814000129699707
+                    },
+                    "narrowestBetween": "ground ends | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 8.5,
+                    "pathWithSiteAndWorkers": 8.5
+                },
+                {
+                    "id": "ramp: waterline -> DiveExit",
+                    "line": [
+                        {
+                            "x": 6.300000190734863,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        }
+                    ],
+                    "widthBefore": 3.950000047683716,
+                    "widthWithSite": 3.950000047683716,
+                    "widthWithSiteAndWorkers": 3.950000047683716,
+                    "narrowestAt": {
+                        "x": 6.300000190734863,
+                        "y": -9.0
+                    },
+                    "narrowestBetween": "ground ends | step",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.75,
+                    "pathWithSiteAndWorkers": 2.75
+                },
+                {
+                    "id": "wade: waterline -> beach",
+                    "line": [
+                        {
+                            "x": -6.5,
+                            "y": -10.300000190734864
+                        },
+                        {
+                            "x": -6.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 6.0,
+                    "widthWithSite": 6.0,
+                    "widthWithSiteAndWorkers": 4.6519999504089359,
+                    "narrowestAt": {
+                        "x": -6.5,
+                        "y": -10.788999557495118
+                    },
+                    "narrowestBetween": "Audit_P188_Worker_S2_3 | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.25,
+                    "pathWithSiteAndWorkers": 2.25
+                },
+                {
+                    "id": "gate: street -> beach",
+                    "line": [
+                        {
+                            "x": 0.0,
+                            "y": -18.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 28.0,
+                    "widthWithSite": 0.0,
+                    "widthWithSiteAndWorkers": 0.0,
+                    "narrowestAt": {
+                        "x": 0.0,
+                        "y": -13.75
+                    },
+                    "narrowestBetween": "blocked by Audit_P188_Wreck_S2",
+                    "stillPassable": false,
+                    "endpointsFreeWithWorkers": false,
+                    "pathBefore": 5.5,
+                    "pathWithSiteAndWorkers": 5.565999984741211
+                },
+                {
+                    "id": "beach strip: hull part <-> fuel-tank part",
+                    "line": [
+                        {
+                            "x": -12.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 12.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 16.5,
+                    "widthWithSite": 0.0,
+                    "widthWithSiteAndWorkers": 0.0,
+                    "narrowestAt": {
+                        "x": -4.5,
+                        "y": -12.5
+                    },
+                    "narrowestBetween": "blocked by Audit_P188_Wreck_S2",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 24.5,
+                    "pathWithSiteAndWorkers": 28.329999923706056
+                }
+            ],
+            "carries": [
+                {
+                    "id": "S2:boat-part-hull",
+                    "part": "boat-part-hull",
+                    "label": "walk boat-part-hull -> S2 work point 0",
+                    "goal": "(-5.25, 8.4, -14)",
+                    "start": {
+                        "x": -12.0,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": -5.283999919891357,
+                        "y": 8.479999542236329,
+                        "z": -13.991999626159668
+                    },
+                    "path": [
+                        {
+                            "x": -12.0,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": -5.25,
+                            "y": 8.399999618530274,
+                            "z": -14.0
+                        }
+                    ],
+                    "drivenLength": 6.880000114440918,
+                    "landLength": 6.880000114440918,
+                    "swimLength": 0.0,
+                    "simSeconds": 1.7200000286102296,
+                    "landSeconds": 1.7200000286102296,
+                    "swimSeconds": 0.0,
+                    "straightLine": 6.914999961853027,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 86,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S2:boat-part-engine:wade",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the wade, walk -> S2 work point 0",
+                    "goal": "(-5.25, 8.4, -14)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": -5.25,
+                        "y": 8.479999542236329,
+                        "z": -14.0
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 7.75,
+                            "z": -10.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": -5.25,
+                            "y": 8.399999618530274,
+                            "z": -14.0
+                        }
+                    ],
+                    "drivenLength": 6.539999961853027,
+                    "landLength": 4.132999897003174,
+                    "swimLength": 2.4079999923706056,
+                    "simSeconds": 1.7799999713897706,
+                    "landSeconds": 1.0399999618530274,
+                    "swimSeconds": 0.7400000095367432,
+                    "straightLine": 6.129000186920166,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 89,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S2:boat-part-engine:ramp",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the ramp, walk -> S2 work point 0",
+                    "goal": "(-5.25, 8.4, -14)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": -5.25,
+                        "y": 8.479999542236329,
+                        "z": -14.0
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": 5.599999904632568,
+                            "y": 7.75,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 7.25,
+                            "y": 8.399999618530274,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 6.25,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": -3.25,
+                            "y": 8.399999618530274,
+                            "z": -16.25
+                        },
+                        {
+                            "x": -5.25,
+                            "y": 8.399999618530274,
+                            "z": -14.0
+                        }
+                    ],
+                    "drivenLength": 30.280000686645509,
+                    "landLength": 17.415000915527345,
+                    "swimLength": 12.864999771118164,
+                    "simSeconds": 8.579999923706055,
+                    "landSeconds": 4.360000133514404,
+                    "swimSeconds": 4.21999979019165,
+                    "straightLine": 6.129000186920166,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 429,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S2:boat-part-fuel-tank",
+                    "part": "boat-part-fuel-tank",
+                    "label": "walk boat-part-fuel-tank -> S2 work point 0",
+                    "goal": "(-5.25, 8.4, -14)",
+                    "start": {
+                        "x": 12.5,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": -5.25,
+                        "y": 8.479999542236329,
+                        "z": -14.0
+                    },
+                    "path": [
+                        {
+                            "x": 12.5,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": -4.5,
+                            "y": 8.399999618530274,
+                            "z": -15.0
+                        },
+                        {
+                            "x": -5.25,
+                            "y": 8.399999618530274,
+                            "z": -14.0
+                        }
+                    ],
+                    "drivenLength": 18.433000564575197,
+                    "landLength": 18.433000564575197,
+                    "swimLength": 0.0,
+                    "simSeconds": 4.619999885559082,
+                    "landSeconds": 4.619999885559082,
+                    "swimSeconds": 0.0,
+                    "straightLine": 17.812999725341798,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 231,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                }
+            ],
+            "dropCarries": [],
+            "fishWithin8m": 6,
+            "notes": []
+        },
+        {
+            "id": "S3",
+            "label": "street plaza east of the gate line (dry, off the beach strip)",
+            "surface": "CoastWalk, MainStreet",
+            "center": {
+                "x": 5.5,
+                "y": 8.399999618530274,
+                "z": -19.0
+            },
+            "yaw": 90.0,
+            "dryFraction": 1.0,
+            "waterFraction": 0.0,
+            "footprint": [
+                {
+                    "x": 3.0,
+                    "y": -17.799999237060548
+                },
+                {
+                    "x": 3.0,
+                    "y": -20.200000762939454
+                },
+                {
+                    "x": 8.0,
+                    "y": -20.200000762939454
+                },
+                {
+                    "x": 8.0,
+                    "y": -17.799999237060548
+                }
+            ],
+            "footprintObstacles": [],
+            "workCells": 354,
+            "workCellsOffCorridor": 354,
+            "waitCells": 1284,
+            "waitCellsOffCorridor": 1188,
+            "waitAreaOffCorridorM2": 74.25,
+            "workers": [
+                {
+                    "id": "S3-work-0",
+                    "zone": "Town",
+                    "position": {
+                        "x": 2.5,
+                        "y": 8.399999618530274,
+                        "z": -20.5
+                    },
+                    "distanceToRim": 0.5830000042915344,
+                    "distanceToNearestCorridor": 3.5360000133514406,
+                    "distanceToBoarding": 18.013999938964845,
+                    "nearestCorridor": "gate: street -> beach"
+                },
+                {
+                    "id": "S3-work-1",
+                    "zone": "Town",
+                    "position": {
+                        "x": 2.5,
+                        "y": 8.399999618530274,
+                        "z": -19.25
+                    },
+                    "distanceToRim": 0.5,
+                    "distanceToNearestCorridor": 2.7950000762939455,
+                    "distanceToBoarding": 16.854000091552736,
+                    "nearestCorridor": "gate: street -> beach"
+                },
+                {
+                    "id": "S3-work-2",
+                    "zone": "Town",
+                    "position": {
+                        "x": 2.5,
+                        "y": 8.399999618530274,
+                        "z": -18.0
+                    },
+                    "distanceToRim": 0.5,
+                    "distanceToNearestCorridor": 2.5,
+                    "distanceToBoarding": 15.708000183105469,
+                    "nearestCorridor": "gate: street -> beach"
+                },
+                {
+                    "id": "S3-work-3",
+                    "zone": "Town",
+                    "position": {
+                        "x": 3.25,
+                        "y": 8.399999618530274,
+                        "z": -17.25
+                    },
+                    "distanceToRim": 0.550000011920929,
+                    "distanceToNearestCorridor": 3.25,
+                    "distanceToBoarding": 14.720000267028809,
+                    "nearestCorridor": "gate: street -> beach"
+                }
+            ],
+            "fourWorkersFit": true,
+            "fourWorkersFitOffCorridor": true,
+            "drop": {
+                "id": "S3-drop",
+                "zone": "Town",
+                "groundCollider": "P46_ContinuousTown/CoastWalk",
+                "note": "nearest dry free cell beyond the work band (<= 10 m), >= 1.31 m off every corridor; rim 1,501 m",
+                "position": {
+                    "x": 2.25,
+                    "y": 8.399999618530274,
+                    "z": -16.5
+                },
+                "onDryWalkSurface": true,
+                "insideSwimVolume": false,
+                "embedded": false,
+                "distanceToBoarding": 14.470999717712403
+            },
+            "corridors": [
+                {
+                    "id": "pier: ledge -> DiveExit -> dock-town-1",
+                    "line": [
+                        {
+                            "x": 9.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -3.9000000953674318
+                        }
+                    ],
+                    "widthBefore": 2.0,
+                    "widthWithSite": 2.0,
+                    "widthWithSiteAndWorkers": 2.0,
+                    "narrowestAt": {
+                        "x": 9.0,
+                        "y": -6.814000129699707
+                    },
+                    "narrowestBetween": "ground ends | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 8.5,
+                    "pathWithSiteAndWorkers": 8.5
+                },
+                {
+                    "id": "ramp: waterline -> DiveExit",
+                    "line": [
+                        {
+                            "x": 6.300000190734863,
+                            "y": -9.0
+                        },
+                        {
+                            "x": 9.0,
+                            "y": -9.0
+                        }
+                    ],
+                    "widthBefore": 3.950000047683716,
+                    "widthWithSite": 3.950000047683716,
+                    "widthWithSiteAndWorkers": 3.950000047683716,
+                    "narrowestAt": {
+                        "x": 6.300000190734863,
+                        "y": -9.0
+                    },
+                    "narrowestBetween": "ground ends | step",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.75,
+                    "pathWithSiteAndWorkers": 2.75
+                },
+                {
+                    "id": "wade: waterline -> beach",
+                    "line": [
+                        {
+                            "x": -6.5,
+                            "y": -10.300000190734864
+                        },
+                        {
+                            "x": -6.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 6.0,
+                    "widthWithSite": 6.0,
+                    "widthWithSiteAndWorkers": 6.0,
+                    "narrowestAt": {
+                        "x": -6.5,
+                        "y": -10.788999557495118
+                    },
+                    "narrowestBetween": "ground ends | ground ends",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 2.25,
+                    "pathWithSiteAndWorkers": 2.25
+                },
+                {
+                    "id": "gate: street -> beach",
+                    "line": [
+                        {
+                            "x": 0.0,
+                            "y": -18.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 28.0,
+                    "widthWithSite": 16.950000762939454,
+                    "widthWithSiteAndWorkers": 16.149999618530275,
+                    "narrowestAt": {
+                        "x": 0.0,
+                        "y": -18.0
+                    },
+                    "narrowestBetween": "P46_ContinuousTown/Edge_TownWest | Audit_P188_Worker_S3_2",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 5.5,
+                    "pathWithSiteAndWorkers": 5.5
+                },
+                {
+                    "id": "beach strip: hull part <-> fuel-tank part",
+                    "line": [
+                        {
+                            "x": -12.0,
+                            "y": -12.5
+                        },
+                        {
+                            "x": 12.5,
+                            "y": -12.5
+                        }
+                    ],
+                    "widthBefore": 16.5,
+                    "widthWithSite": 6.800000190734863,
+                    "widthWithSiteAndWorkers": 5.900000095367432,
+                    "narrowestAt": {
+                        "x": 3.25,
+                        "y": -12.5
+                    },
+                    "narrowestBetween": "step | Audit_P188_Worker_S3_3",
+                    "stillPassable": true,
+                    "endpointsFreeWithWorkers": true,
+                    "pathBefore": 24.5,
+                    "pathWithSiteAndWorkers": 25.886999130249025
+                }
+            ],
+            "carries": [
+                {
+                    "id": "S3:boat-part-hull",
+                    "part": "boat-part-hull",
+                    "label": "walk boat-part-hull -> S3 work point 0",
+                    "goal": "(2.5, 8.4, -20.5)",
+                    "start": {
+                        "x": -12.0,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": 2.5,
+                        "y": 8.479999542236329,
+                        "z": -20.5
+                    },
+                    "path": [
+                        {
+                            "x": -12.0,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 2.5,
+                            "y": 8.399999618530274,
+                            "z": -20.5
+                        }
+                    ],
+                    "drivenLength": 16.559999465942384,
+                    "landLength": 16.559999465942384,
+                    "swimLength": 0.0,
+                    "simSeconds": 4.139999866485596,
+                    "landSeconds": 4.139999866485596,
+                    "swimSeconds": 0.0,
+                    "straightLine": 16.559999465942384,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 207,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                },
+                {
+                    "id": "S3:boat-part-engine:wade",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the wade, walk -> S3 work point 0",
+                    "goal": "(2.5, 8.4, -20.5)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": 2.49399995803833,
+                        "y": 8.479999542236329,
+                        "z": -20.493999481201173
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 7.75,
+                            "z": -10.0
+                        },
+                        {
+                            "x": -6.5,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": 2.5,
+                            "y": 8.399999618530274,
+                            "z": -20.5
+                        }
+                    ],
+                    "drivenLength": 16.46500015258789,
+                    "landLength": 14.057999610900879,
+                    "swimLength": 2.4079999923706056,
+                    "simSeconds": 4.260000228881836,
+                    "landSeconds": 3.5199999809265138,
+                    "swimSeconds": 0.7400000095367432,
+                    "straightLine": 15.402999877929688,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 213,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S3:boat-part-engine:ramp",
+                    "part": "boat-part-engine",
+                    "label": "swim boat-part-engine ashore via the ramp, walk -> S3 work point 0",
+                    "goal": "(2.5, 8.4, -20.5)",
+                    "start": {
+                        "x": -6.5,
+                        "y": 7.000999927520752,
+                        "z": -8.0
+                    },
+                    "end": {
+                        "x": 2.494999885559082,
+                        "y": 8.479999542236329,
+                        "z": -20.4950008392334
+                    },
+                    "path": [
+                        {
+                            "x": -6.5,
+                            "y": 7.000999927520752,
+                            "z": -8.0
+                        },
+                        {
+                            "x": 5.599999904632568,
+                            "y": 7.75,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 7.25,
+                            "y": 8.399999618530274,
+                            "z": -9.0
+                        },
+                        {
+                            "x": 6.25,
+                            "y": 8.399999618530274,
+                            "z": -11.5
+                        },
+                        {
+                            "x": 1.25,
+                            "y": 8.399999618530274,
+                            "z": -19.25
+                        },
+                        {
+                            "x": 2.5,
+                            "y": 8.399999618530274,
+                            "z": -20.5
+                        }
+                    ],
+                    "drivenLength": 27.6560001373291,
+                    "landLength": 14.791000366210938,
+                    "swimLength": 12.864999771118164,
+                    "simSeconds": 7.920000076293945,
+                    "landSeconds": 3.700000047683716,
+                    "swimSeconds": 4.21999979019165,
+                    "straightLine": 15.402999877929688,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 396,
+                    "blockedFrames": 0,
+                    "waterTransitions": 1,
+                    "modes": "surface > walk",
+                    "failures": []
+                },
+                {
+                    "id": "S3:boat-part-fuel-tank",
+                    "part": "boat-part-fuel-tank",
+                    "label": "walk boat-part-fuel-tank -> S3 work point 0",
+                    "goal": "(2.5, 8.4, -20.5)",
+                    "start": {
+                        "x": 12.5,
+                        "y": 8.399999618530274,
+                        "z": -12.5
+                    },
+                    "end": {
+                        "x": 2.5,
+                        "y": 8.479999542236329,
+                        "z": -20.5
+                    },
+                    "path": [
+                        {
+                            "x": 12.5,
+                            "y": 8.399999618530274,
+                            "z": -12.5
+                        },
+                        {
+                            "x": 2.0,
+                            "y": 8.399999618530274,
+                            "z": -17.75
+                        },
+                        {
+                            "x": 2.5,
+                            "y": 8.399999618530274,
+                            "z": -20.5
+                        }
+                    ],
+                    "drivenLength": 14.534000396728516,
+                    "landLength": 14.534000396728516,
+                    "swimLength": 0.0,
+                    "simSeconds": 3.640000104904175,
+                    "landSeconds": 3.640000104904175,
+                    "swimSeconds": 0.0,
+                    "straightLine": 12.805999755859375,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "frames": 182,
+                    "blockedFrames": 0,
+                    "waterTransitions": 0,
+                    "modes": "walk",
+                    "failures": []
+                }
+            ],
+            "dropCarries": [],
+            "fishWithin8m": 0,
+            "notes": []
+        }
+    ],
+    "sightlines": [
+        {
+            "from": "home door",
+            "target": "part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 31.56999969482422,
+            "horizontalAngle": -22.340999603271486,
+            "verticalAngle": -2.811000108718872,
+            "projectedHeightPx1080": 17.7549991607666,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 0.0,
+            "distance": 34.32099914550781,
+            "horizontalAngle": -10.916999816894532,
+            "verticalAngle": -4.910999774932861,
+            "projectedHeightPx1080": 16.291000366210939,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "Storefront/Counter"
+        },
+        {
+            "from": "home door",
+            "target": "part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 31.76300048828125,
+            "horizontalAngle": 23.174999237060548,
+            "verticalAngle": -2.7939999103546144,
+            "projectedHeightPx1080": 17.64699935913086,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "site S0 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.449999809265137,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 0.0,
+            "distance": 42.26900100708008,
+            "horizontalAngle": 12.293999671936036,
+            "verticalAngle": -2.0320000648498537,
+            "projectedHeightPx1080": 19.902000427246095,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "site S0 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -7.25
+            },
+            "headingYaw": 0.0,
+            "distance": 35.25699996948242,
+            "horizontalAngle": 12.281999588012696,
+            "verticalAngle": -1.8680000305175782,
+            "projectedHeightPx1080": 21.211000442504884,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "site S1 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 3.5999999046325685,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 0.0,
+            "distance": 29.32200050354004,
+            "horizontalAngle": 7.052000045776367,
+            "verticalAngle": -2.1480000019073488,
+            "projectedHeightPx1080": 28.687999725341798,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "site S1 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -14.5
+            },
+            "headingYaw": 0.0,
+            "distance": 28.21500015258789,
+            "horizontalAngle": 15.414999961853028,
+            "verticalAngle": -2.3340001106262209,
+            "projectedHeightPx1080": 26.496999740600587,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "Npc_buyer-recording/Body"
+        },
+        {
+            "from": "home door",
+            "target": "site S2 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": -2.200000047683716,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 0.0,
+            "distance": 29.183000564575197,
+            "horizontalAngle": -4.322999954223633,
+            "verticalAngle": -2.1589999198913576,
+            "projectedHeightPx1080": 28.823999404907228,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "site S2 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 1.75,
+                "y": 8.800000190734864,
+                "z": -14.25
+            },
+            "headingYaw": 0.0,
+            "distance": 27.506000518798829,
+            "horizontalAngle": 3.6480000019073488,
+            "verticalAngle": -2.3940000534057619,
+            "projectedHeightPx1080": 27.18000030517578,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "home door",
+            "target": "site S3 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 5.5,
+                "y": 8.850000381469727,
+                "z": -19.0
+            },
+            "headingYaw": 0.0,
+            "distance": 23.35700035095215,
+            "horizontalAngle": 13.619999885559082,
+            "verticalAngle": -2.696000099182129,
+            "projectedHeightPx1080": 36.0,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "Npc_buyer-recording/Body"
+        },
+        {
+            "from": "home door",
+            "target": "site S3 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -41.70000076293945
+            },
+            "targetPoint": {
+                "x": 2.25,
+                "y": 8.800000190734864,
+                "z": -16.5
+            },
+            "headingYaw": 0.0,
+            "distance": 25.299999237060548,
+            "horizontalAngle": 5.1020002365112309,
+            "verticalAngle": -2.6029999256134035,
+            "projectedHeightPx1080": 29.54400062561035,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 20.402000427246095,
+            "horizontalAngle": -36.027000427246097,
+            "verticalAngle": -4.34499979019165,
+            "projectedHeightPx1080": 27.427000045776368,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 0.0,
+            "distance": 21.982999801635743,
+            "horizontalAngle": -17.198999404907228,
+            "verticalAngle": -7.639999866485596,
+            "projectedHeightPx1080": 25.302000045776368,
+            "lineOfSight": false,
+            "inViewAtHeading": true,
+            "blocker": "P46_ContinuousTown/MainStreet"
+        },
+        {
+            "from": "town square",
+            "target": "part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 20.700000762939454,
+            "horizontalAngle": 37.14699935913086,
+            "verticalAngle": -4.2820000648498539,
+            "projectedHeightPx1080": 27.034000396728517,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S0 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.449999809265137,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 0.0,
+            "distance": 29.982999801635743,
+            "horizontalAngle": 17.468000411987306,
+            "verticalAngle": -2.864000082015991,
+            "projectedHeightPx1080": 28.040000915527345,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S0 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -7.25
+            },
+            "headingYaw": 0.0,
+            "distance": 23.006999969482423,
+            "horizontalAngle": 19.025999069213868,
+            "verticalAngle": -2.861999988555908,
+            "projectedHeightPx1080": 32.481998443603519,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S1 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 3.5999999046325685,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 0.0,
+            "distance": 16.790000915527345,
+            "horizontalAngle": 12.380999565124512,
+            "verticalAngle": -3.747999906539917,
+            "projectedHeightPx1080": 50.027000427246097,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S1 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -14.5
+            },
+            "headingYaw": 0.0,
+            "distance": 16.325000762939454,
+            "horizontalAngle": 27.350000381469728,
+            "verticalAngle": -4.03000020980835,
+            "projectedHeightPx1080": 45.72200012207031,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S2 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": -2.200000047683716,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 0.0,
+            "distance": 16.547000885009767,
+            "horizontalAngle": -7.639999866485596,
+            "verticalAngle": -3.802999973297119,
+            "projectedHeightPx1080": 50.7599983215332,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S2 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 1.75,
+                "y": 8.800000190734864,
+                "z": -14.25
+            },
+            "headingYaw": 0.0,
+            "distance": 14.852999687194825,
+            "horizontalAngle": 6.765999794006348,
+            "verticalAngle": -4.427000045776367,
+            "projectedHeightPx1080": 50.224998474121097,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S3 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 5.5,
+                "y": 8.850000381469727,
+                "z": -19.0
+            },
+            "headingYaw": 0.0,
+            "distance": 11.413000106811524,
+            "horizontalAngle": 28.81100082397461,
+            "verticalAngle": -5.505000114440918,
+            "projectedHeightPx1080": 73.41799926757813,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "town square",
+            "target": "site S3 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -29.0
+            },
+            "targetPoint": {
+                "x": 2.25,
+                "y": 8.800000190734864,
+                "z": -16.5
+            },
+            "headingYaw": 0.0,
+            "distance": 12.701000213623047,
+            "horizontalAngle": 10.204000473022461,
+            "verticalAngle": -5.173999786376953,
+            "projectedHeightPx1080": 58.67300033569336,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 12.0,
+            "horizontalAngle": -90.0,
+            "verticalAngle": -7.360000133514404,
+            "projectedHeightPx1080": 46.380001068115237,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 0.0,
+            "distance": 7.906000137329102,
+            "horizontalAngle": -55.30500030517578,
+            "verticalAngle": -20.45599937438965,
+            "projectedHeightPx1080": 66.50900268554688,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 0.0,
+            "distance": 12.5,
+            "horizontalAngle": 90.0,
+            "verticalAngle": -7.068999767303467,
+            "projectedHeightPx1080": 44.55400085449219,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S0 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.449999809265137,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 0.0,
+            "distance": 15.079999923706055,
+            "horizontalAngle": 36.641998291015628,
+            "verticalAngle": -5.679999828338623,
+            "projectedHeightPx1080": 55.54600143432617,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S0 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -7.25
+            },
+            "headingYaw": 0.0,
+            "distance": 9.154999732971192,
+            "horizontalAngle": 55.007999420166019,
+            "verticalAngle": -7.159999847412109,
+            "projectedHeightPx1080": 81.09400177001953,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S1 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 3.5999999046325685,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 0.0,
+            "distance": 3.6010000705718996,
+            "horizontalAngle": 91.59100341796875,
+            "verticalAngle": -16.985000610351564,
+            "projectedHeightPx1080": 223.54200744628907,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S1 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -14.5
+            },
+            "headingYaw": 0.0,
+            "distance": 7.76200008392334,
+            "horizontalAngle": 104.93099975585938,
+            "verticalAngle": -8.427000045776368,
+            "projectedHeightPx1080": 95.35700225830078,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S2 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -2.200000047683716,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 0.0,
+            "distance": 2.2019999027252199,
+            "horizontalAngle": -92.60299682617188,
+            "verticalAngle": -26.541000366210939,
+            "projectedHeightPx1080": 341.947998046875,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S2 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 1.75,
+                "y": 8.800000190734864,
+                "z": -14.25
+            },
+            "headingYaw": 0.0,
+            "distance": 2.4749999046325685,
+            "horizontalAngle": 135.0,
+            "verticalAngle": -24.92300033569336,
+            "projectedHeightPx1080": 274.1820068359375,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S3 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 5.5,
+                "y": 8.850000381469727,
+                "z": -19.0
+            },
+            "headingYaw": 0.0,
+            "distance": 8.515000343322754,
+            "horizontalAngle": 139.76400756835938,
+            "verticalAngle": -7.361000061035156,
+            "projectedHeightPx1080": 98.0469970703125,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle)",
+            "target": "site S3 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 2.25,
+                "y": 8.800000190734864,
+                "z": -16.5
+            },
+            "headingYaw": 0.0,
+            "distance": 4.589000225067139,
+            "horizontalAngle": 150.64199829101563,
+            "verticalAngle": -14.067000389099121,
+            "projectedHeightPx1080": 158.1490020751953,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "part boat-part-hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 90.0,
+            "distance": 12.0,
+            "horizontalAngle": -180.0,
+            "verticalAngle": -7.360000133514404,
+            "projectedHeightPx1080": 46.380001068115237,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "part boat-part-engine",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 90.0,
+            "distance": 7.906000137329102,
+            "horizontalAngle": -145.30499267578126,
+            "verticalAngle": -20.45599937438965,
+            "projectedHeightPx1080": 66.50900268554688,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "part boat-part-fuel-tank",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 90.0,
+            "distance": 12.5,
+            "horizontalAngle": 0.0,
+            "verticalAngle": -7.068999767303467,
+            "projectedHeightPx1080": 44.55400085449219,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S0 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.449999809265137,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 90.0,
+            "distance": 15.079999923706055,
+            "horizontalAngle": -53.358001708984378,
+            "verticalAngle": -5.679999828338623,
+            "projectedHeightPx1080": 55.54600143432617,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S0 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -7.25
+            },
+            "headingYaw": 90.0,
+            "distance": 9.154999732971192,
+            "horizontalAngle": -34.992000579833987,
+            "verticalAngle": -7.159999847412109,
+            "projectedHeightPx1080": 81.09400177001953,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S1 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 3.5999999046325685,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 90.0,
+            "distance": 3.6010000705718996,
+            "horizontalAngle": 1.590999960899353,
+            "verticalAngle": -16.985000610351564,
+            "projectedHeightPx1080": 223.54200744628907,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S1 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -14.5
+            },
+            "headingYaw": 90.0,
+            "distance": 7.76200008392334,
+            "horizontalAngle": 14.930999755859375,
+            "verticalAngle": -8.427000045776368,
+            "projectedHeightPx1080": 95.35700225830078,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S2 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": -2.200000047683716,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 90.0,
+            "distance": 2.2019999027252199,
+            "horizontalAngle": 177.39700317382813,
+            "verticalAngle": -26.541000366210939,
+            "projectedHeightPx1080": 341.947998046875,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S2 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 1.75,
+                "y": 8.800000190734864,
+                "z": -14.25
+            },
+            "headingYaw": 90.0,
+            "distance": 2.4749999046325685,
+            "horizontalAngle": 45.0,
+            "verticalAngle": -24.92300033569336,
+            "projectedHeightPx1080": 274.1820068359375,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S3 hull",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 5.5,
+                "y": 8.850000381469727,
+                "z": -19.0
+            },
+            "headingYaw": 90.0,
+            "distance": 8.515000343322754,
+            "horizontalAngle": 49.763999938964847,
+            "verticalAngle": -7.361000061035156,
+            "projectedHeightPx1080": 98.0469970703125,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "beach (middle) facing east",
+            "target": "site S3 drop",
+            "eye": {
+                "x": 0.0,
+                "y": 9.949999809265137,
+                "z": -12.5
+            },
+            "targetPoint": {
+                "x": 2.25,
+                "y": 8.800000190734864,
+                "z": -16.5
+            },
+            "headingYaw": 90.0,
+            "distance": 4.589000225067139,
+            "horizontalAngle": 60.641998291015628,
+            "verticalAngle": -14.067000389099121,
+            "projectedHeightPx1080": 158.1490020751953,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "part boat-part-hull",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -12.0,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 180.0,
+            "distance": 22.472000122070314,
+            "horizontalAngle": 69.14600372314453,
+            "verticalAngle": -3.946000099182129,
+            "projectedHeightPx1080": 24.913000106811525,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "part boat-part-engine",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -6.5,
+                "y": 7.000999927520752,
+                "z": -8.0
+            },
+            "headingYaw": 180.0,
+            "distance": 15.890000343322754,
+            "horizontalAngle": 77.2760009765625,
+            "verticalAngle": -10.512999534606934,
+            "projectedHeightPx1080": 34.722999572753909,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "part boat-part-fuel-tank",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 12.5,
+                "y": 8.399999618530274,
+                "z": -12.5
+            },
+            "headingYaw": 180.0,
+            "distance": 8.732000350952149,
+            "horizontalAngle": -23.628999710083009,
+            "verticalAngle": -10.0649995803833,
+            "projectedHeightPx1080": 63.27799987792969,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S0 hull",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 9.0,
+                "y": 8.449999809265137,
+                "z": -0.4000000059604645
+            },
+            "headingYaw": 180.0,
+            "distance": 4.099999904632568,
+            "horizontalAngle": 180.0,
+            "verticalAngle": -20.094999313354493,
+            "projectedHeightPx1080": 192.81300354003907,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S0 drop",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -7.25
+            },
+            "headingYaw": 180.0,
+            "distance": 3.131999969482422,
+            "horizontalAngle": 28.610000610351564,
+            "verticalAngle": -20.159000396728517,
+            "projectedHeightPx1080": 224.23300170898438,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S1 hull",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 3.5999999046325685,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 180.0,
+            "distance": 9.734999656677246,
+            "horizontalAngle": 33.689998626708987,
+            "verticalAngle": -6.447000026702881,
+            "projectedHeightPx1080": 85.9219970703125,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S1 drop",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 7.5,
+                "y": 8.800000190734864,
+                "z": -14.5
+            },
+            "headingYaw": 180.0,
+            "distance": 10.112000465393067,
+            "horizontalAngle": 8.531000137329102,
+            "verticalAngle": -6.48799991607666,
+            "projectedHeightPx1080": 73.52300262451172,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S2 hull",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": -2.200000047683716,
+                "y": 8.850000381469727,
+                "z": -12.600000381469727
+            },
+            "headingYaw": 180.0,
+            "distance": 13.821999549865723,
+            "horizontalAngle": 54.125,
+            "verticalAngle": -4.550000190734863,
+            "projectedHeightPx1080": 60.70899963378906,
+            "lineOfSight": true,
+            "inViewAtHeading": false,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S2 drop",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 1.75,
+                "y": 8.800000190734864,
+                "z": -14.25
+            },
+            "headingYaw": 180.0,
+            "distance": 12.149999618530274,
+            "horizontalAngle": 36.63399887084961,
+            "verticalAngle": -5.4070000648498539,
+            "projectedHeightPx1080": 61.310001373291019,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S3 hull",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 5.5,
+                "y": 8.850000381469727,
+                "z": -19.0
+            },
+            "headingYaw": 180.0,
+            "distance": 14.916000366210938,
+            "horizontalAngle": 13.569999694824219,
+            "verticalAngle": -4.2179999351501469,
+            "projectedHeightPx1080": 56.279998779296878,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        },
+        {
+            "from": "pier",
+            "target": "site S3 drop",
+            "eye": {
+                "x": 9.0,
+                "y": 9.949999809265137,
+                "z": -4.5
+            },
+            "targetPoint": {
+                "x": 2.25,
+                "y": 8.800000190734864,
+                "z": -16.5
+            },
+            "headingYaw": 180.0,
+            "distance": 13.767999649047852,
+            "horizontalAngle": 29.357999801635743,
+            "verticalAngle": -4.775000095367432,
+            "projectedHeightPx1080": 54.15700149536133,
+            "lineOfSight": true,
+            "inViewAtHeading": true,
+            "blocker": ""
+        }
+    ],
+    "notMeasured": [
+        "real 1/2/4-process walks, same-part races, late join, network latency, build frame time (issue #188 item 7)",
+        "carry speed: no carry slowdown exists in integration or PR #190, so carrying = walkSpeed/swimSpeed",
+        "swim legs use WaterField's own tracker (deadband) with swimSpeed and fins level 0; current drift is not applied",
+        "fog/day-night readability: sight lines are geometric only (no fog, light or contrast)",
+        "candidate sites S1-S3 are temporary 2.4 x 0.9 x 5 m solid boxes (conservative: PR #190's worksite is collider-less)",
+        "workers are temporary capsules of the real radius at fixed points; real crowding/animation not simulated"
+    ]
+}
