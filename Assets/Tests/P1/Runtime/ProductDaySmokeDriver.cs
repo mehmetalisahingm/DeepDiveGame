@@ -69,6 +69,7 @@ namespace DeepDive.P1.Lab
         private bool cancelSent;
         private bool cancelObserved;
         private ulong repairObservedRequest;
+        private FishActor recordingFish;
         private static string Arg(string key, string fallback = "")
         {
             var args = Environment.GetCommandLineArgs(); var index = Array.IndexOf(args, key);
@@ -459,10 +460,19 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 substep = 1;
             }
-            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.IsSpawned && !f.IsDead);
+            if(recordingFish==null || !recordingFish.IsSpawned || recordingFish.IsDead ||
+                (!bridge.IsRecordingLocal && !ClearFishLine(recordingFish)))
+                recordingFish=FindObjectsByType<FishActor>(FindObjectsSortMode.None)
+                    .Where(f=>f.IsSpawned && !f.IsDead && ClearFishLine(f))
+                    .OrderBy(f=>(f.transform.position-local.RecordingEyePosition).sqrMagnitude).FirstOrDefault();
+            var fish=recordingFish;
             if (fish == null) { Stop(); return; }
             var delta = fish.transform.position - local.RecordingEyePosition;
-            if (delta.magnitude > 4.5f) { MoveToward(fish.transform.position - Vector3.up * 1.4f); aimAt = 0; return; }
+            if (delta.magnitude > 4.5f)
+            {
+                var stand=fish.transform.position-Vector3.up*1.4f;stand.y=Mathf.Max(.1f,stand.y);
+                MoveToward(stand);aimAt=0;return;
+            }
             Aim(fish.transform.position);
             if (bridge.IsRecordingLocal)
             {
@@ -471,6 +481,9 @@ namespace DeepDive.P1.Lab
             }
             else if (Settled()) { recordingAt = 0; Act(bridge.ToggleRecordingLocal); }
         }
+        private bool ClearFishLine(FishActor fish) =>
+            !Physics.Linecast(local.RecordingEyePosition,fish.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
+            blocker.collider.GetComponentInParent<FishActor>()==fish;
         private void HoldForShore()
         {
             var stand = new Vector3(-7.6f, 5.5f, -5f);
