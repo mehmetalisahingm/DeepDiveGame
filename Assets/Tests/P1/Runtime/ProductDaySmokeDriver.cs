@@ -283,7 +283,11 @@ namespace DeepDive.P1.Lab
             var names = new[] { "BoatPart_Hull", "BoatPart_Engine", "BoatPart_FuelTank" };
             if (part >= names.Length) { localDone = sync.BoatPartsDone.Value == 3; return; }
             if ((sync.BoatPartsMask.Value & (1 << part)) != 0) { part++; aimAt = 0; return; }
-            if (part == 1 && !engineEntered)
+            var target = GameObject.Find(names[part]).transform.position;
+            var surface = FindFirstObjectByType<SwimVolume>().GetComponent<Collider>().bounds.max.y;
+            var submerged = target.y < surface - 0.1f;
+            // #188: the engine now rests on the dry beach; take the water entry route only for a part that is really under the surface.
+            if (submerged && !engineEntered)
             {
                 if (!partRoute)
                 {
@@ -293,9 +297,6 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 engineEntered = true; route = null;
             }
-            var target = GameObject.Find(names[part]).transform.position;
-            var surface = FindFirstObjectByType<SwimVolume>().GetComponent<Collider>().bounds.max.y;
-            var submerged = target.y < surface - 0.1f;
             var stand = submerged ? target + Vector3.forward * 1.8f : target;
             if (submerged)
             {
