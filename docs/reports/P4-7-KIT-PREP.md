@@ -125,6 +125,12 @@ Kaynak: repodaki `Assets/DeepDive/Art/Supplied/Fish/Boat.fbx` ve `Resources/Supp
 - Sekiz kombinasyon: bit maskesi 0..7 doğrudan görünür kombinasyona çevrilir (mevcut `BoatPartPresentation` kalıbı: `BoatPartsMask` bit → görünürlük). Test: sekiz maskenin her biri için beklenen görünür parça kümesi (EditMode) + gündüz/gece görüntüsü.
 - **Yapılmayacak (R01):** motor/yakıt tankı görünümü sandala eklenmez; Tripo motorbot ayrı araç olarak kalır.
 
+**19 Ekim güncellemesi (Mehmet'in #186/#189 kararı):** Sunum yeri S0 iskelesi değil **S1 plaj doğu kızağı** `(3.6, 8.4, −12.6)`, yaw 90; kızak kırık gövdenin yalnız *sunum* anchor'ıdır, tamir bitince aynı `boat-1` mevcut deniz wp0'ında görünür (ikinci tekne/otorite yok). Güvenli bırakma `repair-drop-0 = (7.5, 8.4, −14.5)` önerisi benimsendi (gerçek karakter kontrolüyle ölçülecek). `boat-part-engine` malzemesi (görünür ad "oturak/destek") **kuru kıyıya** taşınır; koordinatı Utku ölçer. Mert sunum seti (sıra: Utku anchor → Mehmet etkileşim → Mert sunum; #141/#159 kabulü ve [#189](https://github.com/mehmetalisahingm/DeepDiveGame/issues/189) kapsamı korunur):
+- üç kalıcı görünür mesh/işaret (gövde yaması, oturak/destek, kürek bağlantısı), yuva offsetleri S1 kızağına göre;
+- elde taşınan tahta ve keser, `repair-drop-0` işareti;
+- gündüz/gece okunur ipucu (yuva ve bırakma noktası).
+Hazırlık bu belgeyle sınırlıdır; sunum uygulaması Utku'nun anchor'ları ve Mehmet'in #190 S1 ofsetleri birleşmeden başlamaz.
+
 **Alet/ses/ölçek envanteri (taslak, henüz yapılmadı):** keser (Pirate Kit `Weapon_Axe` 0,45 × 1,05 × 0,12 m adayı, atlas dokusu; MegaKit ile stil uyumu sınanmalı), çivi/bağlantı parçası ve tahta için MegaKit `Prop_*`/ahşap duvar dokusuyla küçük parçalar (kaldırma, bırakma, yerleştirme, darbe sesi ayrı; ses kaynağı lisansı doğrulanmadan seçilmez). Taşınan tahta ölçeği: 1,8 m insana göre 1,5–2 m uzunluk, el tutuş noktası Mehmet #187'nin elinde. **Mehmet'in #190 prototipi** (geçici tahta/çivi/keser/ses) nihai sanat değildir ve bu işle değiştirilir.
 
 ## 6. Açık kararlar ve sonraki adımlar
