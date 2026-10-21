@@ -182,7 +182,8 @@ namespace DeepDive.P1.Lab
         private bool townInjected, townSampledReturn, cameraSeeded;
         private bool legacySeaFixturePlaced;
         private int homeTransferStep = -1;
-        private bool homeTransferComplete;
+        private bool homeTransferComplete, homeTransferWest;
+        private float homeTransferTraceAt;
         private float returnPhaseAt, pendingSeenAt, turnInAt, observedReturnLobbyAt;
         private float recordingStartTime;
         private float recordingTraceAt;
@@ -834,22 +835,35 @@ namespace DeepDive.P1.Lab
             if (homeTransferComplete) return true;
             var origin = ContinuousTownLayout.HomeOrigin;
             var rank = Array.IndexOf(players.OrderBy(p => p.OwnerClientId).ToArray(), local);
+            if (homeTransferStep < 0)
+            {
+                // Choose once. Continuously selecting a side from the moving player's x
+                // would redirect them across the now-solid S1 repair hull mid-route.
+                homeTransferWest = local.transform.position.x < 0f;
+                var z = local.transform.position.z;
+                homeTransferStep = z < -42f ? 7 : z < -25f ? 4 : z < -17f ? 3 : z < -14f ? 2 : 0;
+            }
+            // The S1 broken rowboat blocks the former (0,-12.5) home waypoint.
+            // Approach from the actual shore side, then cross the south (town)
+            // corridor at z=-16. Preserve every PC/playback/publish assertion.
+            var landfall = homeTransferWest ? new Vector3(-6.5f, 8.4f, -11.2f) : new Vector3(9f, 8.4f, -12.5f);
+            var aroundHull = homeTransferWest ? new Vector3(0f, 8.4f, -16f) : new Vector3(9f, 8.4f, -16f);
             var waypoints = new[]
             {
-                new Vector3(0f, 8.4f, -12.5f), new Vector3(0f, 8.4f, -16f),
+                landfall, aroundHull, new Vector3(0f, 8.4f, -16f),
                 new Vector3(0f, 8.4f, -24f), new Vector3(0f, 8.4f, -36f),
                 ContinuousTownLayout.HomeRig.Door, origin + new Vector3(4.95f, 0f, 5f),
                 origin + new Vector3(4.95f, 0f, -2.5f), origin + new Vector3(2f + rank * 0.8f, 0f, -2.4f)
             };
-            if (homeTransferStep < 0)
-            {
-                var z = local.transform.position.z;
-                homeTransferStep = z < -42f ? 6 : z < -25f ? 3 : z < -17f ? 2 : z < -14f ? 1 : 0;
-            }
             if (homeTransferStep >= waypoints.Length)
             { homeTransferComplete = true; local.SubmitLocalInput(Vector3.zero, 0f); return true; }
             var stand = waypoints[homeTransferStep];
             var flat = stand - local.transform.position; flat.y = 0f;
+            if (Time.realtimeSinceStartup >= homeTransferTraceAt)
+            {
+                homeTransferTraceAt = Time.realtimeSinceStartup + 5f;
+                Debug.Log($"P45_HOME_RETURN client={local.OwnerClientId} step={homeTransferStep} pos={local.transform.position} target={stand}");
+            }
             if (flat.magnitude < 0.35f) { homeTransferStep++; return false; }
             var target = homeTransferStep == 0 ? NextBeachWaypoint(local.transform.position, stand) : stand;
             var to = target - local.transform.position;
