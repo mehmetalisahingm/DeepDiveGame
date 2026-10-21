@@ -322,6 +322,15 @@ namespace DeepDive.P1.Lab
                 }
                 waypoint++; return waypoint >= route.Count;
             }
+            // A fresh campaign now has the real broken hull on the dry beach. Keep the
+            // original waypoint/service assertions, but walk around that solid hull just
+            // like the physical-repair driver instead of steering straight through it.
+            var repair = BoatRepairNetworkBinding.Instance;
+            if (!local.Swimming.Value && repair != null && repair.Blocking)
+            {
+                heading = repair.NextAround(local.transform.position, target) - local.transform.position;
+                flat = new Vector2(heading.x, heading.z).magnitude;
+            }
             var yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
             var move = Vector3.forward;
             if (local.Swimming.Value)
