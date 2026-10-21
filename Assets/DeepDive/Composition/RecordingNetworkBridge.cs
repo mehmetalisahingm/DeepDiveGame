@@ -54,6 +54,7 @@ namespace DeepDive.Composition
         {
             var player = LocalPlayer();
             if (player == null || adapter.Session.State.Phase != SessionPhase.Dive) return;
+            if (player.RepairHandsBusy) { ShowStatus("ONCE ONARIM PARCASINI BIRAK"); return; }
             cameraMode = true;
             player.SetHeldEquipmentLocal(HeldEquipmentMode.Camera);
             SubmitLocal(player);
@@ -265,7 +266,7 @@ namespace DeepDive.Composition
                 player = connected.PlayerObject.GetComponent<NetworkPlayer>();
 
             if (result == PlayerActionResult.Accepted &&
-                (player == null || !player.IsSpawned || player.Passive.Value ||
+                (player == null || !player.IsSpawned || player.Passive.Value || player.RepairHandsBusy ||
                  player.CurrentHeldEquipment != HeldEquipmentMode.Camera))
                 result = PlayerActionResult.InvalidState;
 

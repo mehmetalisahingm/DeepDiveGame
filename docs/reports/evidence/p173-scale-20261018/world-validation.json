@@ -1,0 +1,82 @@
+[
+  {
+    "file": "merged-world-1-player0.json",
+    "passed": true,
+    "players": 1,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 179.90675354003906
+  },
+  {
+    "file": "merged-world-1-reload.json",
+    "passed": true,
+    "players": 1,
+    "worldLoads": 1,
+    "day": 0,
+    "distance": 0.0
+  },
+  {
+    "file": "merged-world-2-player0.json",
+    "passed": true,
+    "players": 2,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 181.187744140625
+  },
+  {
+    "file": "merged-world-2-player1.json",
+    "passed": true,
+    "players": 2,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 181.50181579589844
+  },
+  {
+    "file": "merged-world-2-reload.json",
+    "passed": true,
+    "players": 1,
+    "worldLoads": 1,
+    "day": 0,
+    "distance": 0.0
+  },
+  {
+    "file": "merged-world-4-player0.json",
+    "passed": true,
+    "players": 4,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 183.4130859375
+  },
+  {
+    "file": "merged-world-4-player1.json",
+    "passed": true,
+    "players": 4,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 183.67019653320312
+  },
+  {
+    "file": "merged-world-4-player2.json",
+    "passed": true,
+    "players": 4,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 173.24618530273438
+  },
+  {
+    "file": "merged-world-4-player3.json",
+    "passed": true,
+    "players": 4,
+    "worldLoads": 1,
+    "day": 2,
+    "distance": 170.60536193847656
+  },
+  {
+    "file": "merged-world-4-reload.json",
+    "passed": true,
+    "players": 1,
+    "worldLoads": 1,
+    "day": 0,
+    "distance": 0.0
+  }
+]

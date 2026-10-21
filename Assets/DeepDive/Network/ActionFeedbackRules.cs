@@ -13,7 +13,8 @@ namespace DeepDive.Network
         Cooldown = 6,
         Duplicate = 7,
         Rejected = 8,
-        ServiceAccepted = 9
+        ServiceAccepted = 9,
+        RepairAccepted = 10
     }
 
     public readonly struct ActionFeedback
@@ -61,6 +62,13 @@ namespace DeepDive.Network
                     return new ActionFeedback(PlayerFeedbackCue.PickupAccepted, "CATCH SECURED", 0.8f);
                 if (result == PlayerActionResult.InvalidTarget)
                     return new ActionFeedback(PlayerFeedbackCue.Rejected, "NO CATCH", 0.45f);
+            }
+            else if (kind == PlayerActionKind.Repair)
+            {
+                if (result == PlayerActionResult.Accepted)
+                    return new ActionFeedback(PlayerFeedbackCue.RepairAccepted, "REPAIR UPDATED", 0.65f);
+                if (result == PlayerActionResult.InvalidTarget)
+                    return new ActionFeedback(PlayerFeedbackCue.Rejected, "NO REPAIR TARGET", 0.45f);
             }
             else if (kind == PlayerActionKind.ServiceInteraction)
             {

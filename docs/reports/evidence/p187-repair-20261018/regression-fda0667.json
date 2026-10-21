@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "fda06674e3cbfb245aac27261231f78ae09e58a8",
+  "kind": "Windows real owner input - coast repair across Prep/Dive/Return and four-process roles",
+  "localProcessesOnly": true,
+  "coastReports": [
+    "coast2-host.json",
+    "coast2-client1.json"
+  ],
+  "rolesReports": [
+    "roles4-host.json",
+    "roles4-client1.json",
+    "roles4-client2.json",
+    "roles4-client3.json"
+  ]
+}

@@ -294,6 +294,8 @@ Görsel animasyon/partikül öncelikle presentation state'tir. Dünya/ekonomi ot
 
 ## 12. Uygulama öncesi karar defteri
 
+21 Ekim durum notu: R01/R02/R11 artık yalnız öneri değildir; Mert, Utku ve Mehmet'in gerçek alan kararları [#186 kaydında](P48_REPAIR_CONTRACT_PROPOSAL.md) bağlantılarıyla tutulur. Üç grup/tek kalıcı parça, edinme–son darbe ayrımı ve eski kayıt korunması seçildi; tamir S1 kuru plaj kızağında, kullanılmamış malzeme `repair-drop-0` askılarındadır. Tablodaki ilk öneri dili hazırlığın tarihini korur; nihai sanat, #141/#159 ve oyuncu kabulünü tamamlamaz.
+
 | Karar | Çalışma önerisi | Etki/sahip | Ne zaman gerekir? |
 |---|---|---|---|
 | R01 Kürekli sandal + motor/tank uyumsuzluğu | Üç ahşap/fitting tamir grubu; eski ID kontrollü eşleme | Mehmet son tasarım, Mert save, Utku world | P4.8 sanat üretiminden önce |
@@ -315,6 +317,8 @@ R04 yönü 19 Ekim bildirimiyle güncellendi: ev şehirde, şehir merkezi/sahil 
 
 Çalışma önerileri alınmış ekip kararı diye raporlanmaz. Karar kaydında tarih, seçilen seçenek, alternatifin bedeli ve etkilenen kayıt/varlık bulunur. Uygulama bu karar gerçekten alındığında başlar; varsayılan fikir ile imzalanmış sözleşme karışmaz.
 
+18 Ekim #186 hazırlığı: [fiziksel tamir sözleşme önerisi](P48_REPAIR_CONTRACT_PROPOSAL.md), üç görünür tamir grubu, edinme/son darbe ayrımı, sekiz eski maskenin geçişi ve #187/#188/#189 dosya sınırlarını somutlaştırır. Bu belge R01/R02/R11'i tek başına kapatmaz veya #141/#159 kabulünü üretmez.
+
 ## 13. Oyuncu kabul ölçümü
 
 Her testte aynı commit/build, host kampanya, oyuncu sayısı/donanım, yapılan tur, video/JSON ve yapılmayan sınırlar kaydedilir. Test fixture'ı ve gerçek kullanıcı girdisi ayrılır.
@@ -335,3 +339,5 @@ Başlangıç ürün ölçüm hedefleri: ilk hedefi çoğu yeni oyuncunun sözlü
 
 P4.12 tamamlandığında “oynanıyor” ve “görsel/içerik hedefi kabul edildi” ayrı sonuçlarıyla birlikte raporlanır. Yeni oyun tasarım açığı P5'e “küçük polish” diye devredilmez.
 
+
+18 Ekim #187 uygulama istisnası: kullanıcı yalnız fiziksel tamir işini şimdi yetkilendirdi. E ile kaldır/yerleştir, Q ile ortak askıya bırak, üç sol tık darbesiyle tek katkı; edinme tek başına onarım değildir. Geçici mekanik görünüm nihai #189 sanat teslimi sayılmaz; #141/#159 insan kabulü açık kalır.

@@ -57,6 +57,34 @@
             }
         },
         {
+            "name": "Beach_Wade_Fill",
+            "kind": "solid",
+            "min": {
+                "x": -9.5,
+                "y": -3.700000047683716,
+                "z": -15.149999618530274
+            },
+            "max": {
+                "x": -3.5,
+                "y": 8.055999755859375,
+                "z": -4.297999858856201
+            }
+        },
+        {
+            "name": "Beach_Wade_Toe",
+            "kind": "solid",
+            "min": {
+                "x": -9.5,
+                "y": -0.5,
+                "z": -6.561999797821045
+            },
+            "max": {
+                "x": -3.5,
+                "y": 5.199999809265137,
+                "z": -4.138000011444092
+            }
+        },
+        {
             "name": "BioluminescenceEvent",
             "kind": "solid",
             "min": {
@@ -74,14 +102,14 @@
             "name": "BoatPart_Engine",
             "kind": "trigger.BoatPart",
             "min": {
-                "x": -6.800000190734863,
-                "y": 6.701000213623047,
-                "z": -8.300000190734864
+                "x": -2.799999952316284,
+                "y": 8.100000381469727,
+                "z": -13.050000190734864
             },
             "max": {
-                "x": -6.199999809265137,
-                "y": 7.301000118255615,
-                "z": -7.699999809265137
+                "x": -2.200000047683716,
+                "y": 8.699999809265137,
+                "z": -12.449999809265137
             }
         },
         {
@@ -435,6 +463,20 @@
             }
         },
         {
+            "name": "Shore_Ledge_Fill",
+            "kind": "solid",
+            "min": {
+                "x": 7.0,
+                "y": -0.5,
+                "z": -11.0
+            },
+            "max": {
+                "x": 11.0,
+                "y": 7.420000076293945,
+                "z": -7.0
+            }
+        },
+        {
             "name": "Shore_Ramp",
             "kind": "walk",
             "min": {
@@ -445,6 +487,34 @@
             "max": {
                 "x": 7.169000148773193,
                 "y": 8.399999618530274,
+                "z": -7.0
+            }
+        },
+        {
+            "name": "Shore_Ramp_Fill",
+            "kind": "solid",
+            "min": {
+                "x": 0.2980000078678131,
+                "y": -3.700000047683716,
+                "z": -11.0
+            },
+            "max": {
+                "x": 11.149999618530274,
+                "y": 8.055999755859375,
+                "z": -7.0
+            }
+        },
+        {
+            "name": "Shore_Ramp_Toe",
+            "kind": "solid",
+            "min": {
+                "x": 0.1379999965429306,
+                "y": -0.5,
+                "z": -11.0
+            },
+            "max": {
+                "x": 2.562000036239624,
+                "y": 5.199999809265137,
                 "z": -7.0
             }
         },
@@ -557,13 +627,13 @@
         {
             "id": "boat-part-engine",
             "anchorObject": "BoatPart_Engine",
-            "zone": "Sea",
-            "groundCollider": "Beach_Wade",
-            "waterAtPart": "Surface (raw class of a diver standing on the ground at the part)",
+            "zone": "Coast",
+            "groundCollider": "Beach_Platform",
+            "waterAtPart": "Land (raw class of a diver standing on the ground at the part)",
             "position": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "rendererSize": {
                 "x": 0.6000000238418579,
@@ -575,16 +645,16 @@
                 "y": 0.6000000238418579,
                 "z": 0.6000000238418579
             },
-            "groundY": 7.000999927520752,
-            "depthBelowSurface": 0.9990000128746033,
-            "nearestDryStandDistance": -1.0,
-            "onDryWalkSurface": false,
-            "insideSwimVolume": true,
-            "pickupFromDryLand": false,
+            "groundY": 8.399999618530274,
+            "depthBelowSurface": 0.0,
+            "nearestDryStandDistance": 0.0,
+            "onDryWalkSurface": true,
+            "insideSwimVolume": false,
+            "pickupFromDryLand": true,
             "nearestDryStand": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "overlapping": []
         },
@@ -903,35 +973,25 @@
             "failures": []
         },
         {
-            "id": "S0:boat-part-engine:wade",
+            "id": "S0:boat-part-engine",
             "part": "boat-part-engine",
-            "label": "swim boat-part-engine ashore via the wade, walk -> S0 work point 0",
+            "label": "walk boat-part-engine -> S0 work point 0",
             "goal": "(8.25, 8.4, -3.75)",
             "start": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "end": {
                 "x": 8.25,
                 "y": 8.479999542236329,
-                "z": -3.75
+                "z": -3.75600004196167
             },
             "path": [
                 {
-                    "x": -6.5,
-                    "y": 7.000999927520752,
-                    "z": -8.0
-                },
-                {
-                    "x": -6.5,
-                    "y": 7.75,
-                    "z": -10.0
-                },
-                {
-                    "x": -6.5,
+                    "x": -2.5,
                     "y": 8.399999618530274,
-                    "z": -11.5
+                    "z": -12.75
                 },
                 {
                     "x": 6.5,
@@ -949,78 +1009,20 @@
                     "z": -3.75
                 }
             ],
-            "drivenLength": 24.56800079345703,
-            "landLength": 22.160999298095704,
-            "swimLength": 2.4079999923706056,
-            "simSeconds": 6.300000190734863,
-            "landSeconds": 5.559999942779541,
-            "swimSeconds": 0.7400000095367432,
-            "straightLine": 15.350000381469727,
+            "drivenLength": 16.959999084472658,
+            "landLength": 16.959999084472658,
+            "swimLength": 0.0,
+            "simSeconds": 4.239999771118164,
+            "landSeconds": 4.239999771118164,
+            "swimSeconds": 0.0,
+            "straightLine": 14.020000457763672,
             "reached": true,
             "fell": false,
             "stuck": false,
-            "frames": 315,
+            "frames": 212,
             "blockedFrames": 0,
-            "waterTransitions": 1,
-            "modes": "surface > walk",
-            "failures": []
-        },
-        {
-            "id": "S0:boat-part-engine:ramp",
-            "part": "boat-part-engine",
-            "label": "swim boat-part-engine ashore via the ramp, walk -> S0 work point 0",
-            "goal": "(8.25, 8.4, -3.75)",
-            "start": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
-            },
-            "end": {
-                "x": 8.25,
-                "y": 8.479999542236329,
-                "z": -3.75
-            },
-            "path": [
-                {
-                    "x": -6.5,
-                    "y": 7.000999927520752,
-                    "z": -8.0
-                },
-                {
-                    "x": 5.599999904632568,
-                    "y": 7.75,
-                    "z": -9.0
-                },
-                {
-                    "x": 7.25,
-                    "y": 8.399999618530274,
-                    "z": -9.0
-                },
-                {
-                    "x": 8.25,
-                    "y": 8.399999618530274,
-                    "z": -7.0
-                },
-                {
-                    "x": 8.25,
-                    "y": 8.399999618530274,
-                    "z": -3.75
-                }
-            ],
-            "drivenLength": 19.47599983215332,
-            "landLength": 6.611000061035156,
-            "swimLength": 12.864999771118164,
-            "simSeconds": 5.880000114440918,
-            "landSeconds": 1.659999966621399,
-            "swimSeconds": 4.21999979019165,
-            "straightLine": 15.350000381469727,
-            "reached": true,
-            "fell": false,
-            "stuck": false,
-            "frames": 294,
-            "blockedFrames": 0,
-            "waterTransitions": 1,
-            "modes": "surface > walk",
+            "waterTransitions": 0,
+            "modes": "walk",
             "failures": []
         },
         {
@@ -1077,20 +1079,20 @@
             "label": "swim the submerged part straight to the boat's side in the water (placement from water is rejected in PR #190)",
             "goal": "(7.4, 7.4, -2.5)",
             "start": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "end": {
-                "x": 7.25600004196167,
-                "y": 7.089000225067139,
-                "z": -2.5380001068115236
+                "x": 7.26200008392334,
+                "y": 7.400000095367432,
+                "z": -2.5360000133514406
             },
             "path": [
                 {
-                    "x": -6.5,
-                    "y": 7.000999927520752,
-                    "z": -8.0
+                    "x": -2.5,
+                    "y": 8.399999618530274,
+                    "z": -12.75
                 },
                 {
                     "x": -6.5,
@@ -1103,20 +1105,20 @@
                     "z": -2.5
                 }
             ],
-            "drivenLength": 16.08099937438965,
-            "landLength": 0.0,
-            "swimLength": 16.08099937438965,
-            "simSeconds": 5.360000133514404,
-            "landSeconds": 0.0,
-            "swimSeconds": 5.360000133514404,
-            "straightLine": 14.949000358581543,
+            "drivenLength": 21.920000076293947,
+            "landLength": 3.680000066757202,
+            "swimLength": 18.239999771118165,
+            "simSeconds": 7.0,
+            "landSeconds": 0.9200000166893005,
+            "swimSeconds": 6.079999923706055,
+            "straightLine": 14.25,
             "reached": true,
             "fell": false,
             "stuck": false,
-            "frames": 268,
+            "frames": 350,
             "blockedFrames": 0,
-            "waterTransitions": 0,
-            "modes": "surface",
+            "waterTransitions": 1,
+            "modes": "walk > surface",
             "failures": []
         }
     ],
@@ -1388,35 +1390,25 @@
                     "failures": []
                 },
                 {
-                    "id": "S0:boat-part-engine:wade",
+                    "id": "S0:boat-part-engine",
                     "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the wade, walk -> S0 work point 0",
+                    "label": "walk boat-part-engine -> S0 work point 0",
                     "goal": "(8.25, 8.4, -3.75)",
                     "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
+                        "x": -2.5,
+                        "y": 8.399999618530274,
+                        "z": -12.75
                     },
                     "end": {
                         "x": 8.25,
                         "y": 8.479999542236329,
-                        "z": -3.75
+                        "z": -3.75600004196167
                     },
                     "path": [
                         {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": -6.5,
-                            "y": 7.75,
-                            "z": -10.0
-                        },
-                        {
-                            "x": -6.5,
+                            "x": -2.5,
                             "y": 8.399999618530274,
-                            "z": -11.5
+                            "z": -12.75
                         },
                         {
                             "x": 6.5,
@@ -1434,78 +1426,20 @@
                             "z": -3.75
                         }
                     ],
-                    "drivenLength": 24.56800079345703,
-                    "landLength": 22.160999298095704,
-                    "swimLength": 2.4079999923706056,
-                    "simSeconds": 6.300000190734863,
-                    "landSeconds": 5.559999942779541,
-                    "swimSeconds": 0.7400000095367432,
-                    "straightLine": 15.350000381469727,
+                    "drivenLength": 16.959999084472658,
+                    "landLength": 16.959999084472658,
+                    "swimLength": 0.0,
+                    "simSeconds": 4.239999771118164,
+                    "landSeconds": 4.239999771118164,
+                    "swimSeconds": 0.0,
+                    "straightLine": 14.020000457763672,
                     "reached": true,
                     "fell": false,
                     "stuck": false,
-                    "frames": 315,
+                    "frames": 212,
                     "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
-                    "failures": []
-                },
-                {
-                    "id": "S0:boat-part-engine:ramp",
-                    "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the ramp, walk -> S0 work point 0",
-                    "goal": "(8.25, 8.4, -3.75)",
-                    "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
-                    },
-                    "end": {
-                        "x": 8.25,
-                        "y": 8.479999542236329,
-                        "z": -3.75
-                    },
-                    "path": [
-                        {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": 5.599999904632568,
-                            "y": 7.75,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 7.25,
-                            "y": 8.399999618530274,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 8.25,
-                            "y": 8.399999618530274,
-                            "z": -7.0
-                        },
-                        {
-                            "x": 8.25,
-                            "y": 8.399999618530274,
-                            "z": -3.75
-                        }
-                    ],
-                    "drivenLength": 19.47599983215332,
-                    "landLength": 6.611000061035156,
-                    "swimLength": 12.864999771118164,
-                    "simSeconds": 5.880000114440918,
-                    "landSeconds": 1.659999966621399,
-                    "swimSeconds": 4.21999979019165,
-                    "straightLine": 15.350000381469727,
-                    "reached": true,
-                    "fell": false,
-                    "stuck": false,
-                    "frames": 294,
-                    "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
+                    "waterTransitions": 0,
+                    "modes": "walk",
                     "failures": []
                 },
                 {
@@ -1558,7 +1492,7 @@
                 }
             ],
             "dropCarries": [],
-            "fishWithin8m": 7,
+            "fishWithin8m": 8,
             "notes": [
                 "hull floats in the SwimVolume; work cells can only be on dry ground near the pier end"
             ]
@@ -1846,35 +1780,25 @@
                     "failures": []
                 },
                 {
-                    "id": "S1:boat-part-engine:wade",
+                    "id": "S1:boat-part-engine",
                     "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the wade, walk -> S1 work point 0",
+                    "label": "walk boat-part-engine -> S1 work point 0",
                     "goal": "(0.5, 8.4, -11.5)",
                     "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
+                        "x": -2.5,
+                        "y": 8.399999618530274,
+                        "z": -12.75
                     },
                     "end": {
-                        "x": 0.46000000834465029,
+                        "x": 0.5,
                         "y": 8.479999542236329,
                         "z": -11.5
                     },
                     "path": [
                         {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": -6.5,
-                            "y": 7.75,
-                            "z": -10.0
-                        },
-                        {
-                            "x": -6.5,
+                            "x": -2.5,
                             "y": 8.399999618530274,
-                            "z": -11.5
+                            "z": -12.75
                         },
                         {
                             "x": 0.5,
@@ -1882,83 +1806,20 @@
                             "z": -11.5
                         }
                     ],
-                    "drivenLength": 10.704999923706055,
-                    "landLength": 8.29800033569336,
-                    "swimLength": 2.4079999923706056,
-                    "simSeconds": 2.819999933242798,
-                    "landSeconds": 2.0799999237060549,
-                    "swimSeconds": 0.7400000095367432,
-                    "straightLine": 7.826000213623047,
+                    "drivenLength": 3.25,
+                    "landLength": 3.25,
+                    "swimLength": 0.0,
+                    "simSeconds": 0.8199999928474426,
+                    "landSeconds": 0.8199999928474426,
+                    "swimSeconds": 0.0,
+                    "straightLine": 3.25,
                     "reached": true,
                     "fell": false,
                     "stuck": false,
-                    "frames": 141,
+                    "frames": 41,
                     "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
-                    "failures": []
-                },
-                {
-                    "id": "S1:boat-part-engine:ramp",
-                    "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the ramp, walk -> S1 work point 0",
-                    "goal": "(0.5, 8.4, -11.5)",
-                    "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
-                    },
-                    "end": {
-                        "x": 0.5,
-                        "y": 8.479999542236329,
-                        "z": -11.529999732971192
-                    },
-                    "path": [
-                        {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": 5.599999904632568,
-                            "y": 7.75,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 7.25,
-                            "y": 8.399999618530274,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 6.5,
-                            "y": 8.399999618530274,
-                            "z": -14.25
-                        },
-                        {
-                            "x": 0.5,
-                            "y": 8.399999618530274,
-                            "z": -14.25
-                        },
-                        {
-                            "x": 0.5,
-                            "y": 8.399999618530274,
-                            "z": -11.5
-                        }
-                    ],
-                    "drivenLength": 27.985000610351564,
-                    "landLength": 15.119999885559082,
-                    "swimLength": 12.864999771118164,
-                    "simSeconds": 8.0,
-                    "landSeconds": 3.7799999713897707,
-                    "swimSeconds": 4.21999979019165,
-                    "straightLine": 7.826000213623047,
-                    "reached": true,
-                    "fell": false,
-                    "stuck": false,
-                    "frames": 400,
-                    "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
+                    "waterTransitions": 0,
+                    "modes": "walk",
                     "failures": []
                 },
                 {
@@ -2300,7 +2161,7 @@
                     "failures": []
                 }
             ],
-            "fishWithin8m": 5,
+            "fishWithin8m": 0,
             "notes": []
         },
         {
@@ -2586,35 +2447,30 @@
                     "failures": []
                 },
                 {
-                    "id": "S2:boat-part-engine:wade",
+                    "id": "S2:boat-part-engine",
                     "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the wade, walk -> S2 work point 0",
+                    "label": "walk boat-part-engine -> S2 work point 0",
                     "goal": "(-5.25, 8.4, -14)",
                     "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
+                        "x": -2.5,
+                        "y": 9.300000190734864,
+                        "z": -12.75
                     },
                     "end": {
                         "x": -5.25,
-                        "y": 8.479999542236329,
-                        "z": -14.0
+                        "y": 8.916000366210938,
+                        "z": -14.003999710083008
                     },
                     "path": [
                         {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
+                            "x": -2.5,
+                            "y": 9.300000190734864,
+                            "z": -12.75
                         },
                         {
-                            "x": -6.5,
-                            "y": 7.75,
-                            "z": -10.0
-                        },
-                        {
-                            "x": -6.5,
+                            "x": -5.25,
                             "y": 8.399999618530274,
-                            "z": -11.5
+                            "z": -14.25
                         },
                         {
                             "x": -5.25,
@@ -2622,83 +2478,20 @@
                             "z": -14.0
                         }
                     ],
-                    "drivenLength": 6.539999961853027,
-                    "landLength": 4.132999897003174,
-                    "swimLength": 2.4079999923706056,
-                    "simSeconds": 1.7799999713897706,
-                    "landSeconds": 1.0399999618530274,
-                    "swimSeconds": 0.7400000095367432,
-                    "straightLine": 6.129000186920166,
+                    "drivenLength": 3.359999895095825,
+                    "landLength": 3.359999895095825,
+                    "swimLength": 0.0,
+                    "simSeconds": 0.8399999737739563,
+                    "landSeconds": 0.8399999737739563,
+                    "swimSeconds": 0.0,
+                    "straightLine": 3.0209999084472658,
                     "reached": true,
                     "fell": false,
                     "stuck": false,
-                    "frames": 89,
+                    "frames": 42,
                     "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
-                    "failures": []
-                },
-                {
-                    "id": "S2:boat-part-engine:ramp",
-                    "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the ramp, walk -> S2 work point 0",
-                    "goal": "(-5.25, 8.4, -14)",
-                    "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
-                    },
-                    "end": {
-                        "x": -5.25,
-                        "y": 8.479999542236329,
-                        "z": -14.0
-                    },
-                    "path": [
-                        {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": 5.599999904632568,
-                            "y": 7.75,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 7.25,
-                            "y": 8.399999618530274,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 6.25,
-                            "y": 8.399999618530274,
-                            "z": -11.5
-                        },
-                        {
-                            "x": -3.25,
-                            "y": 8.399999618530274,
-                            "z": -16.25
-                        },
-                        {
-                            "x": -5.25,
-                            "y": 8.399999618530274,
-                            "z": -14.0
-                        }
-                    ],
-                    "drivenLength": 30.280000686645509,
-                    "landLength": 17.415000915527345,
-                    "swimLength": 12.864999771118164,
-                    "simSeconds": 8.579999923706055,
-                    "landSeconds": 4.360000133514404,
-                    "swimSeconds": 4.21999979019165,
-                    "straightLine": 6.129000186920166,
-                    "reached": true,
-                    "fell": false,
-                    "stuck": false,
-                    "frames": 429,
-                    "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
+                    "waterTransitions": 0,
+                    "modes": "walk",
                     "failures": []
                 },
                 {
@@ -2751,7 +2544,7 @@
                 }
             ],
             "dropCarries": [],
-            "fishWithin8m": 6,
+            "fishWithin8m": 0,
             "notes": []
         },
         {
@@ -3037,35 +2830,25 @@
                     "failures": []
                 },
                 {
-                    "id": "S3:boat-part-engine:wade",
+                    "id": "S3:boat-part-engine",
                     "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the wade, walk -> S3 work point 0",
+                    "label": "walk boat-part-engine -> S3 work point 0",
                     "goal": "(2.5, 8.4, -20.5)",
                     "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
+                        "x": -2.5,
+                        "y": 8.399999618530274,
+                        "z": -12.75
                     },
                     "end": {
-                        "x": 2.49399995803833,
+                        "x": 2.48799991607666,
                         "y": 8.479999542236329,
-                        "z": -20.493999481201173
+                        "z": -20.481000900268556
                     },
                     "path": [
                         {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": -6.5,
-                            "y": 7.75,
-                            "z": -10.0
-                        },
-                        {
-                            "x": -6.5,
+                            "x": -2.5,
                             "y": 8.399999618530274,
-                            "z": -11.5
+                            "z": -12.75
                         },
                         {
                             "x": 2.5,
@@ -3073,83 +2856,20 @@
                             "z": -20.5
                         }
                     ],
-                    "drivenLength": 16.46500015258789,
-                    "landLength": 14.057999610900879,
-                    "swimLength": 2.4079999923706056,
-                    "simSeconds": 4.260000228881836,
-                    "landSeconds": 3.5199999809265138,
-                    "swimSeconds": 0.7400000095367432,
-                    "straightLine": 15.402999877929688,
+                    "drivenLength": 9.199999809265137,
+                    "landLength": 9.199999809265137,
+                    "swimLength": 0.0,
+                    "simSeconds": 2.299999952316284,
+                    "landSeconds": 2.299999952316284,
+                    "swimSeconds": 0.0,
+                    "straightLine": 9.222999572753907,
                     "reached": true,
                     "fell": false,
                     "stuck": false,
-                    "frames": 213,
+                    "frames": 115,
                     "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
-                    "failures": []
-                },
-                {
-                    "id": "S3:boat-part-engine:ramp",
-                    "part": "boat-part-engine",
-                    "label": "swim boat-part-engine ashore via the ramp, walk -> S3 work point 0",
-                    "goal": "(2.5, 8.4, -20.5)",
-                    "start": {
-                        "x": -6.5,
-                        "y": 7.000999927520752,
-                        "z": -8.0
-                    },
-                    "end": {
-                        "x": 2.494999885559082,
-                        "y": 8.479999542236329,
-                        "z": -20.4950008392334
-                    },
-                    "path": [
-                        {
-                            "x": -6.5,
-                            "y": 7.000999927520752,
-                            "z": -8.0
-                        },
-                        {
-                            "x": 5.599999904632568,
-                            "y": 7.75,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 7.25,
-                            "y": 8.399999618530274,
-                            "z": -9.0
-                        },
-                        {
-                            "x": 6.25,
-                            "y": 8.399999618530274,
-                            "z": -11.5
-                        },
-                        {
-                            "x": 1.25,
-                            "y": 8.399999618530274,
-                            "z": -19.25
-                        },
-                        {
-                            "x": 2.5,
-                            "y": 8.399999618530274,
-                            "z": -20.5
-                        }
-                    ],
-                    "drivenLength": 27.6560001373291,
-                    "landLength": 14.791000366210938,
-                    "swimLength": 12.864999771118164,
-                    "simSeconds": 7.920000076293945,
-                    "landSeconds": 3.700000047683716,
-                    "swimSeconds": 4.21999979019165,
-                    "straightLine": 15.402999877929688,
-                    "reached": true,
-                    "fell": false,
-                    "stuck": false,
-                    "frames": 396,
-                    "blockedFrames": 0,
-                    "waterTransitions": 1,
-                    "modes": "surface > walk",
+                    "waterTransitions": 0,
+                    "modes": "walk",
                     "failures": []
                 },
                 {
@@ -3238,18 +2958,18 @@
                 "z": -41.70000076293945
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 0.0,
-            "distance": 34.32099914550781,
-            "horizontalAngle": -10.916999816894532,
-            "verticalAngle": -4.910999774932861,
-            "projectedHeightPx1080": 16.291000366210939,
-            "lineOfSight": false,
+            "distance": 29.058000564575197,
+            "horizontalAngle": -4.935999870300293,
+            "verticalAngle": -3.052999973297119,
+            "projectedHeightPx1080": 19.28499984741211,
+            "lineOfSight": true,
             "inViewAtHeading": true,
-            "blocker": "Storefront/Counter"
+            "blocker": ""
         },
         {
             "from": "home door",
@@ -3480,18 +3200,18 @@
                 "z": -29.0
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 0.0,
-            "distance": 21.982999801635743,
-            "horizontalAngle": -17.198999404907228,
-            "verticalAngle": -7.639999866485596,
-            "projectedHeightPx1080": 25.302000045776368,
-            "lineOfSight": false,
+            "distance": 16.44099998474121,
+            "horizontalAngle": -8.746000289916993,
+            "verticalAngle": -5.386000156402588,
+            "projectedHeightPx1080": 33.981998443603519,
+            "lineOfSight": true,
             "inViewAtHeading": true,
-            "blocker": "P46_ContinuousTown/MainStreet"
+            "blocker": ""
         },
         {
             "from": "town square",
@@ -3722,15 +3442,15 @@
                 "z": -12.5
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 0.0,
-            "distance": 7.906000137329102,
-            "horizontalAngle": -55.30500030517578,
-            "verticalAngle": -20.45599937438965,
-            "projectedHeightPx1080": 66.50900268554688,
+            "distance": 2.51200008392334,
+            "horizontalAngle": -95.71099853515625,
+            "verticalAngle": -31.67099952697754,
+            "projectedHeightPx1080": 190.0959930419922,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -3964,15 +3684,15 @@
                 "z": -12.5
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 90.0,
-            "distance": 7.906000137329102,
-            "horizontalAngle": -145.30499267578126,
-            "verticalAngle": -20.45599937438965,
-            "projectedHeightPx1080": 66.50900268554688,
+            "distance": 2.51200008392334,
+            "horizontalAngle": 174.28900146484376,
+            "verticalAngle": -31.67099952697754,
+            "projectedHeightPx1080": 190.0959930419922,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -4206,15 +3926,15 @@
                 "z": -4.5
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 180.0,
-            "distance": 15.890000343322754,
-            "horizontalAngle": 77.2760009765625,
-            "verticalAngle": -10.512999534606934,
-            "projectedHeightPx1080": 34.722999572753909,
+            "distance": 14.152999877929688,
+            "horizontalAngle": 54.345001220703128,
+            "verticalAngle": -6.25,
+            "projectedHeightPx1080": 39.415000915527347,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""

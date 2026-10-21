@@ -52,9 +52,11 @@ namespace DeepDive.Network
             if (FirstPerson || state.HeldEquipment != HeldEquipmentMode.None)
             {
                 var camera = state.HeldEquipment == HeldEquipmentMode.Camera;
+                var plank = state.HeldEquipment == HeldEquipmentMode.RepairPart;
                 var y = FirstPerson ? 1.39f : 1.16f;
-                Hold(rightArm, rightElbow, rightHand, new Vector3(camera ? 0.18f : 0.24f, y, 0.44f), 1);
-                Hold(leftArm, leftElbow, leftHand, new Vector3(camera ? -0.18f : -0.12f, y - (camera ? 0 : 0.10f), 0.43f), -1);
+                if (plank) y -= .15f;
+                Hold(rightArm, rightElbow, rightHand, new Vector3(plank ? .35f : camera ? 0.18f : 0.24f, y, plank ? .57f : .44f), 1);
+                Hold(leftArm, leftElbow, leftHand, new Vector3(plank ? -.35f : camera ? -0.18f : -0.12f, y - (camera || plank ? 0 : 0.10f), plank ? .57f : .43f), -1);
                 Aim(rightHand, rightIndex, camera ? Vector3.up : Vector3.forward);
                 Aim(leftHand, leftIndex, camera ? Vector3.up : Vector3.forward);
                 foreach (var finger in fingerBones)

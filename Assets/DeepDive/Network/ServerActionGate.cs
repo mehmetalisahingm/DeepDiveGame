@@ -7,7 +7,8 @@ namespace DeepDive.Network
     {
         Harpoon = 1,
         Pickup = 2,
-        ServiceInteraction = 3
+        ServiceInteraction = 3,
+        Repair = 4
     }
 
     // Host-side replay/rate guard shared by player-originated actions.
@@ -17,12 +18,13 @@ namespace DeepDive.Network
         private double nextHarpoonAt;
         private double nextPickupAt;
         private double nextServiceInteractionAt;
+        private double nextRepairAt;
 
         public PlayerActionResult TryAccept(ulong requestId, PlayerActionKind kind, double now, double cooldownSeconds)
         {
             if (requestId == 0 || requestId <= lastRequestId) return PlayerActionResult.DuplicateRequest;
             if (kind != PlayerActionKind.Harpoon && kind != PlayerActionKind.Pickup &&
-                kind != PlayerActionKind.ServiceInteraction)
+                kind != PlayerActionKind.ServiceInteraction && kind != PlayerActionKind.Repair)
                 return PlayerActionResult.InvalidState;
 
             lastRequestId = requestId;
@@ -32,6 +34,7 @@ namespace DeepDive.Network
             {
                 PlayerActionKind.Harpoon => nextHarpoonAt,
                 PlayerActionKind.Pickup => nextPickupAt,
+                PlayerActionKind.Repair => nextRepairAt,
                 PlayerActionKind.ServiceInteraction => nextServiceInteractionAt,
                 _ => 0d
             };
@@ -50,6 +53,9 @@ namespace DeepDive.Network
                 case PlayerActionKind.ServiceInteraction:
                     nextServiceInteractionAt = now + cooldown;
                     break;
+                case PlayerActionKind.Repair:
+                    nextRepairAt = now + cooldown;
+                    break;
             }
             return PlayerActionResult.Accepted;
         }
@@ -60,6 +66,7 @@ namespace DeepDive.Network
             nextHarpoonAt = 0d;
             nextPickupAt = 0d;
             nextServiceInteractionAt = 0d;
+            nextRepairAt = 0d;
         }
     }
 }

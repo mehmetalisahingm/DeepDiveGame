@@ -9,6 +9,14 @@ namespace DeepDive.P1.Tests
 {
     public class NetworkRulesTests
     {
+        [Test] public void RepairFeedbackDoesNotClaimThatAFishWasCollected()
+        {
+            var repair=ActionFeedbackRules.Resolve(PlayerActionKind.Repair,PlayerActionResult.Accepted);
+            Assert.AreEqual(PlayerFeedbackCue.RepairAccepted,repair.Cue);
+            StringAssert.Contains("REPAIR",repair.Message);
+            Assert.AreEqual("CATCH SECURED",ActionFeedbackRules.Resolve(PlayerActionKind.Pickup,PlayerActionResult.Accepted).Message);
+            Assert.AreEqual("NO REPAIR TARGET",ActionFeedbackRules.Resolve(PlayerActionKind.Repair,PlayerActionResult.InvalidTarget).Message);
+        }
         [Test] public void FourConcurrentReservationsRejectFifthAndReuseFreedSlot()
         {
             var policy = new AdmissionPolicy();

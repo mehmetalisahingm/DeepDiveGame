@@ -1,5 +1,5 @@
 {
-    "branchBase": "codex/p4-integration @ c7b2449",
+    "branchBase": "codex/p4-integration @ 6816fba + #186 engine ashore (first written at c7b2449)",
     "unity": "6000.3.23f1",
     "scene": "Assets/DeepDive/World/Scenes/DiveTestArea.unity",
     "prefab": "Assets/DeepDive/Network/Prefabs/NetworkDiver.prefab",
@@ -489,6 +489,104 @@
                 "x": 0.1599999964237213,
                 "y": 4.159999847412109,
                 "z": 8.550000190734864
+            }
+        },
+        {
+            "name": "Fish_SeaBass_09",
+            "kind": "solid",
+            "min": {
+                "x": -8.267000198364258,
+                "y": 4.340000152587891,
+                "z": 2.4649999141693117
+            },
+            "max": {
+                "x": -7.732999801635742,
+                "y": 4.659999847412109,
+                "z": 3.5350000858306886
+            }
+        },
+        {
+            "name": "Fish_SeaBass_10",
+            "kind": "solid",
+            "min": {
+                "x": -5.670000076293945,
+                "y": 4.340000152587891,
+                "z": 2.493000030517578
+            },
+            "max": {
+                "x": -4.995999813079834,
+                "y": 4.659999847412109,
+                "z": 3.506999969482422
+            }
+        },
+        {
+            "name": "Fish_SeaBass_11",
+            "kind": "solid",
+            "min": {
+                "x": -3.193000078201294,
+                "y": 4.340000152587891,
+                "z": 2.7070000171661379
+            },
+            "max": {
+                "x": -2.140000104904175,
+                "y": 4.659999847412109,
+                "z": 3.2929999828338625
+            }
+        },
+        {
+            "name": "Fish_SeaBass_12",
+            "kind": "solid",
+            "min": {
+                "x": -0.5189999938011169,
+                "y": 4.340000152587891,
+                "z": 2.687999963760376
+            },
+            "max": {
+                "x": 0.5189999938011169,
+                "y": 4.659999847412109,
+                "z": 3.312000036239624
+            }
+        },
+        {
+            "name": "Fish_SeaBass_13",
+            "kind": "solid",
+            "min": {
+                "x": 2.3480000495910646,
+                "y": 4.340000152587891,
+                "z": 2.4839999675750734
+            },
+            "max": {
+                "x": 2.984999895095825,
+                "y": 4.659999847412109,
+                "z": 3.5160000324249269
+            }
+        },
+        {
+            "name": "Fish_SeaBass_14",
+            "kind": "solid",
+            "min": {
+                "x": 5.046000003814697,
+                "y": 4.340000152587891,
+                "z": 2.4709999561309816
+            },
+            "max": {
+                "x": 5.619999885559082,
+                "y": 4.659999847412109,
+                "z": 3.5290000438690187
+            }
+        },
+        {
+            "name": "Fish_SeaBass_15",
+            "kind": "solid",
+            "min": {
+                "x": 7.495999813079834,
+                "y": 4.340000152587891,
+                "z": 2.6570000648498537
+            },
+            "max": {
+                "x": 8.503999710083008,
+                "y": 4.659999847412109,
+                "z": 3.3429999351501467
             }
         },
         {
@@ -1299,11 +1397,11 @@
             "id": "boat-part-engine",
             "kind": "boatPart",
             "source": "scene BoatPartAnchor BoatPart_Engine",
-            "zone": "Sea",
+            "zone": "Coast",
             "position": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "inMap": true
         },
@@ -2377,14 +2475,14 @@
             },
             "targetPoint": {
                 "x": -10.0,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 16.68000030517578,
-            "horizontalAngle": -36.834999084472659,
-            "verticalAngle": 0.35199999809265139,
-            "projectedHeightPx1080": 185.31900024414063,
+            "distance": 15.08899974822998,
+            "horizontalAngle": -41.50699996948242,
+            "verticalAngle": 2.6559998989105226,
+            "projectedHeightPx1080": 278.6300048828125,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2399,14 +2497,14 @@
             },
             "targetPoint": {
                 "x": -3.299999952316284,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 13.751999855041504,
-            "horizontalAngle": -13.885000228881836,
-            "verticalAngle": 0.4269999861717224,
-            "projectedHeightPx1080": 224.7760009765625,
+            "distance": 11.772000312805176,
+            "horizontalAngle": -16.280000686645509,
+            "verticalAngle": 3.4030001163482668,
+            "projectedHeightPx1080": 356.90301513671877,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2421,14 +2519,14 @@
             },
             "targetPoint": {
                 "x": 3.4000000953674318,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 13.776000022888184,
-            "horizontalAngle": 14.288000106811524,
-            "verticalAngle": 0.4259999990463257,
-            "projectedHeightPx1080": 224.37899780273438,
+            "distance": 11.800000190734864,
+            "horizontalAngle": 16.746000289916993,
+            "verticalAngle": 3.3949999809265138,
+            "projectedHeightPx1080": 356.0459899902344,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2443,14 +2541,14 @@
             },
             "targetPoint": {
                 "x": 10.100000381469727,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 16.739999771118165,
-            "horizontalAngle": 37.10900115966797,
-            "verticalAngle": 0.35100001096725466,
-            "projectedHeightPx1080": 184.6529998779297,
+            "distance": 15.156000137329102,
+            "horizontalAngle": 41.79100036621094,
+            "verticalAngle": 2.6440000534057619,
+            "projectedHeightPx1080": 277.4110107421875,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2530,18 +2628,18 @@
                 "z": -41.70000076293945
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 0.0,
-            "distance": 34.32099914550781,
-            "horizontalAngle": -10.916999816894532,
-            "verticalAngle": -4.910999774932861,
-            "projectedHeightPx1080": 16.291000366210939,
-            "lineOfSight": false,
+            "distance": 29.058000564575197,
+            "horizontalAngle": -4.935999870300293,
+            "verticalAngle": -3.052999973297119,
+            "projectedHeightPx1080": 19.28499984741211,
+            "lineOfSight": true,
             "inViewAtHeading": true,
-            "blocker": "Storefront/Counter"
+            "blocker": ""
         },
         {
             "from": "home door",
@@ -2575,14 +2673,14 @@
             },
             "targetPoint": {
                 "x": -10.0,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 10.020999908447266,
-            "horizontalAngle": -86.27999877929688,
-            "verticalAngle": 0.5860000252723694,
-            "projectedHeightPx1080": 308.4519958496094,
+            "distance": 10.097999572753907,
+            "horizontalAngle": -97.97000122070313,
+            "verticalAngle": 3.9660000801086427,
+            "projectedHeightPx1080": 415.82501220703127,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -2597,14 +2695,14 @@
             },
             "targetPoint": {
                 "x": -3.299999952316284,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 3.36299991607666,
-            "horizontalAngle": -78.8550033569336,
-            "verticalAngle": 1.746000051498413,
-            "projectedHeightPx1080": 918.6329956054688,
+            "distance": 3.5850000381469728,
+            "horizontalAngle": -112.98899841308594,
+            "verticalAngle": 11.048999786376954,
+            "projectedHeightPx1080": 1152.362060546875,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -2619,14 +2717,14 @@
             },
             "targetPoint": {
                 "x": 3.4000000953674318,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 3.4619998931884767,
-            "horizontalAngle": 79.17500305175781,
-            "verticalAngle": 1.6959999799728394,
-            "projectedHeightPx1080": 892.60400390625,
+            "distance": 3.677000045776367,
+            "horizontalAngle": 112.37999725341797,
+            "verticalAngle": 10.779000282287598,
+            "projectedHeightPx1080": 1124.469970703125,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -2641,14 +2739,14 @@
             },
             "targetPoint": {
                 "x": 10.100000381469727,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 0.0,
-            "distance": 10.121000289916993,
-            "horizontalAngle": 86.31700134277344,
-            "verticalAngle": 0.5799999833106995,
-            "projectedHeightPx1080": 305.4110107421875,
+            "distance": 10.196999549865723,
+            "horizontalAngle": 97.89199829101563,
+            "verticalAngle": 3.927000045776367,
+            "projectedHeightPx1080": 411.80499267578127,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -2728,18 +2826,18 @@
                 "z": -29.0
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 0.0,
-            "distance": 21.982999801635743,
-            "horizontalAngle": -17.198999404907228,
-            "verticalAngle": -7.639999866485596,
-            "projectedHeightPx1080": 25.302000045776368,
-            "lineOfSight": false,
+            "distance": 16.44099998474121,
+            "horizontalAngle": -8.746000289916993,
+            "verticalAngle": -5.386000156402588,
+            "projectedHeightPx1080": 33.981998443603519,
+            "lineOfSight": true,
             "inViewAtHeading": true,
-            "blocker": "P46_ContinuousTown/MainStreet"
+            "blocker": ""
         },
         {
             "from": "town square",
@@ -2795,14 +2893,14 @@
             },
             "targetPoint": {
                 "x": -10.0,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 18.740999221801759,
-            "horizontalAngle": 32.249000549316409,
-            "verticalAngle": 0.31299999356269839,
-            "projectedHeightPx1080": 164.94200134277345,
+            "distance": 20.503999710083009,
+            "horizontalAngle": 29.190000534057618,
+            "verticalAngle": 1.9550000429153443,
+            "projectedHeightPx1080": 205.1529998779297,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2817,14 +2915,14 @@
             },
             "targetPoint": {
                 "x": -3.299999952316284,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 16.190000534057618,
-            "horizontalAngle": 11.76099967956543,
-            "verticalAngle": 0.3630000054836273,
-            "projectedHeightPx1080": 190.93099975585938,
+            "distance": 18.20199966430664,
+            "horizontalAngle": 10.446000099182129,
+            "verticalAngle": 2.2019999027252199,
+            "projectedHeightPx1080": 231.0659942626953,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2839,14 +2937,14 @@
             },
             "targetPoint": {
                 "x": 3.4000000953674318,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 16.209999084472658,
-            "horizontalAngle": -12.107000350952149,
-            "verticalAngle": 0.3619999885559082,
-            "projectedHeightPx1080": 190.68800354003907,
+            "distance": 18.219999313354493,
+            "horizontalAngle": -10.755000114440918,
+            "verticalAngle": 2.200000047683716,
+            "projectedHeightPx1080": 230.83299255371095,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2861,14 +2959,14 @@
             },
             "targetPoint": {
                 "x": 10.100000381469727,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 18.79400062561035,
-            "horizontalAngle": -32.50600051879883,
-            "verticalAngle": 0.31200000643730166,
-            "projectedHeightPx1080": 164.4720001220703,
+            "distance": 20.55299949645996,
+            "horizontalAngle": -29.43400001525879,
+            "verticalAngle": 1.9509999752044678,
+            "projectedHeightPx1080": 204.6649932861328,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -2948,15 +3046,15 @@
                 "z": -12.5
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 180.0,
-            "distance": 7.906000137329102,
-            "horizontalAngle": 124.69499969482422,
-            "verticalAngle": -20.45599937438965,
-            "projectedHeightPx1080": 66.50900268554688,
+            "distance": 2.51200008392334,
+            "horizontalAngle": 84.28900146484375,
+            "verticalAngle": -31.67099952697754,
+            "projectedHeightPx1080": 190.0959930419922,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""
@@ -3015,14 +3113,14 @@
             },
             "targetPoint": {
                 "x": -10.0,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 30.493000030517579,
-            "horizontalAngle": 38.542999267578128,
-            "verticalAngle": 0.19300000369548798,
-            "projectedHeightPx1080": 101.3740005493164,
+            "distance": 32.12200164794922,
+            "horizontalAngle": 36.26300048828125,
+            "verticalAngle": 1.2480000257492066,
+            "projectedHeightPx1080": 130.9980010986328,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -3037,14 +3135,14 @@
             },
             "targetPoint": {
                 "x": -3.299999952316284,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 26.834999084472658,
-            "horizontalAngle": 27.2810001373291,
-            "verticalAngle": 0.21899999678134919,
-            "projectedHeightPx1080": 115.19300079345703,
+            "distance": 28.672000885009767,
+            "horizontalAngle": 25.402999877929689,
+            "verticalAngle": 1.3990000486373902,
+            "projectedHeightPx1080": 146.74899291992188,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -3059,14 +3157,14 @@
             },
             "targetPoint": {
                 "x": 3.4000000953674318,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 24.49799919128418,
-            "horizontalAngle": 13.21399974822998,
-            "verticalAngle": 0.23999999463558198,
-            "projectedHeightPx1080": 126.1780014038086,
+            "distance": 26.49799919128418,
+            "horizontalAngle": 12.199999809265137,
+            "verticalAngle": 1.5130000114440919,
+            "projectedHeightPx1080": 158.7790069580078,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -3081,14 +3179,14 @@
             },
             "targetPoint": {
                 "x": 10.100000381469727,
-                "y": 10.052000045776368,
-                "z": -28.350000381469728
+                "y": 10.649999618530274,
+                "z": -30.399999618530275
             },
             "headingYaw": 180.0,
-            "distance": 23.875,
-            "horizontalAngle": -2.6410000324249269,
-            "verticalAngle": 0.2460000067949295,
-            "projectedHeightPx1080": 129.4720001220703,
+            "distance": 25.92300033569336,
+            "horizontalAngle": -2.431999921798706,
+            "verticalAngle": 1.5470000505447388,
+            "projectedHeightPx1080": 162.3000030517578,
             "lineOfSight": true,
             "inViewAtHeading": true,
             "blocker": ""
@@ -3146,15 +3244,15 @@
                 "z": -4.5
             },
             "targetPoint": {
-                "x": -6.5,
-                "y": 7.000999927520752,
-                "z": -8.0
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
             },
             "headingYaw": 180.0,
-            "distance": 15.890000343322754,
-            "horizontalAngle": 77.2760009765625,
-            "verticalAngle": -10.512999534606934,
-            "projectedHeightPx1080": 34.722999572753909,
+            "distance": 14.152999877929688,
+            "horizontalAngle": 54.345001220703128,
+            "verticalAngle": -6.25,
+            "projectedHeightPx1080": 39.415000915527347,
             "lineOfSight": true,
             "inViewAtHeading": false,
             "blocker": ""

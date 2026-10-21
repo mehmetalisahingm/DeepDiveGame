@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "d90d9b2b394365c63983bc959a0d786b66a8ad10",
+  "kind": "Windows two real processes - earned full day and fresh host reload",
+  "localProcessesOnly": true,
+  "reports": [
+    "coop-product-player0.json",
+    "coop-product-player1.json",
+    "coop-product-reload.json"
+  ]
+}

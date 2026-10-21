@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='')
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly)
 $ErrorActionPreference='Stop'
 $productRoot=Split-Path -Parent $PSScriptRoot
 $productIsWindows=$env:OS -eq 'Windows_NT'
@@ -16,6 +16,7 @@ try {
         $productArgs=@('-batchmode','-p46-day-role',$(if ($productSlot -eq 0) {'host'} else {'client'}),
             '-p46-day-count',$Players,'-p46-day-slot',$productSlot,'-p46-day-port',$Port,
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
+        if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
         elseif ($productIsWindows) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
@@ -37,9 +38,11 @@ try {
         Start-Sleep -Milliseconds 500
     }
     $productFailed=@()
+    $repairRecovered=$false
     foreach ($productEntry in $productProcesses) {
         if (-not (Test-Path -LiteralPath $productEntry.Report)) { $productFailed+="Player $($productEntry.Slot) missing report"; continue }
         $productResult=Get-Content -LiteralPath $productEntry.Report -Raw|ConvertFrom-Json
+        $repairRecovered=$repairRecovered -or $productResult.cancelRecovered
         [pscustomobject]@{Player=$productEntry.Slot;Passed=$productResult.passed;Step=$productResult.step;Dives=$productResult.diveCount;
             FishSold=$productResult.soldCount;Day=$productResult.day;Income=$productResult.income;Error=$productResult.failure}
         if (-not $productResult.passed -or $productEntry.Process.ExitCode -ne 0) { $productFailed+="Player $($productEntry.Slot): $($productResult.errors -join '; ')" }
@@ -47,6 +50,14 @@ try {
     Write-Output "Evidence: $productRun"
     if ($productFailed.Count -gt 0) { throw ($productFailed -join "`n") }
     $productCheckpoint=Get-Content -LiteralPath (Join-Path $productRun 'player0.json.campaign.json') -Raw|ConvertFrom-Json
+    if ($RepairOnly) {
+        if (-not $repairRecovered -or @($productCheckpoint.BoatPartIds).Count -ne 3 -or
+            @($productCheckpoint.UnusedBoatPartIds).Count -ne 0 -or $productCheckpoint.SchemaVersion -ne 9) {
+            throw 'Physical repair did not recover cancelled material or persist exactly three completed parts.'
+        }
+        Write-Output 'Physical repair owner-input/cancel recovery/mirror/disk PASS.'
+        return
+    }
     if ($productCheckpoint.Day.DayNumber -ne 2 -or @($productCheckpoint.Day.ClosedCloseIds).Count -ne 1 -or
         @($productCheckpoint.Day.SummaryHistory).Count -ne 1 -or @($productCheckpoint.SoldCaptureIds).Count -ne 2 -or
         @($productCheckpoint.BoatPartIds).Count -ne 3 -or @($productCheckpoint.Media.Publications).Count -ne 1 -or

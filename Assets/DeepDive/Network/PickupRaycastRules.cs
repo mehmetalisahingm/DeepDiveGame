@@ -40,6 +40,7 @@ namespace DeepDive.Network
         }
 
         public static bool IsPickupTarget(Collider collider) =>
+            FindTarget<IBoatRepairSlot>(collider) != null ||
             FindTarget<ICatchPickupTarget>(collider) != null ||
             FindTarget<IBoatPartPickupTarget>(collider) != null;
 

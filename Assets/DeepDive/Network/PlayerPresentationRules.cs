@@ -22,7 +22,9 @@ namespace DeepDive.Network
     {
         None = 0,
         Harpoon = 1,
-        Camera = 2
+        Camera = 2,
+        RepairPart = 3,
+        RepairHammer = 4
     }
 
     public readonly struct PlayerPresentationState

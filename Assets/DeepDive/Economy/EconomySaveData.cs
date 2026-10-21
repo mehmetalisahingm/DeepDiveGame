@@ -15,7 +15,8 @@ namespace DeepDive.Economy
         // v7 (P4.4-C) adds the deep progression chain (encyclopedia -> rumor -> trace -> discovery -> boss unlock). Older files load as
         // HasProgression=false, which means the closed default: Locked, nothing counted.
         // v8 (P4.5-C) adds the living-world record (orders/sponsors, home/town development, host role) and the paid reward ids.
-        public const int CurrentSchemaVersion = 8;
+        // v9 (P4.8-A narrow integration): acquired repair material is not completed repair.
+        public const int CurrentSchemaVersion = 9;
         public const int OldestSupportedSchemaVersion = 1;
 
         public int SchemaVersion = CurrentSchemaVersion;
@@ -28,6 +29,7 @@ namespace DeepDive.Economy
         public List<EconomyLoadoutSave> Loadouts = new List<EconomyLoadoutSave>();
         public List<PendingTurnInSave> PendingTurnIns = new List<PendingTurnInSave>();
         public List<string> BoatPartIds = new List<string>();
+        public List<string> UnusedBoatPartIds = new List<string>();
         // v3: safe catches parked in the shared home storage. Always shared (D06: no persistent non-host ids).
         public List<PendingTurnInSave> StoredItems = new List<PendingTurnInSave>();
         public bool HasDay;

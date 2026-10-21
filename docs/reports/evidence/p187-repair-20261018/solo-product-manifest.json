@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "5e416511e59fba49a7ae5451afe6633a81e80bc0",
+  "kind": "Windows solo real input product day and fresh-process reload",
+  "localProcessesOnly": true,
+  "reports": [
+    "solo-product.json",
+    "solo-product-reload.json"
+  ],
+  "image": "repair-first-person-prototype.png",
+  "visualAcceptance": false,
+  "finalArtIssue": 189
+}

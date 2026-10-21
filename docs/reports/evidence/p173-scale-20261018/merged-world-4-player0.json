@@ -1,0 +1,33 @@
+{
+    "passed": true,
+    "homeSpawn": true,
+    "shopOpened": true,
+    "dockReached": true,
+    "swam": true,
+    "pcOpened": true,
+    "slept": true,
+    "morningHome": true,
+    "earlySleepSummary": true,
+    "reloadClean": false,
+    "players": 4,
+    "worldLoads": 1,
+    "completedStep": 9,
+    "firstDay": 1,
+    "morningDay": 2,
+    "distance": 183.4130859375,
+    "largestTravelStep": 0.0882628783583641,
+    "position": "",
+    "phase": "Lobby",
+    "trace": [
+        "1 Prep (-1.50, 8.48, -49.50)",
+        "2 Prep (8.58, 8.48, -4.79)",
+        "3 Dive (8.57, 8.48, -4.77)",
+        "4 Dive (-7.52, 6.11, -5.28)",
+        "5 Return (-7.52, 6.11, -5.28)",
+        "6 Return (2.29, 8.48, -50.38)",
+        "7 Lobby (2.29, 8.48, -50.38)",
+        "8 Lobby (-1.50, 8.40, -49.50)",
+        "9 Lobby (-1.50, 8.40, -49.50)"
+    ],
+    "errors": []
+}

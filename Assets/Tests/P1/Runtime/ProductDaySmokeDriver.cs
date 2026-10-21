@@ -31,6 +31,8 @@ namespace DeepDive.P1.Lab
             public bool passed, reload, initialClean, homeSpawn, repaired, cameraBought, realClip,
                 clipPlayed, clipAdvanced, published, duplicateRefused, slept, morningHome, reloadClean, mapMoved, mapDocked;
             public int slot, players, step, worldLoads, diveCount, soldCount, day, balance, income, boatParts, mapPlayers;
+            public bool observedCarry, observedPlaced, cancelRecovered;
+            public int repairRejected;
             public string clipId = "", recordingId = "", hash = "", position = "", failure = "";
             public long clipBytes;
             public float distance, maxTravelStep;
@@ -61,6 +63,14 @@ namespace DeepDive.P1.Lab
         private Report baseline;
 
         private bool Host => report.slot == 0;
+        private bool repairApproach, repairAtDock, repairExit;
+        private bool RepairOnly => Arg("-p187-repair-only") == "1";
+        private bool sawCarry, sawPlaced;
+        private bool cancelSent;
+        private bool cancelObserved;
+        private ulong repairObservedRequest;
+        private FishActor recordingFish;
+        private float nextHuntTrace;
         private static string Arg(string key, string fallback = "")
         {
             var args = Environment.GetCommandLineArgs(); var index = Array.IndexOf(args, key);
@@ -137,6 +147,11 @@ namespace DeepDive.P1.Lab
                 localDone = true;
             }
             Track(); Observe(); Broadcast(now);
+            foreach (var peer in players)
+            { sawCarry |= peer.RepairHandsBusy && !peer.RepairPlaced.Value; sawPlaced |= peer.RepairPlaced.Value && peer.RepairHits.Value > 0; }
+            if (step==1 && local.LastActionRequestId.Value!=repairObservedRequest)
+            { repairObservedRequest=local.LastActionRequestId.Value; if(local.LastActionResult.Value!=(int)PlayerActionResult.Accepted)report.repairRejected++; }
+            if (step == 16) { Snapshot(); if (now > stageDeadline - 167f) Finish(); return; }
             if (now > nextTrace)
             {
                 nextTrace = now + 5f;
@@ -159,7 +174,9 @@ namespace DeepDive.P1.Lab
         }
         private void LateUpdate()
         {
-            if (!finished && step == 15 && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+            // Step 16 (repair-only) ends the same way: the host quits 3 s after reaching it, which can close a guest's
+            // connection before the guest's own 3 s are up. Its repair evidence is already mirrored by then.
+            if (!finished && (step == 15 || step == 16) && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
         }
         private void Broadcast(float now)
         {
@@ -207,7 +224,9 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 0: SetStep(1); break;
-                case 1: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Dive) SetStep(2); break;
+                case 1:
+                    if (RepairOnly) { SetStep(16); break; }
+                    adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Dive) SetStep(2); break;
                 case 2: SetStep(3); break;
                 case 3: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(4); break;
                 case 4: CycleDive(5); break;
@@ -249,7 +268,7 @@ namespace DeepDive.P1.Lab
                         if (!Follow()) return;
                         substep = 1; route = null;
                     }
-                    if (!Host) { localDone = true; return; }
+                    if (!Host && !RepairOnly) { localDone = true; return; }
                     CollectParts(); break;
                 case 2: case 5:
                     if (!Host) { WaitInWater(); return; }
@@ -281,9 +300,83 @@ namespace DeepDive.P1.Lab
         private void CollectParts()
         {
             var names = new[] { "BoatPart_Hull", "BoatPart_Engine", "BoatPart_FuelTank" };
-            if (part >= names.Length) { localDone = sync.BoatPartsDone.Value == 3; return; }
-            if ((sync.BoatPartsMask.Value & (1 << part)) != 0) { part++; aimAt = 0; return; }
-            if (part == 1 && !engineEntered)
+            if (RepairOnly && expected>1)
+            {
+                var assignment=report.slot;
+                while(part<3 && part%Mathf.Min(3,expected)!=assignment)part++;
+            }
+            if (part >= names.Length)
+            {
+                if(RepairOnly && expected>1 && sync.BoatPartsDone.Value<3)
+                {
+                    var park=P(11.2f+report.slot*.6f,-12.5f);
+                    var exit=local.transform.position.z > -11.8f ? P(8.35f,-12.5f) : park;
+                    var toPark=exit-local.transform.position;toPark.y=0;
+                    if(toPark.magnitude>.2f)MoveToward(Around(exit));else Stop();
+                    return;
+                }
+                localDone = sync.BoatPartsDone.Value == 3; return;
+            }
+            if ((sync.BoatPartsMask.Value & (1 << part)) != 0)
+            { part++; aimAt = 0; repairApproach = repairAtDock = false; repairExit = true; route = null; return; }
+            var site = BoatRepairNetworkBinding.Instance;
+            if (local.RepairHandsBusy)
+            {
+                if (site == null) return;
+                if (!repairAtDock)
+                {
+                    if (!repairApproach)
+                    {
+                        SetRoute(RepairApproach(site, part));
+                        repairApproach=true;
+                    }
+                    if (!Follow()) { aimAt=0; return; }
+                    repairAtDock=true;route=null;
+                }
+                var physicalStand=site.StandPosition(part);physicalStand.y=ContinuousTownLayout.WalkSurfaceY;
+                var toStand=physicalStand-local.transform.position;toStand.y=0;
+                if(toStand.magnitude>.2f){MoveToward(physicalStand);aimAt=0;return;}
+                Aim(site.SlotPosition(part));
+                if (!Settled()) return;
+                if(RepairOnly && !cancelSent && !local.RepairPlaced.Value)
+                { Act(()=>{cancelSent=true;local.SubmitRepairCancelLocal();}); return; }
+                if(cancelObserved)report.cancelRecovered=true;
+                if (!local.RepairPlaced.Value) Act(local.SubmitPickupLocal);
+                else
+                {
+                    if (local.RepairHits.Value==1 && Host && !File.Exists(output+".repair.png")) CaptureRepair();
+                    Act(local.SubmitRepairHammerLocal);
+                }
+                return;
+            }
+            if(site!=null && (sync.BoatMaterialsMask.Value&(1<<part))!=0)
+            {
+                if(cancelSent)cancelObserved=true;
+                if(!repairAtDock)
+                {
+                    if(!repairApproach)
+                    {SetRoute(RepairApproach(site, part));repairApproach=true;}
+                    if(!Follow())return;
+                    repairAtDock=true;route=null;
+                }
+                var rack=site.RackPosition(part);
+                var rackStand=rack+Vector3.right*.65f;rackStand.y=ContinuousTownLayout.WalkSurfaceY;
+                var rackDelta=rackStand-local.transform.position;rackDelta.y=0;
+                if(rackDelta.magnitude>.2f){MoveToward(Around(rackStand));aimAt=0;return;}
+                Aim(rack);if(Settled())Act(local.SubmitPickupLocal);return;
+            }
+            if (repairExit)
+            {
+                // From the beach cradle (#188) the next leg starts on dry sand already; from the berth, walk back off the pier.
+                if (route==null) SetRoute(site != null && site.OnCradle ? new Vector3[0] : new[]{P(9f,-9f),P(9f,-12.5f)});
+                if (!Follow()) return;
+                repairExit=false;route=null;
+            }
+            var target = GameObject.Find(names[part]).transform.position;
+            var surface = FindFirstObjectByType<SwimVolume>().GetComponent<Collider>().bounds.max.y;
+            var submerged = target.y < surface - 0.1f;
+            // #188: the engine now rests on the dry beach; take the water entry route only for a part that is really under the surface.
+            if (submerged && !engineEntered)
             {
                 if (!partRoute)
                 {
@@ -293,9 +386,6 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 engineEntered = true; route = null;
             }
-            var target = GameObject.Find(names[part]).transform.position;
-            var surface = FindFirstObjectByType<SwimVolume>().GetComponent<Collider>().bounds.max.y;
-            var submerged = target.y < surface - 0.1f;
             var stand = submerged ? target + Vector3.forward * 1.8f : target;
             if (submerged)
             {
@@ -303,7 +393,7 @@ namespace DeepDive.P1.Lab
                 stand.y = Mathf.Min(stand.y, surface - eyeHeight - 0.1f);
             }
             if (Vector3.Distance(local.transform.position, stand) > (submerged ? 0.45f : 1.3f))
-            { MoveToward(submerged ? stand : CoastTarget(stand)); aimAt = 0; return; }
+            { MoveToward(submerged ? stand : CoastTarget(Around(stand))); aimAt = 0; return; }
             Aim(target + Vector3.up * 0.3f);
             if (Settled()) Act(local.SubmitPickupLocal);
         }
@@ -324,13 +414,35 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 substep = 1;
             }
-            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.IsSpawned);
+            var eye=local.RecordingEyePosition;
+            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None)
+                .Where(f=>f.IsSpawned && (!f.IsDead || f.GetComponent<CatchObject>().IsAvailable))
+                .Where(f=>!Physics.Linecast(eye,f.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
+                    blocker.collider.GetComponentInParent<FishActor>()==f)
+                .OrderByDescending(f=>f.GetComponent<CatchObject>().IsAvailable)
+                .ThenBy(f=>(f.transform.position-eye).sqrMagnitude).FirstOrDefault();
+            if (Time.realtimeSinceStartup >= nextHuntTrace)
+            {
+                nextHuntTrace = Time.realtimeSinceStartup + 5f;
+                Debug.Log($"P46_PRODUCT_HUNT fish={fish?.name} target={fish?.GetComponent<Collider>().bounds.center} " +
+                    $"available={fish?.GetComponent<CatchObject>().IsAvailable} eye={eye} " +
+                    $"lastAction={local.LastActionRequestId.Value}/{local.LastActionResult.Value} " +
+                    $"swimming={local.Swimming.Value} passive={local.Passive.Value}");
+            }
             if (fish == null) { Stop(); return; }
             local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
             var available = fish.GetComponent<CatchObject>().IsAvailable;
             var target = fish.GetComponent<Collider>().bounds.center;
             var delta = target - local.GetComponentInChildren<Camera>(true).transform.position;
-            if (available && delta.magnitude > 1.7f) { MoveToward(target - Vector3.up * 1.4f); aimAt = 0; return; }
+            // The real E ray reaches 2.5 m. Stop with a margin inside that range rather than
+            // forcing the body to swim underneath a low catch until its eye is only 1.7 m away.
+            // Match the actual eye offset and keep the root above the shallow seabed.
+            if (available && delta.magnitude > 2.2f)
+            {
+                var stand = target - (eye - local.transform.position);
+                stand.y = Mathf.Max(0.1f, stand.y);
+                MoveToward(stand); aimAt = 0; return;
+            }
             Aim(target);
             if (Settled())
             {
@@ -369,10 +481,21 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 substep = 1;
             }
-            var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None).FirstOrDefault(f => f.IsSpawned && !f.IsDead);
+            if(recordingFish==null || !recordingFish.IsSpawned || recordingFish.IsDead ||
+                (!bridge.IsRecordingLocal && !ClearFishLine(recordingFish)))
+                recordingFish=FindObjectsByType<FishActor>(FindObjectsSortMode.None)
+                    .Where(f=>f.IsSpawned && !f.IsDead && ClearFishLine(f))
+                    .OrderBy(f=>(f.transform.position-local.RecordingEyePosition).sqrMagnitude).FirstOrDefault();
+            var fish=recordingFish;
             if (fish == null) { Stop(); return; }
             var delta = fish.transform.position - local.RecordingEyePosition;
-            if (delta.magnitude > 4.5f) { MoveToward(fish.transform.position - Vector3.up * 1.4f); aimAt = 0; return; }
+            // Start in the real basic-camera band before closing further on a moving subject.
+            // The fish need not reach an exact 8 m approach distance to accept an actual take.
+            if (delta.magnitude > 10f)
+            {
+                var stand=fish.transform.position-Vector3.up*1.4f;stand.y=Mathf.Max(.1f,stand.y);
+                MoveToward(stand);aimAt=0;return;
+            }
             Aim(fish.transform.position);
             if (bridge.IsRecordingLocal)
             {
@@ -381,6 +504,9 @@ namespace DeepDive.P1.Lab
             }
             else if (Settled()) { recordingAt = 0; Act(bridge.ToggleRecordingLocal); }
         }
+        private bool ClearFishLine(FishActor fish) =>
+            !Physics.Linecast(local.RecordingEyePosition,fish.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
+            blocker.collider.GetComponentInParent<FishActor>()==fish;
         private void HoldForShore()
         {
             var stand = new Vector3(-7.6f, 5.5f, -5f);
@@ -569,14 +695,31 @@ namespace DeepDive.P1.Lab
             if (report.worldLoads != 1) Fail("World scene reloaded");
         }
         private void SetRoute(IEnumerable<Vector3> points) { route = points.ToList(); waypoint = 0; }
+        // #188: the worksite is either at the water berth (pier approach, as before) or on the beach cradle, where the
+        // walk goes round the solid hull to the repair-work anchor.
+        private IEnumerable<Vector3> RepairApproach(BoatRepairNetworkBinding site, int part)
+        {
+            var stand = site.StandPosition(part);
+            if (site.OnCradle) return site.RouteAround(local.transform.position, P(stand.x, stand.z));
+            return new[] { P(9f+(part-1)*.65f,-12.5f), P(9f+(part-1)*.65f,-9f), P(stand.x, stand.z) };
+        }
+        // Next dry waypoint round the cradle hull while the broken boat lies there; otherwise the target itself.
+        private Vector3 Around(Vector3 target)
+        {
+            var site = BoatRepairNetworkBinding.Instance;
+            return site != null && !local.Swimming.Value ? site.NextAround(local.transform.position, target) : target;
+        }
         private static Vector3 P(float x, float z) => new Vector3(x, ContinuousTownLayout.WalkSurfaceY, z);
         private static Vector3 H(float x, float z) => ContinuousTownLayout.HomeOrigin + new Vector3(x, 0f, z);
         private IEnumerable<Vector3> Outward()
         {
             yield return H(-4.7f, -2f); yield return H(-4.7f, 5f); yield return ContinuousTownLayout.HomeRig.Door;
             yield return P(0f, -36f); yield return P(0f, -24f);
-            yield return P(-1.8f + report.slot * 1.1f, -16f);
-            yield return P(-1.8f + report.slot * 1.1f, -13f);
+            // #188: with the broken boat on the beach cradle (x 1.1..6.1, z -11.4..-13.8) the crew fans out west of it.
+            var cradle = BoatRepairNetworkBinding.Instance;
+            var x = cradle != null && cradle.Blocking ? -1.8f - report.slot * 1.1f : -1.8f + report.slot * 1.1f;
+            yield return P(x, -16f);
+            yield return P(x, -13f);
         }
         private bool Follow(bool depth = false)
         {
@@ -638,6 +781,20 @@ namespace DeepDive.P1.Lab
             nextAction = Time.realtimeSinceStartup + 0.8f; action();
         }
         private void Stop() => local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+        private void CaptureRepair()
+        {
+            var camera=local.GetComponentInChildren<Camera>(true);
+            var previous=camera.targetTexture; var active=RenderTexture.active;
+            var target=new RenderTexture(1280,720,24);var pixels=new Texture2D(1280,720,TextureFormat.RGB24,false);
+            try
+            {
+                target.Create();camera.targetTexture=target;
+                UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(camera,new UnityEngine.Rendering.RenderPipeline.StandardRequest{destination=target});
+                RenderTexture.active=target;pixels.ReadPixels(new Rect(0,0,1280,720),0,0);pixels.Apply();
+                File.WriteAllBytes(output+".repair.png",pixels.EncodeToPNG());
+            }
+            finally {camera.targetTexture=previous;RenderTexture.active=active;target.Release();Destroy(target);Destroy(pixels);}
+        }
         private void Log(string message, string stack, LogType type)
         {
             if ((type == LogType.Error || type == LogType.Exception) && !finished) Fail(message);
@@ -656,6 +813,8 @@ namespace DeepDive.P1.Lab
             if (Host) report.passed &= report.initialClean && report.cameraBought && report.soldCount == 2 &&
                 report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused;
             if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
+            if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
+            report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
             Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);
             Application.Quit(report.passed ? 0 : 1);

@@ -89,8 +89,10 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $seconds = if ($Unified) { 360 } elseif ($Shops) { 150 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 95 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
-    if ($CoastParts) { $seconds = 210 }
+    $seconds = if ($Unified) { 360 } elseif ($Shops) { 150 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 230 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
+    if ($CoastParts) { $seconds = 390 }
+    elseif ($Trip -and -not $TripVehicle) { $seconds = 430 }
+    elseif ($Boat -and -not $Trip) { $seconds = 280 }
     $p1Deadline = (Get-Date).AddSeconds($seconds)
     while (@($p1Processes | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $p1Deadline) { Start-Sleep -Milliseconds 500 }
 

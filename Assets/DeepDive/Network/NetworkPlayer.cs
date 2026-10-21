@@ -64,6 +64,11 @@ namespace DeepDive.Network
         public readonly NetworkVariable<ulong> LastActionRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<int> LastActionResult = new NetworkVariable<int>();
         public readonly NetworkVariable<byte> LastActionKind = new NetworkVariable<byte>();
+        public readonly NetworkVariable<int> RepairPartIndex = new NetworkVariable<int>(-1);
+        public readonly NetworkVariable<bool> RepairPlaced = new NetworkVariable<bool>();
+        public readonly NetworkVariable<int> RepairHits = new NetworkVariable<int>();
+        public readonly NetworkVariable<uint> RepairStroke = new NetworkVariable<uint>();
+        public bool RepairHandsBusy => RepairPartIndex.Value >= 0;
 
         public bool ReadKeyboard { get; set; } = true;
         public LocomotionMode CurrentLocomotion => (LocomotionMode)Locomotion.Value;
@@ -75,7 +80,9 @@ namespace DeepDive.Network
         public PlayerEquipmentCapabilities EquipmentCapabilities => new PlayerEquipmentCapabilities(
             CurrentCameraTier, EquippedFinsLevel.Value, EquippedBagLevel.Value, EquippedHarpoonLevel.Value);
         public PlayerPresentationState PresentationState =>
-            new PlayerPresentationState(CurrentLocomotion, CurrentHeldEquipment, RecordingPresentation.Value);
+            new PlayerPresentationState(CurrentLocomotion, RepairHandsBusy
+                ? (RepairPlaced.Value ? HeldEquipmentMode.RepairHammer : HeldEquipmentMode.RepairPart)
+                : CurrentHeldEquipment, RecordingPresentation.Value);
 
         private readonly ServerInputBuffer input = new ServerInputBuffer();
         private readonly ServerActionGate actionGate = new ServerActionGate();
@@ -175,6 +182,7 @@ namespace DeepDive.Network
                 bodyMaterial.color = Color.HSVToRGB((OwnerClientId * 0.23f) % 1f, 0.65f, 0.95f);
                 if (IsOwner) bodyRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
             }
+            if (GetComponent<RepairCarryView>() == null) gameObject.AddComponent<RepairCarryView>();
             session.Register(this);
         }
 
@@ -196,8 +204,12 @@ namespace DeepDive.Network
                 pitch = Mathf.Clamp(pitch - Input.GetAxisRaw("Mouse Y") * 2f, -85f, 85f);
                 if (Application.isFocused && !Passive.Value)
                 {
-                    if (Input.GetMouseButtonDown(0) && CurrentHeldEquipment == HeldEquipmentMode.Harpoon)
-                        SubmitHarpoonLocal();
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        if (RepairPlaced.Value) SubmitRepairHammerLocal();
+                        else if (!RepairHandsBusy && CurrentHeldEquipment == HeldEquipmentMode.Harpoon) SubmitHarpoonLocal();
+                    }
+                    if (Input.GetKeyDown(KeyCode.Q) && RepairHandsBusy) SubmitRepairCancelLocal();
                     if (Input.GetKeyDown(KeyCode.E)) SubmitPickupLocal();
                     if (Input.GetKeyDown(KeyCode.F)) SubmitServiceInteractionLocal();
                     if (Input.GetKeyDown(KeyCode.Alpha1)) SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
@@ -226,6 +238,53 @@ namespace DeepDive.Network
             if (!IsOwner) return;
             Cursor.lockState = captured ? CursorLockMode.Locked : CursorLockMode.None;
             Cursor.visible = !captured;
+        }
+
+        public void SubmitRepairHammerLocal() => SubmitRepairLocal(BoatRepairCommand.Hammer);
+        public void SubmitRepairCancelLocal() => SubmitRepairLocal(BoatRepairCommand.Cancel);
+        private void SubmitRepairLocal(BoatRepairCommand command)
+        {
+            if (!IsSpawned || !IsOwner || !NetworkManager.IsConnectedClient) return;
+            var request = ++actionSequence;
+            if (IsServer) HandleRepair(command, request);
+            else RepairRpc((byte)command, request);
+        }
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        private void RepairRpc(byte command, ulong request) => HandleRepair((BoatRepairCommand)command, request);
+
+        private void HandleRepair(BoatRepairCommand command, ulong request)
+        {
+            if (!IsServer) return;
+            var gate = actionGate.TryAccept(request, PlayerActionKind.Repair, Time.realtimeSinceStartupAsDouble, .05);
+            if (gate != PlayerActionResult.Accepted) { PublishAction(request, PlayerActionKind.Repair, gate); return; }
+            var index = RepairPartIndex.Value;
+            if (command != BoatRepairCommand.Cancel && command != BoatRepairCommand.Hammer)
+            { PublishAction(request, PlayerActionKind.Repair, PlayerActionResult.InvalidTarget); return; }
+            if (command == BoatRepairCommand.Hammer && (!TryRepairSlotAim(out var aimed) || aimed != index))
+            { PublishAction(request, PlayerActionKind.Repair, PlayerActionResult.InvalidTarget); return; }
+            var result = BoatRepairActions.Request(new PlayerId(OwnerClientId), command, index, request);
+            if (command == BoatRepairCommand.Hammer && result.Accepted) RepairStroke.Value++;
+            PublishAction(request, PlayerActionKind.Repair, result.Accepted ? PlayerActionResult.Accepted : PlayerActionResult.Rejected);
+        }
+
+        public bool TryRepairSlotAim(out int index)
+        {
+            index = -1;
+            if (!IsServer) return false;
+            var frame = input.Read(Time.realtimeSinceStartupAsDouble);
+            var origin = RecordingEyePosition;
+            var hits = Physics.RaycastAll(origin, Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward,
+                pickupRange, ~0, QueryTriggerInteraction.Collide);
+            var collider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits);
+            var slot = collider != null ? FindTarget<IBoatRepairSlot>(collider) : null;
+            if (slot == null) return false;
+            index = slot.PartIndex; return true;
+        }
+
+        public void PublishRepairWork(int part, bool placed, int hits)
+        {
+            if (!IsServer) return;
+            RepairPartIndex.Value = part; RepairPlaced.Value = placed; RepairHits.Value = hits;
         }
 
         // Kept for P1 callers/tests; P2 adds pitch so host can authoritatively raycast harpoon/pickup.
@@ -451,6 +510,7 @@ namespace DeepDive.Network
         private void ApplyHeldEquipmentRequestServer(HeldEquipmentMode mode)
         {
             if (!IsServer) return;
+            if (RepairHandsBusy) return;
             if (mode != HeldEquipmentMode.None && mode != HeldEquipmentMode.Harpoon && mode != HeldEquipmentMode.Camera)
                 return;
             if (mode == HeldEquipmentMode.Camera && !cameraOwned) return;
@@ -486,6 +546,7 @@ namespace DeepDive.Network
         private void HandleHarpoon(ulong requestId)
         {
             if (!IsServer) return;
+            if (RepairHandsBusy) { PublishAction(requestId, PlayerActionKind.Harpoon, PlayerActionResult.InvalidState); return; }
             var kind = PlayerActionKind.Harpoon;
             var effectiveCooldown = CrewRoleEffectRules.ResolveHarpoonCooldown(
                 P4EquipmentEffectRules.ResolveHarpoonCooldown(harpoonCooldown, EquippedHarpoonLevel.Value),
@@ -560,10 +621,17 @@ namespace DeepDive.Network
             }
 
             var playerId = new PlayerId(OwnerClientId);
+            var repairSlot = FindTarget<IBoatRepairSlot>(pickupCollider);
+            if (repairSlot != null)
+            {
+                var placed = BoatRepairActions.Request(playerId, BoatRepairCommand.Place, repairSlot.PartIndex, requestId);
+                PublishAction(requestId, PlayerActionKind.Repair, placed.Accepted ? PlayerActionResult.Accepted : PlayerActionResult.Rejected);
+                return;
+            }
             var catchTarget = FindTarget<ICatchPickupTarget>(pickupCollider);
             if (catchTarget != null)
             {
-                result = PickupRaycastRules.CanPickup(session.Status == ConnectionStatus.Connected,
+                result = !RepairHandsBusy && PickupRaycastRules.CanPickup(session.Status == ConnectionStatus.Connected,
                     session.IsSceneLoading, Passive.Value, DayLock.IsLocked, session.DiveActive, repairPart: false)
                     ? catchTarget.TryPickup(playerId, requestId)
                     : PlayerActionResult.InvalidState;
@@ -577,7 +645,10 @@ namespace DeepDive.Network
                 }
                 else
                 {
-                    var transaction = BoatPartClaim.TryClaimFound(playerId, boatPart.PartId, requestId);
+                    kind = PlayerActionKind.Repair;
+                    var index = 0;
+                    while (index < BoatRepairParts.All.Count && BoatRepairParts.All[index] != boatPart.PartId) index++;
+                    var transaction = BoatRepairActions.Request(playerId, BoatRepairCommand.Grab, index, requestId);
                     result = transaction.Accepted
                         ? PlayerActionResult.Accepted
                         : transaction.ReasonCode switch

@@ -61,11 +61,15 @@ namespace DeepDive.Composition
             var at = player.transform.position;
             foreach (var part in missing)
             {
-                if (anchors.TryGetValue(part, out var anchor) && anchor != null)
+                if ((progress.BoatMaterialsMask.Value & BoatRepairGuide.Bit(part)) != 0)
+                    lines.Add(BoatRepairGuide.PartName(part) + ": hazir; plajdaki ortak askida / elde");
+                else if (anchors.TryGetValue(part, out var anchor) && anchor != null)
                     lines.Add(BoatRepairGuide.Line(part, at.x, at.z, anchor.WorldPosition.x, anchor.WorldPosition.z));
                 else lines.Add(BoatRepairGuide.PartName(part) + ": kiyida");
             }
             note = phase == SessionPhase.Dive ? BoatRepairGuide.DiveNote : BoatRepairGuide.OutsideDiveNote;
+            if (BoatRepairNetworkBinding.Instance != null && BoatRepairNetworkBinding.Instance.OnCradle)
+                note += " Tamir: plajdaki kizak. Birakilan malzeme: kizagin dogusundaki ortak aski.";
         }
 
         // A real Canvas (not IMGUI): it is drawn by the camera like the other P4 panels, so a captured frame shows what the player sees.

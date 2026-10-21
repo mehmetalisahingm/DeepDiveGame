@@ -25,3 +25,18 @@ Birleşmiş commit'ten tekrar Windows build ve iki gerçek süreçli dünya turu
 4. Kısa görsel örnek kabulünden sonra #160 fiziksel taşıma/yerleştirme/keser-çivi tamiri; ardından #161 ortak eylemler, #162 kasaba/ev, #163 canlı deniz ve #164 nihai kabul gelir. Bu görev açılışı bu özellikleri uygulamaya başlamaz.
 
 R01/R02/R11 tamir semantiği/alt-slot/edinme-contribution kararları açık kalır. Plan önerisi ekip kararı gibi yazılmaz. P5/P6 kilidi, ücretli kaynak ve yayın için ayrı yetki sınırları değişmez.
+
+## 18 Ekim — #185 sonrası fiziksel tamir alt işleri
+
+#185, `6816fba` ile entegrasyona birleşti. Ahşap sandal ve Tripo motorbot görselleri elle tamir değildir. #171/#172/#173 açık görsel örnek işlerinin yerine yeni kopya issue açılmadı.
+
+| Alt iş | Sahip | Teslim |
+|---|---|---|
+| [#186](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186) | Mehmet + Utku + Mert | R01/R02/R11, edinme/katkı sözleşmesi ve eski kayıt geçişi |
+| [#187](https://github.com/mehmetalisahingm/DeepDiveGame/issues/187) | Mehmet | Taşı/bırak/yerleştir/keser/darbe, host doğrulaması ve yerel/uzak görünüm |
+| [#188](https://github.com/mehmetalisahingm/DeepDiveGame/issues/188) | Utku | Erişilebilir parçalar, yuvalar, güvenli bırakma ve dört kişi yaklaşma alanı |
+| [#189](https://github.com/mehmetalisahingm/DeepDiveGame/issues/189) | Mert | Kırık/onarılmış kombinasyonlar, parça/alet/ses ve kayıt sunumu |
+
+Hepsi #160'ın gerçek GitHub alt işidir. Önce #186 hazırlığı, sonra kabul edilmiş ortak seam üzerinden alan uygulaması yapılır. [Somut sözleşme ve mask tablosu](P48_REPAIR_CONTRACT_PROPOSAL.md) inceleme içindir; karar veya tamam kaydı değildir. #141 P4.6 teknik temel ve #159 P4.7 görsel örnek uygulama kapısı korunur. Yeni issue açılması sonraki fazı açmaz.
+
+18 Ekim ek kullanıcı kararı: #141/#159 açıkken yalnız Mehmet'in #187 taşıma/yerleştirme/keser işi şimdi uygulanır. #186 önerisindeki dar ID/üç grup/edinme ayrımı bu uygulamanın teknik temelidir; ekip onayı veya diğer fazların açılması sayılmaz. Nihai model/ses ve world yerleşimi #189/#188'de kalır.

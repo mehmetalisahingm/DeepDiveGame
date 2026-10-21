@@ -1,5 +1,7 @@
 # Ortak sistem sözleşmeleri
 
+21 Ekim güncel uygulama kararı: P0–P3 kapalı, P4 açık; P5/P6 kilitlidir. R01/R02/R11 alan onayları ve Mehmet'in 19 Ekim kararı [#186 sözleşme kaydında](P48_REPAIR_CONTRACT_PROPOSAL.md) kaynak yorumlarına bağlıdır. Üç ahşap/bağlantı grubu, eski üç ID, v9 acquired/completed ayrımı ve S1 kuru kızak kullanılır. `repair-drop-0` ortak malzeme askılarının gerçek tüketicisidir. Geçerli request kimliğinin terminal reddi hedef/kaynakla birlikte saklanır; yalnız SaveFailed aynı payload ile yeniden denenebilir. Aşağıdaki eski tarihli taslaklar tarihsel bağlamdır; #141/#159 ve sanat/oyuncu kabulü ayrıca açık kalır.
+
 Plan 3.0 — 15 Eylül 2026. P3 açık, P4–P6 kilitli. İnsan/ekipman, NPC/çanta/sandal sözleşmelerine harita, ayrı kamera satın alma, ev/gün/uyku, medya/kanal, tekne sahipliği ve boss bağlantıları eklendi. Yeni bölümler **tasarımdır; uygulanmış API veya ekip uzlaşısı değildir**. İlgili ara teslimden önce etkilenen alan sahipleri netleştirir; davranış kaynağı [WORLD_SYSTEMS](WORLD_SYSTEMS.md)'tir.
 
 Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Buradaki tip isimleri uygulanmış sınıflar veya mevcut dosyalar değildir. Görev kodları: A=Mehmet, B=Utku, C=Mert.
@@ -411,3 +413,11 @@ Bu isimler ilgili fazın API tasarımında kesinleştirilir. Red, durum değişi
 Bağlantının iki tarafını yazacak kişiler kısa bir görüşmede alanları ve örnek sonucu netleştirir. Ayrı imza matrisi gerekmez; değişiklik bu belgeye ve ilgili göreve yazılır. Hiç kimse diğer tarafın beklediği veri tipini sessizce değiştirmez.
 
 P2 başlangıcı: Mehmet, Utku ve Mert av/vuruş/çanta istek ve sonuçlarını bağımlı koddan önce netleştirir. Bu açılış kaydı sözleşme uzlaşısı değildir.
+
+## P4.8 / #186 — Fiziksel tamir sözleşmesi önerisi
+
+[Somut öneri ve sekiz eski kayıt geçişi](P48_REPAIR_CONTRACT_PROPOSAL.md), mevcut pickup/purchase katkısından edinme–taşıma–son darbe ayrımına geçişi açıklar. R01/R02/R11 kesinleşmiş karar veya uygulanmış ürün API'si değildir. `BoatPartClaim`, `TryContributeBoatPart`, v8 kayıt ve mevcut üç teknik ID bu hazırlıkla değiştirilmez. #187 Mehmet, #188 Utku ve #189 Mert aynı dar sözleşmeyi tüketir; #141/#159 başlama ve gerçek ekip kabulü sınırları korunur.
+
+### 18 Ekim #187 dar kullanıcı istisnası
+
+Kullanıcı #141/#159 açık kalırken #187 uygulamasını açıkça yetkilendirdi. Yukarıdaki hazırlık notunun ardından edinme/son darbe ayrımı uygulanır: v9 UnusedBoatPartIds yalnız edinilmiş ve kullanılmamış üç stable ID'yi tutar; BoatPartIds tamamlanmış katkıdır. Bir ID iki listede birden olamaz. v1-v8 tamamlanmış bitleri korunur, kullanılmamış malzeme verilmez. Son darbe kullanılmamış ID'yi çıkarıp tamamlanmışa ekler ve tek save yazar; save reddinde ikisi/revision geri alınır. Taşıyıcı/yuva rezervasyonu ve yarım darbe geçicidir. Kopma/pasiflik/gün kapanışı malzemeyi ortak askıya döndürür. Ağ değişkeni düzeni değiştiği için protokol DeepDive-P4-5; eski build kabul edilmez. #188/#189 ve gerçek ekip kabulü ayrıca kalır.

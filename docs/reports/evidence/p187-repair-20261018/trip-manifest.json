@@ -1,0 +1,9 @@
+{
+  "sourceCommit": "f17c3e3cdc962ac6bdc2964829e86747aedc2284",
+  "kind": "Windows two real processes - repair then actual pier boarding, near route, return, disembark and campaign reload",
+  "localProcessesOnly": true,
+  "reports": [
+    "trip2-host.json",
+    "trip2-client1.json"
+  ]
+}
