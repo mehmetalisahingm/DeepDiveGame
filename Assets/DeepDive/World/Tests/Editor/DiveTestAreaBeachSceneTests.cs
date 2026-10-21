@@ -54,7 +54,7 @@ namespace DeepDive.World.Tests
         private const float WadeFootY = 5.2f;
 
         private static readonly Vector3 HullPosition = new Vector3(-12f, 8.4f, -12.5f);
-        private static readonly Vector3 EnginePosition = new Vector3(-6.5f, 7.0010767f, -8f);
+        private static readonly Vector3 EnginePosition = new Vector3(-2.5f, 8.4f, -12.75f);   // #186: moved ashore (P4-ENGINE-SHORE.md)
         private static readonly Vector3 FuelTankPosition = new Vector3(12.5f, 8.4f, -12.5f);
         private static readonly Vector3 TownGatePosition = new Vector3(0f, 8.4f, -13.5f);
         private const float AnchorSize = 0.6f;
@@ -476,7 +476,7 @@ namespace DeepDive.World.Tests
             Assert.AreEqual(HullPosition, Require(HullName).transform.position, "hull moved");
             var engine = Require(EngineName).transform.position;
             Assert.AreEqual(EnginePosition.x, engine.x, 0.001f, "engine x");
-            Assert.AreEqual(EnginePosition.y, engine.y, 0.001f, "engine y must sit on the wade face");
+            Assert.AreEqual(EnginePosition.y, engine.y, 0.001f, "engine y must sit on the sand");
             Assert.AreEqual(EnginePosition.z, engine.z, 0.001f, "engine z");
             Assert.AreEqual(FuelTankPosition, Require(FuelTankName).transform.position, "fuel tank moved");
 
@@ -484,27 +484,37 @@ namespace DeepDive.World.Tests
                 Assert.AreEqual(Vector3.one * AnchorSize, Require(name).transform.localScale, name + " scale");
         }
 
+        // #186: the engine left the wade slope (1 m under the water line) for the dry strip. It rests on
+        // the sand, off the wade lane, between the other two parts and at least 6 m from each.
         [Test]
-        public void TheEngineSitsOnTheWadeFaceNotInsideOrAboveIt()
+        public void TheEngineSitsOnTheDrySandBetweenTheOtherTwoParts()
         {
             var engine = Require(EngineName).transform.position;
-            Assert.AreEqual(WadeSurfaceYAt(engine.z), engine.y, 0.01f,
-                "the engine must rest on the slope, not float over it or sink into it");
-            Assert.GreaterOrEqual(engine.x, WadeMinX, "the engine must sit on the shelf");
-            Assert.LessOrEqual(engine.x, WadeMaxX, "the engine must sit on the shelf");
+            Assert.AreEqual(PlatformTopY, engine.y, 0.001f, "the engine must rest on the sand, not float over it or sink into it");
+            Assert.Greater(engine.y, SurfaceY, "the engine must lie above the water line");
+            Assert.LessOrEqual(engine.z, PlatformNorthZ, "the engine must sit on the strip, not on the wade");
+            Assert.IsFalse(engine.x >= WadeMinX && engine.x <= WadeMaxX, "the engine must stay off the wade lane");
+
+            var hull = Require(HullName).transform.position;
+            var fuel = Require(FuelTankName).transform.position;
+            Assert.Greater(engine.x, hull.x, "the engine lies between the hull and the fuel tank");
+            Assert.Less(engine.x, fuel.x, "the engine lies between the hull and the fuel tank");
+            Assert.GreaterOrEqual(Vector3.Distance(engine, hull), 6f, "the engine crowds the hull");
+            Assert.GreaterOrEqual(Vector3.Distance(engine, fuel), 6f, "the engine crowds the fuel tank");
         }
 
         [Test]
         public void EveryBoatPartIsReachableWithoutSwimming()
         {
-            // Free, solo and co-op: a diver can walk or wade to every part. None of them needs a
-            // boat, a camera or deep water, so none may classify as Underwater.
+            // Free, solo and co-op: a diver walks to every part. None of them needs a boat, a camera
+            // or water at all (#186 moved the engine off the wade), so a diver standing on any of
+            // them classifies as Land - not Surface, not Underwater.
             var field = Field();
             foreach (var anchor in Anchors())
             {
                 var state = field.CreateTracker().Classify(Diver(anchor.WorldPosition));
-                Assert.AreNotEqual(EnvironmentLocomotion.Underwater, state,
-                    anchor.PartId + " would need a swim to reach");
+                Assert.AreEqual(EnvironmentLocomotion.Land, state,
+                    anchor.PartId + " would need a wade or a swim to reach");
             }
         }
 

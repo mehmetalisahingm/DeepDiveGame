@@ -1068,7 +1068,7 @@ namespace DeepDive.P1.Lab
         // walked and aimed by real owner input against the real BoatPart_* objects on the beach.
         //
         // Host takes Hull (then repeats the same claim once, expecting Rejected) and Fuel Tank; the guest takes
-        // the Engine, which sits on the wade slope itself. Both parts on the platform need the same climb out
+        // the Engine, which now rests on the dry beach (#188). Any part reached from the water needs the same climb out
         // of the water the beach fix (previous commits) proved works, so this reuses GoToService's waypoint
         // logic rather than walking a straight line at the target.
         private bool boatHintShot;
@@ -1243,10 +1243,10 @@ namespace DeepDive.P1.Lab
         // that same raycast hits the water's own boundary first and never reaches the anchor - measured directly
         // (a driver-side probe raycast at the exact aim used here returned "SwimVolume@0.32" every time). A real
         // diver would have exactly the same problem; it is not specific to this driver. So this approaches a
-        // submerged target from BELOW rather than level with it: the engine sits at y~7, only 1 m under the
-        // surface, and 1.55 m of eye height alone is enough to surface the camera while still standing right at
-        // the anchor's own height. Aiming up at it from underwater keeps the camera below the boundary the
-        // raycast would otherwise clip.
+        // submerged target from BELOW rather than level with it: a part ~1 m under the surface (the engine's
+        // old y~7 slot, before #188 moved it to dry sand) leaves 1.55 m of eye height enough to surface the
+        // camera while still standing right at the anchor's own height. Aiming up at it from underwater keeps
+        // the camera below the boundary the raycast would otherwise clip. A dry part skips all of this.
         private bool GoToBoatPart(NetworkPlayer local, Camera cam, Vector3 targetPosition)
         {
             const float surfaceY = 8f;   // SwimVolume's real top (pos.y 4 + half-size 4), not the decorative mesh at 8.1
@@ -1258,7 +1258,7 @@ namespace DeepDive.P1.Lab
             // the target. 1.8 m out is past where the surface drops below surfaceY - eye height (6.45).
             var standTarget = submerged ? targetPosition + new Vector3(0f, 0f, 1.8f) : targetPosition;
 
-            // Full 3D, not flat: the engine sits partway up the wade slope (unlike an NPC, always on the flat
+            // Full 3D, not flat: a part can sit partway up the wade slope (unlike an NPC, always on the flat
             // platform), so a diver can be horizontally right over it while still metres below it, underwater,
             // still mid-climb - a flat check would call that "close enough" and the pickup raycast (range 2.5 m)
             // would miss high and low every time. Requiring the real 3D distance keeps the paced climb running

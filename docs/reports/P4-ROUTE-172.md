@@ -6,6 +6,8 @@
 
 Unity 6000.3.23f1 batch mode, `DeepDive.Editor.P4RouteAudit.Run` ([kaynak](../../Assets/Editor/P4RouteAudit.cs)). Araç gerçek `DiveTestArea` sahnesini ek sahne olarak açar; `ContinuousTownLayout.Build`, `HomeSceneSetup.EnsureRig`, `CoastalHarborLink.BuildMarkers` ve dört `TownStorefront.Build` ile oyunun çalışırken kurduğu zemin/ev/tezgâh/işaretleri kurar, ölçer ve sahneyi kaydetmeden kapatır. Kapsül değerleri `NetworkDiver.prefab`'tan okunur. [Ham ölçüm (JSON)](evidence/p172-route/current-routes.json).
 
+**19 Ekim yeniden üretim (#186 kararı, [P4-ENGINE-SHORE](P4-ENGINE-SHORE.md)):** `boat-part-engine` kuru kıyıya, (−2.5, 8.4, −12.75) noktasına taşındı. JSON aynı araçla `6816fba` + bu değişiklik üstünde yeniden üretildi. Engine satırı ve 4 engine görüş hattı değişti. Ayrıca #185'ten gelen 7 `Fish_SeaBass_09…15` sınırı (suda) ve dükkân görsel sınırları (20 görüş hattının hedef kutusu) güncellendi. Rotalar, darboğazlar, dünya anchor'ları ve yatak/spawn bulguları değişmedi. Aşağıdaki tablolar `c7b2449` ölçümüdür; dükkân görüş piksel değerleri JSON'da günceldir.
+
 - Kapsül: yarıçap 0,35, boy 1,80, step 0,30, slope 45°, skin 0,08 → dolgulu çap 0,86 m. Kara hızı 4 m/s. Göz 1,55 m, dikey FOV 60° (16:9 yatay ≈ 91,5°).
 - Rota yöntemi: `ContinuousTownWalkTests.Drive` ile aynı (gerçek `CharacterController.Move`, dt 0,02 s, yer çekimi, her karede zemin/düşme/deniz kontrolü). Süre = simülasyon kare sayısı × dt; dönüş/durma/UI yok.
 - Tek koordinat sistemi: Unity dünyası, metre, y yukarı, **+z kuzey (deniz)**, +x doğu.
@@ -68,7 +70,7 @@ Unity 6000.3.23f1 batch mode, `DeepDive.Editor.P4RouteAudit.Run` ([kaynak](../..
 | `Shore_Ramp` kuru üst / su çizgisi | (6.97, 8.39, −9) / (6.17, 8.01, −9) | Coast | evet |
 | `Beach_TownGate` | (0, 8.4, −13.5) | Coast | evet |
 | `boat-part-hull`, `boat-part-fuel-tank` | (−12, 8.4, −12.5), (12.5, 8.4, −12.5) | Coast | evet |
-| `boat-part-engine` | (−6.5, **7.0**, −8) | **Sea** | evet |
+| `boat-part-engine` | (−2.5, 8.4, −12.75); 19 Eki'ye kadar (−6.5, **7.0**, −8), **Sea** | Coast | evet |
 | Kırık sandal yanaşma yeri (`route-near-1` wp0 + Rowboat ofseti 0) | (9, 8.0, −0.4) | Sea | evet |
 | Bed çıkış pozları `bed-0…3:exit` | (yatak x, 8.75, −47.52) | Home | hayır |
 | Eski `PlayerSpawnPoint` `Spawn_0…3` | (±3, 1, ±3) | Sea | evet |

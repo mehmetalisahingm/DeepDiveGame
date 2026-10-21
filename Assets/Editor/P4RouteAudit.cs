@@ -64,7 +64,7 @@ namespace DeepDive.Editor
 
         [Serializable] public sealed class Audit
         {
-            public string branchBase = "codex/p4-integration @ c7b2449";
+            public string branchBase = "codex/p4-integration @ 6816fba + #186 engine ashore (first written at c7b2449)";
             public string unity = Application.unityVersion;
             public string scene = ScenePath, prefab = DiverPath;
             public string coordinates = "Unity world, metres, y up, +z north (sea), +x east";

@@ -1,0 +1,1722 @@
+{
+    "branchBase": "codex/p4-integration @ 6816fba",
+    "unity": "6000.3.23f1",
+    "scene": "Assets/DeepDive/World/Scenes/DiveTestArea.unity",
+    "routes": "docs/reports/evidence/p172-route/current-routes.json",
+    "coordinates": "Unity world, metres, y up, +z north (sea), +x east",
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "skin": 0.07999999821186066,
+    "stepOffset": 0.30000001192092898,
+    "slopeLimit": 45.0,
+    "walkSpeed": 4.0,
+    "eyeHeight": 1.5499999523162842,
+    "verticalFov": 60.0,
+    "horizontalFov16x9": 91.49299621582031,
+    "engineBefore": {
+        "x": -6.5,
+        "y": 7.000999927520752,
+        "z": -8.0
+    },
+    "hull": {
+        "x": -12.0,
+        "y": 8.399999618530274,
+        "z": -12.5
+    },
+    "fuelTank": {
+        "x": 12.5,
+        "y": 8.399999618530274,
+        "z": -12.5
+    },
+    "engineBeforeZone": "Sea",
+    "engineBeforeInSwimVolume": true,
+    "cradleCenter": {
+        "x": 3.5999999046325685,
+        "y": 8.399999618530274,
+        "z": -12.600000381469727
+    },
+    "cradleSize": {
+        "x": 5.0,
+        "y": 1.0,
+        "z": 2.4000000953674318
+    },
+    "workPoints": [
+        {
+            "x": 0.5,
+            "y": -11.5
+        },
+        {
+            "x": 1.0,
+            "y": -14.25
+        },
+        {
+            "x": 6.25,
+            "y": -14.25
+        },
+        {
+            "x": 6.5,
+            "y": -11.0
+        }
+    ],
+    "dropPoint": {
+        "x": 7.5,
+        "y": -14.5
+    },
+    "corridorRects": [
+        {
+            "name": "Dock_Town (pier)",
+            "min": {
+                "x": 8.0,
+                "y": -7.0
+            },
+            "max": {
+                "x": 10.0,
+                "y": -3.5
+            }
+        },
+        {
+            "name": "Shore_Ledge (DiveExit pad)",
+            "min": {
+                "x": 7.0,
+                "y": -11.0
+            },
+            "max": {
+                "x": 11.0,
+                "y": -7.0
+            }
+        },
+        {
+            "name": "Shore_Ramp",
+            "min": {
+                "x": 0.1379999965429306,
+                "y": -11.0
+            },
+            "max": {
+                "x": 7.169000148773193,
+                "y": -7.0
+            }
+        },
+        {
+            "name": "Beach_Wade",
+            "min": {
+                "x": -9.5,
+                "y": -11.168999671936036
+            },
+            "max": {
+                "x": -3.5,
+                "y": -4.138000011444092
+            }
+        },
+        {
+            "name": "wade landing",
+            "min": {
+                "x": -9.5,
+                "y": -12.5
+            },
+            "max": {
+                "x": -3.5,
+                "y": -11.0
+            }
+        },
+        {
+            "name": "ledge landing",
+            "min": {
+                "x": 7.0,
+                "y": -13.5
+            },
+            "max": {
+                "x": 11.0,
+                "y": -11.0
+            }
+        }
+    ],
+    "corridorSegments": [
+        {
+            "name": "gate line (street -> beach)",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -11.0
+            }
+        },
+        {
+            "name": "hull carry -> repair-work-0",
+            "a": {
+                "x": -12.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 0.5,
+                "y": -11.5
+            }
+        },
+        {
+            "name": "hull carry -> repair-work-1",
+            "a": {
+                "x": -12.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 1.0,
+                "y": -14.25
+            }
+        },
+        {
+            "name": "fuel-tank carry -> repair-work-3",
+            "a": {
+                "x": 12.5,
+                "y": -12.5
+            },
+            "b": {
+                "x": 6.5,
+                "y": -11.0
+            }
+        },
+        {
+            "name": "fuel-tank carry -> repair-drop-0",
+            "a": {
+                "x": 12.5,
+                "y": -12.5
+            },
+            "b": {
+                "x": 7.5,
+                "y": -14.5
+            }
+        },
+        {
+            "name": "repair-drop-0 -> dock-town-1",
+            "a": {
+                "x": 7.5,
+                "y": -14.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        }
+    ],
+    "softSegments": [
+        {
+            "name": "#172 route a0",
+            "a": {
+                "x": 0.0,
+                "y": -36.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route a0",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route a0",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route a0",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -4.0
+            }
+        },
+        {
+            "name": "#172 route a1",
+            "a": {
+                "x": 0.0,
+                "y": -36.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route a1",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route a1",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route a1",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -4.0
+            }
+        },
+        {
+            "name": "#172 route a2",
+            "a": {
+                "x": 0.0,
+                "y": -36.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route a2",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route a2",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route a2",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -4.0
+            }
+        },
+        {
+            "name": "#172 route a3",
+            "a": {
+                "x": 0.0,
+                "y": -36.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route a3",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route a3",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route a3",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -4.0
+            }
+        },
+        {
+            "name": "#172 route b",
+            "a": {
+                "x": -10.0,
+                "y": -27.299999237060548
+            },
+            "b": {
+                "x": -6.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route b",
+            "a": {
+                "x": -6.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route b",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route b",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -4.0
+            }
+        },
+        {
+            "name": "#172 route c",
+            "a": {
+                "x": 9.0,
+                "y": -4.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route c",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route c",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": -3.299999952316284,
+                "y": -27.299999237060548
+            }
+        },
+        {
+            "name": "#172 route d1",
+            "a": {
+                "x": 0.0,
+                "y": -36.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route d1",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route d1",
+            "a": {
+                "x": 0.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": -6.5,
+                "y": -11.199999809265137
+            }
+        },
+        {
+            "name": "#172 route d1",
+            "a": {
+                "x": -6.5,
+                "y": -11.199999809265137
+            },
+            "b": {
+                "x": -6.5,
+                "y": -5.0
+            }
+        },
+        {
+            "name": "#172 route d2",
+            "a": {
+                "x": 6.171999931335449,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route d2",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route d2",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 0.0,
+                "y": -16.0
+            }
+        },
+        {
+            "name": "#172 route d2",
+            "a": {
+                "x": 0.0,
+                "y": -16.0
+            },
+            "b": {
+                "x": 0.0,
+                "y": -36.0
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 0.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": -13.800000190734864,
+                "y": -13.800000190734864
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": -13.800000190734864,
+                "y": -13.800000190734864
+            },
+            "b": {
+                "x": -13.399999618530274,
+                "y": -15.199999809265137
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": -13.399999618530274,
+                "y": -15.199999809265137
+            },
+            "b": {
+                "x": -13.399999618530274,
+                "y": -35.400001525878909
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 13.399999618530274,
+                "y": -35.400001525878909
+            },
+            "b": {
+                "x": 13.399999618530274,
+                "y": -15.199999809265137
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 13.399999618530274,
+                "y": -15.199999809265137
+            },
+            "b": {
+                "x": 13.800000190734864,
+                "y": -13.800000190734864
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 13.800000190734864,
+                "y": -13.800000190734864
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -4.0
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 9.0,
+                "y": -4.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -9.0
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 9.0,
+                "y": -9.0
+            },
+            "b": {
+                "x": 9.0,
+                "y": -12.5
+            }
+        },
+        {
+            "name": "#172 route e",
+            "a": {
+                "x": 9.0,
+                "y": -12.5
+            },
+            "b": {
+                "x": 0.0,
+                "y": -12.5
+            }
+        }
+    ],
+    "rejections": {
+        "cells": 4329,
+        "noDryGround": 314,
+        "notCoast": 2360,
+        "insideCollider": 96,
+        "exitZone": 0,
+        "cradleOrPoints": 244,
+        "corridor": 926,
+        "nearPart": 361,
+        "noStand": 0
+    },
+    "survivors": 28,
+    "ranked": [
+        {
+            "id": "c(-2.5, -12.75)",
+            "position": {
+                "x": -2.5,
+                "y": 8.399999618530274,
+                "z": -12.75
+            },
+            "ground": "P46_ContinuousTown/CoastWalk",
+            "zone": "Coast",
+            "inMap": true,
+            "toHull": 9.503000259399414,
+            "toFuelTank": 15.001999855041504,
+            "balance": 9.503000259399414,
+            "corridorMargin": 1.0069999694824219,
+            "toCradle": 3.5999999046325685,
+            "softMargin": 0.014000000432133675,
+            "nearestCorridor": "hull carry -> repair-work-0",
+            "nearestSoft": "#172 route e",
+            "sights": [
+                {
+                    "from": "beach entry (CoastWalk, arriving from the street, facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -17.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 4.931000232696533,
+                    "horizontalAngle": -30.465999603271486,
+                    "projectedHeightPx1080": 108.57499694824219,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "town square (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -29.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 16.44099998474121,
+                    "horizontalAngle": -8.746000289916993,
+                    "projectedHeightPx1080": 33.981998443603519,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "beach gate (Beach_TownGate, line of sight, any heading)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -13.5
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 2.609999895095825,
+                    "horizontalAngle": -73.3010025024414,
+                    "projectedHeightPx1080": 184.86599731445313,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "home door (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -41.70000076293945
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 29.058000564575197,
+                    "horizontalAngle": -4.935999870300293,
+                    "projectedHeightPx1080": 19.28499984741211,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "wade top (coming ashore, facing the beach)",
+                    "eye": {
+                        "x": -6.5,
+                        "y": 9.949999809265137,
+                        "z": -11.199999809265137
+                    },
+                    "headingYaw": 180.0,
+                    "distance": 4.289999961853027,
+                    "horizontalAngle": -68.81900024414063,
+                    "projectedHeightPx1080": 123.03299713134766,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                }
+            ],
+            "visibleInView": 3,
+            "score": 10.428000450134278,
+            "stand": {
+                "x": -1.25,
+                "y": -13.5
+            },
+            "pickupDistance": 2.128000020980835,
+            "pickupHitsPart": true,
+            "pickupBlocker": "",
+            "walks": [
+                {
+                    "from": "home spawn 0 (#172 a0 to the street, then grid path)",
+                    "waypoints": [
+                        {
+                            "x": -1.5,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -42.974998474121097
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -42.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -36.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -16.0
+                        },
+                        {
+                            "x": -1.25,
+                            "y": -13.5
+                        }
+                    ],
+                    "drivenLength": 43.277000427246097,
+                    "simSeconds": 10.819999694824219,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -1.25,
+                        "y": -13.5
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "beach gate",
+                    "waypoints": [
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        },
+                        {
+                            "x": -1.25,
+                            "y": -13.5
+                        }
+                    ],
+                    "drivenLength": 1.25,
+                    "simSeconds": 0.3199999928474426,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -1.25,
+                        "y": -13.5
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "wade top (ashore from the sea)",
+                    "waypoints": [
+                        {
+                            "x": -6.5,
+                            "y": -11.199999809265137
+                        },
+                        {
+                            "x": -1.25,
+                            "y": -13.5
+                        }
+                    ],
+                    "drivenLength": 5.73199987411499,
+                    "simSeconds": 1.440000057220459,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -1.25,
+                        "y": -13.5
+                    },
+                    "failures": []
+                }
+            ],
+            "walkable": true,
+            "hints": [
+                "gate: Motor: bati, 3 m",
+                "square: Motor: kuzey, 16 m",
+                "wade top: Motor: dogu, 4 m"
+            ]
+        },
+        {
+            "id": "c(-1, -12.75)",
+            "position": {
+                "x": -1.0,
+                "y": 8.399999618530274,
+                "z": -12.75
+            },
+            "ground": "P46_ContinuousTown/CoastWalk",
+            "zone": "Coast",
+            "inMap": true,
+            "toHull": 11.003000259399414,
+            "toFuelTank": 13.501999855041504,
+            "balance": 11.003000259399414,
+            "corridorMargin": 1.0,
+            "toCradle": 2.0999999046325685,
+            "softMargin": 0.1550000011920929,
+            "nearestCorridor": "gate line (street -> beach)",
+            "nearestSoft": "#172 route e",
+            "sights": [
+                {
+                    "from": "beach entry (CoastWalk, arriving from the street, facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -17.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 4.366000175476074,
+                    "horizontalAngle": -13.241000175476075,
+                    "projectedHeightPx1080": 121.12699890136719,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "town square (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -29.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 16.2810001373291,
+                    "horizontalAngle": -3.5209999084472658,
+                    "projectedHeightPx1080": 34.31399917602539,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "beach gate (Beach_TownGate, line of sight, any heading)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -13.5
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 1.25,
+                    "horizontalAngle": -53.130001068115237,
+                    "projectedHeightPx1080": 281.8280029296875,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "home door (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -41.70000076293945
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 28.966999053955079,
+                    "horizontalAngle": -1.9780000448226929,
+                    "projectedHeightPx1080": 19.344999313354493,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "wade top (coming ashore, facing the beach)",
+                    "eye": {
+                        "x": -6.5,
+                        "y": 9.949999809265137,
+                        "z": -11.199999809265137
+                    },
+                    "headingYaw": 180.0,
+                    "distance": 5.714000225067139,
+                    "horizontalAngle": -74.26100158691406,
+                    "projectedHeightPx1080": 94.78299713134766,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                }
+            ],
+            "visibleInView": 3,
+            "score": 10.050999641418457,
+            "stand": {
+                "x": 0.0,
+                "y": -13.5
+            },
+            "pickupDistance": 1.9910000562667847,
+            "pickupHitsPart": true,
+            "pickupBlocker": "",
+            "walks": [
+                {
+                    "from": "home spawn 0 (#172 a0 to the street, then grid path)",
+                    "waypoints": [
+                        {
+                            "x": -1.5,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -42.974998474121097
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -42.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -36.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -16.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        }
+                    ],
+                    "drivenLength": 42.959999084472659,
+                    "simSeconds": 10.739999771118164,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": 0.0,
+                        "y": -13.522000312805176
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "beach gate",
+                    "waypoints": [
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        }
+                    ],
+                    "drivenLength": 0.0,
+                    "simSeconds": 0.0,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": 0.0,
+                        "y": -13.5
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "wade top (ashore from the sea)",
+                    "waypoints": [
+                        {
+                            "x": -6.5,
+                            "y": -11.199999809265137
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        }
+                    ],
+                    "drivenLength": 6.880000114440918,
+                    "simSeconds": 1.7200000286102296,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -0.014000000432133675,
+                        "y": -13.494999885559082
+                    },
+                    "failures": []
+                }
+            ],
+            "walkable": true,
+            "hints": [
+                "gate: Motor: kuzeybati, 1 m",
+                "square: Motor: kuzey, 16 m",
+                "wade top: Motor: dogu, 6 m"
+            ]
+        },
+        {
+            "id": "c(-4.75, -14.5)",
+            "position": {
+                "x": -4.75,
+                "y": 8.399999618530274,
+                "z": -14.5
+            },
+            "ground": "Beach_Platform",
+            "zone": "Coast",
+            "inMap": true,
+            "toHull": 7.520999908447266,
+            "toFuelTank": 17.365999221801759,
+            "balance": 7.520999908447266,
+            "corridorMargin": 1.0149999856948853,
+            "toCradle": 5.892000198364258,
+            "softMargin": 1.1770000457763672,
+            "nearestCorridor": "hull carry -> repair-work-1",
+            "nearestSoft": "#172 route b",
+            "sights": [
+                {
+                    "from": "beach entry (CoastWalk, arriving from the street, facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -17.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 5.368000030517578,
+                    "horizontalAngle": -62.24100112915039,
+                    "projectedHeightPx1080": 100.44400024414063,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "town square (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -29.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 15.258000373840332,
+                    "horizontalAngle": -18.13800048828125,
+                    "projectedHeightPx1080": 36.590999603271487,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "beach gate (Beach_TownGate, line of sight, any heading)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -13.5
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 4.854000091552734,
+                    "horizontalAngle": -101.88899993896485,
+                    "projectedHeightPx1080": 110.13099670410156,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "home door (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -41.70000076293945
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 27.61199951171875,
+                    "horizontalAngle": -9.906000137329102,
+                    "projectedHeightPx1080": 20.29199981689453,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "wade top (coming ashore, facing the beach)",
+                    "eye": {
+                        "x": -6.5,
+                        "y": 9.949999809265137,
+                        "z": -11.199999809265137
+                    },
+                    "headingYaw": 180.0,
+                    "distance": 3.734999895095825,
+                    "horizontalAngle": -27.937000274658204,
+                    "projectedHeightPx1080": 138.76499938964845,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                }
+            ],
+            "visibleInView": 3,
+            "score": 8.633999824523926,
+            "stand": {
+                "x": -3.25,
+                "y": -14.5
+            },
+            "pickupDistance": 2.1570000648498537,
+            "pickupHitsPart": true,
+            "pickupBlocker": "",
+            "walks": [
+                {
+                    "from": "home spawn 0 (#172 a0 to the street, then grid path)",
+                    "waypoints": [
+                        {
+                            "x": -1.5,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -42.974998474121097
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -42.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -36.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -16.0
+                        },
+                        {
+                            "x": -3.25,
+                            "y": -14.5
+                        }
+                    ],
+                    "drivenLength": 44.06100082397461,
+                    "simSeconds": 11.020000457763672,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -3.25,
+                        "y": -14.5
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "beach gate",
+                    "waypoints": [
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        },
+                        {
+                            "x": -3.25,
+                            "y": -14.5
+                        }
+                    ],
+                    "drivenLength": 3.359999895095825,
+                    "simSeconds": 0.8399999737739563,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -3.2109999656677248,
+                        "y": -14.48799991607666
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "wade top (ashore from the sea)",
+                    "waypoints": [
+                        {
+                            "x": -6.5,
+                            "y": -11.199999809265137
+                        },
+                        {
+                            "x": -3.25,
+                            "y": -14.5
+                        }
+                    ],
+                    "drivenLength": 4.631999969482422,
+                    "simSeconds": 1.159999966621399,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -3.25,
+                        "y": -14.5
+                    },
+                    "failures": []
+                }
+            ],
+            "walkable": true,
+            "hints": [
+                "gate: Motor: bati, 5 m",
+                "square: Motor: kuzey, 15 m",
+                "wade top: Motor: guneydogu, 4 m"
+            ]
+        },
+        {
+            "id": "c(-3, -14.75)",
+            "position": {
+                "x": -3.0,
+                "y": 8.399999618530274,
+                "z": -14.75
+            },
+            "ground": "P46_ContinuousTown/Fill_BeachBack",
+            "zone": "Coast",
+            "inMap": true,
+            "toHull": 9.277000427246094,
+            "toFuelTank": 15.661999702453614,
+            "balance": 9.277000427246094,
+            "corridorMargin": 1.0290000438690186,
+            "toCradle": 4.209000110626221,
+            "softMargin": 0.5360000133514404,
+            "nearestCorridor": "hull carry -> repair-work-1",
+            "nearestSoft": "#172 route b",
+            "sights": [
+                {
+                    "from": "beach entry (CoastWalk, arriving from the street, facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -17.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 3.75,
+                    "horizontalAngle": -53.130001068115237,
+                    "projectedHeightPx1080": 138.30099487304688,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "town square (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -29.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 14.562000274658204,
+                    "horizontalAngle": -11.888999938964844,
+                    "projectedHeightPx1080": 38.31999969482422,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "beach gate (Beach_TownGate, line of sight, any heading)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -13.5
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 3.25,
+                    "horizontalAngle": -112.62000274658203,
+                    "projectedHeightPx1080": 155.85499572753907,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "home door (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -41.70000076293945
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 27.115999221801759,
+                    "horizontalAngle": -6.3520002365112309,
+                    "projectedHeightPx1080": 20.66200065612793,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "wade top (coming ashore, facing the beach)",
+                    "eye": {
+                        "x": -6.5,
+                        "y": 9.949999809265137,
+                        "z": -11.199999809265137
+                    },
+                    "headingYaw": 180.0,
+                    "distance": 4.985000133514404,
+                    "horizontalAngle": -44.59400177001953,
+                    "projectedHeightPx1080": 107.49400329589844,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                }
+            ],
+            "visibleInView": 3,
+            "score": 8.076000213623047,
+            "stand": {
+                "x": -1.75,
+                "y": -14.0
+            },
+            "pickupDistance": 2.128000020980835,
+            "pickupHitsPart": true,
+            "pickupBlocker": "",
+            "walks": [
+                {
+                    "from": "home spawn 0 (#172 a0 to the street, then grid path)",
+                    "waypoints": [
+                        {
+                            "x": -1.5,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -42.974998474121097
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -42.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -36.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -16.0
+                        },
+                        {
+                            "x": -1.75,
+                            "y": -14.0
+                        }
+                    ],
+                    "drivenLength": 43.119998931884769,
+                    "simSeconds": 10.779999732971192,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -1.7369999885559083,
+                        "y": -14.013999938964844
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "beach gate",
+                    "waypoints": [
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        },
+                        {
+                            "x": -1.75,
+                            "y": -14.0
+                        }
+                    ],
+                    "drivenLength": 1.8200000524520875,
+                    "simSeconds": 0.46000000834465029,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -1.75,
+                        "y": -14.0
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "wade top (ashore from the sea)",
+                    "waypoints": [
+                        {
+                            "x": -6.5,
+                            "y": -11.199999809265137
+                        },
+                        {
+                            "x": -1.75,
+                            "y": -14.0
+                        }
+                    ],
+                    "drivenLength": 5.513999938964844,
+                    "simSeconds": 1.3799999952316285,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -1.75,
+                        "y": -14.0
+                    },
+                    "failures": []
+                }
+            ],
+            "walkable": true,
+            "hints": [
+                "gate: Motor: guneybati, 3 m",
+                "square: Motor: kuzey, 15 m",
+                "wade top: Motor: guneydogu, 5 m"
+            ]
+        },
+        {
+            "id": "c(-6.25, -14.75)",
+            "position": {
+                "x": -6.25,
+                "y": 8.399999618530274,
+                "z": -14.75
+            },
+            "ground": "P46_ContinuousTown/Fill_BeachBack",
+            "zone": "Coast",
+            "inMap": true,
+            "toHull": 6.175000190734863,
+            "toFuelTank": 18.885000228881837,
+            "balance": 6.175000190734863,
+            "corridorMargin": 1.4630000591278077,
+            "toCradle": 7.410999774932861,
+            "softMargin": 1.2740000486373902,
+            "nearestCorridor": "hull carry -> repair-work-1",
+            "nearestSoft": "#172 route b",
+            "sights": [
+                {
+                    "from": "beach entry (CoastWalk, arriving from the street, facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -17.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 6.64300012588501,
+                    "horizontalAngle": -70.20099639892578,
+                    "projectedHeightPx1080": 82.27200317382813,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "town square (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -29.0
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 15.5600004196167,
+                    "horizontalAngle": -23.68199920654297,
+                    "projectedHeightPx1080": 35.887001037597659,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                },
+                {
+                    "from": "beach gate (Beach_TownGate, line of sight, any heading)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -13.5
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 6.374000072479248,
+                    "horizontalAngle": -101.30999755859375,
+                    "projectedHeightPx1080": 85.552001953125,
+                    "lineOfSight": true,
+                    "inViewAtHeading": false,
+                    "blocker": ""
+                },
+                {
+                    "from": "home door (facing the sea)",
+                    "eye": {
+                        "x": 0.0,
+                        "y": 9.949999809265137,
+                        "z": -41.70000076293945
+                    },
+                    "headingYaw": 0.0,
+                    "distance": 27.665000915527345,
+                    "horizontalAngle": -13.057000160217286,
+                    "projectedHeightPx1080": 20.253000259399415,
+                    "lineOfSight": false,
+                    "inViewAtHeading": true,
+                    "blocker": "Npc_buyer-fish/Body"
+                },
+                {
+                    "from": "wade top (coming ashore, facing the beach)",
+                    "eye": {
+                        "x": -6.5,
+                        "y": 9.949999809265137,
+                        "z": -11.199999809265137
+                    },
+                    "headingYaw": 180.0,
+                    "distance": 3.559000015258789,
+                    "horizontalAngle": -4.0279998779296879,
+                    "projectedHeightPx1080": 144.57200622558595,
+                    "lineOfSight": true,
+                    "inViewAtHeading": true,
+                    "blocker": ""
+                }
+            ],
+            "visibleInView": 2,
+            "score": 7.409999847412109,
+            "stand": {
+                "x": -4.75,
+                "y": -14.75
+            },
+            "pickupDistance": 2.1570000648498537,
+            "pickupHitsPart": true,
+            "pickupBlocker": "",
+            "walks": [
+                {
+                    "from": "home spawn 0 (#172 a0 to the street, then grid path)",
+                    "waypoints": [
+                        {
+                            "x": -1.5,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -49.5
+                        },
+                        {
+                            "x": -4.699999809265137,
+                            "y": -42.974998474121097
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -42.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -36.0
+                        },
+                        {
+                            "x": 0.0,
+                            "y": -16.0
+                        },
+                        {
+                            "x": -4.75,
+                            "y": -14.75
+                        }
+                    ],
+                    "drivenLength": 45.36000061035156,
+                    "simSeconds": 11.34000015258789,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -4.718999862670898,
+                        "y": -14.758000373840332
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "beach gate",
+                    "waypoints": [
+                        {
+                            "x": 0.0,
+                            "y": -13.5
+                        },
+                        {
+                            "x": -4.75,
+                            "y": -14.75
+                        }
+                    ],
+                    "drivenLength": 4.880000114440918,
+                    "simSeconds": 1.2200000286102296,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -4.718999862670898,
+                        "y": -14.741999626159668
+                    },
+                    "failures": []
+                },
+                {
+                    "from": "wade top (ashore from the sea)",
+                    "waypoints": [
+                        {
+                            "x": -6.5,
+                            "y": -11.199999809265137
+                        },
+                        {
+                            "x": -4.75,
+                            "y": -14.75
+                        }
+                    ],
+                    "drivenLength": 3.9200000762939455,
+                    "simSeconds": 0.9800000190734863,
+                    "reached": true,
+                    "fell": false,
+                    "stuck": false,
+                    "enteredSea": false,
+                    "endPosition": {
+                        "x": -4.767000198364258,
+                        "y": -14.715999603271485
+                    },
+                    "failures": []
+                }
+            ],
+            "walkable": true,
+            "hints": [
+                "gate: Motor: bati, 6 m",
+                "square: Motor: kuzeybati, 16 m",
+                "wade top: Motor: guney, 4 m"
+            ]
+        }
+    ],
+    "chosen": "c(-2.5, -12.75)",
+    "alternatives": [
+        "c(-1, -12.75)",
+        "c(-4.75, -14.5)"
+    ],
+    "rules": [
+        "cell: 0.25 m grid over x -14.5..14.5, z -20..-11; the part sits on the first collider straight down",
+        "dry: that collider is a walk surface, ground y >= 8.01, the point is outside the SwimVolume and the zone is Coast",
+        "free: a 0.3 m sphere 0.45 m above the ground touches nothing but the ground (BoatPartReachabilityTests rule); not in DiveExit",
+        "clear (hard): >= 1.0 m from pier, Shore_Ledge/DiveExit pad, Shore_Ramp, Beach_Wade, the wade and ledge landings, the gate line, the S1 cradle and the other parts' carry lines; >= 1.06 m from a work point, >= 1.31 m from the drop",
+        "clear (soft): #172 route lines - the part is a trigger and blocks no walk; < 1.0 m costs 1 point",
+        "apart: >= 6 m from the hull and the fuel tank parts",
+        "stand: a capsule-free dry cell 0.75..1.5 m from the part, whose 2.5 m eye ray hits the part's own trigger first",
+        "score: beach entry 3 and town square 3 (line of sight inside the 16:9 frame), beach gate 2 (line of sight), home door 1, wade top 0.5, + min(toHull, toFuelTank)/4, + min(corridorMargin, 3)/4, - 1 if soft margin < 1.0, - 0.5 per metre inside the S1 waiting band (< 4 m from the cradle)",
+        "walks: real CharacterController (prefab radius/height/skin/step/slope, walkSpeed, gravity, dt 0.02) along a 0.25 m grid path"
+    ],
+    "notMeasured": [
+        "fog, light, night and contrast: sight lines are geometric only",
+        "collider-less DevelopmentVisuals / supplied town art props (they cannot block a walk; they can block a view)",
+        "real 1/2/4-process runs and network latency",
+        "PR #190 rack/slot offsets (not on this branch)"
+    ]
+}
