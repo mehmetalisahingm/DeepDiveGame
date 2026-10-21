@@ -30,10 +30,14 @@ namespace DeepDive.World.Editor
                 instance.name = name;
                 // Two staggered rows, clear of the shoreline, ramp and walls. Their entire
                 // 6m horizontal / 3m vertical wander envelope stays inside the water volume.
+                // The first row stood at z -6, where that envelope reached into Beach_Wade,
+                // Shore_Ramp and Beach_Platform and FishMotion (water box only) swam the fish
+                // into them. At z 2.5 it stays 0.6 m clear of the closed wade (north edge
+                // z -4.14) for every column (docs/reports/P4-WADE-UNDERSIDE.md).
                 var column = (index - 1) % 7;
                 var row = (index - 1) / 7;
                 instance.transform.SetPositionAndRotation(new Vector3(-8f + column * (16f / 6f),
-                    row == 0 ? 3.5f : 4.5f, row == 0 ? -6f : 3f), Quaternion.Euler(0f, index * 43f, 0f));
+                    row == 0 ? 3.5f : 4.5f, row == 0 ? 2.5f : 3f), Quaternion.Euler(0f, index * 43f, 0f));
                 EditorUtility.SetDirty(instance);
             }
             EditorSceneManager.MarkSceneDirty(scene);
