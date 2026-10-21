@@ -625,7 +625,7 @@ namespace DeepDive.Network
             if (repairSlot != null)
             {
                 var placed = BoatRepairActions.Request(playerId, BoatRepairCommand.Place, repairSlot.PartIndex, requestId);
-                PublishAction(requestId, kind, placed.Accepted ? PlayerActionResult.Accepted : PlayerActionResult.Rejected);
+                PublishAction(requestId, PlayerActionKind.Repair, placed.Accepted ? PlayerActionResult.Accepted : PlayerActionResult.Rejected);
                 return;
             }
             var catchTarget = FindTarget<ICatchPickupTarget>(pickupCollider);
@@ -645,6 +645,7 @@ namespace DeepDive.Network
                 }
                 else
                 {
+                    kind = PlayerActionKind.Repair;
                     var index = 0;
                     while (index < BoatRepairParts.All.Count && BoatRepairParts.All[index] != boatPart.PartId) index++;
                     var transaction = BoatRepairActions.Request(playerId, BoatRepairCommand.Grab, index, requestId);

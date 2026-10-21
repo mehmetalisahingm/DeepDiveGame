@@ -197,7 +197,7 @@ namespace DeepDive.P4.Tests
                 var engine = Parts().Single(p => p.PartId == BoatRepairParts.Engine).WorldPosition;
                 var gate = Gate();
                 var line = BoatRepairGuide.Line(BoatRepairParts.Engine, gate.x, gate.y, engine.x, engine.z);
-                Assert.AreEqual($"Motor: {BoatRepairGuide.Compass(engine.x - gate.x, engine.z - gate.y)}, " +
+                Assert.AreEqual($"Oturak destegi: {BoatRepairGuide.Compass(engine.x - gate.x, engine.z - gate.y)}, " +
                                 $"{Mathf.RoundToInt(Vector2.Distance(gate, new Vector2(engine.x, engine.z)))} m", line);
                 Assert.IsTrue(Ground(gate.x, gate.y, out var y));
                 Assert.IsTrue(Reached(DryWalk(new Vector3(gate.x, y, gate.y)), engine, 1.5f), "the engine is not walkable on dry land from the gate");

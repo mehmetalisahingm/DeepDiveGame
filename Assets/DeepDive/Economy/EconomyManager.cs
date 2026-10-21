@@ -734,22 +734,25 @@ namespace DeepDive.Economy
         public TransactionResult TryAcquireBoatPart(PlayerId player, string partId, BoatPartSource source, ulong requestId)
         {
             EnsureSubscribed();
-            if (source != BoatPartSource.Found && source != BoatPartSource.Purchased) return TransactionResult.Reject(requestId, "InvalidTarget", Revision);
             var key = (player, requestId, OpBoatMaterial);
-            if (_processedRequests.TryGetValue(key, out var old))
-                return _repairTargets.TryGetValue(key, out var target) && target == partId ? old : TransactionResult.Reject(requestId, "RequestMismatch", Revision);
+            var payload = $"{(int)source}:{partId}";
             if (requestId == 0) return TransactionResult.Reject(requestId, "InvalidState", Revision);
-            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
-            if (!BoatRepairParts.IsPart(partId)) return TransactionResult.Reject(requestId, "InvalidTarget", Revision);
+            if (_repairTargets.TryGetValue(key, out var target) && target != payload)
+                return TransactionResult.Reject(requestId, "RequestMismatch", Revision);
+            if (_processedRequests.TryGetValue(key, out var old)) return old;
+            TransactionResult Reject(string reason) => RememberRepairResult(key, payload, TransactionResult.Reject(requestId, reason, Revision));
+            if (source != BoatPartSource.Found && source != BoatPartSource.Purchased) return Reject("InvalidTarget");
+            if (DayLock.IsLocked) return Reject("DayClosing");
+            if (!BoatRepairParts.IsPart(partId)) return Reject("InvalidTarget");
             if (_boatParts.Contains(partId) || _boatMaterials.Contains(partId))
-                return TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
+                return Reject("AlreadyProcessed");
             var cost = source == BoatPartSource.Purchased ? BoatPartPrice : 0;
-            if (SharedBalance < cost) return TransactionResult.Reject(requestId, "InsufficientFunds", Revision);
+            if (SharedBalance < cost) return Reject("InsufficientFunds");
             var balance = SharedBalance; var revision = Revision;
             _boatMaterials.Add(partId); SharedBalance -= cost; Revision++;
             if (!Persist())
-            { _boatMaterials.Remove(partId); SharedBalance = balance; Revision = revision; return TransactionResult.Reject(requestId, "SaveFailed", Revision); }
-            var result = TransactionResult.Ok(requestId, Revision); _processedRequests[key] = result; _repairTargets[key] = partId;
+            { _boatMaterials.Remove(partId); SharedBalance = balance; Revision = revision; return Reject("SaveFailed"); }
+            var result = RememberRepairResult(key, payload, TransactionResult.Ok(requestId, Revision));
             if (cost > 0) { OnSpent?.Invoke("boat-material-" + partId, cost); OnBalanceChanged?.Invoke(); }
             OnBoatRepairChanged?.Invoke();
             return result;
@@ -759,19 +762,30 @@ namespace DeepDive.Economy
         {
             EnsureSubscribed();
             var key = (player, requestId, OpBoatFinish);
-            if (_processedRequests.TryGetValue(key, out var old))
-                return _repairTargets.TryGetValue(key, out var target) && target == partId ? old : TransactionResult.Reject(requestId, "RequestMismatch", Revision);
             if (requestId == 0) return TransactionResult.Reject(requestId, "InvalidState", Revision);
-            if (DayLock.IsLocked) return TransactionResult.Reject(requestId, "DayClosing", Revision);
-            if (!BoatRepairParts.IsPart(partId)) return TransactionResult.Reject(requestId, "InvalidTarget", Revision);
-            if (_boatParts.Contains(partId)) return TransactionResult.Reject(requestId, "AlreadyProcessed", Revision);
-            if (!_boatMaterials.Contains(partId)) return TransactionResult.Reject(requestId, "MaterialMissing", Revision);
+            if (_repairTargets.TryGetValue(key, out var target) && target != partId)
+                return TransactionResult.Reject(requestId, "RequestMismatch", Revision);
+            if (_processedRequests.TryGetValue(key, out var old)) return old;
+            TransactionResult Reject(string reason) => RememberRepairResult(key, partId, TransactionResult.Reject(requestId, reason, Revision));
+            if (DayLock.IsLocked) return Reject("DayClosing");
+            if (!BoatRepairParts.IsPart(partId)) return Reject("InvalidTarget");
+            if (_boatParts.Contains(partId)) return Reject("AlreadyProcessed");
+            if (!_boatMaterials.Contains(partId)) return Reject("MaterialMissing");
             var revision = Revision;
             _boatMaterials.Remove(partId); _boatParts.Add(partId); Revision++;
             if (!Persist())
-            { _boatParts.Remove(partId); _boatMaterials.Add(partId); Revision = revision; return TransactionResult.Reject(requestId, "SaveFailed", Revision); }
-            var result = TransactionResult.Ok(requestId, Revision); _processedRequests[key] = result; _repairTargets[key] = partId;
+            { _boatParts.Remove(partId); _boatMaterials.Add(partId); Revision = revision; return Reject("SaveFailed"); }
+            var result = RememberRepairResult(key, partId, TransactionResult.Ok(requestId, Revision));
             OnBoatRepairChanged?.Invoke(); OnFleetChanged?.Invoke();
+            return result;
+        }
+
+        private TransactionResult RememberRepairResult((PlayerId, ulong, byte) key, string target, TransactionResult result)
+        {
+            _repairTargets[key] = target;
+            // A failed write is retryable with the same payload; terminal refusals must
+            // not turn into a later purchase/completion when the world or balance changes.
+            if (result.ReasonCode != "SaveFailed") _processedRequests[key] = result;
             return result;
         }
 

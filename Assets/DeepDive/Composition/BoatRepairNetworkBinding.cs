@@ -43,13 +43,15 @@ namespace DeepDive.Composition
         private const float HitPad = .4f;
         public const float RoutePad = 1.4f;
         public Vector3 SlotPosition(int i) => site.transform.TransformPoint(SlotLocal(i));
-        public Vector3 RackPosition(int i) => site.transform.TransformPoint(RackLocal(i));
+        public Vector3 RackPosition(int i) => drop != null
+            ? drop.TransformPoint(new Vector3((i - 1) * .8f, .65f, 0f))
+            : site.transform.TransformPoint(RackLocal(i));
         public Vector3 StandPosition(int i) => OnCradle && i >= 0 && i < workAnchors.Length && workAnchors[i] != null
             ? workAnchors[i].position : site.transform.TransformPoint(StandLocal(i));
         public bool OnCradle => cradle != null;
         // The hull collider is only there while the broken boat is shown (site active on the cradle).
         public bool Blocking => OnCradle && site != null && site.activeSelf;
-        private Transform cradle;
+        private Transform cradle, drop;
         private readonly Transform[] workAnchors = new Transform[RepairAnchorIds.WorkCount];
         private float anchorRetryAt;
         private BoxCollider hull;
@@ -119,6 +121,7 @@ namespace DeepDive.Composition
             anchorRetryAt = Time.unscaledTime + 1f;
             if (!WorldAnchors.TryFind(RepairAnchorIds.Cradle, out var found)) return;
             cradle = found.transform;
+            drop = WorldAnchors.TryFind(RepairAnchorIds.Drop, out var safeDrop) ? safeDrop.transform : null;
             for (var i = 0; i < workAnchors.Length; i++)
                 workAnchors[i] = WorldAnchors.TryFind(RepairAnchorIds.Work(i), out var work) ? work.transform : null;
         }
@@ -261,6 +264,7 @@ namespace DeepDive.Composition
                 boards[i].SetActive(done||placed);
                 for(int n=0;n<3;n++) nails[i*3+n].SetActive(done||(placed&&n<hits));
                 racks[i].SetActive(!done&&!reserved&&(progress.BoatMaterialsMask.Value&(1<<i))!=0);
+                racks[i].transform.position = RackPosition(i);
             }
         }
         private void OnDestroy()

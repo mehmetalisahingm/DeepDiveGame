@@ -1,4 +1,19 @@
-# #186 — Fiziksel sandal tamiri için somut sözleşme önerisi
+# #186 — Fiziksel sandal tamiri sözleşmesi ve karar kaydı
+
+## Güncel karar — 21 Ekim entegrasyonu
+
+18 Ekim önerisinin R01/R02/R11 alan onayları artık kayıtlıdır: [Mert ekonomi/kayıt/sanat](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6250071136), [Utku world/erişim](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6264145166) ve [Mehmet 19 Ekim tasarım kararı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6264232860). Bunlar ilgili alan kararlarıdır; nihai model/ses, ayrı PC veya oyuncu kabulü değildir. Aşağıdaki 18 Ekim öneri dili tarihsel hazırlık kaydı olarak okunur.
+
+- R01: üç görünür grup gövde yaması, oturak/destek, kürek bağlantısı; üç eski teknik ID ve `boat-1` korunur. Gerçek motor/tank yalnız motorbotta.
+- R02: üç grup/üç kalıcı katkı; her grupta tek görünür onarılmış parça. Üç darbe ayrı kalıcı alt-slot değildir.
+- R11: edinme ve tamamlama ayrı; ücret bir kez edinmede, tüketim/katkı son host darbesinde tek save. v9 geçiş tablosu ve v1–v8 tamamlanmış bitler korunur.
+- S1: kırık sandal kuru plaj kızağında `(3.6, 8.4, -12.6)`, yaw 90. Onarılan aynı sandal mevcut rota wp0'ına geçer. Ücretsiz oturak malzemesi #194'ün ölçülmüş kuru `(−2.5, 8.4, −12.75)` konumundadır.
+- Güvenli bırakma: kullanılmamış malzeme askıları `repair-drop-0=(7.5, 8.4, -14.5)` çevresine bağlanır; üç rafta x ofsetleri −0.8/0/+0.8 m, yükseklik 0.65 m. Böylece #194 başlangıcıyla eski askının görsel karışması giderilir. Q/kopma/pasiflik/Closing aynı acquired malzemeyi orada gösterir. Tamir bitince geçici tamir sunumu gizlenir; kalıcı kızak/dekor sanatı #189'un teslimidir.
+- Tekil istek: edinme ve final işleminin kalıcı ret sonucu aynı request ID ile sonradan başarıya dönüşmez. Parça/edinme kaynağı değişen replay reddedilir; SaveFailed aynı payload ile retry edilebilir.
+
+21 Ekim açık kullanıcı talimatı “birleştir görevleri yap” ile #190, kuru parça #194, kıyı düzeltmesi #195 ve S1 bağlantısı #196 aynı teknik adayda birleştirilip doğrulanır. Bu yalnız bu hazır tamir/erişim entegrasyonunun sırasını öne alır; #141/#159 kabulü, #189 nihai sanat veya P4.9–P4.12 uygulama izni üretilmez. Draft #196'daki geniş faz kapısı bu dar teknik birleştirme ile kapanmaz.
+
+## 18 Ekim tarihli hazırlık
 
 18 Ekim 2026. Mehmet'in #186 hazırlığı; #187/#188/#189 için birlikte incelenecek dar tasarım. **Öneridir; R01/R02/R11 kararı, diğer kişilerin onayı veya P4.6/P4.7 kabulü değildir.** Sonraki açık kullanıcı talimatı (“Evet, benim tamir işimi şimdi uygula”) yalnız #187 için uygulama istisnası verir; #141/#159 kabulü açık kalır. Kaynak temel #185 birleşimi `6816fba`. Bu istisnadaki uygulama R01/R02/R11 seçimlerini dar teknik temel olarak kullanır: v9 `UnusedBoatPartIds`, mevcut tamamlanmış ID listesi ve `DeepDive-P4-5` protokolü. Diğer kişilerin onayı veya #188/#189 nihai teslimi değildir.
 

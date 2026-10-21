@@ -362,7 +362,7 @@ namespace DeepDive.P1.Lab
                 var rack=site.RackPosition(part);
                 var rackStand=rack+Vector3.right*.65f;rackStand.y=ContinuousTownLayout.WalkSurfaceY;
                 var rackDelta=rackStand-local.transform.position;rackDelta.y=0;
-                if(rackDelta.magnitude>.2f){MoveToward(rackStand);aimAt=0;return;}
+                if(rackDelta.magnitude>.2f){MoveToward(Around(rackStand));aimAt=0;return;}
                 Aim(rack);if(Settled())Act(local.SubmitPickupLocal);return;
             }
             if (repairExit)
@@ -489,8 +489,9 @@ namespace DeepDive.P1.Lab
             var fish=recordingFish;
             if (fish == null) { Stop(); return; }
             var delta = fish.transform.position - local.RecordingEyePosition;
-            // Sea bass flee inside 5 m at 3.2 m/s; the real camera framing band is 5-12 m.
-            if (delta.magnitude > 8f)
+            // Start in the real basic-camera band before closing further on a moving subject.
+            // The fish need not reach an exact 8 m approach distance to accept an actual take.
+            if (delta.magnitude > 10f)
             {
                 var stand=fish.transform.position-Vector3.up*1.4f;stand.y=Mathf.Max(.1f,stand.y);
                 MoveToward(stand);aimAt=0;return;

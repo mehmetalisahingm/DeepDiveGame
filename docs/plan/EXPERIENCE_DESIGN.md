@@ -294,6 +294,8 @@ Görsel animasyon/partikül öncelikle presentation state'tir. Dünya/ekonomi ot
 
 ## 12. Uygulama öncesi karar defteri
 
+21 Ekim durum notu: R01/R02/R11 artık yalnız öneri değildir; Mert, Utku ve Mehmet'in gerçek alan kararları [#186 kaydında](P48_REPAIR_CONTRACT_PROPOSAL.md) bağlantılarıyla tutulur. Üç grup/tek kalıcı parça, edinme–son darbe ayrımı ve eski kayıt korunması seçildi; tamir S1 kuru plaj kızağında, kullanılmamış malzeme `repair-drop-0` askılarındadır. Tablodaki ilk öneri dili hazırlığın tarihini korur; nihai sanat, #141/#159 ve oyuncu kabulünü tamamlamaz.
+
 | Karar | Çalışma önerisi | Etki/sahip | Ne zaman gerekir? |
 |---|---|---|---|
 | R01 Kürekli sandal + motor/tank uyumsuzluğu | Üç ahşap/fitting tamir grubu; eski ID kontrollü eşleme | Mehmet son tasarım, Mert save, Utku world | P4.8 sanat üretiminden önce |

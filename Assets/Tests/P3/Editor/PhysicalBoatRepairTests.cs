@@ -157,5 +157,36 @@ namespace DeepDive.P3.Tests
             var overlap=new EconomySaveData();overlap.BoatPartIds.Add(BoatRepairParts.Hull);overlap.UnusedBoatPartIds.Add(BoatRepairParts.Hull);
             Assert.IsFalse(economy.TryRestore(overlap));Assert.AreEqual(70,economy.SharedBalance);
         }
+        [Test] public void RejectedPurchaseCannotSucceedOnReplayAfterTheBalanceChanges()
+        {
+            var rejected=economy.TryAcquireBoatPart(alice,BoatRepairParts.Hull,BoatPartSource.Purchased,1);
+            Assert.AreEqual("InsufficientFunds",rejected.ReasonCode);
+            Assert.IsTrue(economy.TryCreditReward("funds",240));
+            var replay=economy.TryAcquireBoatPart(alice,BoatRepairParts.Hull,BoatPartSource.Purchased,1);
+            Assert.AreEqual(rejected.ReasonCode,replay.ReasonCode);Assert.AreEqual(rejected.Revision,replay.Revision);
+            Assert.AreEqual(240,economy.SharedBalance);Assert.IsEmpty(economy.UnusedBoatParts);
+            Assert.AreEqual("RequestMismatch",economy.TryAcquireBoatPart(alice,BoatRepairParts.Hull,BoatPartSource.Found,1).ReasonCode);
+            Assert.AreEqual("RequestMismatch",economy.TryAcquireBoatPart(alice,BoatRepairParts.Engine,BoatPartSource.Purchased,1).ReasonCode);
+            Assert.IsTrue(economy.TryAcquireBoatPart(alice,BoatRepairParts.Hull,BoatPartSource.Purchased,2).Accepted);
+            Assert.AreEqual(120,economy.SharedBalance);
+        }
+        [Test] public void FailedAcquisitionSaveCanRetryOnlyItsOriginalPayload()
+        {
+            economy.SetPersistenceHandler(()=>false);
+            Assert.AreEqual("SaveFailed",economy.TryAcquireBoatPart(alice,BoatRepairParts.Hull,BoatPartSource.Found,1).ReasonCode);
+            Assert.IsEmpty(economy.UnusedBoatParts);
+            economy.SetPersistenceHandler(()=>true);
+            Assert.AreEqual("RequestMismatch",economy.TryAcquireBoatPart(alice,BoatRepairParts.Engine,BoatPartSource.Found,1).ReasonCode);
+            Assert.IsTrue(economy.TryAcquireBoatPart(alice,BoatRepairParts.Hull,BoatPartSource.Found,1).Accepted);
+            Assert.AreEqual(1,economy.UnusedBoatParts.Count);
+        }
+        [Test] public void RejectedFinishStaysRejectedAfterMaterialArrives()
+        {
+            Assert.AreEqual("MaterialMissing",economy.TryFinishBoatPart(alice,BoatRepairParts.Hull,1).ReasonCode);
+            Assert.IsTrue(economy.TryAcquireBoatPart(bob,BoatRepairParts.Hull,BoatPartSource.Found,2).Accepted);
+            Assert.AreEqual("MaterialMissing",economy.TryFinishBoatPart(alice,BoatRepairParts.Hull,1).ReasonCode);
+            Assert.IsEmpty(economy.BoatRepair.CompletedPartIds);
+            Assert.IsTrue(economy.TryFinishBoatPart(alice,BoatRepairParts.Hull,3).Accepted);
+        }
     }
 }

@@ -1,5 +1,7 @@
 # Ortak sistem sözleşmeleri
 
+21 Ekim güncel uygulama kararı: P0–P3 kapalı, P4 açık; P5/P6 kilitlidir. R01/R02/R11 alan onayları ve Mehmet'in 19 Ekim kararı [#186 sözleşme kaydında](P48_REPAIR_CONTRACT_PROPOSAL.md) kaynak yorumlarına bağlıdır. Üç ahşap/bağlantı grubu, eski üç ID, v9 acquired/completed ayrımı ve S1 kuru kızak kullanılır. `repair-drop-0` ortak malzeme askılarının gerçek tüketicisidir. Geçerli request kimliğinin terminal reddi hedef/kaynakla birlikte saklanır; yalnız SaveFailed aynı payload ile yeniden denenebilir. Aşağıdaki eski tarihli taslaklar tarihsel bağlamdır; #141/#159 ve sanat/oyuncu kabulü ayrıca açık kalır.
+
 Plan 3.0 — 15 Eylül 2026. P3 açık, P4–P6 kilitli. İnsan/ekipman, NPC/çanta/sandal sözleşmelerine harita, ayrı kamera satın alma, ev/gün/uyku, medya/kanal, tekne sahipliği ve boss bağlantıları eklendi. Yeni bölümler **tasarımdır; uygulanmış API veya ekip uzlaşısı değildir**. İlgili ara teslimden önce etkilenen alan sahipleri netleştirir; davranış kaynağı [WORLD_SYSTEMS](WORLD_SYSTEMS.md)'tir.
 
 Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Buradaki tip isimleri uygulanmış sınıflar veya mevcut dosyalar değildir. Görev kodları: A=Mehmet, B=Utku, C=Mert.
