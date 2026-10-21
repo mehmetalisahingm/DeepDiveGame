@@ -129,6 +129,73 @@ namespace DeepDive.P3.Tests
             Assert.IsEmpty(economy.UnusedBoatParts);
         }
 
+        [Test] public void ClosingDayAfterTwoStrokes_KeepsPurchasedMaterialAndNoFinishedRepairOnReload()
+        {
+            // Simulate the host's closing-day cleanup: unfinished transient work goes away,
+            // but acquisition, one-time purchase cost, and completed parts are durable.
+            Assert.IsTrue(economy.TryRestore(new EconomySaveData { SharedBalance = 240 }));
+            Assert.IsTrue(economy.TryAcquireBoatPart(alice, BoatRepairParts.Hull, BoatPartSource.Purchased, 100).Accepted);
+            Assert.AreEqual(120, economy.SharedBalance);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Grab, 0, 1, 0).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Place, 0, 2, 0).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 3, 1).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 4, 2).Accepted);
+            work.Release(alice); // BoatRepairNetworkBinding.Update when DayLock.IsLocked.
+            Assert.IsFalse(work.IsReserved(0));
+            Assert.IsEmpty(economy.BoatRepair.CompletedPartIds);
+            var snapshot = JsonUtility.FromJson<EconomySaveData>(
+                JsonUtility.ToJson(economy.ExportSaveData("day-close", "checkpoint")));
+
+            Object.DestroyImmediate(root);
+            root = new GameObject("next-day-repair-test");
+            economy = root.AddComponent<EconomyManager>();
+            Assert.IsTrue(economy.TryRestore(snapshot));
+            Assert.AreEqual(120, economy.SharedBalance);
+            Assert.IsEmpty(economy.BoatRepair.CompletedPartIds);
+            Assert.AreEqual(1, economy.UnusedBoatParts.Count);
+            work = new BoatRepairWorkSession(i => Contains(economy.UnusedBoatParts, i),
+                i => Contains(economy.BoatRepair.CompletedPartIds, i),
+                (p, i, r) => economy.TryAcquireBoatPart(p, BoatRepairParts.All[i], BoatPartSource.Found, r),
+                (p, i, r) => economy.TryFinishBoatPart(p, BoatRepairParts.All[i], r));
+            Assert.IsFalse(work.TryGet(alice, out _));
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Grab, 0, 1, 3).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Place, 0, 2, 3).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 0, 3, 4).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 0, 4, 5).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 0, 5, 6).Accepted);
+            Assert.AreEqual(120, economy.SharedBalance); // No second purchase.
+            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.IsEmpty(economy.UnusedBoatParts);
+        }
+
+        [Test] public void FailedFinalSaveThenGuestDisconnect_DoesNotLoseMaterialOrCarryPartialHits()
+        {
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Grab, 0, 1, 0).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Place, 0, 2, 0).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 3, 1).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 4, 2).Accepted);
+            economy.SetPersistenceHandler(() => false);
+            Assert.AreEqual("SaveFailed",
+                work.Execute(alice, BoatRepairCommand.Hammer, 0, 5, 3).ReasonCode);
+            Assert.AreEqual(1, economy.UnusedBoatParts.Count);
+            Assert.IsEmpty(economy.BoatRepair.CompletedPartIds);
+            work.Release(alice); // Guest disconnected before its next save attempt.
+            Assert.IsFalse(work.IsReserved(0));
+            economy.SetPersistenceHandler(() => true);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Grab, 0, 1, 4).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Place, 0, 2, 4).Accepted);
+            Assert.IsTrue(work.TryGet(bob, out var recovered));
+            Assert.AreEqual(0, recovered.Hits);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 0, 3, 5).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 0, 4, 6).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 0, 5, 7).Accepted);
+            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.IsEmpty(economy.UnusedBoatParts);
+            // A stale request from the old guest cannot complete or consume a second time.
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 5, 8).Accepted == false);
+            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+        }
+
         [Test] public void WrongSlot_UnplacedHammer_AndFastStrokesAreRejected()
         {
             Do(BoatRepairCommand.Grab);
