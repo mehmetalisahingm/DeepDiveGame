@@ -44,6 +44,8 @@ P4.3 tekne sahipliği/aktif gövde/envanter/harita, P4.4 boss/hasar/ödül, P4.5
 
 ## Günlük kısa kontrol
 
+19 Ekim kalite kırılımı [Q01–Q14](WORLD_QUALITY_DELIVERIES.md) her ilgili işte kullanılır. PR, üst başlık olarak “canlı deniz bitti” yerine hangi somut su/habitat/tür/değer/boss veya şehir/mekân paketini teslim ettiğini yazar. Hareket/ışık/ses için gerçek video, av/değer için gerçek satış/kayıt, mesafe için gerçek yaya turu gerekir. Yeni kodun testleri, oyuncu görsel kabulü ve üst faz kapanışı ayrı raporlanır.
+
 Yeni deneyim işleri [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md) alan/parça sırasına bölünür. R01/R02/R11 ve diğer [tasarım kararları](EXPERIENCE_DESIGN.md) uygulama öncesinde kaydedilir. Oyuncu hedefi, eylemin yerel/uzak görünümü, iptal/ret ve kayıt sonucu PR tesliminde birlikte belirtilir.
 
 1. Aktif fazdaki kendi görevini ve bağımlılığını kontrol et.

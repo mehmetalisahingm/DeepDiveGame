@@ -8,6 +8,8 @@ P4.7–P4.12'nin bağlayıcı yeni planı [PLAYER_EXPERIENCE_EXPANSION](PLAYER_E
 
 ## Oyunun iki gelir yolu
 
+19 Ekim ürün ayrıntısı: [WORLD_QUALITY_DELIVERIES](WORLD_QUALITY_DELIVERIES.md) Q03–Q06 şehir–uzak sahil/ev/dükkân mekânlarını, Q07–Q09 su/iniş/mercan habitatını, Q10–Q12 tür hareketi/derinlik değeri/boss keşfini tanımlar. Görsel dalga fizik otoritesini değiştirmez; tür/habitat/gerçek satış kaydı değer farkını doğrular, oyuncunun derinliği tek başına fiyat çarpanı değildir. Eski kayıt ve tek ödeme korunur. Boss kodu veya tarihli teknik kabul yeni kampanyadan bulunabilir nihai karşılaşma yerine geçmez. Bunlar plan ayrıntılarıdır; yeni uygulama API'si veya faz açılışı değildir.
+
 Yerleşim, her eylemin dünya/beden/ses karşılığı, beş türün gerçek erişimi ve günler boyunca ilerleme [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md) içinde ayrıntılıdır. İlk sürüm sınırları korunur; ileri seçenekler ayrı [FUTURE_ROADMAP](FUTURE_ROADMAP.md) kararıdır.
 
 **Balıkçılık:** Kıyıdan veya tekneyle git → avı çantada taşı → güvenle dön → balıkçıda seçip sat → hemen gelir.

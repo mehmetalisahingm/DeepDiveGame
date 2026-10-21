@@ -17,6 +17,8 @@ Birleşmiş commit'ten tekrar Windows build ve iki gerçek süreçli dünya turu
 
 ## Sıra ve sınır
 
+19 Ekim kullanıcı itirazıyla #159/#161/#162/#163/#164 için [Q01–Q14 alt teslim kaynağı](WORLD_QUALITY_DELIVERIES.md) eklendi. Bu ek GitHub'da yeni alt issue açıldığı iddiası değildir. Sıradaki açılabilir görevler: kara+deniz kalite örneği; şehir–sahil ölçek blokajı; sokak/mimari, dört gerçek dükkân ve ev içi; su yüzeyi, dalış geçişi, mercan/habitat, balık hareketi, derinlik/değer, bulunabilir boss ve tekne sunumu. Üst işlerden birini tek video/katalogla kapatmak yerine ilgili Q kanıtları toplanır. Faz kapıları ve mevcut dar kullanıcı istisnaları korunur.
+
 1. Mevcut P4.6 içinde #170 birleşik teknik döngü ve #138/#140/#141'in eksik kanıtları tamamlanır. Ayrı bilgisayarda dört oyuncu/üç gün ve üç kişinin gerçek kabulü #141'de kalır; aynı PC'deki süreçler bunun yerine geçmez.
 2. P4.7 için mevcut sahneyi ölçme, placeholder/kaynak envanteri, referans/palet ve rig/kamera inceleme hazırlığı yapılabilir. Yeni sanat/geometri/rig'in oyuna uygulanması P4.6 teknik temel kabulünden sonra başlar. Issue oluşturulması aşamayı açmaz.
 3. Mert'in örnek kiti, Utku'nun örnek alanı ve Mehmet'in kamera/ölçek bağlantısı aynı kısa bölümde birleştirilir; gerçek Windows görüntüsü, gündüz/gece okunurluk, kare süresi ve kullanıcının hedef kalite değerlendirmesi #159'a bağlanır.

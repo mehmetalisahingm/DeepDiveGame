@@ -6,6 +6,8 @@ Durum: ihtiyaç duyulan fazdan önce birlikte kesinleştirilecek tasarım. Burad
 
 Amaç: Mehmet, Utku ve Mert'in birbirine bağlanabilen sistemler üretmesi. P0'da yalnızca P1 için gereken kimlik/oturum bağlantıları kesinleşir. Av/çanta ayrıntıları P2 öncesinde, çekim/ekonomi/kayıt ayrıntıları P3 öncesinde netleşir. İleriki fazın taslağı o özelliği erken uygulama izni vermez.
 
+19 Ekim [dünya kalite planının](WORLD_QUALITY_DELIVERIES.md) uygulama öncesi seam'leri: geometri taşınırken stable hizmet/PC/yatak/rota/berth/save kimlikleri korunur; su shader/dekor animasyonu host hareket/av/ödeme otoritesi değildir; tür/habitat/fiyat tek ortak katalog eşlemesinden tüketilir. Q11'de fiyat ve varsa ağırlık semantiği, Q10'da canlı/collider/erişilebilir av, Q12'de keşif/arena ve tek kalıcı ödül alanlarca kesinleştirilir. Görsel örnek bu sözleşmeleri veya eski kampanyayı sessizce değiştirmez; bu not henüz uygulanmış API değildir.
+
 Tarihli uygulama notları kendi gününün kanıtıdır. 14 Eylül ayrı çalışma dalının durumu [P3-WIP-HANDOFF](../reports/P3-WIP-HANDOFF.md)'ta; yeni kapsamın kabul koşulları [PHASES](PHASES.md) ve [GAMEPLAY_LOOP](GAMEPLAY_LOOP.md)'tadır. Özellikle mevcut dalış sonu ödeme hattı, P3.2'de NPC'ye teslim akışına dönüştürülecektir.
 
 P1 uygulamaları ortak akışa bağlandı: [entegrasyon kaydı](../reports/P1-INTEGRATION-REPORT.md),

@@ -2,6 +2,8 @@
 
 13 Ekim 2026 — [oyuncu deneyimi tasarımının](EXPERIENCE_DESIGN.md) uygulanabilir iş parçaları. Faz kapıları [PHASES](PHASES.md), açık durum [STATUS](STATUS.md) içindedir. Bu iş listesi atama/planlama kaydıdır; saat tahmini, ekip onayı veya uygulama başlangıcı değildir.
 
+19 Ekim ek iş kırılımı: [WORLD_QUALITY_DELIVERIES Q01–Q14](WORLD_QUALITY_DELIVERIES.md). Aşağıdaki 7–12 üst işleri korunur; özellikle 10-1, 11-2, 11-3 ve 11-5 artık tek PR veya tek kabul kutusu değildir. Su yüzeyi/iniş/habitat/balık/değer/boss ile şehir ölçeği/mimari/dükkân/ev kendi bağımlılığı, alan sahibi ve gerçek oyun kanıtıyla küçük paketlere ayrılır. Önce kara ve deniz kalite örneği; P4.10'da ölçek, sonra mekânlar; P4.11'de su/iniş, habitat, tür/değer, boss ve yolculuk. Sonraki faz kodunu başlatma kapıları korunur.
+
 ## 1. Üç katmanlı iş takibi
 
 - Ana faz: P4.7–P4.12; ürün sonucu ve kabul kapısı.
