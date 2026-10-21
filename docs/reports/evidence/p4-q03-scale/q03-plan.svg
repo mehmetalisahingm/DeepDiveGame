@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="624" height="904" viewBox="0 0 624 904">
+<rect width="624" height="904" fill="#fbfaf7"/>
+<rect x="96.0" y="-53.6" width="132.0" height="220.0" fill="#cfe3ee" stroke="none" opacity="1.0"/>
+<rect x="129.0" y="-42.6" width="66.0" height="176.0" fill="#a9cfe3" stroke="none" opacity="1.0"/>
+<rect x="129.0" y="108.1" width="66.0" height="25.3" fill="#efe2bf" stroke="none" opacity="1.0"/>
+<rect x="129.6" y="108.1" width="64.9" height="114.4" fill="none" stroke="#9aa5b1" stroke-dasharray="4 3" opacity="1.0"/>
+<rect x="148.8" y="192.8" width="26.4" height="26.4" fill="none" stroke="#9aa5b1" stroke-dasharray="4 3" opacity="1.0"/>
+<text x="133.2" y="234.5" font-size="9" text-anchor="start" fill="#7b8794" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">bugünkü kasaba</text>
+<rect x="140.0" y="307.2" width="79.2" height="61.6" fill="#f3d9a4" stroke="#b7791f" opacity="1.0"/>
+<rect x="140.0" y="826.4" width="26.4" height="26.4" fill="#e8c8b0" stroke="#9c4221" opacity="1.0"/>
+<polyline points="153.2,311.6 148.8,276.4 137.8,223.6 148.8,175.2 162.0,133.4 162.0,130.1" fill="none" stroke="#2b6cb0" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="153.2,826.4 153.2,800.0 175.2,749.4 140.0,683.4 118.0,610.8 131.2,540.4 162.0,474.4 179.6,408.4 179.6,368.8 179.6,338.0 153.2,311.6" fill="none" stroke="#c05621" stroke-width="4" stroke-linejoin="round"/>
+<polyline points="162.0,130.1 177.4,129.0 181.8,120.2 181.8,108.5" fill="none" stroke="#2f855a" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="162.0" cy="130.1" r="2.5" fill="#2f855a"/>
+<circle cx="181.8" cy="108.5" r="2.5" fill="#2f855a"/>
+<circle cx="181.8" cy="120.2" r="2.5" fill="#2f855a"/>
+<circle cx="147.7" cy="124.5" r="2.5" fill="#2f855a"/>
+<circle cx="169.9" cy="128.1" r="2.5" fill="#2f855a"/>
+<circle cx="135.6" cy="127.9" r="2.5" fill="#2f855a"/>
+<circle cx="156.5" cy="128.4" r="2.5" fill="#2f855a"/>
+<circle cx="189.5" cy="127.9" r="2.5" fill="#2f855a"/>
+<circle cx="178.5" cy="132.3" r="2.5" fill="#2f855a"/>
+<circle cx="153.2" cy="311.6" r="4.5" fill="#6b46c1"/>
+<text x="160.2" y="315.6" font-size="10" text-anchor="start" fill="#44337a" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">buyer-fish (balıkçı)</text>
+<circle cx="144.4" cy="346.8" r="4.5" fill="#6b46c1"/>
+<text x="151.4" y="350.8" font-size="10" text-anchor="start" fill="#44337a" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">shop-equipment</text>
+<circle cx="214.8" cy="324.8" r="4.5" fill="#6b46c1"/>
+<text x="221.8" y="328.8" font-size="10" text-anchor="start" fill="#44337a" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">buyer-recording</text>
+<circle cx="190.6" cy="144.4" r="4.5" fill="#6b46c1"/>
+<text x="197.6" y="148.4" font-size="10" text-anchor="start" fill="#44337a" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">vendor-vehicle (liman, öneri)</text>
+<circle cx="118.0" cy="610.8" r="8" fill="none" stroke="#d53f8c" stroke-width="2"/>
+<text x="118.0" y="614.8" font-size="10" text-anchor="middle" fill="#d53f8c" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">1</text>
+<circle cx="148.8" cy="276.4" r="8" fill="none" stroke="#d53f8c" stroke-width="2"/>
+<text x="148.8" y="280.4" font-size="10" text-anchor="middle" fill="#d53f8c" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">2</text>
+<circle cx="181.8" cy="108.5" r="8" fill="none" stroke="#d53f8c" stroke-width="2"/>
+<text x="181.8" y="112.5" font-size="10" text-anchor="middle" fill="#d53f8c" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">3</text>
+<text x="153.2" y="874.8" font-size="11" text-anchor="middle" fill="#9c4221" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">EV (kapı kuzeye bakar)</text>
+<text x="179.6" y="397.0" font-size="11" text-anchor="middle" fill="#7b341e" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">MEYDAN</text>
+<text x="162.0" y="43.2" font-size="11" text-anchor="middle" fill="#2a4365" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">DENİZ (SwimVolume x ±15)</text>
+<text x="206.0" y="118.0" font-size="10" text-anchor="start" fill="#744210" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">kıyı / iskele (sabit)</text>
+<line x1="41.0" y1="848.4000000000001" x2="151.0" y2="848.4000000000001" stroke="#1f2933" stroke-width="2"/>
+<text x="41.0" y="843.4" font-size="10" text-anchor="start" fill="#1f2933" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">50 m</text>
+<text x="47.6" y="89.4" font-size="10" text-anchor="start" fill="#1f2933" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">▲ kuzey (+z, deniz)</text>
+<text x="334.0" y="40.0" font-size="12" text-anchor="start" fill="#1f2933" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">Q03 ölçek adayı B (öneri, uygulama değil)</text>
+<text x="334.0" y="58.0" font-size="11" text-anchor="start" fill="#1f2933" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Ev → iskele: 367.4 m ≈ 91.8 s</text>
+<text x="334.0" y="76.0" font-size="11" text-anchor="start" fill="#c05621" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Ev sokağı (turuncu) H = 251.2 m</text>
+<text x="334.0" y="94.0" font-size="11" text-anchor="start" fill="#2b6cb0" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Sahil yolu (mavi) C = 84.8 m</text>
+<text x="334.0" y="112.0" font-size="11" text-anchor="start" fill="#2f855a" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Kapı → iskele (yeşil) P = 16.8 m</text>
+<text x="334.0" y="130.0" font-size="11" text-anchor="start" fill="#1f2933" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Satış turu kıyı↔balıkçı: 60.8 s</text>
+<text x="334.0" y="148.0" font-size="11" text-anchor="start" fill="#1f2933" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">En dik eğim: 5.6° (CC sınırı 45°)</text>
+<text x="334.0" y="166.0" font-size="11" text-anchor="start" fill="#44337a" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Mor: hizmet noktaları; pembe: kompozisyonlar</text>
+<text x="334.0" y="184.0" font-size="11" text-anchor="start" fill="#7b8794" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Kesikli gri: bugünkü kasaba ve ev</text>
+<text x="334.0" y="202.0" font-size="11" text-anchor="start" fill="#2a4365" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">Açık mavi: görünen deniz düzlemi (yüzülemez)</text>
+<text x="334.0" y="228.0" font-size="10" text-anchor="start" fill="#97266d" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">1 evden meydan: kuleler (−20,−232) virajında görünür</text>
+<text x="334.0" y="244.0" font-size="10" text-anchor="start" fill="#97266d" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">2 meydandan su: (−6,−80) sırtında deniz açılır</text>
+<text x="334.0" y="260.0" font-size="10" text-anchor="start" fill="#97266d" font-family="Segoe UI, Arial, sans-serif" font-weight="normal">3 iskeleden kasaba: teras silueti ~95 m güneyde</text>
+</svg>

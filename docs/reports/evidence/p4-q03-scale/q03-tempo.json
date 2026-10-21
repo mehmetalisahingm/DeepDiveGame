@@ -1,0 +1,196 @@
+{
+  "constants": {
+    "walk_mps": 4.0,
+    "day_s": 1200.0,
+    "warn_22_left_s": 150.0,
+    "warn_23_left_s": 75.0
+  },
+  "assumptions": {
+    "dive_cycle_s": [
+      120,
+      180
+    ],
+    "sell_stop_s": 10,
+    "equip_stop_s": 15,
+    "evening_home_s": 30,
+    "house_exit_m": 14.5,
+    "swim_back_s": 60
+  },
+  "P_gate_to_pier_m": 16.8,
+  "candidates": {
+    "today": {
+      "label": "Bugün (#172)",
+      "H_m": 15.1,
+      "C_m": 14.2,
+      "P_m": 16.8,
+      "home_to_pier_m": 60.5,
+      "home_to_pier_s": 15.1,
+      "morning_s": 30.1,
+      "evening_s": 45.1,
+      "sale_round_trip_s": 25.5,
+      "warn_23_exit_to_buyer_s": 17.7,
+      "warn_23_ok": true,
+      "warn_22_in_water_ok": true,
+      "per_dive": [
+        {
+          "dive_cycle_s": 120,
+          "dives_sell_every_dive": 7,
+          "dives_sell_every_2": 8,
+          "non_dive_share_sell_every_dive": 0.3
+        },
+        {
+          "dive_cycle_s": 180,
+          "dives_sell_every_dive": 5,
+          "dives_sell_every_2": 5,
+          "non_dive_share_sell_every_dive": 0.25
+        }
+      ],
+      "note": "#172 gerçek a0 sürüşü 58,6 m / 14,7 s; model 4 m/s düz çizgi"
+    },
+    "B": {
+      "label": "B — önerilen: uzak ev, balıkçı meydanın kıyı köşesinde, orta sahil yolu",
+      "H_m": 251.2,
+      "C_m": 84.8,
+      "P_m": 16.8,
+      "home_to_pier_m": 367.4,
+      "home_to_pier_s": 91.8,
+      "morning_s": 106.8,
+      "evening_s": 121.8,
+      "sale_round_trip_s": 60.8,
+      "warn_23_exit_to_buyer_s": 35.4,
+      "warn_23_ok": true,
+      "warn_22_in_water_ok": true,
+      "per_dive": [
+        {
+          "dive_cycle_s": 120,
+          "dives_sell_every_dive": 5,
+          "dives_sell_every_2": 6,
+          "non_dive_share_sell_every_dive": 0.5
+        },
+        {
+          "dive_cycle_s": 180,
+          "dives_sell_every_dive": 4,
+          "dives_sell_every_2": 4,
+          "non_dive_share_sell_every_dive": 0.4
+        }
+      ],
+      "max_grade_deg": 5.6
+    },
+    "B+": {
+      "label": "B+ — ilk çizim: balıkçı meydanın arkasında (sahil yolu 125 m)",
+      "H_m": 209.6,
+      "C_m": 125.2,
+      "P_m": 16.8,
+      "home_to_pier_m": 366.0,
+      "home_to_pier_s": 91.5,
+      "morning_s": 106.5,
+      "evening_s": 121.5,
+      "sale_round_trip_s": 81.0,
+      "warn_23_exit_to_buyer_s": 45.5,
+      "warn_23_ok": true,
+      "warn_22_in_water_ok": true,
+      "per_dive": [
+        {
+          "dive_cycle_s": 120,
+          "dives_sell_every_dive": 4,
+          "dives_sell_every_2": 6,
+          "non_dive_share_sell_every_dive": 0.6
+        },
+        {
+          "dive_cycle_s": 180,
+          "dives_sell_every_dive": 3,
+          "dives_sell_every_2": 4,
+          "non_dive_share_sell_every_dive": 0.55
+        }
+      ],
+      "max_grade_deg": 4.1
+    },
+    "A": {
+      "label": "A — kıyıya yakın merkez, çok uzak ev",
+      "H_m": 258.3,
+      "C_m": 68.1,
+      "P_m": 16.8,
+      "home_to_pier_m": 357.7,
+      "home_to_pier_s": 89.4,
+      "morning_s": 104.4,
+      "evening_s": 119.4,
+      "sale_round_trip_s": 52.4,
+      "warn_23_exit_to_buyer_s": 31.2,
+      "warn_23_ok": true,
+      "warn_22_in_water_ok": true,
+      "per_dive": [
+        {
+          "dive_cycle_s": 120,
+          "dives_sell_every_dive": 5,
+          "dives_sell_every_2": 6,
+          "non_dive_share_sell_every_dive": 0.5
+        },
+        {
+          "dive_cycle_s": 180,
+          "dives_sell_every_dive": 4,
+          "dives_sell_every_2": 4,
+          "non_dive_share_sell_every_dive": 0.4
+        }
+      ],
+      "max_grade_deg": 3.8
+    },
+    "C": {
+      "label": "C — merkez evin yanında, uzun sahil yolu",
+      "H_m": 63.7,
+      "C_m": 262.5,
+      "P_m": 16.8,
+      "home_to_pier_m": 357.5,
+      "home_to_pier_s": 89.4,
+      "morning_s": 104.4,
+      "evening_s": 119.4,
+      "sale_round_trip_s": 149.7,
+      "warn_23_exit_to_buyer_s": 79.8,
+      "warn_23_ok": false,
+      "warn_22_in_water_ok": true,
+      "per_dive": [
+        {
+          "dive_cycle_s": 120,
+          "dives_sell_every_dive": 3,
+          "dives_sell_every_2": 5,
+          "non_dive_share_sell_every_dive": 0.7
+        },
+        {
+          "dive_cycle_s": 180,
+          "dives_sell_every_dive": 2,
+          "dives_sell_every_2": 3,
+          "non_dive_share_sell_every_dive": 0.7
+        }
+      ],
+      "max_grade_deg": 2.5
+    },
+    "D": {
+      "label": "D — 500 m üst sınır (B'nin ev sokağı uzatılmış)",
+      "H_m": 416.4,
+      "C_m": 84.8,
+      "P_m": 16.8,
+      "home_to_pier_m": 532.5,
+      "home_to_pier_s": 133.1,
+      "morning_s": 148.1,
+      "evening_s": 163.1,
+      "sale_round_trip_s": 60.8,
+      "warn_23_exit_to_buyer_s": 35.4,
+      "warn_23_ok": true,
+      "warn_22_in_water_ok": true,
+      "per_dive": [
+        {
+          "dive_cycle_s": 120,
+          "dives_sell_every_dive": 4,
+          "dives_sell_every_2": 5,
+          "non_dive_share_sell_every_dive": 0.6
+        },
+        {
+          "dive_cycle_s": 180,
+          "dives_sell_every_dive": 3,
+          "dives_sell_every_2": 4,
+          "non_dive_share_sell_every_dive": 0.55
+        }
+      ],
+      "max_grade_deg": 5.6
+    }
+  }
+}
