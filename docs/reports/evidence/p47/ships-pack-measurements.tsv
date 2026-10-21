@@ -1,0 +1,7 @@
+name	size_x	size_y	size_z	pivot_to_bottom_y	center_x	center_z	verts	tris	meshes	submeshes	materials	textured_mats	import_scale
+Boat	0.36	0.16	0.67	0.00	0.00	-0.01	300	172	1	2	2	0	1.00
+BoatWSail	0.40	0.85	0.99	0.00	0.01	0.07	1544	1020	2	5	4	0	1.00
+CruiseShip	4.00	6.60	18.05	0.00	0.00	0.16	1330	858	1	4	4	0	1.00
+Lifeboat	0.65	0.21	1.11	0.00	0.00	0.02	960	626	1	4	4	0	1.00
+Sail ship	1.70	3.85	6.38	-0.11	0.00	0.58	5766	3938	5	12	5	0	1.00
+Viking boat	1.57	2.51	4.20	-0.01	-0.01	0.18	2944	1640	2	6	5	0	1.00

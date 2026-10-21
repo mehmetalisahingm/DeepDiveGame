@@ -2,6 +2,8 @@
 
 13 Ekim 2026 — Plan 3.1 ayrıntısı. Bu belge çalışma tasarımıdır; uygulama, performans veya ekip kabulü kanıtı değildir. Teslim sırası [P4.7–P4.12](PLAYER_EXPERIENCE_EXPANSION.md), üretim parçaları [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md), ileri seçenekler [FUTURE_ROADMAP](FUTURE_ROADMAP.md) içindedir.
 
+19 Ekim kullanıcı geri bildiriminin [ayrıntılı kalite teslimleri](WORLD_QUALITY_DELIVERIES.md), su hareketi/gerçeklik hissi, mercan/habitat, balık rig/animasyonu, derinlikte değerli av, bulunabilir boss ve şehir–sahil ölçeği için bağlayıcı plan ayrıntısıdır. Bu yön kararı uygulama veya ekip kabulü değildir; aşağıdaki eski kısa rota varsayımı güncellenmiştir.
+
 ## 1. Oyunun vermesi gereken his
 
 Dört arkadaşın aynı kıyı kasabasında bir hayat kurması: sabah hazırlık, denizde ortak keşif ve risk, kıyıda kazancın somut karşılığı, akşam gerçek görüntüleri birlikte izleme. Oyuncu sadece menü açan veya puan biriktiren kişi değildir; nesneyi tutar, iş yapar, ortamı tanır ve arkadaşının ne yaptığını anlar.
@@ -61,7 +63,7 @@ Yeni yerleşimde ayrı ölçülür:
 - Alternatif sokak/uzun sahil keşif turu; günlük zorunlu yol değildir.
 - Tahta taşırken ana yol; ağır taşıma yavaşlatması eklemeden önce tekrarın sıkıcılığı değerlendirilir.
 
-Başlangıç çizim hedefleri: hizmetler arası 10–25 saniye; ev–iskele doğrudan yol 30–60 saniye; çevreye bakılan ilk tur 60–90 saniye; isteğe bağlı sahil/yan yol daha uzun. Sayılar birlikte test edilip ayarlanır. Hiçbiri uygulamaya başlamadan kabul edilmiş metrik değildir.
+19 Ekim çizim adayı: ev şehrin mahallesinde, şehir merkezi ile sahil/liman arasında gerçek yol vardır. Ev–iskele ana yolu 300–500 m, mevcut 4 m/sn hızla yaklaşık 75–125 saniye kesintisiz yürüyüş olarak blokajda ölçülür. Hizmetler arası 10–25 saniye çalışma adayı korunur; liman hizmeti kıyıda kalabilir. İlk keşif ve yan yollar daha uzun olabilir. Bu aralıklar onaylanmış mesafe/süre değildir; gerçek ilk gelir ve günlük tekrar turuyla Q03 kabul edilir. Uzun boş koridor veya normal yolculuk teleport'u çözüm değildir.
 
 Daha dolu görünüm için en az üç ayrı kompozisyon: evden meydan, meydandan su, iskeleden kasaba. Her birinde ön/orta/arka plan ve okunur hedef vardır. Uzun dümdüz boş bir koridor veya her yerde aynı kasa tekrarı yeterli değildir.
 
@@ -305,6 +307,11 @@ Görsel animasyon/partikül öncelikle presentation state'tir. Dünya/ekonomi ot
 | R09 Erişilebilirlik kapsamı | Kritik input/metin/kamera seçenekleri önce | Mehmet/Mert | P4.9 UI işleri |
 | R10 Gelecek genişlemeler | P6 sonrası veri/kapsam kararı, ayrı kampanya uyumu | Ürün kararı Mehmet | İlk sürüm kapanışından sonra |
 | R11 Pickup/satın alma bugün otomatik katkı | Edinilen malzeme ile tamamlanan tamiri ayır; fiyat bir kez edinmede | Mehmet etkileşim, Mert ekonomi/save, Utku nesne | P4.8 API/şema tasarımından önce |
+| R12 Derinlik ve av değeri | Sığ/resif/derin türlerin ayrı temel değeri ve net tur geliri; ağırlık formülü ayrıca seçilir | Mert ekonomi, Utku habitat, Mehmet erişim | Q11; fiyat/save semantiği değişmeden önce |
+| R13 Su ve canlı kalite örneği | Hareketli yüzey, iniş, küçük mercan habitatı ve doğru animasyonlu bir tür | Mert kaynak, Utku su/world, Mehmet capture/maliyet | Q01; bütün denize kaynak yaymadan önce |
+| R14 Boss keşfi ve görünümü | Oyuncu paketinden ipucu/iz/rota/arena denetimi; ayrı model ve okunur saldırılar | Utku, Mert, Mehmet | Q12; teknik encounter kabulünden ayrı |
+
+R04 yönü 19 Ekim bildirimiyle güncellendi: ev şehirde, şehir merkezi/sahil ayrı mesafede; 300–500 m ilk blokaj adayıdır, kesin yerleşim kararı değildir. R12–R14 ve Q01–Q14 ayrıntıları [dünya kalite teslimlerinde](WORLD_QUALITY_DELIVERIES.md) kayıtlıdır.
 
 Çalışma önerileri alınmış ekip kararı diye raporlanmaz. Karar kaydında tarih, seçilen seçenek, alternatifin bedeli ve etkilenen kayıt/varlık bulunur. Uygulama bu karar gerçekten alındığında başlar; varsayılan fikir ile imzalanmış sözleşme karışmaz.
 

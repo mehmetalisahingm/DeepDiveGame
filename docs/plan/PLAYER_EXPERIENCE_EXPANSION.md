@@ -8,6 +8,8 @@
 
 P4.6 teknik ve fiziksel temel kabulü açık kalır. Yeni ürün teslimleri P4.7–P4.12 olarak P5'ten önce eklenmiştir. P4.6'nın mevcut teknik açıkları kapatılmadan sonraki aşamanın oyun kodu başlamaz. Kaynak araştırması, tasarım ve planlama paralel yapılabilir. Her aşama kendi küçük gerçek oyun gösterimiyle kabul edilir.
 
+19 Ekim geri bildirimi bu başlıkların tek başına yeterli ayrıntıda olmadığını gösterdi. [WORLD_QUALITY_DELIVERIES](WORLD_QUALITY_DELIVERIES.md) Q01–Q14, hareketli su/iniş/mercan/balık/değer/boss ve şehir mesafesi/mimari/dükkân/ev için bağımsız somut teslim ve kabul kaynağıdır. Teknik test sonucu bu ürün açıklarını kapatmaz; yeni alt paketler uygulanmış veya GitHub issue'su açılmış sayılmaz.
+
 ## Her etkileşimin tasarım kontrolü
 
 Ayrıntılı oyuncu yolculuğu, yerleşim/tempo, eylem tabloları, ekonomi, UI, kayıt ve tasarım kararları: [EXPERIENCE_DESIGN.md](EXPERIENCE_DESIGN.md). Aşama bazında alan işleri, üretim envanteri, kritik yol ve kanıt paketleri: [PRODUCTION_BLUEPRINT.md](PRODUCTION_BLUEPRINT.md). P5/P6 ayrıntıları ve P6 sonrası aday aşamalar: [FUTURE_ROADMAP.md](FUTURE_ROADMAP.md).
@@ -26,10 +28,12 @@ Bu kontrolü alan sahibi PR'da doldurur. Her özellik için yeni mekanik icat ed
 
 **Görünen sonuç:** evin kapısından sahile giden kısa bir bölüm ilk kez hedef sanat kalitesinde görünür. Bir dükkân cephesi, kıyı, kırık sandal ve oyuncu elleri aynı görsel dili taşır.
 
+Q01 ayrıca hareketli deniz, mercan/kaya örneği ve bir doğru animasyonlu balığı kısa gerçek oyun örneğinde değerlendirir. Kara örneğinin onayı su kalitesini onaylamaz; her ikisi kendi videosu ve kare süresiyle gösterilir.
+
 - Mert: renk/malzeme, model ve ses referansları; ev–dükkân–sandal için tek uyumlu kaynak seti. Kaynak ve üretim listesi; tekrar kullanılabilir modüler parçalar.
 - Utku: tek kasaba/tek deniz yerleşimi; ev, meydan, hizmetler, sahil, iskele, görüş çizgileri ve alternatif yaya yolları.
 - Mehmet: insan ölçeği, kamera, el/nesne kadrajı, kontrolcü geçişi, co-op görünürlüğü ve etkileşim noktaları.
-- Tasarım başlangıç hedefi: ev–iskele ana yolunda yaklaşık 60–90 saniye rahat yürüyüş; satış/alışveriş birbirine yakın. Bu bir teslim süresi değil, ölçülüp oynama sonucuyla değiştirilecek yol temposudur.
+- 19 Ekim ölçek adayı: ev şehrin mahallesinde; merkez ile sahil/liman ayrı alanlardır. Ev–iskele 300–500 m gerçek yol, mevcut hızla yaklaşık 75–125 saniye kesintisiz yürüyüş olarak önce blokajda ölçülür. Satış/alışveriş merkezi kompakt kalır. Bu onaylanmış ölçü veya takvim değildir; Q03 gerçek av/satış turuyla tempo kabulü ister.
 - İçerik taslağı: bir meydan, ana yol ve iki kısa yan bağlantı; dört hizmet cephesi; 6–10 tekrar kullanılabilir arka plan bina cephesi; açık kıyı ve bir dönüm noktası. Ulaşılamayan dekor kapıları etkileşimli gibi işaretlenmez.
 - #153/#154 yerleşim ve sanat başlangıcı; #157 kamera/hareket bağlantısıdır. Ayrı dünyalar veya ikinci şehir üretilmez.
 
@@ -67,6 +71,8 @@ Mevcut üç onarım kimliği korunur: gövde, motor, yakıt tankı. Gövde katk�
 
 ## P4.10 — Yaşanan kasaba ve ortak ev
 
+Bu üst iş Q03 ölçek/mesafe, Q04 dış mimari, Q05 dört ayrı gerçek hizmet mekânı ve Q06 ev içi/gelişim olarak [ayrı kabul edilir](WORLD_QUALITY_DELIVERIES.md). Dört tabela veya uzatılmış boş yol yeterli değildir; ev şehirde, sahil ayrı yolculuk mesafesinde olur.
+
 **Görünen sonuç:** dört esnafın tanınır çalışma alanı ve hareketi vardır; oyuncu eve girip yatağına, depoya ve PC'ye fiziksel olarak erişir. Kazandığı gelişimler ortamda görünür.
 
 - Mert: dükkân içi/tezgâh ayrıntıları, balık tartma/teslim sunumu, ekipman sergisi, küçük NPC çalışma/selamlama döngüleri, ev eşyaları ve UI düzeni.
@@ -80,6 +86,8 @@ Mevcut üç onarım kimliği korunur: gövde, motor, yakıt tankı. Gövde katk�
 
 ## P4.11 — Canlı deniz, keşif ve yolculuk sunumu
 
+Bu üst iş Q07 hareketli yüzey, Q08 suya giriş/derinlik, Q09 mercan/habitat, Q10 balık model/animasyonu, Q11 derinlik ve av değeri, Q12 bulunabilir boss ve Q13 üç tekne sunumu olarak [ayrı kabul edilir](WORLD_QUALITY_DELIVERIES.md). Beş türün sadece katalogda bulunması veya bütün türlere aynı temel satış bedeli verilmesi içerik/ilerleme teslimi değildir.
+
 **Görünen sonuç:** kıyı, resif ve derin kesim ayrılır; türler şekil/boyut/davranışla tanınır. Deniz tabanı, bitkiler, su ışığı ve ses derinliği anlatır.
 
 - Utku: #155 tek tür teşhisi; beş normal tür ve ayrı boss için gerçek spawn/habitat/erişim haritası. Sürü davranışı gerekiyorsa mevcut tür sayısını artırmadan sınırlı sunum; amaç sadece rastgele balık çoğaltmak değildir.
@@ -92,6 +100,8 @@ Mevcut üç onarım kimliği korunur: gövde, motor, yakıt tankı. Gövde katk�
 **Kabul:** yeni kampanyadan başlayarak tür erişimi/av/çekim; üç kesim gündüz/gece videosu; boss araştırma ve mücadele kanıtı; aktif tekne harita/dönüş tutarlılığı ve 1–4 oyuncu performansı.
 
 ## P4.12 — Nihai dünya ve deneyim kabulü
+
+[Q14 ürün listesi](WORLD_QUALITY_DELIVERIES.md) su, şehir, ev/dükkân, habitat, balık hareketi, tür değeri ve boss keşfini ayrıca gerektirir. Önceki teknik boss/rota kabulü veya yeni PR birleşimi bu kutuları kendiliğinden işaretlemez.
 
 Aynı sabit Windows build ve kampanyada: evden çıkış → fiziksel parça/elle sandal onarımı → ücretsiz kıyı avı → satış/ekipman → tekne → tür keşfi/çekim → güvenli dönüş → PC/yayın → ev gelişimi → uyku/sonuç. Mevcut ilk gün özgürlüğü korunur; bütün zincir zorunlu öğreticiye çevrilmez.
 

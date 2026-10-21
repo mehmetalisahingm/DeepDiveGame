@@ -4,6 +4,8 @@ Plan **3.1 — 13 Ekim 2026**. Temel plan 3.0 korunur; oyuncu deneyimi ve sanat 
 
 Aktif faz: **P4**. P0–P3 kapalıdır. P4.5 PR #135 ile birleşti; P4.6 kabulü açık. Yeni P4.7–P4.12 planı [oyuncu deneyimi genişletmesinde](PLAYER_EXPERIENCE_EXPANSION.md) kayıtlıdır. P5/P6 kilitlidir; yeni plan uygulama veya tamam kaydı değildir.
 
+19 Ekim kullanıcı kalite geri bildirimi: su/hareket, mercan ve habitat, balık model/animasyonu, derinlikte değerli av, bulunabilir boss, uzak sahil ve gerçek ev/dükkân mekânları ürün açığı olarak kaydedildi. [Dünya kalite teslimleri](WORLD_QUALITY_DELIVERIES.md), P4.7–P4.12 üst işleri altında Q01–Q14 ayrı oyun gösterimi ve kabul kapısını tanımlar. Mevcut faz/issue kapanmaz; bu plan turu oyun kodu, yeni sanat veya nihai görsel kabul teslimi değildir. Teknik boss kabulü ile bulunabilir/son kaliteli boss deneyimi ayrılır. Beş normal tür ve bir boss hedefi korunur; mevcut üç türün eşit 120 taban değeri derinlik ekonomisi kabulü değildir.
+
 18 Ekim kullanıcı kapsam kararı: mevcut faz kabulünü kapatmadan **15 avlanabilir kıyı balığı** ve kullanıcının sağladığı **Tripo motorbotunun görsel entegrasyonu** ayrıca istendi. Bu iki dar içerik işi şimdi uygulanır; P4.7–P4.12'nin bütünü açılmaz. Balıklar mevcut levrek modeli/türünden 15 ayrı sahne nesnesidir; beş tür/gelişmiş ekosistem veya fiziksel sandal onarımı teslimi değildir. Motorbot `boat-2` görünümüdür; başlangıç sandalı `boat-1` ve satın alma zinciri korunur. Dünya sahnesi/balık yazımında Utku, görsel kaynak/uyumda Mert inceleme sahibidir; onların onayı üretilmez. Kanıt ve kalanlar [teslim raporunda](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) tutulur.
 
 Unity sürümü: `6000.3.23f1`.

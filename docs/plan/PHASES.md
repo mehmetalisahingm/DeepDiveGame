@@ -219,6 +219,8 @@ Kullanıcı, küçük dünya/zayıf görsel kalite ve fiziksel sandal tamiri bek
 
 Derin tasarım: [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md); uygulanabilir iş parçaları: [PRODUCTION_BLUEPRINT](PRODUCTION_BLUEPRINT.md). P5/P6 ayrıntısı ve yalnız aday olan P7–P10 seçenekleri: [FUTURE_ROADMAP](FUTURE_ROADMAP.md). P7–P10 aktif kapsam değildir; bu belge oyun uygulamasını açmaz.
 
+19 Ekim kalite ayrıntısı: [Q01–Q14 dünya teslimleri](WORLD_QUALITY_DELIVERIES.md) bu üst aşamaları ayrı kabul edilen işlere böler. P4.7 hem kara hem hareketli deniz kalite örneğini içerir. P4.10 ölçekli şehir–uzak sahil, mimari, dört gerçek hizmet mekânı ve ev içini; P4.11 hareketli su, dalış geçişi, mercan/habitat, balık animasyonu, derinlik/değer, boss ve tekne sunumunu ayrı teslim eder. Eski dört geniş başlık dört küçük kalan iş sayılmaz; yeni faz açılışı veya tamam kaydı üretilmez.
+
 | Aşama | Görünen teslim | Mehmet | Utku | Mert |
 |---|---|---|---|---|
 | P4.7 | Hedef görsel örnek ve daha dolu dünya yerleşimi | İnsan ölçeği, kamera/eller, co-op | Yerleşim/zemin/anchor | Model, malzeme, sanat ve ses seti |
