@@ -168,7 +168,7 @@ namespace DeepDive.P1.Lab
                     if (adapter.IsAuthority && AllAt(2) && state.Phase == SessionPhase.Prep) adapter.AdvancePhase();
                     if (state.Phase == SessionPhase.Dive)
                     {
-                        SetRoute(new[] { P(9f, -9f), P(9f, -12.5f), P(0f, -12.5f), P(-6.5f, -11.2f),
+                        SetRoute(new[] { P(9f, -9f), P(9f, -12.5f), P(9f, -16f), P(0f, -16f), P(-6.5f, -11.2f),
                             P(-6.5f, -8.7f), new Vector3(-7.6f + slot * 0.75f, 6f, -5f) });
                         // On the 2m-wide pier the rear row leaves first, so it cannot trap
                         // the front row. No actor is placed outside the authored dock.
@@ -285,13 +285,15 @@ namespace DeepDive.P1.Lab
             yield return shop + new Vector3(0f, 0f, 2.8f);
             yield return shop + new Vector3(0f, 0f, 2f);
             yield return shop + new Vector3(0f, 0f, 2.8f);
-            yield return P(0f, -24f); yield return P(0f, -16f); yield return P(0f, -12.5f);
-            yield return P(9f, -12.5f); yield return P(9f, -9f);
+            yield return P(0f, -24f); yield return P(0f, -16f);
+            // The S1 broken rowboat occupies the direct center beach crossing. Walk past its east end.
+            yield return P(9f, -16f); yield return P(9f, -12.5f); yield return P(9f, -9f);
             yield return P(8.55f + (slot % 2) * 0.9f, -4.5f - (slot / 2) * 1f);
         }
         private IEnumerable<Vector3> Homeward()
         {
-            yield return P(-6.5f, -8.7f); yield return P(-6.5f, -11.2f); yield return P(0f, -12.5f);
+            yield return P(-6.5f, -8.7f); yield return P(-6.5f, -11.2f);
+            // Return west of the cradle; do not cut through its collision hull at x=0, z=-12.5.
             yield return P(0f, -16f); yield return P(0f, -24f); yield return P(0f, -36f);
             yield return ContinuousTownLayout.HomeRig.Door; yield return H(4.95f, 5f);
             yield return H(4.95f, -2.5f); yield return H(2f + slot * 0.8f, -2.4f);
