@@ -1099,6 +1099,9 @@ namespace DeepDive.P1.Lab
                     next=new Vector3(lane,y,ahead);
                 }
             }
+            // #188: on the beach cradle the stand is on dry sand; only the hull is in the way.
+            else if(BoatRepairNetworkBinding.Instance!=null && BoatRepairNetworkBinding.Instance.OnCradle)
+                next=local.Swimming.Value?target:BoatRepairNetworkBinding.Instance.NextAround(pos,target);
             else if(toDock && pos.z < -11f && Mathf.Abs(pos.x-9f)>.2f)next=new Vector3(9f,8.4f,-12.5f);
             else if(toDock && pos.z < -7.5f)next=new Vector3(9f,8.4f,-7.3f);
             else if(!toDock && pos.z > -11.8f)next=new Vector3(8.35f,8.4f,-12.5f);
@@ -1216,7 +1219,8 @@ namespace DeepDive.P1.Lab
             }
             if(boatWasAtDock)
             {
-                if(!WalkRepair(local,cam,new Vector3(9f,8.4f,-12.5f),false))return;
+                // Off the pier from the berth; from the beach cradle (#188) the next part walk starts on dry sand.
+                if(!site.OnCradle && !WalkRepair(local,cam,new Vector3(9f,8.4f,-12.5f),false))return;
                 boatWasAtDock=false;
             }
             var partName = host ? boatStep == 0 ? "BoatPart_Hull" : "BoatPart_FuelTank" : "BoatPart_Engine";
@@ -1264,6 +1268,8 @@ namespace DeepDive.P1.Lab
             {
                 boatSettleAt = 0;
                 var target = NextBeachWaypoint(local.transform.position, standTarget);
+                var cradle = BoatRepairNetworkBinding.Instance;
+                if (cradle != null && !local.Swimming.Value) target = cradle.NextAround(local.transform.position, target);
                 var heading = target - local.transform.position;
                 var flatHeading = heading; flatHeading.y = 0;
                 var walkYaw = Mathf.Atan2(flatHeading.x, flatHeading.z) * Mathf.Rad2Deg;

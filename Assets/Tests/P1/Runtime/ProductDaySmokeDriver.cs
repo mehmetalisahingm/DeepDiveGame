@@ -174,7 +174,9 @@ namespace DeepDive.P1.Lab
         }
         private void LateUpdate()
         {
-            if (!finished && step == 15 && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+            // Step 16 (repair-only) ends the same way: the host quits 3 s after reaching it, which can close a guest's
+            // connection before the guest's own 3 s are up. Its repair evidence is already mirrored by then.
+            if (!finished && (step == 15 || step == 16) && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
         }
         private void Broadcast(float now)
         {
@@ -310,7 +312,7 @@ namespace DeepDive.P1.Lab
                     var park=P(11.2f+report.slot*.6f,-12.5f);
                     var exit=local.transform.position.z > -11.8f ? P(8.35f,-12.5f) : park;
                     var toPark=exit-local.transform.position;toPark.y=0;
-                    if(toPark.magnitude>.2f)MoveToward(exit);else Stop();
+                    if(toPark.magnitude>.2f)MoveToward(Around(exit));else Stop();
                     return;
                 }
                 localDone = sync.BoatPartsDone.Value == 3; return;
@@ -325,8 +327,7 @@ namespace DeepDive.P1.Lab
                 {
                     if (!repairApproach)
                     {
-                        SetRoute(new[] { P(9f+(part-1)*.65f,-12.5f), P(9f+(part-1)*.65f,-9f),
-                            P(site.StandPosition(part).x,site.StandPosition(part).z) });
+                        SetRoute(RepairApproach(site, part));
                         repairApproach=true;
                     }
                     if (!Follow()) { aimAt=0; return; }
@@ -354,7 +355,7 @@ namespace DeepDive.P1.Lab
                 if(!repairAtDock)
                 {
                     if(!repairApproach)
-                    {SetRoute(new[]{P(9f+(part-1)*.65f,-12.5f),P(9f+(part-1)*.65f,-9f),P(site.StandPosition(part).x,site.StandPosition(part).z)});repairApproach=true;}
+                    {SetRoute(RepairApproach(site, part));repairApproach=true;}
                     if(!Follow())return;
                     repairAtDock=true;route=null;
                 }
@@ -366,7 +367,8 @@ namespace DeepDive.P1.Lab
             }
             if (repairExit)
             {
-                if (route==null) SetRoute(new[]{P(9f,-9f),P(9f,-12.5f)});
+                // From the beach cradle (#188) the next leg starts on dry sand already; from the berth, walk back off the pier.
+                if (route==null) SetRoute(site != null && site.OnCradle ? new Vector3[0] : new[]{P(9f,-9f),P(9f,-12.5f)});
                 if (!Follow()) return;
                 repairExit=false;route=null;
             }
@@ -390,7 +392,7 @@ namespace DeepDive.P1.Lab
                 stand.y = Mathf.Min(stand.y, surface - eyeHeight - 0.1f);
             }
             if (Vector3.Distance(local.transform.position, stand) > (submerged ? 0.45f : 1.3f))
-            { MoveToward(submerged ? stand : CoastTarget(stand)); aimAt = 0; return; }
+            { MoveToward(submerged ? stand : CoastTarget(Around(stand))); aimAt = 0; return; }
             Aim(target + Vector3.up * 0.3f);
             if (Settled()) Act(local.SubmitPickupLocal);
         }
@@ -691,14 +693,31 @@ namespace DeepDive.P1.Lab
             if (report.worldLoads != 1) Fail("World scene reloaded");
         }
         private void SetRoute(IEnumerable<Vector3> points) { route = points.ToList(); waypoint = 0; }
+        // #188: the worksite is either at the water berth (pier approach, as before) or on the beach cradle, where the
+        // walk goes round the solid hull to the repair-work anchor.
+        private IEnumerable<Vector3> RepairApproach(BoatRepairNetworkBinding site, int part)
+        {
+            var stand = site.StandPosition(part);
+            if (site.OnCradle) return site.RouteAround(local.transform.position, P(stand.x, stand.z));
+            return new[] { P(9f+(part-1)*.65f,-12.5f), P(9f+(part-1)*.65f,-9f), P(stand.x, stand.z) };
+        }
+        // Next dry waypoint round the cradle hull while the broken boat lies there; otherwise the target itself.
+        private Vector3 Around(Vector3 target)
+        {
+            var site = BoatRepairNetworkBinding.Instance;
+            return site != null && !local.Swimming.Value ? site.NextAround(local.transform.position, target) : target;
+        }
         private static Vector3 P(float x, float z) => new Vector3(x, ContinuousTownLayout.WalkSurfaceY, z);
         private static Vector3 H(float x, float z) => ContinuousTownLayout.HomeOrigin + new Vector3(x, 0f, z);
         private IEnumerable<Vector3> Outward()
         {
             yield return H(-4.7f, -2f); yield return H(-4.7f, 5f); yield return ContinuousTownLayout.HomeRig.Door;
             yield return P(0f, -36f); yield return P(0f, -24f);
-            yield return P(-1.8f + report.slot * 1.1f, -16f);
-            yield return P(-1.8f + report.slot * 1.1f, -13f);
+            // #188: with the broken boat on the beach cradle (x 1.1..6.1, z -11.4..-13.8) the crew fans out west of it.
+            var cradle = BoatRepairNetworkBinding.Instance;
+            var x = cradle != null && cradle.Blocking ? -1.8f - report.slot * 1.1f : -1.8f + report.slot * 1.1f;
+            yield return P(x, -16f);
+            yield return P(x, -13f);
         }
         private bool Follow(bool depth = false)
         {

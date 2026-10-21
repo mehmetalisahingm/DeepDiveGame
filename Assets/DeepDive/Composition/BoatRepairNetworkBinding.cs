@@ -5,6 +5,7 @@ using DeepDive.Economy;
 using DeepDive.Network;
 using DeepDive.Session;
 using DeepDive.Trip;
+using DeepDive.World;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,6 +13,9 @@ using UnityEngine.SceneManagement;
 namespace DeepDive.Composition
 {
     // Mechanical prototype at the existing berth. No scene asset, movement or trip authority is replaced.
+    // P4.8-B (#188): when World authored the beach cradle (RepairAnchorIds, DiveTestAreaRepairCradleSetup) the
+    // worksite lies there instead, on dry Beach_Platform with a low solid hull, and the crew stands on the
+    // repair-work anchors. Without those anchors it stays at the berth exactly as before.
     public sealed class BoatRepairNetworkBinding : MonoBehaviour
     {
         private NetworkManager manager;
@@ -27,9 +31,28 @@ namespace DeepDive.Composition
         private readonly List<TextMesh> labels = new List<TextMesh>();
         private BoatTripPlayerSync trip;
         public static BoatRepairNetworkBinding Instance { get; private set; }
-        public Vector3 SlotPosition(int i) => site.transform.TransformPoint(new Vector3((i - 1) * .65f, .75f, -2.15f));
-        public Vector3 RackPosition(int i) => site.transform.TransformPoint(new Vector3(-.65f, .65f, -4.1f - i * .8f));
-        public Vector3 StandPosition(int i) => site.transform.TransformPoint(new Vector3((i - 1) * .65f, 0, i == 1 ? -4.2f : -3.8f));
+        public static Vector3 SlotLocal(int i) => new Vector3((i - 1) * .65f, .75f, -2.15f);
+        public static Vector3 RackLocal(int i) => new Vector3(-.65f, .65f, -4.1f - i * .8f);
+        public static Vector3 StandLocal(int i) => new Vector3((i - 1) * .65f, 0, i == 1 ? -4.2f : -3.8f);
+        // Low enough to stay under the slot triggers (y .35-1.15) so the E/hammer ray still reaches them
+        // (PickupRaycastRules treats solid geometry as an occluder), high enough not to be stepped over (stepOffset .3).
+        public const float CradleHullHeight = .4f;
+        // A leg counts as blocked when it passes within HitPad of the hull (capsule radius .35 + .05); a detour
+        // then runs RoutePad off the rim: past a crew member on a south-side work point (.45 m off the rim) plus
+        // two padded capsules (.86 m each side of contact).
+        private const float HitPad = .4f;
+        public const float RoutePad = 1.4f;
+        public Vector3 SlotPosition(int i) => site.transform.TransformPoint(SlotLocal(i));
+        public Vector3 RackPosition(int i) => site.transform.TransformPoint(RackLocal(i));
+        public Vector3 StandPosition(int i) => OnCradle && i >= 0 && i < workAnchors.Length && workAnchors[i] != null
+            ? workAnchors[i].position : site.transform.TransformPoint(StandLocal(i));
+        public bool OnCradle => cradle != null;
+        // The hull collider is only there while the broken boat is shown (site active on the cradle).
+        public bool Blocking => OnCradle && site != null && site.activeSelf;
+        private Transform cradle;
+        private readonly Transform[] workAnchors = new Transform[RepairAnchorIds.WorkCount];
+        private float anchorRetryAt;
+        private BoxCollider hull;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -55,7 +78,10 @@ namespace DeepDive.Composition
             if (inWorld)
             {
                 if (site == null) BuildSite();
-                site.transform.SetPositionAndRotation(trip.BoatWorldPosition.Value, Quaternion.Euler(0, trip.BoatYaw.Value, 0));
+                ResolveAnchors();
+                if (OnCradle) site.transform.SetPositionAndRotation(cradle.position, cradle.rotation);
+                else site.transform.SetPositionAndRotation(trip.BoatWorldPosition.Value, Quaternion.Euler(0, trip.BoatYaw.Value, 0));
+                hull.enabled = OnCradle;
                 var progress = local.GetComponent<EconomyPlayerSync>();
                 site.SetActive(!trip.BoatVisible.Value && progress != null && progress.BoatPartsMask.Value != 7);
             }
@@ -86,6 +112,62 @@ namespace DeepDive.Composition
             else { BoatRepairActions.Unbind(Handle); work = null; workers.Clear(); }
             if (inWorld) RefreshSite(local.GetComponent<EconomyPlayerSync>());
         }
+        // Scene lookups are not free, so a missing cradle is retried once a second rather than every frame.
+        private void ResolveAnchors()
+        {
+            if (cradle != null || Time.unscaledTime < anchorRetryAt) return;
+            anchorRetryAt = Time.unscaledTime + 1f;
+            if (!WorldAnchors.TryFind(RepairAnchorIds.Cradle, out var found)) return;
+            cradle = found.transform;
+            for (var i = 0; i < workAnchors.Length; i++)
+                workAnchors[i] = WorldAnchors.TryFind(RepairAnchorIds.Work(i), out var work) ? work.transform : null;
+        }
+
+        // A dry walk from `from` to `to` that keeps RoutePad off the cradle hull: straight when the line is clear,
+        // otherwise along a detour line RoutePad off the hull's south (town) side, the side the beach has room on:
+        // onto that line level with `from`, along it to level with `to` (clamped to the hull's ends), then `to`.
+        // Never back toward a corner already passed, so a caller can recompute it every frame. Without a blocking
+        // hull (berth, or the boat already repaired): just `to`. Starts on the north (water) side are not handled:
+        // the dry strip there is narrower than a diver.
+        public List<Vector3> RouteAround(Vector3 from, Vector3 to)
+        {
+            var route = new List<Vector3>();
+            if (Blocking && BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var size))
+            {
+                var hitW = size.Width * .5f + HitPad;
+                var hitL = size.Length * .5f + HitPad;
+                var a = site.transform.InverseTransformPoint(from);
+                var b = site.transform.InverseTransformPoint(to);
+                if (Blocked(a, b, hitW, hitL))
+                {
+                    // Local +x is the hull's south side at the S1 yaw (90); pick it from the cradle frame, not the world.
+                    var side = Vector3.Dot(site.transform.right, Vector3.back) >= 0f ? 1f : -1f;
+                    var line = side * (size.Width * .5f + RoutePad);
+                    var end = size.Length * .5f + RoutePad;
+                    route.Add(Flat(site.transform.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(a.z, -end, end))), to.y));
+                    route.Add(Flat(site.transform.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(b.z, -end, end))), to.y));
+                }
+            }
+            route.Add(to);
+            return route;
+        }
+        private static bool Blocked(Vector3 a, Vector3 b, float halfW, float halfL)
+        {
+            for (var t = 0f; t <= 1f; t += .02f)
+            {
+                var q = Vector3.Lerp(a, b, t);
+                if (Mathf.Abs(q.x) < halfW && Mathf.Abs(q.z) < halfL) return true;
+            }
+            return false;
+        }
+        // The next RouteAround waypoint more than .3 m (flat) from `from`, for callers that steer every frame.
+        public Vector3 NextAround(Vector3 from, Vector3 to)
+        {
+            foreach (var w in RouteAround(from, to))
+                if (new Vector2(w.x - from.x, w.z - from.z).magnitude > .3f) return w;
+            return to;
+        }
+        private static Vector3 Flat(Vector3 p, float y) { p.y = y; return p; }
         private NetworkPlayer Player(PlayerId id) => manager.ConnectedClients.TryGetValue(id.Value, out var client) && client.PlayerObject != null
             ? client.PlayerObject.GetComponent<NetworkPlayer>() : null;
         private TransactionResult Handle(PlayerId id, BoatRepairCommand command, int index, ulong request)
@@ -109,6 +191,11 @@ namespace DeepDive.Composition
             foreach(var old in materials) if(old!=null)Destroy(old);
             materials.Clear();
             site = new GameObject("StarterBoatRepairWorksite");
+            BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var hullSize);
+            hull = site.AddComponent<BoxCollider>();
+            hull.center = new Vector3(0f, CradleHullHeight * .5f, 0f);
+            hull.size = new Vector3(hullSize.Width, CradleHullHeight, hullSize.Length);
+            hull.enabled = false;
             var wood = MakeMaterial(new Color(.28f, .14f, .065f));
             var fresh = MakeMaterial(new Color(.66f, .43f, .21f));
             var iron = MakeMaterial(new Color(.13f, .15f, .17f));
