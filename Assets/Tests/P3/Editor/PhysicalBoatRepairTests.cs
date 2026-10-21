@@ -66,6 +66,69 @@ namespace DeepDive.P3.Tests
             Assert.IsTrue(work.Execute(bob,BoatRepairCommand.Place,0,2,2).Accepted);
             work.TryGet(bob,out var state);Assert.AreEqual(0,state.Hits);
         }
+        [Test] public void FourPlayersContendForOnePart_OnlyOneCompletionIsRecorded()
+        {
+            // Host RPCs are serialized; all four clients submit their first request in the same simulated tick.
+            var players = new[] {alice, bob, new PlayerId(3), new PlayerId(4)};
+            var winners = 0;
+            foreach (var player in players)
+            {
+                var result = work.Execute(player, BoatRepairCommand.Grab, 0, 1, 10);
+                if (result.Accepted) winners++;
+                else Assert.AreEqual("PartInUse", result.ReasonCode);
+            }
+            Assert.AreEqual(1, winners);
+            Assert.IsTrue(work.IsReserved(0));
+            Assert.AreEqual(1, economy.UnusedBoatParts.Count);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Place, 0, 2, 10).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 3, 11).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 4, 12).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 5, 13).Accepted);
+
+            Assert.IsFalse(work.IsReserved(0));
+            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.IsEmpty(economy.UnusedBoatParts);
+            for (int i = 1; i < players.Length; i++)
+            {
+                // An old rejected RPC must not become a success after the material state changes.
+                Assert.AreEqual("PartInUse",
+                    work.Execute(players[i], BoatRepairCommand.Grab, 0, 1, 14).ReasonCode);
+                Assert.AreEqual("AlreadyProcessed",
+                    work.Execute(players[i], BoatRepairCommand.Grab, 0, 2, 14).ReasonCode);
+            }
+            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Grab, 1, 3, 15).Accepted);
+        }
+
+        [Test] public void DisconnectReleasesOneReservationWithoutInterruptingAnotherSlot()
+        {
+            var charlie = new PlayerId(3);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Grab, 0, 1, 0).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Grab, 1, 1, 0).Accepted);
+            Assert.AreEqual("PartInUse", work.Execute(charlie, BoatRepairCommand.Grab, 0, 1, 0).ReasonCode);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Place, 0, 2, 0).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Place, 1, 2, 0).Accepted);
+            Assert.IsTrue(work.Execute(alice, BoatRepairCommand.Hammer, 0, 3, 1).Accepted);
+            work.Release(alice); // Simulates the host's cleanup when this guest disconnects.
+            Assert.IsTrue(work.IsReserved(1));
+            Assert.AreEqual("PartInUse", work.Execute(charlie, BoatRepairCommand.Grab, 0, 1, 2).ReasonCode);
+            Assert.IsTrue(work.Execute(charlie, BoatRepairCommand.Grab, 0, 2, 2).Accepted);
+            Assert.IsTrue(work.Execute(charlie, BoatRepairCommand.Place, 0, 3, 2).Accepted);
+            Assert.IsTrue(work.TryGet(charlie, out var recovered));
+            Assert.AreEqual(0, recovered.Hits); // The disconnected worker's partial strokes do not transfer.
+
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 1, 3, 3).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 1, 4, 4).Accepted);
+            Assert.IsTrue(work.Execute(bob, BoatRepairCommand.Hammer, 1, 5, 5).Accepted);
+            Assert.AreEqual(1, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.IsTrue(work.TryGet(charlie, out _));
+            Assert.IsTrue(work.Execute(charlie, BoatRepairCommand.Hammer, 0, 4, 6).Accepted);
+            Assert.IsTrue(work.Execute(charlie, BoatRepairCommand.Hammer, 0, 5, 7).Accepted);
+            Assert.IsTrue(work.Execute(charlie, BoatRepairCommand.Hammer, 0, 6, 8).Accepted);
+            Assert.AreEqual(2, economy.BoatRepair.CompletedPartIds.Count);
+            Assert.IsEmpty(economy.UnusedBoatParts);
+        }
+
         [Test] public void WrongSlot_UnplacedHammer_AndFastStrokesAreRejected()
         {
             Do(BoatRepairCommand.Grab);
