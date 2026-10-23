@@ -148,7 +148,20 @@ namespace DeepDive.P1.Lab
                         if (!report.reload && !report.initialClean) { Fail("Starting campaign is not fresh/zero"); return; }
                     }
                 }
-                if (report.reload) { ReloadTick(); return; }
+                if (report.reload)
+                {
+                    if (RepairOnly)
+                    {
+                        var economy=adapter.GetComponent<EconomyManager>();
+                        report.reloadClean=economy.BoatRepair.CompletedPartIds.Count==3 && economy.UnusedBoatParts.Count==0 &&
+                            economy.SharedBalance==baseline.balance && sync.DayNumber.Value==baseline.day &&
+                            economy.ExportSaveData("read-only","").SoldCaptureIds.Count==baseline.soldCount;
+                        if(!report.reloadClean){Fail("Fresh host did not restore the exact repaired campaign");return;}
+                        Snapshot();Finish();
+                    }
+                    else ReloadTick();
+                    return;
+                }
                 localDone = true;
             }
             Track(); Observe(); Broadcast(now);
@@ -843,6 +856,7 @@ namespace DeepDive.P1.Lab
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
             if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
             if (RepairPurchase && Host) report.passed &= report.purchasedMaterial && report.purchaseDidNotRepair && report.saveFaultRefused && report.saveFaultRecovered;
+            if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
             Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);

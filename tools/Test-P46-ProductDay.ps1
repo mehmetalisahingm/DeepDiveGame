@@ -62,18 +62,18 @@ try {
             throw 'Physical repair did not recover cancelled material or persist exactly three completed parts.'
         }
         Write-Output 'Physical repair owner-input/cancel recovery/mirror/disk PASS.'
-        return
     }
-    if ($productCheckpoint.Day.DayNumber -ne 2 -or @($productCheckpoint.Day.ClosedCloseIds).Count -ne 1 -or
+    if (-not $RepairOnly -and ($productCheckpoint.Day.DayNumber -ne 2 -or @($productCheckpoint.Day.ClosedCloseIds).Count -ne 1 -or
         @($productCheckpoint.Day.SummaryHistory).Count -ne 1 -or @($productCheckpoint.SoldCaptureIds).Count -ne 2 -or
         @($productCheckpoint.BoatPartIds).Count -ne 3 -or @($productCheckpoint.Media.Publications).Count -ne 1 -or
-        @($productCheckpoint.ChannelSettleIds).Count -ne 1) { throw 'Campaign does not contain exactly one settled day/publication and the earned repair/catches.' }
+        @($productCheckpoint.ChannelSettleIds).Count -ne 1)) { throw 'Campaign does not contain exactly one settled day/publication and the earned repair/catches.' }
     $productReload=Join-Path $productRun 'reload.json'
     Copy-Item -LiteralPath (Join-Path $productRun 'player0.json.campaign.json') -Destination ($productReload+'.campaign.json')
     $productReloadArgs=@('-batchmode','-screen-width','960','-screen-height','540','-screen-fullscreen','0',
         '-p46-day-role','host','-p46-day-count',1,'-p46-day-slot',0,'-p46-day-port',($Port+1),
         '-p46-day-reload',1,'-p46-day-baseline',('"{0}"' -f (Join-Path $productRun 'player0.json')),
         '-p1-report',('"{0}"' -f $productReload),'-logFile',('"{0}"' -f (Join-Path $productRun 'reload.log')))
+    if ($RepairOnly) { $productReloadArgs+=@('-p187-repair-only','1') }
     if ($productIsWindows) {
         $productReloadProcess=Start-Process -FilePath $productBuild -ArgumentList $productReloadArgs -WindowStyle Hidden -PassThru
     } else {
@@ -84,7 +84,8 @@ try {
     if (-not (Test-Path -LiteralPath $productReload)) { throw 'Missing reload report.' }
     $productReloadResult=Get-Content -LiteralPath $productReload -Raw|ConvertFrom-Json
     if (-not $productReloadResult.passed -or $productReloadProcess.ExitCode -ne 0) { throw "Reload failed: $($productReloadResult.errors -join '; ')" }
-    Write-Output 'Fresh-process reload/clip playback/duplicate publish PASS.'
+    if ($RepairOnly) { Write-Output 'Fresh-process repaired campaign/material/balance/sale/day reload PASS.' }
+    else { Write-Output 'Fresh-process reload/clip playback/duplicate publish PASS.' }
 } finally {
     foreach ($productEntry in $productProcesses) {
         if (-not $productEntry.Process.HasExited) { Stop-Process -Id $productEntry.Process.Id -Force }
