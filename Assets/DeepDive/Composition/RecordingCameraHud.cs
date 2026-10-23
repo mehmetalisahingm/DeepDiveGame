@@ -64,7 +64,7 @@ namespace DeepDive.Composition
             var tier = CreateRect(frame, "CameraModel", -165, 22, 150, 26);
             tier.anchorMin = tier.anchorMax = new Vector2(1, 1);
             tierLabel = Label(tier, 14);
-            var focus = CreateRect(frame, "FocusBrackets", 0, 0, 48, 48);
+            var focus = CreateRect(root.transform, "FocusBrackets", 0, 0, 48, 48);
             focus.anchorMin = focus.anchorMax = new Vector2(.5f, .5f); focus.pivot = new Vector2(.5f, .5f);
             Corners(focus, 11, new Color(.6f, .94f, .8f, .85f));
             var footer = CreateRect(frame, "ControlsPanel", 14, 40, 370, 28);
