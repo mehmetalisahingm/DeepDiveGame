@@ -35,6 +35,12 @@ namespace DeepDive.P1.Lab
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public int repairRejected;
+            // #188 hunt-first: parts state when the first catch was sold (-1 = not observed).
+            public bool huntFirst;
+            public int partsAtFirstSale = -1;
+            // Bed step diagnostics: what the local eye ray met when the one-shot request left, and the home answer.
+            public bool inBed;
+            public string bedRay = "", bedAnswer = "";
             public string clipId = "", recordingId = "", hash = "", position = "", failure = "";
             public long clipBytes;
             public float distance, maxTravelStep;
@@ -67,6 +73,8 @@ namespace DeepDive.P1.Lab
         private bool Host => report.slot == 0;
         private bool repairApproach, repairAtDock, repairExit;
         private bool RepairOnly => Arg("-p187-repair-only") == "1";
+        // #188: catch and sell first, repair afterwards in the same day (the repair must not gate the first catch).
+        private bool HuntFirst => Arg("-p188-hunt-first") == "1";
         private bool sawCarry, sawPlaced;
         private bool cancelSent;
         private bool cancelObserved;
@@ -92,6 +100,9 @@ namespace DeepDive.P1.Lab
             report.reload = Arg("-p46-day-reload") == "1";
             if (report.reload) baseline = JsonUtility.FromJson<Report>(File.ReadAllText(Arg("-p46-day-baseline")));
             Application.runInBackground = true; QualitySettings.vSyncCount = 0; Application.targetFrameRate = 60;
+            // Opt-in quiet run: the smoke checks no audio, so local runs need not play the game's sound.
+            if (Arg("-p46-mute") == "1") AudioListener.volume = 0f;
+            if (HuntFirst && RepairOnly) { Fail("-p188-hunt-first and -p187-repair-only are exclusive"); yield break; }
             deadline = Time.realtimeSinceStartup + 1000f;
             SceneManager.sceneLoaded += SceneLoaded;
             Application.logMessageReceived += Log;
@@ -109,7 +120,7 @@ namespace DeepDive.P1.Lab
             if (finished || adapter == null) return;
             var now = Time.realtimeSinceStartup;
             if (now > deadline || (step > 0 && now > stageDeadline))
-            { Fail($"Timeout step={step} sub={substep} waypoint={waypoint} position={report.position}"); return; }
+            { Fail($"Timeout step={step} sub={substep} waypoint={waypoint} position={report.position}{BedState()}"); return; }
             if (leaving)
             { if (adapter.Connection.Status == ConnectionStatus.Offline) Finish(); return; }
             if (RepairInterruptions && RepairReconnect(now)) return;
@@ -278,7 +289,7 @@ namespace DeepDive.P1.Lab
                         if (!Follow()) return;
                         substep = 1; route = null;
                     }
-                    if (!Host && !RepairOnly) { localDone = true; return; }
+                    if ((!Host && !RepairOnly) || HuntFirst) { localDone = true; return; }
                     CollectParts(); break;
                 case 2: case 5:
                     if (!Host) { WaitInWater(); return; }
@@ -410,7 +421,10 @@ namespace DeepDive.P1.Lab
         }
         private void WaitInWater()
         {
-            if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f),
+            // #188 hunt-first: guests reach the wade together with the host, so each takes its own entry point
+            // east of the host's (-6.5) entry and shore hold (-7.6) instead of all pressing on one waypoint.
+            var entryX = HuntFirst ? -6.5f + report.slot * 0.9f : -6.5f;
+            if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(entryX, 6f, -5f),
                 new Vector3(1f + report.slot * 1.2f, 5.3f, -4f) });
             localDone = Follow(true);
         }
@@ -472,8 +486,26 @@ namespace DeepDive.P1.Lab
                 if (sold < (step == 4 ? 1 : 2)) { Act(local.SubmitServiceInteractionLocal); return; }
                 report.soldCount = sold;
                 substep = 1; aimAt = 0;
-                if (step == 4) { localDone = true; return; }
+                if (step == 4 && HuntFirst)
+                {
+                    report.partsAtFirstSale = sync.BoatPartsDone.Value;
+                    substep = 2; stageDeadline = Time.realtimeSinceStartup + 170f;
+                }
+                if (step == 4 && !HuntFirst) { localDone = true; return; }
             }
+            if (substep == 2)
+            {
+                // Town -> beach on the same legs Outward() ends with, then the normal part/repair walk.
+                if (route == null)
+                {
+                    var cradle = BoatRepairNetworkBinding.Instance;
+                    var x = cradle != null && cradle.Blocking ? -1.8f - report.slot * 1.1f : -1.8f + report.slot * 1.1f;
+                    SetRoute(new[] { P(0f, -24f), P(x, -16f), P(x, -13f) });
+                }
+                if (!Follow()) return;
+                route = null; substep = 3;
+            }
+            if (substep == 3) { CollectParts(); return; }
             if (!GoToService(TownServiceCatalog.EquipmentShopId)) return;
             if (!sync.ShopOpen) { Act(local.SubmitServiceInteractionLocal); return; }
             if (!economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId))
@@ -607,15 +639,26 @@ namespace DeepDive.P1.Lab
                 .Single(b => b.Kind == HomeInteractionKind.Bed && b.BedId == DayIds.Beds[report.slot]);
             if (substep == 0)
             {
-                if (route == null) SetRoute(new[] { H(4.95f, -2.5f), H(4.95f, 0f),
-                    new Vector3(bed.ExitPose.position.x, ContinuousTownLayout.WalkSurfaceY, bed.ExitPose.position.z) });
+                var exit = new Vector3(bed.ExitPose.position.x, ContinuousTownLayout.WalkSurfaceY, bed.ExitPose.position.z);
+                // #188 hunt-first: the crew reaches the bedroom together, so walk a lane .9 m south of the exit row and turn
+                // north only at one's own bed; the host judges each bed ray on its own positions, and a neighbour crossing
+                // the exit row cut a waiting player's ray (InvalidTarget, 23 Oct runs).
+                if (route == null) SetRoute(HuntFirst
+                    ? new[] { H(4.95f, -2.5f), H(4.95f, exit.z - ContinuousTownLayout.HomeOrigin.z - .9f), exit - new Vector3(0f, 0f, .9f), exit }
+                    : new[] { H(4.95f, -2.5f), H(4.95f, 0f), exit });
                 if (!Follow()) return;
                 Aim(bed.GetComponent<Collider>().bounds.center);
                 if (!Settled()) return;
+                var eye = local.GetComponentInChildren<Camera>(true).transform.position;
+                report.bedRay = Physics.Raycast(eye, bed.GetComponent<Collider>().bounds.center - eye, out var seen, 3.25f, ~0,
+                    QueryTriggerInteraction.Collide) ? seen.collider.name : "none";
+                HomeStatus = "";
                 typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
                     .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
                 substep = 1;
             }
+            report.inBed = local.Seated.Value;
+            if (!string.IsNullOrEmpty(HomeStatus)) report.bedAnswer = HomeStatus;
             if (sync.DayNumber.Value <= firstDay || local.Seated.Value || DayLock.IsLocked) return;
             report.slept = sync.SummaryDayNumber.Value == firstDay && sync.SummaryReason.Value == (byte)DayCloseReason.EarlySleep;
             report.morningHome = Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) < 0.7f;
@@ -746,9 +789,13 @@ namespace DeepDive.P1.Lab
             if (waypoint >= route.Count) { Stop(); return true; }
             var target = route[waypoint]; var delta = target - local.transform.position;
             var flat = new Vector2(delta.x, delta.z).magnitude;
-            var tolerance = step == 10 && waypoint == route.Count - 1 ? 0.08f : 0.3f;
+            // #188 hunt-first: the bed is approached head-on from the lane, so a .3 m stop can leave the feet past the
+            // host's 3.25 m bed range; stand on the exit pose like the step 10 seat approach.
+            var tolerance = (step == 10 || (HuntFirst && step == 14)) && waypoint == route.Count - 1 ? 0.08f : 0.3f;
             if (flat < tolerance && (!depth || waypoint != route.Count - 1 || Mathf.Abs(delta.y) < 0.45f))
             { waypoint++; return waypoint >= route.Count; }
+            // #188 hunt-first: the unrepaired hull still lies on the beach cradle, so dry legs go round it.
+            if (HuntFirst && !local.Swimming.Value) { MoveToward(Around(target)); return false; }
             MoveToward(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target);
             return false;
         }
@@ -819,6 +866,16 @@ namespace DeepDive.P1.Lab
         {
             if ((type == LogType.Error || type == LogType.Exception) && !finished) Fail(message);
         }
+        // Step 14 timeouts name the bed state recorded while connected, so a refused one-shot request is visible
+        // even when the host has already left and the local player object is gone.
+        private string BedState() => step == 14 ? $" inBed={report.inBed} ray={report.bedRay} home={report.bedAnswer}" : "";
+        private string HomeStatus
+        {
+            get => HomeStatusField.GetValue(adapter.GetComponent<HomePlayerInteractionBinding>()) as string;
+            set => HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(), value);
+        }
+        private static readonly FieldInfo HomeStatusField =
+            typeof(HomePlayerInteractionBinding).GetField("statusMessage", BindingFlags.Instance | BindingFlags.NonPublic);
         private void Fail(string reason) { report.failure = reason; report.errors.Add(reason); Finish(); }
         private void Finish()
         {
@@ -834,6 +891,8 @@ namespace DeepDive.P1.Lab
                 report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused &&
                 report.cameraHudRecording && report.cameraHudTimerAdvanced && report.cameraHudStopped;
             if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
+            report.huntFirst = HuntFirst;
+            if (HuntFirst && Host) report.passed &= report.partsAtFirstSale == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
             if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
