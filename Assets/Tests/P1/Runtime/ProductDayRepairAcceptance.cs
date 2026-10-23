@@ -21,6 +21,9 @@ namespace DeepDive.P1.Lab
         {
             if (repairPhase == value) return;
             repairPhase = value;
+            // Rejoin and the product's morning placement begin inside the real house again.
+            // Reuse the door/hallway route rather than heading through a wall to the beach.
+            if ((value == 3 || value == 5) && local != null && local.transform.position.z < -39f) substep = 0;
             route = null; waypoint = part = 0; aimAt = 0;
             repairApproach = repairAtDock = repairExit = partRoute = engineEntered = false;
             stageDeadline = Time.realtimeSinceStartup + 170f;
