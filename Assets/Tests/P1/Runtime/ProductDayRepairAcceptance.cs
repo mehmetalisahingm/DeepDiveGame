@@ -35,7 +35,7 @@ namespace DeepDive.P1.Lab
             reconnectSent = true; tracked = false;
             route = null; repairApproach = repairAtDock = false;
             if (!adapter.JoinRoom("127.0.0.1", ushort.Parse(Arg("-p46-day-port", "24777"))))
-                Fail("Repair guest could not rejoin the live Prep session");
+                Fail("Repair guest could not rejoin the live Lobby session");
             return true;
         }
 
@@ -69,8 +69,20 @@ namespace DeepDive.P1.Lab
                     (sync.BoatMaterialsMask.Value & 1) != 0 && sync.BoatPartsDone.Value == 0 &&
                     peers.All(p => p.RepairPartIndex.Value != 0))
                 { report.repairDisconnect = true; SetRepairPhase(3); }
-                if (repairPhase == 3 && peers.Length == expected && sync.BoatPartsMask.Value == 1)
-                { report.repairRejoin = true; SetRepairPhase(4); }
+                if (repairPhase == 3)
+                {
+                    // The product accepts joins only in Lobby. Exercise its normal phase
+                    // transitions rather than opening Prep/Dive admission for the test.
+                    if (peers.Length < expected && adapter.Session.State.Phase != SessionPhase.Lobby)
+                    { adapter.AdvancePhase(); Stop(); return false; }
+                    if (adapter.Session.State.Phase == SessionPhase.Lobby)
+                    {
+                        if (peers.Length == expected && AllReady()) adapter.AdvancePhase();
+                        Stop(); return false;
+                    }
+                    if (peers.Length == expected && sync.BoatPartsMask.Value == 1)
+                    { report.repairRejoin = true; SetRepairPhase(4); }
+                }
                 if (repairPhase == 4 && midnightStarted && adapter.GetComponent<DayNetworkBinding>().Engine.DayNumber > firstDay)
                 {
                     var engine = adapter.GetComponent<DayNetworkBinding>().Engine;
