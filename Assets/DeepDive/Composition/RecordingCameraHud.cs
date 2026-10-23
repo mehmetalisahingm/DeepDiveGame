@@ -23,7 +23,7 @@ namespace DeepDive.Composition
             if (root == null) Build();
             root.SetActive(true);
             canvas.worldCamera = camera;
-            canvas.planeDistance = Mathf.Max(.5f, camera.nearClipPlane + .05f);
+            canvas.planeDistance = camera.nearClipPlane + .01f;
             // Existing oxygen/weather warnings use screen pixels; keep the tally below them.
             frame.offsetMax = new Vector2(-30f, -Mathf.Max(132f, 142f / Mathf.Max(.1f, canvas.scaleFactor)));
             tally.text = recording ? "REC" : "STBY";
