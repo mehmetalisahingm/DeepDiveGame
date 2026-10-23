@@ -27,6 +27,15 @@ namespace DeepDive.Network
         public void Present(PlayerPresentationState value, float normalizedSpeed)
         { state = value; speed = Mathf.Clamp01(normalizedSpeed); }
 
+        public void PresentRepair(Vector3 left, Vector3 right, Quaternion rotation)
+        {
+            if (Model == null) return;
+            HoldWorld(leftArm, leftElbow, leftHand, left, -1);
+            HoldWorld(rightArm, rightElbow, rightHand, right, 1);
+            if (leftHand != null) leftHand.rotation = rotation;
+            if (rightHand != null) rightHand.rotation = rotation;
+        }
+
         private void LateUpdate()
         {
             if (Model == null || leftArm == null) return;
@@ -88,14 +97,17 @@ namespace DeepDive.Network
                 Model.TransformDirection(direction)) * bone.rotation;
         }
         private void Hold(Transform upper, Transform lower, Transform hand, Vector3 localTarget, float side)
+        { HoldWorld(upper, lower, hand, Model.TransformPoint(localTarget), side); }
+
+        private void HoldWorld(Transform upper, Transform lower, Transform hand, Vector3 target, float side)
         {
             if (upper == null || lower == null || hand == null) return;
-            var target = Model.TransformPoint(localTarget);
             var a = Vector3.Distance(upper.position, lower.position);
             var b = Vector3.Distance(lower.position, hand.position);
             var delta = target - upper.position;
             var distance = Mathf.Clamp(delta.magnitude, 0.02f, a + b - 0.001f);
             var direction = delta.normalized;
+            target = upper.position + direction * distance;
             var along = (a * a - b * b + distance * distance) / (2 * distance);
             var bend = Vector3.ProjectOnPlane(Model.TransformDirection(new Vector3(side, -1, 0)), direction).normalized;
             var elbow = upper.position + direction * along + bend * Mathf.Sqrt(Mathf.Max(0, a * a - along * along));

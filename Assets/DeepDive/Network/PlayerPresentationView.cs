@@ -36,6 +36,16 @@ namespace DeepDive.Network
         private CoastalDiverPose bodyPose, armsPose;
         private NetworkPlayer networkPlayer;
 
+        // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
+        // These targets never move the player root or submit gameplay actions.
+        public void ApplyRepairGrips(Vector3 left, Vector3 right, Quaternion rotation)
+        {
+            EnsureInitialized();
+            bodyPose?.PresentRepair(left, right, rotation);
+            if (networkPlayer != null && networkPlayer.IsOwner)
+                armsPose?.PresentRepair(left, right, rotation);
+        }
+
         private static readonly int LocomotionParam = Animator.StringToHash("LocomotionMode");
         private static readonly int SpeedParam = Animator.StringToHash("MoveSpeed");
         private static readonly int EquipmentParam = Animator.StringToHash("HeldEquipment");

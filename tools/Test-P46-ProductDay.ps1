@@ -1,6 +1,8 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo)
 $ErrorActionPreference='Stop'
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
+if ($RepairPurchase -and (-not $RepairOnly -or $RepairInterruptions)) { throw 'RepairPurchase requires RepairOnly and cannot combine with RepairInterruptions.' }
+if ($RepairVideo -and -not $RepairPurchase) { throw 'RepairVideo requires RepairPurchase (host repairs while guest observes).' }
 $productRoot=Split-Path -Parent $PSScriptRoot
 $productIsWindows=$env:OS -eq 'Windows_NT'
 if ($BuildPath) { $productBuild=$BuildPath }
@@ -19,8 +21,10 @@ try {
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
         if ($RepairInterruptions) { $productArgs+=@('-p187-interruptions','1') }
+        if ($RepairPurchase) { $productArgs+=@('-p187-purchase','1') }
+        if ($RepairVideo) { $productArgs+=@('-p187-video','1') }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
-        elseif ($productIsWindows) { $productArgs+='-nographics' }
+        elseif ($productIsWindows -and -not $RepairVideo) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
         if ($productIsWindows) {
             $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru

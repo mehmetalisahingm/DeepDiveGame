@@ -34,6 +34,8 @@ namespace DeepDive.P1.Lab
             public bool observedCarry, observedPlaced, cancelRecovered;
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
+            public bool purchasedMaterial, purchaseDidNotRepair, saveFaultRefused, saveFaultRecovered;
+            public int repairVideoFrames;
             public int repairRejected;
             public string clipId = "", recordingId = "", hash = "", position = "", failure = "";
             public long clipBytes;
@@ -180,6 +182,7 @@ namespace DeepDive.P1.Lab
             // Step 16 (repair-only) ends the same way: the host quits 3 s after reaching it, which can close a guest's
             // connection before the guest's own 3 s are up. Its repair evidence is already mirrored by then.
             if (!finished && (step == 15 || step == 16) && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+            CaptureRepairVideo();
         }
         private void Broadcast(float now)
         {
@@ -272,11 +275,11 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
-                    if (substep == 0)
+                    if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
                         if (!Follow()) return;
-                        substep = 1; route = null;
+                        substep = 1; route = null; purchaseHomeExited = true;
                     }
                     if (!Host && !RepairOnly) { localDone = true; return; }
                     CollectParts(); break;
@@ -309,9 +312,10 @@ namespace DeepDive.P1.Lab
 
         private void CollectParts()
         {
+            if (RepairPurchase && !PurchasedRepairAcceptance()) return;
             if (RepairInterruptions && repairPhase < 5 && !RepairAcceptance()) return;
             var names = new[] { "BoatPart_Hull", "BoatPart_Engine", "BoatPart_FuelTank" };
-            if (RepairOnly && expected>1 && (!RepairInterruptions || repairPhase == 5))
+            if (RepairOnly && !RepairPurchase && expected>1 && (!RepairInterruptions || repairPhase == 5))
             {
                 var assignment=report.slot;
                 while(part<3 && part%Mathf.Min(3,expected)!=assignment)part++;
@@ -356,6 +360,8 @@ namespace DeepDive.P1.Lab
                 else
                 {
                     if (local.RepairHits.Value==1 && Host && !File.Exists(output+".repair.png")) CaptureView(".repair.png");
+                    if (RepairPurchase && Host && part==0 && local.RepairHits.Value==2 && !report.saveFaultRefused)
+                    { RefuseFinalStrokeOnDisk(); return; }
                     Act(local.SubmitRepairHammerLocal);
                 }
                 return;
@@ -836,6 +842,7 @@ namespace DeepDive.P1.Lab
             if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
             if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
+            if (RepairPurchase && Host) report.passed &= report.purchasedMaterial && report.purchaseDidNotRepair && report.saveFaultRefused && report.saveFaultRecovered;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
             Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);

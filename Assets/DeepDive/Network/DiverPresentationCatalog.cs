@@ -13,6 +13,13 @@ namespace DeepDive.Network
         [SerializeField] private GameObject cameraPropPrefab;
         [SerializeField] private GameObject cameraAdvancedPropPrefab;
         [SerializeField] private GameObject cameraProfessionalPropPrefab;
+        [Header("Optional P4.8 repair art; unassigned uses the mechanical prototype")]
+        [SerializeField] private GameObject repairPlankPrefab;
+        [SerializeField] private GameObject repairHatchetPrefab;
+        [SerializeField] private AudioClip repairImpactClip;
+        public GameObject RepairPlankPrefab => ExistingOrNull(repairPlankPrefab);
+        public GameObject RepairHatchetPrefab => ExistingOrNull(repairHatchetPrefab);
+        public AudioClip RepairImpactClip => repairImpactClip ? repairImpactClip : null;
 
         // Unity keeps a managed wrapper for a prefab whose source asset disappeared. Returning
         // it directly lets callers pass a MissingReference to Instantiate. The implicit Unity
