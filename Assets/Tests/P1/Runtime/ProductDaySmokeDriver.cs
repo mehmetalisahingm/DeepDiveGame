@@ -355,7 +355,7 @@ namespace DeepDive.P1.Lab
                 if (!local.RepairPlaced.Value) Act(local.SubmitPickupLocal);
                 else
                 {
-                    if (local.RepairHits.Value==1 && Host && !File.Exists(output+".repair.png")) CaptureRepair();
+                    if (local.RepairHits.Value==1 && Host && !File.Exists(output+".repair.png")) CaptureView(".repair.png");
                     Act(local.SubmitRepairHammerLocal);
                 }
                 return;
@@ -487,7 +487,7 @@ namespace DeepDive.P1.Lab
                 adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0)
             {
                 report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
-                if (!File.Exists(output + ".camera-standby.png")) ScreenCapture.CaptureScreenshot(output + ".camera-standby.png");
+                if (!File.Exists(output + ".camera-standby.png")) CaptureView(".camera-standby.png");
                 HoldForShore(); return;
             }
             if (substep == 0)
@@ -517,7 +517,7 @@ namespace DeepDive.P1.Lab
                 report.cameraHudRecording = true;
                 report.cameraHudTimerAdvanced |= bridge.RecordingElapsedSeconds >= 2f;
                 if (bridge.RecordingElapsedSeconds >= 3f && !File.Exists(output + ".camera-rec.png"))
-                    ScreenCapture.CaptureScreenshot(output + ".camera-rec.png");
+                    CaptureView(".camera-rec.png");
                 if (recordingAt == 0) recordingAt = Time.realtimeSinceStartup;
                 if (Time.realtimeSinceStartup - recordingAt > 12f) Act(bridge.ToggleRecordingLocal);
             }
@@ -801,17 +801,17 @@ namespace DeepDive.P1.Lab
             nextAction = Time.realtimeSinceStartup + 0.8f; action();
         }
         private void Stop() => local.SubmitLocalInput(Vector3.zero, 0f, 0f);
-        private void CaptureRepair()
+        private void CaptureView(string suffix)
         {
             var camera=local.GetComponentInChildren<Camera>(true);
             var previous=camera.targetTexture; var active=RenderTexture.active;
             var target=new RenderTexture(1280,720,24);var pixels=new Texture2D(1280,720,TextureFormat.RGB24,false);
             try
             {
-                target.Create();camera.targetTexture=target;
+                target.Create();camera.targetTexture=target;Canvas.ForceUpdateCanvases();
                 UnityEngine.Rendering.RenderPipeline.SubmitRenderRequest(camera,new UnityEngine.Rendering.RenderPipeline.StandardRequest{destination=target});
                 RenderTexture.active=target;pixels.ReadPixels(new Rect(0,0,1280,720),0,0);pixels.Apply();
-                File.WriteAllBytes(output+".repair.png",pixels.EncodeToPNG());
+                File.WriteAllBytes(output+suffix,pixels.EncodeToPNG());
             }
             finally {camera.targetTexture=previous;RenderTexture.active=active;target.Release();Destroy(target);Destroy(pixels);}
         }

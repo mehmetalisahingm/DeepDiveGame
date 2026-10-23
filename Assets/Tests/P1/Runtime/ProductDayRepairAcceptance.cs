@@ -36,6 +36,7 @@ namespace DeepDive.P1.Lab
             if (adapter.Connection.Status != ConnectionStatus.Offline) return true;
             if (now < reconnectAt) return true;
             reconnectSent = true; tracked = false;
+            messages = null; substep = 0;
             route = null; repairApproach = repairAtDock = false;
             if (!adapter.JoinRoom("127.0.0.1", ushort.Parse(Arg("-p46-day-port", "24777"))))
                 Fail("Repair guest could not rejoin the live Lobby session");

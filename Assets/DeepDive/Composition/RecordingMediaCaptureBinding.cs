@@ -275,6 +275,7 @@ namespace DeepDive.Composition
             {
                 if (sourceCameras.Length > 0) captureCamera.CopyFrom(sourceCameras[0]);
                 captureCamera.enabled = false;
+                captureCamera.cullingMask &= ~(1 << 5); // Owner viewfinder belongs on screen, not in the archived footage.
                 captureCamera.targetTexture = captureTarget;
                 captureCamera.fieldOfView = Mathf.Clamp(player.RecordingFieldOfView, 20f, 120f);
                 captureCamera.aspect = Width / (float)Height;
