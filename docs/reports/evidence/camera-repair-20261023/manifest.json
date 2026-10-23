@@ -1,0 +1,110 @@
+{
+  "date": "2026-10-23",
+  "unity": "6000.3.23f1",
+  "deliverySource": "86161d1c27da961d1b6fd8b31522f3da999ccb3a",
+  "windowsBuild": "PASS",
+  "binaryHashes": [
+    {
+      "file": "DeepDive.Composition.dll",
+      "sha256": "c74c0a57b43f11c86587c2a66017070305b0edd76dfe21f8221b0686d8f11bf4"
+    },
+    {
+      "file": "DeepDive.P1.Lab.dll",
+      "sha256": "007b00597a324790410880b247f73e5260a57f79ad0ee3992abd1e74348ebe7f"
+    }
+  ],
+  "editMode": {
+    "passed": 1346,
+    "source": "86161d1c27da961d1b6fd8b31522f3da999ccb3a",
+    "xmlSha256": "bc71e08b45075ba2007a731d95a688fe0d491179a2976b723d8d3ba175bd933b",
+    "failed": 0
+  },
+  "repairFourProcesses": {
+    "completed": 3,
+    "race": true,
+    "acceleratedMidnight": true,
+    "run": "P46-product-20261023-135057-4",
+    "guestDisconnect": true,
+    "day": 2,
+    "source": "515b54a7fbde1e10adf9aa4b433f5dc6b11c073c",
+    "passed": true,
+    "lobbyRejoin": true,
+    "summaryCount": 1,
+    "unused": 0
+  },
+  "productTwoProcesses": {
+    "run": "P46-product-20261023-135107-2",
+    "passed": true,
+    "source": "515b54a7fbde1e10adf9aa4b433f5dc6b11c073c",
+    "freshHostReload": true
+  },
+  "productSolo": {
+    "run": "P46-product-20261023-135704-1",
+    "passed": true,
+    "source": "86161d1c27da961d1b6fd8b31522f3da999ccb3a",
+    "freshHostReload": true
+  },
+  "scope": "Same Windows PC; runtime actor/movement/RPC/capture/save paths. Midnight uses accelerated host time. No separate-PC or final human/art acceptance.",
+  "files": [
+    {
+      "file": "archive-first-frame.jpg",
+      "sha256": "043a3058278a5e5d32228a158d2d54aca80d5743c9aa10447a7495fa6e33d863",
+      "bytes": 3217
+    },
+    {
+      "file": "camera-rec.png",
+      "sha256": "0f773615c555fd065b05802a5d081b03a578f2d15f830c7d4efae4242c221d51",
+      "bytes": 102930
+    },
+    {
+      "file": "camera-standby.png",
+      "sha256": "45aad7adaaa2d2640d9f693a95d6535548591b49b46bd9c7bff8213a0008c38a",
+      "bytes": 87974
+    },
+    {
+      "file": "product-guest.json",
+      "sha256": "1a042743ae4e8d454970a88e71aedf6996433146d9501bc0db64674f02104a68",
+      "bytes": 2804
+    },
+    {
+      "file": "product-host.json",
+      "sha256": "90195acacb5ef2513264c635721d7a4da8357b9f9d204441264c1f66d920bb45",
+      "bytes": 2807
+    },
+    {
+      "file": "product-reload.json",
+      "sha256": "ed75a88261517dbdcb223c45685d0b88e6a19730cc83e754d5cea839d59edf86",
+      "bytes": 1212
+    },
+    {
+      "file": "product-solo.json",
+      "sha256": "7720cf1cc6e47309908ac7182568b562c3180ef70b7c617dff73b226c222f9ba",
+      "bytes": 2804
+    },
+    {
+      "file": "repair-player0.json",
+      "sha256": "ae55ab959403127e69df872e47e3b215139745b02fc016174ebbb6e35e1caf9b",
+      "bytes": 1583
+    },
+    {
+      "file": "repair-player1.json",
+      "sha256": "553583be06af181a149781ff5fc71d4c71f23e95b0f316f9173ed86523871c0e",
+      "bytes": 1584
+    },
+    {
+      "file": "repair-player2.json",
+      "sha256": "cac853c3261a5f915dff84cebb7c4912900ee49b86166b29d9e2a4a4b4950d1a",
+      "bytes": 1539
+    },
+    {
+      "file": "repair-player3.json",
+      "sha256": "c62515206a122d1c9804a3f3ee4850df407748382d07c1ae568cfadd79d40376",
+      "bytes": 1585
+    },
+    {
+      "file": "solo-reload.json",
+      "sha256": "ed75a88261517dbdcb223c45685d0b88e6a19730cc83e754d5cea839d59edf86",
+      "bytes": 1212
+    }
+  ]
+}

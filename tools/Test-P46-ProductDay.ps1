@@ -1,5 +1,6 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$HuntFirst, [switch]$Mute)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$HuntFirst, [switch]$Mute)
 $ErrorActionPreference='Stop'
+if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
 if ($HuntFirst -and $RepairOnly) { throw '-HuntFirst and -RepairOnly are exclusive' }
 $productRoot=Split-Path -Parent $PSScriptRoot
 $productIsWindows=$env:OS -eq 'Windows_NT'
@@ -18,6 +19,7 @@ try {
             '-p46-day-count',$Players,'-p46-day-slot',$productSlot,'-p46-day-port',$Port,
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
+        if ($RepairInterruptions) { $productArgs+=@('-p187-interruptions','1') }
         if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
@@ -54,7 +56,7 @@ try {
     if ($productFailed.Count -gt 0) { throw ($productFailed -join "`n") }
     $productCheckpoint=Get-Content -LiteralPath (Join-Path $productRun 'player0.json.campaign.json') -Raw|ConvertFrom-Json
     if ($RepairOnly) {
-        if (-not $repairRecovered -or @($productCheckpoint.BoatPartIds).Count -ne 3 -or
+        if ((-not $RepairInterruptions -and -not $repairRecovered) -or @($productCheckpoint.BoatPartIds).Count -ne 3 -or
             @($productCheckpoint.UnusedBoatPartIds).Count -ne 0 -or $productCheckpoint.SchemaVersion -ne 9) {
             throw 'Physical repair did not recover cancelled material or persist exactly three completed parts.'
         }

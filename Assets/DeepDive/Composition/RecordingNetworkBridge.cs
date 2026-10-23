@@ -46,8 +46,12 @@ namespace DeepDive.Composition
         private ulong localRecordingTarget;
         private string localStatus = string.Empty;
         private float localStatusUntil;
+        private double recordingStartedAt;
+        private RecordingCameraHud cameraHud;
 
         public bool IsRecordingLocal => localRecording;
+        public float RecordingElapsedSeconds => localRecording
+            ? (float)System.Math.Max(0, Time.unscaledTimeAsDouble - recordingStartedAt) : 0f;
 
         // Same owner intent used by keyboard input and opt-in multiplayer smoke tests.
         public void ToggleRecordingLocal()
@@ -86,8 +90,10 @@ namespace DeepDive.Composition
             EnsureMessaging();
             if (manager == null || !manager.IsListening)
             {
+                if (cameraHud != null) cameraHud.Hide();
                 cameraMode = false;
                 localRecording = false;
+                recordingStartedAt = 0;
                 localRecordingTarget = 0;
                 localRequestSequence = localLastAppliedRequest = 0;
                 lastRequestByPlayer.Clear();
@@ -96,13 +102,15 @@ namespace DeepDive.Composition
             }
 
             var player = LocalPlayer();
-            if (player == null) return;
+            if (player == null) { if (cameraHud != null) cameraHud.Hide(); return; }
 
             if (adapter.Session.State.Phase != SessionPhase.Dive)
             {
                 if (cameraMode || localRecording)
                     player.SetHeldEquipmentLocal(HeldEquipmentMode.None);
+                if (cameraHud != null) cameraHud.Hide();
                 cameraMode = localRecording = false;
+                recordingStartedAt = 0;
                 localRecordingTarget = 0;
                 if (adapter.IsAuthority)
                 {
@@ -127,6 +135,15 @@ namespace DeepDive.Composition
 
             if (Application.isFocused && cameraMode && Input.GetKeyDown(KeyCode.R))
                 ToggleRecordingLocal();
+            var visible = (cameraMode || localRecording) && !player.Passive.Value && !player.RepairHandsBusy &&
+                player.CurrentHeldEquipment == HeldEquipmentMode.Camera;
+            if (visible)
+            {
+                if (cameraHud == null) cameraHud = gameObject.AddComponent<RecordingCameraHud>();
+                cameraHud.Show(OwnerCamera(player), localRecording, RecordingElapsedSeconds, player.CurrentCameraTier,
+                    Time.unscaledTime < localStatusUntil ? localStatus : string.Empty);
+            }
+            else if (cameraHud != null) cameraHud.Hide();
         }
 
         private void EnsureMessaging()
@@ -362,6 +379,8 @@ namespace DeepDive.Composition
         {
             if (requestId <= localLastAppliedRequest) return;
             localLastAppliedRequest = requestId;
+            if (active && !localRecording) recordingStartedAt = Time.unscaledTimeAsDouble;
+            else if (!active) recordingStartedAt = 0;
             localRecording = active;
             localRecordingTarget = active ? targetId : 0;
 
@@ -389,42 +408,16 @@ namespace DeepDive.Composition
 
         private void OnGUI()
         {
-            if (adapter == null || adapter.Session.State.Phase != SessionPhase.Dive) return;
-            var player = LocalPlayer();
-            if (player == null) return;
-
+            if (adapter == null || adapter.Session.State.Phase != SessionPhase.Dive || LocalPlayer() == null || cameraMode || localRecording) return;
             GUI.Box(new Rect(Screen.width - 190, 18, 170, 26), "[C] CAMERA");
-            if (!cameraMode && !localRecording)
-            {
-                if (Time.unscaledTime < localStatusUntil)
-                    GUI.Box(new Rect(Screen.width * 0.5f - 110, 118, 220, 28), localStatus);
-                return;
-            }
-
-            var width = Mathf.Min(640f, Screen.width * 0.68f);
-            var height = Mathf.Min(360f, Screen.height * 0.58f);
-            var frame = new Rect((Screen.width - width) * 0.5f, (Screen.height - height) * 0.5f, width, height);
-            GUI.Box(frame, localRecording ? "REC" : "CAMERA");
-
-            var hasTarget = TryAimTarget(player, out var previewTarget);
-            var targetText = localRecording
-                ? $"TARGET #{localRecordingTarget}"
-                : hasTarget ? $"TARGET LOCK #{previewTarget}" : "NO TARGET";
-            GUI.Box(new Rect(frame.x + 12, frame.y + 12, 190, 26), targetText);
-            GUI.Box(new Rect(frame.xMax - 170, frame.y + 12, 158, 26), $"TIER {player.CurrentCameraTier}");
-            GUI.Box(new Rect(frame.x + 12, frame.yMax - 38, 270, 26),
-                localRecording ? "[R] STOP RECORDING" : "[R] START RECORDING   [C] CLOSE");
-
-            var cx = frame.center.x;
-            var cy = frame.center.y;
-            GUI.Label(new Rect(cx - 8, cy - 12, 30, 30), "+");
             if (Time.unscaledTime < localStatusUntil)
-                GUI.Box(new Rect(cx - 110, frame.y + 46, 220, 28), localStatus);
+                GUI.Box(new Rect(Screen.width * .5f - 110, 118, 220, 28), localStatus);
         }
 
         private void OnDestroy()
         {
             UnregisterMessages();
+            if (cameraHud != null) Destroy(cameraHud);
         }
     }
 }
