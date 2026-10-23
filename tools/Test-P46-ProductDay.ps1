@@ -1,5 +1,6 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$HuntFirst, [switch]$Mute)
 $ErrorActionPreference='Stop'
+if ($HuntFirst -and $RepairOnly) { throw '-HuntFirst and -RepairOnly are exclusive' }
 $productRoot=Split-Path -Parent $PSScriptRoot
 $productIsWindows=$env:OS -eq 'Windows_NT'
 if ($BuildPath) { $productBuild=$BuildPath }
@@ -17,6 +18,8 @@ try {
             '-p46-day-count',$Players,'-p46-day-slot',$productSlot,'-p46-day-port',$Port,
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
+        if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
+        if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
         elseif ($productIsWindows) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
@@ -44,7 +47,7 @@ try {
         $productResult=Get-Content -LiteralPath $productEntry.Report -Raw|ConvertFrom-Json
         $repairRecovered=$repairRecovered -or $productResult.cancelRecovered
         [pscustomobject]@{Player=$productEntry.Slot;Passed=$productResult.passed;Step=$productResult.step;Dives=$productResult.diveCount;
-            FishSold=$productResult.soldCount;Day=$productResult.day;Income=$productResult.income;Error=$productResult.failure}
+            FishSold=$productResult.soldCount;PartsAtFirstSale=$productResult.partsAtFirstSale;Day=$productResult.day;Income=$productResult.income;Error=$productResult.failure}
         if (-not $productResult.passed -or $productEntry.Process.ExitCode -ne 0) { $productFailed+="Player $($productEntry.Slot): $($productResult.errors -join '; ')" }
     }
     Write-Output "Evidence: $productRun"
@@ -68,6 +71,7 @@ try {
         '-p46-day-role','host','-p46-day-count',1,'-p46-day-slot',0,'-p46-day-port',($Port+1),
         '-p46-day-reload',1,'-p46-day-baseline',('"{0}"' -f (Join-Path $productRun 'player0.json')),
         '-p1-report',('"{0}"' -f $productReload),'-logFile',('"{0}"' -f (Join-Path $productRun 'reload.log')))
+    if ($Mute) { $productReloadArgs+=@('-p46-mute','1') }
     if ($productIsWindows) {
         $productReloadProcess=Start-Process -FilePath $productBuild -ArgumentList $productReloadArgs -WindowStyle Hidden -PassThru
     } else {
