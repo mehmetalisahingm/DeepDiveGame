@@ -22,7 +22,7 @@ namespace DeepDive.P1.Lab
 {
     // Explicit development-player command only. All mutations below are owner input/RPCs;
     // no stock, money, camera, clip, clock, sleep or position fixture is installed.
-    public sealed class ProductDaySmokeDriver : MonoBehaviour
+    public sealed partial class ProductDaySmokeDriver : MonoBehaviour
     {
         private const string StateMessage = "test/p46/product-state";
         private const string DoneMessage = "test/p46/product-done";
@@ -32,6 +32,8 @@ namespace DeepDive.P1.Lab
                 clipPlayed, clipAdvanced, published, duplicateRefused, slept, morningHome, reloadClean, mapMoved, mapDocked;
             public int slot, players, step, worldLoads, diveCount, soldCount, day, balance, income, boatParts, mapPlayers;
             public bool observedCarry, observedPlaced, cancelRecovered;
+            public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
+            public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public int repairRejected;
             public string clipId = "", recordingId = "", hash = "", position = "", failure = "";
             public long clipBytes;
@@ -110,6 +112,7 @@ namespace DeepDive.P1.Lab
             { Fail($"Timeout step={step} sub={substep} waypoint={waypoint} position={report.position}"); return; }
             if (leaving)
             { if (adapter.Connection.Status == ConnectionStatus.Offline) Finish(); return; }
+            if (RepairInterruptions && RepairReconnect(now)) return;
             if (adapter.Connection.Status != ConnectionStatus.Connected || adapter.Connection.IsSceneLoading) return;
             if (messages == null && manager.CustomMessagingManager != null)
             {
@@ -183,10 +186,11 @@ namespace DeepDive.P1.Lab
             if (Host && localDone) done.Add(local.OwnerClientId);
             if (now < nextBroadcast || messages == null) return;
             nextBroadcast = now + 0.2f;
-            using var writer = new FastBufferWriter(8, Allocator.Temp);
+            using var writer = new FastBufferWriter(24, Allocator.Temp);
             writer.WriteValueSafe(step);
             if (Host)
             {
+                if (RepairInterruptions) { writer.WriteValueSafe(repairPhase); writer.WriteValueSafe(repairWinner); }
                 foreach (var id in manager.ConnectedClientsIds)
                     if (id != 0) messages.SendNamedMessage(StateMessage, id, writer, NetworkDelivery.ReliableSequenced);
             }
@@ -199,6 +203,12 @@ namespace DeepDive.P1.Lab
         private void ReceiveState(ulong sender, FastBufferReader reader)
         {
             reader.ReadValueSafe(out int value);
+            if (RepairInterruptions && !Host && sender == 0)
+            {
+                reader.ReadValueSafe(out int phase); reader.ReadValueSafe(out ulong winner);
+                repairWinner = winner;
+                SetRepairPhase(phase);
+            }
             if (!Host && sender == 0 && value > step) SetStep(value);
         }
         private void ReceiveDone(ulong sender, FastBufferReader reader)
@@ -299,8 +309,9 @@ namespace DeepDive.P1.Lab
 
         private void CollectParts()
         {
+            if (RepairInterruptions && repairPhase < 5 && !RepairAcceptance()) return;
             var names = new[] { "BoatPart_Hull", "BoatPart_Engine", "BoatPart_FuelTank" };
-            if (RepairOnly && expected>1)
+            if (RepairOnly && expected>1 && (!RepairInterruptions || repairPhase == 5))
             {
                 var assignment=report.slot;
                 while(part<3 && part%Mathf.Min(3,expected)!=assignment)part++;
@@ -474,7 +485,11 @@ namespace DeepDive.P1.Lab
             var bridge = adapter.GetComponent<RecordingNetworkBridge>();
             if (recordingAt > 0 && !bridge.IsRecordingLocal &&
                 adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0)
-            { HoldForShore(); return; }
+            {
+                report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
+                if (!File.Exists(output + ".camera-standby.png")) ScreenCapture.CaptureScreenshot(output + ".camera-standby.png");
+                HoldForShore(); return;
+            }
             if (substep == 0)
             {
                 if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
@@ -499,6 +514,10 @@ namespace DeepDive.P1.Lab
             Aim(fish.transform.position);
             if (bridge.IsRecordingLocal)
             {
+                report.cameraHudRecording = true;
+                report.cameraHudTimerAdvanced |= bridge.RecordingElapsedSeconds >= 2f;
+                if (bridge.RecordingElapsedSeconds >= 3f && !File.Exists(output + ".camera-rec.png"))
+                    ScreenCapture.CaptureScreenshot(output + ".camera-rec.png");
                 if (recordingAt == 0) recordingAt = Time.realtimeSinceStartup;
                 if (Time.realtimeSinceStartup - recordingAt > 12f) Act(bridge.ToggleRecordingLocal);
             }
@@ -692,7 +711,8 @@ namespace DeepDive.P1.Lab
                 if (distance > 1.5f) Fail("Unexpected travel discontinuity: " + distance);
             }
             previous = local.transform.position; wasSeated = seat; previousDay = sync.DayNumber.Value;
-            if (report.worldLoads != 1) Fail("World scene reloaded");
+            if (report.worldLoads != 1 && !(RepairInterruptions && disconnectSent && report.worldLoads == 2))
+                Fail("World scene reloaded outside the explicit repair guest rejoin");
         }
         private void SetRoute(IEnumerable<Vector3> points) { route = points.ToList(); waypoint = 0; }
         // #188: the worksite is either at the water berth (pier approach, as before) or on the beach cradle, where the
@@ -811,9 +831,11 @@ namespace DeepDive.P1.Lab
                 report.mapPlayers >= expected && report.mapMoved && report.mapDocked && report.slept && report.morningHome &&
                 report.day == firstDay + 1 && report.income > 0 && report.errors.Count == 0;
             if (Host) report.passed &= report.initialClean && report.cameraBought && report.soldCount == 2 &&
-                report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused;
+                report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused &&
+                report.cameraHudRecording && report.cameraHudTimerAdvanced && report.cameraHudStopped;
             if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
+            if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
             Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);
