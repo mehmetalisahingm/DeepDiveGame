@@ -778,7 +778,7 @@ namespace DeepDive.P1.Lab
             var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a => a.Definition.ServiceId == id);
             var stand = anchor.WorldPosition + anchor.transform.forward * 1.6f;
             var delta = stand - local.transform.position; delta.y = 0f;
-            if (delta.magnitude > 0.2f) { MoveToward(CoastTarget(stand)); aimAt = 0; return false; }
+            if (delta.magnitude > 0.2f) { MoveToward(Around(CoastTarget(stand))); aimAt = 0; return false; }
             Aim(anchor.WorldPosition + Vector3.up);
             return Settled();
         }

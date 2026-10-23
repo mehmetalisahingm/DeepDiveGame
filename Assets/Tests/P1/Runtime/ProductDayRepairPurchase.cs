@@ -41,13 +41,16 @@ namespace DeepDive.P1.Lab
             }
             if(purchaseStage==1)
             {
+                // Before repairing, the solid cradle still blocks the ordinary post-repair
+                // product route across the beach. Enter the shallows from its west side.
+                if(substep==0 && route==null)SetRoute(new[]{P(-6.5f,-11.2f),new Vector3(-6.5f,6f,-5f)});
                 Hunt();
                 if(localDone) {localDone=false;purchaseStage=2;route=null;aimAt=0;}
                 return false;
             }
             if(purchaseStage==2)
             {
-                if(route==null)SetRoute(new[]{P(-6.5f,-11.2f),P(0,-12.5f),P(9,-12.5f),P(8.2f,-9.8f)});
+                if(route==null)SetRoute(new[]{P(-6.5f,-11.2f),P(-6.5f,-16),P(9,-16),P(8.2f,-9.8f)});
                 if(!Follow() || local.Swimming.Value || !local.GetComponent<DeepDive.Inventory.InventoryPlayerSync>().SafelyReturned.Value)return false;
                 adapter.AdvancePhase();
                 if(adapter.Session.State.Phase==SessionPhase.Return){purchaseStage=3;substep=0;route=null;aimAt=0;}
@@ -114,7 +117,8 @@ namespace DeepDive.P1.Lab
             var worker=Host?local:FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&p.OwnerClientId==0);
             if(worker==null || (!Host&&!purchaseObserverReady))return;
             // The first (purchased) hull material, including Q/recovery and three real strokes.
-            if(worker.RepairHandsBusy && worker.RepairPartIndex.Value==0)repairVideoUntil=Time.realtimeSinceStartup+1f;
+            if(worker.RepairHandsBusy && worker.RepairPartIndex.Value==0 && repairVideoUntil==0)repairVideoUntil=float.PositiveInfinity;
+            if(float.IsPositiveInfinity(repairVideoUntil) && (sync.BoatPartsMask.Value&1)!=0)repairVideoUntil=Time.realtimeSinceStartup+1f;
             if(repairVideoUntil<Time.realtimeSinceStartup || Time.realtimeSinceStartup<nextRepairFrame)return;
             nextRepairFrame=Time.realtimeSinceStartup+.125f;
             var folder=output+".repair-frames";Directory.CreateDirectory(folder);
