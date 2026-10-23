@@ -62,6 +62,8 @@ Ertesi sabah aynı yayın için bir sonuç kartı gelir: izlenme, takipçi deği
 
 ## Gerçek klip ve ev PC'si — P4.2
 
+23 Ekim dar kamera sunumu: kullanıcı talebiyle owner vizöründe host kabulüne bağlı kırmızı REC/ışık ve geçen süre, durunca STBY, merkez odak köşeleri ve R/C ipuçları eklenir. Bunlar kaydın değerlendirme/ödeme otoritesi değildir. Owner Canvas'ı UI katmanında çizilir; ayrı arşiv capture kamerası bu katmanı almaz. Mevcut 320×180/5 FPS prototip kodlaması bu arayüz teslimiyle 720p/24 FPS hedefine ulaşmış sayılmaz. [Kaynak ve gerçek test kanıtı](../reports/P4-CAMERA-REC-REPAIR-20261023.md).
+
 **Görünür teslim:** Kamera oyuncunun elindedir. Kayıtta kendi çevirdiği açı, gördüğü canlı, kadrajı, hareketi ve oyun ortam sesi yakalanır. Eve geldiğinde bunları klip olarak yeniden izler; yalnız kalite puanı, sabit resim veya önceden hazırlanmış film yeterli değildir. Diğer oyuncular da ortak ev ekranında aynı klibi izleyebilir. Oyun dışı masaüstü, mikrofon ve sesli sohbet kaydı kapsamda yoktur.
 
 İlk medya bütçesi, uygulama öncesi teknik deneme için taslak: **720p/24 FPS hedefi, klip başına en çok 30 saniye, oyuncu başına dalışta dört klip ve kampanyada 1 GB arşiv tavanı**. Bunlar başarılmış ölçümler değildir; capture/encode/aktarım/oynatma yaklaşımı hedef Windows build'inde denenir. Oyunun kayıt açıkken kare süresi, görüntü/ses uyumu ve dört eşzamanlı kamera etkisi ölçülür. Sorun varsa önce yöntem/bütçe gözden geçirilir; izlenebilir video şartı sessizce puan ekranına çevrilmez.
