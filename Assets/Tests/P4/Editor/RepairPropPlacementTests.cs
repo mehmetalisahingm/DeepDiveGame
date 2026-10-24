@@ -17,7 +17,9 @@ namespace DeepDive.P4.Tests
             try
             {
                 var pose=instance.GetComponent<CoastalDiverPose>();
-                pose.SendMessage("Awake");
+                // EditMode does not run MonoBehaviour messages. Initialize the real
+                // rig's bone cache explicitly without asking Unity to dispatch Awake.
+                typeof(CoastalDiverPose).GetMethod("Awake",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).Invoke(pose,null);
                 var upperLeft=RepairPropPlacement.Marker(instance.transform,"UpperArm.L");
                 var upperRight=RepairPropPlacement.Marker(instance.transform,"UpperArm.R");
                 var left=upperLeft.position+new Vector3(.06f,-.18f,.35f);
