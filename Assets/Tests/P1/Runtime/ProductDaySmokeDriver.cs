@@ -377,7 +377,9 @@ namespace DeepDive.P1.Lab
                 }
                 var physicalStand=site.StandPosition(part);physicalStand.y=ContinuousTownLayout.WalkSurfaceY;
                 var toStand=physicalStand-local.transform.position;toStand.y=0;
-                if(toStand.magnitude>.2f){MoveToward(physicalStand);aimAt=0;return;}
+                // Q/recovery can leave repairAtDock cached while the carrier is at
+                // the shared rack on the opposite end. Walk round the solid hull.
+                if(toStand.magnitude>.2f){MoveToward(Around(physicalStand));aimAt=0;return;}
                 Aim(site.SlotPosition(part));
                 if (!Settled()) return;
                 if(RepairOnly && !cancelSent && !local.RepairPlaced.Value)
