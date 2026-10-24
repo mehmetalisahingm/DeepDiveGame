@@ -1,11 +1,37 @@
 using DeepDive.Network;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEditor;
 
 namespace DeepDive.P4.Tests
 {
     public sealed class RepairPropPlacementTests
     {
+        [TestCase("CoastalDiver")]
+        [TestCase("CoastalArms")]
+        public void ActualSharedRigReachesRepairGripsWithoutMovingItsRoot(string name)
+        {
+            var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/DeepDive/Player/Character/"+name+".prefab");
+            Assert.That(prefab,Is.Not.Null);
+            var instance=Object.Instantiate(prefab);
+            try
+            {
+                var pose=instance.GetComponent<CoastalDiverPose>();
+                pose.SendMessage("Awake");
+                var upperLeft=RepairPropPlacement.Marker(instance.transform,"UpperArm.L");
+                var upperRight=RepairPropPlacement.Marker(instance.transform,"UpperArm.R");
+                var left=upperLeft.position+new Vector3(.06f,-.18f,.35f);
+                var right=upperRight.position+new Vector3(-.06f,-.18f,.35f);
+                var rootPosition=instance.transform.position;var rootRotation=instance.transform.rotation;
+                pose.PresentRepair(left,right,Quaternion.identity);
+                Assert.That(Vector3.Distance(RepairPropPlacement.Marker(instance.transform,"Hand.L").position,left),Is.LessThan(.015f),"Left grip");
+                Assert.That(Vector3.Distance(RepairPropPlacement.Marker(instance.transform,"Hand.R").position,right),Is.LessThan(.015f),"Right grip");
+                Assert.That(instance.transform.position,Is.EqualTo(rootPosition));
+                Assert.That(instance.transform.rotation,Is.EqualTo(rootRotation));
+            }
+            finally {Object.DestroyImmediate(instance);}
+        }
+
         [Test]
         public void ImportedNestedGripAlignsWithoutChangingScaleOrMarkerHierarchy()
         {

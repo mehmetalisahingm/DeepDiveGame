@@ -22,6 +22,9 @@ namespace DeepDive.P1.Lab
 {
     // Explicit development-player command only. All mutations below are owner input/RPCs;
     // no stock, money, camera, clip, clock, sleep or position fixture is installed.
+    // Capture after RepairCarryView (200) applies visual hand IK. An earlier camera
+    // request can observe the locomotion pose between the two cosmetic updates.
+    [DefaultExecutionOrder(500)]
     public sealed partial class ProductDaySmokeDriver : MonoBehaviour
     {
         private const string StateMessage = "test/p46/product-state";
