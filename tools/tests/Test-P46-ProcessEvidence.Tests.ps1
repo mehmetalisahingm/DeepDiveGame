@@ -21,6 +21,8 @@ try {
     $bad=Entry 'bad' 0
     Set-Content -LiteralPath $bad.Report -Value '{broken'
     Assert-Evidence ((Get-P46ProcessFailure @($bad)) -like '*invalid JSON*') 'Truncated JSON is a failure'
+    $writing=[pscustomobject]@{Slot='writer';Report=$bad.Report;Process=[pscustomobject]@{HasExited=$false}}
+    Assert-Evidence ($null -eq (Get-P46ProcessFailure @($writing))) 'Live partial writer rechecked before declaring malformed evidence'
     Complete-P46ProcessEvidence @($bad) $evidenceRoot 'invalid report' 1
     Assert-Evidence (Test-Path -LiteralPath ($bad.Report+'.invalid')) 'Original malformed evidence preserved'
     $failure=Entry 'failure' 1

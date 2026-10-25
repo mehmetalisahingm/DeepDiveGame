@@ -3,7 +3,12 @@ function Get-P46ProcessFailure($Entries) {
     foreach ($entry in $Entries) {
         if (Test-Path -LiteralPath $entry.Report) {
             try { $data = Get-Content -LiteralPath $entry.Report -Raw | ConvertFrom-Json }
-            catch { return "Player $($entry.Slot) wrote invalid JSON: $($_.Exception.Message)" }
+            catch {
+                # A live writer may still be finishing File.WriteAllText. Recheck
+                # on the next poll; a terminated writer's malformed file is FAIL.
+                if (-not $entry.Process.HasExited) { continue }
+                return "Player $($entry.Slot) wrote invalid JSON: $($_.Exception.Message)"
+            }
             if (-not $data.passed) { return "Player $($entry.Slot) failed: $($data.failure)" }
         }
         if ($entry.Process.HasExited) {
