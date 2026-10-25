@@ -38,9 +38,14 @@ namespace DeepDive.Network
 
         // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
         // These targets never move the player root or submit gameplay actions.
-        public void ApplyRepairGrips(Vector3 left, Vector3 right, Quaternion rotation)
+        public void ApplyRepairGrips(Vector3 left, Vector3 right, Quaternion rotation, bool finishStroke=false)
         {
             EnsureInitialized();
+            // The accepted final stroke clears transient work before the short visual
+            // recovery ends. Keep its hands, and hide ordinary equipment during recovery.
+            if(finishStroke && networkPlayer!=null && networkPlayer.IsOwner)
+                SetRendererGroup(firstPersonRenderers,true,false);
+            SetActive(firstPersonHarpoon,false);SetActive(thirdPersonHarpoon,false);HideAllCameras();
             bodyPose?.PresentRepair(left, right, rotation);
             if (networkPlayer != null && networkPlayer.IsOwner)
                 armsPose?.PresentRepair(left, right, rotation);

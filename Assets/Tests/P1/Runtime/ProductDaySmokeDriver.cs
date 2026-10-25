@@ -39,6 +39,7 @@ namespace DeepDive.P1.Lab
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public bool purchasedMaterial, purchaseDidNotRepair, saveFaultRefused, saveFaultRecovered;
             public int repairVideoFrames;
+            public bool repairArtSeen, repairToolContactSeen, repairGripVerified;
             public int repairRejected;
             // #188 hunt-first: parts state when the first catch was sold (-1 = not observed).
             public bool huntFirst;
@@ -920,6 +921,8 @@ namespace DeepDive.P1.Lab
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
             if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
             if (RepairPurchase && Host) report.passed &= report.purchasedMaterial && report.purchaseDidNotRepair && report.saveFaultRefused && report.saveFaultRecovered;
+            if (Arg("-p187-video")=="1" && !report.reload)
+                report.passed &= report.repairArtSeen && report.repairToolContactSeen && report.repairGripVerified;
             if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             File.WriteAllText(output, JsonUtility.ToJson(report, true));

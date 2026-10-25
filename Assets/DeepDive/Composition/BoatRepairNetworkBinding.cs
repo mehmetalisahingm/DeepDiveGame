@@ -55,6 +55,7 @@ namespace DeepDive.Composition
         private readonly Transform[] workAnchors = new Transform[RepairAnchorIds.WorkCount];
         private float anchorRetryAt;
         private BoxCollider hull;
+        private float nailRootZ=-.075f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -202,6 +203,14 @@ namespace DeepDive.Composition
             var wood = MakeMaterial(new Color(.28f, .14f, .065f));
             var fresh = MakeMaterial(new Color(.66f, .43f, .21f));
             var iron = MakeMaterial(new Color(.13f, .15f, .17f));
+            var repairArt=Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
+            var surface=repairArt!=null&&repairArt.RepairPlacedPlankPrefab!=null
+                ?RepairPropPlacement.Marker(repairArt.RepairPlacedPlankPrefab.transform,"FastenerSurface"):null;
+            var contact=repairArt!=null&&repairArt.RepairNailPrefab!=null
+                ?RepairPropPlacement.Marker(repairArt.RepairNailPrefab.transform,"ContactPoint"):null;
+            if(surface!=null&&contact!=null)
+                nailRootZ=repairArt.RepairPlacedPlankPrefab.transform.InverseTransformPoint(surface.position).z-
+                    repairArt.RepairNailPrefab.transform.InverseTransformPoint(contact.position).z;
             for (int side = -1; side <= 1; side += 2)
             {
                 Box("CrackedGunwale", new Vector3(side * 1.02f, .55f, .2f), new Vector3(.14f, .28f, 3.8f), wood);
@@ -219,11 +228,28 @@ namespace DeepDive.Composition
                 label.transform.localPosition=slot.transform.localPosition+Vector3.up*.65f;
                 var text=label.AddComponent<TextMesh>();text.text=BoatRepairGuide.PartName(BoatRepairParts.All[i]);
                 text.anchor=TextAnchor.MiddleCenter;text.fontSize=48;text.characterSize=.012f;text.color=new Color(1,.88f,.55f);labels.Add(text);
-                boards[i] = Box("RepairPlank-" + i, slot.transform.localPosition, new Vector3(.58f,.7f,.1f),fresh);
-                for (int n=0;n<3;n++) nails.Add(Box("Nail-"+i+"-"+n,slot.transform.localPosition+new Vector3((n-1)*.15f,.23f,-.075f),new Vector3(.035f,.035f,.05f),iron));
-                racks[i] = Box("RecoveredMaterial-"+i,new Vector3(-.65f,.65f,-4.1f-i*.8f),new Vector3(.6f,.14f,.45f),fresh);
+                boards[i] = repairArt!=null && repairArt.RepairPlacedPlankPrefab!=null
+                    ? Instantiate(repairArt.RepairPlacedPlankPrefab,site.transform,false)
+                    : Box("RepairPlank-"+i,slot.transform.localPosition,new Vector3(.58f,.7f,.1f),fresh);
+                boards[i].transform.localPosition=slot.transform.localPosition;
+                var tips=new Transform[3];
+                for(int n=0;n<3;n++)
+                {
+                    var nail=repairArt!=null && repairArt.RepairNailPrefab!=null
+                        ? Instantiate(repairArt.RepairNailPrefab,site.transform,false)
+                        : Box("Nail-"+i+"-"+n,Vector3.zero,new Vector3(.035f,.035f,.05f),iron);
+                    nail.name="Nail-"+i+"-"+n;
+                    nail.transform.localPosition=slot.transform.localPosition+new Vector3((n-1)*.15f,.23f,nailRootZ);
+                    nails.Add(nail);tips[n]=nail.transform;
+                }
+                slot.AddComponent<RepairWorkContactTarget>().Bind(i,tips);
+                bool authoredRack=repairArt!=null && repairArt.RepairPlankPrefab!=null;
+                racks[i]=authoredRack?Instantiate(repairArt.RepairPlankPrefab,site.transform,false):
+                    Box("RecoveredMaterial-"+i,new Vector3(-.65f,.65f,-4.1f-i*.8f),new Vector3(.6f,.14f,.45f),fresh);
+                racks[i].name="RecoveredMaterial-"+i;
                 racks[i].AddComponent<BoatRepairRackTarget>().Index=i;
                 var pickup=racks[i].AddComponent<BoxCollider>(); pickup.isTrigger=true;
+                if(authoredRack)pickup.size=new Vector3(.78f,.24f,.12f);
             }
         }
         private Material MakeMaterial(Color color)
@@ -262,7 +288,14 @@ namespace DeepDive.Composition
                 labels[i].gameObject.SetActive(!done && i==selected && camera!=null && Vector3.Distance(camera.transform.position,SlotPosition(i))<4f);
                 if(camera!=null)labels[i].transform.rotation=camera.transform.rotation;
                 boards[i].SetActive(done||placed);
-                for(int n=0;n<3;n++) nails[i*3+n].SetActive(done||(placed&&n<hits));
+                for(int n=0;n<3;n++)
+                {
+                    var nail=nails[i*3+n];nail.SetActive(done||placed);
+                    // All nails can be seen on placement; each host-accepted stroke
+                    // drives one head flush. Rejected actions never advance the model.
+                    var raised=!done&&n>=hits?.045f:0f;
+                    nail.transform.localPosition=SlotLocal(i)+new Vector3((n-1)*.15f,.23f,nailRootZ-raised);
+                }
                 racks[i].SetActive(!done&&!reserved&&(progress.BoatMaterialsMask.Value&(1<<i))!=0);
                 racks[i].transform.position = RackPosition(i);
             }

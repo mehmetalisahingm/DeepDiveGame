@@ -116,14 +116,28 @@ namespace DeepDive.P1.Lab
             if(Arg("-p187-video")!="1" || finished || local==null || !local.IsSpawned || step!=1)return;
             var worker=Host?local:FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&p.OwnerClientId==0);
             if(worker==null || (!Host&&!purchaseObserverReady))return;
+            var presentation=worker.GetComponent<RepairCarryView>();
+            if(presentation!=null)
+            {
+                report.repairArtSeen|=presentation.UsesAuthoredArt;
+                if(presentation.StrokeAge<.2f && presentation.NailContactError<.04f)
+                    report.repairToolContactSeen=true;
+                if(worker.RepairPlaced.Value)
+                {
+                    var rig=worker.GetComponentsInChildren<CoastalDiverPose>(true).FirstOrDefault(p=>p.FirstPerson==worker.IsOwner);
+                    var hand=rig!=null?RepairPropPlacement.Marker(rig.transform,"Hand.R"):null;
+                    if(hand!=null && Vector3.Distance(hand.position,presentation.RightGripPosition)<.08f)
+                        report.repairGripVerified=true;
+                }
+            }
             // The first (purchased) hull material, including Q/recovery and three real strokes.
             if(worker.RepairHandsBusy && worker.RepairPartIndex.Value==0 && repairVideoUntil==0)repairVideoUntil=float.PositiveInfinity;
             if(float.IsPositiveInfinity(repairVideoUntil) && (sync.BoatPartsMask.Value&1)!=0)repairVideoUntil=Time.realtimeSinceStartup+1f;
             if(repairVideoUntil<Time.realtimeSinceStartup || Time.realtimeSinceStartup<nextRepairFrame)return;
-            nextRepairFrame=Time.realtimeSinceStartup+.125f;
+            nextRepairFrame=Time.realtimeSinceStartup+.05f;
             var folder=output+".repair-frames";Directory.CreateDirectory(folder);
             CaptureView(".repair-frames/"+(repairFrame++).ToString("D5")+".png");
-            File.AppendAllText(Path.Combine(folder,"frames.csv"),$"{repairFrame-1},{Time.realtimeSinceStartup:F4},{worker.RepairPartIndex.Value},{worker.RepairPlaced.Value},{worker.RepairHits.Value},{worker.RepairStroke.Value}\n");
+            File.AppendAllText(Path.Combine(folder,"frames.csv"),System.FormattableString.Invariant($"{repairFrame-1},{Time.realtimeSinceStartup:F4},{worker.RepairPartIndex.Value},{worker.RepairPlaced.Value},{worker.RepairHits.Value},{worker.RepairStroke.Value}\n"));
             report.repairVideoFrames=repairFrame;
         }
     }

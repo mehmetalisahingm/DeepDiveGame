@@ -17,9 +17,13 @@ namespace DeepDive.Network
         [SerializeField] private GameObject repairPlankPrefab;
         [SerializeField] private GameObject repairHatchetPrefab;
         [SerializeField] private AudioClip repairImpactClip;
+        [SerializeField] private GameObject repairPlacedPlankPrefab;
+        [SerializeField] private GameObject repairNailPrefab;
         public GameObject RepairPlankPrefab => ExistingOrNull(repairPlankPrefab);
         public GameObject RepairHatchetPrefab => ExistingOrNull(repairHatchetPrefab);
         public AudioClip RepairImpactClip => repairImpactClip ? repairImpactClip : null;
+        public GameObject RepairPlacedPlankPrefab => ExistingOrNull(repairPlacedPlankPrefab);
+        public GameObject RepairNailPrefab => ExistingOrNull(repairNailPrefab);
 
         // Unity keeps a managed wrapper for a prefab whose source asset disappeared. Returning
         // it directly lets callers pass a MissingReference to Instantiate. The implicit Unity
