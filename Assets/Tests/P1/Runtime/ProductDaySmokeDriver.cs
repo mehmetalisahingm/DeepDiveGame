@@ -52,6 +52,7 @@ namespace DeepDive.P1.Lab
             public long clipBytes;
             public float distance, maxTravelStep;
             public double maxMotionSampleGap;
+            public int motionTrackingSegments;
             public bool runnerAbortReceived, injectedFailure;
             public List<MotionSample> motionSamples=new List<MotionSample>();
             public List<string> trace = new List<string>(), tripPhases = new List<string>();
@@ -161,7 +162,7 @@ namespace DeepDive.P1.Lab
                 {
                     if (Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) > 0.7f) return;
                     homeChecked = true; report.homeSpawn = true; firstDay = sync.DayNumber.Value;
-                    previous = local.transform.position; tracked = true; previousDay = firstDay;
+                    BeginMotionSegment();
                     if (Host)
                     {
                         var economy = adapter.GetComponent<EconomyManager>();
@@ -186,6 +187,7 @@ namespace DeepDive.P1.Lab
                 }
                 localDone = true;
             }
+            if(!ResumeMotionAfterRejoin())return;
             Track();
             if (finished) return;
             Observe(); Broadcast(now);
@@ -780,15 +782,7 @@ namespace DeepDive.P1.Lab
         private void Track()
         {
             report.position = local.transform.position.ToString();
-            if (!tracked)
-            {
-                // A real disconnect/rejoin creates a new NetworkObject. Start a new
-                // motion segment, then keep checking it; do not disable tracking for
-                // the rest of the rejoined guest's run.
-                previous=local.transform.position; wasSeated=local.Seated.Value;
-                previousDay=sync.DayNumber.Value; motionAt=0; tracked=true;
-                return;
-            }
+            if (!tracked) return;
             var distance = Vector3.Distance(previous, local.transform.position);
             RecordMotion(distance);
             var seat = local.Seated.Value;

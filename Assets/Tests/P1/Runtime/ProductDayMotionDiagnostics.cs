@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using DeepDive.Composition;
+using DeepDive.Session;
 using UnityEngine;
 
 namespace DeepDive.P1.Lab
@@ -17,6 +18,29 @@ namespace DeepDive.P1.Lab
         }
         private readonly Queue<MotionSample> motionHistory=new Queue<MotionSample>();
         private double motionAt, motionFixedAt, motionGap, motionFixedGap;
+
+        private void BeginMotionSegment()
+        {
+            previous=local.transform.position; wasSeated=local.Seated.Value;
+            previousDay=sync.DayNumber.Value; motionAt=0; tracked=true;
+            report.motionTrackingSegments++;
+        }
+
+        private bool ResumeMotionAfterRejoin()
+        {
+            if(tracked)return true;
+            // The real join spawns a new object in Lobby, then the product's
+            // Prep transition places it in the house. As on initial entry,
+            // wait for that placement before sending route input/tracking.
+            var atHome=false;
+            for(var i=0;i<4;i++)
+                atHome |= Vector3.Distance(local.transform.position,ContinuousTownLayout.HomeRig.Spawn(i))<.7f;
+            if(RepairInterruptions && reconnectSent &&
+                (adapter.Session.State.Phase!=SessionPhase.Prep || !atHome))
+            {Stop();return false;}
+            BeginMotionSegment();
+            return true;
+        }
 
         private void RecordMotion(float distance)
         {
