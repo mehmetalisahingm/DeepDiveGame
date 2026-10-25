@@ -1,6 +1,6 @@
 # Birlikte çalışma düzeni
 
-Plan 3.1 — güncel durum 13 Ekim 2026. P0–P3 kapalı; P4.5 birleşti, P4.6 kabulü açık. Kullanıcı isteğiyle P4.7–P4.12 oyuncu deneyimi/sanat planı eklendi. P5/P6 kilitli; yeni teslimlerin uygulaması önceki kabul kapısına bağlıdır. Önceki test/ekip onayları yeni özelliklere taşınmaz.
+Plan 3.2 — 25 Ekim 2026. Kullanıcının kararıyla eski P4.6/P4.7 ara-kabulleri [ertelenerek idari kapatıldı](DEFERRED_ACCEPTANCE.md). P4.7–P4.11 üretimi ortak kabul bekleyişi olmadan küçük paketlerle ilerler; öncelik tamir/görsel kit ve taşınan yerleşimdir. Son ortak/ayrı PC/çok gün/nihai görsel kabul P4.12/#164'tedir. Önceki PASS yeni build kabulü sayılmaz; P5/P6 nihai P4 kapanışını bekler.
 
 Mehmet=A, Utku=B, Mert=C. Aynı fazda çalışılır; erken bitiren mevcut fazın incelemesine, testine veya devredilen alt işine destek olur.
 
@@ -36,7 +36,7 @@ Mert V01–V03 insan/animasyon/ekipman setini küçük paket olarak sağlar; Meh
 
 P3.2'de eski otomatik ödeme yolu ile yeni NPC teslim yolu aynı anda aktif bırakılamaz. Şema göçü, bekleyen av/kayıt ve tek ödeme regresyonu aynı teslimde tamamlanır. P3.3'te tek sandal otoritesi, onarım/koltuk/rota ve kopma davranışı birlikte doğrulanır.
 
-P4 sırası: P4.1 ev/gün/keşif → P4.2 klip/PC/kanal → P4.3 ekipman/büyük tekneler → P4.4 tür/boss → P4.5 günlük dünya/gelişim/roller → P4.6 teknik temel kabulü → P4.7 görsel örnek → P4.8 fiziksel sandal tamiri → P4.9 ortak eylemler → P4.10 kasaba/ev → P4.11 canlı deniz → P4.12 nihai deneyim kabulü. Önceki ara teslim kabul edilmeden sonraki özellik başlamaz; aynı teslimin bağımsız A/B/C işleri beraber hazırlanabilir. Alt ajan kullanımı ayrıca yetki ister.
+P4 üretim sırası: mevcut temel → P4.7 kit/örnek yerleşim → P4.8 fiziksel sandal tamiri → P4.9 ortak eylemler → P4.10 kasaba/ev → P4.11 canlı deniz → P4.12 nihai kabul. Eski ayrı ara-kabuller son gelişmiş sürüme taşınmıştır; yeni paket gerçek kod/varlık girdileri hazırsa önceki insan/ayrı PC kabulünü beklemez. Alan sahipliği, ortak sahne sırası ve anlamlı değişiklik testleri korunur. Alt ajan kullanımı ayrıca yetki ister.
 
 Medya P4.2'de önce hedef Windows build'inde gerçek kayıt/aktarım/oynatma denemesiyle doğrulanır. Teknik sorun çözülmeden PC'de stok video/puan kartını başarı diye sunmayın. Gün sonu, yayın hakları/ödeme ve klip dosyası ayrı durumlar olarak tek kampanya kaydına bağlanır; sonraki görevlerde sahte veriyle kapatılmaz.
 

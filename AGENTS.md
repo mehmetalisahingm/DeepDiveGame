@@ -2,6 +2,10 @@
 
 Her görevden önce docs/plan/STATUS.md, PHASES.md içindeki mevcut faz, ilgili CONTRACTS.md bölümü ve WORKFLOW.md okunur. Ev/gün/medya/harita/tekne/boss işinde WORLD_SYSTEMS.md'nin ilgili bölümü de okunur.
 
+## 25 Ekim 2026 kullanıcı kararı — ara-kabulleri sona ertele
+
+P4.6/P4.7'nin eski kabul bekleyişleri ertelenerek idari kapatılır; tamam/PASS yazılmaz. Aşağıdaki önceki ara-kabul kapısı hükümleri P4.7–P4.11 üretimini artık bekletmez. Aktif öncelik P4.8 tamir/görsel kit ve taşınan P4.7 üretimidir; mevcut eylem/kasaba/deniz kapsamı küçük paketlerle ilerleyebilir. Gerçek varlık/kod bağımlılıkları, sahiplik ve yeni değişikliğin anlamlı teknik doğrulaması korunur. Eski ortak/ayrı PC/çok gün/nihai görsel testler son gelişmiş build'de P4.12/#164'e taşınır; #207 bilinen kusur açık kalır. P5/P6 nihai P4 kabulünü bekler. Ayrıntı: docs/plan/DEFERRED_ACCEPTANCE.md. Bu tarihli açık kullanıcı kararı, aşağıdaki eski P4 ara-kabul sırası metinlerinin önündedir.
+
 ## Ekip
 
 - Mehmet (A): oyuncu, dalış, ekipman kullanımı ve temel oturum bağlantısı.
