@@ -1,19 +1,28 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1)
 $ErrorActionPreference='Stop'
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
 if ($RepairPurchase -and (-not $RepairOnly -or $RepairInterruptions)) { throw 'RepairPurchase requires RepairOnly and cannot combine with RepairInterruptions.' }
 if ($RepairVideo -and -not $RepairPurchase) { throw 'RepairVideo requires RepairPurchase (host repairs while guest observes).' }
 if ($HuntFirst -and $RepairOnly) { throw '-HuntFirst and -RepairOnly are exclusive' }
 $productRoot=Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'P46-ProcessEvidence.ps1')
+if ($FaultSlot -ge $Players) { throw 'FaultSlot must identify a started player.' }
 $productIsWindows=$env:OS -eq 'Windows_NT'
 if ($BuildPath) { $productBuild=$BuildPath }
 elseif ($productIsWindows) { $productBuild=Join-Path $productRoot 'Builds/P1-Integrated/DeepDiveGame-P1.exe' }
 else { $productBuild=Join-Path $productRoot 'Builds/P1-Integrated/DeepDiveGame-P1.x86_64' }
 if (-not (Test-Path -LiteralPath $productBuild)) { throw "Integrated build not found: $productBuild" }
-$productRun=Join-Path $productRoot ('Logs/P46-product-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + $Players)
-New-Item -ItemType Directory -Path $productRun | Out-Null
+$productLease=$null
+if (-not $AllowConcurrent) {
+    New-Item -ItemType Directory -Path (Join-Path $productRoot 'Logs') -Force | Out-Null
+    try { $productLease=[IO.File]::Open((Join-Path $productRoot 'Logs/product-day-active.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
+    catch { throw 'Another product-day run is active. Wait for it to finish, or explicitly use -AllowConcurrent for a load experiment.' }
+}
+$productRun=Join-Path $productRoot ('Logs/P46-product-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff') + '-' + $Players)
 $productProcesses=@()
+$productFailure=$null
 try {
+    New-Item -ItemType Directory -Path $productRun | Out-Null
     for ($productSlot=0;$productSlot -lt $Players;$productSlot++) {
         $productReport=Join-Path $productRun "player$productSlot.json"
         $productLog=Join-Path $productRun "player$productSlot.log"
@@ -26,6 +35,7 @@ try {
         if ($RepairVideo) { $productArgs+=@('-p187-video','1') }
         if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
+        if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
         elseif ($productIsWindows -and -not $RepairVideo) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
@@ -44,8 +54,11 @@ try {
     }
     $productLimit=(Get-Date).AddSeconds(1050)
     while (@($productProcesses | Where-Object {-not $_.Process.HasExited}).Count -gt 0 -and (Get-Date) -lt $productLimit) {
+        $productFailure=Get-P46ProcessFailure $productProcesses
+        if ($productFailure) { throw $productFailure }
         Start-Sleep -Milliseconds 500
     }
+    if (@($productProcesses | Where-Object {-not $_.Process.HasExited}).Count -gt 0) { throw 'Product-day process deadline exceeded.' }
     $productFailed=@()
     $repairRecovered=$false
     foreach ($productEntry in $productProcesses) {
@@ -90,8 +103,10 @@ try {
     if (-not $productReloadResult.passed -or $productReloadProcess.ExitCode -ne 0) { throw "Reload failed: $($productReloadResult.errors -join '; ')" }
     if ($RepairOnly) { Write-Output 'Fresh-process repaired campaign/material/balance/sale/day reload PASS.' }
     else { Write-Output 'Fresh-process reload/clip playback/duplicate publish PASS.' }
+} catch {
+    $productFailure=$_.Exception.Message
+    throw
 } finally {
-    foreach ($productEntry in $productProcesses) {
-        if (-not $productEntry.Process.HasExited) { Stop-Process -Id $productEntry.Process.Id -Force }
-    }
+    try { Complete-P46ProcessEvidence $productProcesses $productRun $productFailure $Players }
+    finally { if ($null -ne $productLease) { $productLease.Dispose() } }
 }
