@@ -1,0 +1,5 @@
+P187_PURCHASE earned=120 cost=120 acquired-not-completed
+P187_SAVE_REFUSED actual-disk-lock checkpoint-unchanged material-retained hits=2
+P187_SAVE_RETRY completed-once material-consumed-once balance-unchanged
+P46_PRODUCT_RESULT passed=True failure=
+P1_BUILD_SUCCEEDED integrated=true target=windows
