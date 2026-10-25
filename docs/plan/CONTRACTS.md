@@ -422,4 +422,6 @@ P2 başlangıcı: Mehmet, Utku ve Mert av/vuruş/çanta istek ve sonuçlarını 
 
 ### 18 Ekim #187 dar kullanıcı istisnası
 
+24 Ekim #187 sunum bağlantısı: `DiverPresentationCatalog` isteğe bağlı `repairPlankPrefab` (`Grip_Left`/`Grip_Right`), `repairHatchetPrefab` (`GripPoint`) ve `repairImpactClip` tüketir. Grip işaretleri yalnız mevcut el kemiklerini yönlendirir; root-motion, RPC veya ekonomik katkı üretmez. Atanmamış nihai kit mevcut prototipe düşer; #189 sanat/alet teması kabulü oluşmaz. `-p187-purchase` ve `-p187-video` yalnız açık development senaryosudur; normal oyuncuya disk hatası sağlayıcısı kurulmaz.
+
 Kullanıcı #141/#159 açık kalırken #187 uygulamasını açıkça yetkilendirdi. Yukarıdaki hazırlık notunun ardından edinme/son darbe ayrımı uygulanır: v9 UnusedBoatPartIds yalnız edinilmiş ve kullanılmamış üç stable ID'yi tutar; BoatPartIds tamamlanmış katkıdır. Bir ID iki listede birden olamaz. v1-v8 tamamlanmış bitleri korunur, kullanılmamış malzeme verilmez. Son darbe kullanılmamış ID'yi çıkarıp tamamlanmışa ekler ve tek save yazar; save reddinde ikisi/revision geri alınır. Taşıyıcı/yuva rezervasyonu ve yarım darbe geçicidir. Kopma/pasiflik/gün kapanışı malzemeyi ortak askıya döndürür. Ağ değişkeni düzeni değiştiği için protokol DeepDive-P4-5; eski build kabul edilmez. #188/#189 ve gerçek ekip kabulü ayrıca kalır.

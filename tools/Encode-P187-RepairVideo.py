@@ -11,6 +11,12 @@ import sys
 
 folder, ffmpeg, output = map(pathlib.Path, sys.argv[1:])
 rows = list(csv.reader((folder / "frames.csv").read_text().splitlines()))
+# Existing development players use the Windows locale for F4 timestamps. Turkish
+# decimal commas split that one value into two fields; recover the exact timestamp.
+rows = [([r[0], r[1] + "." + r[2], *r[3:]] if len(r) == 7 and r[4] in ("True", "False") else r)
+        for r in rows]
+if any(len(r) != 6 for r in rows):
+    raise SystemExit("Unexpected frame metadata shape")
 if len(rows) < 8:
     raise SystemExit("Not enough actual repair frames")
 concat = folder / "frames.ffconcat"
