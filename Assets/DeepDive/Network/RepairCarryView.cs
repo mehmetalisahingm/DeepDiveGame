@@ -120,7 +120,7 @@ namespace DeepDive.Network
                 var left=board.activeSelf && boardLeft!=null?boardLeft.position:
                     Vector3.Lerp(transform.TransformPoint(new Vector3(-.22f,1.18f,.3f)),gripPosition-transform.right*.16f,.7f);
                 var right=board.activeSelf && boardRight!=null?boardRight.position:gripPosition;
-                GetComponent<PlayerPresentationView>()?.ApplyRepairGrips(left,right,parent.rotation,finishing);
+                GetComponent<PlayerPresentationView>()?.ApplyRepairGrips(left,right,board.activeSelf?board.transform.rotation:transform.rotation,finishing);
             }
         }
         private void OnGUI()

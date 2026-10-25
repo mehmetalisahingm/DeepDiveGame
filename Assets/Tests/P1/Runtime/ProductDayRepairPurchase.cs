@@ -126,8 +126,12 @@ namespace DeepDive.P1.Lab
                 {
                     var rig=worker.GetComponentsInChildren<CoastalDiverPose>(true).FirstOrDefault(p=>p.FirstPerson==worker.IsOwner);
                     var hand=rig!=null?RepairPropPlacement.Marker(rig.transform,"Hand.R"):null;
-                    if(hand!=null && Vector3.Distance(hand.position,presentation.RightGripPosition)<.08f)
-                        report.repairGripVerified=true;
+                    if(hand!=null)
+                    {
+                        var error=Vector3.Distance(hand.position,presentation.RightGripPosition);
+                        report.minRepairGripError=Mathf.Min(report.minRepairGripError,error);
+                        if(error<.08f)report.repairGripVerified=true;
+                    }
                 }
             }
             // The first (purchased) hull material, including Q/recovery and three real strokes.

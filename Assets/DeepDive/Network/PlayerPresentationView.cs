@@ -41,6 +41,11 @@ namespace DeepDive.Network
         public void ApplyRepairGrips(Vector3 left, Vector3 right, Quaternion rotation, bool finishStroke=false)
         {
             EnsureInitialized();
+            // World-space contact must use the body's shoulder frame. Keeping the
+            // usual camera-relative arms while looking down moves shoulders forward
+            // and makes a reachable world grip unreachable in first person.
+            if(runtimeFirstPersonArms!=null)
+                runtimeFirstPersonArms.transform.SetPositionAndRotation(transform.position,transform.rotation);
             // The accepted final stroke clears transient work before the short visual
             // recovery ends. Keep its hands, and hide ordinary equipment during recovery.
             if(finishStroke && networkPlayer!=null && networkPlayer.IsOwner)
@@ -72,6 +77,11 @@ namespace DeepDive.Network
         public void Apply(bool isOwner, PlayerPresentationState state, float normalizedSpeed, CameraTier cameraTier)
         {
             EnsureInitialized();
+            if(runtimeFirstPersonArms!=null)
+            {
+                runtimeFirstPersonArms.transform.localPosition=new Vector3(0,-1.65f,0);
+                runtimeFirstPersonArms.transform.localRotation=Quaternion.identity;
+            }
 
             var showEquipment = state.Locomotion != LocomotionMode.Passive;
             SetRendererGroup(firstPersonRenderers, isOwner && showEquipment && state.HeldEquipment != HeldEquipmentMode.None, false);
