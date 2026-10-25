@@ -22,8 +22,8 @@
   "files": [
     {
       "file": "editmode-summary.json",
-      "bytes": 173,
-      "sha256": "FECCB8975D70AF007F76BFE587693171FA6BDC6307A25DCA91FCF302BEA29143"
+      "bytes": 166,
+      "sha256": "027099D57779E7EDB74A3A04F4329116C046E5E8C018754A08EC36670B80F198"
     },
     {
       "file": "latest-four-failed-player2.json",
@@ -90,5 +90,6 @@
       "bytes": 67401,
       "sha256": "90EEE778F0F69F08D272F608ACD75678AFFCC550CB6A21C6B65220DD41EAD100"
     }
-  ]
+  ],
+  "textEncoding": "UTF-8, LF; line endings normalized, report values unchanged"
 }
