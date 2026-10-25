@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/p46-product-day.yml'
       - 'tools/Test-P46-ProductDay.ps1'
+      - 'tools/P46-ProcessEvidence.ps1'
+      - 'tools/tests/Test-P46-ProcessEvidence.Tests.ps1'
       - 'Assets/Tests/P1/Runtime/ProductDaySmokeDriver.cs'
       - 'Assets/DeepDive/**'
   push:
@@ -40,6 +42,9 @@ jobs:
         with:
           lfs: true
           persist-credentials: false
+      - name: Process report failure and preservation regression
+        shell: pwsh
+        run: ./tools/tests/Test-P46-ProcessEvidence.Tests.ps1
       - name: Build Linux integrated Unity player
         uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
         with:
