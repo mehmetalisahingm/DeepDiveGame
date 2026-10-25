@@ -6,7 +6,7 @@
 
 Üç kişinin bildirimi: birlikte oynanabiliyor; sandal görevi 2/3 kaldı, dünya küçük, grafikler zayıf ve yalnız tek balık görüldü. Ortak oynanabilirlik bildirimi saklanır; nihai görsel/içerik kabulüne çevrilmez. Otomatik testler, yürüyüş yolu ve kataloglar tek başına bitmiş oyun değildir.
 
-P4.6 teknik ve fiziksel temel kabulü açık kalır. Yeni ürün teslimleri P4.7–P4.12 olarak P5'ten önce eklenmiştir. P4.6'nın mevcut teknik açıkları kapatılmadan sonraki aşamanın oyun kodu başlamaz. Kaynak araştırması, tasarım ve planlama paralel yapılabilir. Her aşama kendi küçük gerçek oyun gösterimiyle kabul edilir.
+25 Ekim 2026 sıra revizyonu: kullanıcı kararıyla P4.6/P4.7 eski ara-kabulleri ertelenerek idari kapatılır. P4.7–P4.11 üretimi gerçek kod/varlık girdileriyle küçük paketler hâlinde ilerler; eski insan/ayrı PC kabulü yeni paketi bekletmez. #171/#172 kit/yerleşimi ve #187/#188/#189 tamiri açık üretimdir. Ertelenmiş testler son gelişmiş Windows build'inde P4.12/#164 [erteleme defterinden](DEFERRED_ACCEPTANCE.md) tamamlanır. P5/P6 nihai P4 kapanışını bekler. Bu karar ürünün/grafiklerin tamamlandığı anlamına gelmez.
 
 19 Ekim geri bildirimi bu başlıkların tek başına yeterli ayrıntıda olmadığını gösterdi. [WORLD_QUALITY_DELIVERIES](WORLD_QUALITY_DELIVERIES.md) Q01–Q14, hareketli su/iniş/mercan/balık/değer/boss ve şehir mesafesi/mimari/dükkân/ev için bağımsız somut teslim ve kabul kaynağıdır. Teknik test sonucu bu ürün açıklarını kapatmaz; yeni alt paketler uygulanmış veya GitHub issue'su açılmış sayılmaz.
 
@@ -37,7 +37,7 @@ Q01 ayrıca hareketli deniz, mercan/kaya örneği ve bir doğru animasyonlu bal�
 - İçerik taslağı: bir meydan, ana yol ve iki kısa yan bağlantı; dört hizmet cephesi; 6–10 tekrar kullanılabilir arka plan bina cephesi; açık kıyı ve bir dönüm noktası. Ulaşılamayan dekor kapıları etkileşimli gibi işaretlenmez.
 - #153/#154 yerleşim ve sanat başlangıcı; #157 kamera/hareket bağlantısıdır. Ayrı dünyalar veya ikinci şehir üretilmez.
 
-**Kabul:** aynı kamera/kadrajla önce–sonra görüntüleri, gerçek yaya turu, gündüz/gece okunabilirlik ve kare süresi ölçümü; kullanıcı hedef kaliteyi değerlendirir. Görsel örnek kabul edilmeden bütün harita aynı varlıklarla doldurulmaz.
+**Kanıt:** aynı kamera/kadrajla önce–sonra görüntüleri, gerçek yaya turu, gündüz/gece okunabilirlik ve kare süresi ölçümü. Kit yayılırken örnekte ölçek/malzeme uyumu kontrol edilir; 25 Ekim kararıyla ayrı ara-faz kullanıcı kabulü üretimi bekletmez. Son ortak kalite değerlendirmesi P4.12/#164'e taşınmıştır.
 
 ## P4.8 — Elle ve aşamalı sandal tamiri
 
@@ -128,5 +128,5 @@ Mert'in üretimi bütün aşamaların tedarik listesiyle küçük parçalara bö
 
 Sahne değişimi sırası: Utku geometri/anchor → Mehmet hareket/etkileşim → Mert sunum/servis → ortak build. Prefab sanat değişimlerinde Mert varlık/.meta seti → ilgili alan sahibi binding → co-op doğrulama. Ortak dosyayı iki kişi aynı anda düzenlemez; görevde sıra belirtilir.
 
-Her aşamanın bağımsız hazırlığı paraleldir; uygulama öncekinden kabul alır. Takvim tarihi ve ekip tamamı uydurulmaz. P5 #147–#150 ancak genişletilmiş P4 kabulü ve main/build kapısından sonra açılır; P6 teslim kapsamı korunur.
+Her aşamanın gerçek kod/varlık bağımlılığı korunur; 25 Ekim kararıyla eski ayrı ara-kabul bekleyişi üretimi durdurmaz. Son ortak değerlendirme P4.12'ye taşınmıştır. Takvim tarihi ve ekip tamamı uydurulmaz. P5 #147–#150 ancak nihai P4 kabulü ve main/build kapanışından sonra açılır; P6 teslim kapsamı korunur.
 

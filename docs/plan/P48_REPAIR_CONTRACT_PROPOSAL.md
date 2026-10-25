@@ -1,5 +1,7 @@
 # #186 — Fiziksel sandal tamiri sözleşmesi ve karar kaydı
 
+25 Ekim 2026 sıra kararı: aşağıdaki tarihli “yalnız #187 istisnası / #141/#159 beklenir” hükümleri [erteleme defteriyle](DEFERRED_ACCEPTANCE.md) güncellendi. Eski ayrı ara-kabuller P4.12/#164'e taşındı; mevcut P4.7–P4.11 üretimi gerçek girdilerle ilerler. R01/R02/R11, stable ID/v9, D06 ve tek katkı/save kuralları korunur; #189 sanat üretimi ve #207 kusuru açık kalır.
+
 ## Güncel karar — 21 Ekim entegrasyonu
 
 18 Ekim önerisinin R01/R02/R11 alan onayları artık kayıtlıdır: [Mert ekonomi/kayıt/sanat](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6250071136), [Utku world/erişim](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6264145166) ve [Mehmet 19 Ekim tasarım kararı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/186#issuecomment-6264232860). Bunlar ilgili alan kararlarıdır; nihai model/ses, ayrı PC veya oyuncu kabulü değildir. Aşağıdaki 18 Ekim öneri dili tarihsel hazırlık kaydı olarak okunur.

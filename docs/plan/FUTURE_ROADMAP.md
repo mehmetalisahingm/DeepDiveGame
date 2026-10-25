@@ -1,5 +1,7 @@
 # DeepDive ileri ürün yol haritası
 
+25 Ekim 2026 başlangıç sırası güncellemesi: eski P4.6/P4.7 ayrı kabulleri [P4.12/#164'e ertelendi](DEFERRED_ACCEPTANCE.md); bunlar yeniden ayrı geçiş kapısı olmaz. P5/P6, P4.7–P4.11 üretimi ve ertelenmiş testleri kapsayan nihai P4.12/main/build kapanışını bekler. P7–P10 yine yalnız adaydır.
+
 13 Ekim 2026 — ileriye dönük ayrıntılı seçenekler. Bu belge P4/P5/P6'nın sınırlarını değiştiren uygulama izni değildir. [Deneyim tasarımı](EXPERIENCE_DESIGN.md) mevcut oyunun ayrıntısı, [üretim planı](PRODUCTION_BLUEPRINT.md) öncelikli iş sırasıdır. Aşağıdaki P7–P10 adları aday plan aşamalarıdır; aktif faz veya yayın takvimi değildir.
 
 ## 1. Ufuklar ve başlangıç şartları

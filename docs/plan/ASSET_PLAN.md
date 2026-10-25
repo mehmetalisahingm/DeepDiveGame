@@ -1,5 +1,7 @@
 # Görsel, animasyon ve ses teslim planı
 
+25 Ekim 2026 kullanıcı kararı: P4.6/P4.7 eski ara-kabul bekleyişleri [P4.12/#164'e ertelendi](DEFERRED_ACCEPTANCE.md). Kit/yerleşim #171/#172 ve tamir sanat/ses #189 açık üretimdir; mevcut P4.7–P4.11 sanat kapsamı küçük paketlerle uygulanabilir. Örnekten malzeme/ölçek uyumu kontrol edilir; son kullanıcı/ortak görsel kabulü gelişmiş sürümde yapılır. Üretilmemiş varlık tamam sayılmaz; kaynak/lisans ve alan sahipliği kuralları korunur.
+
 **Plan 3.0 — 15 Eylül 2026.** İnsan/kıyı/ekipman planına ev/yatak/PC, keşif haritası, üç tekne, boss, gün-gece/hava ve kasaba gelişimi eklendi. Durum: **planlandı, varlıklar bu revizyonla üretilmedi/eklenmedi**. Mert sanat/ses üretimi ve tutarlılık sahibidir; Mehmet oyuncu/ekipman/tekne/medyaya, Utku çevre/canlı/bossa, Mert ev/kasaba/UI'a bağlar. [Fazlar](PHASES.md), [oyun akışı](GAMEPLAY_LOOP.md) ve [dünya sistemleri](WORLD_SYSTEMS.md) ile kullanılır.
 
 ## 13 Ekim 2026 üretim sırası

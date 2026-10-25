@@ -1,6 +1,6 @@
 # Dünya, deniz ve ilerleme için ayrı ürün teslimleri
 
-19 Ekim 2026 — kullanıcının oynama geri bildirimiyle plan ayrıntısı. Bu belge uygulama veya kabul kanıtı değildir. P4.6/#141 ve P4.7/#159 açık kalır; daha önce verilen dar #187 uygulama izni genişletilmez. P4.9–P4.12 üst başlıkları ve mevcut issue kimlikleri korunur; aşağıdaki işler onların ayrı kabul edilen alt teslimleridir. P5'e sanat/içerik borcu taşınmaz.
+19 Ekim kalite ayrıntısı; çalışma sırası 25 Ekim 2026'da kullanıcı kararıyla güncellendi. Eski P4.6/#141 ve P4.7/#159 ara-kabulleri ertelenerek idari kapatılır; yalnız #187 istisnası yerine P4.7–P4.11 mevcut üretimi gerçek girdilerle ilerler. Q01–Q14 ürün hedefleri korunur; son ortak/görsel/ayrı PC testler [P4.12/#164 defterindedir](DEFERRED_ACCEPTANCE.md). Bu belge uygulama/PASS kanıtı değildir; P5'e sanat/içerik borcu taşınmaz.
 
 ## Sorun ve bugünkü kanıt sınırı
 
@@ -83,7 +83,7 @@ Kabul: yeni kampanyada ipuçlarından yardım almadan bulma; solo ve co-op araş
 
 ## Bağımlılık, üretim ve süre
 
-P4.6 teknik temel ve P4.7 hedef kalite kapıları korunur; #187 için mevcut dar istisna ayrıca korunur. Q01 kara/deniz örneğinin tasarımı, kaynak envanteri ve Q03 ölçek çizimi mevcut kapılar beklerken hazırlanabilir; bu belge sonraki faz kodunu açmaz. P4.9, P4.10, P4.11 üst faz uygulama sırası değiştirilmez. Su örneği P4.7'de gösterilir; bütün su/habitat uygulaması P4.11 içinde paket paket teslim edilir. Böylece suyun hedef görünümü son kabul gününe kadar belirsiz bırakılmaz.
+25 Ekim kullanıcı kararıyla eski P4.6/P4.7 ayrı ara-kabulleri sona taşındı. Q01 örneği/kit, Q03 ölçek ve P4.8–P4.11 üretimi gerçek varlık/kod girdileriyle ilerler; eski kabulü beklemez. Mevcut kapsam ve üretim bağımlılıkları korunur. Su örneği kit çalışmasında erken gösterilir; su/habitat P4.11'de paket paket teslim edilir. Böylece hedef görünüm erken somutlaşır, son ortak görsel kabul P4.12/#164'te yapılır.
 
 P4.10 iç sırası Q03 ölçek → Q04 mimari ile Q05/Q06 mekân setleri → gerçek günlük tur. P4.11 iç bağımlılıkları Q07 su + Q08 geçiş → Q09 habitat → Q10 tür + Q11 değer → Q12 boss; Q13 tekne sunumu aynı route/world verisini tüketir. Her alan diğer kişinin ortak sahnesini paralel düzenlemez; parça/prefab devri ve tek bir sahne entegrasyonu planlanır.
 

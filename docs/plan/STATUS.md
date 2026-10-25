@@ -1,8 +1,10 @@
 # Güncel durum ve görev takibi
 
-Plan **3.1 — 13 Ekim 2026**. Temel plan 3.0 korunur; oyuncu deneyimi ve sanat teslimleri genişletildi.
+Plan **3.2 — 25 Ekim 2026**. Temel içerik bütçesi korunur; eski ara-kabuller son gelişmiş sürüme ertelendi.
 
-Aktif faz: **P4**. P0–P3 kapalıdır. P4.5 PR #135 ile birleşti; P4.6 kabulü açık. Yeni P4.7–P4.12 planı [oyuncu deneyimi genişletmesinde](PLAYER_EXPERIENCE_EXPANSION.md) kayıtlıdır. P5/P6 kilitlidir; yeni plan uygulama veya tamam kaydı değildir.
+Aktif faz: **P4 üretim**; öncelik **P4.8 tamir/görsel kit**, P4.7'den taşınan kit ve yerleşim işleriyle birlikte. P0–P3 kapalı; P4.5 birleşti. Kullanıcının 25 Ekim açık talimatıyla P4.6/P4.7 eski ara-kabul bekleyişleri **ertelenerek idari kapalıdır**. #138/#140/#141/#156/#157/#159/#173 son kontrolleri [P4.12/#164 erteleme defterine](DEFERRED_ACCEPTANCE.md) taşınır; PASS veya bitmiş grafik kaydı değildir. P4.7–P4.11 mevcut üretimi eski ortak kabulü beklemez; gerçek kod/varlık girdileriyle küçük paketler ilerler. P5/P6, P4.12 ve P4 main/build kapanışını bekler.
+
+Bilinen özel tamir tekrarı hatası ve eksik raporlar **#207** açık kusurudur. #206 devam PR'ı ayrı izlenir; bu plan kararı kusuru düzeltmiş veya PR'ı birleştirmiş sayılmaz. #171/#172 ve #187/#188/#189 dâhil üretilmemiş sanat/yerleşim/etkileşim işleri açık kalır. Aşağıdaki tarihli eski “kabul açık/sonraki aşama kilitli” notları tarihsel kanıttır; güncel çalışma sırası bu paragraf ve erteleme defteridir.
 
 23 Ekim kullanıcı talebi: Mehmet'in #187 kalan gerçek oturum testleri ilerletilir; mevcut kamera arayüzü kayıt kabulüyle başlayan sol REC/kırmızı ışık/süre, STBY ve açık vizör köşeleriyle geliştirilir. Bu dar kamera sunumu isteği şimdi uygulanabilir; #141/#159 veya P4.9–P4.12 kabulünü açmaz. Kayıt göstergesi client tuşuna değil host sonucuna bağlıdır; klip/evaluasyon/ödeme otoritesi korunur. Dört süreçte aynı-parça yarışı, gerçek guest kopma/yeniden katılma ve hızlandırılmış host saatiyle gerçek gün kapanışı ayrı development senaryosunda doğrulanır; test sonucu henüz bu notla verilmez. Mevcut `f0762f2` entegrasyonunun Unity/Windows, filo/boss, yaşayan dünya, ürün günü, 1/2/4 dünya ve üç gün CI koşuları geçti; #186 sözleşme hazırlığı kapalıdır, nihai ekip/görsel kabul açık kalır.
 

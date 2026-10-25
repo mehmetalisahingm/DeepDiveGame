@@ -1,5 +1,7 @@
 # Yaşayan dünya: ev, gün, kanal, keşif ve boss
 
+25 Ekim 2026 kullanıcı kararı: eski P4.6/P4.7 ortak kabul bekleyişleri ertelenerek idari kapalıdır. P4.7–P4.11 mevcut dünya/eylem/görsel üretimi gerçek kod/varlık girdileriyle ilerler. Ayrı PC/çok gün/son görsel testler P4.12/#164 [erteleme defterine](DEFERRED_ACCEPTANCE.md) taşınır; eski “yalnız #187 uygulama izni” sıra sınırının yerini bu karar alır. D06 host kampanyası, tek aktif tekne/sabit rota, kayıt ve tek ödeme kuralları korunur. Üretilmemiş sanat yapılmış sayılmaz; #207 açık kusurdur.
+
 **Plan 3.0 — 15 Eylül 2026.** Kullanıcının yeni kapsamı ve onu tamamlayan sınırlı tasarım ekleridir. Tamamlanmış sistem veya teknik başarı iddiası değildir. Ana kapsam/sahiplik/kabul [PHASES](PHASES.md), başlangıç yolculuğu [GAMEPLAY_LOOP](GAMEPLAY_LOOP.md), bağlantılar [CONTRACTS](CONTRACTS.md), sanat [ASSET_PLAN](ASSET_PLAN.md) içindedir.
 
 ## 13 Ekim 2026 oyuncu deneyimi revizyonu
