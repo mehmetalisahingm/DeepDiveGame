@@ -1,0 +1,3 @@
+# Portable evidence hashes.
+*.json -text
+*.txt -text

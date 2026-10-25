@@ -1,0 +1,35 @@
+{
+  "passed": false,
+  "requestedPlayers": 4,
+  "failure": "Player 2 failed: Unexpected travel discontinuity: 8.170139; realGap=0.000000; fixedGap=0.000000; from=(-1.50, 8.40, -48.25); to=(-1.25, 7.00, -40.20)",
+  "processes": [
+    {
+      "slot": 0,
+      "report": "player0.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 1,
+      "report": "player1.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 2,
+      "report": "player2.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 3,
+      "report": "player3.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    }
+  ]
+}

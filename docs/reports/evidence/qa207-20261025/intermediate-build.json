@@ -1,0 +1,18 @@
+{
+  "source": "c5c562a4890370a9fb565a08bb00d033888c5a34",
+  "editor": "6000.3.23f1",
+  "dlls": [
+    {
+      "file": "DeepDive.Network.dll",
+      "sha256": "B8823477BD146FF2DE01722B714EE8FE5554F2E9B6FD7005EBB6121A79F8B647"
+    },
+    {
+      "file": "DeepDive.Composition.dll",
+      "sha256": "5086A7CDF24D58A17D64A75670EC9B45FD0CDC1906E0C1C55C648E51D76F30A9"
+    },
+    {
+      "file": "DeepDive.P1.Lab.dll",
+      "sha256": "0B67AE87FA1A4F58FADAC6C823A5FA079CE30B939F376F98A0E2EC218BE6887F"
+    }
+  ]
+}

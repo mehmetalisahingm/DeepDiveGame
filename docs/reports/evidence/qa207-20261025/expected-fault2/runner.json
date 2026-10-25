@@ -1,0 +1,21 @@
+{
+  "passed": false,
+  "requestedPlayers": 2,
+  "failure": "Player 1 failed: Injected QA peer failure",
+  "processes": [
+    {
+      "slot": 0,
+      "report": "player0.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 1,
+      "report": "player1.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    }
+  ]
+}
