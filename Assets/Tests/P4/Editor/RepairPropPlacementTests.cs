@@ -26,8 +26,8 @@ namespace DeepDive.P4.Tests
                 var right=upperRight.position+new Vector3(-.06f,-.18f,.35f);
                 var rootPosition=instance.transform.position;var rootRotation=instance.transform.rotation;
                 pose.PresentRepair(left,right,Quaternion.identity);
-                Assert.That(Vector3.Distance(RepairPropPlacement.Marker(instance.transform,"Hand.L").position,left),Is.LessThan(.015f),"Left grip");
-                Assert.That(Vector3.Distance(RepairPropPlacement.Marker(instance.transform,"Hand.R").position,right),Is.LessThan(.015f),"Right grip");
+                Assert.That(Vector3.Distance(pose.RepairLeftPalmPosition,left),Is.LessThan(.015f),"Left palm grip");
+                Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,right),Is.LessThan(.015f),"Right palm grip");
                 Assert.That(instance.transform.position,Is.EqualTo(rootPosition));
                 Assert.That(instance.transform.rotation,Is.EqualTo(rootRotation));
             }

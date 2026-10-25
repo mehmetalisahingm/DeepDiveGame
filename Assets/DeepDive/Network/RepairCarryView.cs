@@ -118,9 +118,11 @@ namespace DeepDive.Network
             if(active||finishing)
             {
                 var left=board.activeSelf && boardLeft!=null?boardLeft.position:
-                    Vector3.Lerp(transform.TransformPoint(new Vector3(-.22f,1.18f,.3f)),gripPosition-transform.right*.16f,.7f);
+                    transform.TransformPoint(new Vector3(-.22f,1.05f,.25f));
                 var right=board.activeSelf && boardRight!=null?boardRight.position:gripPosition;
-                GetComponent<PlayerPresentationView>()?.ApplyRepairGrips(left,right,board.activeSelf?board.transform.rotation:transform.rotation,finishing);
+                var leftRotation=board.activeSelf && boardLeft!=null?boardLeft.rotation:transform.rotation*Quaternion.Euler(55,-25,-15);
+                var rightRotation=board.activeSelf && boardRight!=null?boardRight.rotation:hammerGrip!=null?hammerGrip.rotation:transform.rotation;
+                GetComponent<PlayerPresentationView>()?.ApplyRepairGrips(left,right,leftRotation,rightRotation,finishing,board.activeSelf);
             }
         }
         private void OnGUI()

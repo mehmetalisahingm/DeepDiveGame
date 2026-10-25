@@ -125,10 +125,9 @@ namespace DeepDive.P1.Lab
                 if(worker.RepairPlaced.Value)
                 {
                     var rig=worker.GetComponentsInChildren<CoastalDiverPose>(true).FirstOrDefault(p=>p.FirstPerson==worker.IsOwner);
-                    var hand=rig!=null?RepairPropPlacement.Marker(rig.transform,"Hand.R"):null;
-                    if(hand!=null)
+                    if(rig!=null)
                     {
-                        var error=Vector3.Distance(hand.position,presentation.RightGripPosition);
+                        var error=Vector3.Distance(rig.RepairRightPalmPosition,presentation.RightGripPosition);
                         report.minRepairGripError=Mathf.Min(report.minRepairGripError,error);
                         if(error<.08f)report.repairGripVerified=true;
                     }

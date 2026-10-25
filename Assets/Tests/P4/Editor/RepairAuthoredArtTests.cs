@@ -8,6 +8,24 @@ namespace DeepDive.P4.Tests
     public sealed class RepairAuthoredArtTests
     {
         private const string Root="Assets/DeepDive/Art/RepairTools/";
+        [Test]
+        public void ReleasingRepairRestoresThumbInsteadOfLeavingAClenchedHand()
+        {
+            var instance=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/DeepDive/Player/Character/CoastalArms.prefab"));
+            try
+            {
+                var pose=instance.GetComponent<CoastalDiverPose>();
+                var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+                typeof(CoastalDiverPose).GetMethod("Awake",flags).Invoke(pose,null);
+                var thumb=RepairPropPlacement.Marker(instance.transform,"Thumb2.R");
+                Assert.That(thumb,Is.Not.Null);var bind=thumb.localRotation;
+                pose.PresentRepair(new Vector3(-.2f,1.2f,.35f),new Vector3(.2f,1.2f,.35f),Quaternion.identity);
+                Assert.That(Quaternion.Angle(bind,thumb.localRotation),Is.GreaterThan(1));
+                typeof(CoastalDiverPose).GetMethod("LateUpdate",flags).Invoke(pose,null);
+                Assert.That(Quaternion.Angle(bind,thumb.localRotation),Is.LessThan(.01f));
+            }
+            finally{Object.DestroyImmediate(instance);}
+        }
         [TestCase("OakRepairPlank",.7f,.9f)]
         [TestCase("CarpentersAdze",.5f,.8f)]
         [TestCase("ForgedBoatNail",.05f,.1f)]

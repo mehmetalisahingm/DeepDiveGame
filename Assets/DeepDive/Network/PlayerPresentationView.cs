@@ -38,7 +38,7 @@ namespace DeepDive.Network
 
         // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
         // These targets never move the player root or submit gameplay actions.
-        public void ApplyRepairGrips(Vector3 left, Vector3 right, Quaternion rotation, bool finishStroke=false)
+        public void ApplyRepairGrips(Vector3 left,Vector3 right,Quaternion leftRotation,Quaternion rightRotation,bool finishStroke=false,bool gripLeft=true)
         {
             EnsureInitialized();
             // World-space contact must use the body's shoulder frame. Keeping the
@@ -51,9 +51,9 @@ namespace DeepDive.Network
             if(finishStroke && networkPlayer!=null && networkPlayer.IsOwner)
                 SetRendererGroup(firstPersonRenderers,true,false);
             SetActive(firstPersonHarpoon,false);SetActive(thirdPersonHarpoon,false);HideAllCameras();
-            bodyPose?.PresentRepair(left, right, rotation);
+            bodyPose?.PresentRepair(left,right,leftRotation,rightRotation,gripLeft);
             if (networkPlayer != null && networkPlayer.IsOwner)
-                armsPose?.PresentRepair(left, right, rotation);
+                armsPose?.PresentRepair(left,right,leftRotation,rightRotation,gripLeft);
         }
 
         private static readonly int LocomotionParam = Animator.StringToHash("LocomotionMode");

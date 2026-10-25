@@ -8,7 +8,7 @@ The source is `RepairToolArtBuilder.cs`; regenerate from
 - **OakRepairPlank:** chipped/chamfered oak, physical grain/knot detail and two
   hand grip markers. Approximately 78 cm long. No rigidbody or collider.
 - **CarpentersAdze:** shaped oak handle, seven grip bindings, bevelled forged
-  steel head and worn steel edges. `GripPoint` is the wrist anchor;
+  steel head and worn steel edges. `GripPoint` is the palm contact surface;
   `ToolContact` is the hammer poll's nail contact point.
 - **ForgedBoatNail:** shaped steel head, shank and tapered point; `ContactPoint`
   is the head surface. It does not own interaction or physics.

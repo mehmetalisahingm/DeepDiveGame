@@ -28,8 +28,8 @@ namespace DeepDive.Editor
 
             var plank=new GameObject("OakRepairPlank");
             Plank(plank.transform,"CarrySlat",.78f,.22f,.05f);
-            Marker(plank.transform,"Grip_Left",new Vector3(-.27f,0,-.03f));
-            Marker(plank.transform,"Grip_Right",new Vector3(.27f,0,-.03f));
+            Marker(plank.transform,"Grip_Left",new Vector3(-.27f,-.07f,-.03f)).localRotation=Quaternion.Euler(0,-90,0);
+            Marker(plank.transform,"Grip_Right",new Vector3(.27f,-.07f,-.03f)).localRotation=Quaternion.Euler(0,90,0);
             Marker(plank.transform,"GripPoint",Vector3.zero);
             SavePrefab(plank,"OakRepairPlank");
 
@@ -60,7 +60,7 @@ namespace DeepDive.Editor
                 new Vector2(.16f,.365f),new Vector2(.105f,.435f),new Vector2(-.055f,.445f)};
             var head=Part(hatchet.transform,"BevelledForgedHead",SaveMesh(Chamfer(profile,.095f,.009f),"AdzeHead"),new[]{steel,edge,steel});
             head.localRotation=Quaternion.Euler(0,90,0);
-            Marker(hatchet.transform,"GripPoint",Vector3.zero);
+            Marker(hatchet.transform,"GripPoint",new Vector3(.024f,0,0));
             Marker(hatchet.transform,"ToolContact",new Vector3(0,.47f,.14f));
             SavePrefab(hatchet,"CarpentersAdze");
 
@@ -116,8 +116,8 @@ namespace DeepDive.Editor
             part.AddComponent<MeshFilter>().sharedMesh=mesh;part.AddComponent<MeshRenderer>().sharedMaterials=materials;
             return part.transform;
         }
-        private static void Marker(Transform parent,string name,Vector3 position)
-        {var marker=new GameObject(name).transform;marker.SetParent(parent,false);marker.localPosition=position;}
+        private static Transform Marker(Transform parent,string name,Vector3 position)
+        {var marker=new GameObject(name).transform;marker.SetParent(parent,false);marker.localPosition=position;return marker;}
         private static void SavePrefab(GameObject value,string name)
         {PrefabUtility.SaveAsPrefabAsset(value,Root+"/"+name+".prefab");Object.DestroyImmediate(value);}
 
