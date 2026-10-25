@@ -2,7 +2,7 @@
 
 Plan sürümü: **3.0 — 15 Eylül 2026**. Kullanıcının yeni isteği: yaşayan kıyı dünyası; ilk sandal görevi ve alternatif kıyı avı; ayrı satın alınan kamera; canlı tekne konumlu keşif haritası; ortak ev, yataklar, gün/saat ve gün özeti; gerçekten izlenebilir klipler ve ev PC'sinden oyun içi kanal; daha büyük tekneler; ansiklopedi, boss, sponsorlar, kasaba gelişimi ve günlük çeşitlilik.
 
-**13 Ekim 2026 revizyonu 3.1:** P0–P3 kapalı, P4 açık; P4.6 kabulü ve kullanıcı oynama geri bildiriminden çıkan ürün eksikleri açık. P5/P6 kilitli. P4.7–P4.12 yeni plan teslimleridir; bu düzenleme oyun uygulamasını veya faz kapanışını ilan etmez.
+**25 Ekim 2026 revizyonu 3.2:** P0–P3 kapalı, P4 üretim açıktır. Kullanıcının kararıyla P4.6/P4.7 eski ara-kabul bekleyişleri ertelenerek idari kapatılır; PASS değildir. P4.7–P4.11 üretimi eski ayrı PC/çok gün/nihai görsel kabulünü beklemeden gerçek kod/varlık girdileriyle ilerler. Öncelik P4.8 ve taşınan görsel kit/yerleşimdir. Son gelişmiş sürümde P4.12/#164 [ertelenen testleri](DEFERRED_ACCEPTANCE.md) tamamlar. P5/P6 nihai P4 kapanışını bekler.
 
 Bu belge görev ve kapsamın kaynağıdır. Güncel durum [STATUS.md](STATUS.md), bağlantılar [CONTRACTS.md](CONTRACTS.md), birleştirme düzeni [WORKFLOW.md](WORKFLOW.md) içindedir.
 
@@ -230,7 +230,7 @@ Derin tasarım: [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md); uygulanabilir iş par
 | P4.11 | Canlı deniz ve görünür keşif/yolculuk | Kamera/zıpkın/tekne sunumu | Beş tür, habitat, boss ve sualtı | Uyumlu varlık/ışık/efekt/ses |
 | P4.12 | Tek buildde nihai dünya/deneyim kabulü | Oyuncu/ağ/medya | Dünya/rota/boss | Kayıt/ekonomi/sanat; ortak gerçek kabul |
 
-P4.6 teknik temel kabulü, P4.7 uygulamasından önce tamamlanır; hazırlık paralel yürüyebilir. Sonraki uygulama her küçük teslimin kabulüne bağlıdır. Grafik gelişiminin ilk görünür kanıtı P4.7'dir; sanat P5'e ertelenmez. Genişletilmiş P4'ün nihai kapısı P4.12'dir.
+25 Ekim kararıyla P4.6/P4.7 ayrı ara-kabulleri üretimin başlangıç kapısı olmaktan çıkarıldı. Kit/yerleşim #171/#172'de üretilir; tamir → ortak eylemler → kasaba/ev → canlı deniz gerçek girdi bağımlılıklarıyla küçük paketlerde ilerler. Ortak/ayrı PC/son görsel kabul P4.12'de tek gelişmiş build'e bağlanır. Yeni değişikliklerin anlamlı teknik kontrolleri sürer; bilinen #207 açık kusurdur. Sanat/içerik üretimi ertelenmedi, yalnız eski ayrı kabul turları sona taşındı.
 
 18 Ekim açık kullanıcı istisnası: 15 avlanabilir kıyı balığı ve sağlanan Tripo motorbot görseli mevcut kabul devam ederken uygulanır. Bu talep yalnız bu iki içerik parçasının sırasını öne alır; diğer faz/insan/ayrı bilgisayar kabul koşullarını kaldırmaz. Tür sayısı bu işte birden beşe yükseltilmez. Kaynak ve doğrulama [P4-FISH15-TRIPO-MOTORBOAT](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) içindedir.
 
@@ -238,7 +238,7 @@ P4.6 teknik temel kabulü, P4.7 uygulamasından önce tamamlanır; hazırlık pa
 
 18 Ekim ek sıra istisnası: kullanıcının üç FBX paketinden istediği bina/ev/sandal/balık görselleri mevcut P4 kabulü sürerken entegre edilir. Bu yalnız sağlanan kitin küçük içerik teslimidir; yeni faz kapısı veya tamam kaydı değildir. Tür sayısı bu teslimde üçe çıkar; planın beş tür/boss/nihai sanat bütçesinin tamamlandığı anlamına gelmez.
 
-Yeni özellik ve içerik yok. Başlama kapısı: P4.6 temel kabulü ve yeni P4.7–P4.12 teslimlerinin kabulü; P4'ün main/build kapanışı. #147–#150 hazırlık görevleri bu kapıya bağlıdır.
+Yeni özellik ve içerik yok. Başlama kapısı: P4.7–P4.11 üretimi, ertelenmiş testleri de içeren P4.12 nihai kabulü ve P4 main/build kapanışı. Eski #141/#159 yeniden açılıp ayrı ara-faz kabulü aranmaz. #147–#150 hazırlık görevleri nihai kapıya bağlıdır.
 
 | Görev | Sorumlu | Yapacağı iş |
 |---|---|---|

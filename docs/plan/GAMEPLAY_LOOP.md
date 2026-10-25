@@ -1,5 +1,7 @@
 # Oyun akışı ve görünür gelişim
 
+25 Ekim 2026 sıra güncellemesi: kullanıcı eski P4 ara-kabullerini [son gelişmiş build/P4.12'ye erteledi](DEFERRED_ACCEPTANCE.md). P4.7–P4.11 mevcut üretimi gerçek kod/varlık girdileriyle ilerler; aşağıdaki önceki tarihli ayrı ara-kabul koşulları bu üretimi bekletmez. Ürün davranışı, fiziksel yol ve kayıt/ödeme sınırları korunur; yeni PASS/oyuncu kabulü üretilmez.
+
 Plan 3.0 — 15 Eylül 2026. İnsan karakter, fiziksel kıyı dünyası, ev/gün/PC, balıkçılık/kanal ve ileri keşif döngüsüdür. **Planlanan davranıştır; uygulanmış özellik listesi değildir.** Ana plan [PHASES](PHASES.md), güncel kanıt [STATUS](STATUS.md), bağlantılar [CONTRACTS](CONTRACTS.md); yeni sistem ayrıntıları [WORLD_SYSTEMS](WORLD_SYSTEMS.md) içindedir.
 
 ## 13 Ekim 2026 yeni deneyim teslimleri

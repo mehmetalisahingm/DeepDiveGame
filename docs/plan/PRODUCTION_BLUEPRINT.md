@@ -1,5 +1,7 @@
 # DeepDive üretim, bağımlılık ve kabul planı
 
+25 Ekim 2026 güncel sıra: [eski ara-kabuller sona ertelendi](DEFERRED_ACCEPTANCE.md). P4.6/P4.7 idari kabul bekleyişi kapalı; P4.7–P4.11 üretimi gerçek kod/varlık girdileriyle ilerler. Aktif öncelik tamir/görsel kit ve taşınan örnek yerleşimdir. Aşağıdaki önceki tarihli “ara-kabul olmadan sonraki kod başlamaz” hükümlerinin önünde bu kullanıcı kararı geçerlidir. Son ortak kabul P4.12/#164, P5/P6 ise nihai P4 kapanışıdır.
+
 13 Ekim 2026 — [oyuncu deneyimi tasarımının](EXPERIENCE_DESIGN.md) uygulanabilir iş parçaları. Faz kapıları [PHASES](PHASES.md), açık durum [STATUS](STATUS.md) içindedir. Bu iş listesi atama/planlama kaydıdır; saat tahmini, ekip onayı veya uygulama başlangıcı değildir.
 
 19 Ekim ek iş kırılımı: [WORLD_QUALITY_DELIVERIES Q01–Q14](WORLD_QUALITY_DELIVERIES.md). Aşağıdaki 7–12 üst işleri korunur; özellikle 10-1, 11-2, 11-3 ve 11-5 artık tek PR veya tek kabul kutusu değildir. Su yüzeyi/iniş/habitat/balık/değer/boss ile şehir ölçeği/mimari/dükkân/ev kendi bağımlılığı, alan sahibi ve gerçek oyun kanıtıyla küçük paketlere ayrılır. Önce kara ve deniz kalite örneği; P4.10'da ölçek, sonra mekânlar; P4.11'de su/iniş, habitat, tür/değer, boss ve yolculuk. Sonraki faz kodunu başlatma kapıları korunur.
@@ -95,7 +97,7 @@ Beş türün görsel kaynaklarını bütün dünya otoriteleri hazır olmadan bi
 | 12-6 | Performans/dar düzeltme turu | Her alan | Aynı donanımda rapor; açık kusur sınıflaması |
 | 12-7 | P4 kapanış ve main/build | Utku koordinasyon | Gerçek üç kişinin sonuçları; birleşmiş build kontrolü |
 
-P4.6'daki teknik/ayrı bilgisayar/çok gün kontrolleri korunur. Yeni nihai sanat/deneyim karşılığı P4.12'de ayrıca kabul edilir; görev kapısını küçülterek daha önce yapılmayan işi yapılmış sayma.
+P4.6'daki ayrı bilgisayar/çok gün/ortak kontroller 25 Ekim kararıyla P4.12/#164'e taşınmıştır. Yeni kodun anlamlı teknik doğrulaması sürer. Son sanat/deneyim ve ertelenen liste aynı gelişmiş build'de kabul edilir; erteleme daha önce yapılmayan işi yapılmış saymaz.
 
 ## 3. Kritik yol ve paralel hazırlık
 
