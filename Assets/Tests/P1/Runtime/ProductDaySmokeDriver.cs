@@ -22,6 +22,9 @@ namespace DeepDive.P1.Lab
 {
     // Explicit development-player command only. All mutations below are owner input/RPCs;
     // no stock, money, camera, clip, clock, sleep or position fixture is installed.
+    // Capture after RepairCarryView (200) applies visual hand IK. An earlier camera
+    // request can observe the locomotion pose between the two cosmetic updates.
+    [DefaultExecutionOrder(500)]
     public sealed partial class ProductDaySmokeDriver : MonoBehaviour
     {
         private const string StateMessage = "test/p46/product-state";
@@ -34,6 +37,10 @@ namespace DeepDive.P1.Lab
             public bool observedCarry, observedPlaced, cancelRecovered;
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
+            public bool purchasedMaterial, purchaseDidNotRepair, saveFaultRefused, saveFaultRecovered;
+            public int repairVideoFrames;
+            public bool repairArtSeen, repairToolContactSeen, repairGripVerified;
+            public float minRepairGripError=999f;
             public int repairRejected;
             // #188 hunt-first: parts state when the first catch was sold (-1 = not observed).
             public bool huntFirst;
@@ -157,7 +164,20 @@ namespace DeepDive.P1.Lab
                         if (!report.reload && !report.initialClean) { Fail("Starting campaign is not fresh/zero"); return; }
                     }
                 }
-                if (report.reload) { ReloadTick(); return; }
+                if (report.reload)
+                {
+                    if (RepairOnly)
+                    {
+                        var economy=adapter.GetComponent<EconomyManager>();
+                        report.reloadClean=economy.BoatRepair.CompletedPartIds.Count==3 && economy.UnusedBoatParts.Count==0 &&
+                            economy.SharedBalance==baseline.balance && sync.DayNumber.Value==baseline.day &&
+                            economy.ExportSaveData("read-only","").SoldCaptureIds.Count==baseline.soldCount;
+                        if(!report.reloadClean){Fail("Fresh host did not restore the exact repaired campaign");return;}
+                        Snapshot();Finish();
+                    }
+                    else ReloadTick();
+                    return;
+                }
                 localDone = true;
             }
             Track(); Observe(); Broadcast(now);
@@ -191,6 +211,7 @@ namespace DeepDive.P1.Lab
             // Step 16 (repair-only) ends the same way: the host quits 3 s after reaching it, which can close a guest's
             // connection before the guest's own 3 s are up. Its repair evidence is already mirrored by then.
             if (!finished && (step == 15 || step == 16) && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+            CaptureRepairVideo();
         }
         private void Broadcast(float now)
         {
@@ -283,11 +304,11 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
-                    if (substep == 0)
+                    if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
                         if (!Follow()) return;
-                        substep = 1; route = null;
+                        substep = 1; route = null; purchaseHomeExited = true;
                     }
                     if ((!Host && !RepairOnly) || HuntFirst) { localDone = true; return; }
                     CollectParts(); break;
@@ -320,9 +341,10 @@ namespace DeepDive.P1.Lab
 
         private void CollectParts()
         {
+            if (RepairPurchase && !PurchasedRepairAcceptance()) return;
             if (RepairInterruptions && repairPhase < 5 && !RepairAcceptance()) return;
             var names = new[] { "BoatPart_Hull", "BoatPart_Engine", "BoatPart_FuelTank" };
-            if (RepairOnly && expected>1 && (!RepairInterruptions || repairPhase == 5))
+            if (RepairOnly && !RepairPurchase && expected>1 && (!RepairInterruptions || repairPhase == 5))
             {
                 var assignment=report.slot;
                 while(part<3 && part%Mathf.Min(3,expected)!=assignment)part++;
@@ -357,7 +379,9 @@ namespace DeepDive.P1.Lab
                 }
                 var physicalStand=site.StandPosition(part);physicalStand.y=ContinuousTownLayout.WalkSurfaceY;
                 var toStand=physicalStand-local.transform.position;toStand.y=0;
-                if(toStand.magnitude>.2f){MoveToward(physicalStand);aimAt=0;return;}
+                // Q/recovery can leave repairAtDock cached while the carrier is at
+                // the shared rack on the opposite end. Walk round the solid hull.
+                if(toStand.magnitude>.2f){MoveToward(Around(physicalStand));aimAt=0;return;}
                 Aim(site.SlotPosition(part));
                 if (!Settled()) return;
                 if(RepairOnly && !cancelSent && !local.RepairPlaced.Value)
@@ -367,6 +391,8 @@ namespace DeepDive.P1.Lab
                 else
                 {
                     if (local.RepairHits.Value==1 && Host && !File.Exists(output+".repair.png")) CaptureView(".repair.png");
+                    if (RepairPurchase && Host && part==0 && local.RepairHits.Value==2 && !report.saveFaultRefused)
+                    { RefuseFinalStrokeOnDisk(); return; }
                     Act(local.SubmitRepairHammerLocal);
                 }
                 return;
@@ -819,7 +845,7 @@ namespace DeepDive.P1.Lab
             var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a => a.Definition.ServiceId == id);
             var stand = anchor.WorldPosition + anchor.transform.forward * 1.6f;
             var delta = stand - local.transform.position; delta.y = 0f;
-            if (delta.magnitude > 0.2f) { MoveToward(CoastTarget(stand)); aimAt = 0; return false; }
+            if (delta.magnitude > 0.2f) { MoveToward(Around(CoastTarget(stand))); aimAt = 0; return false; }
             Aim(anchor.WorldPosition + Vector3.up);
             return Settled();
         }
@@ -895,6 +921,18 @@ namespace DeepDive.P1.Lab
             if (HuntFirst && Host) report.passed &= report.partsAtFirstSale == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
             if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
+            if (RepairPurchase && Host) report.passed &= report.purchasedMaterial && report.purchaseDidNotRepair && report.saveFaultRefused && report.saveFaultRecovered;
+            if (Arg("-p187-video")=="1" && !report.reload)
+            {
+                var visuals=report.repairArtSeen && report.repairToolContactSeen && report.repairGripVerified;
+                if(!visuals && report.errors.Count==0)
+                {
+                    report.failure=$"Repair visuals: art={report.repairArtSeen}, contact={report.repairToolContactSeen}, grip={report.repairGripVerified}, minGripError={report.minRepairGripError}";
+                    report.errors.Add(report.failure);
+                }
+                report.passed &= visuals;
+            }
+            if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
             Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);

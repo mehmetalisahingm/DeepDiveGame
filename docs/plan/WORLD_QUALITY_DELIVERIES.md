@@ -12,6 +12,34 @@ Hedef: kıyı kasabasının ayrı mahalleleri ile sahile gerçek yolculuk; suya 
 
 ## Ayrı kabul edilen iş paketleri
 
+### 25 Ekim — kullanıcıdan tek tek fikir beklemeyen tasarım takibi
+
+Bu kayıt mevcut kapsamın somut sunum ayrıntılarıdır; yeni faz açılışı veya oyun
+uygulaması değildir. Aşağıdaki ayrıntılar alan sahibinin teslimine bağlanır;
+kullanıcının her birini ayrıca tarif etmesi beklenmez. İlk görünür kalite
+hedefi Q01/#159'dur: ev kapısı–bir gerçek dükkân–kıyı–sandal ile ayrı kısa
+su/mercan/balık örneği. Model sayısı veya CI sonucu bu örneğin yerine geçmez.
+
+| Oyuncunun tarif etmesini beklemeyeceğimiz ayrıntı | Mevcut iş / sahip | Oyunda görülecek kanıt |
+| --- | --- | --- |
+| Ölçek, ortak malzeme paleti, zemine oturma/gölge, gündüz/gece okunurluğu | Q01, #171 Mert; #172 Utku; #173 Mehmet | Aynı kadrajda yürüyüş; kapı, insan, el ve su birlikte tutarlı |
+| Tahtaya gerçekten uzanan eller; kavrama, yuva/çivi teması, darbe ve bırakırken el geri dönüşü | #187 Mehmet + #189 Mert | Kendi ve arkadaş kamerasında aynı eylem; final kit ile temas ayrıca kabul edilir |
+| Başarılı her darbenin çivi/ahşap/ses karşılığı; son tahtada hasarlı bölümün kapanması | #189 Mert, #188 Utku, #187 Mehmet | Darbe sayacı kapalıyken de geçici iş ve tamamlanmış tahta anlaşılır |
+| Kamera/zıpkın geçişi, avı alma ve NPC'ye teslimde beden/nesne sürekliliği | Q02/#161; Mehmet, Mert rig/ses, Utku hedef | Ekipman havada belirmez; ret/iptalde teslim olmuş gibi davranmaz |
+| Şehrin ön/orta/arka planı; ev sokağı, meydan ve sahile açılan görüş; yön veren tabelalar | Q03/Q04, #153/#162; Utku + Mert | Işınlanmadan dolu yaya turu; uzatılmış boş yol şehir sayılmaz |
+| Dükkânın işini anlatan tartı/buzlu kasa, ekipman rafı, medya masası, tersane araçları; halat/ağ/kasa gibi sınırlı çevre seti | Q05/#162; Mert kaynak, Utku yerleşim, Mehmet erişim | Hizmet adı yazmasa da mekânın işi anlaşılır; giriş/tezgâh yolu açık kalır |
+| Evde dört kişiye yer, tanınır yatak alanları, ekipman/depo/PC ve kazanılmış gelişimin rafta/ışıkta görünmesi | Q06/#162; Mert, Mehmet kullanım | Gelişim yalnız sayaç değildir; yeni oturumda aynı görünüm ve engelsiz geçiş |
+| Kum/taş/ahşap ayak sesleri; kıyı dalgası; su çizgisinde ses ve görüntü değişimi, nefes/kabarcık | Q07/Q08, #163; Utku + Mert, Mehmet kamera | Kesintisiz kara→su→derinlik→yüzey kaydı ve dinleme |
+| Balıkta kuyruk/yüzgeç, dönüş/kaçış; mercan/kaya/batıkta farklı siluet ve derinlik kimliği | Q09/Q10/#163; Utku + Mert | Kayarak giden renk kopyaları yerine tanınır model/hareket; dekor balığı avlanabilir tür sayılmaz |
+| Derine gitmenin kazanç/risk karşılığı; bossu önceden hissettiren fiziksel iz, arena silueti ve saldırı işaretleri | Q11/Q12/#163; Utku, Mert ekonomi/ses, Mehmet erişim | Yeni kampanyadan gerçek av/satış ve ipuçlarıyla boss bulma; debug koordinatı gerekmez |
+| Kamera hedefini örtmeyen HUD; REC/ret/çanta dolu/yanlış yuva gibi gerçek durumu açıklayan geri bildirim | Q01/Q02/Q14; Mehmet + Mert | Farklı çözünürlükte okunur; host reddini başarı diye göstermez |
+
+Bu listenin üretim sahibi alan sahibidir; tasarım ve entegrasyon kontrolünde
+Mehmet'in son karar rolü korunur. Mert'in bütün varlıkları tek başına sıfırdan
+üretmesi varsayılmaz. Mevcut uyumlu kaynaklar ve küçük kit devri kullanılır.
+Ücretli kaynak veya yeni mekanik gerekiyorsa mevcut işin içine gizlenmez.
+Kabul kanıtı yoksa durum açık yazılır; bu satırlar uygulanmış gibi işaretlenmez.
+
 | Kimlik | Üst aşama | Oyunda görünen teslim | Sorumlu alan | Geçiş kanıtı |
 |---|---|---|---|---|
 | Q01 | P4.7 / #159 | Kara ve deniz için iki kısa hedef kalite örneği | Mert kaynak, Utku yerleşim, Mehmet kamera/ölçüm | Hareketli gündüz/gece görüntüsü; kullanıcı görsel değerlendirmesi |

@@ -1,0 +1,90 @@
+{
+  "source": "40eb0659b40f7e975b48cf5d9f74eb269d44556b",
+  "editor": "6000.3.23f1",
+  "dlls": [
+    {
+      "file": "DeepDive.Network.dll",
+      "sha256": "B8823477BD146FF2DE01722B714EE8FE5554F2E9B6FD7005EBB6121A79F8B647"
+    },
+    {
+      "file": "DeepDive.Composition.dll",
+      "sha256": "5086A7CDF24D58A17D64A75670EC9B45FD0CDC1906E0C1C55C648E51D76F30A9"
+    },
+    {
+      "file": "DeepDive.P1.Lab.dll",
+      "sha256": "6E454CB4B76D775CE8BD177001BD9E5DD8B599743A46C616341B5A357A5C54CA"
+    }
+  ],
+  "run": "Logs/P46-product-20261025-135948-2",
+  "command": "./tools/Test-P46-ProductDay.ps1 -Players 2 -Port 25119 -RepairOnly -RepairPurchase -RepairVideo -Mute",
+  "editmode": {
+    "total": 1357,
+    "passed": 1357,
+    "failed": 0
+  },
+  "samePC": true,
+  "videos": {
+    "owner": {
+      "frames": 237,
+      "durationSeconds": 14.1802,
+      "audio": false,
+      "interpolated": false
+    },
+    "peer": {
+      "frames": 230,
+      "durationSeconds": 13.843800000000002,
+      "audio": false,
+      "interpolated": false
+    }
+  },
+  "files": {
+    ".gitattributes": {
+      "sha256": "f9e150f6be348fb61bbbb147e41faf967e628b378d1f514b36db8219b5a10a7b",
+      "bytes": 111
+    },
+    "editmode.xml": {
+      "sha256": "8cae183d482687b4d95292f61155f6037928013e24fb3a06fdadbaa609d968f6",
+      "bytes": 1023036
+    },
+    "frames-owner.csv": {
+      "sha256": "8859bd82fc963cd674378a3551df8ee6dab6965ed8abfdea7786ef9d157b5b3c",
+      "bytes": 5593
+    },
+    "frames-peer.csv": {
+      "sha256": "7c27a3a70605bb1c9cd4af948a509e96bc208a926ba864912dcfd8e0dd1ee85a",
+      "bytes": 5426
+    },
+    "player0.json": {
+      "sha256": "e5a0b3ae8f5d14cc7d862f2d37ec5bbeaf019199274373e336e536f029abd96d",
+      "bytes": 1761
+    },
+    "player1.json": {
+      "sha256": "e0b011085e1ccb4694ef6dd0662168f70a59a97dc5e875c522a72501d5b1f1de",
+      "bytes": 1767
+    },
+    "reload.json": {
+      "sha256": "365aa7e6f9e8e86eb80337f35608752278d658fc3b1452723f374d1174873e6e",
+      "bytes": 1479
+    },
+    "repair-owner.mp4": {
+      "sha256": "175cf27614a86915d164c30311faf954b954200b0a3645c2bbc0a586cbd4d0f3",
+      "bytes": 617275
+    },
+    "repair-owner.png": {
+      "sha256": "7a2bbfa8951ba5249f0d04d5021d87b64e6cf5cff068a9a285be3a75a07920c7",
+      "bytes": 159560
+    },
+    "repair-peer.mp4": {
+      "sha256": "914f0fa9232aa047875d3cb2d42a67ce30017ce8937a2b5788d20a75788cbcfe",
+      "bytes": 693510
+    },
+    "repair-peer.png": {
+      "sha256": "8b379fa7945a7cf44bf2f51d3a2ab890fb165bb93bb513a8d905d9f0cbb54b56",
+      "bytes": 69432
+    },
+    "run-markers.txt": {
+      "sha256": "be37b3c7a582e9789c90a6c1bd406c4f2ab99507addd8b0c22befb88fbb596bb",
+      "bytes": 300
+    }
+  }
+}

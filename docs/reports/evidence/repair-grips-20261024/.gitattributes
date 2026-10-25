@@ -1,0 +1,3 @@
+# Preserve evidence bytes so the manifest hashes remain portable across checkouts.
+*.json -text
+*.csv -text

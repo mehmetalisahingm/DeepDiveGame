@@ -1,0 +1,5 @@
+# Preserve report bytes across checkouts for manifest hashes.
+*.json -text
+*.csv -text
+*.xml -text
+*.txt -text

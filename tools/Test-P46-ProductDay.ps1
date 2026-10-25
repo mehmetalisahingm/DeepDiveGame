@@ -1,6 +1,8 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$HuntFirst, [switch]$Mute)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute)
 $ErrorActionPreference='Stop'
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
+if ($RepairPurchase -and (-not $RepairOnly -or $RepairInterruptions)) { throw 'RepairPurchase requires RepairOnly and cannot combine with RepairInterruptions.' }
+if ($RepairVideo -and -not $RepairPurchase) { throw 'RepairVideo requires RepairPurchase (host repairs while guest observes).' }
 if ($HuntFirst -and $RepairOnly) { throw '-HuntFirst and -RepairOnly are exclusive' }
 $productRoot=Split-Path -Parent $PSScriptRoot
 $productIsWindows=$env:OS -eq 'Windows_NT'
@@ -20,10 +22,12 @@ try {
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
         if ($RepairInterruptions) { $productArgs+=@('-p187-interruptions','1') }
+        if ($RepairPurchase) { $productArgs+=@('-p187-purchase','1') }
+        if ($RepairVideo) { $productArgs+=@('-p187-video','1') }
         if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
-        elseif ($productIsWindows) { $productArgs+='-nographics' }
+        elseif ($productIsWindows -and -not $RepairVideo) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
         if ($productIsWindows) {
             $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru
@@ -61,18 +65,18 @@ try {
             throw 'Physical repair did not recover cancelled material or persist exactly three completed parts.'
         }
         Write-Output 'Physical repair owner-input/cancel recovery/mirror/disk PASS.'
-        return
     }
-    if ($productCheckpoint.Day.DayNumber -ne 2 -or @($productCheckpoint.Day.ClosedCloseIds).Count -ne 1 -or
+    if (-not $RepairOnly -and ($productCheckpoint.Day.DayNumber -ne 2 -or @($productCheckpoint.Day.ClosedCloseIds).Count -ne 1 -or
         @($productCheckpoint.Day.SummaryHistory).Count -ne 1 -or @($productCheckpoint.SoldCaptureIds).Count -ne 2 -or
         @($productCheckpoint.BoatPartIds).Count -ne 3 -or @($productCheckpoint.Media.Publications).Count -ne 1 -or
-        @($productCheckpoint.ChannelSettleIds).Count -ne 1) { throw 'Campaign does not contain exactly one settled day/publication and the earned repair/catches.' }
+        @($productCheckpoint.ChannelSettleIds).Count -ne 1)) { throw 'Campaign does not contain exactly one settled day/publication and the earned repair/catches.' }
     $productReload=Join-Path $productRun 'reload.json'
     Copy-Item -LiteralPath (Join-Path $productRun 'player0.json.campaign.json') -Destination ($productReload+'.campaign.json')
     $productReloadArgs=@('-batchmode','-screen-width','960','-screen-height','540','-screen-fullscreen','0',
         '-p46-day-role','host','-p46-day-count',1,'-p46-day-slot',0,'-p46-day-port',($Port+1),
         '-p46-day-reload',1,'-p46-day-baseline',('"{0}"' -f (Join-Path $productRun 'player0.json')),
         '-p1-report',('"{0}"' -f $productReload),'-logFile',('"{0}"' -f (Join-Path $productRun 'reload.log')))
+    if ($RepairOnly) { $productReloadArgs+=@('-p187-repair-only','1') }
     if ($Mute) { $productReloadArgs+=@('-p46-mute','1') }
     if ($productIsWindows) {
         $productReloadProcess=Start-Process -FilePath $productBuild -ArgumentList $productReloadArgs -WindowStyle Hidden -PassThru
@@ -84,7 +88,8 @@ try {
     if (-not (Test-Path -LiteralPath $productReload)) { throw 'Missing reload report.' }
     $productReloadResult=Get-Content -LiteralPath $productReload -Raw|ConvertFrom-Json
     if (-not $productReloadResult.passed -or $productReloadProcess.ExitCode -ne 0) { throw "Reload failed: $($productReloadResult.errors -join '; ')" }
-    Write-Output 'Fresh-process reload/clip playback/duplicate publish PASS.'
+    if ($RepairOnly) { Write-Output 'Fresh-process repaired campaign/material/balance/sale/day reload PASS.' }
+    else { Write-Output 'Fresh-process reload/clip playback/duplicate publish PASS.' }
 } finally {
     foreach ($productEntry in $productProcesses) {
         if (-not $productEntry.Process.HasExited) { Stop-Process -Id $productEntry.Process.Id -Force }

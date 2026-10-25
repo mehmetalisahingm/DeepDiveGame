@@ -1,0 +1,95 @@
+{
+  "verifiedOn": "2026-10-25",
+  "passingRuntimeSource": "2857678e89f7bcc4bbe867b25f3bde91c663c422",
+  "latestRuntimeSource": "f0ae302bfd287e75727681261f5846ba29b69d9a",
+  "latestFourResult": "Failed: travel discontinuity; other process reports missing",
+  "latestTwoRepeats": "No final JSON reports; not accepted",
+  "ciCodeHead": "f0ae302: unity, product-day, real-world passed",
+  "ownerVideo": {
+    "sampledSeconds": 12.59,
+    "audio": false,
+    "frames": 94
+  },
+  "peerVideo": {
+    "sampledSeconds": 12.09,
+    "audio": false,
+    "frames": 91
+  },
+  "capture": "Actual owner cameras after hand IK, approximately 8 Hz, timestamp-based VFR; no desktop IMGUI",
+  "oldBuildBinary": "Not preserved; no old binary hash asserted",
+  "separateComputerAcceptance": false,
+  "finalArtAcceptance": false,
+  "files": [
+    {
+      "file": "editmode-summary.json",
+      "bytes": 166,
+      "sha256": "027099D57779E7EDB74A3A04F4329116C046E5E8C018754A08EC36670B80F198"
+    },
+    {
+      "file": "latest-four-failed-player2.json",
+      "bytes": 1868,
+      "sha256": "CAAA2EB5F330364B88F00F24CF5D0122C4E8BF480F17A819FB98F8A65C67B344"
+    },
+    {
+      "file": "owner-frames.csv",
+      "bytes": 2159,
+      "sha256": "42B97BCF87974E3550C0B5EBCBE12643F29EEFBBE40D9E2F40CE15D1BBB8DEE1"
+    },
+    {
+      "file": "peer-frames.csv",
+      "bytes": 2090,
+      "sha256": "EF2E7A4EC5BEE742FFB348B353AF9D3B2667336BCF0B07D6F90197C7362229BF"
+    },
+    {
+      "file": "product-player0.json",
+      "bytes": 3103,
+      "sha256": "3313F3DCA37CF42F7C673F68F9092DD86CE9919C2E376C88BEB458338408027F"
+    },
+    {
+      "file": "product-player1.json",
+      "bytes": 3103,
+      "sha256": "29E6947FD92E7487D67EDF5C911C4D2730B768031A212E87BBA5F308EDAA9ED9"
+    },
+    {
+      "file": "product-reload.json",
+      "bytes": 1482,
+      "sha256": "D3CD7BEA06DA0635C8681AED52A0F8AF3BEC1985D8EEAD176BD36AA9BA252B00"
+    },
+    {
+      "file": "purchase-player0.json",
+      "bytes": 1851,
+      "sha256": "D745AC78421FBB503FCEE280A0D4B17D021C4CA8693973B92A57ADF472497FBA"
+    },
+    {
+      "file": "purchase-player1.json",
+      "bytes": 1856,
+      "sha256": "43A2A7533C4474E2DF3A303A91925D6B664784E39A96CAAAD74AFE79748E86C6"
+    },
+    {
+      "file": "purchase-reload.json",
+      "bytes": 1480,
+      "sha256": "E460C99B4F1E569D03D781BC90DB92BF2D5CC12A293D04707DB85D249BA0D8B9"
+    },
+    {
+      "file": "repair-owner.mp4",
+      "bytes": 390716,
+      "sha256": "D61BAC6755D5B46E29C93ACE25A6D1E4A1F9BE368C85AA62E22C93DD85337204"
+    },
+    {
+      "file": "repair-owner.png",
+      "bytes": 189050,
+      "sha256": "F8025B32BF50F317F5AC8E9D231A0BD66D77DD48EE90F78E33E87F3AF33E9AFB"
+    },
+    {
+      "file": "repair-peer.mp4",
+      "bytes": 380825,
+      "sha256": "5F0E36B9F9DF190A93DE3C1FB08050BABC1A6E166ACA8C752AF72A61C07A6FDC"
+    },
+    {
+      "file": "repair-peer.png",
+      "bytes": 67401,
+      "sha256": "90EEE778F0F69F08D272F608ACD75678AFFCC550CB6A21C6B65220DD41EAD100"
+    }
+  ],
+  "textEncoding": "UTF-8, LF; line endings normalized, report values unchanged"
+}
