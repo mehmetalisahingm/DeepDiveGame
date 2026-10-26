@@ -77,6 +77,8 @@ Kara ve deniz örnekleri bağımsız değerlendirilir. Birinin beğenilmesi diğ
 
 ## Q07–Q09: Su ve habitatlar
 
+26 Ekim kullanıcı devri: Q07/Q08 **su görselleri ve kamera geçişi** tek uygulayıcı olarak Mehmet'e atandı; [#163 koordinasyon kaydı](https://github.com/mehmetalisahingm/DeepDiveGame/issues/163#issuecomment-6424681378). Ortak renderer/pipeline ayarları bu pakette güncellenir. Q09 habitat, model/ses ve #164 nihai kabulünün diğer alan sahiplikleri korunur. İlerleme ve gerçek kanıt [su raporunda](../reports/P411-OCEAN-20261026.md) tutulur; aşağıdaki bütün kabul listesinin bittiği anlamına gelmez.
+
 **Yüzey:** uzaktan düz boyalı levha gibi görünmeyen dalga/normal hareketi; bakış açısına uygun yansıma ve saydamlık; sığdan derine renk/geçirgenlik; kıyı köpüğü, dalga vurması ve ses. Sakin/rüzgârlı günler görünüm/hareket/ses farkı verir. Sabit rota tekne çevresinde hareketle ilişkili su izi ve sıçrama vardır. Görsel dalga, yüzen oyuncunun veya dört koltuğun fizik/otorite konumunu ikinci kez taşımaz.
 
 **Giriş/iniş:** su çizgisinin kameradan geçişi, kırılma/ışık ve ses değişimi, yakın kabarcık/nefes; sığda görünen taban ve ışık desenleri; aşağı indikçe yönlü ışığın azalması, değişen renk/ses ve yer yer parçacık. Derinlik hissi yalnız bütün ekranı mavi/siyah yapmakla sağlanmaz. Kayıt klibi gerçek oyun kamerasındaki aynı ortamı içerir. Yüzey çizgisi, clipping, şeffaf nesne sırası ve farklı kalite ayarları test edilir.

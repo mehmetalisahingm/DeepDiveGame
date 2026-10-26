@@ -107,8 +107,22 @@ namespace DeepDive.Network
         private bool cameraOwned;
         private HeldEquipmentMode requestedEquipment = HeldEquipmentMode.Harpoon;
         private Vector3 lastPresentationPosition;
+        private float visualWaterSurface=float.NaN;
+        private Vector3 cameraRest;
+        private bool cameraRestBound;
+        public float WaterViewLift=>controller!=null && !Seated.Value && !Passive.Value
+            ? SurfaceCameraRules.Lift(CurrentLocomotion,transform.position.y+
+                (controller.center.y+controller.height*.5f)*transform.lossyScale.y,visualWaterSurface):0;
+        public void SetVisualWaterSurface(float surface)
+        {visualWaterSurface=surface;UpdateWaterEye();}
+        private void UpdateWaterEye()
+        {
+            if(viewCamera==null)return;
+            if(!cameraRestBound){cameraRest=viewCamera.transform.localPosition;cameraRestBound=true;}
+            viewCamera.transform.localPosition=cameraRest+Vector3.up*WaterViewLift;
+        }
 
-        public Vector3 RecordingEyePosition => viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
+        public Vector3 RecordingEyePosition {get{UpdateWaterEye();return viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;}}
         public float RecordingFieldOfView => viewCamera != null ? viewCamera.fieldOfView : 60f;
         public Vector3 RecordingForwardServer
         {
@@ -189,6 +203,7 @@ namespace DeepDive.Network
         private void Update()
         {
             if (!IsSpawned) return;
+            UpdateWaterEye();
             UpdatePresentationView();
             if (!IsOwner) return;
 
@@ -566,7 +581,7 @@ namespace DeepDive.Network
             }
 
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
-            var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
+            var origin = RecordingEyePosition;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             var effectiveRange = CrewRoleEffectRules.ResolveHarpoonRange(
                 P4EquipmentEffectRules.ResolveHarpoonRange(harpoonRange, EquippedHarpoonLevel.Value),
@@ -607,7 +622,7 @@ namespace DeepDive.Network
             }
 
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
-            var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
+            var origin = RecordingEyePosition;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             // BoatPartAnchor uses a trigger so E-pickup must include triggers. Resolve the full hit stack so
             // ambient trigger volumes (notably SwimVolume) cannot consume the ray before a real pickup target,
@@ -682,7 +697,7 @@ namespace DeepDive.Network
             }
 
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
-            var origin = viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;
+            var origin = RecordingEyePosition;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
             if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, serviceInteractionRange), ~0,
                     QueryTriggerInteraction.Collide))

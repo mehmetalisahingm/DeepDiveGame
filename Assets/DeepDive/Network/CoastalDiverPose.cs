@@ -38,8 +38,9 @@ namespace DeepDive.Network
                 if(IsFinger(finger)&&finger.childCount>0)fingerBind[finger]=finger.localRotation;
         }
         private float equipmentLowering;
-        public void Present(PlayerPresentationState value, float normalizedSpeed,float lowering=0)
-        { state = value; speed = Mathf.Clamp01(normalizedSpeed);equipmentLowering=Mathf.Clamp01(lowering); }
+        private float waterLift;
+        public void Present(PlayerPresentationState value, float normalizedSpeed,float lowering=0,float surfaceLift=0)
+        { state = value; speed = Mathf.Clamp01(normalizedSpeed);equipmentLowering=Mathf.Clamp01(lowering);waterLift=surfaceLift; }
 
         public void PresentRepair(Vector3 left, Vector3 right, Quaternion rotation)
         {PresentRepair(left,right,rotation,rotation,true);}
@@ -105,6 +106,7 @@ namespace DeepDive.Network
             var rotation = Quaternion.Euler(underwater ? 78f : 0f, 0f, 0f);
             Model.localRotation = rotation;
             Model.localPosition = underwater ? new Vector3(0, 0.9f, 0) - rotation * new Vector3(0, 0.9f, 0) : Vector3.zero;
+            if(!FirstPerson)Model.localPosition+=Vector3.up*waterLift;
             if (swimming)
             {
                 var kick = Mathf.Sin(cycle) * Mathf.Lerp(0.10f, 0.40f, speed);

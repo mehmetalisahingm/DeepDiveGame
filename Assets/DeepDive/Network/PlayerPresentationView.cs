@@ -121,7 +121,7 @@ namespace DeepDive.Network
                 !isOwner && showCamera, cameraTier);
 
             ApplyAnimator(state, normalizedSpeed);
-            bodyPose?.Present(visualState, normalizedSpeed,lowered);
+            bodyPose?.Present(visualState, normalizedSpeed,lowered,networkPlayer!=null?networkPlayer.WaterViewLift:0);
             armsPose?.Present(visualState, normalizedSpeed,lowered);
         }
 
