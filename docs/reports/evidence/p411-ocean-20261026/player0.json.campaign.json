@@ -1,12 +1,12 @@
 {
     "SchemaVersion": 9,
     "CampaignId": "local-host",
-    "CheckpointId": "c71aa30a523747f89d00b909562360a6",
+    "CheckpointId": "400989a1ff734ae692538903d6772892",
     "SharedBalance": 380,
     "Revision": 16,
     "SoldCaptureIds": [
-        "40772d5eb95d4354b33fc2b64911b28c",
-        "3a4c96c8aa114ebd8f6e6a2ee77db4f0"
+        "ccde32a6b7c4407e9b303013453ca8ef",
+        "d6abe30a40ce498a93656c93b3f65703"
     ],
     "PaidRecordingIds": [],
     "Loadouts": [
@@ -39,13 +39,13 @@
                 "CloseId": "close-day-1",
                 "Reason": 0,
                 "FishSold": 2,
-                "FishSoldWeightGrams": 2509,
+                "FishSoldWeightGrams": 3241,
                 "Income": 240,
                 "Expenses": 150,
                 "DiscoveredSpeciesIds": [
-                    "tuna",
+                    "sea_bass",
                     "red_snapper",
-                    "sea_bass"
+                    "tuna"
                 ],
                 "LostDivers": 0,
                 "LostCaptureIds": [],
@@ -297,8 +297,8 @@
         ],
         "Observations": [
             {
-                "ObservationId": "sighting:tuna",
-                "SpeciesId": "tuna",
+                "ObservationId": "sighting:sea_bass",
+                "SpeciesId": "sea_bass",
                 "Evidence": 0,
                 "RegionId": "region-near-1",
                 "CellId": "region-near-1:gx-1:gz-3",
@@ -315,8 +315,8 @@
                 "DayNumber": 1
             },
             {
-                "ObservationId": "sighting:sea_bass",
-                "SpeciesId": "sea_bass",
+                "ObservationId": "sighting:tuna",
+                "SpeciesId": "tuna",
                 "Evidence": 0,
                 "RegionId": "region-near-1",
                 "CellId": "region-near-1:gx-1:gz-3",
@@ -324,16 +324,7 @@
                 "DayNumber": 1
             },
             {
-                "ObservationId": "40772d5eb95d4354b33fc2b64911b28c",
-                "SpeciesId": "tuna",
-                "Evidence": 2,
-                "RegionId": "region-near-1",
-                "CellId": "region-near-1:gx-1:gz-1",
-                "DepthBandId": "shallow",
-                "DayNumber": 1
-            },
-            {
-                "ObservationId": "3a4c96c8aa114ebd8f6e6a2ee77db4f0",
+                "ObservationId": "ccde32a6b7c4407e9b303013453ca8ef",
                 "SpeciesId": "tuna",
                 "Evidence": 2,
                 "RegionId": "region-near-1",
@@ -342,7 +333,16 @@
                 "DayNumber": 1
             },
             {
-                "ObservationId": "559b6b1b1c544733b6e740f6d1b4d732",
+                "ObservationId": "d6abe30a40ce498a93656c93b3f65703",
+                "SpeciesId": "tuna",
+                "Evidence": 2,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-2:gz-1",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "563fb78abcb94ae09b64196cf0b876de",
                 "SpeciesId": "sea_bass",
                 "Evidence": 1,
                 "RegionId": "region-near-1",
@@ -353,10 +353,10 @@
         ]
     },
     "ChannelRightIds": [
-        "559b6b1b1c544733b6e740f6d1b4d732"
+        "563fb78abcb94ae09b64196cf0b876de"
     ],
     "ChannelSettleIds": [
-        "settle-pub-clip-559b6b1b1c544733b6e740f6d1b4d732"
+        "settle-pub-clip-563fb78abcb94ae09b64196cf0b876de"
     ],
     "HasMedia": true,
     "HasFleet": true,
@@ -374,9 +374,9 @@
         "LastOrderTemplateId": "order-fish-quick",
         "LastSponsorTemplateId": "sponsor-new-species",
         "UsedEvidenceIds": [
-            "40772d5eb95d4354b33fc2b64911b28c",
-            "3a4c96c8aa114ebd8f6e6a2ee77db4f0",
-            "pub-clip-559b6b1b1c544733b6e740f6d1b4d732"
+            "ccde32a6b7c4407e9b303013453ca8ef",
+            "d6abe30a40ce498a93656c93b3f65703",
+            "pub-clip-563fb78abcb94ae09b64196cf0b876de"
         ],
         "DevelopmentIds": [],
         "HostRole": 0
@@ -388,7 +388,7 @@
     "Progression": {
         "Version": 1,
         "Stage": 2,
-        "EncyclopediaEvidenceId": "enc:sighting:tuna",
+        "EncyclopediaEvidenceId": "enc:sighting:sea_bass",
         "RumorEvidenceId": "rumor:region-near-1:gx-3:gz3",
         "TraceIds": [],
         "DiscoveryEvidenceId": "",
@@ -399,16 +399,16 @@
     "Media": {
         "Clips": [
             {
-                "ClipId": "clip-559b6b1b1c544733b6e740f6d1b4d732",
-                "RecordingId": "559b6b1b1c544733b6e740f6d1b4d732",
-                "DiveId": "a21aa79dee4843c4acc417e521617571",
+                "ClipId": "clip-563fb78abcb94ae09b64196cf0b876de",
+                "RecordingId": "563fb78abcb94ae09b64196cf0b876de",
+                "DiveId": "bf03e867797b4542af2686ef3a69f017",
                 "DayNumber": 1,
                 "OwnerPlayerId": 0,
                 "SubjectId": "sea_bass",
                 "Quality": 2,
-                "DurationSeconds": 12.035503387451172,
-                "ContentHash": "9e80aa8ed9ea4fbe905c00c07778c20e689042badd143c371c03c7940401c056",
-                "SizeBytes": 303064,
+                "DurationSeconds": 12.037759780883789,
+                "ContentHash": "049e37df8064ce2d8ae7b7d3be057af31dca4191e97b88a55c8dbf3468c0a4d0",
+                "SizeBytes": 301819,
                 "MediaReady": true,
                 "SafeReturned": true,
                 "SubjectKind": 1,
@@ -420,9 +420,9 @@
         ],
         "Publications": [
             {
-                "PublicationId": "pub-clip-559b6b1b1c544733b6e740f6d1b4d732",
-                "ClipId": "clip-559b6b1b1c544733b6e740f6d1b4d732",
-                "RecordingId": "559b6b1b1c544733b6e740f6d1b4d732",
+                "PublicationId": "pub-clip-563fb78abcb94ae09b64196cf0b876de",
+                "ClipId": "clip-563fb78abcb94ae09b64196cf0b876de",
+                "RecordingId": "563fb78abcb94ae09b64196cf0b876de",
                 "OwnerPlayerId": 0,
                 "SubjectId": "sea_bass",
                 "Title": "Ilk gercek gun",
@@ -431,7 +431,7 @@
                 "Views": 240,
                 "FollowersGained": 12,
                 "Income": 60,
-                "SettledId": "settle-pub-clip-559b6b1b1c544733b6e740f6d1b4d732"
+                "SettledId": "settle-pub-clip-563fb78abcb94ae09b64196cf0b876de"
             }
         ],
         "Followers": 12

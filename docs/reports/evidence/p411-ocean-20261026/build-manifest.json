@@ -42,7 +42,7 @@
   {
     "path": "DeepDiveGame-P1_Data/boot.config",
     "bytes": 397,
-    "sha256": "2eefbab66337e131f14ed0e7e308e0d2c1989495ffe10595bca772deaa85baaf"
+    "sha256": "83efda583c27507bb1fbf5bee69b42c79c35a1892ede37c859490386eabdb512"
   },
   {
     "path": "DeepDiveGame-P1_Data/globalgamemanagers",
@@ -71,8 +71,8 @@
   },
   {
     "path": "DeepDiveGame-P1_Data/resources.assets",
-    "bytes": 8765464,
-    "sha256": "67d067bade2984677d097dce92f5eec55e7976266487e5ac24a2108578927d0b"
+    "bytes": 8765512,
+    "sha256": "38a5981ce41d6927a2d270bde2c706a7a052a0c31f2d04ca5684eb718d466f4d"
   },
   {
     "path": "DeepDiveGame-P1_Data/resources.assets.resS",

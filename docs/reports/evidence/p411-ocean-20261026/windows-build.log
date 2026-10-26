@@ -1,12 +1,12 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
 Built from '6000.3/staging' branch; Version is '6000.3.23f1 (09d2ecc7fb28) revision 643820'; Using compiler version '194234433'; Build Type 'Release'
-OS: 'Windows 11  (10.0.26200) CoreSingleLanguage' Language: 'tr' Physical Memory: 16125 MB
 [Licensing::IpcConnector] Channel LicenseClient-mehmetali doesn't exist
+OS: 'Windows 11  (10.0.26200) CoreSingleLanguage' Language: 'tr' Physical Memory: 16125 MB
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
 System  architecture: x64
 Process architecture: x64
-Date: 2026-10-26T20:01:17Z
-[Licensing::Module] Successfully launched the LicensingClient (PId: 7512)
+Date: 2026-10-26T20:11:03Z
+[Licensing::Module] Successfully launched the LicensingClient (PId: 10932)
 
 COMMAND LINE ARGUMENTS:
 C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Unity.exe
@@ -59,34 +59,34 @@ C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
     "memorysetup-job-temp-allocator-block-size-background=1048576"
     "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
     "memorysetup-temp-allocator-size-cloud-worker=32768"
-Player connection [24532]  Target information:
+Player connection [19244]  Target information:
 
-Player connection [24532]  * "[IP] 26.223.157.184 [Port] 55504 [Flags] 2 [Guid] 4219173409 [EditorId] 4219173409 [Version] 1048832 [Id] WindowsEditor(7,mehmet) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [19244]  * "[IP] 26.223.157.184 [Port] 55504 [Flags] 2 [Guid] 3743478021 [EditorId] 3743478021 [Version] 1048832 [Id] WindowsEditor(7,mehmet) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [24532]  * "[IP] 192.168.56.1 [Port] 55504 [Flags] 2 [Guid] 4219173409 [EditorId] 4219173409 [Version] 1048832 [Id] WindowsEditor(7,mehmet) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [19244]  * "[IP] 192.168.56.1 [Port] 55504 [Flags] 2 [Guid] 3743478021 [EditorId] 3743478021 [Version] 1048832 [Id] WindowsEditor(7,mehmet) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [24532]  * "[IP] 10.93.122.84 [Port] 55504 [Flags] 2 [Guid] 4219173409 [EditorId] 4219173409 [Version] 1048832 [Id] WindowsEditor(7,mehmet) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [19244]  * "[IP] 10.93.122.84 [Port] 55504 [Flags] 2 [Guid] 3743478021 [EditorId] 3743478021 [Version] 1048832 [Id] WindowsEditor(7,mehmet) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [24532] Host joined multi-casting on [225.0.0.222:54997]...
-Player connection [24532] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Player connection [19244] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [19244] Host joined alternative multi-casting on [225.0.0.222:34997]...
 Input System module state changed to: Initialized.
 [Physics::Module] Initialized fallback backend.
 [Physics::Module] Id: 0xdecafbad
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-mehmetali" at "2026-10-26T20:01:18.5515049Z"
-[Package Manager] Connected to IPC stream "Upm-24184" after 0.4 seconds.
-[Licensing::Module] Licensing is not yet initialized.
-[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 7512, path: "C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-mehmetali" at "2026-10-26T20:11:03.47615Z"
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 10932, path: "C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
 [Licensing::Module] LicensingClient has failed validation; ignoring
 [Licensing::Client] Handshaking with LicensingClient:
   Version:                 1.18.3+d7ffd15
-  Session Id:              f09797670c71439a965f7e29519c4874
-  Correlation Id:          ddbc766659fd3c49b8ce1734d992c649
-  External correlation Id: 3573756605553548556
+  Session Id:              ee9a1296a2af47349341beea770980f2
+  Correlation Id:          39f8886cdb0ebd912a351f7e0d81c860
+  External correlation Id: 3844036043635248693
   Machine Id:              I+PyeVqBoQL7+1+l0dtn52jft2I=
-[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-mehmetali" (connect: 0.57s, validation: 0.25s, handshake: 0.07s)
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-mehmetali-notifications" at "2026-10-26T20:01:18.8736347Z"
-[Licensing::Module] Connected to LicensingClient (PId: 7512, launch time: 0.01, total connection time: 0.89s)
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-mehmetali" (connect: 0.37s, validation: 0.17s, handshake: 0.21s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-mehmetali-notifications" at "2026-10-26T20:11:03.8544439Z"
+[Licensing::Module] Connected to LicensingClient (PId: 10932, launch time: 0.01, total connection time: 0.75s)
 [Licensing::Module] Error: Access token is unavailable; failed to update
+[Package Manager] Connected to IPC stream "Upm-17832" after 0.5 seconds.
+[Licensing::Module] Licensing is not yet initialized.
 [Licensing::Client] Successfully resolved entitlement details
 [Licensing::Module] License group:
   Id: F4-W9SV-9EM7-3NKZ-E7M7-XXXX
@@ -98,7 +98,7 @@ Input System module state changed to: Initialized.
   Product: Unity Personal
   Type: Assigned
   Expiration: Unlimited
-[Licensing::Client] Successfully updated license, isAsync: True, time: 0.02
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.01
 [Licensing::Client] Successfully resolved entitlement details
 [Licensing::Module] License group:
   Id: F4-W9SV-9EM7-3NKZ-E7M7-XXXX
@@ -110,8 +110,8 @@ Input System module state changed to: Initialized.
   Product: Unity Personal
   Type: Assigned
   Expiration: Unlimited
-[Licensing::Module] Licensing Background thread has ended after 0.98s
-[Licensing::Module] Licensing is initialized (took 0.34s).
+[Licensing::Module] Licensing Background thread has ended after 0.84s
+[Licensing::Module] Licensing is initialized (took 0.06s).
 [Licensing::Client] Successfully resolved entitlement details
 [Licensing::Module] License group:
   Id: F4-W9SV-9EM7-3NKZ-E7M7-XXXX
@@ -130,6 +130,7 @@ Library Redirect Path: Library/
 [Physics::Module] SDK Version: 4.1.2
 [Physics::Module] Integration Version: 1.0.0
 [Physics::Module] Threading Mode: Multi-Threaded
+Artifact Garbage Collection - Removed 1 unused hashed content files
 Targeting platform: Win64
 Refreshing native plugins compatible for Editor in 0.14 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
@@ -146,7 +147,7 @@ Initialize mono
 Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/Managed'
 Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
 Mono config path = 'C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56184
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56832
 Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
 Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
 ImportWorker Server TCP listen port: 0
@@ -154,41 +155,41 @@ AcceleratorClientConnectionCallback - disconnected - :0
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
 Register platform support module: C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
-Registered in 0.004302 seconds.
-- Loaded All Assemblies, in  1.119 seconds
+Registered in 0.002880 seconds.
+- Loaded All Assemblies, in  0.506 seconds
 Native extension for WindowsStandalone target not found
 Package Manager log level set to [2]
 ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:False
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  0.741 seconds
-Domain Reload Profiling: 1854ms
-	BeginReloadAssembly (351ms)
+- Finished resetting the current domain, in  0.400 seconds
+Domain Reload Profiling: 900ms
+	BeginReloadAssembly (188ms)
 		ExecutionOrderSort (0ms)
 		DisableScriptedObjects (0ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (17ms)
-	RebuildCommonClasses (76ms)
-	RebuildNativeTypeToScriptingClass (24ms)
-	initialDomainReloadingComplete (170ms)
-	LoadAllAssembliesAndSetupDomain (492ms)
-		LoadAssemblies (322ms)
+		CreateAndSetChildDomain (16ms)
+	RebuildCommonClasses (49ms)
+	RebuildNativeTypeToScriptingClass (16ms)
+	initialDomainReloadingComplete (63ms)
+	LoadAllAssembliesAndSetupDomain (183ms)
+		LoadAssemblies (166ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (486ms)
-			TypeCache.Refresh (482ms)
-				TypeCache.ScanAssembly (450ms)
+		AnalyzeDomain (180ms)
+			TypeCache.Refresh (177ms)
+				TypeCache.ScanAssembly (163ms)
 			BuildScriptInfoCaches (0ms)
 			ResolveRequiredComponents (1ms)
-	FinalizeReload (742ms)
+	FinalizeReload (400ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (641ms)
+		SetupLoadedEditorAssemblies (358ms)
 			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (259ms)
-			SetLoadedEditorAssemblies (7ms)
-			BeforeProcessingInitializeOnLoad (121ms)
-			ProcessInitializeOnLoadAttributes (157ms)
-			ProcessInitializeOnLoadMethodAttributes (96ms)
+			InitializePlatformSupportModulesInManaged (44ms)
+			SetLoadedEditorAssemblies (4ms)
+			BeforeProcessingInitializeOnLoad (81ms)
+			ProcessInitializeOnLoadAttributes (140ms)
+			ProcessInitializeOnLoadMethodAttributes (89ms)
 			AfterProcessingInitializeOnLoad (0ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
@@ -236,136 +237,118 @@ Application.AssetDatabase Initial Refresh Start
     com.unity.modules.imgui@1.0.0 (location: C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Library\PackageCache\com.unity.modules.imgui)
     com.unity.modules.ui@1.0.0 (location: C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Library\PackageCache\com.unity.modules.ui)
 [Subsystems] No new subsystems found in resolved package list.
-[Package Manager] Done registering packages in 0.03 seconds
+[Package Manager] Done registering packages in 0.02 seconds
 Starting: C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
 WorkingDir: C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
 DisplayProgressbar: Compiling Scripts
-ExitCode: 0 Duration: 0s576ms
+ExitCode: 0 Duration: 0s445ms
 [683/876    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
-*** Tundra build success (0.53 seconds), 1 items updated, 876 evaluated
-AssetDatabase: script compilation time: 1.113489s
+*** Tundra build success (0.41 seconds), 1 items updated, 876 evaluated
+AssetDatabase: script compilation time: 0.950800s
 Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  1.019 seconds
-Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
+- Loaded All Assemblies, in  0.786 seconds
+Refreshing native plugins compatible for Editor in 0.82 ms, found 0 plugins.
 Native extension for WindowsStandalone target not found
 ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  3.817 seconds
-Domain Reload Profiling: 4823ms
-	BeginReloadAssembly (376ms)
+- Finished resetting the current domain, in  2.520 seconds
+Domain Reload Profiling: 3297ms
+	BeginReloadAssembly (357ms)
 		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (31ms)
+		DisableScriptedObjects (37ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (156ms)
-	RebuildCommonClasses (43ms)
-	RebuildNativeTypeToScriptingClass (13ms)
-	initialDomainReloadingComplete (44ms)
-	LoadAllAssembliesAndSetupDomain (530ms)
-		LoadAssemblies (490ms)
+		CreateAndSetChildDomain (167ms)
+	RebuildCommonClasses (40ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (34ms)
+	LoadAllAssembliesAndSetupDomain (336ms)
+		LoadAssemblies (323ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (189ms)
-			TypeCache.Refresh (136ms)
-				TypeCache.ScanAssembly (125ms)
-			BuildScriptInfoCaches (35ms)
-			ResolveRequiredComponents (14ms)
-	FinalizeReload (3818ms)
+		AnalyzeDomain (129ms)
+			TypeCache.Refresh (87ms)
+				TypeCache.ScanAssembly (77ms)
+			BuildScriptInfoCaches (31ms)
+			ResolveRequiredComponents (9ms)
+	FinalizeReload (2520ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (3454ms)
+		SetupLoadedEditorAssemblies (2280ms)
 			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (30ms)
-			SetLoadedEditorAssemblies (5ms)
-			BeforeProcessingInitializeOnLoad (231ms)
-			ProcessInitializeOnLoadAttributes (2932ms)
-			ProcessInitializeOnLoadMethodAttributes (241ms)
-			AfterProcessingInitializeOnLoad (14ms)
-			EditorAssembliesLoaded (1ms)
+			InitializePlatformSupportModulesInManaged (21ms)
+			SetLoadedEditorAssemblies (3ms)
+			BeforeProcessingInitializeOnLoad (159ms)
+			ProcessInitializeOnLoadAttributes (1927ms)
+			ProcessInitializeOnLoadMethodAttributes (161ms)
+			AfterProcessingInitializeOnLoad (9ms)
+			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
-		AwakeInstancesAfterBackupRestoration (42ms)
-Asset Pipeline Refresh (id=2ccd00ca113a0c94186efdf50108b3f0): Total: 6.626 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+		AwakeInstancesAfterBackupRestoration (21ms)
+Start importing Packages/com.unity.render-pipelines.core/Tests/Editor/UnifiedRayTracing/TraceRays.urtshader using Guid(1142bbad8b9e8c44c83a9775ff120d37) (ScriptedImporter)Launched and connected shader compiler UnityShaderCompiler.exe after 0.01 seconds
+ -> (artifact id: '38ac005376b021a7e9f4e9f75cb2c4e8') in 0.0452847 seconds
+Start importing Packages/com.unity.render-pipelines.universal/Runtime/RendererFeatures/SurfaceCacheGI/SurfaceCacheCore/RisEstimation.urtshader using Guid(713f6141bd66a134383b787f2eaa7c11) (ScriptedImporter) -> (artifact id: '5146b39842153622670d027e1887ac6d') in 0.0128951 seconds
+Start importing Packages/com.unity.render-pipelines.core/Editor/Lighting/ProbeVolume/RenderingLayerMask/TraceRenderingLayerMask.urtshader using Guid(94a070d33e408384bafc1dea4a565df9) (ScriptedImporter) -> (artifact id: 'b67936887104dd6aebfe8d0931bc482f') in 0.0135338 seconds
+Start importing Packages/com.unity.render-pipelines.universal/Runtime/RendererFeatures/SurfaceCacheGI/SurfaceCacheCore/UniformEstimation.urtshader using Guid(94a39d12848d8d64ca962a72b74e7c50) (ScriptedImporter) -> (artifact id: '0d4636a02768de9269d2f27db7d580ce') in 0.0089752 seconds
+Start importing Packages/com.unity.render-pipelines.core/Tests/Editor/UnifiedRayTracing/TraceTransparentRays.urtshader using Guid(6513c3b892e933c4f8d00c19d5c47532) (ScriptedImporter) -> (artifact id: 'd5a22aa85d0a39d2617229ecf7a50a09') in 0.0052918 seconds
+Start importing Packages/com.unity.render-pipelines.core/Editor/Lighting/ProbeVolume/DynamicGI/DynamicGISkyOcclusion.urtshader using Guid(5a2a534753fbdb44e96c3c78b5a6999d) (ScriptedImporter) -> (artifact id: '94c013258671826b0a2d6ac6ab67bff2') in 0.0091194 seconds
+Start importing Packages/com.unity.render-pipelines.core/Tests/Editor/UnifiedRayTracing/TraceRaysAndFetchAttributes.urtshader using Guid(fbc59f55df2416344b008dc23753cae2) (ScriptedImporter) -> (artifact id: 'ace34066ac714b5376a279e670a068d5') in 0.006248 seconds
+Start importing Packages/com.unity.render-pipelines.universal/Runtime/RendererFeatures/SurfaceCacheGI/SurfaceCacheCore/RestirCandidateTemporal.urtshader using Guid(ad3a9f9982f8c4f4a839a78955e78458) (ScriptedImporter) -> (artifact id: 'a9c30a87e55d2b0482dd2bc019ad5471') in 0.0083693 seconds
+Start importing Packages/com.unity.render-pipelines.core/Editor/Lighting/ProbeVolume/VirtualOffset/TraceVirtualOffset.urtshader using Guid(ff2cbab5da58bf04d82c5f34037ed123) (ScriptedImporter) -> (artifact id: '42f73bbc0b48d50a1f6843655e53df83') in 0.0103248 seconds
+Refreshing native plugins compatible for Editor in 0.50 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=989ffe00dcbaa0345ad2cd589648b70d): Total: 5.150 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
 	Summary:
-		Imports: total=0 (actual=0, local cache=0, cache server=0)
-		Asset DB Process Time: managed=0 ms, native=4349 ms
-		Asset DB Callback time: managed=47 ms, native=34 ms
-		Scripting: domain reloads=1, domain reload time=1020 ms, compile time=1116 ms, other=57 ms
+		Imports: total=9 (actual=9, local cache=0, cache server=0)
+		Asset DB Process Time: managed=3 ms, native=3015 ms
+		Asset DB Callback time: managed=188 ms, native=155 ms
+		Scripting: domain reloads=1, domain reload time=786 ms, compile time=952 ms, other=48 ms
 		Project Asset Count: scripts=893, non-scripts=1673
 		Asset File Changes: new=0, changed=0, moved=0, deleted=0
 		Scan Filter Count: 0
 	InvokeCustomDependenciesCallbacks: 0.002ms
-	InvokePackagesCallback: 38.904ms
-	ApplyChangesToAssetFolders: 0.761ms
-	Scan: 156.457ms
-	OnSourceAssetsModified: 0.004ms
-	CategorizeAssetsWithTransientArtifact: 23.038ms
-	ProcessAssetsWithTransientArtifactChanges: 86.576ms
-	CategorizeAssets: 63.510ms
-	ImportOutOfDateAssets: 3826.556ms (2708.805ms without children)
-		CompileScripts: 1115.535ms
-		ReloadNativeAssets: 0.044ms
-		UnloadImportedAssets: 0.984ms
-		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.602ms
-		InitializingProgressBar: 0.001ms
+	InvokePackagesCallback: 30.190ms
+	ApplyChangesToAssetFolders: 0.778ms
+	Scan: 94.352ms
+	OnSourceAssetsModified: 0.003ms
+	CategorizeAssetsWithTransientArtifact: 17.895ms
+	ProcessAssetsWithTransientArtifactChanges: 71.370ms
+	CategorizeAssets: 41.977ms
+	ImportOutOfDateAssets: 2652.515ms (1571.929ms without children)
+		ImportManagerImport: 125.810ms (2.881ms without children)
+			ImportInProcess: 122.484ms
+			UpdateCategorizedAssets: 0.445ms
+		CompileScripts: 952.192ms
+		ReloadNativeAssets: 0.026ms
+		UnloadImportedAssets: 0.712ms
+		ReloadImportedAssets: 1.036ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.412ms
+		InitializingProgressBar: 0.009ms
 		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
-		OnDemandSchedulerStart: 0.585ms
-	PostProcessAllAssets: 48.018ms
-	GatherAllCurrentPrimaryArtifactRevisions: 0.003ms
-	UnloadStreamsBegin: 7.819ms
-	PersistCurrentRevisions: 0.123ms
-	UnloadStreamsEnd: 0.002ms
-	GenerateScriptTypeHashes: 4.084ms
-	Untracked: 2374.011ms
+		OnDemandSchedulerStart: 0.388ms
+	PostProcessAllAssets: 315.508ms
+	Hotreload: 1.868ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.002ms
+	UnloadStreamsBegin: 3.169ms
+	PersistCurrentRevisions: 0.175ms
+	UnloadStreamsEnd: 0.001ms
+	GenerateScriptTypeHashes: 2.665ms
+	Untracked: 1920.121ms
 
 Application.AssetDatabase Initial Refresh End
-Scanning for USB devices : 4.434ms
+Scanning for USB devices : 1.288ms
 Initializing Unity extensions:
 [MODES] ModeService[none].Initialize
 [MODES] ModeService[none].LoadModes
 [MODES] Loading mode Default (0) for mode-current-id-DeepDiveGame-P0
-Unloading 19 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 4000 unused Assets / (2.2 MB). Loaded Objects now: 4858.
-Memory consumption went from 161.9 MB to 159.7 MB.
-Total: 12.833000 ms (FindLiveObjects: 0.566600 ms CreateObjectMapping: 0.393400 ms MarkObjects: 9.419100 ms  DeleteObjects: 2.451100 ms)
+Unloading 32 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 4012 unused Assets / (2.4 MB). Loaded Objects now: 4901.
+Memory consumption went from 165.2 MB to 162.8 MB.
+Total: 8.962300 ms (FindLiveObjects: 0.423300 ms CreateObjectMapping: 0.407000 ms MarkObjects: 5.784800 ms  DeleteObjects: 2.344100 ms)
 
-Start importing Assets/Settings/P0RenderPipeline.asset using Guid(57211af7dbb94ea40a44550efda154d9) (NativeFormatImporter) -> (artifact id: 'a9dec4192a6633682815bb2d26232ebc') in 0.0106883 seconds
-Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
+Start importing Assets/Settings/P0RenderPipeline.asset using Guid(57211af7dbb94ea40a44550efda154d9) (NativeFormatImporter) -> (artifact id: 'a9dec4192a6633682815bb2d26232ebc') in 0.0042657 seconds
+Refreshing native plugins compatible for Editor in 0.40 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Asset Pipeline Refresh (id=3be50efaf3cc32244acac94f26ae2366): Total: 0.428 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
-	Summary:
-		Imports: total=1 (actual=1, local cache=0, cache server=0)
-		Asset DB Process Time: managed=3 ms, native=104 ms
-		Asset DB Callback time: managed=316 ms, native=2 ms
-		Scripting: domain reloads=0, domain reload time=0 ms, compile time=0 ms, other=0 ms
-		Project Asset Count: scripts=893, non-scripts=1673
-		Asset File Changes: new=0, changed=0, moved=0, deleted=0
-		Scan Filter Count: 3
-	InvokeCustomDependenciesCallbacks: 0.001ms
-	InvokePackagesCallback: 0.001ms
-	ApplyChangesToAssetFolders: 0.067ms
-	Scan: 48.430ms
-	OnSourceAssetsModified: 0.001ms
-	CategorizeAssetsWithTransientArtifact: 0.017ms
-	ProcessAssetsWithTransientArtifactChanges: 0.067ms
-	CategorizeAssets: 37.510ms
-	ImportOutOfDateAssets: 14.601ms (0.297ms without children)
-		ImportManagerImport: 12.605ms (1.455ms without children)
-			ImportInProcess: 11.113ms
-			UpdateCategorizedAssets: 0.037ms
-		ReloadNativeAssets: 0.028ms
-		UnloadImportedAssets: 0.292ms
-		ReloadImportedAssets: 0.000ms
-		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.411ms
-		InitializingProgressBar: 0.011ms
-		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
-		OnDemandSchedulerStart: 0.954ms
-	PostProcessAllAssets: 318.229ms
-	Hotreload: 0.988ms
-	GatherAllCurrentPrimaryArtifactRevisions: 0.172ms
-	UnloadStreamsBegin: 0.068ms
-	PersistCurrentRevisions: 0.099ms
-	UnloadStreamsEnd: 0.002ms
-	Untracked: 7.707ms
-
+Asset Pipeline Refresh (id=00056e0ec4f6afb4fbe04e6fb9310e31): Total: 0.073 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
 1 URP assets included in build
 - P0RenderPipeline - Assets/Settings/P0RenderPipeline.asset
 	 - P0Renderer - Assets/Settings/P0Renderer.asset - UnityEngine.Rendering.Universal.UniversalRendererData
@@ -388,14 +371,14 @@ DeepDive.Editor.P1IntegratedBuild:BuildWindows () (at Assets/Editor/P1Integrated
 
 (Filename: ./Library/PackageCache/com.unity.render-pipelines.universal@7865b6b91f8a/Editor/BuildProcessors/URPPreprocessBuild.cs Line: 73)
 
-Start importing Assets/Settings/P0RenderPipeline.asset using Guid(57211af7dbb94ea40a44550efda154d9) (NativeFormatImporter) -> (artifact id: 'a9dec4192a6633682815bb2d26232ebc') in 0.0035024 seconds
-Refreshing native plugins compatible for Editor in 0.52 ms, found 0 plugins.
+Start importing Assets/Settings/P0RenderPipeline.asset using Guid(57211af7dbb94ea40a44550efda154d9) (NativeFormatImporter) -> (artifact id: 'a9dec4192a6633682815bb2d26232ebc') in 0.0034642 seconds
+Refreshing native plugins compatible for Editor in 0.45 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Asset Pipeline Refresh (id=1d8ea19c6df0c2348912a7fefa12f9c2): Total: 0.029 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
-Start importing Assets/Resources using Guid(530ac67431dae38449bf515ccdd7b5d3) (DefaultImporter) -> (artifact id: 'fa5c700d6caf5d97290d06716da6f740') in 0.0170899 seconds
-Refreshing native plugins compatible for Editor in 0.48 ms, found 0 plugins.
+Asset Pipeline Refresh (id=fc3772f2b12341e4fa05d133d8de9376): Total: 0.018 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/Resources using Guid(afbbcc4470381194887681531e9a30af) (DefaultImporter) -> (artifact id: '50328425248c5ba2012afa8920a1c16c') in 0.012193 seconds
+Refreshing native plugins compatible for Editor in 0.30 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Asset Pipeline Refresh (id=9d4d65f2b70770f4587b9ef8ef46f188): Total: 0.071 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=ff0ce105931cdfc4cb218f2b5299ef78): Total: 0.050 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
 [TestRunBuilder] Creating new file 'Assets/Resources/PerformanceTestRunInfo.json' (1691 bytes)
 UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
 UnityEngine.StackTraceUtility:ExtractStackTrace ()
@@ -436,224 +419,125 @@ DeepDive.Editor.P1IntegratedBuild:BuildWindows () (at Assets/Editor/P1Integrated
 
 (Filename: ./Library/PackageCache/com.unity.test-framework.performance@8b56083ec0f0/Editor/TestRunBuilder.cs Line: 242)
 
-Start importing ProjectSettings/ProjectSettings.asset using Guid(00000000000000004000000000000000) (LibraryAssetImporter) -> (artifact id: 'f9e3db5e508185f189c55930667bfca4') in 0.0040482 seconds
-Start importing ProjectSettings/GraphicsSettings.asset using Guid(00000000000000006100000000000000) (LibraryAssetImporter) -> (artifact id: '8398e78c8e886032426ff993103426b0') in 0.0034645 seconds
-Start importing Assets/UniversalRenderPipelineGlobalSettings.asset using Guid(ccb67f708daa3d14a8b9e21224b8cab1) (NativeFormatImporter) -> (artifact id: '8847dbc37db6dfc6daeae36fec1d5276') in 0.0032708 seconds
-Refreshing native plugins compatible for Editor in 0.59 ms, found 0 plugins.
+Start importing ProjectSettings/ProjectSettings.asset using Guid(00000000000000004000000000000000) (LibraryAssetImporter) -> (artifact id: 'f9e3db5e508185f189c55930667bfca4') in 0.0022566 seconds
+Start importing ProjectSettings/GraphicsSettings.asset using Guid(00000000000000006100000000000000) (LibraryAssetImporter) -> (artifact id: '8398e78c8e886032426ff993103426b0') in 0.0024273 seconds
+Start importing Assets/UniversalRenderPipelineGlobalSettings.asset using Guid(ccb67f708daa3d14a8b9e21224b8cab1) (NativeFormatImporter) -> (artifact id: '8847dbc37db6dfc6daeae36fec1d5276') in 0.0020331 seconds
+Refreshing native plugins compatible for Editor in 0.34 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Asset Pipeline Refresh (id=17dc893c96cb6d34db56cb28b9cdc62c): Total: 0.039 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
-Launched and connected shader compiler UnityShaderCompiler.exe after 0.03 seconds
+Asset Pipeline Refresh (id=01373da042793e84f8a7839e0db2e2ed): Total: 0.024 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
 Starting: C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aESkipCompile.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssembliesAndTypeDB
 WorkingDir: C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
-ExitCode: 0 Duration: 2s542ms
-[3/4        2s] BuildPlayerDataGenerator Library/BuildPlayerData/Editor/TypeDb-All.json
-*** Tundra build success (2.47 seconds), 1 items updated, 4 evaluated
-Start importing Assets/Resources/PerformanceTestRunSettings.json using Guid(091f95cc4faa5124bb09ce913aa808e7) (TextScriptImporter) -> (artifact id: '975deadf50b84b75141a317870e0f4ca') in 0.0174167 seconds
-Start importing Assets/Resources/PerformanceTestRunInfo.json using Guid(1d0af7d5bb8c61a4cad49b59a1991ff7) (TextScriptImporter) -> (artifact id: '39158d2f91377179b8961f08bc98fb04') in 0.0176134 seconds
-Refreshing native plugins compatible for Editor in 0.53 ms, found 0 plugins.
+ExitCode: 0 Duration: 0s79ms
+*** Tundra build success (0.04 seconds), 0 items updated, 4 evaluated
+Start importing Assets/Resources/PerformanceTestRunInfo.json using Guid(c53812764e043614782bdffba52b431d) (TextScriptImporter) -> (artifact id: 'ff8ae38c3a3a620c66c2da913dcbed80') in 0.0151232 seconds
+Start importing Assets/Resources/PerformanceTestRunSettings.json using Guid(8e55bb50fcad930459c80b02a488bb26) (TextScriptImporter) -> (artifact id: 'df380096934fa6e7136bcd3278a7bbea') in 0.0167783 seconds
+Refreshing native plugins compatible for Editor in 0.46 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Asset Pipeline Refresh (id=61bb503c2154d8643a30164b8a55b28f): Total: 0.092 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=07861445a85df194aaa40e457089445a): Total: 0.071 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
 [ScriptCompilation] Requested script compilation because: Recompiling scripts for player build.
 BuildPlayer: start building target 19
 Starting: C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aPDevDbg.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssembliesAndTypeDB
 WorkingDir: C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
 Total cache size 204296876
-Total cache size after purge 204296876, took 00:00:00.9161247
-ExitCode: 0 Duration: 8s695ms
+Total cache size after purge 204296876, took 00:00:00.3818514
+ExitCode: 0 Duration: 3s822ms
 [414/627    0s] WriteResponseFile Library/Bee/artifacts/rsp/4747638433968585886.rsp
-[519/627    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
-[547/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InternalAPIEngineBridge.004.dll
-[548/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipeline.Universal.ShaderLibrary.dll
-[549/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Economy.dll
-[550/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Media.dll
-[551/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Config.Runtime.dll
-[552/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.UnifiedRayTracing.Runtime.dll
-[553/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Burst.dll
-[554/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Networking.Transport.dll
-[555/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Collections.dll
-[556/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Mathematics.dll
-[557/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Inventory.dll
-[558/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Day.dll
+[525/627    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
 [559/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.dll
-[560/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll
-[561/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.dll
-[562/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Session.dll
-[563/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Core.Contracts.dll
-[564/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.Shared.dll
-[565/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.dll
-[566/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Progression.dll
-[567/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Shaders.dll
-[568/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.GPUDriven.Runtime.dll
-[569/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.ShaderLibrary.dll
-[570/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Living.dll
-[571/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.pdb
-[572/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.pdb
-[573/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.dll
-[574/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Collections.pdb
-[575/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InternalAPIEngineBridge.004.pdb
-[576/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Mathematics.pdb
-[577/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Networking.Transport.pdb
-[578/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Session.pdb
-[579/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Economy.pdb
-[580/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipeline.Universal.ShaderLibrary.pdb
-[581/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Inventory.pdb
-[582/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Shaders.pdb
-[583/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.ShaderLibrary.pdb
-[584/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Living.pdb
-[585/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.2D.Runtime.dll
-[586/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Netcode.Runtime.pdb
-[587/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Progression.pdb
-[588/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.2D.Runtime.pdb
-[589/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Core.Contracts.pdb
-[590/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Netcode.Runtime.dll
-[591/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.UnifiedRayTracing.Runtime.pdb
-[592/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.pdb
-[593/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.Shared.pdb
-[594/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Media.pdb
-[595/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.pdb
-[596/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.GPUDriven.Runtime.pdb
-[597/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Config.Runtime.pdb
-[598/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Burst.pdb
-[599/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Day.pdb
-[600/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.pdb
-[601/627    0s] Csc Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.Network.dll (+2 others)
-[607/627    0s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/DeepDive.MapUI.dll (+pdb)
-Processing assembly Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.MapUI.dll, with 133 defines and 179 references
-
-processors: Unity.Jobs.CodeGen.JobsILPostProcessor, Unity.Netcode.Editor.CodeGen.INetworkMessageILPP, Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP, Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP, Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP, zzzUnity.Burst.CodeGen.BurstILPostProcessor
-
-running Unity.Jobs.CodeGen.JobsILPostProcessor
-
-running Unity.Netcode.Editor.CodeGen.INetworkMessageILPP
-
-running Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP
-
-running Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP
-
-running Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP
-
-running zzzUnity.Burst.CodeGen.BurstILPostProcessor
-[608/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.MapUI.dll
-[609/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.MapUI.pdb
-[610/627    1s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/DeepDive.Trip.dll (+pdb)
-Processing assembly Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.Trip.dll, with 133 defines and 181 references
-
-processors: Unity.Jobs.CodeGen.JobsILPostProcessor, Unity.Netcode.Editor.CodeGen.INetworkMessageILPP, Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP, Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP, Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP, zzzUnity.Burst.CodeGen.BurstILPostProcessor
-
-running Unity.Jobs.CodeGen.JobsILPostProcessor
-
-running Unity.Netcode.Editor.CodeGen.INetworkMessageILPP
-
-running Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP
-
-running Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP
-
-running Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP
-
-running zzzUnity.Burst.CodeGen.BurstILPostProcessor
-[611/627    1s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/DeepDive.World.dll (+pdb)
-Processing assembly Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.World.dll, with 133 defines and 180 references
-
-processors: Unity.Jobs.CodeGen.JobsILPostProcessor, Unity.Netcode.Editor.CodeGen.INetworkMessageILPP, Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP, Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP, Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP, zzzUnity.Burst.CodeGen.BurstILPostProcessor
-
-running Unity.Jobs.CodeGen.JobsILPostProcessor
-
-running Unity.Netcode.Editor.CodeGen.INetworkMessageILPP
-
-running Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP
-
-running Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP
-
-running Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP
-
-running zzzUnity.Burst.CodeGen.BurstILPostProcessor
-[612/627    2s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/DeepDive.P1.Lab.dll (+pdb)
-Processing assembly Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.P1.Lab.dll, with 133 defines and 192 references
-
-processors: Unity.Jobs.CodeGen.JobsILPostProcessor, Unity.Netcode.Editor.CodeGen.INetworkMessageILPP, Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP, Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP, Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP, zzzUnity.Burst.CodeGen.BurstILPostProcessor
-
-running Unity.Jobs.CodeGen.JobsILPostProcessor
-
-running Unity.Netcode.Editor.CodeGen.INetworkMessageILPP
-
-running Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP
-
-running Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP
-
-running Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP
-
-running zzzUnity.Burst.CodeGen.BurstILPostProcessor
-[613/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Trip.pdb
-[614/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.World.pdb
-[615/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Trip.dll
-[616/627    2s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/DeepDive.Network.dll (+pdb)
-Processing assembly Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.Network.dll, with 133 defines and 180 references
-
-processors: Unity.Jobs.CodeGen.JobsILPostProcessor, Unity.Netcode.Editor.CodeGen.INetworkMessageILPP, Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP, Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP, Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP, zzzUnity.Burst.CodeGen.BurstILPostProcessor
-
-running Unity.Jobs.CodeGen.JobsILPostProcessor
-
-running Unity.Netcode.Editor.CodeGen.INetworkMessageILPP
-
-running Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP
-
-running Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP
-
-running Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP
-
-running zzzUnity.Burst.CodeGen.BurstILPostProcessor
-[617/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.P1.Lab.pdb
-[618/627    2s] ILPostProcess Library/Bee/artifacts/1900b0aPDevDbg.dag/post-processed/DeepDive.Composition.dll (+pdb)
-Processing assembly Library/Bee/artifacts/1900b0aPDevDbg.dag/DeepDive.Composition.dll, with 133 defines and 193 references
-
-processors: Unity.Jobs.CodeGen.JobsILPostProcessor, Unity.Netcode.Editor.CodeGen.INetworkMessageILPP, Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP, Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP, Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP, zzzUnity.Burst.CodeGen.BurstILPostProcessor
-
-running Unity.Jobs.CodeGen.JobsILPostProcessor
-
-running Unity.Netcode.Editor.CodeGen.INetworkMessageILPP
-
-running Unity.Netcode.Editor.CodeGen.INetworkSerializableILPP
-
-running Unity.Netcode.Editor.CodeGen.NetworkBehaviourILPP
-
-running Unity.Netcode.Editor.CodeGen.RuntimeAccessModifiersILPP
-
-running zzzUnity.Burst.CodeGen.BurstILPostProcessor
-[619/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Network.pdb
-[620/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.World.dll
-[621/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Composition.pdb
-[622/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Network.dll
-[623/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Composition.dll
-[624/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.P1.Lab.dll
-[626/627    0s] BuildPlayerDataGenerator Library/BuildPlayerData/Player/RuntimeInitializeOnLoads.json (+1 other)
-*** Tundra build success (8.65 seconds), 76 items updated, 627 evaluated
-Rebuilding Data files because Assets/Resources/PerformanceTestRunInfo.json is dirty (hash)
+[560/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InternalAPIEngineBridge.004.dll
+[561/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Netcode.Runtime.dll
+[562/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Collections.dll
+[563/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipeline.Universal.ShaderLibrary.dll
+[564/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Economy.dll
+[565/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Burst.dll
+[566/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Config.Runtime.dll
+[567/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Network.dll
+[568/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Media.dll
+[569/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.MapUI.dll
+[570/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.dll
+[571/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Inventory.dll
+[572/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Mathematics.dll
+[573/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.P1.Lab.dll
+[574/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.Shared.dll
+[575/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Session.dll
+[576/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.dll
+[577/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.UnifiedRayTracing.Runtime.dll
+[578/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll
+[579/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Trip.dll
+[580/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Day.dll
+[581/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.ShaderLibrary.dll
+[582/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Composition.dll
+[583/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.2D.Runtime.dll
+[584/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.dll
+[585/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Living.dll
+[586/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.World.dll
+[587/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Progression.dll
+[588/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Core.Contracts.dll
+[589/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.GPUDriven.Runtime.dll
+[590/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Networking.Transport.dll
+[591/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Shaders.dll
+[592/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.pdb
+[593/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Session.pdb
+[594/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.MapUI.pdb
+[595/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Collections.pdb
+[596/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.ShaderLibrary.pdb
+[597/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Economy.pdb
+[598/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.InternalAPIEngineBridge.004.pdb
+[599/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Inventory.pdb
+[600/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Burst.pdb
+[601/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipeline.Universal.ShaderLibrary.pdb
+[602/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Core.Contracts.pdb
+[603/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Composition.pdb
+[604/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.Shared.pdb
+[605/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.World.pdb
+[606/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Living.pdb
+[607/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Mathematics.pdb
+[608/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Netcode.Runtime.pdb
+[609/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/UnityEngine.UI.pdb
+[610/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Progression.pdb
+[611/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.UnifiedRayTracing.Runtime.pdb
+[612/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.2D.Runtime.pdb
+[613/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Core.Runtime.pdb
+[614/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.Networking.Transport.pdb
+[615/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.TextMeshPro.pdb
+[616/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Config.Runtime.pdb
+[617/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Day.pdb
+[618/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Shaders.pdb
+[619/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Media.pdb
+[620/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.Universal.Runtime.pdb
+[621/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Network.pdb
+[622/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.Trip.pdb
+[623/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/DeepDive.P1.Lab.pdb
+[624/627    0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Unity.RenderPipelines.GPUDriven.Runtime.pdb
+*** Tundra build success (3.79 seconds), 68 items updated, 627 evaluated
+Rebuilding Data files because Assets/DeepDive/Composition/OceanShaders/OceanSurface.shader is dirty (hash)
 Total cache size 204296876
-Total cache size after purge 204296876, took 00:00:00.3441938
+Total cache size after purge 204296876, took 00:00:00.2706080
 Opening scene 'Assets/DeepDive/World/Scenes/PrepArea.unity'
 Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
 Loaded scene 'Assets/DeepDive/World/Scenes/PrepArea.unity'
-	Deserialize:            5.219 ms
-	Integration:            132.506 ms
-	Integration of assets:  0.022 ms
-	Thread Wait Time:       24.650 ms
-	Total Operation Time:   162.398 ms
+	Deserialize:            5.056 ms
+	Integration:            134.834 ms
+	Integration of assets:  0.021 ms
+	Thread Wait Time:       19.864 ms
+	Total Operation Time:   159.775 ms
 Unloading 36 unused Assets / (0.7 MB). Loaded Objects now: 4976.
-Memory consumption went from 160.2 MB to 159.5 MB.
-Total: 7.444800 ms (FindLiveObjects: 0.335200 ms CreateObjectMapping: 0.333600 ms MarkObjects: 6.421200 ms  DeleteObjects: 0.353400 ms)
+Memory consumption went from 160.3 MB to 159.6 MB.
+Total: 5.973400 ms (FindLiveObjects: 0.207500 ms CreateObjectMapping: 0.107000 ms MarkObjects: 5.358300 ms  DeleteObjects: 0.299800 ms)
 
-Created GICache directory at C:/Users/mehmet/AppData/LocalLow/Unity/Caches/GiCache. Took: 0.034s, timestamps: [25.291 - 25.325]
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.01 seconds
+Created GICache directory at C:/Users/mehmet/AppData/LocalLow/Unity/Caches/GiCache. Took: 0.026s, timestamps: [13.490 - 13.516]
 Opening scene 'Assets/DeepDive/World/Scenes/DiveTestArea.unity'
 Unloading 202 Unused Serialized files (Serialized files now loaded: 0)
 Loaded scene 'Assets/DeepDive/World/Scenes/DiveTestArea.unity'
-	Deserialize:            12.655 ms
-	Integration:            153.428 ms
-	Integration of assets:  0.029 ms
-	Thread Wait Time:       0.117 ms
-	Total Operation Time:   166.228 ms
-Unloading 2695 unused Assets / (16.3 MB). Loaded Objects now: 5899.
-Memory consumption went from 200.3 MB to 183.9 MB.
-Total: 11.163100 ms (FindLiveObjects: 0.559900 ms CreateObjectMapping: 0.266800 ms MarkObjects: 6.618400 ms  DeleteObjects: 3.716100 ms)
+	Deserialize:            12.759 ms
+	Integration:            144.953 ms
+	Integration of assets:  0.026 ms
+	Thread Wait Time:       0.116 ms
+	Total Operation Time:   157.854 ms
+Unloading 2695 unused Assets / (30.0 MB). Loaded Objects now: 5899.
+Memory consumption went from 200.3 MB to 170.3 MB.
+Total: 11.103400 ms (FindLiveObjects: 0.379100 ms CreateObjectMapping: 0.222600 ms MarkObjects: 5.970900 ms  DeleteObjects: 4.529200 ms)
 
 
 
@@ -978,19 +862,19 @@ Dependency assembly - System.ServiceModel.Routing.dll
 Dependency assembly - System.Security.Cryptography.Cng.dll
 
 Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 132 unused Assets / (69.9 KB). Loaded Objects now: 4928.
-Memory consumption went from 161.4 MB to 161.3 MB.
-Total: 8.387800 ms (FindLiveObjects: 0.448200 ms CreateObjectMapping: 0.153700 ms MarkObjects: 7.568800 ms  DeleteObjects: 0.214200 ms)
+Unloading 132 unused Assets / (70.0 KB). Loaded Objects now: 4928.
+Memory consumption went from 161.5 MB to 161.4 MB.
+Total: 6.675800 ms (FindLiveObjects: 0.298300 ms CreateObjectMapping: 0.099600 ms MarkObjects: 6.104900 ms  DeleteObjects: 0.172300 ms)
 
 Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
 Unloading 0 unused Assets / (0 B). Loaded Objects now: 4928.
-Memory consumption went from 161.3 MB to 161.3 MB.
-Total: 7.601800 ms (FindLiveObjects: 0.217300 ms CreateObjectMapping: 0.102800 ms MarkObjects: 7.267900 ms  DeleteObjects: 0.012400 ms)
+Memory consumption went from 161.4 MB to 161.4 MB.
+Total: 5.591300 ms (FindLiveObjects: 0.208600 ms CreateObjectMapping: 0.094400 ms MarkObjects: 5.277600 ms  DeleteObjects: 0.009600 ms)
 
 Unloading 1 Unused Serialized files (Serialized files now loaded: 0)
 Unloading 177 unused Assets / (149.9 MB). Loaded Objects now: 4928.
-Memory consumption went from 311.8 MB to 161.9 MB.
-Total: 31.050500 ms (FindLiveObjects: 0.377100 ms CreateObjectMapping: 0.320800 ms MarkObjects: 10.085900 ms  DeleteObjects: 20.264800 ms)
+Memory consumption went from 311.9 MB to 162.0 MB.
+Total: 23.036800 ms (FindLiveObjects: 0.241200 ms CreateObjectMapping: 0.116500 ms MarkObjects: 5.522700 ms  DeleteObjects: 17.154900 ms)
 
 Compiling shader "Hidden/Universal Render Pipeline/Sampling"
   Pass "BoxDownsample" (vp)
@@ -999,7 +883,7 @@ Compiling shader "Hidden/Universal Render Pipeline/Sampling"
     After settings filtering:   1
     After built-in stripping:   1
     After scriptable stripping: 1
-    Processed in 0.07 seconds
+    Processed in 0.06 seconds
   Pass "BoxDownsample" (fp)
     Target graphics API: d3d11
     Full variant space:         1
@@ -1158,7 +1042,7 @@ Compiling shader "Hidden/TerrainEngine/Details/UniversalPipeline/BillboardWaving
     Prepared data for serialisation in 0.00s
   Pass ForwardLit (fp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass DepthOnly (vp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass DepthOnly (vp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass DepthOnly (fp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1638,19 +1522,19 @@ Compiling shader "Hidden/Universal/CoreBlit"
     After built-in stripping:   2
     After scriptable stripping: 2
     Processed in 0.00 seconds
-  Pass Nearest (vp, d3d11) finished in 0.08 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass Nearest (vp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass Nearest (fp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass Bilinear (vp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass Bilinear (fp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass Bilinear (fp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass NearestQuad (vp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass NearestQuad (vp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass NearestQuad (fp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass NearestQuad (fp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuad (vp, d3d11) finished in 0.07 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuad (vp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass BilinearQuad (fp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1662,9 +1546,9 @@ Compiling shader "Hidden/Universal/CoreBlit"
     Prepared data for serialisation in 0.00s
   Pass BilinearQuadPadding (fp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass NearestQuadPaddingRepeat (vp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass NearestQuadPaddingRepeat (vp, d3d11) finished in 0.05 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass NearestQuadPaddingRepeat (fp, d3d11) finished in 0.06 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass NearestQuadPaddingRepeat (fp, d3d11) finished in 0.05 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass BilinearQuadPaddingRepeat (vp, d3d11) finished in 0.05 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1676,9 +1560,9 @@ Compiling shader "Hidden/Universal/CoreBlit"
     Prepared data for serialisation in 0.00s
   Pass NearestQuadPaddingAlphaBlend (vp, d3d11) finished in 0.05 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass NearestQuadPaddingAlphaBlend (fp, d3d11) finished in 0.05 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass NearestQuadPaddingAlphaBlend (fp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuadPaddingAlphaBlend (vp, d3d11) finished in 0.05 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuadPaddingAlphaBlend (vp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass BilinearQuadPaddingAlphaBlend (fp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1688,11 +1572,11 @@ Compiling shader "Hidden/Universal/CoreBlit"
     Prepared data for serialisation in 0.00s
   Pass BilinearQuadPaddingAlphaBlendRepeat (vp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuadPaddingAlphaBlendRepeat (fp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuadPaddingAlphaBlendRepeat (fp, d3d11) finished in 0.03 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuadPaddingAlphaBlendOctahedral (vp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuadPaddingAlphaBlendOctahedral (vp, d3d11) finished in 0.03 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuadPaddingAlphaBlendOctahedral (fp, d3d11) finished in 0.04 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuadPaddingAlphaBlendOctahedral (fp, d3d11) finished in 0.03 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass CubeToOctahedral (vp, d3d11) finished in 0.03 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1704,7 +1588,7 @@ Compiling shader "Hidden/Universal/CoreBlit"
     Prepared data for serialisation in 0.00s
   Pass CubeToOctahedralAlpha (vp, d3d11) finished in 0.03 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass CubeToOctahedralAlpha (fp, d3d11) finished in 0.03 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass CubeToOctahedralAlpha (fp, d3d11) finished in 0.02 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass CubeToOctahedralRed (vp, d3d11) finished in 0.02 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1718,9 +1602,9 @@ Compiling shader "Hidden/Universal/CoreBlit"
     Prepared data for serialisation in 0.00s
   Pass BilinearQuadAlpha (fp, d3d11) finished in 0.02 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuadRed (vp, d3d11) finished in 0.02 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuadRed (vp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearQuadRed (fp, d3d11) finished in 0.02 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearQuadRed (fp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass NearestCubeToOctahedralPadding (vp, d3d11) finished in 0.01 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1732,7 +1616,7 @@ Compiling shader "Hidden/Universal/CoreBlit"
     Prepared data for serialisation in 0.00s
   Pass BilinearDebugDraw (vp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass BilinearDebugDraw (fp, d3d11) finished in 0.01 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass BilinearDebugDraw (fp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass NearestDebugDraw (vp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -1860,7 +1744,7 @@ Compiling shader "Hidden/Universal/CoreBlitColorAndDepth"
     Prepared data for serialisation in 0.00s
   Pass ColorOnly (fp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass ColorAndDepth (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass ColorAndDepth (vp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass ColorAndDepth (fp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -2355,9 +2239,14 @@ Compiling shader "DeepDive/Ocean Surface"
     After built-in stripping:   4
     After scriptable stripping: 4
     Processed in 0.00 seconds
-  Pass OceanForward (vp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.01 seconds
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.01 seconds
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
+  Pass OceanForward (vp, d3d11) finished in 0.17 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 3 variants (0.43s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass OceanForward (fp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass OceanForward (fp, d3d11) finished in 0.40 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 3 variants (1.16s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
 Serialized binary data for shader DeepDive/Ocean Surface in 0.00s
     d3d11 (total internal programs: 8, unique: 8)
@@ -2495,25 +2384,25 @@ Compiling shader "Universal Render Pipeline/Lit"
     After built-in stripping:   4
     After scriptable stripping: 0
     Processed in 0.00 seconds
-  Pass ForwardLit (vp, d3d11) finished in 0.03 seconds. Local cache hits 32 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass ForwardLit (vp, d3d11) finished in 0.02 seconds. Local cache hits 32 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass ForwardLit (fp, d3d11) finished in 0.03 seconds. Local cache hits 64 (0.02s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass ForwardLit (fp, d3d11) finished in 0.02 seconds. Local cache hits 64 (0.02s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass ShadowCaster (vp, d3d11) finished in 0.02 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass ShadowCaster (fp, d3d11) finished in 0.02 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass DepthOnly (vp, d3d11) finished in 0.02 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass DepthOnly (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass DepthOnly (fp, d3d11) finished in 0.02 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass DepthOnly (fp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass DepthNormals (vp, d3d11) finished in 0.01 seconds. Local cache hits 8 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass DepthNormals (fp, d3d11) finished in 0.01 seconds. Local cache hits 8 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass MotionVectors (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass MotionVectors (vp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass MotionVectors (fp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass MotionVectors (fp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
 Serialized binary data for shader Universal Render Pipeline/Lit in 0.00s
     d3d11 (total internal programs: 136, unique: 136)
@@ -2562,7 +2451,7 @@ Compiling shader "Universal Render Pipeline/Particles/Unlit"
     Processed in 0.00 seconds
   Pass ForwardLit (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass ForwardLit (fp, d3d11) finished in 0.01 seconds. Local cache hits 8 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass ForwardLit (fp, d3d11) finished in 0.01 seconds. Local cache hits 8 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass DepthOnly (vp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -2659,7 +2548,7 @@ Compiling shader "Universal Render Pipeline/Unlit"
     After built-in stripping:   2
     After scriptable stripping: 0
     Processed in 0.00 seconds
-  Pass Unlit (vp, d3d11) finished in 0.02 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass Unlit (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass Unlit (fp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -2669,7 +2558,7 @@ Compiling shader "Universal Render Pipeline/Unlit"
     Prepared data for serialisation in 0.00s
   Pass DepthNormalsOnly (vp, d3d11) finished in 0.01 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass DepthNormalsOnly (fp, d3d11) finished in 0.01 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass DepthNormalsOnly (fp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass MotionVectors (vp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -2720,9 +2609,9 @@ Compiling shader "Legacy Shaders/VertexLit"
     After built-in stripping:   2
     After scriptable stripping: 2
     Processed in 0.00 seconds
-  Pass  (vp, d3d11) finished in 0.01 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -2777,13 +2666,13 @@ Compiling shader "Legacy Shaders/Diffuse"
     After built-in stripping:   4
     After scriptable stripping: 4
     Processed in 0.00 seconds
-  Pass FORWARD (vp, d3d11) finished in 0.01 seconds. Local cache hits 16 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass FORWARD (vp, d3d11) finished in 0.00 seconds. Local cache hits 16 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass FORWARD (fp, d3d11) finished in 0.01 seconds. Local cache hits 8 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass FORWARD (fp, d3d11) finished in 0.00 seconds. Local cache hits 8 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass FORWARD (vp, d3d11) finished in 0.01 seconds. Local cache hits 10 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass FORWARD (vp, d3d11) finished in 0.00 seconds. Local cache hits 10 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass FORWARD (fp, d3d11) finished in 0.00 seconds. Local cache hits 10 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass FORWARD (fp, d3d11) finished in 0.00 seconds. Local cache hits 10 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass DEFERRED (vp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -2953,10 +2842,6 @@ Compiling shader "Hidden/Internal-DepthNormalsTexture"
     After built-in stripping:   1
     After scriptable stripping: 1
     Processed in 0.00 seconds
-  Pass  (vp, d3d11) finished in 0.02 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
-    Prepared data for serialisation in 0.00s
-  Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
-    Prepared data for serialisation in 0.00s
   Pass  (vp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
@@ -2974,6 +2859,10 @@ Compiling shader "Hidden/Internal-DepthNormalsTexture"
   Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (vp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+    Prepared data for serialisation in 0.00s
+  Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+    Prepared data for serialisation in 0.00s
+  Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -3052,11 +2941,11 @@ Compiling shader "Hidden/Internal-ScreenSpaceShadows"
     After built-in stripping:   4
     After scriptable stripping: 4
     Processed in 0.00 seconds
-  Pass  (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass  (vp, d3d11) finished in 0.01 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 4 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -3185,7 +3074,7 @@ Compiling shader "Hidden/Internal-DeferredShading"
     Processed in 0.00 seconds
   Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 26 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 26 (0.02s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 26 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -4129,7 +4018,7 @@ Compiling shader "Hidden/Internal-ODSWorldTexture"
     Prepared data for serialisation in 0.00s
   Pass  (vp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass  (fp, d3d11) finished in 0.01 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass  (fp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass  (vp, d3d11) finished in 0.00 seconds. Local cache hits 1 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -4368,7 +4257,7 @@ Compiling shader "Hidden/VideoDecode"
     Prepared data for serialisation in 0.00s
   Pass YCbCrA_To_RGBA (fp, d3d11) finished in 0.01 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
-  Pass Flip_RGBA_To_RGBA (vp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
+  Pass Flip_RGBA_To_RGBA (vp, d3d11) finished in 0.01 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
   Pass Flip_RGBA_To_RGBA (fp, d3d11) finished in 0.00 seconds. Local cache hits 2 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants.
     Prepared data for serialisation in 0.00s
@@ -4520,22 +4409,10 @@ SpriteAtlasDatabase::Cleanup
 Starting: C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --dagfile="Library/Bee/Player7e798ed4.dag" --profile="Library/Bee/backend1.traceevents" Player
 WorkingDir: C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
 DisplayProgressbar: Incremental Player Build
-C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame/Library/PackageCache/com.unity.burst@2f3d916873ea/.Runtime\bcl.exe exited after 5377 ms.
-stdout:
-Starting 1 library requests
-Done
-stderr:
-
-ExitCode: 4 Duration: 8s431ms
-Starting: C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\netcorerun\netcorerun.exe "C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\WinPlayerBuildProgram.exe" "C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/Bee;C:/Program Files/Unity/Hub/Editor/6000.3.23f1/Editor/Data/Tools/BuildPipeline" "Library/Bee/Player7e798ed4.dag.json" "Library/Bee/Player7e798ed4-inputdata.json" "Library\Bee\buildprogram0.traceevents"
-WorkingDir: C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
-ExitCode: 0 Duration: 0s340ms
-Starting: C:\Program Files\Unity\Hub\Editor\6000.3.23f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --dagfile="Library/Bee/Player7e798ed4.dag" --dagfilejson="Library\Bee\Player7e798ed4.dag.json" --profile="Library/Bee/backend2.traceevents" Player
-WorkingDir: C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame
-ExitCode: 0 Duration: 0s149ms
-Refreshing native plugins compatible for Editor in 0.54 ms, found 0 plugins.
+ExitCode: 0 Duration: 0s374ms
+Refreshing native plugins compatible for Editor in 0.34 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Asset Pipeline Refresh (id=149f02cf15d51c54eb9917539f90eef9): Total: 0.085 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=606cafcb7839b6a41b1bdd826cd6bab8): Total: 0.054 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
 Stripping Runtime Debug Shader Variants, you won't be able to use some features of Rendering Debugger in the Player Build.
 UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
 UnityEngine.StackTraceUtility:ExtractStackTrace ()
@@ -4556,7 +4433,7 @@ DeepDive.Editor.P1IntegratedBuild:BuildWindows () (at Assets/Editor/P1Integrated
 
 (Filename: ./Library/PackageCache/com.unity.render-pipelines.core@0bb36005e9ba/Editor/ShaderStripping/ShaderStrippingReport.cs Line: 379)
 
-Refreshing native plugins compatible for Editor in 0.57 ms, found 0 plugins.
+Refreshing native plugins compatible for Editor in 0.37 ms, found 0 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 
 -------------------------------------------------------------------------------
@@ -6122,26 +5999,26 @@ Used Assets and files from the Resources folder, sorted by uncompressed size:
  0.1 kb	 0.0% Assets/Resources/PerformanceTestRunSettings.json
 -------------------------------------------------------------------------------
 Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 2853 unused Assets / (19.9 MB). Loaded Objects now: 4940.
-Memory consumption went from 188.3 MB to 168.4 MB.
-Total: 15.335300 ms (FindLiveObjects: 0.389600 ms CreateObjectMapping: 0.294000 ms MarkObjects: 9.141700 ms  DeleteObjects: 5.508100 ms)
+Unloading 2853 unused Assets / (19.7 MB). Loaded Objects now: 4940.
+Memory consumption went from 188.5 MB to 168.8 MB.
+Total: 11.164100 ms (FindLiveObjects: 0.460300 ms CreateObjectMapping: 0.264600 ms MarkObjects: 6.845900 ms  DeleteObjects: 3.591000 ms)
 
 DisplayProgressNotification: Build Successful
 Build Finished, Result: Success.
-##utp:{"type":"PlayerBuildInfo","version":2,"phase":"Immediate","time":1793044914993,"processId":24184,"steps":[{"description":"Preprocess Player","duration":686},{"description":"Prepare For Build","duration":16},{"description":"ProducePlayerScriptAssemblies","duration":11975},{"description":"Verify Build setup","duration":301},{"description":"Prepare assets for target platform","duration":4},{"description":"Prepare splash screen","duration":0},{"description":"Building scenes","duration":759},{"description":"Build scripts DLLs","duration":53},{"description":"Build GlobalGameManagers file","duration":152},{"description":"Writing asset files","duration":790},{"description":"Building Resources/unity_builtin_extra","duration":183},{"description":"Write data build dirty tracking information","duration":377},{"description":"Postprocess built player","duration":9442}],"duration":24738}
+##utp:{"type":"PlayerBuildInfo","version":2,"phase":"Immediate","time":1793045479809,"processId":17832,"steps":[{"description":"Preprocess Player","duration":434},{"description":"Prepare For Build","duration":9},{"description":"ProducePlayerScriptAssemblies","duration":4240},{"description":"Verify Build setup","duration":229},{"description":"Prepare assets for target platform","duration":3},{"description":"Prepare splash screen","duration":0},{"description":"Building scenes","duration":695},{"description":"Build scripts DLLs","duration":47},{"description":"Build GlobalGameManagers file","duration":126},{"description":"Writing asset files","duration":1094},{"description":"Building Resources/unity_builtin_extra","duration":147},{"description":"Write data build dirty tracking information","duration":369},{"description":"Postprocess built player","duration":814}],"duration":8207}
 Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
 Loaded scene 'Temp/__Backupscenes/0.backup'
-	Deserialize:            1.196 ms
-	Integration:            159.422 ms
-	Integration of assets:  0.005 ms
-	Thread Wait Time:       0.038 ms
-	Total Operation Time:   160.661 ms
-Unloading 0 unused Assets / (13.8 KB). Loaded Objects now: 4932.
-Memory consumption went from 161.2 MB to 161.2 MB.
-Total: 9.990600 ms (FindLiveObjects: 0.424600 ms CreateObjectMapping: 0.414300 ms MarkObjects: 9.124700 ms  DeleteObjects: 0.025200 ms)
+	Deserialize:            0.784 ms
+	Integration:            133.172 ms
+	Integration of assets:  0.003 ms
+	Thread Wait Time:       0.048 ms
+	Total Operation Time:   134.006 ms
+Unloading 0 unused Assets / (16 B). Loaded Objects now: 4932.
+Memory consumption went from 161.5 MB to 161.5 MB.
+Total: 5.940800 ms (FindLiveObjects: 0.220700 ms CreateObjectMapping: 0.105600 ms MarkObjects: 5.603400 ms  DeleteObjects: 0.009800 ms)
 
 Total cache size 204296876
-Total cache size after purge 204296876, took 00:00:00.7081778
+Total cache size after purge 204296876, took 00:00:00.4725722
 P1_BUILD_SUCCEEDED integrated=true target=windows
 UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
 UnityEngine.StackTraceUtility:ExtractStackTrace ()
