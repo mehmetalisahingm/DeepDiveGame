@@ -1,3 +1,4 @@
 *.json -text
 *.xml -text
 *.csv -text
+*.log -text
