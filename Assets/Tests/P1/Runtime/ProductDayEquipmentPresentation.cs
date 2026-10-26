@@ -42,7 +42,7 @@ namespace DeepDive.P1.Lab
             if(worker==null)return;
             if(!equipmentObserverReady)
             {
-                if(route==null)SetRoute(new[]{P(-6.5f,-11.2f),new Vector3(-4.3f,6,-5)});
+                if(route==null)SetRoute(new[]{P(9f,-12.5f),P(-6.5f,-11.2f),new Vector3(-4.3f,6,-5)});
                 if(!Follow(true))return;
                 equipmentObserverReady=true;
                 local.SetHeldEquipmentLocal(HeldEquipmentMode.Camera);equipmentRefusalAt=Time.realtimeSinceStartup;
