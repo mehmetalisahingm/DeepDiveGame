@@ -54,6 +54,8 @@ namespace DeepDive.P1.Lab
             public double maxMotionSampleGap;
             public int motionTrackingSegments;
             public bool runnerAbortReceived, injectedFailure;
+            public bool equipmentLoweredSeen,equipmentRaisedSeen,equipmentCancelled,unownedCameraRefused;
+            public int equipmentVideoFrames;
             public List<MotionSample> motionSamples=new List<MotionSample>();
             public List<string> trace = new List<string>(), tripPhases = new List<string>();
             public List<ulong> fishIds = new List<ulong>();
@@ -224,6 +226,7 @@ namespace DeepDive.P1.Lab
             // connection before the guest's own 3 s are up. Its repair evidence is already mirrored by then.
             if (!finished && (step == 15 || step == 16) && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
             CaptureRepairVideo();
+            CaptureEquipmentVideo();
         }
         private void Broadcast(float now)
         {
@@ -337,7 +340,7 @@ namespace DeepDive.P1.Lab
                     if (!Host) { localDone = true; return; }
                     SellAndBuy(); break;
                 case 8:
-                    if (!Host) { WaitInWater(); return; }
+                    if (!Host) { if(EquipmentVideo)EquipmentObserver();else WaitInWater(); return; }
                     Record(); break;
                 case 10: TripOut(); break;
                 case 11:
@@ -566,6 +569,7 @@ namespace DeepDive.P1.Lab
                 if (!Follow(true)) return;
                 substep = 1;
             }
+            if(EquipmentVideo && !EquipmentSwitchProbe())return;
             if(recordingFish==null || !recordingFish.IsSpawned || recordingFish.IsDead ||
                 (!bridge.IsRecordingLocal && !ClearFishLine(recordingFish)))
                 recordingFish=FindObjectsByType<FishActor>(FindObjectsSortMode.None)
@@ -946,6 +950,14 @@ namespace DeepDive.P1.Lab
                 report.passed &= visuals;
             }
             if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
+            if(EquipmentVideo && !report.reload)
+            {
+                var equipmentOk=report.equipmentLoweredSeen && report.equipmentRaisedSeen && report.equipmentVideoFrames>=8 &&
+                    (Host?report.equipmentCancelled:report.unownedCameraRefused);
+                if(!equipmentOk && report.errors.Count==0)
+                {report.failure="Equipment transition/cancel/refusal visual proof missing";report.errors.Add(report.failure);}
+                report.passed &= equipmentOk;
+            }
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             report.motionSamples=motionHistory.ToList();
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
