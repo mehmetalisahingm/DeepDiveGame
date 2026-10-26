@@ -37,8 +37,9 @@ namespace DeepDive.Network
             foreach(var finger in fingerBones)
                 if(IsFinger(finger)&&finger.childCount>0)fingerBind[finger]=finger.localRotation;
         }
-        public void Present(PlayerPresentationState value, float normalizedSpeed)
-        { state = value; speed = Mathf.Clamp01(normalizedSpeed); }
+        private float equipmentLowering;
+        public void Present(PlayerPresentationState value, float normalizedSpeed,float lowering=0)
+        { state = value; speed = Mathf.Clamp01(normalizedSpeed);equipmentLowering=Mathf.Clamp01(lowering); }
 
         public void PresentRepair(Vector3 left, Vector3 right, Quaternion rotation)
         {PresentRepair(left,right,rotation,rotation,true);}
@@ -123,8 +124,10 @@ namespace DeepDive.Network
                 var plank = state.HeldEquipment == HeldEquipmentMode.RepairPart;
                 var y = FirstPerson ? 1.39f : 1.16f;
                 if (plank) y -= .15f;
-                Hold(rightArm, rightElbow, rightHand, new Vector3(plank ? .35f : camera ? 0.18f : 0.24f, y, plank ? .57f : .44f), 1);
-                Hold(leftArm, leftElbow, leftHand, new Vector3(plank ? -.35f : camera ? -0.18f : -0.12f, y - (camera || plank ? 0 : 0.10f), plank ? .57f : .43f), -1);
+                y-=(FirstPerson ? .34f : .25f)*equipmentLowering;
+                var zOffset=-.10f*equipmentLowering;
+                Hold(rightArm, rightElbow, rightHand, new Vector3(plank ? .35f : camera ? 0.18f : 0.24f, y, (plank ? .57f : .44f)+zOffset), 1);
+                Hold(leftArm, leftElbow, leftHand, new Vector3(plank ? -.35f : camera ? -0.18f : -0.12f, y - (camera || plank ? 0 : 0.10f), (plank ? .57f : .43f)+zOffset), -1);
                 Aim(rightHand, rightIndex, camera ? Vector3.up : Vector3.forward);
                 Aim(leftHand, leftIndex, camera ? Vector3.up : Vector3.forward);
                 foreach (var finger in fingerBones)
@@ -139,7 +142,7 @@ namespace DeepDive.Network
                 if (equipmentSocket != null)
                 {
                     equipmentSocket.position = rightHand.position + Model.TransformDirection(new Vector3(0, .085f, .015f));
-                    equipmentSocket.rotation = Model.rotation;
+                    equipmentSocket.rotation = Model.rotation*Quaternion.Euler(25*equipmentLowering,0,0);
                 }
             }
         }

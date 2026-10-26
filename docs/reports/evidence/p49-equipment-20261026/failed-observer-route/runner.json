@@ -1,0 +1,21 @@
+{
+  "passed": false,
+  "requestedPlayers": 2,
+  "failure": "Player 0 failed: Runner aborted: Stopping the probe to correct its observer route through the dry beach approach",
+  "processes": [
+    {
+      "slot": 0,
+      "report": "player0.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 1,
+      "report": "player1.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    }
+  ]
+}

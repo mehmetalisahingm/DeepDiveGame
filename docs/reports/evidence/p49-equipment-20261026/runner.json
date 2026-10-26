@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "requestedPlayers": 2,
+  "failure": "",
+  "processes": [
+    {
+      "slot": 0,
+      "report": "player0.json",
+      "exitCode": 0,
+      "passed": true,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 1,
+      "report": "player1.json",
+      "exitCode": 0,
+      "passed": true,
+      "runnerGenerated": false
+    },
+    {
+      "slot": "reload",
+      "report": "reload.json",
+      "exitCode": 0,
+      "passed": true,
+      "runnerGenerated": false
+    }
+  ]
+}
