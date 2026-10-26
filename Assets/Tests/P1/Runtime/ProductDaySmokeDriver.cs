@@ -51,6 +51,10 @@ namespace DeepDive.P1.Lab
             public string clipId = "", recordingId = "", hash = "", position = "", failure = "";
             public long clipBytes;
             public float distance, maxTravelStep;
+            public double maxMotionSampleGap;
+            public int motionTrackingSegments;
+            public bool runnerAbortReceived, injectedFailure;
+            public List<MotionSample> motionSamples=new List<MotionSample>();
             public List<string> trace = new List<string>(), tripPhases = new List<string>();
             public List<ulong> fishIds = new List<ulong>();
             public List<ulong> primaryFishIds = new List<ulong>();
@@ -124,7 +128,10 @@ namespace DeepDive.P1.Lab
         }
         private void Update()
         {
-            if (finished || adapter == null) return;
+            if (finished) return;
+            if (!string.IsNullOrEmpty(output) && File.Exists(output+".abort"))
+            { report.runnerAbortReceived=true; Fail("Runner aborted: "+File.ReadAllText(output+".abort").Trim()); return; }
+            if (adapter == null) return;
             var now = Time.realtimeSinceStartup;
             if (now > deadline || (step > 0 && now > stageDeadline))
             { Fail($"Timeout step={step} sub={substep} waypoint={waypoint} position={report.position}{BedState()}"); return; }
@@ -155,7 +162,7 @@ namespace DeepDive.P1.Lab
                 {
                     if (Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) > 0.7f) return;
                     homeChecked = true; report.homeSpawn = true; firstDay = sync.DayNumber.Value;
-                    previous = local.transform.position; tracked = true; previousDay = firstDay;
+                    BeginMotionSegment();
                     if (Host)
                     {
                         var economy = adapter.GetComponent<EconomyManager>();
@@ -180,7 +187,12 @@ namespace DeepDive.P1.Lab
                 }
                 localDone = true;
             }
-            Track(); Observe(); Broadcast(now);
+            if(!ResumeMotionAfterRejoin())return;
+            Track();
+            if (finished) return;
+            Observe(); Broadcast(now);
+            if (step==1 && Arg("-p46-fault-slot")==report.slot.ToString())
+            { report.injectedFailure=true; Fail("Injected QA peer failure"); return; }
             foreach (var peer in players)
             { sawCarry |= peer.RepairHandsBusy && !peer.RepairPlaced.Value; sawPlaced |= peer.RepairPlaced.Value && peer.RepairHits.Value > 0; }
             if (step==1 && local.LastActionRequestId.Value!=repairObservedRequest)
@@ -772,12 +784,13 @@ namespace DeepDive.P1.Lab
             report.position = local.transform.position.ToString();
             if (!tracked) return;
             var distance = Vector3.Distance(previous, local.transform.position);
+            RecordMotion(distance);
             var seat = local.Seated.Value;
             // Seat/bed pose and D07 morning are explicit body-placement boundaries.
             if (!seat && !wasSeated && sync.DayNumber.Value == previousDay && step < 14)
             {
                 report.distance += distance; report.maxTravelStep = Mathf.Max(report.maxTravelStep, distance);
-                if (distance > 1.5f) Fail("Unexpected travel discontinuity: " + distance);
+                if (distance > 1.5f) Fail(FormattableString.Invariant($"Unexpected travel discontinuity: {distance:F6}; realGap={motionGap:F6}; fixedGap={motionFixedGap:F6}; from={previous}; to={local.transform.position}"));
             }
             previous = local.transform.position; wasSeated = seat; previousDay = sync.DayNumber.Value;
             if (report.worldLoads != 1 && !(RepairInterruptions && disconnectSent && report.worldLoads == 2))
@@ -903,7 +916,7 @@ namespace DeepDive.P1.Lab
         private static readonly FieldInfo HomeStatusField =
             typeof(HomePlayerInteractionBinding).GetField("statusMessage", BindingFlags.Instance | BindingFlags.NonPublic);
         private void Fail(string reason) { report.failure = reason; report.errors.Add(reason); Finish(); }
-        private void Finish()
+        private void Finish(bool quit=true)
         {
             if (finished) return;
             finished = true;
@@ -934,9 +947,10 @@ namespace DeepDive.P1.Lab
             }
             if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
+            report.motionSamples=motionHistory.ToList();
             File.WriteAllText(output, JsonUtility.ToJson(report, true));
             Debug.Log("P46_PRODUCT_RESULT passed=" + report.passed + " failure=" + report.failure);
-            Application.Quit(report.passed ? 0 : 1);
+            if(quit) Application.Quit(report.passed ? 0 : 1);
         }
     }
 }

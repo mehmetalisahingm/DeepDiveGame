@@ -1,0 +1,11 @@
+PASS Crash detected without waiting for session timeout
+PASS Missing report becomes explicitly generated failure
+PASS Runner never calls generated evidence PASS
+PASS Truncated JSON is a failure
+PASS Live partial writer rechecked before declaring malformed evidence
+PASS Original malformed evidence preserved
+PASS Original gameplay failure never overwritten
+PASS Successful exited processes accepted
+PASS Successful player plus fresh reload yields runner PASS
+PASS Missing reload cannot yield runner PASS
+10 checks PASS; fixtures: C:\Users\mehmet\AppData\Local\Temp\p46-process-evidence-655c23da8cc842dfa836fe4c40c2f705

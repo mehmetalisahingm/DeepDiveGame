@@ -1,0 +1,217 @@
+{
+  "runtimeBuild": {
+    "source": "ea56b9252e94e1a43a0cf694792426e6cd7bc1f2",
+    "editor": "6000.3.23f1",
+    "dlls": [
+      {
+        "file": "DeepDive.Network.dll",
+        "sha256": "B8823477BD146FF2DE01722B714EE8FE5554F2E9B6FD7005EBB6121A79F8B647"
+      },
+      {
+        "file": "DeepDive.Composition.dll",
+        "sha256": "5086A7CDF24D58A17D64A75670EC9B45FD0CDC1906E0C1C55C648E51D76F30A9"
+      },
+      {
+        "file": "DeepDive.P1.Lab.dll",
+        "sha256": "C4A625CF03D18A6D858F5EB8FC87278017FD3786F6B675CC4DDB3C96839362C3"
+      }
+    ]
+  },
+  "runnerSource": "80dc7fa605b85241d99669b5de29802967a478fe",
+  "allProcessesSamePC": true,
+  "original1535CauseProven": false,
+  "cases": [
+    {
+      "name": "baseline-single4",
+      "run": "Logs/P46-product-20261025-151518-4",
+      "expectedPassed": true,
+      "runtimeSource": "40eb0659b40f7e975b48cf5d9f74eb269d44556b",
+      "runnerSource": null
+    },
+    {
+      "name": "intermediate-purchase2-a",
+      "run": "Logs/P46-product-20261025-152520-235-2",
+      "expectedPassed": true,
+      "runtimeSource": "c5c562a4890370a9fb565a08bb00d033888c5a34",
+      "runnerSource": "c5c562a4890370a9fb565a08bb00d033888c5a34"
+    },
+    {
+      "name": "intermediate-rejoin4-fail",
+      "run": "Logs/P46-product-20261025-152542-288-4",
+      "expectedPassed": false,
+      "runtimeSource": "c5c562a4890370a9fb565a08bb00d033888c5a34",
+      "runnerSource": "c5c562a4890370a9fb565a08bb00d033888c5a34"
+    },
+    {
+      "name": "intermediate-purchase2-b",
+      "run": "Logs/P46-product-20261025-152618-224-2",
+      "expectedPassed": true,
+      "runtimeSource": "c5c562a4890370a9fb565a08bb00d033888c5a34",
+      "runnerSource": "c5c562a4890370a9fb565a08bb00d033888c5a34"
+    },
+    {
+      "name": "final-rejoin4",
+      "run": "Logs/P46-product-20261025-152957-532-4",
+      "expectedPassed": true,
+      "runtimeSource": "ea56b9252e94e1a43a0cf694792426e6cd7bc1f2",
+      "runnerSource": "ea56b9252e94e1a43a0cf694792426e6cd7bc1f2"
+    },
+    {
+      "name": "final-purchase2",
+      "run": "Logs/P46-product-20261025-153245-579-2",
+      "expectedPassed": true,
+      "runtimeSource": "ea56b9252e94e1a43a0cf694792426e6cd7bc1f2",
+      "runnerSource": "80dc7fa605b85241d99669b5de29802967a478fe"
+    },
+    {
+      "name": "expected-fault2",
+      "run": "Logs/P46-product-20261025-153229-066-2",
+      "expectedPassed": false,
+      "runtimeSource": "ea56b9252e94e1a43a0cf694792426e6cd7bc1f2",
+      "runnerSource": "80dc7fa605b85241d99669b5de29802967a478fe"
+    }
+  ],
+  "files": {
+    ".gitattributes": {
+      "sha256": "cfe9bde3770df1cfa70c34d661b9dcee23c22085d4e7a3fbe09802814eec6831",
+      "bytes": 53
+    },
+    "baseline-single4/player0.json": {
+      "sha256": "8a907a9634a324c1d35266e26c1d6a88da5d4115fab9dbac4167fffa64f890d3",
+      "bytes": 1767
+    },
+    "baseline-single4/player1.json": {
+      "sha256": "e386c40b744bf6b872a3295b77683ffa6fa38c70606b765fd1d2b9b7993e5e96",
+      "bytes": 1770
+    },
+    "baseline-single4/player2.json": {
+      "sha256": "5c18e107b8aa4f9ed4d9bc890412bf86f9c16682b46e8360dcc45d5c9c044838",
+      "bytes": 1730
+    },
+    "baseline-single4/player3.json": {
+      "sha256": "768715283525b70f7b19d9351f8df7124cdbd96b0a6e4991b91368c7d8908ccd",
+      "bytes": 1773
+    },
+    "baseline-single4/reload.json": {
+      "sha256": "afb72435b99cf7fe272d2cdbebe6086218124f5545db419ae7164d8cf8eeaeeb",
+      "bytes": 1479
+    },
+    "expected-fault2/player0.json": {
+      "sha256": "3026c12584323f408e25a8043c8528080ec7da4608280c05ff77256fd01df87c",
+      "bytes": 8690
+    },
+    "expected-fault2/player1.json": {
+      "sha256": "676524bfd0ef08573b5e7e5956d17b04029f4062dc565996fa72fd70aa469ea3",
+      "bytes": 7192
+    },
+    "expected-fault2/runner.json": {
+      "sha256": "89ebf4301f5a4730c6b86426c7a64525ec06ce1ccefd97edf9c1595f60f2a761",
+      "bytes": 400
+    },
+    "final-purchase2/player0.json": {
+      "sha256": "187799f030da33565f0c9fc4ae7592957bddbbd5b0f33239be0133ae2ef13425",
+      "bytes": 55705
+    },
+    "final-purchase2/player1.json": {
+      "sha256": "a2d419da5c6f2b078c45741a3924fd47108fe06c735f27dbcf8c055246477b6a",
+      "bytes": 55650
+    },
+    "final-purchase2/reload.json": {
+      "sha256": "3b927f5cd10a33cbcabfaff6867b788f0be3c9382f9470f5e678de7c2cac91e4",
+      "bytes": 1622
+    },
+    "final-purchase2/runner.json": {
+      "sha256": "a968234d46fc252f7dbfcd8cdb514c3ef64063bd4d8c01ad7c679d08bb7f05a9",
+      "bytes": 498
+    },
+    "final-rejoin4/player0.json": {
+      "sha256": "7f52ac6896448982d3ced4b26f588f300775ee07b55bd28cc6c678bbdecd853f",
+      "bytes": 56153
+    },
+    "final-rejoin4/player1.json": {
+      "sha256": "1a52ae8b9602428c8b0b20bf68ad63d69b39e58409be1aff22adb66175191ef3",
+      "bytes": 56217
+    },
+    "final-rejoin4/player2.json": {
+      "sha256": "838fcdc7b02119b54a226735589106594bc6f189e0488d58d41561990e576ae6",
+      "bytes": 56305
+    },
+    "final-rejoin4/player3.json": {
+      "sha256": "eb36d049a421bef86fee16aec769eff4c6253af2b69a234a0b846c078c385d00",
+      "bytes": 56230
+    },
+    "final-rejoin4/reload.json": {
+      "sha256": "43d0283d438f7e1bd82c844ccfb60ca709ec2c0e71a934fb148220c44e553f70",
+      "bytes": 1622
+    },
+    "final-rejoin4/runner.json": {
+      "sha256": "6e854c5e0b484d5936c32bbb64af2381c8f8a59c5430602de6dd8c0d957b42c7",
+      "bytes": 770
+    },
+    "intermediate-build.json": {
+      "sha256": "21bb214fced5409d3dab51a0ca2a06474efbdaa7e7b32dcefcaee3799ddf3bd4",
+      "bytes": 507
+    },
+    "intermediate-purchase2-a/player0.json": {
+      "sha256": "327182862834d3413986547dffd37aafd912e84dc5430e9e7c68fed23653d47c",
+      "bytes": 55799
+    },
+    "intermediate-purchase2-a/player1.json": {
+      "sha256": "04852c4d73ee1e25afab2ee1450d91c04d1349fac364e118b357609538bd3c62",
+      "bytes": 55753
+    },
+    "intermediate-purchase2-a/reload.json": {
+      "sha256": "e045f74d4cc951058f90915e7a7a680b645730da703e977b946022175cd92106",
+      "bytes": 1591
+    },
+    "intermediate-purchase2-a/runner.json": {
+      "sha256": "a968234d46fc252f7dbfcd8cdb514c3ef64063bd4d8c01ad7c679d08bb7f05a9",
+      "bytes": 498
+    },
+    "intermediate-purchase2-b/player0.json": {
+      "sha256": "ab0f1ae089e7f11f5882f26f967fa588cdb09c262c712626272c28efb9f2b9c1",
+      "bytes": 55661
+    },
+    "intermediate-purchase2-b/player1.json": {
+      "sha256": "5a4658def4147b92068c4c429e2d036663af05219a0f3ecd9838c53431a87e05",
+      "bytes": 55722
+    },
+    "intermediate-purchase2-b/reload.json": {
+      "sha256": "e045f74d4cc951058f90915e7a7a680b645730da703e977b946022175cd92106",
+      "bytes": 1591
+    },
+    "intermediate-purchase2-b/runner.json": {
+      "sha256": "a968234d46fc252f7dbfcd8cdb514c3ef64063bd4d8c01ad7c679d08bb7f05a9",
+      "bytes": 498
+    },
+    "intermediate-rejoin4-fail/player0.json": {
+      "sha256": "2bd1e19f43b7344c8214a404b8a9589ddfaf20e891d77be241417497b5fc2a62",
+      "bytes": 55967
+    },
+    "intermediate-rejoin4-fail/player1.json": {
+      "sha256": "074bbf556b25fe8d46435741b08d0c1a687b5073b5149a6fb0336b068d307dce",
+      "bytes": 58229
+    },
+    "intermediate-rejoin4-fail/player2.json": {
+      "sha256": "230586d482c8983fb7c64a769b09c8aa7cae9c45d27243d05fbb2e25803cf147",
+      "bytes": 56980
+    },
+    "intermediate-rejoin4-fail/player3.json": {
+      "sha256": "0d9503dc3bf080763209d23231f690b562dc1c7d82450c34a23430e56e5c4b79",
+      "bytes": 58179
+    },
+    "intermediate-rejoin4-fail/runner.json": {
+      "sha256": "9cef911ae8cac7a4b45e688f2b951910785b54ded050a9b7ece4935ca0edb325",
+      "bytes": 782
+    },
+    "process-tests.txt": {
+      "sha256": "7c2e2523aea1b5d4ecd5b71ea8e290a391f4c9e4e5f7108c577991ed19e8b3f8",
+      "bytes": 619
+    }
+  },
+  "currentTools": {
+    "tools/Test-P46-ProductDay.ps1": "fca21151a91914704e075169422e083322cdb8758bbf852e4c375c058a051f0f",
+    "tools/P46-ProcessEvidence.ps1": "46d3330fb51e3eb0e18f6c668616a3d92d1d1919cb9a546b867cd3956c5b5013",
+    "tools/tests/Test-P46-ProcessEvidence.Tests.ps1": "43b73cc578caefee5b1ab0178eeefa1d3f540fcd4598ec5076522e15775f11c8"
+  }
+}
