@@ -65,5 +65,16 @@ namespace DeepDive.P4.Tests
             Assert.That(6.2f+1.55f+surface,Is.GreaterThan(8));
             Assert.That(SurfaceCameraRules.Lift(LocomotionMode.Surface,8,float.NaN),Is.Zero);
         }
+        [Test]
+        public void WadingUpTheRampReturnsToTheDryEyeWithoutA35CmStep()
+        {
+            var prior=SurfaceCameraRules.Lift(LocomotionMode.Surface,8,8);
+            for(var top=8.01f;top<9.85f;top+=.01f)
+            {
+                var lift=SurfaceCameraRules.Lift(top<9.8f?LocomotionMode.Surface:LocomotionMode.Land,top,8);
+                Assert.That(Mathf.Abs(lift-prior),Is.LessThan(.02f));prior=lift;
+            }
+            Assert.That(prior,Is.Zero);
+        }
     }
 }
