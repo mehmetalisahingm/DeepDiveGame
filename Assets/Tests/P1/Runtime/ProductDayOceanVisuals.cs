@@ -11,17 +11,29 @@ namespace DeepDive.P1.Lab
         private bool OceanVideo=>Arg("-p411-ocean-video")=="1";
         private int oceanWaypoint,oceanFrame;
         private float oceanHold,nextOceanFrame,oceanFirstTime,oceanFirstHeight;
-        private bool oceanShoreDone,oceanSurveyDone,oceanCapturing;
+        private bool oceanShoreDone,oceanShoreCaptured,oceanSurveyDone,oceanCapturing;
         private Vector3[] oceanRoute;
 
         private bool OceanShore()
         {
             if(oceanShoreDone)return true;
-            oceanCapturing=true;
-            Aim(new Vector3(-4,8,40));
-            if(oceanHold==0)oceanHold=Time.realtimeSinceStartup+3;
-            if(Time.realtimeSinceStartup<oceanHold)return false;
-            CaptureView(".ocean-shore.png");oceanShoreDone=true;oceanCapturing=false;oceanHold=0;return true;
+            if(!oceanShoreCaptured)
+            {
+                oceanCapturing=true;
+                Aim(new Vector3(-4,8,40));
+                if(oceanHold==0)oceanHold=Time.realtimeSinceStartup+3;
+                if(Time.realtimeSinceStartup<oceanHold)return false;
+                CaptureView(".ocean-shore.png");oceanShoreCaptured=true;oceanCapturing=false;
+            }
+            // Outward() ends at the dry engine pickup. The observer must walk out of
+            // its E ray instead of standing over it until the host finishes repairing.
+            if(!Host)
+            {
+                var parking=P(-8,-15.5f);var delta=parking-local.transform.position;delta.y=0;
+                if(delta.magnitude>.25f){MoveToward(Around(parking));return false;}
+                Stop();
+            }
+            oceanShoreDone=true;oceanHold=0;return true;
         }
 
         private bool OceanSurvey()
