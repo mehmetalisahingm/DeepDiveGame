@@ -1,0 +1,4 @@
+# Preserve evidence bytes across Windows/Linux checkouts.
+*.json -text
+*.csv -text
+*.xml -text
