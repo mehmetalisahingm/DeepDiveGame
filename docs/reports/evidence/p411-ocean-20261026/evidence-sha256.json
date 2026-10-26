@@ -1,0 +1,247 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 37,
+    "sha256": "99586198bd2ad2d6d82a06aa1419e570f283eab0163e7dc1e2f3d1e2e36a7126"
+  },
+  {
+    "path": "actual-clip-first-frame.jpg",
+    "bytes": 4633,
+    "sha256": "97a8c46b880919a415023ca01ae85b8cf4d42bfc911e1009da8d90174df0f59e"
+  },
+  {
+    "path": "actual-clip.json",
+    "bytes": 465,
+    "sha256": "9c87c62ccb8e0ac16092d64d5bf24b6ea1c3665a2faa4f5bded34f93a7fdedd2"
+  },
+  {
+    "path": "build-manifest.json",
+    "bytes": 56910,
+    "sha256": "8c2f3e22a041685b8954019f778ba67501d7a12d421de014b1e8f64fa8b35043"
+  },
+  {
+    "path": "editmode.xml",
+    "bytes": 1048346,
+    "sha256": "333d7865e253c9c60f0a889072dcafa1f47d7e55490191df097043db99708ef9"
+  },
+  {
+    "path": "editor-after-night.png",
+    "bytes": 286394,
+    "sha256": "b98fbcbc66e0d8453c6e538a45ee0045116ecc93ada19bc26afb2ecc44f7b340"
+  },
+  {
+    "path": "editor-after-shore.png",
+    "bytes": 510373,
+    "sha256": "39b3695b87f9ec9c63666e5b0854f84de7e10570432067fcee680168f9220d28"
+  },
+  {
+    "path": "editor-after-snells-window.png",
+    "bytes": 361351,
+    "sha256": "ba5c2195a6112303c64126a5b28826f3eeaad39968d249fc7f07337caaf3ca45"
+  },
+  {
+    "path": "editor-after-underwater.png",
+    "bytes": 636095,
+    "sha256": "a7b71cc09d4690a34e47921651538efa7dbcdefde348f917cffd342eba75fb3d"
+  },
+  {
+    "path": "editor-after-wind.png",
+    "bytes": 595897,
+    "sha256": "172f5482e16b07606cd187c12c5d6d06b15563c2354620ee0c237393ef174ba7"
+  },
+  {
+    "path": "editor-before-shore.png",
+    "bytes": 32910,
+    "sha256": "9b0282cf60a4c704acd98d1edce3b07cbf046acd83f9d389e781c813e6381c8c"
+  },
+  {
+    "path": "editor-preview.log",
+    "bytes": 33230,
+    "sha256": "9bf81ddfe7c7fe78465b529f44f78d701a7f797a44ab019542757ce504dbc730"
+  },
+  {
+    "path": "ocean-player0.mp4",
+    "bytes": 3027266,
+    "sha256": "ffccb907cd875f1e128771103a60f18463ab12bc75e0351fb04a469497271f7f"
+  },
+  {
+    "path": "ocean-player1.mp4",
+    "bytes": 3203181,
+    "sha256": "8460c26ab567bc476318329e0e74fb57fcd725fab1d2ade85582dad3675d7f4a"
+  },
+  {
+    "path": "player0-camera-rec.png",
+    "bytes": 801958,
+    "sha256": "a29218307fe0a47a438c8dcc7e8fada076b95021c6171d1403219b167c3c2d91"
+  },
+  {
+    "path": "player0-ocean-band-1.png",
+    "bytes": 625443,
+    "sha256": "a05d9edc4cc87dc16dbbf8996c287ca6c46eacf2b2c66e8e3c268de057b95197"
+  },
+  {
+    "path": "player0-ocean-band-2.png",
+    "bytes": 603491,
+    "sha256": "5dcb50b2695460319612b5c2321acaae07d1dd01f92f5b82a84e3c1c8572d785"
+  },
+  {
+    "path": "player0-ocean-band-3.png",
+    "bytes": 609947,
+    "sha256": "deda28d153f5e4a9b056cd36c471b23f4972d8a88afcee572cdb237fd81557aa"
+  },
+  {
+    "path": "player0-ocean-shore.png",
+    "bytes": 512374,
+    "sha256": "7a9ca00c547b6b9d3fde97d0ea13e3c85782d83f41aa7f5e4f2f8582320f727a"
+  },
+  {
+    "path": "player0-ocean-surface-2.png",
+    "bytes": 436312,
+    "sha256": "64ac0a7a98170c8d04b8e423b10ec92407da14b4bb5edf0996ae60f83bcedb29"
+  },
+  {
+    "path": "player0-ocean-surface-8.png",
+    "bytes": 490974,
+    "sha256": "8231ce13ae2ad7a2ca3ee71a2d1a136863eff9b5d1ec33e9f31c1f6074c9c0ff"
+  },
+  {
+    "path": "player0-survey-frames.csv",
+    "bytes": 22283,
+    "sha256": "098e373ba6e482aaf89e1c5e2c589ae3059869403c7a4b35432556682026ffa1"
+  },
+  {
+    "path": "player0-survey.json",
+    "bytes": 489,
+    "sha256": "ac13bbe698d381cd8ffb1e4b9b16c1376fd95d9fbbeb9b61f7e8aec2068dc51d"
+  },
+  {
+    "path": "player0.json",
+    "bytes": 66212,
+    "sha256": "80e0d0be21a491db17eb2e744d542e2f0e8be3adf37fd2901b10f7aae42d3968"
+  },
+  {
+    "path": "player0.json.campaign.json",
+    "bytes": 13444,
+    "sha256": "a2bc1859a0925989fef1c7d0db057c8783e0c6efebe45d4e15d30f8af91549fc"
+  },
+  {
+    "path": "player1-ocean-band-1.png",
+    "bytes": 612559,
+    "sha256": "a00cb922f41e770b3f6af610a7af1af9ef339c27326186659698e31004a83ba7"
+  },
+  {
+    "path": "player1-ocean-band-2.png",
+    "bytes": 605926,
+    "sha256": "99fbc30853985dd661900e0444d421fe86980640a2c5f6ee3b30d0b30ff5225f"
+  },
+  {
+    "path": "player1-ocean-band-3.png",
+    "bytes": 596902,
+    "sha256": "9683b54dbceca8f1184bf3f9070684bb8241ed8fe9335c2a46dcf96d110f4f13"
+  },
+  {
+    "path": "player1-ocean-shore.png",
+    "bytes": 526494,
+    "sha256": "dd066360edeb11b0968638536adb83e54838b9850390fad99c25fc32cd48cf2b"
+  },
+  {
+    "path": "player1-ocean-surface-2.png",
+    "bytes": 409345,
+    "sha256": "a7523e4f6f77610bea828740af9023039521b6bdc5c7ac06b7a5ccba517dd2d9"
+  },
+  {
+    "path": "player1-ocean-surface-8.png",
+    "bytes": 416878,
+    "sha256": "393df5772bccd44d67c9aa1642d63aa55630af6d29ab74e12e9f225c4c477538"
+  },
+  {
+    "path": "player1-survey-frames.csv",
+    "bytes": 23691,
+    "sha256": "c29db1720b36c9ca15897f9a2e42c20e1c155bb7aa2f8755c22123d073c9b0c0"
+  },
+  {
+    "path": "player1-survey.json",
+    "bytes": 478,
+    "sha256": "4047d8689431dfcb073ff67d0aad51c0f2ef531b4e92eba7e12dc679ce35624c"
+  },
+  {
+    "path": "player1.json",
+    "bytes": 66361,
+    "sha256": "0731c8afa766bb520cde9d5fa6c0e3e83b03ca8bf0a3e55bc48e90b2756946c5"
+  },
+  {
+    "path": "product-build-hashes.json",
+    "bytes": 698,
+    "sha256": "6b1f53818349a0930ad8e57b227540d4c2719e0ce2b0667f717d18eabeeeb5d7"
+  },
+  {
+    "path": "product-build-manifest.json",
+    "bytes": 56910,
+    "sha256": "c146dfe0ea18ec81c4ca39a721d4f9046e86450f68e1c0137e9438184cac1eeb"
+  },
+  {
+    "path": "product-windows-build.log",
+    "bytes": 381283,
+    "sha256": "b9bc54e325ce3f7ddce15bd45c7cd105436667834c2424ae54fe760c5f359d15"
+  },
+  {
+    "path": "reload.json",
+    "bytes": 2114,
+    "sha256": "f5598dc0318c26a106ab1ea948c597ee54d8ef6b54997eebefb131d1f813d3c7"
+  },
+  {
+    "path": "reload.json.campaign.json",
+    "bytes": 13444,
+    "sha256": "a2bc1859a0925989fef1c7d0db057c8783e0c6efebe45d4e15d30f8af91549fc"
+  },
+  {
+    "path": "runner.json",
+    "bytes": 526,
+    "sha256": "b29bc97397f1adb258468dd7ea92e90f37f38413d7144357ad5d6695c737a278"
+  },
+  {
+    "path": "windows-build.log",
+    "bytes": 384654,
+    "sha256": "4fb8b08bc76b375b5e4bcf88ea4099ec21abc8bcb5c6b438a477bf4195a8e86c"
+  },
+  {
+    "path": "final-world/player0.json",
+    "bytes": 859,
+    "sha256": "558503348f8ed1b3a8215f0afdf3291d08b0c61642e1df08d316c825d45bafda"
+  },
+  {
+    "path": "final-world/player1.json",
+    "bytes": 857,
+    "sha256": "d81b9dc549c91b2a890c966c320420014d82d86cce5cae106cc1555eecabd1c8"
+  },
+  {
+    "path": "final-world/reload.json",
+    "bytes": 492,
+    "sha256": "c2d2d802b9f9379301d63f08b8d1be60e48940af140116350a98c2075c9e22f8"
+  },
+  {
+    "path": "observer-blocked/player0.json",
+    "bytes": 68708,
+    "sha256": "96e68a6a73ea1ea3db585e262aedcb4eb32e3d6fab94d77de51727201765168f"
+  },
+  {
+    "path": "observer-blocked/player0.log",
+    "bytes": 82328,
+    "sha256": "178a6e04b2de8c0123ad1853dc15cd169e8ea4a93693fe0541e057ce08cbd832"
+  },
+  {
+    "path": "observer-blocked/player1.json",
+    "bytes": 68603,
+    "sha256": "bea2022d54e0b59f169ee7367f034a831ca3100d2d215f35bad5900ca9100ed9"
+  },
+  {
+    "path": "observer-blocked/player1.log",
+    "bytes": 1261748,
+    "sha256": "da5924aa13251e7f6e2bb330397bae8c5d61358e78e8e292a2c8f768bf0eb6f0"
+  },
+  {
+    "path": "observer-blocked/runner.json",
+    "bytes": 526,
+    "sha256": "e59c9b934375673e3c0f3d391c5946b8d63008b9336290ba4c7e01739a3f8d9a"
+  }
+]

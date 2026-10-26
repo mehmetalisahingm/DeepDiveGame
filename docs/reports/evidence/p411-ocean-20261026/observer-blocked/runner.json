@@ -1,0 +1,21 @@
+{
+  "passed": false,
+  "requestedPlayers": 2,
+  "failure": "Player 0: Timeout step=1 sub=1 waypoint=0 position=(-1.32, 8.48, -12.43)\nPlayer 1: Timeout step=1 sub=1 waypoint=7 position=(-2.62, 8.48, -12.82)",
+  "processes": [
+    {
+      "slot": 0,
+      "report": "player0.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    },
+    {
+      "slot": 1,
+      "report": "player1.json",
+      "exitCode": 1,
+      "passed": false,
+      "runnerGenerated": false
+    }
+  ]
+}
