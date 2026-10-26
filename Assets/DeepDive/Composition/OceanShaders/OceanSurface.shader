@@ -67,7 +67,13 @@ Shader "DeepDive/Ocean Surface"
                 float4 projected=mul(_OceanReflectionVP,float4(input.positionWS,1));
                 float2 ruv=projected.xy/max(.001,projected.w)*.5+.5+n.xz*.018;
                 if(above && _OceanReflectionValid>.5 && projected.w>0 && all(ruv>0) && all(ruv<1))
-                    reflected=lerp(reflected,SAMPLE_TEXTURE2D(_OceanReflection,sampler_OceanReflection,ruv).rgb,.82);
+                {
+                    // A planar view has finite coverage. Fade into the analytic sky
+                    // near its border instead of exposing the rectangular RT bounds.
+                    float2 edge=min(ruv,1-ruv);
+                    float coverage=smoothstep(0,.10,min(edge.x,edge.y));
+                    reflected=lerp(reflected,SAMPLE_TEXTURE2D(_OceanReflection,sampler_OceanReflection,ruv).rgb,.82*coverage);
+                }
                 float3 color=lerp(water,reflected,fresnel);
                 float3 h=normalize(view+sun.direction);
                 float sparkle=pow(saturate(dot(n,h)),lerp(320,100,_OceanWind))*2.8;
