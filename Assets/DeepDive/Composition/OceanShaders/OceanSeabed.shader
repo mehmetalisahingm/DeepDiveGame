@@ -21,13 +21,18 @@ Shader "DeepDive/Ocean Seabed"
             half4 Frag(Varyings i):SV_Target
             {
                 float3 n=normalize(i.normal);float sand=saturate((n.y-.25)*2);
-                float noise=OceanNoise(i.world.xz*.7)+OceanNoise(i.world.zy*2.3)*.35;
+                // Triplanar grain avoids stretching the floor texture up the rock walls.
+                float3 weights=pow(abs(n),4);weights/=max(.001,dot(weights,1));
+                float noise=dot(weights,float3(OceanNoise(i.world.yz*.7),OceanNoise(i.world.xz*.7),OceanNoise(i.world.xy*.7)));
+                noise+=dot(weights,float3(OceanNoise(i.world.yz*2.3),OceanNoise(i.world.xz*2.3),OceanNoise(i.world.xy*2.3)))*.35;
                 float ripple=sin(i.world.x*11+OceanNoise(i.world.xz*.25)*6)*.035;
-                float fine=(OceanNoise(i.world.xz*65)-.5)*.05/(1+length(fwidth(i.world.xz))*40);
+                float fine=(dot(weights,float3(OceanNoise(i.world.yz*65),OceanNoise(i.world.xz*65),OceanNoise(i.world.xy*65)))-.5)*.05/(1+length(fwidth(i.world))*40);
                 float3 albedo=lerp(float3(.18,.22,.20),float3(.49,.43,.31),sand)*( .75+noise*.25)+ripple*sand+fine;
                 Light sun=GetMainLight(TransformWorldToShadowCoord(i.world));
-                float3 lit=albedo*(sun.color*saturate(dot(n,sun.direction))*sun.shadowAttenuation+
-                    float3(.16,.20,.23)*lerp(.2,1,_OceanDaylight));
+                float waterDepth=max(0,_OceanSurfaceY-i.world.y);
+                float3 directTransmission=exp(-float3(.12,.065,.04)*waterDepth);
+                float3 lit=albedo*(sun.color*saturate(dot(n,sun.direction))*sun.shadowAttenuation*directTransmission+
+                    float3(.16,.20,.23)*lerp(.2,1,_OceanDaylight)*exp(-waterDepth*.045));
                 return half4(MixFog(lit,i.fog),1);
             }
             ENDHLSL
