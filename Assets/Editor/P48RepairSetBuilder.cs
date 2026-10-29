@@ -114,6 +114,17 @@ namespace DeepDive.EditorTools
             foreach (var x in new[] { -.985f, -.325f, .325f, .985f })
                 Prim(PrimitiveType.Cube, frame.transform, "Post_" + (x < 0 ? "L" : "R") + Mathf.Abs(Mathf.RoundToInt(x * 100)), new Vector3(x, .745f, Stern), new Vector3(Mathf.Abs(x) > .9f ? .07f : .06f, .89f, .12f), ribWood);
 
+            // Chalk-white trim around each bay opening: still readable when the oak inside has gone dark.
+            var trim = new GameObject("BayTrim"); trim.transform.SetParent(frame.transform, false);
+            foreach (var slotX in new[] { -.65f, 0f, .65f })
+            {
+                var tag = "Bay" + Mathf.RoundToInt(slotX * 100);
+                Prim(PrimitiveType.Cube, trim.transform, tag + "_Top", new Vector3(slotX, 1.1f, Stern - .062f), new Vector3(.62f, .02f, .006f), chalk);
+                Prim(PrimitiveType.Cube, trim.transform, tag + "_Bottom", new Vector3(slotX, .39f, Stern - .062f), new Vector3(.62f, .02f, .006f), chalk);
+                Prim(PrimitiveType.Cube, trim.transform, tag + "_Left", new Vector3(slotX - .3f, .745f, Stern - .062f), new Vector3(.02f, .72f, .006f), chalk);
+                Prim(PrimitiveType.Cube, trim.transform, tag + "_Right", new Vector3(slotX + .3f, .745f, Stern - .062f), new Vector3(.02f, .72f, .006f), chalk);
+            }
+
             // Splintered leftovers behind the bays (kept behind the repaired panel plane, never inside it).
             var remnants = new GameObject("Remnants"); remnants.transform.SetParent(root.transform, false);
             // Bay 0, hull patch: ragged plank stubs hanging from the port post, sill splinters.
@@ -135,8 +146,9 @@ namespace DeepDive.EditorTools
             var lantern = new GameObject("WorkLantern"); lantern.transform.SetParent(root.transform, false);
             lantern.transform.localPosition = new Vector3(.985f, 1.19f, Stern);
             Prim(PrimitiveType.Cube, lantern.transform, "Pole", new Vector3(0, .2f, 0), new Vector3(.045f, .4f, .045f), ribWood);
-            Prim(PrimitiveType.Cube, lantern.transform, "Arm", new Vector3(-.09f, .38f, 0), new Vector3(.2f, .03f, .03f), ribWood);
-            AddLantern(lantern.transform, new Vector3(-.17f, .24f, 0f));
+            // The arm reaches out toward the crew so the light falls on the bays head-on, not along the panel faces.
+            Prim(PrimitiveType.Cube, lantern.transform, "Arm", new Vector3(0, .38f, -.2f), new Vector3(.03f, .03f, .4f), ribWood);
+            AddLantern(lantern.transform, new Vector3(0f, .24f, -.4f));
             return root;
         }
 
@@ -150,6 +162,13 @@ namespace DeepDive.EditorTools
             foreach (var x in new[] { -.058f, .058f })
                 foreach (var z in new[] { -.058f, .058f })
                     Prim(PrimitiveType.Cube, l.transform, "Bar", new Vector3(x, 0, z), new Vector3(.012f, .15f, .012f), brass);
+            // Warm point light, only on in the dark (RepairLanternGlow): the cue that makes the fresh oak readable at night.
+            var lampObject = new GameObject("LanternLight"); lampObject.transform.SetParent(l.transform, false);
+            lampObject.transform.localPosition = new Vector3(0, -.05f, 0);
+            var lamp = lampObject.AddComponent<Light>();
+            lamp.type = LightType.Point; lamp.range = 6.5f; lamp.intensity = 0f; lamp.shadows = LightShadows.None;
+            lamp.color = new Color(1f, .74f, .4f); lamp.enabled = false;
+            lampObject.AddComponent<DeepDive.Composition.RepairLanternGlow>();
         }
 
         // --- repaired parts (panel frame: origin = slot centre, front/nail face toward -z, same as OakRepairPatch) --

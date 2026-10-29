@@ -67,17 +67,43 @@ namespace DeepDive.P4.Tests
             var hull = (GameObject)Object.Instantiate(Load(BoatRepairSetArt.DamagedHull));
             try
             {
-                var b = BoundsOf(hull);
-                Assert.GreaterOrEqual(b.min.x, -size.Width * .5f - .05f); Assert.LessOrEqual(b.max.x, size.Width * .5f + .05f);
-                Assert.GreaterOrEqual(b.min.z, -size.Length * .5f); Assert.LessOrEqual(b.max.z, size.Length * .5f);
-                Assert.GreaterOrEqual(b.min.y, -0.01f, "stands on the ground");
                 var lantern = hull.transform.Find("WorkLantern");
                 Assert.IsNotNull(lantern);
                 var withoutLantern = hull.GetComponentsInChildren<Renderer>().Where(r => !r.transform.IsChildOf(lantern)).ToArray();
                 var hullOnly = withoutLantern[0].bounds; foreach (var r in withoutLantern) hullOnly.Encapsulate(r.bounds);
+                Assert.GreaterOrEqual(hullOnly.min.x, -size.Width * .5f - .05f); Assert.LessOrEqual(hullOnly.max.x, size.Width * .5f + .05f);
+                Assert.GreaterOrEqual(hullOnly.min.z, -size.Length * .5f); Assert.LessOrEqual(hullOnly.max.z, size.Length * .5f);
+                Assert.GreaterOrEqual(hullOnly.min.y, -0.01f, "stands on the ground");
+                // The lantern arm reaches out toward the crew (so the light falls on the bays head-on) but not past the work points (0.85 m behind the stern).
+                Assert.GreaterOrEqual(BoundsOf(hull).min.z, -size.Length * .5f - .3f);
                 Assert.Less(hullOnly.max.y, 1.45f, "stays below eye height so it never hides the bays from the crew");
             }
             finally { Object.DestroyImmediate(hull); }
+        }
+
+        [Test]
+        public void LanternsCarryALightThatOnlyBurnsInTheDark()
+        {
+            foreach (var resource in new[] { BoatRepairSetArt.DamagedHull, BoatRepairSetArt.Trestle })
+            {
+                var prefab = Load(resource);
+                var glow = prefab.GetComponentInChildren<RepairLanternGlow>(true);
+                Assert.IsNotNull(glow, resource);
+                var lamp = glow.GetComponent<Light>();
+                Assert.AreEqual(LightType.Point, lamp.type); Assert.AreEqual(LightShadows.None, lamp.shadows, "no shadow maps: one cheap light per lantern");
+                Assert.LessOrEqual(lamp.range, 8f); Assert.IsFalse(lamp.enabled, "off until the scene is dark");
+            }
+            Assert.AreEqual(0f, RepairLanternGlow.Darkness(new Color(.64f, .69f, .72f)), "full day");
+            Assert.AreEqual(1f, RepairLanternGlow.Darkness(new Color(.16f, .17f, .18f)), "night (DaylightModel ambient x0.25)");
+        }
+
+        [Test]
+        public void EveryBayIsFramedInChalkTrim()
+        {
+            var hull = Load(BoatRepairSetArt.DamagedHull);
+            var trim = hull.transform.Find("TransomFrame/BayTrim");
+            Assert.IsNotNull(trim);
+            Assert.AreEqual(12, trim.childCount, "four strips for each of the three bays");
         }
 
         [Test]
