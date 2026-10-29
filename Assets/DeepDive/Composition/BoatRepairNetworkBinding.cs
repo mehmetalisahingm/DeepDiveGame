@@ -131,25 +131,37 @@ namespace DeepDive.Composition
         // otherwise along a detour line RoutePad off the hull's south (town) side, the side the beach has room on:
         // onto that line level with `from`, along it to level with `to` (clamped to the hull's ends), then `to`.
         // Never back toward a corner already passed, so a caller can recompute it every frame. Without a blocking
-        // hull (berth, or the boat already repaired): just `to`. Starts on the north (water) side are not handled:
-        // the dry strip there is narrower than a diver.
-        public List<Vector3> RouteAround(Vector3 from, Vector3 to)
+        // hull (berth, or the boat already repaired): just `to`. A start on the north (water) side level with the hull
+        // (a diver walking off the top of Shore_Ramp) cannot use the .4 m north strip and would clip the hull going
+        // straight south, so it first rounds the east end: the north corner lies on the dry Shore_Ledge, the west
+        // end's north corner is open water (#188, measured 26 Oct).
+        public List<Vector3> RouteAround(Vector3 from, Vector3 to) =>
+            Blocking ? RouteAround(site.transform, from, to) : new List<Vector3> { to };
+        // The same walk round a hull lying at `hull` (the worksite frame), for tests that build the hull themselves.
+        public static List<Vector3> RouteAround(Transform hull, Vector3 from, Vector3 to)
         {
             var route = new List<Vector3>();
-            if (Blocking && BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var size))
+            if (BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var size))
             {
                 var hitW = size.Width * .5f + HitPad;
                 var hitL = size.Length * .5f + HitPad;
-                var a = site.transform.InverseTransformPoint(from);
-                var b = site.transform.InverseTransformPoint(to);
+                var a = hull.InverseTransformPoint(from);
+                var b = hull.InverseTransformPoint(to);
                 if (Blocked(a, b, hitW, hitL))
                 {
                     // Local +x is the hull's south side at the S1 yaw (90); pick it from the cradle frame, not the world.
-                    var side = Vector3.Dot(site.transform.right, Vector3.back) >= 0f ? 1f : -1f;
+                    var side = Vector3.Dot(hull.right, Vector3.back) >= 0f ? 1f : -1f;
                     var line = side * (size.Width * .5f + RoutePad);
                     var end = size.Length * .5f + RoutePad;
-                    route.Add(Flat(site.transform.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(a.z, -end, end))), to.y));
-                    route.Add(Flat(site.transform.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(b.z, -end, end))), to.y));
+                    if (side * a.x < 0f && Mathf.Abs(a.z) < hitL)
+                    {
+                        // Local +z is east at the S1 yaw; pick the ledge end from the cradle frame, not the world.
+                        var east = Vector3.Dot(hull.forward, Vector3.right) >= 0f ? end : -end;
+                        route.Add(Flat(hull.TransformPoint(new Vector3(-line, 0f, east)), to.y));
+                        a = new Vector3(line, 0f, east);
+                    }
+                    route.Add(Flat(hull.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(a.z, -end, end))), to.y));
+                    route.Add(Flat(hull.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(b.z, -end, end))), to.y));
                 }
             }
             route.Add(to);
