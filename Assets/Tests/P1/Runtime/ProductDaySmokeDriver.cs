@@ -499,7 +499,14 @@ namespace DeepDive.P1.Lab
             { HoldForShore(); return; }
             if (substep == 0)
             {
-                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
+                if (route == null)
+                {
+                    var approach=new List<Vector3>{P(9f,-12.5f),P(-6.5f,-11.2f),new Vector3(-6.5f,6f,-5f)};
+                    // The camera crew crosses the wade's north toe before descending to a catch.
+                    // The original straight diagonal can meet the solid shore fill after a fish dies.
+                    if(ActionVideo){approach.Add(new Vector3(-6.5f,6f,0));approach.Add(new Vector3(-6.5f,4f,2));}
+                    SetRoute(approach);
+                }
                 if (!Follow(true)) return;
                 substep = 1;
             }
@@ -517,6 +524,17 @@ namespace DeepDive.P1.Lab
                     $"available={fish?.GetComponent<CatchObject>().IsAvailable} eye={eye} " +
                     $"lastAction={local.LastActionRequestId.Value}/{local.LastActionResult.Value} " +
                     $"swimming={local.Swimming.Value} passive={local.Passive.Value}");
+                if(ActionVideo && fish==null)
+                {
+                    var nearest=FindObjectsByType<CatchObject>(FindObjectsSortMode.None).Where(c=>c.IsSpawned&&c.IsAvailable)
+                        .OrderBy(c=>(c.transform.position-eye).sqrMagnitude).FirstOrDefault();
+                    if(nearest!=null)
+                    {
+                        var center=nearest.GetComponent<Collider>().bounds.center;
+                        Physics.Linecast(eye,center,out var obstruction,~0,QueryTriggerInteraction.Ignore);
+                        Debug.Log($"P49_HUNT_BLOCKER catch={nearest.name} target={center} blocker={obstruction.collider?.name} hit={obstruction.point}");
+                    }
+                }
             }
             if (fish == null) { Stop(); return; }
             local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);

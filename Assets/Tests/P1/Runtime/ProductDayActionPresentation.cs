@@ -24,10 +24,10 @@ namespace DeepDive.P1.Lab
             var worker=ActionWorker;if(worker==null)return;
             if(!actionObserverEntered)
             {
-                if(route==null)SetRoute(new[]{P(9,-12.5f),P(-5.5f,-11.2f),new Vector3(-5.5f,6,-5)});
+                if(route==null)SetRoute(new[]{P(9,-12.5f),P(-5.5f,-11.2f),new Vector3(-5.5f,6,-5),new Vector3(-5.5f,6,0),new Vector3(-5.5f,4,2)});
                 if(!Follow(true))return;actionObserverEntered=true;
             }
-            var offset=new Vector3(3,0,-1.5f);var target=worker.transform.position+offset;
+            var offset=new Vector3(3,0,2);var target=worker.transform.position+offset;
             if(Vector3.Distance(local.transform.position,target)>1.1f){MoveToward(target);return;}
             Stop();Aim(worker.GetComponent<PlayerActionView>()?.ActionFocus??worker.transform.position+Vector3.up*.95f);
             var view=worker.GetComponent<PlayerActionView>();
