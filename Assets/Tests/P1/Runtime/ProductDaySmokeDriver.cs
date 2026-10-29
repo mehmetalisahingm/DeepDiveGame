@@ -56,6 +56,9 @@ namespace DeepDive.P1.Lab
             public bool runnerAbortReceived, injectedFailure;
             public bool equipmentLoweredSeen,equipmentRaisedSeen,equipmentCancelled,unownedCameraRefused;
             public int equipmentVideoFrames;
+            public int actionVideoFrames,actionCollects,actionDeliveries,actionBoards,actionExits;
+            public int actionKinds;
+            public bool actionProps,actionSeatedEye,actionStandingEye;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
             public int oceanBands, oceanVideoFrames;
             public string oceanGpu="";
@@ -231,6 +234,7 @@ namespace DeepDive.P1.Lab
             CaptureRepairVideo();
             CaptureEquipmentVideo();
             CaptureOceanVideo();
+            CaptureActionVideo();
         }
         private void Broadcast(float now)
         {
@@ -334,7 +338,7 @@ namespace DeepDive.P1.Lab
                     CollectParts(); break;
                 case 2: case 5:
                     if(step==2 && OceanVideo && !OceanSurvey())return;
-                    if (!Host) { WaitInWater(); return; }
+                    if (!Host) { if(ActionVideo)ActionObserver();else WaitInWater(); return; }
                     Hunt(); break;
                 case 3: case 6: case 9:
                     if (route == null) SetRoute(new[] { P(-6.5f, -11.2f), P(0f, -12.5f), P(9f, -12.5f),
@@ -343,7 +347,7 @@ namespace DeepDive.P1.Lab
                     if (!local.GetComponent<InventoryPlayerSync>().SafelyReturned.Value) return;
                     localDone = !local.Swimming.Value; break;
                 case 4: case 7:
-                    if (!Host) { localDone = true; return; }
+                    if (!Host) { if(ActionVideo)ActionSaleObserver();else localDone = true; return; }
                     SellAndBuy(); break;
                 case 8:
                     if (!Host) { if(EquipmentVideo)EquipmentObserver();else WaitInWater(); return; }
@@ -524,6 +528,7 @@ namespace DeepDive.P1.Lab
         }
         private void SellAndBuy()
         {
+            if(ActionVideo && local.GetComponent<PlayerActionView>()?.ActiveKind==PlayerVisualAction.Deliver){Stop();return;}
             var economy = adapter.GetComponent<EconomyManager>();
             if (substep == 0)
             {
@@ -970,6 +975,15 @@ namespace DeepDive.P1.Lab
                 if(!equipmentOk && report.errors.Count==0)
                 {report.failure="Equipment transition/cancel/refusal visual proof missing";report.errors.Add(report.failure);}
                 report.passed &= equipmentOk;
+            }
+            if(ActionVideo && !report.reload)
+            {
+                var actionsOk=report.actionProps && report.actionCollects==2 && report.actionDeliveries==2 &&
+                    report.actionBoards>=2 && report.actionExits>=2 && report.actionKinds==15 && report.actionVideoFrames>=30 &&
+                    report.actionSeatedEye && report.actionStandingEye;
+                if(!actionsOk && report.errors.Count==0)
+                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye}";report.errors.Add(report.failure);}
+                report.passed &= actionsOk;
             }
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             report.motionSamples=motionHistory.ToList();

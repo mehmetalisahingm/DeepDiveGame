@@ -40,6 +40,8 @@ namespace DeepDive.Network
         public HeldEquipmentMode DisplayedEquipment=>equipmentTransition.Displayed;
         public float EquipmentLowering=>equipmentTransition.Lowering;
         public bool IsChangingEquipment=>equipmentTransition.IsSwitching;
+        public void ApplyActionGrips(Vector3 left,Vector3 right,Quaternion leftRotation,Quaternion rightRotation)
+        { ApplyRepairGrips(left,right,leftRotation,rightRotation,true); }
 
         // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
         // These targets never move the player root or submit gameplay actions.
@@ -121,7 +123,8 @@ namespace DeepDive.Network
                 !isOwner && showCamera, cameraTier);
 
             ApplyAnimator(state, normalizedSpeed);
-            bodyPose?.Present(visualState, normalizedSpeed,lowered,networkPlayer!=null?networkPlayer.WaterViewLift:0);
+            bodyPose?.Present(visualState, normalizedSpeed,lowered,networkPlayer!=null?networkPlayer.WaterViewLift:0,
+                networkPlayer!=null && networkPlayer.VisualBoatSeated);
             armsPose?.Present(visualState, normalizedSpeed,lowered);
         }
 

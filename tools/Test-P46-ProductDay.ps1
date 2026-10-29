@@ -1,5 +1,6 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo)
 $ErrorActionPreference='Stop'
+if ($ActionVideo -and ($Players -ne 2 -or $RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal two-player product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
 if ($RepairPurchase -and (-not $RepairOnly -or $RepairInterruptions)) { throw 'RepairPurchase requires RepairOnly and cannot combine with RepairInterruptions.' }
 if ($RepairVideo -and -not $RepairPurchase) { throw 'RepairVideo requires RepairPurchase (host repairs while guest observes).' }
@@ -37,6 +38,7 @@ try {
         if ($RepairVideo) { $productArgs+=@('-p187-video','1') }
         if ($EquipmentVideo) { $productArgs+=@('-p49-equipment-video','1') }
         if ($OceanVideo) { $productArgs+=@('-p411-ocean-video','1') }
+        if ($ActionVideo) { $productArgs+=@('-p49-action-video','1') }
         if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
