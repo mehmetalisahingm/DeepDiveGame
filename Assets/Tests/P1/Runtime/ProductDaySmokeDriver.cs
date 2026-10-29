@@ -468,9 +468,9 @@ namespace DeepDive.P1.Lab
         }
         private void WaitInWater()
         {
-            // #188 hunt-first: guests reach the wade together with the host, so each takes its own entry point
-            // east of the host's (-6.5) entry and shore hold (-7.6) instead of all pressing on one waypoint.
-            var entryX = HuntFirst ? -6.5f + report.slot * 0.9f : -6.5f;
+            // Guests reach the wade together with the host, so each takes its own entry point east of the host's
+            // (-6.5) entry and shore hold (-7.6) instead of all pressing on one waypoint (#188; 4p jam 29 Oct, #155).
+            var entryX = -6.5f + report.slot * 0.9f;
             if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(entryX, 6f, -5f),
                 new Vector3(1f + report.slot * 1.2f, 5.3f, -4f) });
             localDone = Follow(true);
@@ -688,12 +688,11 @@ namespace DeepDive.P1.Lab
             if (substep == 0)
             {
                 var exit = new Vector3(bed.ExitPose.position.x, ContinuousTownLayout.WalkSurfaceY, bed.ExitPose.position.z);
-                // #188 hunt-first: the crew reaches the bedroom together, so walk a lane .9 m south of the exit row and turn
-                // north only at one's own bed; the host judges each bed ray on its own positions, and a neighbour crossing
-                // the exit row cut a waiting player's ray (InvalidTarget, 23 Oct runs).
-                if (route == null) SetRoute(HuntFirst
-                    ? new[] { H(4.95f, -2.5f), H(4.95f, exit.z - ContinuousTownLayout.HomeOrigin.z - .9f), exit - new Vector3(0f, 0f, .9f), exit }
-                    : new[] { H(4.95f, -2.5f), H(4.95f, 0f), exit });
+                // The crew reaches the bedroom together, so walk a lane .9 m south of the exit row and turn north only at
+                // one's own bed; the host judges each bed ray on its own positions, and a neighbour crossing the exit row
+                // cut a waiting player's ray (InvalidTarget: #188 hunt-first 23 Oct, default 4p day 29 Oct, #155).
+                if (route == null) SetRoute(new[] { H(4.95f, -2.5f), H(4.95f, exit.z - ContinuousTownLayout.HomeOrigin.z - .9f),
+                    exit - new Vector3(0f, 0f, .9f), exit });
                 if (!Follow()) return;
                 Aim(bed.GetComponent<Collider>().bounds.center);
                 if (!Settled()) return;
@@ -838,9 +837,9 @@ namespace DeepDive.P1.Lab
             if (waypoint >= route.Count) { Stop(); return true; }
             var target = route[waypoint]; var delta = target - local.transform.position;
             var flat = new Vector2(delta.x, delta.z).magnitude;
-            // #188 hunt-first: the bed is approached head-on from the lane, so a .3 m stop can leave the feet past the
-            // host's 3.25 m bed range; stand on the exit pose like the step 10 seat approach.
-            var tolerance = (step == 10 || (HuntFirst && step == 14)) && waypoint == route.Count - 1 ? 0.08f : 0.3f;
+            // The bed is approached head-on from the lane, so a .3 m stop can leave the feet past the host's 3.25 m
+            // bed range; stand on the exit pose like the step 10 seat approach.
+            var tolerance = (step == 10 || step == 14) && waypoint == route.Count - 1 ? 0.08f : 0.3f;
             if (flat < tolerance && (!depth || waypoint != route.Count - 1 || Mathf.Abs(delta.y) < 0.45f))
             { waypoint++; return waypoint >= route.Count; }
             // #188 hunt-first: the unrepaired hull still lies on the beach cradle, so dry legs go round it.
