@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '')
+param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render)
 $ErrorActionPreference = 'Stop'
 $worldRoot = Split-Path -Parent $PSScriptRoot
 $worldIsWindows = $env:OS -eq 'Windows_NT'
@@ -13,7 +13,7 @@ try {
     for ($worldSlot = 0; $worldSlot -lt $Players; $worldSlot++) {
         $worldReport = Join-Path $worldRun ("player$worldSlot.json")
         $worldLog = Join-Path $worldRun ("player$worldSlot.log")
-        $worldGraphics = if ($worldIsWindows) { @('-nographics') }
+        $worldGraphics = if ($worldIsWindows -and -not $Render) { @('-nographics') }
             else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
         $worldArgs = @('-batchmode') + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
             '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port,
@@ -48,7 +48,7 @@ try {
     $worldHost = Get-Content -LiteralPath (Join-Path $worldRun 'player0.json') -Raw | ConvertFrom-Json
     $worldReloadReport = Join-Path $worldRun 'reload.json'
     Copy-Item -LiteralPath (Join-Path $worldRun 'player0.json.campaign.json') -Destination ($worldReloadReport + '.campaign.json')
-    $worldReloadGraphics = if ($worldIsWindows) { @('-nographics') }
+    $worldReloadGraphics = if ($worldIsWindows -and -not $Render) { @('-nographics') }
         else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
     $worldReloadArgs = @('-batchmode') + $worldReloadGraphics + @('-p46-world-role', 'host', '-p46-world-count', 1,
         '-p46-world-slot', 0, '-p46-world-port', ($Port + 1), '-p46-world-reload-day', $worldHost.morningDay,

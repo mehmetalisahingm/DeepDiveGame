@@ -56,6 +56,9 @@ namespace DeepDive.P1.Lab
             public bool runnerAbortReceived, injectedFailure;
             public bool equipmentLoweredSeen,equipmentRaisedSeen,equipmentCancelled,unownedCameraRefused;
             public int equipmentVideoFrames;
+            public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
+            public int oceanBands, oceanVideoFrames;
+            public string oceanGpu="";
             public List<MotionSample> motionSamples=new List<MotionSample>();
             public List<string> trace = new List<string>(), tripPhases = new List<string>();
             public List<ulong> fishIds = new List<ulong>();
@@ -227,6 +230,7 @@ namespace DeepDive.P1.Lab
             if (!finished && (step == 15 || step == 16) && adapter != null && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
             CaptureRepairVideo();
             CaptureEquipmentVideo();
+            CaptureOceanVideo();
         }
         private void Broadcast(float now)
         {
@@ -325,9 +329,11 @@ namespace DeepDive.P1.Lab
                         if (!Follow()) return;
                         substep = 1; route = null; purchaseHomeExited = true;
                     }
+                    if(OceanVideo && !OceanShore())return;
                     if ((!Host && !RepairOnly) || HuntFirst) { localDone = true; return; }
                     CollectParts(); break;
                 case 2: case 5:
+                    if(step==2 && OceanVideo && !OceanSurvey())return;
                     if (!Host) { WaitInWater(); return; }
                     Hunt(); break;
                 case 3: case 6: case 9:
@@ -950,6 +956,14 @@ namespace DeepDive.P1.Lab
                 report.passed &= visuals;
             }
             if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
+            if(OceanVideo && !report.reload)
+            {
+                var oceanOk=report.oceanReady && report.oceanReflection && report.oceanAnimated &&
+                    report.oceanSurfaceEye && report.oceanBands==3 && report.oceanVideoFrames>=30;
+                if(!oceanOk && report.errors.Count==0)
+                {report.failure=$"Ocean proof missing: ready={report.oceanReady}, reflection={report.oceanReflection}, motion={report.oceanAnimated}, eye={report.oceanSurfaceEye}, bands={report.oceanBands}";report.errors.Add(report.failure);}
+                report.passed &= oceanOk;
+            }
             if(EquipmentVideo && !report.reload)
             {
                 var equipmentOk=report.equipmentLoweredSeen && report.equipmentRaisedSeen && report.equipmentVideoFrames>=8 &&

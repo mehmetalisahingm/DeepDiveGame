@@ -1,0 +1,439 @@
+{
+    "SchemaVersion": 9,
+    "CampaignId": "local-host",
+    "CheckpointId": "400989a1ff734ae692538903d6772892",
+    "SharedBalance": 380,
+    "Revision": 16,
+    "SoldCaptureIds": [
+        "ccde32a6b7c4407e9b303013453ca8ef",
+        "d6abe30a40ce498a93656c93b3f65703"
+    ],
+    "PaidRecordingIds": [],
+    "Loadouts": [
+        {
+            "PlayerId": 0,
+            "EquipmentIds": [
+                "camera-basic"
+            ]
+        }
+    ],
+    "PendingTurnIns": [],
+    "BoatPartIds": [
+        "boat-part-hull",
+        "boat-part-engine",
+        "boat-part-fuel-tank"
+    ],
+    "UnusedBoatPartIds": [],
+    "StoredItems": [],
+    "HasDay": true,
+    "Day": {
+        "DayNumber": 2,
+        "ClockMinute": 480,
+        "ClosedCloseIds": [
+            "close-day-1"
+        ],
+        "SummaryHistory": [
+            {
+                "DayNumber": 1,
+                "DayId": "day-1",
+                "CloseId": "close-day-1",
+                "Reason": 0,
+                "FishSold": 2,
+                "FishSoldWeightGrams": 3241,
+                "Income": 240,
+                "Expenses": 150,
+                "DiscoveredSpeciesIds": [
+                    "sea_bass",
+                    "red_snapper",
+                    "tuna"
+                ],
+                "LostDivers": 0,
+                "LostCaptureIds": [],
+                "ProgressIds": [
+                    "boat-part-boat-part-hull",
+                    "boat-part-boat-part-engine",
+                    "boat-part-boat-part-fuel-tank",
+                    "boat-repaired"
+                ],
+                "PublicationsQueued": 1
+            }
+        ],
+        "Ledger": {
+            "FishSold": 0,
+            "FishSoldWeightGrams": 0,
+            "Income": 0,
+            "Expenses": 0,
+            "DiscoveredSpeciesIds": [],
+            "ProgressIds": [],
+            "EventIds": []
+        }
+    },
+    "HasExploration": true,
+    "Exploration": {
+        "RegionId": "region-near-1",
+        "DiscoveredCells": [
+            {
+                "CellId": "region-near-1:gx-3:gz-3",
+                "GridX": -3,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-3",
+                "GridX": -2,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz-3",
+                "GridX": -1,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx0:gz-3",
+                "GridX": 0,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-3",
+                "GridX": 1,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx2:gz-3",
+                "GridX": 2,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-2",
+                "GridX": -2,
+                "GridZ": -2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz-2",
+                "GridX": -1,
+                "GridZ": -2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-2",
+                "GridX": 1,
+                "GridZ": -2,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-1",
+                "GridX": -2,
+                "GridZ": -1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz-1",
+                "GridX": -1,
+                "GridZ": -1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx0:gz-1",
+                "GridX": 0,
+                "GridZ": -1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-1",
+                "GridX": 1,
+                "GridZ": -1,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz0",
+                "GridX": -2,
+                "GridZ": 0,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz0",
+                "GridX": 1,
+                "GridZ": 0,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz1",
+                "GridX": -3,
+                "GridZ": 1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz1",
+                "GridX": -2,
+                "GridZ": 1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz1",
+                "GridX": 1,
+                "GridZ": 1,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx2:gz1",
+                "GridX": 2,
+                "GridZ": 1,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz2",
+                "GridX": -3,
+                "GridZ": 2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz2",
+                "GridX": -2,
+                "GridZ": 2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz3",
+                "GridX": -3,
+                "GridZ": 3,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz3",
+                "GridX": -2,
+                "GridZ": 3,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz4",
+                "GridX": -3,
+                "GridZ": 4,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz4",
+                "GridX": -2,
+                "GridZ": 4,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz5",
+                "GridX": -3,
+                "GridZ": 5,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz5",
+                "GridX": -2,
+                "GridZ": 5,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz6",
+                "GridX": -3,
+                "GridZ": 6,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz6",
+                "GridX": -2,
+                "GridZ": 6,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz7",
+                "GridX": -3,
+                "GridZ": 7,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz7",
+                "GridX": -2,
+                "GridZ": 7,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz8",
+                "GridX": -3,
+                "GridZ": 8,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz8",
+                "GridX": -2,
+                "GridZ": 8,
+                "DepthBandId": "reef"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz9",
+                "GridX": -3,
+                "GridZ": 9,
+                "DepthBandId": "deep"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz9",
+                "GridX": -2,
+                "GridZ": 9,
+                "DepthBandId": "deep"
+            },
+            {
+                "CellId": "region-near-1:gx-3:gz10",
+                "GridX": -3,
+                "GridZ": 10,
+                "DepthBandId": "deep"
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz10",
+                "GridX": -2,
+                "GridZ": 10,
+                "DepthBandId": "deep"
+            }
+        ],
+        "Observations": [
+            {
+                "ObservationId": "sighting:sea_bass",
+                "SpeciesId": "sea_bass",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-1:gz-3",
+                "DepthBandId": "",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "sighting:red_snapper",
+                "SpeciesId": "red_snapper",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-1:gz-3",
+                "DepthBandId": "",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "sighting:tuna",
+                "SpeciesId": "tuna",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-1:gz-3",
+                "DepthBandId": "",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "ccde32a6b7c4407e9b303013453ca8ef",
+                "SpeciesId": "tuna",
+                "Evidence": 2,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-2:gz-1",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "d6abe30a40ce498a93656c93b3f65703",
+                "SpeciesId": "tuna",
+                "Evidence": 2,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-2:gz-1",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "563fb78abcb94ae09b64196cf0b876de",
+                "SpeciesId": "sea_bass",
+                "Evidence": 1,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-2:gz-1",
+                "DepthBandId": "shallow",
+                "DayNumber": 1
+            }
+        ]
+    },
+    "ChannelRightIds": [
+        "563fb78abcb94ae09b64196cf0b876de"
+    ],
+    "ChannelSettleIds": [
+        "settle-pub-clip-563fb78abcb94ae09b64196cf0b876de"
+    ],
+    "HasMedia": true,
+    "HasFleet": true,
+    "HasProgression": true,
+    "HasLiving": true,
+    "Living": {
+        "Version": 1,
+        "BoardDay": 2,
+        "OrderTemplateId": "order-fish-heavy",
+        "OrderStatus": 1,
+        "OrderProgress": 0,
+        "SponsorTemplateId": "sponsor-event",
+        "SponsorStatus": 1,
+        "SponsorProgress": 0,
+        "LastOrderTemplateId": "order-fish-quick",
+        "LastSponsorTemplateId": "sponsor-new-species",
+        "UsedEvidenceIds": [
+            "ccde32a6b7c4407e9b303013453ca8ef",
+            "d6abe30a40ce498a93656c93b3f65703",
+            "pub-clip-563fb78abcb94ae09b64196cf0b876de"
+        ],
+        "DevelopmentIds": [],
+        "HostRole": 0
+    },
+    "RewardIds": [
+        "reward:day1:order-fish-quick",
+        "reward:day1:sponsor-new-species"
+    ],
+    "Progression": {
+        "Version": 1,
+        "Stage": 2,
+        "EncyclopediaEvidenceId": "enc:sighting:sea_bass",
+        "RumorEvidenceId": "rumor:region-near-1:gx-3:gz3",
+        "TraceIds": [],
+        "DiscoveryEvidenceId": "",
+        "CompletedBossIds": []
+    },
+    "FleetPurchasedBoatIds": [],
+    "FleetActiveBoatId": "",
+    "Media": {
+        "Clips": [
+            {
+                "ClipId": "clip-563fb78abcb94ae09b64196cf0b876de",
+                "RecordingId": "563fb78abcb94ae09b64196cf0b876de",
+                "DiveId": "bf03e867797b4542af2686ef3a69f017",
+                "DayNumber": 1,
+                "OwnerPlayerId": 0,
+                "SubjectId": "sea_bass",
+                "Quality": 2,
+                "DurationSeconds": 12.037759780883789,
+                "ContentHash": "049e37df8064ce2d8ae7b7d3be057af31dca4191e97b88a55c8dbf3468c0a4d0",
+                "SizeBytes": 301819,
+                "MediaReady": true,
+                "SafeReturned": true,
+                "SubjectKind": 1,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx-2:gz-1",
+                "DepthBandId": "shallow",
+                "FirstRecordingOfSubject": true
+            }
+        ],
+        "Publications": [
+            {
+                "PublicationId": "pub-clip-563fb78abcb94ae09b64196cf0b876de",
+                "ClipId": "clip-563fb78abcb94ae09b64196cf0b876de",
+                "RecordingId": "563fb78abcb94ae09b64196cf0b876de",
+                "OwnerPlayerId": 0,
+                "SubjectId": "sea_bass",
+                "Title": "Ilk gercek gun",
+                "QueuedDay": 1,
+                "ResultDay": 2,
+                "Views": 240,
+                "FollowersGained": 12,
+                "Income": 60,
+                "SettledId": "settle-pub-clip-563fb78abcb94ae09b64196cf0b876de"
+            }
+        ],
+        "Followers": 12
+    }
+}

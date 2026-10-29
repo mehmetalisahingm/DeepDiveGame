@@ -1,0 +1,17 @@
+{
+  "frames": 627,
+  "elapsedSeconds": 67.69201999999999,
+  "captureWidth": 1280,
+  "captureHeight": 720,
+  "encodedWidth": 960,
+  "encodedHeight": 540,
+  "silent": true,
+  "run": "P46-product-20261026-231148-553-2",
+  "source": "e76d992",
+  "gpu": "NVIDIA GeForce GTX 1650",
+  "serverTimeFirst": 42.60489,
+  "serverTimeLast": 110.3136,
+  "minObservedWave": -0.109471,
+  "maxObservedWave": 0.109092,
+  "note": "VFR actual camera frames; capture cadence is not game FPS"
+}
