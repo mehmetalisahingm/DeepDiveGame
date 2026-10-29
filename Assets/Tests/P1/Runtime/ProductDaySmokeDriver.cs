@@ -58,6 +58,7 @@ namespace DeepDive.P1.Lab
             public int equipmentVideoFrames;
             public int actionVideoFrames,actionCollects,actionDeliveries,actionBoards,actionExits;
             public int actionKinds;
+            public int actionVisibleKinds;
             public bool actionProps,actionSeatedEye,actionStandingEye;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
             public int oceanBands, oceanVideoFrames;
@@ -223,7 +224,11 @@ namespace DeepDive.P1.Lab
                 }
             }
             if (!localDone) Tick();
-            else if (step != 14) Stop();
+            else if (step != 14)
+            {
+                if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
+                else if(ActionVideo)HoldActionView();else Stop();
+            }
             if (Host) AdvanceHost();
         }
         private void LateUpdate()
@@ -355,7 +360,9 @@ namespace DeepDive.P1.Lab
                 case 10: TripOut(); break;
                 case 11:
                     Stop();
+                    if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
                     if (trip.IsSeated) { Act(trip.RequestDisembarkLocal); return; }
+                    if(ActionVideo && local.GetComponent<PlayerActionView>().ActiveKind==PlayerVisualAction.Disembark)return;
                     localDone = true; break;
                 case 12: TripBack(); break;
                 case 13: HomePc(); break;
@@ -481,6 +488,12 @@ namespace DeepDive.P1.Lab
         }
         private void Hunt()
         {
+            if(ActionVideo)
+            {
+                var actionView=local.GetComponent<PlayerActionView>();
+                if(actionView!=null&&actionView.ActiveKind==PlayerVisualAction.Collect)
+                {Stop();Aim(actionView.ActionFocus);return;}
+            }
             var inventory = adapter.GetComponent<InventoryManager>();
             if (inventory.Bags.TryGetValue(new PlayerId(0), out var bag) && bag.Items.Count > 0)
             { HoldForShore(); return; }
@@ -528,7 +541,8 @@ namespace DeepDive.P1.Lab
         }
         private void SellAndBuy()
         {
-            if(ActionVideo && local.GetComponent<PlayerActionView>()?.ActiveKind==PlayerVisualAction.Deliver){Stop();return;}
+            if(ActionVideo && local.GetComponent<PlayerActionView>()?.ActiveKind==PlayerVisualAction.Deliver)
+            {Aim(local.GetComponent<PlayerActionView>().ActionFocus);return;}
             var economy = adapter.GetComponent<EconomyManager>();
             if (substep == 0)
             {
@@ -627,6 +641,7 @@ namespace DeepDive.P1.Lab
                 substep = 1;
             }
             Stop();
+            if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
             var phase = (BoatTripPhase)trip.Phase.Value;
             if (!trip.IsSeated) { Act(trip.RequestBoardNearestLocal); return; }
             if (trip.SeatedCount.Value < expected) return;
@@ -636,6 +651,7 @@ namespace DeepDive.P1.Lab
         private void TripBack()
         {
             Stop();
+            if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
             var phase = (BoatTripPhase)trip.Phase.Value;
             if (phase == BoatTripPhase.Anchored)
             {
@@ -646,6 +662,7 @@ namespace DeepDive.P1.Lab
             if (phase == BoatTripPhase.Docked && report.tripPhases.Contains("Inbound"))
             {
                 if (trip.IsSeated) { Act(trip.RequestDisembarkLocal); return; }
+                if(ActionVideo && local.GetComponent<PlayerActionView>().ActiveKind==PlayerVisualAction.Disembark)return;
                 localDone = trip.SeatedCount.Value == 0;
             }
         }
@@ -979,10 +996,10 @@ namespace DeepDive.P1.Lab
             if(ActionVideo && !report.reload)
             {
                 var actionsOk=report.actionProps && report.actionCollects==2 && report.actionDeliveries==2 &&
-                    report.actionBoards>=2 && report.actionExits>=2 && report.actionKinds==15 && report.actionVideoFrames>=30 &&
+                    report.actionBoards>=2 && report.actionExits>=2 && report.actionKinds==15 && (Host||report.actionVisibleKinds==15) && report.actionVideoFrames>=30 &&
                     report.actionSeatedEye && report.actionStandingEye;
                 if(!actionsOk && report.errors.Count==0)
-                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye}";report.errors.Add(report.failure);}
+                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds}/{report.actionVisibleKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye}";report.errors.Add(report.failure);}
                 report.passed &= actionsOk;
             }
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;

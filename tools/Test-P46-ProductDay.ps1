@@ -43,7 +43,7 @@ try {
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
-        elseif ($productIsWindows -and -not ($RepairVideo -or $EquipmentVideo -or $OceanVideo)) { $productArgs+='-nographics' }
+        elseif ($productIsWindows -and -not ($RepairVideo -or $EquipmentVideo -or $OceanVideo -or $ActionVideo)) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
         if ($productIsWindows) {
             $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru

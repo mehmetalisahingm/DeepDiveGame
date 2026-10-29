@@ -16,7 +16,7 @@ namespace DeepDive.Composition
         private NetworkManager manager;
         private CustomMessagingManager messages;
         private PlayerActionReceipt receipt=new PlayerActionReceipt();
-        private readonly Dictionary<ulong,ulong> serviceRequests=new Dictionary<ulong,ulong>();
+        private ServicePresentationReceipt serviceRequests=new ServicePresentationReceipt();
         private ulong sequence;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Install()
@@ -43,7 +43,7 @@ namespace DeepDive.Composition
             {
                 if(messages!=null)messages.UnregisterNamedMessageHandler(MessageName);
                 manager=current;messages=manager!=null?manager.CustomMessagingManager:null;
-                receipt=new PlayerActionReceipt();serviceRequests.Clear();sequence=0;
+                receipt=new PlayerActionReceipt();serviceRequests=new ServicePresentationReceipt();sequence=0;
                 messages?.RegisterNamedMessageHandler(MessageName,Receive);
             }
             if(manager==null || !manager.IsListening || manager.SpawnManager==null)return;
@@ -66,10 +66,7 @@ namespace DeepDive.Composition
         }
         private void Delivered(EconomyPlayerSync actor,TownServiceOutcome outcome)
         {
-            if(manager==null || !manager.IsServer || !outcome.Accepted ||
-                outcome.ServiceType!=ServicePointType.FishBuyer || outcome.ItemCount<1)return;
-            if(serviceRequests.TryGetValue(actor.NetworkObjectId,out var previous)&&previous==outcome.RequestId)return;
-            serviceRequests[actor.NetworkObjectId]=outcome.RequestId;
+            if(manager==null || !manager.IsServer || !serviceRequests.Accept(actor.NetworkObjectId,outcome))return;
             var player=actor.GetComponent<NetworkPlayer>();if(player==null)return;
             var source=player.transform.position+player.transform.forward*.75f+Vector3.up*.9f;
             foreach(var anchor in FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None))

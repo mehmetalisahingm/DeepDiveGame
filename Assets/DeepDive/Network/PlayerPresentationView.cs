@@ -52,7 +52,8 @@ namespace DeepDive.Network
             // usual camera-relative arms while looking down moves shoulders forward
             // and makes a reachable world grip unreachable in first person.
             if(runtimeFirstPersonArms!=null)
-                runtimeFirstPersonArms.transform.SetPositionAndRotation(transform.position,transform.rotation);
+                runtimeFirstPersonArms.transform.SetPositionAndRotation(transform.position+Vector3.up*
+                    (networkPlayer!=null ? networkPlayer.VisualBoatSeated ? NetworkPlayer.BoatSeatedVisualOffset : networkPlayer.WaterViewLift : 0),transform.rotation);
             // The accepted final stroke clears transient work before the short visual
             // recovery ends. Keep its hands, and hide ordinary equipment during recovery.
             if(finishStroke && networkPlayer!=null && networkPlayer.IsOwner)

@@ -1,4 +1,5 @@
 using DeepDive.Composition;
+using DeepDive.Core.Contracts;
 using DeepDive.Network;
 using NUnit.Framework;
 using Unity.Collections;
@@ -32,6 +33,18 @@ namespace DeepDive.P4.Tests
             var gate=new PlayerActionReceipt();var message=Accepted();message.Sequence=6;
             Assert.That(gate.Accept(0,message,10),Is.True);Assert.That(gate.Accept(0,Accepted(),10),Is.False);
             message=Accepted();message.PlayerObject=19;Assert.That(gate.Accept(0,message,10),Is.True);
+        }
+        [Test] public void RefusedEmptyAndReplayedOldSaleNeverShowAnotherCrate()
+        {
+            var gate=new ServicePresentationReceipt();
+            var rejected=new TownServiceOutcome("buyer-fish",ServicePointType.FishBuyer,1,false,"SaveFailed",0,2);
+            Assert.That(gate.Accept(7,rejected),Is.False);
+            var empty=new TownServiceOutcome("buyer-fish",ServicePointType.FishBuyer,1,true,"NoCatches",0,0);
+            Assert.That(gate.Accept(7,empty),Is.False);
+            var sale=new TownServiceOutcome("buyer-fish",ServicePointType.FishBuyer,1,true,"Sold",120,1);
+            Assert.That(gate.Accept(7,sale),Is.True);
+            Assert.That(gate.Accept(7,new TownServiceOutcome("buyer-fish",ServicePointType.FishBuyer,2,true,"Sold",120,1)),Is.True);
+            Assert.That(gate.Accept(7,sale),Is.False);Assert.That(gate.Accept(8,sale),Is.True);
         }
         [Test] public void EnvelopeRoundTripAndTruncationAndTrailingData()
         {

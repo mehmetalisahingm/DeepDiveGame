@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DeepDive.Core.Contracts;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -52,6 +53,17 @@ namespace DeepDive.Composition
             if(sender!=NetworkManager.ServerClientId || !message.Valid(now) ||
                 (last.TryGetValue(message.PlayerObject,out var seen)&&message.Sequence<=seen))return false;
             last[message.PlayerObject]=message.Sequence;return true;
+        }
+    }
+
+    public sealed class ServicePresentationReceipt
+    {
+        private readonly Dictionary<ulong,HashSet<ulong>> seen=new Dictionary<ulong,HashSet<ulong>>();
+        public bool Accept(ulong actor,TownServiceOutcome outcome)
+        {
+            if(!outcome.Accepted || outcome.ServiceType!=ServicePointType.FishBuyer || outcome.ItemCount<1)return false;
+            if(!seen.TryGetValue(actor,out var requests))seen[actor]=requests=new HashSet<ulong>();
+            return requests.Add(outcome.RequestId);
         }
     }
 }

@@ -32,6 +32,8 @@ namespace DeepDive.Composition
         public PlayerVisualAction ActiveKind{get;private set;}
         public bool AuthoredProps=>bag!=null&&crate!=null;
         public float ActionAge{get;private set;}
+        public Vector3 ActionFocus=>ActiveKind==PlayerVisualAction.Deliver && crate!=null ? crate.transform.position :
+            ActiveKind==PlayerVisualAction.Collect && bag!=null ? bag.transform.position+Vector3.up*.3f : Point(Vector3.up*.85f);
         private double Now=>NetworkManager.Singleton!=null&&NetworkManager.Singleton.IsListening?NetworkManager.Singleton.ServerTime.Time:Time.unscaledTimeAsDouble;
         private void Awake()
         {
@@ -103,12 +105,13 @@ namespace DeepDive.Composition
             ActiveKind=PlayerVisualAction.None;
             if(blocked)until=0;
             var active=!blocked && Now<until;
+            var holdingBag=active && action.Kind==PlayerVisualAction.Collect;
             if(bag!=null)
             {
                 bag.SetActive(!player.Passive.Value);
-                bag.transform.SetPositionAndRotation(Point(active?new Vector3(0,.87f,.58f):new Vector3(-.23f,.88f,-.08f)),transform.rotation);
+                bag.transform.SetPositionAndRotation(Point(holdingBag?new Vector3(0,.87f,.58f):new Vector3(-.36f,.75f,-.07f)),transform.rotation);
                 foreach(var renderer in bag.GetComponentsInChildren<Renderer>(true))
-                    renderer.shadowCastingMode=player.IsOwner&&!active?ShadowCastingMode.ShadowsOnly:ShadowCastingMode.On;
+                    renderer.shadowCastingMode=player.IsOwner&&!holdingBag?ShadowCastingMode.ShadowsOnly:ShadowCastingMode.On;
             }
             if(crate!=null)crate.SetActive(active&&action.Kind==PlayerVisualAction.Deliver);
             if(!active)
@@ -118,6 +121,7 @@ namespace DeepDive.Composition
                 {
                     ActiveKind=seatTransition>0?PlayerVisualAction.Board:PlayerVisualAction.Disembark;
                     var age=Mathf.Clamp01((float)(Now-seatAt)/.65f);
+                    ActionAge=age;
                     var lift=Mathf.Sin(age*Mathf.PI)*.12f;
                     var y=seated?.96f:1.15f;
                     hands?.ApplyActionGrips(Point(new Vector3(-.29f,y+lift,.32f)),Point(new Vector3(.29f,y+lift,.32f)),
@@ -143,7 +147,7 @@ namespace DeepDive.Composition
                     transform.rotation*Quaternion.Euler(-90,0,0),Mathf.SmoothStep(0,1,Mathf.Clamp01((age-.25f)/.25f))));
                 fish.SetActive(age<.92f);
             }
-            var right=Vector3.Lerp(Point(new Vector3(.25f,1.25f,.51f)),bagRight.position,stow);
+            var right=Vector3.Lerp(held+transform.right*.06f-Vector3.up*.025f,bagRight.position,stow);
             hands?.ApplyActionGrips(bagLeft.position,right,bagLeft.rotation,Quaternion.Slerp(transform.rotation*Quaternion.Euler(5,0,60),bagRight.rotation,stow));
             if(age<.32f&&fish!=null)
             {
