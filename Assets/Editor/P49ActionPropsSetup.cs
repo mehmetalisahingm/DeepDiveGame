@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using DeepDive.Network;
 using UnityEditor;
 using UnityEngine;
 using Object=UnityEngine.Object;
@@ -50,7 +51,11 @@ namespace DeepDive.EditorTools
                 for(int i=0;i<=16;i++){var t=i/16f;handle.Add(new Vector3(side*.20f,.31f+Mathf.Sin(t*Mathf.PI)*.105f,Mathf.Lerp(-.08f,.08f,t)));}
                 Tube(bag,"Handle"+side,handle,.012f,rope);
                 Grip(bag,side<0?"Grip_Left":"Grip_Right",new Vector3(side*.20f,.415f,0));
-                for(int i=0;i<19;i++)Box(bag,"Stitch",new Vector3(side*.157f,-.28f+i*.028f,-.12f),new Vector3(.025f,.006f,.006f),rope);
+                for(int i=0;i<19;i++)
+                {
+                    var y=-.28f+i*.028f;var shape=Mathf.Lerp(.48f,1,Mathf.Sin((y+.34f)/.68f*Mathf.PI*.55f));
+                    Box(bag,"Stitch",new Vector3(side*.162f*shape,y,-.116f*shape),new Vector3(.018f,.005f,.005f),rope);
+                }
             }
             Box(bag,"ReinforcedBase",new Vector3(0,-.31f,0),new Vector3(.25f,.06f,.17f),leather);
             Save(bag,"CatchSatchel");
@@ -76,7 +81,21 @@ namespace DeepDive.EditorTools
                 foreach(var x in new[]{-.26f,.26f})foreach(var y in new[]{-.1f,0f,.1f})
                     Box(crate,"NailHead",new Vector3(x,y,side*.198f),new Vector3(.012f,.012f,.006f),iron);
             }
-            Save(crate,"FishCrate");AssetDatabase.SaveAssets();AssetDatabase.Refresh();Debug.Log("P49_ACTION_PROPS_DONE");
+            Save(crate,"FishCrate");
+            // The supplied open rowboat has no benches. Add visible supports under the existing four seats.
+            var benches=new GameObject("RowboatBenches");
+            foreach(var seat in new[]{BoatSeatLayoutRules.SeatIds[0],BoatSeatLayoutRules.SeatIds[2]})
+            {
+                BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat,seat,out var offset);
+                var y=offset.y+.24f;
+                for(int slat=0;slat<3;slat++)Box(benches,"BenchSlat",new Vector3(0,y,offset.z+(slat-1)*.17f),new Vector3(1.9f,.08f,.162f),slat==1?edge:wood);
+                foreach(var x in new[]{-.76f,.76f})
+                {
+                    Box(benches,"BenchSupport",new Vector3(x,.335f,offset.z),new Vector3(.08f,.43f,.38f),wood);
+                    foreach(var z in new[]{-.17f,.17f})Box(benches,"BenchPeg",new Vector3(x,y+.042f,offset.z+z),new Vector3(.025f,.008f,.025f),iron);
+                }
+            }
+            Save(benches,"RowboatBenches");AssetDatabase.SaveAssets();AssetDatabase.Refresh();Debug.Log("P49_ACTION_PROPS_DONE");
         }
         private static Material Material(string name,Color color,float smooth,float metal=0)
         {
@@ -100,7 +119,9 @@ namespace DeepDive.EditorTools
         private static GameObject Part(GameObject root,string name,Mesh mesh,Vector3 position,Vector3 scale,Material material)
         {
             var obj=new GameObject(name);obj.transform.SetParent(root.transform,false);obj.transform.localPosition=position;obj.transform.localScale=scale;
-            obj.AddComponent<MeshFilter>().sharedMesh=mesh;obj.AddComponent<MeshRenderer>().sharedMaterial=material;return obj;
+            obj.AddComponent<MeshFilter>().sharedMesh=mesh;
+            var materials=new Material[mesh.subMeshCount];for(int i=0;i<materials.Length;i++)materials[i]=material;
+            obj.AddComponent<MeshRenderer>().sharedMaterials=materials;return obj;
         }
         private static void Tube(GameObject root,string name,List<Vector3> path,float radius,Material material)
         {
@@ -131,9 +152,13 @@ namespace DeepDive.EditorTools
             var groups=new Dictionary<Material,List<CombineInstance>>();
             foreach(var filter in root.GetComponentsInChildren<MeshFilter>())
             {
-                var mat=filter.GetComponent<MeshRenderer>().sharedMaterial;
-                if(!groups.TryGetValue(mat,out var list))groups[mat]=list=new List<CombineInstance>();
-                list.Add(new CombineInstance{mesh=filter.sharedMesh,transform=filter.transform.localToWorldMatrix});
+                var materials=filter.GetComponent<MeshRenderer>().sharedMaterials;
+                for(int sub=0;sub<filter.sharedMesh.subMeshCount;sub++)
+                {
+                    var mat=materials[Mathf.Min(sub,materials.Length-1)];
+                    if(!groups.TryGetValue(mat,out var list))groups[mat]=list=new List<CombineInstance>();
+                    list.Add(new CombineInstance{mesh=filter.sharedMesh,subMeshIndex=sub,transform=filter.transform.localToWorldMatrix});
+                }
             }
             foreach(var pair in groups)
             {

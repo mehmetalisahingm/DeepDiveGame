@@ -19,6 +19,14 @@ namespace DeepDive.P1.Lab
             var euler=local.GetComponentInChildren<Camera>(true).transform.eulerAngles;
             local.SubmitLocalInput(Vector3.zero,euler.y,Mathf.DeltaAngle(0,euler.x));
         }
+        private void MoveWatching(Vector3 target,Vector3 focus)
+        {
+            var look=focus-local.RecordingEyePosition;
+            var yaw=Mathf.Atan2(look.x,look.z)*Mathf.Rad2Deg;
+            var pitch=-Mathf.Atan2(look.y,new Vector2(look.x,look.z).magnitude)*Mathf.Rad2Deg;
+            var move=Quaternion.Inverse(Quaternion.Euler(0,yaw,0))*(target-local.transform.position).normalized;
+            local.SubmitLocalInput(move,yaw,pitch);
+        }
         private void ActionObserver()
         {
             var worker=ActionWorker;if(worker==null)return;
@@ -28,7 +36,8 @@ namespace DeepDive.P1.Lab
                 if(!Follow(true))return;actionObserverEntered=true;
             }
             var offset=new Vector3(3,0,2);var target=worker.transform.position+offset;
-            if(Vector3.Distance(local.transform.position,target)>1.1f){MoveToward(target);return;}
+            if(Vector3.Distance(local.transform.position,target)>1.1f)
+            {MoveWatching(target,worker.GetComponent<PlayerActionView>().ActionFocus);return;}
             Stop();Aim(worker.GetComponent<PlayerActionView>()?.ActionFocus??worker.transform.position+Vector3.up*.95f);
             var view=worker.GetComponent<PlayerActionView>();
             localDone=view!=null&&view.CollectCount>=(step==2?1:2)&&view.ActiveKind==PlayerVisualAction.None;

@@ -551,6 +551,11 @@ namespace DeepDive.P1.Lab
                 MoveToward(stand); aimAt = 0; return;
             }
             Aim(target);
+            if(ActionVideo && available && delta.magnitude<=2.2f)
+            {
+                var observer=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&!p.IsOwner);
+                if(observer==null || Vector3.Distance(observer.transform.position,local.transform.position+new Vector3(3,0,2))>1.2f)return;
+            }
             if (Settled())
             {
                 if (available) Act(local.SubmitPickupLocal);

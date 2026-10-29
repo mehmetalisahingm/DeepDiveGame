@@ -82,6 +82,24 @@ namespace DeepDive.P4.Tests
             Assert.That(prefab.GetComponentsInChildren<Collider>(true),Is.Empty);
             Assert.That(PlayerActionView.FishResource("unmodelled_species"),Is.Null);
         }
+        [Test] public void ClosedCrateHasARealMeshSurfaceOnAllSixSides()
+        {
+            var crate=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.CrateResource));
+            try
+            {
+                var filters=crate.GetComponentsInChildren<MeshFilter>();
+                foreach(var filter in filters)filter.gameObject.AddComponent<MeshCollider>().sharedMesh=filter.sharedMesh;
+                Physics.SyncTransforms();
+                var center=crate.transform.TransformPoint(new Vector3(.025f,0,.025f));
+                foreach(var direction in new[]{Vector3.left,Vector3.right,Vector3.up,Vector3.down,Vector3.forward,Vector3.back})
+                {
+                    var ray=new Ray(center+direction*2,-direction);bool found=false;
+                    foreach(var collider in crate.GetComponentsInChildren<MeshCollider>())found|=collider.Raycast(ray,out _,3);
+                    Assert.That(found,Is.True,$"Crate has no visible shell from {direction}");
+                }
+            }
+            finally{Object.DestroyImmediate(crate);}
+        }
         [Test] public void BoatEyePresentationNeverMovesAuthoritativeRoot()
         {
             var root=new GameObject("Eye presentation test");
@@ -93,6 +111,25 @@ namespace DeepDive.P4.Tests
                 actor.SetVisualBoatSeated(false);Assert.That(actor.VisualBoatSeated,Is.False);
             }
             finally{Object.DestroyImmediate(root);}
+        }
+        [Test] public void SuppliedRowboatHasAVisibleBenchUnderAllFourStableSeats()
+        {
+            var benches=Object.Instantiate(Resources.Load<GameObject>("PlayerActions/RowboatBenches"));
+            try
+            {
+                Assert.That(benches.GetComponentsInChildren<Collider>(),Is.Empty);
+                Assert.That(benches.GetComponentsInChildren<NetworkObject>(),Is.Empty);
+                foreach(var mesh in benches.GetComponentsInChildren<MeshFilter>())mesh.gameObject.AddComponent<MeshCollider>().sharedMesh=mesh.sharedMesh;
+                Physics.SyncTransforms();
+                foreach(var seat in BoatSeatLayoutRules.SeatIds)
+                {
+                    BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat,seat,out var offset);
+                    var ray=new Ray(offset+Vector3.up*2,Vector3.down);var height=float.NegativeInfinity;
+                    foreach(var collider in benches.GetComponentsInChildren<MeshCollider>())if(collider.Raycast(ray,out var hit,3))height=Mathf.Max(height,hit.point.y);
+                    Assert.That(height,Is.EqualTo(.63f).Within(.02f),seat);
+                }
+            }
+            finally{Object.DestroyImmediate(benches);}
         }
     }
 }
