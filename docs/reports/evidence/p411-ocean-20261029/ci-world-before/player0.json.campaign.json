@@ -1,0 +1,143 @@
+{
+    "SchemaVersion": 9,
+    "CampaignId": "local-host",
+    "CheckpointId": "94fe28a02db64590bd666e658872c955",
+    "SharedBalance": 0,
+    "Revision": 0,
+    "SoldCaptureIds": [],
+    "PaidRecordingIds": [],
+    "Loadouts": [],
+    "PendingTurnIns": [],
+    "BoatPartIds": [],
+    "UnusedBoatPartIds": [],
+    "StoredItems": [],
+    "HasDay": true,
+    "Day": {
+        "DayNumber": 1,
+        "ClockMinute": 517,
+        "ClosedCloseIds": [],
+        "SummaryHistory": [],
+        "Ledger": {
+            "FishSold": 0,
+            "FishSoldWeightGrams": 0,
+            "Income": 0,
+            "Expenses": 0,
+            "DiscoveredSpeciesIds": [
+                "red_snapper",
+                "tuna",
+                "sea_bass"
+            ],
+            "ProgressIds": [],
+            "EventIds": []
+        }
+    },
+    "HasExploration": true,
+    "Exploration": {
+        "RegionId": "region-near-1",
+        "DiscoveredCells": [
+            {
+                "CellId": "region-near-1:gx-2:gz-3",
+                "GridX": -2,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-1:gz-3",
+                "GridX": -1,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-3",
+                "GridX": 1,
+                "GridZ": -3,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx-2:gz-2",
+                "GridX": -2,
+                "GridZ": -2,
+                "DepthBandId": "shallow"
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-2",
+                "GridX": 1,
+                "GridZ": -2,
+                "DepthBandId": ""
+            },
+            {
+                "CellId": "region-near-1:gx1:gz-1",
+                "GridX": 1,
+                "GridZ": -1,
+                "DepthBandId": ""
+            }
+        ],
+        "Observations": [
+            {
+                "ObservationId": "sighting:red_snapper",
+                "SpeciesId": "red_snapper",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx1:gz-3",
+                "DepthBandId": "",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "sighting:tuna",
+                "SpeciesId": "tuna",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx1:gz-3",
+                "DepthBandId": "",
+                "DayNumber": 1
+            },
+            {
+                "ObservationId": "sighting:sea_bass",
+                "SpeciesId": "sea_bass",
+                "Evidence": 0,
+                "RegionId": "region-near-1",
+                "CellId": "region-near-1:gx1:gz-2",
+                "DepthBandId": "",
+                "DayNumber": 1
+            }
+        ]
+    },
+    "ChannelRightIds": [],
+    "ChannelSettleIds": [],
+    "HasMedia": true,
+    "HasFleet": true,
+    "HasProgression": true,
+    "HasLiving": true,
+    "Living": {
+        "Version": 1,
+        "BoardDay": 1,
+        "OrderTemplateId": "order-fish-quick",
+        "OrderStatus": 1,
+        "OrderProgress": 0,
+        "SponsorTemplateId": "sponsor-new-species",
+        "SponsorStatus": 1,
+        "SponsorProgress": 0,
+        "LastOrderTemplateId": "",
+        "LastSponsorTemplateId": "",
+        "UsedEvidenceIds": [],
+        "DevelopmentIds": [],
+        "HostRole": 0
+    },
+    "RewardIds": [],
+    "Progression": {
+        "Version": 1,
+        "Stage": 1,
+        "EncyclopediaEvidenceId": "enc:sighting:red_snapper",
+        "RumorEvidenceId": "",
+        "TraceIds": [],
+        "DiscoveryEvidenceId": "",
+        "CompletedBossIds": []
+    },
+    "FleetPurchasedBoatIds": [],
+    "FleetActiveBoatId": "",
+    "Media": {
+        "Clips": [],
+        "Publications": [],
+        "Followers": 0
+    }
+}

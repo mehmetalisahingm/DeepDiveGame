@@ -1,0 +1,10 @@
+{
+  "head": "afddb1da04aa86d1b1a62f2367984634ef3fe4a6",
+  "mergeTest": "9334a2ce6f04d1752d12a5b50dec105032f9c1cf",
+  "run": 40394385349,
+  "job": 121823432067,
+  "artifact": 12686916538,
+  "zipSha256": "937d776f1a388d9bc443fa50ff9445dedf4f61486cd6e0203abefe57ccab331b",
+  "result": "FAILED: four players waiting at sleep step 8; player 2 not in bed",
+  "historicalRefusalReason": "not recorded by old driver"
+}

@@ -1,0 +1,34 @@
+{
+    "passed": false,
+    "homeSpawn": true,
+    "shopOpened": true,
+    "dockReached": true,
+    "swam": true,
+    "pcOpened": true,
+    "slept": true,
+    "morningHome": false,
+    "earlySleepSummary": false,
+    "reloadClean": false,
+    "players": 4,
+    "worldLoads": 1,
+    "completedStep": 8,
+    "firstDay": 1,
+    "morningDay": 0,
+    "distance": 186.75344848632813,
+    "largestTravelStep": 0.4800005555152893,
+    "position": "(-3.45, 8.95, -44.55)",
+    "phase": "Lobby",
+    "trace": [
+        "1 Prep (-1.50, 8.40, -49.50)",
+        "2 Prep (8.58, 8.48, -4.79)",
+        "3 Dive (8.58, 8.48, -4.77)",
+        "4 Dive (-7.52, 6.12, -5.29)",
+        "5 Return (-7.52, 6.11, -5.27)",
+        "6 Return (2.29, 8.48, -50.38)",
+        "7 Lobby (2.29, 8.48, -50.38)",
+        "8 Lobby (-3.45, 8.95, -44.55)"
+    ],
+    "errors": [
+        "Timed out at step 8 waypoint 3"
+    ]
+}

@@ -1,0 +1,87 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 37,
+    "sha256": "518d7c1fb6d4535eff9783e74f330763bee15caf02983853ad708c95ac7452b8"
+  },
+  {
+    "path": "build-manifest.json",
+    "bytes": 56910,
+    "sha256": "048f77103dc85b545ba2c1e45185ba361895efb60589ca436867fa2a0656b5fe"
+  },
+  {
+    "path": "ci-before.json",
+    "bytes": 421,
+    "sha256": "7200e86e871c87af435590f00ef2b7c33b7842112538bc4e8ea5bf37728bcbbb"
+  },
+  {
+    "path": "ci-world-original.zip",
+    "bytes": 115270,
+    "sha256": "937d776f1a388d9bc443fa50ff9445dedf4f61486cd6e0203abefe57ccab331b"
+  },
+  {
+    "path": "editmode.xml",
+    "bytes": 1048322,
+    "sha256": "e9898c147856fa33472287645a9ef5941b24d329f0ab940afe11ab1e50c1a106"
+  },
+  {
+    "path": "windows-build.log",
+    "bytes": 382334,
+    "sha256": "ff15ec61e160c280856b1008c876f04074468c36a4d6214c4ad5a88e3d6f289c"
+  },
+  {
+    "path": "windows-zip.json",
+    "bytes": 220,
+    "sha256": "eaf1521aea861576d505cd69b52d5d4217b98b038f283b58fd46d137bca93b44"
+  },
+  {
+    "path": "ci-world-before/player0.json",
+    "bytes": 888,
+    "sha256": "d793188cd14be43e60f7dc57cf103b6924795b634def9d72b01972a7061fcf7c"
+  },
+  {
+    "path": "ci-world-before/player0.json.campaign.json",
+    "bytes": 4002,
+    "sha256": "37bc91ef43619b73c9d9d364c0133ed5e4afda252649ad8e45bcc9b11ea62f68"
+  },
+  {
+    "path": "ci-world-before/player1.json",
+    "bytes": 866,
+    "sha256": "b257b8eb9f20d02b8de28953c5221ea65989061e0f3e2763b61f2170e5a97eed"
+  },
+  {
+    "path": "ci-world-before/player2.json",
+    "bytes": 866,
+    "sha256": "176ce32154cd24a75a4a92e210b04632ac3422a2e03d3ca6a199141165848711"
+  },
+  {
+    "path": "ci-world-before/player3.json",
+    "bytes": 864,
+    "sha256": "f9cc426594fa5d99e540ca821399f22488e4b9b2a7c95f7d0cd625fb1dd647fc"
+  },
+  {
+    "path": "four-after/player0.json",
+    "bytes": 985,
+    "sha256": "ea5c9200901fce6b513243ad8ccdc50eb1dbc4c6c5d8105447f16c6cf3ea7ee9"
+  },
+  {
+    "path": "four-after/player1.json",
+    "bytes": 983,
+    "sha256": "6c76b1606e0e7d2f819b23c2516b1abaa74c28ee84be0901316a3c80801afae4"
+  },
+  {
+    "path": "four-after/player2.json",
+    "bytes": 983,
+    "sha256": "21a44fe4e38ce846bd57adcae3ed40dcd165808a91ab146612b4378c426ed335"
+  },
+  {
+    "path": "four-after/player3.json",
+    "bytes": 979,
+    "sha256": "013c27dcb60d3df250ec9227c4aa3692b0912fc0cdd6e6e5629da41ea1e2ec3d"
+  },
+  {
+    "path": "four-after/reload.json",
+    "bytes": 575,
+    "sha256": "00b248563de076c6b24e448e8e510b08b3372503513c5e9ff8ff00dca780b4a0"
+  }
+]
