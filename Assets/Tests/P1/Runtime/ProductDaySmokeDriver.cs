@@ -92,6 +92,7 @@ namespace DeepDive.P1.Lab
 
         private bool Host => report.slot == 0;
         private bool repairApproach, repairAtDock, repairExit;
+        private bool repairRackRoute,repairRackReached;
         private bool RepairOnly => Arg("-p187-repair-only") == "1";
         // #188: catch and sell first, repair afterwards in the same day (the repair must not gate the first catch).
         private bool HuntFirst => Arg("-p188-hunt-first") == "1";
@@ -417,7 +418,7 @@ namespace DeepDive.P1.Lab
                 Aim(site.SlotPosition(part));
                 if (!Settled()) return;
                 if(RepairOnly && !cancelSent && !local.RepairPlaced.Value)
-                { Act(()=>{cancelSent=true;local.SubmitRepairCancelLocal();}); return; }
+                { Act(()=>{cancelSent=true;repairRackRoute=repairRackReached=false;local.SubmitRepairCancelLocal();}); return; }
                 if(cancelObserved)report.cancelRecovered=true;
                 if (!local.RepairPlaced.Value) Act(local.SubmitPickupLocal);
                 else
@@ -431,6 +432,31 @@ namespace DeepDive.P1.Lab
             }
             if(site!=null && (sync.BoatMaterialsMask.Value&(1<<part))!=0)
             {
+                // R03's first work point is behind the north half of the stern. Returning
+                // to the rack through the narrow north rim can fall onto the ramp; walk
+                // back behind the stern, then along the same dry south lane used by the crew.
+                if(site.OnCradle && part==0 && !repairRackReached &&
+                    WorldAnchors.TryGetPose(RepairAnchorIds.Cradle,out var cradle))
+                {
+                    if(!repairRackRoute)
+                    {
+                        BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat,out var hull);
+                        var south=hull.Width*.5f+BoatRepairNetworkBinding.RoutePad;
+                        var west=-hull.Length*.5f-BoatRepairNetworkBinding.RoutePad;
+                        var start=Quaternion.Inverse(cradle.rotation)*(local.transform.position-cradle.position);
+                        var rackGoal=site.RackPosition(0)+Vector3.right*.65f;rackGoal.y=ContinuousTownLayout.WalkSurfaceY;
+                        var path=new List<Vector3>();
+                        Vector3 Ground(Vector3 p){var world=cradle.position+cradle.rotation*p;return P(world.x,world.z);}
+                        if(start.z < -hull.Length*.5f)
+                        {path.Add(Ground(new Vector3(start.x,0,west)));path.Add(Ground(new Vector3(south,0,west)));}
+                        else path.AddRange(site.RouteAround(local.transform.position,Ground(new Vector3(south,0,start.z))));
+                        var rackLocal=Quaternion.Inverse(cradle.rotation)*(rackGoal-cradle.position);
+                        path.Add(Ground(new Vector3(south,0,rackLocal.z)));path.Add(rackGoal);
+                        SetRoute(path);repairRackRoute=true;
+                    }
+                    if(!Follow())return;
+                    repairRackReached=true;repairAtDock=true;repairApproach=false;route=null;
+                }
                 if(cancelSent)cancelObserved=true;
                 if(!repairAtDock)
                 {

@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$Render)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($Players -ne 2 -or $RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal two-player product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -43,7 +43,7 @@ try {
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
         if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
-        elseif ($productIsWindows -and -not ($RepairVideo -or $EquipmentVideo -or $OceanVideo -or $ActionVideo)) { $productArgs+='-nographics' }
+        elseif ($productIsWindows -and -not ($RepairVideo -or $EquipmentVideo -or $OceanVideo -or $ActionVideo -or $Render)) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
         if ($productIsWindows) {
             $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru
