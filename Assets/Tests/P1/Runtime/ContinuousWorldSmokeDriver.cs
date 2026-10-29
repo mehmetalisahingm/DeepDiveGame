@@ -27,6 +27,9 @@ namespace DeepDive.P1.Lab
             public int players, worldLoads, completedStep, firstDay, morningDay;
             public float distance, largestTravelStep;
             public string position, phase;
+            public string bedRay="",bedAnswer="";
+            public float bedDistance;
+            public bool inBed;
             public List<string> trace = new List<string>(), errors = new List<string>();
         }
         private readonly Report report = new Report();
@@ -84,7 +87,8 @@ namespace DeepDive.P1.Lab
         private void Update()
         {
             if (finished || adapter == null) return;
-            if (Time.realtimeSinceStartup > deadline) { Fail("Timed out at step " + step + " waypoint " + waypoint); return; }
+            if (Time.realtimeSinceStartup > deadline)
+            { Fail($"Timed out at step {step} waypoint {waypoint} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed}"); return; }
             if (leaving)
             {
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
@@ -203,20 +207,33 @@ namespace DeepDive.P1.Lab
                     if (state.Phase == SessionPhase.Lobby && state.Revision >= 4)
                     {
                         var bed = Bed();
-                        SetRoute(new[] { H(4.95f, -2.5f), H(4.95f, 0f),
-                            new Vector3(bed.ExitPose.position.x, ContinuousTownLayout.WalkSurfaceY, bed.ExitPose.position.z) });
+                        var exit=new Vector3(bed.ExitPose.position.x,ContinuousTownLayout.WalkSurfaceY,bed.ExitPose.position.z);
+                        // The exit row is also the waiting sleepers' eye-to-bed ray.
+                        // Walk the lane south of it, then turn north at one's own bed
+                        // (the already exercised product-day HuntFirst approach).
+                        SetRoute(new[] { H(4.95f,-2.5f),new Vector3(H(4.95f,0).x,exit.y,exit.z-.9f),
+                            exit-Vector3.forward*.9f,exit });
                         SetStep(7);
                     }
                     break;
                 case 7:
-                    if (!Follow()) return;
+                    if (!Follow()) { aimAt=0; return; }
                     Aim(Bed().GetComponent<Collider>().bounds.center);
                     if (aimAt == 0) aimAt = Time.realtimeSinceStartup + 0.8f;
                     if (Time.realtimeSinceStartup < aimAt) return;
+                    var bedTarget=Bed().GetComponent<Collider>().bounds.center;
+                    var bedEye=local.RecordingEyePosition;
+                    report.bedRay=Physics.Raycast(bedEye,bedTarget-bedEye,out var bedHit,
+                        HomePlayerInteractionBinding.InteractionRange,~0,QueryTriggerInteraction.Collide)?bedHit.collider.name:"none";
+                    report.bedDistance=Vector3.Distance(local.transform.position,Bed().WorldPosition);
+                    HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(),"");
                     typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
                         .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
                     SetStep(8); break;
                 case 8:
+                    report.inBed=local.Seated.Value;
+                    var bedAnswer=HomeStatusField.GetValue(adapter.GetComponent<HomePlayerInteractionBinding>()) as string;
+                    if(!string.IsNullOrEmpty(bedAnswer))report.bedAnswer=bedAnswer;
                     report.slept |= local.Seated.Value || HomePlayerInteractionBinding.TryGetBed(local.OwnerClientId, out _);
                     // The last/solo H request can synchronously complete the morning before the
                     // next frame. The authoritative early-sleep summary proves that acceptance.
@@ -267,7 +284,7 @@ namespace DeepDive.P1.Lab
             manager.ConnectedClientsIds.All(id => progress.TryGetValue(id, out var p) && p >= value);
         private void SetStep(int value)
         {
-            step = value; report.completedStep = value;
+            step = value; report.completedStep = value;aimAt=0;
             report.trace.Add(value + " " + adapter.Session.State.Phase + " " + local.transform.position);
             Debug.Log("P46_WORLD_STEP " + report.trace.Last());
         }
@@ -310,7 +327,8 @@ namespace DeepDive.P1.Lab
             // Dry-route y is a floor datum, not a command to swim above the water surface.
             // Only the explicit final submerged waypoint requires its target depth.
             var needsDepth = step == 3 && waypoint == route.Count - 1;
-            if (flat < 0.3f && (!needsDepth || Mathf.Abs(heading.y) < 0.5f))
+            var tolerance=step==7 && waypoint==route.Count-1?.08f:.3f;
+            if (flat < tolerance && (!needsDepth || Mathf.Abs(heading.y) < 0.5f))
             {
                 // The request is aim/range validated by the host; no service id or reward fixture.
                 if (step == 1 && waypoint == 6)
@@ -355,6 +373,8 @@ namespace DeepDive.P1.Lab
         {
             if (type == LogType.Exception || type == LogType.Error) report.errors.Add(message);
         }
+        private static readonly FieldInfo HomeStatusField=typeof(HomePlayerInteractionBinding)
+            .GetField("statusMessage",BindingFlags.Instance|BindingFlags.NonPublic);
         private void Fail(string reason) { report.errors.Add(reason); Finish(); }
         private void Finish()
         {
