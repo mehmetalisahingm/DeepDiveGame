@@ -116,6 +116,29 @@ namespace DeepDive.Composition
                     }
                 }
 
+                // #189: the seven in-progress completion states (mask 0 = 0/3, 1/2/4 = the three single parts, 3/5/6 = the three pairs; the
+                // binding hides the whole worksite at 7 and the real boat takes over). boards[i] shows when bit i is set, as in the binding.
+                camera.transform.position = cradle.position + cradle.rotation * new Vector3(0f, 2.1f, -5.6f);
+                camera.transform.LookAt(site.TransformPoint(new Vector3(0f, .55f, -.6f))); camera.fieldOfView = 55f;
+                foreach (var minute in new[] { 0, 2 })
+                {
+                    Apply(DaylightModel.Evaluate(Minutes[minute], DayPhase.Running, 0), sun, camera);
+                    foreach (var glow in FindObjectsByType<RepairLanternGlow>(FindObjectsSortMode.None)) glow.Refresh();
+                    for (var mask = 0; mask < 7; mask++)
+                    {
+                        for (var i = 0; i < 3; i++) if (slots[i] != null) slots[i].SetActive(((mask >> i) & 1) == 1);
+                        yield return null; yield return null;
+                        var stateRt = new RenderTexture(960, 540, 24, RenderTextureFormat.ARGB32); camera.targetTexture = stateRt;
+                        camera.Render(); camera.Render();
+                        RenderTexture.active = stateRt;
+                        var stateTex = new Texture2D(960, 540, TextureFormat.RGB24, false); stateTex.ReadPixels(new Rect(0, 0, 960, 540), 0, 0); stateTex.Apply();
+                        RenderTexture.active = null; camera.targetTexture = null; Destroy(stateRt);
+                        File.WriteAllBytes(Path.Combine(output, $"state-{Names[minute]}-mask{mask}.jpg"), stateTex.EncodeToJPG(82));
+                        Destroy(stateTex);
+                    }
+                }
+                foreach (var slot in slots) if (slot != null) slot.SetActive(true);
+
                 // Frame time of the repair worksite (hull, parts, trestle and both lanterns): wide view, with and without, alternated so drift shows.
                 camera.transform.position = views[2].Item2; camera.transform.LookAt(views[2].Item3); camera.fieldOfView = views[2].Item4;
                 foreach (var minute in new[] { 0, 3 })
