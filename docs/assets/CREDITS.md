@@ -2,7 +2,7 @@
 
 ## Yerel üretim — tamir alanı seti — 26 Ekim 2026
 
-`Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
+`Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Kaldırma/yerleştirme/bırakma sesleri (`Art/RepairTools/OakPlank*.wav`) `Assets/Editor/P48RepairAudioBuilder.cs` ile sentezlendi; kayıt, örnek veya indirme yoktur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
 
 ## Kullanıcının sağladığı Quaternius FBX paketleri — 18 Ekim 2026
 
