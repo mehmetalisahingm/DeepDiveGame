@@ -40,6 +40,8 @@ namespace DeepDive.Network
         public HeldEquipmentMode DisplayedEquipment=>equipmentTransition.Displayed;
         public float EquipmentLowering=>equipmentTransition.Lowering;
         public bool IsChangingEquipment=>equipmentTransition.IsSwitching;
+        public void ApplyActionGrips(Vector3 left,Vector3 right,Quaternion leftRotation,Quaternion rightRotation)
+        { ApplyRepairGrips(left,right,leftRotation,rightRotation,true); }
 
         // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
         // These targets never move the player root or submit gameplay actions.
@@ -50,7 +52,8 @@ namespace DeepDive.Network
             // usual camera-relative arms while looking down moves shoulders forward
             // and makes a reachable world grip unreachable in first person.
             if(runtimeFirstPersonArms!=null)
-                runtimeFirstPersonArms.transform.SetPositionAndRotation(transform.position,transform.rotation);
+                runtimeFirstPersonArms.transform.SetPositionAndRotation(transform.position+Vector3.up*
+                    (networkPlayer!=null ? networkPlayer.VisualBoatSeated ? NetworkPlayer.BoatSeatedVisualOffset : networkPlayer.WaterViewLift : 0),transform.rotation);
             // The accepted final stroke clears transient work before the short visual
             // recovery ends. Keep its hands, and hide ordinary equipment during recovery.
             if(finishStroke && networkPlayer!=null && networkPlayer.IsOwner)
@@ -121,7 +124,8 @@ namespace DeepDive.Network
                 !isOwner && showCamera, cameraTier);
 
             ApplyAnimator(state, normalizedSpeed);
-            bodyPose?.Present(visualState, normalizedSpeed,lowered,networkPlayer!=null?networkPlayer.WaterViewLift:0);
+            bodyPose?.Present(visualState, normalizedSpeed,lowered,networkPlayer!=null?networkPlayer.WaterViewLift:0,
+                networkPlayer!=null && networkPlayer.VisualBoatSeated);
             armsPose?.Present(visualState, normalizedSpeed,lowered);
         }
 

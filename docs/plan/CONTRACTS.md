@@ -424,6 +424,14 @@ P2 başlangıcı: Mehmet, Utku ve Mert av/vuruş/çanta istek ve sonuçlarını 
 
 ## P4.8 / #186 — Fiziksel tamir sözleşmesi önerisi
 
+### 29 Ekim #161 — Kabul edilmiş eylemin kozmetik sunumu
+
+Kullanıcı Mehmet'in kalan işlerini ve ek görsel ayrıntıları uygulamayı istedi. `CatchObject.CollectedForPresentation` yalnız çanta kabulünden sonra ilk tüketimde oyuncu/tür/kaynak bildirir; `EconomyPlayerSync.ServiceOutcomeForPresentation` gerçek servis sonucu yazıldıktan sonra bildirim verir. Eski `Claimed` imzası, çanta/ödeme/save yetkisi değişmez. Composition yalnız kabul edilmiş, pozitif adetli FishBuyer sonucunu sunar. Aynı servis request'i ikinci kasa üretmez.
+
+İsteğe bağlı `DeepDive.P49.VisualAction.v1` named message host→bağlı oyuncular içindir: player NetworkObjectId, monoton sequence, server time, Collect/Deliver türü, world source, FixedString64 tür kimliği, adet. Alıcı yalnız server göndereni, geçerli boyut/sonlu koordinat/zaman/adet, mevcut player nesnesi ve yeni sequence kabul eder; 1.8 saniyeden eski eylem oynatılmaz. Bu mesaj bir istek değildir, gameplay yazarı yoktur. Yeni NetworkVariable/RPC düzeni veya kayıt alanı eklenmediğinden mevcut DeepDive-P4-5 el sıkışması korunur; eski oyuncu bu isteğe bağlı görsel uzantıyı göstermez. Yeni görsellerin iki tarafta görünmesi için aynı yeni build gerekir.
+
+Tekne sunumu mevcut `BoatTripPlayerSync.MySeatId` aynasından sürülür; ilk spawn/late join oturmuşsa eski binme animasyonu tekrarlanmaz. Yatakta kullanılan genel `Seated` tek başına tekne pozu başlatmaz. Tekne oturuşunda beden ve göz -0.52 m görsel offset alır; root/koltuk/rota değişmez ve etkileşim ışını aynı gerçek göz noktasını kullanır. Eldeki torba/kasa ve kabul edilmiş av kopyası collider/NetworkObject taşımaz. Kayıt, tamir, pasiflik veya ekipman değişimi görsel toparlanmayı keser; giriş/hareket/ekonomi animasyonu beklemez. Ses ve son insan/ayrı PC kabulü #164'te kalır.
+
 [Somut öneri ve sekiz eski kayıt geçişi](P48_REPAIR_CONTRACT_PROPOSAL.md), mevcut pickup/purchase katkısından edinme–taşıma–son darbe ayrımına geçişi açıklar. R01/R02/R11 kesinleşmiş karar veya uygulanmış ürün API'si değildir. `BoatPartClaim`, `TryContributeBoatPart`, v8 kayıt ve mevcut üç teknik ID bu hazırlıkla değiştirilmez. #187 Mehmet, #188 Utku ve #189 Mert aynı dar sözleşmeyi tüketir; #141/#159 başlama ve gerçek ekip kabulü sınırları korunur.
 
 ### 18 Ekim #187 dar kullanıcı istisnası
