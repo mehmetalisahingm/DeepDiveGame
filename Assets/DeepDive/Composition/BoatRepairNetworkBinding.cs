@@ -52,6 +52,7 @@ namespace DeepDive.Composition
         // The hull collider is only there while the broken boat is shown (site active on the cradle).
         public bool Blocking => OnCradle && site != null && site.activeSelf;
         private Transform cradle, drop;
+        private GameObject trestle;
         private readonly Transform[] workAnchors = new Transform[RepairAnchorIds.WorkCount];
         private float anchorRetryAt;
         private BoxCollider hull;
@@ -87,8 +88,13 @@ namespace DeepDive.Composition
                 hull.enabled = OnCradle;
                 var progress = local.GetComponent<EconomyPlayerSync>();
                 site.SetActive(!trip.BoatVisible.Value && progress != null && progress.BoatPartsMask.Value != 7);
+                if (trestle != null) trestle.SetActive(site.activeSelf);
             }
-            else if (site != null) site.SetActive(false);
+            else
+            {
+                if (site != null) site.SetActive(false);
+                if (trestle != null) trestle.SetActive(false);
+            }
             if (Host)
             {
                 if (work == null) work = new BoatRepairWorkSession(i => Has(i, false), i => Has(i, true),
@@ -123,6 +129,7 @@ namespace DeepDive.Composition
             if (!WorldAnchors.TryFind(RepairAnchorIds.Cradle, out var found)) return;
             cradle = found.transform;
             drop = WorldAnchors.TryFind(RepairAnchorIds.Drop, out var safeDrop) ? safeDrop.transform : null;
+            if (trestle == null) trestle = BoatRepairSetArt.AttachTrestle(drop);
             for (var i = 0; i < workAnchors.Length; i++)
                 workAnchors[i] = WorldAnchors.TryFind(RepairAnchorIds.Work(i), out var work) ? work.transform : null;
         }
@@ -131,25 +138,37 @@ namespace DeepDive.Composition
         // otherwise along a detour line RoutePad off the hull's south (town) side, the side the beach has room on:
         // onto that line level with `from`, along it to level with `to` (clamped to the hull's ends), then `to`.
         // Never back toward a corner already passed, so a caller can recompute it every frame. Without a blocking
-        // hull (berth, or the boat already repaired): just `to`. Starts on the north (water) side are not handled:
-        // the dry strip there is narrower than a diver.
-        public List<Vector3> RouteAround(Vector3 from, Vector3 to)
+        // hull (berth, or the boat already repaired): just `to`. A start on the north (water) side level with the hull
+        // (a diver walking off the top of Shore_Ramp) cannot use the .4 m north strip and would clip the hull going
+        // straight south, so it first rounds the east end: the north corner lies on the dry Shore_Ledge, the west
+        // end's north corner is open water (#188, measured 26 Oct).
+        public List<Vector3> RouteAround(Vector3 from, Vector3 to) =>
+            Blocking ? RouteAround(site.transform, from, to) : new List<Vector3> { to };
+        // The same walk round a hull lying at `hull` (the worksite frame), for tests that build the hull themselves.
+        public static List<Vector3> RouteAround(Transform hull, Vector3 from, Vector3 to)
         {
             var route = new List<Vector3>();
-            if (Blocking && BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var size))
+            if (BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var size))
             {
                 var hitW = size.Width * .5f + HitPad;
                 var hitL = size.Length * .5f + HitPad;
-                var a = site.transform.InverseTransformPoint(from);
-                var b = site.transform.InverseTransformPoint(to);
+                var a = hull.InverseTransformPoint(from);
+                var b = hull.InverseTransformPoint(to);
                 if (Blocked(a, b, hitW, hitL))
                 {
                     // Local +x is the hull's south side at the S1 yaw (90); pick it from the cradle frame, not the world.
-                    var side = Vector3.Dot(site.transform.right, Vector3.back) >= 0f ? 1f : -1f;
+                    var side = Vector3.Dot(hull.right, Vector3.back) >= 0f ? 1f : -1f;
                     var line = side * (size.Width * .5f + RoutePad);
                     var end = size.Length * .5f + RoutePad;
-                    route.Add(Flat(site.transform.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(a.z, -end, end))), to.y));
-                    route.Add(Flat(site.transform.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(b.z, -end, end))), to.y));
+                    if (side * a.x < 0f && Mathf.Abs(a.z) < hitL)
+                    {
+                        // Local +z is east at the S1 yaw; pick the ledge end from the cradle frame, not the world.
+                        var east = Vector3.Dot(hull.forward, Vector3.right) >= 0f ? end : -end;
+                        route.Add(Flat(hull.TransformPoint(new Vector3(-line, 0f, east)), to.y));
+                        a = new Vector3(line, 0f, east);
+                    }
+                    route.Add(Flat(hull.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(a.z, -end, end))), to.y));
+                    route.Add(Flat(hull.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(b.z, -end, end))), to.y));
                 }
             }
             route.Add(to);
@@ -211,13 +230,17 @@ namespace DeepDive.Composition
             if(surface!=null&&contact!=null)
                 nailRootZ=repairArt.RepairPlacedPlankPrefab.transform.InverseTransformPoint(surface.position).z-
                     repairArt.RepairNailPrefab.transform.InverseTransformPoint(contact.position).z;
-            for (int side = -1; side <= 1; side += 2)
+            // Authored broken hull (#189); the primitive stand-in below only shows when that art is missing.
+            if (!BoatRepairSetArt.AttachDamagedHull(site.transform))
             {
-                Box("CrackedGunwale", new Vector3(side * 1.02f, .55f, .2f), new Vector3(.14f, .28f, 3.8f), wood);
-                Box("BowSide", new Vector3(side * .55f, .5f, 1.85f), new Vector3(.13f, .4f, 1.25f), wood).transform.localRotation = Quaternion.Euler(0, side * -47, 0);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    Box("CrackedGunwale", new Vector3(side * 1.02f, .55f, .2f), new Vector3(.14f, .28f, 3.8f), wood);
+                    Box("BowSide", new Vector3(side * .55f, .5f, 1.85f), new Vector3(.13f, .4f, 1.25f), wood).transform.localRotation = Quaternion.Euler(0, side * -47, 0);
+                }
+                for (int i = 0; i < 5; i++) Box("OldFloor", new Vector3((i-2)*.36f, .15f, .1f), new Vector3(.3f,.12f,3.4f-i%2*.4f), wood);
+                Box("OldSeat", new Vector3(0,.65f,.65f),new Vector3(1.9f,.13f,.4f),wood);
             }
-            for (int i = 0; i < 5; i++) Box("OldFloor", new Vector3((i-2)*.36f, .15f, .1f), new Vector3(.3f,.12f,3.4f-i%2*.4f), wood);
-            Box("OldSeat", new Vector3(0,.65f,.65f),new Vector3(1.9f,.13f,.4f),wood);
             for (int i = 0; i < 3; i++)
             {
                 var slot = new GameObject("RepairSlot-" + i); slot.transform.SetParent(site.transform,false);
@@ -228,9 +251,11 @@ namespace DeepDive.Composition
                 label.transform.localPosition=slot.transform.localPosition+Vector3.up*.65f;
                 var text=label.AddComponent<TextMesh>();text.text=BoatRepairGuide.PartName(BoatRepairParts.All[i]);
                 text.anchor=TextAnchor.MiddleCenter;text.fontSize=48;text.characterSize=.012f;text.color=new Color(1,.88f,.55f);labels.Add(text);
-                boards[i] = repairArt!=null && repairArt.RepairPlacedPlankPrefab!=null
-                    ? Instantiate(repairArt.RepairPlacedPlankPrefab,site.transform,false)
-                    : Box("RepairPlank-"+i,slot.transform.localPosition,new Vector3(.58f,.7f,.1f),fresh);
+                boards[i] = BoatRepairSetArt.Part(i,site.transform);
+                if (boards[i] == null)
+                    boards[i] = repairArt!=null && repairArt.RepairPlacedPlankPrefab!=null
+                        ? Instantiate(repairArt.RepairPlacedPlankPrefab,site.transform,false)
+                        : Box("RepairPlank-"+i,slot.transform.localPosition,new Vector3(.58f,.7f,.1f),fresh);
                 boards[i].transform.localPosition=slot.transform.localPosition;
                 var tips=new Transform[3];
                 for(int n=0;n<3;n++)

@@ -1,0 +1,103 @@
+{
+  "source": "4e6ac1c1a1bbb983720be09b3f7213fda4eef9bb",
+  "editor": "6000.3.23f1",
+  "dlls": [
+    {
+      "file": "DeepDive.Network.dll",
+      "sha256": "918025F366ABEE8E62CF1BE64222F0D99FC4A37067D748845F35B25C64C1DEF8"
+    },
+    {
+      "file": "DeepDive.Composition.dll",
+      "sha256": "762B959894271EB4E86818EB5917B6EC87850C69F4B3D4E601C202DCDD69AD4D"
+    },
+    {
+      "file": "DeepDive.P1.Lab.dll",
+      "sha256": "8A9C4D3D28FA1E58919B630EE4136D90A5DAA1E709D54FF22FE30C575BE9E97C"
+    }
+  ],
+  "editmodeSource": "b9f1ae1a493dc099fd6bee9ee22060c7498822ba",
+  "run": "Logs/P46-product-20261026-212427-765-2",
+  "failedObserverRun": "Logs/P46-product-20261026-211857-479-2",
+  "samePC": true,
+  "testResult": {
+    "total": 1368,
+    "passed": 1368,
+    "failed": 0
+  },
+  "videos": {
+    "owner": {
+      "frames": 64,
+      "durationSeconds": 3.8654999999999973,
+      "interpolated": false,
+      "audio": false
+    },
+    "peer": {
+      "frames": 118,
+      "durationSeconds": 7.02709999999999,
+      "interpolated": false,
+      "audio": false
+    }
+  },
+  "files": {
+    ".gitattributes": {
+      "sha256": "dbfafaaa0d6c16ccf77e5dcbdc263eaccaca578010378eac067b818b595e85fa",
+      "bytes": 95
+    },
+    "editmode.xml": {
+      "sha256": "ef9fd27f1b914ad4533dae2a1c17569f91986d346b850f24b52a5468bd782760",
+      "bytes": 1031895
+    },
+    "equipment-owner.mp4": {
+      "sha256": "b8342f035ef7c8d363b37f66816f3ce71e61bb1a76d4e692c0e2284e00953dae",
+      "bytes": 52060
+    },
+    "equipment-owner.png": {
+      "sha256": "15f3e18d38a63e329f40214196894e5331cdc2e9a7af015460413ea86654bd75",
+      "bytes": 55140
+    },
+    "equipment-peer.mp4": {
+      "sha256": "e4e8780039c9b6ef3bb732017f910f62e00649b1c8672f78456f7f903b17bcee",
+      "bytes": 146712
+    },
+    "equipment-peer.png": {
+      "sha256": "92bc88bd341c4dca39bb79482c551c60764921a14008fa933d5241f92dbe3ce6",
+      "bytes": 94545
+    },
+    "failed-observer-route/player0.json": {
+      "sha256": "504813c0a684abc7b70f4588a797945b7f73937e6a98cb376f5c1864354c1e5e",
+      "bytes": 56786
+    },
+    "failed-observer-route/player1.json": {
+      "sha256": "c888f0a4b932f526c46824ef01f1ef1892af04c26b19b1bc670bd237f59167cc",
+      "bytes": 56976
+    },
+    "failed-observer-route/runner.json": {
+      "sha256": "a9c13775315ea32d3c4d392b8a630b8586212a72e283d0f1b3e421f93d35db86",
+      "bytes": 471
+    },
+    "frames-owner.csv": {
+      "sha256": "0d740a9851662a6b94aa11e7af541f7c073e5b1027f3869d1e395bbd0ef47e52",
+      "bytes": 1831
+    },
+    "frames-peer.csv": {
+      "sha256": "0baa809b3ebe9e21cbeab2658e4f2abd4e1da2d5ad3b310178560e18b9ac5c58",
+      "bytes": 3413
+    },
+    "player0.json": {
+      "sha256": "726620e80aa6b74cde213b2a466ef5dfb013a5f476c368569fe2f3cc1f569053",
+      "bytes": 53933
+    },
+    "player1.json": {
+      "sha256": "edcff8a1c6cb5fcb1e9afb819ebb07d4af5b5eae3c01d2907c29251f3d1d7e87",
+      "bytes": 53962
+    },
+    "reload.json": {
+      "sha256": "85e2ac34954adf8e80647d958ed7037cafa64115637ea163f55017e398431669",
+      "bytes": 1782
+    },
+    "runner.json": {
+      "sha256": "a968234d46fc252f7dbfcd8cdb514c3ef64063bd4d8c01ad7c679d08bb7f05a9",
+      "bytes": 498
+    }
+  }
+}

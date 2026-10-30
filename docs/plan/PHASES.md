@@ -232,6 +232,8 @@ Derin tasarım: [EXPERIENCE_DESIGN](EXPERIENCE_DESIGN.md); uygulanabilir iş par
 
 25 Ekim kararıyla P4.6/P4.7 ayrı ara-kabulleri üretimin başlangıç kapısı olmaktan çıkarıldı. Kit/yerleşim #171/#172'de üretilir; tamir → ortak eylemler → kasaba/ev → canlı deniz gerçek girdi bağımlılıklarıyla küçük paketlerde ilerler. Ortak/ayrı PC/son görsel kabul P4.12'de tek gelişmiş build'e bağlanır. Yeni değişikliklerin anlamlı teknik kontrolleri sürer; bilinen #207 açık kusurdur. Sanat/içerik üretimi ertelenmedi, yalnız eski ayrı kabul turları sona taşındı.
 
+26 Ekim açık kullanıcı ataması: “suyun gerçekliğini ... bu görevi üstlen kendi başına” talebiyle Q07/Q08'in deniz yüzeyi, ışık/kırılma ve kamera geçişi görsel üretimi Mehmet'e devredildi. P4.11/#163 altında bu dar paket şimdi uygulanır; ortak render ayarları ve optik göz yüksekliği de kapsamındadır. Host su/oksijen sınıflandırması, oyuncu/tekne fizik konumu, tek rota ve D06 korunur. Q09 habitat, Q10 tür, Q11 değer, Q12 boss ve son ses/insan/dört PC kabulü bu atamayla tamamlanmış sayılmaz.
+
 18 Ekim açık kullanıcı istisnası: 15 avlanabilir kıyı balığı ve sağlanan Tripo motorbot görseli mevcut kabul devam ederken uygulanır. Bu talep yalnız bu iki içerik parçasının sırasını öne alır; diğer faz/insan/ayrı bilgisayar kabul koşullarını kaldırmaz. Tür sayısı bu işte birden beşe yükseltilmez. Kaynak ve doğrulama [P4-FISH15-TRIPO-MOTORBOAT](../reports/P4-FISH15-TRIPO-MOTORBOAT.md) içindedir.
 
 ## P5 — Hataları ve performansı düzelt

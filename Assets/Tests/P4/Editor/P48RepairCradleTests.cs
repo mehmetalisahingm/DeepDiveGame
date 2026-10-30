@@ -186,6 +186,57 @@ namespace DeepDive.P4.Tests
             }, furnitureProxies: true);
         }
 
+        // A diver wading off the top of Shore_Ramp stands north of the hull, level with it: the body is out of the
+        // water (feet above 7.1) from x ~4.6, and the .4 m north strip is narrower than a diver. RouteAround rounds the
+        // ledge (east) end there; going straight south from the ramp runs into the beach face and the hull.
+        [Test]
+        public void RampTopWalksRoundTheLedgeEndToEveryWorkPoint()
+        {
+            WithScenery(scene =>
+            {
+                var site = BuildSite(scene);
+                var work = WorkPoints();
+                var crew = work.Select((w, i) => Worker(scene, w, i)).ToArray();
+                try
+                {
+                    Physics.SyncTransforms();
+                    Assert.IsTrue(Physics.Raycast(new Vector3(5.2f, 12f, -9.5f), Vector3.down, out var ramp, 10f, ~0,
+                        QueryTriggerInteraction.Ignore), "no ground on Shore_Ramp at x 5.2");
+                    var start = ramp.point;
+                    Assert.Greater(start.y, 7.1f, "the ramp start must be out of the water (wading, not swimming)");
+                    var south = Cradle.z - (2.4f * 0.5f + BoatRepairNetworkBinding.RoutePad);
+                    Assert.IsFalse(WalkWithController(scene, new[] { start, P(start.x, south) }, out var straight, start.y - 0.3f),
+                        "straight south from the ramp must not get past the beach face and the hull");
+                    StringAssert.Contains("stuck", straight);
+                    var failures = new List<string>();
+                    for (var i = 0; i < crew.Length; i++)
+                    {
+                        crew[i].SetActive(false);
+                        Physics.SyncTransforms();
+                        var route = BoatRepairNetworkBinding.RouteAround(site.transform, start, work[i]);
+                        var corner = route[0];
+                        if (corner.x < Cradle.x + 2.5f + 0.4f || corner.z < -11f)
+                            failures.Add($"repair-work-{i}: first waypoint {corner} is not the north ledge corner");
+                        if (!WalkWithController(scene, new[] { start }.Concat(route).ToArray(), out var why, start.y - 0.3f))
+                            failures.Add($"ramp -> repair-work-{i}: {why}");
+                        crew[i].SetActive(true);
+                        Physics.SyncTransforms();
+                    }
+                    // South and west starts keep the old route: no north corner.
+                    var beach = BoatRepairNetworkBinding.RouteAround(site.transform, P(-12f, -12.5f), work[2]);
+                    if (beach.Count != 3 || beach.Any(w => w.z > -11.4f))
+                        failures.Add("beach start route changed: " + string.Join(" ", beach));
+                    Assert.IsEmpty(failures, string.Join("\n", failures));
+                }
+                finally
+                {
+                    foreach (var c in crew) Object.DestroyImmediate(c);
+                    Object.DestroyImmediate(site);
+                    Physics.SyncTransforms();
+                }
+            }, furnitureProxies: true);
+        }
+
         // ---- helpers -----------------------------------------------------------------------------
 
         private static Pose CradlePose()
@@ -238,8 +289,8 @@ namespace DeepDive.P4.Tests
         }
 
         // Walks the waypoints with a NetworkDiver-sized CharacterController at walk speed with gravity. Fails on a fall
-        // off the walk height, on 1 s without progress, or after 30 s.
-        private static bool WalkWithController(Scene scene, Vector3[] line, out string why)
+        // below `floor` (default: off the walk height), on 1 s without progress, or after 30 s.
+        private static bool WalkWithController(Scene scene, Vector3[] line, out string why, float floor = WalkY - 0.3f)
         {
             var go = new GameObject("Test_P48_Walker");
             SceneManager.MoveGameObjectToScene(go, scene);
@@ -264,7 +315,7 @@ namespace DeepDive.P4.Tests
                         cc.Move(dir.normalized * step + Vector3.up * fall * Dt);
                         t += Dt;
                         stuck = Flat(go.transform.position - before) < step * 0.25f ? stuck + Dt : 0f;
-                        if (go.transform.position.y < WalkY - 0.3f) { why = $"fell to {go.transform.position} on leg {w}"; return false; }
+                        if (go.transform.position.y < floor) { why = $"fell to {go.transform.position} on leg {w}"; return false; }
                         if (stuck > 1f) { why = $"stuck at {go.transform.position} on leg {w} toward {line[w]}"; return false; }
                         if (t > 30f) { why = "timeout"; return false; }
                     }

@@ -35,6 +35,11 @@ namespace DeepDive.Network
         private int drivenAnimatorState;
         private CoastalDiverPose bodyPose, armsPose;
         private NetworkPlayer networkPlayer;
+        private readonly EquipmentVisualTransition equipmentTransition=new EquipmentVisualTransition();
+        private readonly Dictionary<Transform,Pose> ownerEquipmentRest=new Dictionary<Transform,Pose>();
+        public HeldEquipmentMode DisplayedEquipment=>equipmentTransition.Displayed;
+        public float EquipmentLowering=>equipmentTransition.Lowering;
+        public bool IsChangingEquipment=>equipmentTransition.IsSwitching;
 
         // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
         // These targets never move the player root or submit gameplay actions.
@@ -77,6 +82,17 @@ namespace DeepDive.Network
         public void Apply(bool isOwner, PlayerPresentationState state, float normalizedSpeed, CameraTier cameraTier)
         {
             EnsureInitialized();
+            equipmentTransition.Tick(state.HeldEquipment,cameraTier,Time.unscaledDeltaTime,
+                state.Recording || state.Locomotion==LocomotionMode.Passive || state.Locomotion==LocomotionMode.Seated);
+            var visualState=new PlayerPresentationState(state.Locomotion,equipmentTransition.Displayed,state.Recording);
+            cameraTier=equipmentTransition.Tier;
+            var lowered=equipmentTransition.Lowering;
+            foreach(var rest in ownerEquipmentRest)
+            {
+                if(rest.Key==null)continue;
+                rest.Key.localPosition=rest.Value.position+new Vector3(0,-.34f*lowered,-.10f*lowered);
+                rest.Key.localRotation=Quaternion.Euler(25*lowered,0,-7*lowered)*rest.Value.rotation;
+            }
             if(runtimeFirstPersonArms!=null)
             {
                 runtimeFirstPersonArms.transform.localPosition=new Vector3(0,-1.65f,0);
@@ -84,7 +100,7 @@ namespace DeepDive.Network
             }
 
             var showEquipment = state.Locomotion != LocomotionMode.Passive;
-            SetRendererGroup(firstPersonRenderers, isOwner && showEquipment && state.HeldEquipment != HeldEquipmentMode.None, false);
+            SetRendererGroup(firstPersonRenderers, isOwner && showEquipment && visualState.HeldEquipment != HeldEquipmentMode.None, false);
             SetRendererGroup(thirdPersonRenderers, true, isOwner);
 
             var hasHumanRig = thirdPersonRenderers != null && thirdPersonRenderers.Length > 0;
@@ -95,18 +111,18 @@ namespace DeepDive.Network
                     fallbackBody.shadowCastingMode = isOwner ? ShadowCastingMode.ShadowsOnly : ShadowCastingMode.On;
             }
 
-            SetActive(firstPersonHarpoon, isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Harpoon);
-            SetActive(thirdPersonHarpoon, !isOwner && showEquipment && state.HeldEquipment == HeldEquipmentMode.Harpoon);
+            SetActive(firstPersonHarpoon, isOwner && showEquipment && visualState.HeldEquipment == HeldEquipmentMode.Harpoon);
+            SetActive(thirdPersonHarpoon, !isOwner && showEquipment && visualState.HeldEquipment == HeldEquipmentMode.Harpoon);
 
-            var showCamera = showEquipment && state.HeldEquipment == HeldEquipmentMode.Camera;
+            var showCamera = showEquipment && visualState.HeldEquipment == HeldEquipmentMode.Camera;
             SetCameraTier(firstPersonCamera, firstPersonCameraAdvanced, firstPersonCameraProfessional,
                 isOwner && showCamera, cameraTier);
             SetCameraTier(thirdPersonCamera, thirdPersonCameraAdvanced, thirdPersonCameraProfessional,
                 !isOwner && showCamera, cameraTier);
 
             ApplyAnimator(state, normalizedSpeed);
-            bodyPose?.Present(state, normalizedSpeed);
-            armsPose?.Present(state, normalizedSpeed);
+            bodyPose?.Present(visualState, normalizedSpeed,lowered,networkPlayer!=null?networkPlayer.WaterViewLift:0);
+            armsPose?.Present(visualState, normalizedSpeed,lowered);
         }
 
         private void EnsureInitialized()
@@ -126,6 +142,8 @@ namespace DeepDive.Network
             }
 
             BuildRuntimePresentation();
+            foreach(var prop in new[]{firstPersonHarpoon,firstPersonCamera,firstPersonCameraAdvanced,firstPersonCameraProfessional})
+                if(prop!=null)ownerEquipmentRest[prop.transform]=new Pose(prop.transform.localPosition,prop.transform.localRotation);
 
             if (animator == null) animator = GetComponentInChildren<Animator>(true);
             if (animator != null)

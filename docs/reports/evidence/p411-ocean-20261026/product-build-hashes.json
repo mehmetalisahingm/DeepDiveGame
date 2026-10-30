@@ -1,0 +1,18 @@
+[
+  {
+    "path": "Builds/P1-Integrated/DeepDiveGame-P1.exe",
+    "sha256": "56c28afba054092826b7a8a80ba3767daa87967f182c0c562eb2f98799175b7a"
+  },
+  {
+    "path": "Builds/P1-Integrated/DeepDiveGame-P1_Data/Managed/DeepDive.Composition.dll",
+    "sha256": "3da6cf3dfb9e2e2083c834769a3ba16d4df1383acfeb030a8d8cc49116743acc"
+  },
+  {
+    "path": "Builds/P1-Integrated/DeepDiveGame-P1_Data/Managed/DeepDive.Network.dll",
+    "sha256": "e496663ab65267eedd77283a550dd069d134605f8db97cf3965e8b59f821a92b"
+  },
+  {
+    "path": "Builds/P1-Integrated/DeepDiveGame-P1_Data/Managed/DeepDive.P1.Lab.dll",
+    "sha256": "af9a9fda355f5008b8aea8db577da7c7dcf2aff9a83bd6d3209eae49357a3180"
+  }
+]
