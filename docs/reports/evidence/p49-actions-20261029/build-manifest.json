@@ -1,0 +1,1512 @@
+[
+  {
+    "path": "DeepDiveGame-P1.exe",
+    "bytes": 667136,
+    "sha256": "56c28afba054092826b7a8a80ba3767daa87967f182c0c562eb2f98799175b7a"
+  },
+  {
+    "path": "UnityCrashHandler64.exe",
+    "bytes": 1728936,
+    "sha256": "ae5db232862c121f59d77f30d4c6bbb7246a5ac5f48acc25a55ecca4ed5f7570"
+  },
+  {
+    "path": "UnityPlayer.dll",
+    "bytes": 84343728,
+    "sha256": "a56336022ab3c15ec474c09198f8389bd3448bb54d67c928eefe20b1c77686c2"
+  },
+  {
+    "path": "WinPixEventRuntime.dll",
+    "bytes": 58368,
+    "sha256": "81adcfd8253c3489be720da7e30f16004dc9a1f02a8b418c6c3aef4993032e6d"
+  },
+  {
+    "path": "D3D12/D3D12Core.dll",
+    "bytes": 4725304,
+    "sha256": "625bd40005b1c3708695d5256ecf230d278e6b8edba5a88af70f3d91324f3052"
+  },
+  {
+    "path": "D3D12/d3d12SDKLayers.dll",
+    "bytes": 4930104,
+    "sha256": "c0730cc70d3250d3de19c04c17845ba9e70eecaf502d684d1409195ebc5b5959"
+  },
+  {
+    "path": "DeepDiveGame-P0_BurstDebugInformation_DoNotShip/Data/Plugins/x86_64/lib_burst_generated.txt",
+    "bytes": 278942,
+    "sha256": "63aba972ae5a8c2b0d52b31ffbcaf0d7300155e8bd239e071a6b46530a81bcd1"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/app.info",
+    "bytes": 28,
+    "sha256": "2fdcb4add906310d919d355c8c38bb4ba0b0fe780c1d472035c64d8b11f0e7f4"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/boot.config",
+    "bytes": 399,
+    "sha256": "9ad138970ae9837342832460b7a4e8fd7dbaa8e553c61dad387f7f985bc9e590"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/globalgamemanagers",
+    "bytes": 248484,
+    "sha256": "f2b8f20d046b97d46b836fb6150e9dbcd9537848e77f6eb7cb828ba8ce768b76"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/globalgamemanagers.assets",
+    "bytes": 442048,
+    "sha256": "ed3127abdbfdb0baba2057c3d22d7c9da62bf9fbbb0460d5df3ac1349470e08f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/globalgamemanagers.assets.resS",
+    "bytes": 2818784,
+    "sha256": "984b98af5c179fbbd1b772f2f0a06c5cec7a92b98d46094aac4de9cc72122a0a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/level0",
+    "bytes": 7860,
+    "sha256": "a33b9c5f15238ae19e272b28fe8569ac001f073cc8841686cbc36532916f53ce"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/level1",
+    "bytes": 98596,
+    "sha256": "32386165f1cc988aa9504b33abf57286958ffbcf9aca8c97d0bdc6b5a5972003"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/resources.assets",
+    "bytes": 10105768,
+    "sha256": "bc79273cd849b1894780949606af29444570b53bacb9ca3a9bd10ad8c2b992cf"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/resources.assets.resS",
+    "bytes": 26636928,
+    "sha256": "182a233088a77d96e258fb7f6d6c3c0fb1bab7f08bae8b4ca18b8b1b05b2a70d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/resources.resource",
+    "bytes": 1248,
+    "sha256": "11a76b5139a9ccd146a0512f27b5b2540387ce26fd99f9ab381a3f909fe6cb78"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/RuntimeInitializeOnLoads.json",
+    "bytes": 11026,
+    "sha256": "9e662661fe2c95718e60c2b07e594f3baf4e38e565717cf041ad48b88bfea195"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/ScriptingAssemblies.json",
+    "bytes": 4371,
+    "sha256": "6a26bc00cc1889c5be31c97b13058ea75c1eb582bf827607cfdc6a110bfb134f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/sharedassets0.assets",
+    "bytes": 112292,
+    "sha256": "200a057f366054864cc7fbd09aeb75222e4334d155a11e7f2bacf218ef00c6e6"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/sharedassets0.assets.resS",
+    "bytes": 524288,
+    "sha256": "393efe6399536384aa91bdfc4e64f244b4d3e1fbb6a4ff145c483ffee64ccb36"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/sharedassets0.resource",
+    "bytes": 1451200,
+    "sha256": "7fddcd590a786c7a81d8bc124aa765890d6ffbe6cfed5f11d7bd0dbda1c7660e"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/sharedassets1.assets",
+    "bytes": 55680,
+    "sha256": "658aaf6c940cb3153752fdd2da9a1da9a43badb7f666b369a7075fb999faa589"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/sharedassets1.assets.resS",
+    "bytes": 21856,
+    "sha256": "d438ec8b1dc00b9dcb98cd2d1d897a0972fb3558ef62886d414ab17470b2c831"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Composition.dll",
+    "bytes": 226304,
+    "sha256": "71cb283be2bcc7cab67d21eff6986cf5b6b7ce1a26f68daa6a0ece7ffecd1ef0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Composition.pdb",
+    "bytes": 108468,
+    "sha256": "0eba766a7672971cfce0f4ba0be45bc81d149dd184b93bcca166509ee16fee6c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Core.Contracts.dll",
+    "bytes": 53248,
+    "sha256": "75e83050651f950773aabe6fab380d5d1d6af83ae03fd761c94f478387d412d5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Core.Contracts.pdb",
+    "bytes": 29572,
+    "sha256": "a5dedafb33088c7e1dd6cbcf61b19f098ff6948b176ececd9f4859e2be58bf76"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Day.dll",
+    "bytes": 16384,
+    "sha256": "b9a984822c97ca873a704e1b2d20a541e4b767c0263b705d344b09e32ed6250a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Day.pdb",
+    "bytes": 18856,
+    "sha256": "dbc64684d3922c8b0284a3c66e6498c161261c1fb44e1de88505bf7803db782d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Economy.dll",
+    "bytes": 78848,
+    "sha256": "ab75dbd7ad81d7b27d97ab6c53fe415c42dd24cc8736a2005b35e00c3f7edc39"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Economy.pdb",
+    "bytes": 35076,
+    "sha256": "f7b4184257c9478289b76eb693d3393774c6b2a30ca51e16e342296513e77e44"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Inventory.dll",
+    "bytes": 18432,
+    "sha256": "32b35381d8a7ac689ee4ac9580a1fa38a91941696e8fa7847f2d94cc15d1f68a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Inventory.pdb",
+    "bytes": 18276,
+    "sha256": "ab0e26e1bf94357fff6bcc600b14d2a0db5d9b8b890d4a8d1001f9c46da598d7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Living.dll",
+    "bytes": 13312,
+    "sha256": "d9f76a8a91d88f6f4dd01c9adafae9d3626644f77043876e4b68ee15b2d40304"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Living.pdb",
+    "bytes": 17588,
+    "sha256": "0d8d6195ec98481a743230ea02ba14586f915db9dcd782439ee2f417b9c9ea8f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.MapUI.dll",
+    "bytes": 7680,
+    "sha256": "e999157ccf163f8b32df2c2ad3174e533251db7faec8f66cbaa37bd0e9780fdd"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.MapUI.pdb",
+    "bytes": 15412,
+    "sha256": "dc91135b5621e355cd5c25b0096008fdd4246a98578e94088014adec805f09a7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Media.dll",
+    "bytes": 16384,
+    "sha256": "f3fc2037d4c0456adcfc643eaa2a38d84d7f057737f359e73a1f3518fb69a554"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Media.pdb",
+    "bytes": 18568,
+    "sha256": "268098b8e1f4f7dcc1dc19203004420d14d0cf1d2034744285536d6e2909a83c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Network.dll",
+    "bytes": 110592,
+    "sha256": "24141e751046ab6a25bd661774a4493eaba3773b44e498b8cd80837362a2e24c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Network.pdb",
+    "bytes": 51284,
+    "sha256": "d04c097ecf0d397efdfa408de102f5566b2e06a2f945e4221c9fb526d26e16d9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.P1.Lab.dll",
+    "bytes": 262144,
+    "sha256": "d958146ef8269e8a1f7eefc1571eb74b977bd3d42bbca8477b0f956cc9c7ab5d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.P1.Lab.pdb",
+    "bytes": 100208,
+    "sha256": "48c0af02d8605de0f70c10b4918550b642759be5c6f54736d4df5974ac29cdf7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Progression.dll",
+    "bytes": 9728,
+    "sha256": "9213c87bb15e14647180dd81369a3a740f302b0f91f353d23c36b64040f58075"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Progression.pdb",
+    "bytes": 16656,
+    "sha256": "e8bc9d0c5a3db13d5535d2ae3ef46808efee31e60c4e0cf99d13a40db59013b4"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Session.dll",
+    "bytes": 17920,
+    "sha256": "89e4b752f735a44b6c2eda01dd2d88ece4014db72f064bc04f602bea71781718"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Session.pdb",
+    "bytes": 18820,
+    "sha256": "40265b66dde6d370222e308e0040aa636efea1f3318b634a1fdf3035aeb47e13"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Trip.dll",
+    "bytes": 27648,
+    "sha256": "8188c06602caada426c23bede5bf169bd3d170e5473e84efdc5398b8b159703b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.Trip.pdb",
+    "bytes": 19304,
+    "sha256": "e0848dbc5443b31be07020a75232dfc9f1cae2f78921acf60358f1995581fb0b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.World.dll",
+    "bytes": 94720,
+    "sha256": "d6bef477a6a2c9bd50033106e29e0700b056b8d8c8a1e8902c351a8b704c96bb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/DeepDive.World.pdb",
+    "bytes": 54240,
+    "sha256": "62cf235e9e318912e16a228abff1e7b715250e56c6213bff7c9ead8d69f7985d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Mono.Security.dll",
+    "bytes": 241152,
+    "sha256": "82df31404def10ffd69c09e3a8c454e76552f3a37675d1b7b8c743cfd3d1af6f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/mscorlib.dll",
+    "bytes": 4632064,
+    "sha256": "194417662b72e9fdc29df44aa07fb693a9cf2194d84e327231f3eeff1104ae0f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/netstandard.dll",
+    "bytes": 90112,
+    "sha256": "6ae62e082dc494a2433984177f60ca4db5fae69b1f360a8b33754172b310b8c5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.ComponentModel.Composition.dll",
+    "bytes": 257024,
+    "sha256": "9373a420101d4c674b9f74bce93a45c58ddb3548c130d9b65ab87235d0a4ed30"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Configuration.dll",
+    "bytes": 124928,
+    "sha256": "d3acb14b8ebaf7482d2d3e26e8c04685299e2b471a513a30508bd0cab8336354"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Core.dll",
+    "bytes": 1113088,
+    "sha256": "ebf140bf5f8d49ccac20c14935625b0ae0a46c30aa4f90b2808f3b9678822470"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Data.DataSetExtensions.dll",
+    "bytes": 29696,
+    "sha256": "79a01061129709358567a9254684ba52ba66371e01e0354e7fa4852a9f62e59f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Data.dll",
+    "bytes": 2125312,
+    "sha256": "5d0807269bfcf112aa844951232ef105bbb642abb1e14c2e78dd70fb9245e98a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.dll",
+    "bytes": 2641920,
+    "sha256": "9e8a5190797e35428b1ae9bce6d47d39a1dbc3e974f14239e44678913dc6194a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Drawing.dll",
+    "bytes": 489984,
+    "sha256": "76dca8fbe098c285b03de79369f9f2aa141dec44de99ebcc0478c7e762024204"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.EnterpriseServices.dll",
+    "bytes": 44544,
+    "sha256": "d8a3d6c1929ec028793ff07df92781c03ebb38c63005d4c12c35e3116d04fcaf"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.IO.Compression.dll",
+    "bytes": 114688,
+    "sha256": "7370dc2d3a6f02dbda1a69ca596f2ae96fc464809b3bbca6071fc1fc1edfbb2d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.IO.Compression.FileSystem.dll",
+    "bytes": 18432,
+    "sha256": "40ef91246d44d6c4d8a1505e1210b0c54963a12938ba0458959bb064d62f36f4"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Net.Http.dll",
+    "bytes": 122880,
+    "sha256": "c46d5b5dc68af8ce1b34e8ace4372b157e2e85ab63d6b5eea938ca71dc7fb064"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Numerics.dll",
+    "bytes": 119296,
+    "sha256": "74f6771aedd33262470e8e653fc0f4e04a659bcdadbeb44b2f8826fba7053f77"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Runtime.dll",
+    "bytes": 12288,
+    "sha256": "e0a7334b7ba419aaab6bd3bb6992d693e689341a9178172c9bf99c2aa6a085bd"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Runtime.Serialization.dll",
+    "bytes": 934400,
+    "sha256": "2aa92fb930200ddb3c9c3ffaaff39bd6cdc6d689f19614f6c3b84a15060800f0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Security.dll",
+    "bytes": 320000,
+    "sha256": "95a29120e164e5bdb7ff5dcb2cb4641e5ea0aca7c1ad0854b0e9b2b0ff5abe2d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.ServiceModel.Internals.dll",
+    "bytes": 215040,
+    "sha256": "6738a31088136d38a50354371feb83a4fd1558acca2a5f8b165c34a859e08c47"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Transactions.dll",
+    "bytes": 35328,
+    "sha256": "cfac784408e3b7da6c6e94ec04c162c6d902372fab19353c02aeda3464ce185f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Xml.dll",
+    "bytes": 3160064,
+    "sha256": "f90799a0c38f3d45e390f9768ab467bf681a052e1b807f4c59fabef5f7edaffa"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/System.Xml.Linq.dll",
+    "bytes": 136704,
+    "sha256": "ed219710472b837fddf45cc73c912e04b4d6b8ca833ea074ec1f73bc00157b05"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Burst.dll",
+    "bytes": 327680,
+    "sha256": "fa2d1e0b433826bb1d3a89d93c41dc5388c5368b376d6af8b0b865b5ac0d84fc"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Burst.pdb",
+    "bytes": 216128,
+    "sha256": "0ae56cb6468b3438434bc9ab4c62df401f1e0b945ea4452bcb891e10ab6d34ee"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Burst.Unsafe.dll",
+    "bytes": 5632,
+    "sha256": "9d9c1ff52411decbee5d9f0d1cd61ebeaa222077aa77a52101ea3debafae98e2"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Collections.dll",
+    "bytes": 478208,
+    "sha256": "97a7abded8e99a2e28cb5afd7a4180526277248a19014669239ad07d3f690949"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Collections.LowLevel.ILSupport.dll",
+    "bytes": 5120,
+    "sha256": "ff50383f807f9692e4913b97e47d86fefcb8faa33d6d48cd3e3fd6fc7ffb448d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Collections.pdb",
+    "bytes": 303068,
+    "sha256": "d05a2a310cff2286bfc7c74a1997150cc11b303d366c3c805469b2ecb60627af"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.InternalAPIEngineBridge.004.dll",
+    "bytes": 4096,
+    "sha256": "299b23b6a3a79f89b0301eae375c319a32c5a754db466baca343776b44746cbc"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.InternalAPIEngineBridge.004.pdb",
+    "bytes": 14164,
+    "sha256": "513354f121420f16adf6fc5cfec9635bdb62cba9e4394da2e5af676bd456c5ea"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Mathematics.dll",
+    "bytes": 871424,
+    "sha256": "f4e327cd107aa594394c2fcb5628883d03dbed84d67ffa46e39e8313c8d3f864"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Mathematics.pdb",
+    "bytes": 508956,
+    "sha256": "b186a492bbfa0ae281e5f9f8d8f640877fe291670c3140bd12a250c033a6e4cf"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Netcode.Runtime.dll",
+    "bytes": 636416,
+    "sha256": "65ee64e6503010c62c1325bf54f90c440168dfbf7daf763f2816bc13ed417274"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Netcode.Runtime.pdb",
+    "bytes": 308456,
+    "sha256": "7918c99230520fbceb638dfaf470efab35ba97bf63c95de527cf10dadf18d581"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Networking.Transport.dll",
+    "bytes": 227840,
+    "sha256": "b836407b6697e9bb170b4c5a0b819c7b95f0c20e9897e69f8151af5403865486"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.Networking.Transport.pdb",
+    "bytes": 134288,
+    "sha256": "ba9f961c686b81fe66c96666eb1e824ce33b17c117dde7f87d1c083d0a61fce9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipeline.Universal.ShaderLibrary.dll",
+    "bytes": 7680,
+    "sha256": "79833783b6007ccf2c480c4de9f55016c8d01a5ba5c3959ea5d5e6a2623c9881"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipeline.Universal.ShaderLibrary.pdb",
+    "bytes": 14224,
+    "sha256": "2984b6c06214fbb1c93d1665f4526144a9811700cc86586dec740cc8a4a4bf72"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Core.Runtime.dll",
+    "bytes": 1218048,
+    "sha256": "811ffb821f00637b738c14596d03701ac18f9e6f13adfb4de3174ab0f32842f9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Core.Runtime.pdb",
+    "bytes": 450316,
+    "sha256": "01464ad5fb48a469b92e80e16411d2744796783f7e7203a20c00da0783c2b454"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Core.Runtime.Shared.dll",
+    "bytes": 4608,
+    "sha256": "892601a2dc0d8144ccd293da9af451ea3701c255ff7f5a485367509438f212f3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Core.Runtime.Shared.pdb",
+    "bytes": 14080,
+    "sha256": "2d08796777dfd50834e6b923517c8d9ea9fb626efe4bbdee8cc2a830fca44620"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Core.ShaderLibrary.dll",
+    "bytes": 3584,
+    "sha256": "161f0d79638bb92bfe6ae3cf3683dde8b058d5d6663bd8d1c1d62c552179b03d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Core.ShaderLibrary.pdb",
+    "bytes": 13924,
+    "sha256": "9fc035d1d12fb421c62f2070e2a4b49ab1ecf9bca73de41bc20c48e1a524538b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.GPUDriven.Runtime.dll",
+    "bytes": 243712,
+    "sha256": "74b3e62fc35b640822ee17056523c177a5f20306aa4dc7031c9f172d0ff644d3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.GPUDriven.Runtime.pdb",
+    "bytes": 120316,
+    "sha256": "f5c6cd848effd144fb51826decf9bd2aa440f2c06df579298f2282abcbcb52ab"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll",
+    "bytes": 3584,
+    "sha256": "4897168cdb9e6d0f7c7b542de9688030842c079f59d4c22ebc1b841589abf8a7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.pdb",
+    "bytes": 13924,
+    "sha256": "aa933fa6feb6943312ca794a4e12f009ede0590e902448fef99dcbe75c637501"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.2D.Runtime.dll",
+    "bytes": 238592,
+    "sha256": "595ad91ab8ad24652f64918974269134eb1df4dbf99f013b91df941748c7ecb3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.2D.Runtime.pdb",
+    "bytes": 146748,
+    "sha256": "3be73ee240348f752e7e4ad303762def9305975982408c19a45a8e477960b273"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.Config.Runtime.dll",
+    "bytes": 4096,
+    "sha256": "e0e63b5a196da367c795b65a848afb2cbf8bac3e622d23408d6284d97483cad7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.Config.Runtime.pdb",
+    "bytes": 14004,
+    "sha256": "80bfa71000c513502769692e9a7ffa85fe2ef138910a0c61cd392e48b4400d90"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.Runtime.dll",
+    "bytes": 738304,
+    "sha256": "b0a600ab0e157a7b080c4071d11852d11943c05ffd004a887c86f8352c8112de"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.Runtime.pdb",
+    "bytes": 298660,
+    "sha256": "2097c56dc857722b495c1f4f28aecc0d369efaaeda56e2ed667340301f74ae4e"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.Shaders.dll",
+    "bytes": 3584,
+    "sha256": "34b30f239f562d5b855c4b86adf199e5ddc2fc8456f631cff4613396877f9fc8"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.RenderPipelines.Universal.Shaders.pdb",
+    "bytes": 13912,
+    "sha256": "0fb0cd9a3680737b2bb7950ddf8454c6ec9394d1a3bfa79c8262eca2447ac815"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.TextMeshPro.dll",
+    "bytes": 496640,
+    "sha256": "7c9ab7a25330ecca3aa61cd5424b3d0c02697512356d6c8d81427edb110ccfb9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.TextMeshPro.pdb",
+    "bytes": 249768,
+    "sha256": "603c0fb8d72a9a01708963c349ca19a87b8fb17daa5563c3dd4d350f632e22cf"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.UnifiedRayTracing.Runtime.dll",
+    "bytes": 97792,
+    "sha256": "e0598e0923cd334054c76430d6e93d4e716dc5b152b32191d4ebf76a8cb5ce70"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/Unity.UnifiedRayTracing.Runtime.pdb",
+    "bytes": 52960,
+    "sha256": "042412c203200b896365db24c6a992ba58322bde870f4c6b05976d037929d166"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AccessibilityModule.dll",
+    "bytes": 51112,
+    "sha256": "a5fa24e7883369c30b9169fcb751a4f8be031463a14fbdd931dc9adb29e69b7f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AccessibilityModule.pdb",
+    "bytes": 23076,
+    "sha256": "2da85588671e8ba9eb32776b9fbce2a980adcb1d028b473223f0524552802dc1"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AdaptivePerformanceModule.dll",
+    "bytes": 125352,
+    "sha256": "7c432c37cb78d10a0f21e3adc187b6b80618d110f850c5fa3007e38216fb45e3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AdaptivePerformanceModule.pdb",
+    "bytes": 53316,
+    "sha256": "b420b6386fa94fe71940e5b676e0fd5e3005e67dbb2423bbceb648759f8e6422"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AIModule.dll",
+    "bytes": 77224,
+    "sha256": "974961edda005bb2deb8a2ecac91e789077d48cee07488402b5c9af2393ddd3a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AIModule.pdb",
+    "bytes": 20664,
+    "sha256": "9584a5ca5b4af549e737ae92f169effe0b5cb9f2b35b82ea1d5b76ef9e86477d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AMDModule.dll",
+    "bytes": 21928,
+    "sha256": "ee2604e25cfd20e458d4bbb47e3ceba5cb39f384b51bc5de9fa030a1f55a21dc"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AMDModule.pdb",
+    "bytes": 12032,
+    "sha256": "047c2d1e63b8887c2a28d7965f53d9757ed3cb52e1cd82b077c935e1e8b9454f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AndroidJNIModule.dll",
+    "bytes": 121768,
+    "sha256": "ac447e55d500c2b2f9e91ee0ebc60ce6927e5d2bcbd9a9acc9e5145a518d6c5a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AndroidJNIModule.pdb",
+    "bytes": 50232,
+    "sha256": "4bddb2c1c9f10d5a16dc0266f365ede06ae3896ef10758a37c4d50438697885c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AnimationModule.dll",
+    "bytes": 225192,
+    "sha256": "330fb90b27f234ac2041fbc0c781454845336d1eb05cd98647faa88fe066aece"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AnimationModule.pdb",
+    "bytes": 60776,
+    "sha256": "e8795a50f6ba64b19a16212b099ad9a4726e5c1544e7626a1961d17db43ddf6f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ARModule.dll",
+    "bytes": 25512,
+    "sha256": "5059fc91bab78307cc5a6543c5e4de3b8fbe0dc4561568cce26abff97684b247"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ARModule.pdb",
+    "bytes": 10012,
+    "sha256": "f98f6e3c28c373b343a6061d1a30b501b608ce92e6d43db33ef754476fd92535"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AssetBundleModule.dll",
+    "bytes": 41904,
+    "sha256": "59acf32e4b57aa3df4e2337895cf069d235feba4bd9975309c3580067fa5b1c5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AssetBundleModule.pdb",
+    "bytes": 14152,
+    "sha256": "8d21e5f4db4dcec53b8fcc20882d9bd253563f85da71afe28fb4d2c443796b24"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AudioModule.dll",
+    "bytes": 142760,
+    "sha256": "b6dc68cfa469ac9381b27e9bcefd0585ee899a8f790daf095885a915178ad874"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.AudioModule.pdb",
+    "bytes": 35200,
+    "sha256": "9b3fd9aaa3986fb9e600fc559e396f2f22f2a647246a71809cd98d267cace665"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ClothModule.dll",
+    "bytes": 36264,
+    "sha256": "034b2c05375cdd91f41d298456a9697c3ee611f843956279e2271ba03726281c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ClothModule.pdb",
+    "bytes": 10580,
+    "sha256": "4ba5b31d1fa10d8e10e0682188099e9f03cf8bd6e1b458f2dfd0f38a85ab4755"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ClusterInputModule.dll",
+    "bytes": 28080,
+    "sha256": "ca95b43085951de99cff6fa3c38ebd058e7564f1e5759892cb030b181f85b3e8"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ClusterInputModule.pdb",
+    "bytes": 9396,
+    "sha256": "c38265c655c20168144394cb8995e88a9114ade06ff22a536fcf374edfe4c027"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ClusterRendererModule.dll",
+    "bytes": 26536,
+    "sha256": "da82b43abf534b995d5e0d162fb74a12f2bad0db1912207f813bc0af9047f8f8"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ClusterRendererModule.pdb",
+    "bytes": 10004,
+    "sha256": "e1600f446b6328f988bf7ea757dc9b498b41e13586b2464da7cdb894a878ec50"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ContentLoadModule.dll",
+    "bytes": 32680,
+    "sha256": "c10ca5bb5bca4486b82c9af2f36220ffd61728f639b02f80bfd272603bc7a46d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ContentLoadModule.pdb",
+    "bytes": 11176,
+    "sha256": "2cd988e675b60f40cc926c830388f34d146883ab1ef8acfe41baa62236fe1bbe"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.CoreModule.dll",
+    "bytes": 1985968,
+    "sha256": "bb8d037511c8bc0fd5c29b5d636ef8a0073b0a6d2f020a9c91fff3788fdb4754"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.CoreModule.pdb",
+    "bytes": 573696,
+    "sha256": "df5447d91297f05f50f50d0534b07f910b68bb940235635e62e457cb0a193bbe"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.CrashReportingModule.dll",
+    "bytes": 26536,
+    "sha256": "97502e6ddbba42f9d3d467417bc1eb8bd398c93b9556cb5b04c584ed8aec26e1"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.CrashReportingModule.pdb",
+    "bytes": 10008,
+    "sha256": "8e423c0f7eacb205a9e4f072d6ead6def1faed071f5481b7e52c28e69f38eed8"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.DirectorModule.dll",
+    "bytes": 41896,
+    "sha256": "971c9bf1d4b45b68a3da7b78e921dcf8aecd0c81054fc7c096d95e86cb603210"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.DirectorModule.pdb",
+    "bytes": 13920,
+    "sha256": "9d210f8da84c23fd755e099410676f86194ccef7447c68fb84c95502e2354387"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.dll",
+    "bytes": 197544,
+    "sha256": "5e1eb9d702d2720902b76176bc1f436b7989cef4549defddc7858c14eaaeb540"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.DSPGraphModule.dll",
+    "bytes": 31656,
+    "sha256": "27489b6744b5b035662ec2f3a371aeec5ed9c807abf987858582a75dd755c6bb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.DSPGraphModule.pdb",
+    "bytes": 9604,
+    "sha256": "4bf1d2d61c907ab2a4ae1194adafac725049ec687208df4f734e5e546d51bfe4"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GameCenterModule.dll",
+    "bytes": 45992,
+    "sha256": "1f70c5c08ae0de38f8144a2996fb40ccddd04fd33625f80a6b81949b5f51e376"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GameCenterModule.pdb",
+    "bytes": 17488,
+    "sha256": "2c3fae70530f3dddd78f31ec2630bd538692087d7deb54d0c12bfe4fbe75c8e9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GIModule.dll",
+    "bytes": 24496,
+    "sha256": "6450f7fd7e1ec11d9774d2880b0b231b5fe2f7125f6139a62bd733014bc2fdc2"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GIModule.pdb",
+    "bytes": 9276,
+    "sha256": "63dccf906f85380d2fde85e8c4612c6a11dfe5c734bf4b6a626e29532b65a145"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GraphicsStateCollectionSerializerModule.dll",
+    "bytes": 14256,
+    "sha256": "46dbc7f5a8078c64f8bfae77ac63a11ab3f54894fc171eb414a6ea9c338be419"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GraphicsStateCollectionSerializerModule.pdb",
+    "bytes": 9304,
+    "sha256": "e6fe3c5041d870d90d7ad7ce45d53b908ed5868f9ee76147d6d7281688118481"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GridModule.dll",
+    "bytes": 30632,
+    "sha256": "cb7b5597020ee2177ef9f1c6c0e382e3c2a64c45fb3565f10f38f2c149cf559d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.GridModule.pdb",
+    "bytes": 10132,
+    "sha256": "be97b83a737655f3644ed7948c8231bae5fcb4812ea1ed65bd471c7ebb643474"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.HierarchyCoreModule.dll",
+    "bytes": 109488,
+    "sha256": "2ee0ad7fa6f578dcc2ba441630a0d39bbedc02fcad24cc6b359aaa185c7e5f59"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.HierarchyCoreModule.pdb",
+    "bytes": 36440,
+    "sha256": "ba009ad2936554fe4fbb068b50bed3d1644b5979b4576cf5d48fc0949a8d95de"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.HierarchyModule.dll",
+    "bytes": 102312,
+    "sha256": "38d3c942c6cc0ab2767ebba13f2a44dbb928d89e3d343a37433f1e88e41611fb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.HierarchyModule.pdb",
+    "bytes": 47660,
+    "sha256": "99cc02b0d57e372058bffff525a942d324bc2049199961403ac2b5670ef6ecf0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.HotReloadModule.dll",
+    "bytes": 24488,
+    "sha256": "a535bdbb00afc8b5b4f90d443e17dc38636d08153f0ef3e95b13357942dbbbd6"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.HotReloadModule.pdb",
+    "bytes": 9276,
+    "sha256": "4c5e3e42f62e56dff41532d71d847ca1c1ef9a7656a75b463d8e9b19873647f3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.IdentifiersModule.dll",
+    "bytes": 16816,
+    "sha256": "a91d03169660dc2516bad0a0e589eecbd991ec299ffad1c1c42cc9eed551b391"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.IdentifiersModule.pdb",
+    "bytes": 9760,
+    "sha256": "f29f897f33f4bca66d04114348edbada66d7c3a2829e655e99ced23fa5120fc6"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ImageConversionModule.dll",
+    "bytes": 31144,
+    "sha256": "de11d6490c5de5f6097aa0ee6e7b873e39655fe8b7bc0862aa188f34b1d46c47"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ImageConversionModule.pdb",
+    "bytes": 10616,
+    "sha256": "95bc973fee3888bb8a6ecf9d786a9fb7935092dc6d28ae456bffb3aaa2f55b4b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.IMGUIModule.dll",
+    "bytes": 214440,
+    "sha256": "004c07cf9420bf5e19c356d9f766d8d8f650d40d88402131819f64fd0c7364bb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.IMGUIModule.pdb",
+    "bytes": 90484,
+    "sha256": "cc5e04af14394a8020015da6c819d151a0bf7a6ae6234487e5e9da1ad24701ba"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InputForUIModule.dll",
+    "bytes": 57768,
+    "sha256": "bee81fe05b6a80a2bc250003123833a08a659d9142e183aa2dbe5cf11bc16591"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InputForUIModule.pdb",
+    "bytes": 26108,
+    "sha256": "9725a5009667c9df729bfe8f56679c93cfa6e0161532700a362d479691454c2c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InputLegacyModule.dll",
+    "bytes": 45480,
+    "sha256": "67d14a46b82a2a7e644a822e81abb3f610117486eef7c63bfc7eeb23b17a81e2"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InputLegacyModule.pdb",
+    "bytes": 15384,
+    "sha256": "6c04fbc424556f2f473125ff9911302ce158638527b6e935a3ff22b14c83df12"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InputModule.dll",
+    "bytes": 28592,
+    "sha256": "d1eac4ae6ce27d423f46d435d0d82bd184eac1ee6f15a844f1023823ef20bcac"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InputModule.pdb",
+    "bytes": 10644,
+    "sha256": "083b1a7f70f91b8e062af0ae569f30173f5f082422d345b3042031c0542b104d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InsightsModule.dll",
+    "bytes": 14256,
+    "sha256": "e1d04ae760554d21c3d1b4e1fa76e4562bc319c136748ced66d0a1a02aab33af"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.InsightsModule.pdb",
+    "bytes": 9600,
+    "sha256": "0cc18a40ee9d160604a710dd43c3acebc9bb90359d95e66d11c24d3cdfb1383d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.JSONSerializeModule.dll",
+    "bytes": 27056,
+    "sha256": "6a3ea398c047f93a9b59b08be0ee4e888744d9addb89b61599e57ce2a1ed392b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.JSONSerializeModule.pdb",
+    "bytes": 9900,
+    "sha256": "22857ab648d8d941a4171dd878b831f1e5f124056d48a249ca0db14fa8268fc0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.LocalizationModule.dll",
+    "bytes": 27048,
+    "sha256": "046b4f4e833c2fe5503d4491ce6be2b47d8c6a360e9c4042380004b7ec33642e"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.LocalizationModule.pdb",
+    "bytes": 9696,
+    "sha256": "762386a83674bb7777beb37ac7302a40eda8b71ff6d7bddc32a4847da335b6fe"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.MarshallingModule.dll",
+    "bytes": 83880,
+    "sha256": "d163c20ad929a17837c3f26515de4de12ea63b75eda38558e1aee73d9dee620b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.MarshallingModule.pdb",
+    "bytes": 14288,
+    "sha256": "6fedcb922f34da7a029f69580a41714727a9f2741adcfe2ee6e828ac74466acb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.MultiplayerModule.dll",
+    "bytes": 17832,
+    "sha256": "7aa4a9da0f175362f2df7cd15873a698d6bb1f638015449ba7601c69d6f30549"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.MultiplayerModule.pdb",
+    "bytes": 10368,
+    "sha256": "1980cb440fa8530076d1a2479988ef070dc47b0a310b6c362d351229cc1ac6b0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.NVIDIAModule.dll",
+    "bytes": 40880,
+    "sha256": "4afd8332d38255437b727d8767944ed82315e9945d4c5590e2d35e0ddc59e08a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.NVIDIAModule.pdb",
+    "bytes": 16444,
+    "sha256": "810417bb3a8820b423fb4e6e2bd04990bda09d4b9c5a954b03a8a08afa730306"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ParticleSystemModule.dll",
+    "bytes": 171944,
+    "sha256": "f7b650a8a66f11e82336ae9603e6795c04a03411af9497b815b40f67bf7caaf7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ParticleSystemModule.pdb",
+    "bytes": 40464,
+    "sha256": "4259a9e44175ae680a75604e848f3142c434cd3de726c757e657e3b9c5994e85"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.pdb",
+    "bytes": 12676,
+    "sha256": "7f038b7bc68ca659396e5b929e85b48ff3087c40394f54879a007311d2b82b9a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PerformanceReportingModule.dll",
+    "bytes": 25000,
+    "sha256": "5675beb705588c398f7a32d31b34d6f000e6ddbf8d9d0b96fba2cfee8b28098e"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PerformanceReportingModule.pdb",
+    "bytes": 9480,
+    "sha256": "71d64555e2c6fdbfdee431651efc9a859ea60a54481b510de7da2bcac46d9688"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.Physics2DModule.dll",
+    "bytes": 586672,
+    "sha256": "9c18e1a8cd3ca07aeb53c47566c941de51c0d8a2e7e7c1de56fa974aced4b758"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.Physics2DModule.pdb",
+    "bytes": 135156,
+    "sha256": "3cb1cbf9b94ca28bb38a56e369a00073b41b824074a2000d868f5b2ad2480cc6"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PhysicsBackendPhysXModule.dll",
+    "bytes": 14248,
+    "sha256": "5e4c6cc76643e991aae0570a6e1e99ac8f9cffe90a7b554519f5155f24721134"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PhysicsBackendPhysXModule.pdb",
+    "bytes": 9296,
+    "sha256": "00249e78260f203211d27c14a24f33a2ec90602a10f627be8a9e77a08d1eae8d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PhysicsModule.dll",
+    "bytes": 183720,
+    "sha256": "2393629a247eee0f6b84bc3a72afdc23daef62e3c8101312e3c0cb1be7f5c242"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PhysicsModule.pdb",
+    "bytes": 46224,
+    "sha256": "3df315983e183a1ad58cdc009889fe8a15665a0b663433e6e401bc783864ca7d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PropertiesModule.dll",
+    "bytes": 134056,
+    "sha256": "6e94c537e45c3efb83ff3237ea8c15d0e9a04484beeabe37966a8183644cf014"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.PropertiesModule.pdb",
+    "bytes": 62772,
+    "sha256": "6fbdf3c9e812304c9e02a86b93ffeface96de6ff8541fef7f2cb531732417760"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.RenderAs2DModule.dll",
+    "bytes": 25520,
+    "sha256": "bed011bc998a02f5161858abb1217f631d62824e068d4b0d1f570034a963893e"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.RenderAs2DModule.pdb",
+    "bytes": 9324,
+    "sha256": "c3a58050f8816331edee37b30038f9671e337ed1304b496fbab5c9a2f1f94e99"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll",
+    "bytes": 24496,
+    "sha256": "194323889a6266fa899a0b78bce94c4615201583e1ef58c2c24f8edae4d4e826"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.pdb",
+    "bytes": 9336,
+    "sha256": "e6b0624094b6016ec2d841994c2960f84ab49ca0236fa87d0fb597350254cca5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ScreenCaptureModule.dll",
+    "bytes": 26544,
+    "sha256": "cd3553dbd16c6a90eb9d32af429e2e5ba399b36e2bfa2586a7ab7bffbab9eaba"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ScreenCaptureModule.pdb",
+    "bytes": 9880,
+    "sha256": "c3d54ae7dee235b3fe8c26beb76a3295c85e1facd74f930450bb583f4c428977"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ShaderRuntimeModule.dll",
+    "bytes": 25512,
+    "sha256": "4163db520c2900caac15b24018d63f1714d4ab9ea404302e73ef32dc2198b1df"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ShaderRuntimeModule.pdb",
+    "bytes": 9316,
+    "sha256": "4625f8597e97412a65495463d7af15be3ce2e53a013f8823ffd25f8cc60d5ada"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ShaderVariantAnalyticsModule.dll",
+    "bytes": 24488,
+    "sha256": "af82b9a937b959d67ac6f522447de03e9b076d0e9d4147b98768162f5745b41c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.ShaderVariantAnalyticsModule.pdb",
+    "bytes": 9400,
+    "sha256": "9b4007f3d4e614d0011f572e93e5065e3e4ad1d98208691303e37466da081d0a"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SharedInternalsModule.dll",
+    "bytes": 38312,
+    "sha256": "d0413e056aac6107844654eac0276988b8db54a5a8f1f12823c4c19a8ef37592"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SharedInternalsModule.pdb",
+    "bytes": 14288,
+    "sha256": "cc2f373b2a0b9b9c40d2fd1a75f24f1211d0dbf02d8a0fd65cdf7b847fe95dd8"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SpriteMaskModule.dll",
+    "bytes": 28592,
+    "sha256": "613b375ca7460b7d329711d38418f5c20899ef086730800c5cf5ec625d511856"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SpriteMaskModule.pdb",
+    "bytes": 9608,
+    "sha256": "733680f47faf0281fb766f347f99a7f59dbe157f35b30183761c0435254016e7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SpriteShapeModule.dll",
+    "bytes": 32688,
+    "sha256": "c86b9ff0a46fa8ec733226fe8a002732fde6a3661481c9c62b311a83a8839b68"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SpriteShapeModule.pdb",
+    "bytes": 10932,
+    "sha256": "33dea112d2d96758da2c3d5c2d91478d5b848c59aeefc5235add606be2655dc3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.StreamingModule.dll",
+    "bytes": 26024,
+    "sha256": "173e3481e19098f5afc3714198080d9c1705b6f421c1b69183471c5768bdf314"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.StreamingModule.pdb",
+    "bytes": 9352,
+    "sha256": "7af0c0f2d4498f038748368c2e86d1bee74e99155f072d11546161be81dfa4b5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SubstanceModule.dll",
+    "bytes": 29096,
+    "sha256": "f020a4c53a4aa71e375f6b62ce9da2be68b5e6346e40a3b814dfcacdf7e6ae26"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SubstanceModule.pdb",
+    "bytes": 11480,
+    "sha256": "a8518a761f5b1b11847ffa3bd464a20654ce65b9dd07828e0dd00743c31985a9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SubsystemsModule.dll",
+    "bytes": 41904,
+    "sha256": "6bf783bb594d172cfba95922561355a37e12ce0ce94a728f841d5f56c1a4e9e9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.SubsystemsModule.pdb",
+    "bytes": 16020,
+    "sha256": "c83fa4ca5defdbefcbfb845a26cf48577c134a378d51271a340a3567e4c68bf1"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TerrainModule.dll",
+    "bytes": 134056,
+    "sha256": "b09cb4964f113edfd9c4f5ed560408055c097d9222a4770a9a49e7182919a1c5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TerrainModule.pdb",
+    "bytes": 33988,
+    "sha256": "8f34b096fd6f9eb91e9c765ed234c0c63b9a188b4a952d1015a6c1b4b67b189b"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TerrainPhysicsModule.dll",
+    "bytes": 25512,
+    "sha256": "6cbff4a2e466e9a7804a2ddf05fb93ead11664ed1bd431b649dc5f74b79d3de7"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TerrainPhysicsModule.pdb",
+    "bytes": 9740,
+    "sha256": "3763701b23c001fe265e2413a3016005a175856c132c07e8a0e890f314bfc620"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TextCoreFontEngineModule.dll",
+    "bytes": 81840,
+    "sha256": "13a9ac49be43a19cb1617bdfcf0027a94887020345d16cb3ed0ee785d6e4aba9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TextCoreFontEngineModule.pdb",
+    "bytes": 29312,
+    "sha256": "29a659e37012fe16be9ba3ff1cfbfcd9d46460e85a37944f8d65d465e80a1e27"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TextCoreTextEngineModule.dll",
+    "bytes": 334768,
+    "sha256": "d2db5f932ff7c6aa823b74cdd80552a018af715f6fdb9308f14be3e979f24280"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TextCoreTextEngineModule.pdb",
+    "bytes": 153964,
+    "sha256": "eed9b5d70e39a8df78acd407f95575c37030a2a45610108434431e64868890b6"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TextRenderingModule.dll",
+    "bytes": 39344,
+    "sha256": "5d12376829961f0eb5763dc13982fa9a65e1107dbf7c36a809421dbb2984c2fb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TextRenderingModule.pdb",
+    "bytes": 15380,
+    "sha256": "f1edfa86cf2cbcf822e894ca4e023002e623cdc3dac13b695f456fd0d698e625"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TilemapModule.dll",
+    "bytes": 58792,
+    "sha256": "1d37435bc2f39463e2d4542148c2bc0825c59897442db82bf86b83dcec5202af"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TilemapModule.pdb",
+    "bytes": 19112,
+    "sha256": "29dc479e3f6f5c98204e7bb6ba1ef8f9e2a4909a7bdeb8506bb9f3c5392de53d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TLSModule.dll",
+    "bytes": 32168,
+    "sha256": "391a43384d213283d6c3ae9e1b34edc7d0105aa5212b923d2ab64a69b7c05bdb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.TLSModule.pdb",
+    "bytes": 9296,
+    "sha256": "0ef0c20d4e7c2f9f4b967bceac3c2f0787f4eb8ed6a01288d9b892485f53fe44"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UI.dll",
+    "bytes": 271360,
+    "sha256": "763878294d4af0f3108fd955bb632612854ed5f3c525a31ff7483d1387a6643c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UI.pdb",
+    "bytes": 165208,
+    "sha256": "a32ecbc1a7f95dadefee7b001771629dcf923ffa754dfaf87380a0fa46385309"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UIElementsModule.dll",
+    "bytes": 2452392,
+    "sha256": "b8cfcc3a603a87078ba9c577cf2988ed21278e1d46e36ed849b976f6e3bb6ab9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UIElementsModule.pdb",
+    "bytes": 1099896,
+    "sha256": "56d0c32d0295c04cc6374f64cf27428f8fe4db604f86343f04cd84845cb1bf17"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UIModule.dll",
+    "bytes": 50096,
+    "sha256": "44fcfeb6a6871e997eb22cf1fcf4b2623cf41ec47083f6ce1568aee6e03dc8f9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UIModule.pdb",
+    "bytes": 13980,
+    "sha256": "a57b3d2f66ea882fa998db4d4dd745367db8790478e70ce15d593f14a4722941"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UmbraModule.dll",
+    "bytes": 24496,
+    "sha256": "76ae62b5b6ba4eeeec5aff97c785e27ff39d6310e0041bc67c407c009bd96398"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UmbraModule.pdb",
+    "bytes": 9276,
+    "sha256": "aa7fb94403321fb41e91c7215892a6dce6d3d4fadf1b6bbeed0eefaf3349dbc9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityAnalyticsCommonModule.dll",
+    "bytes": 35752,
+    "sha256": "1dfa9494bd9106184306db9a6b04434baf52ea86f570529857754f80e70bbf8c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityAnalyticsCommonModule.pdb",
+    "bytes": 13756,
+    "sha256": "902b40875575b81a14cc833569cc04b8b4a2c8ae527abfd4f6314da27163adef"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityAnalyticsModule.dll",
+    "bytes": 60848,
+    "sha256": "20e1296c79d592fafce71f68c4f640eaf49c4a379967499e0a556a7e24a35075"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityAnalyticsModule.pdb",
+    "bytes": 18000,
+    "sha256": "e45815dcf44fcf168772f65ffe0df612ec569b410921d0152d4a711ef8c6f6c0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityConnectModule.dll",
+    "bytes": 27560,
+    "sha256": "60d6cadb2ebe7ad72b3aca5adbd703eceb1036a65c5a1b515c5113c5cbea9bf8"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityConnectModule.pdb",
+    "bytes": 9872,
+    "sha256": "77270eba77918654b142b440febadb774a1d92bfeda49ac20207cb9f5e781041"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityConsentModule.dll",
+    "bytes": 16304,
+    "sha256": "58fb8dc8dbdb1118ce5db8caf4bdd70f91967ac48dfacac0cb3d7c64eeca92c9"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityConsentModule.pdb",
+    "bytes": 9904,
+    "sha256": "c226072ae4e3c725af82756d08ca40b685761f4272516d72e429fbf87fa02157"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityCurlModule.dll",
+    "bytes": 26032,
+    "sha256": "fddc2430eb14879db4ea727e810c6b928b2137e1bdbe6337f2af37d5235b33dd"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityCurlModule.pdb",
+    "bytes": 9668,
+    "sha256": "ee9727b7a6c57ca8f90630864882913b022a2249273c5dc3f8c6087ddc896577"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll",
+    "bytes": 28584,
+    "sha256": "5551a06ce9831fc9caebe5bd17bd7ce7fffd64b154baf6bb83ef3eae519bdce5"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestAssetBundleModule.pdb",
+    "bytes": 10848,
+    "sha256": "e8080653af27aeac0fe60dff4de0c6ddfbe3ccf9f78e36a609017f28b588c797"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestAudioModule.dll",
+    "bytes": 28592,
+    "sha256": "9e095c1e87dacae75dcccdd66308147e15b9ca9a08e83c921f7400e31b49ae53"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestAudioModule.pdb",
+    "bytes": 10648,
+    "sha256": "9f6cb6a73dfc6e3b1bc24e48a173b42b8144dbc9149d5240f33d4549461707b1"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestModule.dll",
+    "bytes": 70056,
+    "sha256": "bb801aa484ba0aea443f71d89016e2cc6e95574889845af56949b310710affaa"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestModule.pdb",
+    "bytes": 28484,
+    "sha256": "6e883c459428ac38886f17b30eb9ed5b768aa0b207582adad0842a39067df31e"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestTextureModule.dll",
+    "bytes": 27568,
+    "sha256": "2d12f7f0732d9956cb5e9678f2c439db4b1ee07b1a2f4658f0a3fa8ff4ea8f10"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestTextureModule.pdb",
+    "bytes": 10816,
+    "sha256": "7505887d6071bd86b3d96145c9804284d2ad8384900341e20289c4c7d29ac1eb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestWWWModule.dll",
+    "bytes": 36784,
+    "sha256": "11d9dd109fb5d2c246afd2920c0e508e82dbfeacde48c085036193396ee450bd"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.UnityWebRequestWWWModule.pdb",
+    "bytes": 13716,
+    "sha256": "4c4a1956fba5efd6e9f92cdf777c2ce009b29c7e034c48e297177db468c01874"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VectorGraphicsModule.dll",
+    "bytes": 252848,
+    "sha256": "2231811ebfa8a0ca9050bc6c50eb2506a6d4f015c994eb7e6493cd4014e1d734"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VectorGraphicsModule.pdb",
+    "bytes": 143320,
+    "sha256": "95067f8a771845784a16148f033de3db7f9142e968c1fb6b6ba544e6fb23eceb"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VehiclesModule.dll",
+    "bytes": 31664,
+    "sha256": "76dde9d6bab0f1c831bb1cee40e3c2b5a82e2d3e80000a96aeda1db40308d93c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VehiclesModule.pdb",
+    "bytes": 10516,
+    "sha256": "a3b25b709937d41e91ab01b330b9b999cbd936fad913acedb7e3d1ca15fd150d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VFXModule.dll",
+    "bytes": 78256,
+    "sha256": "76d82d542f9dd0e48e23cd2c89498332a2e0b6e40884b0701cdfd1edb17862ee"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VFXModule.pdb",
+    "bytes": 18784,
+    "sha256": "43d8cf5a288a9d81cbc30532825bd6ad8ac336c332d7c97b21f4d2137de6e7e0"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VideoModule.dll",
+    "bytes": 49072,
+    "sha256": "b5532a864efdb169b99612a82a7aa13cdc210867e97ab8ecb9dde9223618ca9f"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VideoModule.pdb",
+    "bytes": 14164,
+    "sha256": "ddaa5334205e1fe942811190c494a9d996c8eaf8470ec786d31e70ce0bfc89c3"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VirtualTexturingModule.dll",
+    "bytes": 42920,
+    "sha256": "746dc4eaf43730b07c9c0474b4c6196820d17babcd7aae53a426ee620aef1f63"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VirtualTexturingModule.pdb",
+    "bytes": 13524,
+    "sha256": "9d8c25b853d56ec6a7a1ffd987c916ccb94b10c0c0472c5f11f85b135b4c259c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VRModule.dll",
+    "bytes": 31664,
+    "sha256": "cb9dd7682c4d8ec6da4fe243d07f41afb4fbd4b56bf95038113fe86d26f05679"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.VRModule.pdb",
+    "bytes": 10404,
+    "sha256": "034e3228a06cb3317f84ae15e2bc45eddd558564e38fe0a2f7302ce9f6d93474"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.WindModule.dll",
+    "bytes": 26544,
+    "sha256": "58073b39a314aa1e1d6ad69cc42e734147cbb27d4bab3e313d4b5c0ab76dd570"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.WindModule.pdb",
+    "bytes": 9412,
+    "sha256": "e067aa46fb82cbddb52fd0a768ee833e3b60c75347bace4c0236c19d85d13129"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.XRModule.dll",
+    "bytes": 88488,
+    "sha256": "eb4f8185115030367c4aa14b802ca7e4cdbc1544ada0feb3ab9d00fa32d9913d"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Managed/UnityEngine.XRModule.pdb",
+    "bytes": 24288,
+    "sha256": "42e0eafc6976b62b4f6ba48bed18f55547eb033fdce6c02cfcf9301c6083285c"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Plugins/x86_64/lib_burst_generated.dll",
+    "bytes": 1092608,
+    "sha256": "ed009400e33d2c346e6ccb5ca3f2bd7cbb482410abf18a3926ab4d7d1bb24650"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Plugins/x86_64/lib_burst_generated.pdb",
+    "bytes": 6103040,
+    "sha256": "34481dc38c4d4275975d50c9c9cc0f3d8bed90ddef981a6b60f72e10d73255fe"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Resources/unity default resources",
+    "bytes": 5883716,
+    "sha256": "32b58bdb9cf090212b46a8ca7436dcdae89e4ef43e9d55a835233c21d1347734"
+  },
+  {
+    "path": "DeepDiveGame-P1_Data/Resources/unity_builtin_extra",
+    "bytes": 403496,
+    "sha256": "ca9e79aecbcfc5513ce70e8a3705883db27c5ad4398f64fa444d13428ae4ab8c"
+  },
+  {
+    "path": "MonoBleedingEdge/EmbedRuntime/mono-2.0-bdwgc.dll",
+    "bytes": 7828904,
+    "sha256": "49fbad5379ffa912da6b9122da57f4d00d38660cdec5f6b5b8e2be6ff79a057c"
+  },
+  {
+    "path": "MonoBleedingEdge/EmbedRuntime/MonoPosixHelper.dll",
+    "bytes": 611248,
+    "sha256": "ca1013a9af2fb4a4e9e2b39c34281ba2e6416490071de0fdd022d02a6aad0d45"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/browscap.ini",
+    "bytes": 311984,
+    "sha256": "4ddd50f31fb968f30bedefc253a46dc3f2890192d05cdaa9e0a64a056eee807e"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/config",
+    "bytes": 3815,
+    "sha256": "5776169973a26a387b8b3e5c0f2301a7ab9a6dd7c7d3efa22a96abc47fbf8662"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx",
+    "bytes": 60575,
+    "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/2.0/machine.config",
+    "bytes": 29066,
+    "sha256": "e91782a27fa39fc6c1d6ee8b08529f5d35052310d0006034b878eb04b8f2af30"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/2.0/settings.map",
+    "bytes": 2622,
+    "sha256": "49c6160f9d54af4270a3b4e997fc4a8301f79b9e2070118fa46ddbcbbc44f9a2"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/2.0/web.config",
+    "bytes": 11635,
+    "sha256": "cf2b54339e069b9e42f7d6795eecbf562c50c1011f4ca8f65f578fe52d97ff92"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/2.0/Browsers/Compat.browser",
+    "bytes": 1605,
+    "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.0/DefaultWsdlHelpGenerator.aspx",
+    "bytes": 60575,
+    "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.0/machine.config",
+    "bytes": 33598,
+    "sha256": "e60aec2c5115d65b3acb3c55ea21576dbd770f579166c017125571e46ae560ed"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.0/settings.map",
+    "bytes": 2622,
+    "sha256": "ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.0/web.config",
+    "bytes": 18802,
+    "sha256": "e38bb8cc68fe5b4edecdfd288d094b9e8ced7629039b2a347682aba0d8bd7492"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.0/Browsers/Compat.browser",
+    "bytes": 1605,
+    "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.5/DefaultWsdlHelpGenerator.aspx",
+    "bytes": 60575,
+    "sha256": "751861040b69ea63a3827507b7c8da9c7f549dc181c1c8af4b7ca78cc97d710a"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.5/machine.config",
+    "bytes": 34056,
+    "sha256": "ee950004b576fb28dc85f4b0435ed04bf96612de2e8b53be84d07afe85a0de6c"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.5/settings.map",
+    "bytes": 2622,
+    "sha256": "ce1db1ad8a9512073164e3eccdc193f7eda036e1a9733caec4635de21b2865c8"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.5/web.config",
+    "bytes": 18811,
+    "sha256": "c4cbddd4fd9347b58cc5a72b36dc4ba1ad2bb699e65869d05cd3fb9865f0d824"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/4.5/Browsers/Compat.browser",
+    "bytes": 1605,
+    "sha256": "8a1082057ac5681dcd4e9c227ed7fb8eb42ac1618963b5de3b65739dd77e2741"
+  },
+  {
+    "path": "MonoBleedingEdge/etc/mono/mconfig/config.xml",
+    "bytes": 25817,
+    "sha256": "0c56e34c69124510fa8c19e7b4c2ca6c1c4ff460ae19f798dd0ca035809e396d"
+  }
+]

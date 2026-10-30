@@ -1,0 +1,34 @@
+{
+  "gameSource": "47e616ed6084aec7ec1abf8d962fa37f4184b21d",
+  "repairSource": "513d2f7a81908b8c87501763756c92d7d1de5e89",
+  "finalSource": "2e4c890a32f72657974d2d071087b180f4726181",
+  "editModePassed": 1407,
+  "runs": [
+    {
+      "directory": "Logs/P46-product-20261029-194030-443-2",
+      "gpuProcesses": 2,
+      "source": "47e616e",
+      "arguments": "-Players 2 -Port 25961 -ActionVideo -Mute",
+      "result": "PASS"
+    },
+    {
+      "directory": "Logs/P46-product-20261030-204055-799-4",
+      "gpuProcesses": 4,
+      "source": "513d2f7",
+      "arguments": "-Players 4 -Port 25981 -RepairOnly -RepairInterruptions -Render -Mute",
+      "result": "PASS"
+    },
+    {
+      "directory": "Logs/P46-product-20261030-204825-191-2",
+      "gpuProcesses": 1,
+      "source": "2e4c890",
+      "arguments": "-Players 2 -Port 25991 -Mute",
+      "result": "PASS"
+    }
+  ],
+  "limits": [
+    "Same PC; not human/separate-PC acceptance",
+    "Historic issue #207 root cause remains unproven",
+    "repair-worksite-update-sample.png captured before LateUpdate IK, not hand-contact acceptance"
+  ]
+}

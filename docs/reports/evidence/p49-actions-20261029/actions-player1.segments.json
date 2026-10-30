@@ -1,0 +1,71 @@
+{
+  "actual_frames": 131,
+  "idle_gaps_cut": true,
+  "interpolated_frames": 0,
+  "segments": [
+    {
+      "kind": 1,
+      "first": 0,
+      "last": 18,
+      "source_start": 53.9435,
+      "source_end": 55.395,
+      "output_duration": 1.5289500000000054
+    },
+    {
+      "kind": 2,
+      "first": 19,
+      "last": 44,
+      "source_start": 78.1627,
+      "source_end": 79.6535,
+      "output_duration": 1.5483999999999867
+    },
+    {
+      "kind": 1,
+      "first": 45,
+      "last": 64,
+      "source_start": 98.842,
+      "source_end": 100.3354,
+      "output_duration": 1.5689000000000135
+    },
+    {
+      "kind": 2,
+      "first": 65,
+      "last": 90,
+      "source_start": 123.3225,
+      "source_end": 124.8509,
+      "output_duration": 1.5892999999999802
+    },
+    {
+      "kind": 3,
+      "first": 91,
+      "last": 98,
+      "source_start": 167.5931,
+      "source_end": 168.1565,
+      "output_duration": 0.643100000000004
+    },
+    {
+      "kind": 4,
+      "first": 99,
+      "last": 109,
+      "source_start": 176.5007,
+      "source_end": 177.1061,
+      "output_duration": 0.6636999999999915
+    },
+    {
+      "kind": 3,
+      "first": 110,
+      "last": 119,
+      "source_start": 177.549,
+      "source_end": 178.1297,
+      "output_duration": 0.6447000000000287
+    },
+    {
+      "kind": 4,
+      "first": 120,
+      "last": 130,
+      "source_start": 186.4002,
+      "source_end": 186.9727,
+      "output_duration": 0.6295499999999947
+    }
+  ]
+}
