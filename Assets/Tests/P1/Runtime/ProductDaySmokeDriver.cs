@@ -528,9 +528,9 @@ namespace DeepDive.P1.Lab
                 if (route == null)
                 {
                     var approach=new List<Vector3>{P(9f,-12.5f),P(-6.5f,-11.2f),new Vector3(-6.5f,6f,-5f)};
-                    // The camera crew crosses the wade's north toe before descending to a catch.
-                    // The original straight diagonal can meet the solid shore fill after a fish dies.
-                    if(ActionVideo){approach.Add(new Vector3(-6.5f,6f,0));approach.Add(new Vector3(-6.5f,4f,2));}
+                    // Cross the wade's north toe before descending to a catch. CI's ordinary
+                    // two-player hunt hit the same solid fill as the video crew's first run.
+                    approach.Add(new Vector3(-6.5f,6f,0));approach.Add(new Vector3(-6.5f,4f,2));
                     SetRoute(approach);
                 }
                 if (!Follow(true)) return;
