@@ -18,6 +18,14 @@ The source is `RepairToolArtBuilder.cs`; regenerate from
 - **OakNailImpact.wav:** original deterministic wood/metal impact synthesis,
   22050 Hz, mono, 16-bit, 0.16 seconds. No microphone recording.
 
+- **OakPlankLift / OakPlankSeat / OakPlankDrop.wav:** (26 Ekim, #189) original synthesised
+  wood sounds for taking the material, seating the board on its slot and dropping it
+  (0.26 / 0.20 / 0.36 s, 22050 Hz mono 16-bit, fixed noise seeds, no recording).
+  Regenerate from **DeepDive / P4.8 / Generate repair carry sounds**. `RepairCarryView`
+  plays them on host-published work-state changes only (lift: hands become busy; seat:
+  board placed on a slot; drop: hands freed without an accepted final stroke), so a
+  rejected or cancelled-before-acceptance action never makes a success sound.
+
 The catalog binds these assets into the player's hands, material rack and
 repair slots. Host-accepted hits drive nail seating, tool contact and sound;
 visuals never grant material, money or completion. Existing slot colliders,

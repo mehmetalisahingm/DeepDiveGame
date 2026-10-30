@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace DeepDive.Network
 {
+    // What the host-published work state just did to the carried material; each cue has its own sound.
+    public enum RepairCue { None, Lift, Seat, Drop }
+
     // Cosmetic only. Host-published work/stroke variables drive both local and observer views.
     [DefaultExecutionOrder(200)]
     public sealed class RepairCarryView : MonoBehaviour
@@ -11,13 +14,24 @@ namespace DeepDive.Network
         private GameObject board, hammer;
         private Material wood, metal;
         private AudioSource audioSource;
-        private AudioClip impact;
+        private AudioClip impact, liftClip, dropClip, seatClip;
+        private bool cuePrimed, wasBusy, wasPlaced;
         private uint stroke;
         private float pulse;
         private Transform boardLeft, boardRight, hammerGrip, toolContact;
         private bool ownsImpact;
         private int rememberedPart=-1, rememberedHits, strikePart=-1, strikeNail;
         private Vector3 previousPosition;
+        // Lift: hands newly busy. Seat: the carried board went onto its slot. Drop: hands freed without an accepted final stroke
+        // (Q / disconnect / release); a completing stroke frees the hands in the same network tick and is voiced by the impact.
+        // Only host-published variables move these edges, so a rejected action never makes a success sound.
+        public static RepairCue CueFor(bool wasBusy,bool wasPlaced,bool busy,bool placed,bool struck)
+        {
+            if(!wasBusy&&busy)return RepairCue.Lift;
+            if(busy&&!wasPlaced&&placed)return RepairCue.Seat;
+            if(wasBusy&&!busy&&!struck)return RepairCue.Drop;
+            return RepairCue.None;
+        }
         public bool UsesAuthoredArt {get;private set;}
         public Vector3 RightGripPosition => hammerGrip!=null?hammerGrip.position:transform.position;
         public float NailContactError {get;private set;}=float.PositiveInfinity;
@@ -56,6 +70,7 @@ namespace DeepDive.Network
             audioSource=gameObject.AddComponent<AudioSource>(); audioSource.playOnAwake=false; audioSource.spatialBlend=player.IsOwner?0f:1f; audioSource.maxDistance=15;
             // Short prototype wood impact; final art/audio remains #189's delivery.
             impact=catalog!=null?catalog.RepairImpactClip:null;
+            liftClip=catalog!=null?catalog.RepairLiftClip:null;dropClip=catalog!=null?catalog.RepairDropClip:null;seatClip=catalog!=null?catalog.RepairSeatClip:null;
             if(impact==null)
             {
                 var samples=new float[4410]; uint seed=137;
@@ -73,7 +88,8 @@ namespace DeepDive.Network
         private void LateUpdate()
         {
             if(board==null||player==null)return;
-            if(player.RepairStroke.Value!=stroke)
+            var struck=player.RepairStroke.Value!=stroke;
+            if(struck)
             {
                 strikePart=player.RepairHandsBusy?player.RepairPartIndex.Value:rememberedPart;
                 strikeNail=player.RepairHandsBusy?Mathf.Clamp(player.RepairHits.Value-1,0,2):Mathf.Clamp(rememberedHits,0,2);
@@ -82,6 +98,14 @@ namespace DeepDive.Network
             }
             bool active=player.IsSpawned&&!player.Passive.Value&&player.RepairHandsBusy;
             bool finishing=player.IsSpawned&&!player.Passive.Value&&!player.Seated.Value&&Time.unscaledTime<pulse;
+            var placedNow=active&&player.RepairPlaced.Value;
+            if(cuePrimed)
+            {
+                var cue=CueFor(wasBusy,wasPlaced,active,placedNow,struck);
+                var clip=cue==RepairCue.Lift?liftClip:cue==RepairCue.Seat?seatClip:cue==RepairCue.Drop?dropClip:null;
+                if(clip!=null)audioSource.PlayOneShot(clip);
+            }
+            cuePrimed=true;wasBusy=active;wasPlaced=placedNow;
             if(active){rememberedPart=player.RepairPartIndex.Value;rememberedHits=player.RepairHits.Value;}
             board.SetActive(active&&!player.RepairPlaced.Value);
             hammer.SetActive((active&&player.RepairPlaced.Value)||finishing);
