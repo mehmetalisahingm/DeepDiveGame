@@ -1,0 +1,7 @@
+id,kind,lod0_tris,lod1_tris,renderers,materials,width_m,height_m,depth_m
+reef-coral-branching,Coral,1200,234,2,2,1.15,1.29,1.21
+reef-coral-fan,Coral,236,60,2,2,1.21,1.02,0.20
+reef-coral-mound,Coral,648,210,2,2,1.34,0.46,1.10
+reef-rock-boulder,Rock,480,120,2,2,2.31,0.75,1.65
+reef-rock-arch,Rock,400,120,2,2,4.76,2.33,1.21
+reef-plant-seagrass,Plant,144,144,3,2,1.08,1.17,1.10
