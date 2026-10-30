@@ -12,6 +12,12 @@
 
 Üç resmî Quaternius paket sayfasındaki **CC0** kaydı 18 Ekim 2026'da okundu. Kaynak FBX'ler `Assets/DeepDive/Art/Supplied/`, yerel URP materyalleri ve metreye uyarlanmış prefablar `Assets/DeepDive/Art/Resources/SuppliedKit/` içindedir; model dosyaları Git LFS'tedir. Arşivlerde harici atlas dokuları yoktur; FBX materyal renkleri URP'ye taşındı, eksik atlas varmış gibi davranılmadı. Levrek için CoralGrouper modeli geçici görsel vekildir; bunun yeni biyolojik tür kabulü olduğu iddia edilmez. Tuna ve RedSnapper kendi kimlikleriyle oyundadır. Atıf zorunlu olmamakla birlikte Quaternius'a teşekkürler.
 
+## Kullanıcının Quaternius Pirate Kit paketi (kıyı seti) — 30 Ekim 2026
+
+Kaynak: kullanıcının depo dışında sağladığı `Pirate Kit - Nov 2023-20261016T191140Z-1-001.zip` (dosya adındaki damga 16 Ekim 2026; 18 Ekim 2026 kararıyla kıyı parçaları için seçildi), [resmî paket sayfası](https://quaternius.com/packs/piratekit.html). Sayfada 30 Ekim 2026'da okundu: **CC0**, 71 model, FBX/OBJ/Blend/glTF, ücretsiz. ZIP'in içinde lisans dosyası yoktur; CC0 kaydı yalnız resmî sayfaya dayanır. Atıf zorunlu değil; Quaternius'a teşekkürler.
+
+Depoya yalnız 16 kıyı parçası ve atlas dokusu alındı: `Assets/DeepDive/Art/Supplied/PirateKit/` (`Models/` 16 FBX, `Textures/Atlas_Pirate.png`; model ve doku Git LFS'te). URP atlas malzemesi, importer eşlemesi ve metre ölçekli prefablar (`Assets/DeepDive/Art/Resources/ShoreKit/`) kodla üretilir: `Assets/Editor/P47ShoreKitSetup.cs`. Karakter, silah, gemi, ev ve diğer 55 model alınmadı. Stil notu: Pirate Kit düz renk atlaslıdır, ev cephesi için seçilen MegaKit dokuludur; yan yana uyum #211 birleşince ayrıca değerlendirilir. Ayrıntı: [P47-SHORE-KIT-20261030.md](../reports/P47-SHORE-KIT-20261030.md).
+
 ## Kullanıcının Tripo motorbotu — 18 Ekim 2026
 
 Kaynak arşiv: `luxury+motorboat+3d+model.zip`; FBX kimliği `tripo_convert_7888c55b-2cb4-455c-804a-c9ae75a50e4e`. Kullanıcı bu sohbette **"Biz ürettik, GitHub'a da koyabilirsin"** diyerek kendi üretimi olduğunu ve kaynak paylaşım iznini bildirdi. Üretim tarihi/hesap planı arşivde bulunmuyor; bunlar uydurulmaz. [Tripo şartları](https://www.tripo3d.ai/terms) §5.2 ve [resmî kullanım açıklaması](https://www.tripo3d.ai/help/privacy-policy/how-to-use-tripo-models-commercially) 18 Ekim'de okundu; haklar hesap planına bağlıdır. Bu kayıt CC0 veya bağımsız bir üçüncü kişi lisans doğrulaması iddiası değildir; ticari yayın bu görev kapsamında değildir.

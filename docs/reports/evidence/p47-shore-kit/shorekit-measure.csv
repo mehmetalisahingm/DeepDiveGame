@@ -1,0 +1,17 @@
+id,model,tris,renderers,min_x,min_y,min_z,max_x,max_y,max_z,materials
+shore-dock,Environment_Dock,1912,1,-1.00,-2.00,-1.35,1.18,1.01,1.31,MI_PirateAtlas
+shore-dock-pole,Environment_Dock_Pole,524,1,-0.16,-2.00,-0.20,0.20,1.01,0.18,MI_PirateAtlas
+shore-dock-broken,Environment_Dock_Broken,2052,1,-1.20,-2.00,-1.35,1.18,1.01,1.31,MI_PirateAtlas
+shore-rock-1,Environment_Rock_1,766,1,-0.34,-0.24,-0.32,0.35,0.35,0.33,MI_PirateAtlas
+shore-rock-2,Environment_Rock_2,3072,1,-0.40,-0.03,-0.37,0.38,1.02,0.39,MI_PirateAtlas
+shore-rock-3,Environment_Rock_3,712,1,-0.30,0.00,-0.29,0.47,0.61,0.29,MI_PirateAtlas
+shore-rock-4,Environment_Rock_4,712,1,-0.35,0.00,-0.40,0.42,0.71,0.35,MI_PirateAtlas
+shore-rock-5,Environment_Rock_5,716,1,-0.30,-0.30,-0.29,0.31,0.31,0.29,MI_PirateAtlas
+shore-palm-1,Environment_PalmTree_1,3208,1,-1.67,0.01,-1.40,0.94,3.59,1.12,MI_PirateAtlas
+shore-palm-2,Environment_PalmTree_2,2924,1,-2.03,0.00,-1.25,0.60,2.69,1.33,MI_PirateAtlas
+shore-palm-3,Environment_PalmTree_3,3134,1,-1.66,0.00,-1.62,1.20,2.69,1.13,MI_PirateAtlas
+shore-prop-barrel,Prop_Barrel,640,1,-0.36,0.00,-0.36,0.36,0.66,0.36,MI_PirateAtlas
+shore-prop-bucket,Prop_Bucket,532,1,-0.38,0.00,-0.36,0.37,0.68,0.36,MI_PirateAtlas
+shore-prop-bucket-fishes,Prop_Bucket_Fishes,3860,1,-0.48,0.00,-0.65,0.38,0.68,0.50,MI_PirateAtlas
+shore-prop-anchor,Prop_Anchor,544,1,-0.39,0.00,-0.45,0.39,0.09,0.50,MI_PirateAtlas
+shore-prop-chest,Prop_Chest_Closed,1636,1,-0.70,-0.02,-0.44,0.70,0.86,0.44,MI_PirateAtlas
