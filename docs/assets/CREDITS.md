@@ -1,5 +1,11 @@
 # Varlık kaynak kaydı
 
+## Quaternius Medieval Village MegaKit (Standard, ücretsiz katman) — 26 Ekim 2026
+
+Kaynak: [resmî paket sayfası](https://quaternius.com/packs/medievalvillagemegakit.html); dosya, [OpenGameArt aynasındaki](https://opengameart.org/node/174568) `medieval_village_megakitstandard.zip` (100 MB, 176 model; indirme 18 ve 26 Ekim 2026, kullanıcı onayıyla). Lisans **CC0 1.0** (paket içi `License_Standard.txt`, repoda `LICENSE-Quaternius-MedievalVillage.txt`), atıf zorunlu değil; Quaternius'a teşekkürler. Pro/Source katmanları ücretli olduğu için **alınmadı**; ücretli satın alma yoktur.
+
+Konum: `Assets/DeepDive/Art/MegaKit/`. `Models/` kaynak FBX'ler (176), `Textures/` paketteki 14 temel renk/pürüzlülük dokusu ve 6 normal haritası (Unity için "Normals Godot-Unity" klasöründen), `Materials/` yerel URP/Lit materyalleri (paketteki `MI_*` adlarıyla; `MI_MetalOrnaments` dokusu pakette olmadığı için düz koyu demir, `Shop_Accent_Equipment` ekipman hizmet mavisi `#3F6FB5`), `Prefabs/` örnek `HomeFacade_Sample` ve `ShopFront_Sample` (sahneye yerleştirilmedi). Model ve dokular Git LFS'tedir. Yerel dönüşümler: materyal eşlemesi, normal harita türü, örnek montaj; model geometrisi değiştirilmedi. Kit, tezgâh/raf/tabela içermez: `ShopFront_Sample` tezgâhı ve tabelayı yerel ilkel bloklarla kurar. Ayrıntı ve ölçüm: [P4-7-KIT-PREP.md](../reports/P4-7-KIT-PREP.md) §5c–§5f. Kaynağı yeniden üretmek için `Assets/Editor/P47MegaKitSetup.cs` (`DeepDive/P4.7/Rebuild MegaKit`).
+
 ## Yerel üretim — tamir alanı seti — 26 Ekim 2026
 
 `Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
