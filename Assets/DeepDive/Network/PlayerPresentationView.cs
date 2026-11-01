@@ -40,8 +40,23 @@ namespace DeepDive.Network
         public HeldEquipmentMode DisplayedEquipment=>equipmentTransition.Displayed;
         public float EquipmentLowering=>equipmentTransition.Lowering;
         public bool IsChangingEquipment=>equipmentTransition.IsSwitching;
+        public Transform ActionBodyFrame { get { EnsureInitialized();return bodyPose!=null ? bodyPose.Model : null; } }
+        public Transform ActionHip { get { EnsureInitialized();return bodyPose!=null ? bodyPose.Hip : null; } }
+        public float ActionGripError(bool firstPerson,Vector3 left,Vector3 right)
+        {
+            var pose=firstPerson?armsPose:bodyPose;
+            return pose==null?float.PositiveInfinity:Mathf.Max(Vector3.Distance(pose.RepairLeftPalmPosition,left),Vector3.Distance(pose.RepairRightPalmPosition,right));
+        }
         public void ApplyActionGrips(Vector3 left,Vector3 right,Quaternion leftRotation,Quaternion rightRotation)
-        { ApplyRepairGrips(left,right,leftRotation,rightRotation,true); }
+        {
+            ApplyRepairGrips(left,right,leftRotation,rightRotation,true);
+            // World props and both rigs share the actual posed shoulders, including the swim pitch.
+            if(networkPlayer!=null && networkPlayer.IsOwner && armsPose!=null && bodyPose!=null && bodyPose.Model!=null && armsPose.Model!=null)
+            {
+                armsPose.Model.SetPositionAndRotation(bodyPose.Model.position,bodyPose.Model.rotation);
+                armsPose.PresentRepair(left,right,leftRotation,rightRotation,true);
+            }
+        }
 
         // Cosmetic IK follows the visible grip markers after the ordinary locomotion pose.
         // These targets never move the player root or submit gameplay actions.

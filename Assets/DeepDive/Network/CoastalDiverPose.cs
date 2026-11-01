@@ -11,6 +11,7 @@ namespace DeepDive.Network
         private Transform leftArm, leftElbow, leftHand, rightArm, rightElbow, rightHand;
         private Transform leftLeg, leftKnee, leftFoot, rightLeg, rightKnee, rightFoot, head;
         private Transform equipmentSocket, leftIndex, rightIndex;
+        public Transform Hip { get; private set; }
         private Transform[] fingerBones;
         private PlayerPresentationState state;
         private float speed, cycle;
@@ -28,6 +29,7 @@ namespace DeepDive.Network
             leftLeg = Bone("UpperLeg.L"); leftKnee = Bone("LowerLeg.L"); leftFoot = Bone("Foot.L");
             rightLeg = Bone("UpperLeg.R"); rightKnee = Bone("LowerLeg.R"); rightFoot = Bone("Foot.R");
             head = Bone("Head");
+            Hip = Bone("Hips");
             equipmentSocket = Bone("Socket_RightHand_Equipment");
             leftIndex = Bone("Index2.L"); rightIndex = Bone("Index2.R");
             fingerBones = GetComponentsInChildren<Transform>(true);

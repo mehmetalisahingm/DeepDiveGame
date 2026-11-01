@@ -1,4 +1,5 @@
 using DeepDive.Network;
+using DeepDive.Session;
 using DeepDive.Trip;
 using Unity.Collections;
 using Unity.Netcode;
@@ -19,12 +20,25 @@ namespace DeepDive.Composition
         private PlayerActionMessage action;
         private double until;
         private LineRenderer lanyard;
+        private LineRenderer shoulderStrap;
         private Material cord;
         private bool seated;
         private int seatTransition;
         private double seatAt;
         private HeldEquipmentMode equipmentAtStart;
         private ulong requestAtStart;
+        private Vector3 fishCenter;
+        private Renderer[] bagRenderers;
+        private SessionNetworkAdapter session;
+        private SessionPhase phase;
+        private bool phaseKnown;
+        public Vector3 LeftGripPosition{get;private set;}
+        public Vector3 RightGripPosition{get;private set;}
+        public bool ContactExpected{get;private set;}
+        public float BodyGripError=>hands!=null?hands.ActionGripError(false,LeftGripPosition,RightGripPosition):float.PositiveInfinity;
+        public float OwnerGripError=>hands!=null?hands.ActionGripError(true,LeftGripPosition,RightGripPosition):float.PositiveInfinity;
+        public Transform Satchel=>bag!=null?bag.transform:null;
+        public Transform SatchelHip=>hands!=null?hands.ActionHip:null;
         public int CollectCount{get;private set;}
         public int DeliveryCount{get;private set;}
         public int BoardCount{get;private set;}
@@ -33,12 +47,14 @@ namespace DeepDive.Composition
         public bool AuthoredProps=>bag!=null&&crate!=null;
         public float ActionAge{get;private set;}
         public Vector3 ActionFocus=>ActiveKind==PlayerVisualAction.Deliver && crate!=null ? crate.transform.position :
-            ActiveKind==PlayerVisualAction.Collect && bag!=null ? bag.transform.position+Vector3.up*.3f : Point(Vector3.up*.85f);
+            ActiveKind==PlayerVisualAction.Collect && bag!=null ? ContactExpected?(LeftGripPosition+RightGripPosition)*.5f:bag.transform.position+Body.up*.3f : Point(Vector3.up*.85f);
         private double Now=>NetworkManager.Singleton!=null&&NetworkManager.Singleton.IsListening?NetworkManager.Singleton.ServerTime.Time:Time.unscaledTimeAsDouble;
         private void Awake()
         {
             player=GetComponent<NetworkPlayer>();hands=GetComponent<PlayerPresentationView>();trip=GetComponent<BoatTripPlayerSync>();
+            session=FindFirstObjectByType<SessionNetworkAdapter>();
             bag=Spawn(BagResource);crate=Spawn(CrateResource);
+            bagRenderers=bag!=null?bag.GetComponentsInChildren<Renderer>(true):new Renderer[0];
             bagLeft=Marker(bag,"Grip_Left");bagRight=Marker(bag,"Grip_Right");
             crateLeft=Marker(crate,"Grip_Left");crateRight=Marker(crate,"Grip_Right");
             if(crate!=null)crate.SetActive(false);
@@ -75,6 +91,12 @@ namespace DeepDive.Composition
                     foreach(var animation in fish.GetComponentsInChildren<Animation>(true))animation.enabled=false;
                     foreach(var animator in fish.GetComponentsInChildren<Animator>(true))animator.enabled=false;
                     fish.transform.localScale*=.62f;
+                    var renderers=fish.GetComponentsInChildren<Renderer>(true);
+                    if(renderers.Length>0)
+                    {
+                        var bounds=renderers[0].bounds;foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+                        fishCenter=fish.transform.InverseTransformPoint(bounds.center);
+                    }
                 }
             }
             else DeliveryCount++;
@@ -93,25 +115,54 @@ namespace DeepDive.Composition
             foreach(var t in root.GetComponentsInChildren<Transform>(true))if(t.name==name)return t;
             return null;
         }
-        private Vector3 Point(Vector3 local)=>transform.TransformPoint(local)+Vector3.up*(seated?NetworkPlayer.BoatSeatedVisualOffset:player.WaterViewLift);
+        private Transform Body=>hands!=null&&hands.ActionBodyFrame!=null?hands.ActionBodyFrame:transform;
+        private Vector3 Point(Vector3 local)=>Body.TransformPoint(local);
+        public static Pose StowedSatchelPose(Transform hip)
+        {
+            // Outside the thigh/tank and forward of the bench; the long sack lies along the leg.
+            return new Pose(hip.position+hip.rotation*new Vector3(-.43f,-.12f,.13f),hip.rotation);
+        }
+        private void Grips(Vector3 left,Vector3 right,Quaternion leftRotation,Quaternion rightRotation,bool contact=true)
+        {
+            LeftGripPosition=left;RightGripPosition=right;ContactExpected=contact;
+            hands?.ApplyActionGrips(left,right,leftRotation,rightRotation);
+        }
         private void LateUpdate()
         {
             if(player==null || !player.IsSpawned){Hide();return;}
+            if(session!=null && session.Session!=null)
+            {
+                var current=session.Session.State.Phase;
+                if(phaseKnown && current!=phase){until=0;seatTransition=0;}
+                phase=current;phaseKnown=true;
+            }
             var blocked=player.Passive.Value || player.RepairHandsBusy || player.RecordingPresentation.Value;
             blocked |= player.CurrentHeldEquipment!=equipmentAtStart && Now<until;
             // An accepted shot is free to interrupt this cosmetic recovery immediately.
             if(Now<until && player.LastActionRequestId.Value!=requestAtStart &&
                 player.LastActionKind.Value==(byte)PlayerActionKind.Harpoon)blocked=true;
-            ActiveKind=PlayerVisualAction.None;
-            if(blocked)until=0;
+            ActiveKind=PlayerVisualAction.None;ContactExpected=false;
+            if(blocked){until=0;seatTransition=0;}
             var active=!blocked && Now<until;
             var holdingBag=active && action.Kind==PlayerVisualAction.Collect;
             if(bag!=null)
             {
                 bag.SetActive(!player.Passive.Value);
-                bag.transform.SetPositionAndRotation(Point(holdingBag?new Vector3(0,.87f,.58f):new Vector3(-.36f,.75f,-.07f)),transform.rotation);
-                foreach(var renderer in bag.GetComponentsInChildren<Renderer>(true))
+                var hip=SatchelHip;
+                var stowed=hip!=null?StowedSatchelPose(hip):new Pose(Point(new Vector3(-.43f,.75f,.13f)),Body.rotation);
+                bag.transform.SetPositionAndRotation(holdingBag?Point(new Vector3(0,.87f,.32f)):stowed.position,holdingBag?Body.rotation:stowed.rotation);
+                foreach(var renderer in bagRenderers)
                     renderer.shadowCastingMode=player.IsOwner&&!holdingBag?ShadowCastingMode.ShadowsOnly:ShadowCastingMode.On;
+                if(!holdingBag&&!player.Passive.Value)
+                {
+                    EnsureStrap();shoulderStrap.enabled=true;
+                    shoulderStrap.shadowCastingMode=player.IsOwner?ShadowCastingMode.ShadowsOnly:ShadowCastingMode.On;
+                    shoulderStrap.SetPosition(0,bag.transform.TransformPoint(new Vector3(0,.31f,.13f)));
+                    shoulderStrap.SetPosition(1,Point(new Vector3(-.22f,1.48f,.07f)));
+                    shoulderStrap.SetPosition(2,Point(new Vector3(-.22f,1.48f,-.12f)));
+                    shoulderStrap.SetPosition(3,bag.transform.TransformPoint(new Vector3(0,.31f,-.13f)));
+                }
+                else if(shoulderStrap!=null)shoulderStrap.enabled=false;
             }
             if(crate!=null)crate.SetActive(active&&action.Kind==PlayerVisualAction.Deliver);
             if(!active)
@@ -124,8 +175,8 @@ namespace DeepDive.Composition
                     ActionAge=age;
                     var lift=Mathf.Sin(age*Mathf.PI)*.12f;
                     var y=seated?.96f:1.15f;
-                    hands?.ApplyActionGrips(Point(new Vector3(-.29f,y+lift,.32f)),Point(new Vector3(.29f,y+lift,.32f)),
-                        transform.rotation*Quaternion.Euler(60,0,-20),transform.rotation*Quaternion.Euler(60,0,20));
+                    Grips(Point(new Vector3(-.29f,y+lift,.32f)),Point(new Vector3(.29f,y+lift,.32f)),
+                        Body.rotation*Quaternion.Euler(60,0,-20),Body.rotation*Quaternion.Euler(60,0,20),false);
                 }
                 return;
             }
@@ -136,19 +187,20 @@ namespace DeepDive.Composition
         {
             if(bag==null || bagLeft==null || bagRight==null)return;
             var age=ActionAge;
-            var held=Point(new Vector3(.10f,1.38f,.58f));
+            var held=Point(new Vector3(.10f,1.30f,.43f));
             var arrive=Mathf.SmoothStep(0,1,Mathf.Clamp01(age/.35f));
             var stow=Mathf.SmoothStep(0,1,Mathf.Clamp01((age-.48f)/.42f));
             // A constant-size fish is lowered through the open mouth into the opaque cloth sack.
-            var fishPosition=Vector3.Lerp(Vector3.Lerp(action.Source,held,arrive),Point(new Vector3(0,.87f,.58f)),stow);
+            var fishPosition=Vector3.Lerp(Vector3.Lerp(action.Source,held,arrive),Point(new Vector3(0,.87f,.32f)),stow);
             if(fish!=null)
             {
-                fish.transform.SetPositionAndRotation(fishPosition,Quaternion.Slerp(transform.rotation*Quaternion.Euler(0,90,10),
-                    transform.rotation*Quaternion.Euler(-90,0,0),Mathf.SmoothStep(0,1,Mathf.Clamp01((age-.25f)/.25f))));
+                fish.transform.rotation=Quaternion.Slerp(Body.rotation*Quaternion.Euler(0,90,10),
+                    Body.rotation*Quaternion.Euler(-90,0,0),Mathf.SmoothStep(0,1,Mathf.Clamp01((age-.25f)/.25f)));
+                fish.transform.position+=fishPosition-fish.transform.TransformPoint(fishCenter);
                 fish.SetActive(age<.92f);
             }
-            var right=Vector3.Lerp(held+transform.right*.06f-Vector3.up*.025f,bagRight.position,stow);
-            hands?.ApplyActionGrips(bagLeft.position,right,bagLeft.rotation,Quaternion.Slerp(transform.rotation*Quaternion.Euler(5,0,60),bagRight.rotation,stow));
+            var right=Vector3.Lerp(held+Body.right*.035f,bagRight.position,stow);
+            Grips(bagLeft.position,right,bagLeft.rotation,Quaternion.Slerp(Body.rotation*Quaternion.Euler(5,0,60),bagRight.rotation,stow),age>.35f&&age<.88f);
             if(age<.32f&&fish!=null)
             {
                 EnsureLanyard();lanyard.enabled=true;lanyard.SetPosition(0,right);lanyard.SetPosition(1,fishPosition);
@@ -160,12 +212,12 @@ namespace DeepDive.Composition
             if(crate==null||crateLeft==null||crateRight==null)return;
             var raise=Mathf.SmoothStep(0,1,Mathf.Clamp01(ActionAge/.25f));
             var lower=Mathf.SmoothStep(0,1,Mathf.Clamp01((ActionAge-.4f)/.5f));
-            var held=Point(new Vector3(0,1.12f,.52f));
+            var held=Point(new Vector3(0,1.30f,.26f));
             // Hands release at arm's reach; the crate then settles on the real service counter.
-            crate.transform.SetPositionAndRotation(Vector3.Lerp(Vector3.Lerp(Point(new Vector3(0,.82f,.35f)),held,raise),
-                action.Source,lower),transform.rotation);
-            if(lower<.45f)hands?.ApplyActionGrips(crateLeft.position,crateRight.position,crateLeft.rotation,crateRight.rotation);
-            else hands?.ApplyActionGrips(Point(new Vector3(-.2f,1.05f,.35f)),Point(new Vector3(.2f,1.05f,.35f)),transform.rotation,transform.rotation);
+            crate.transform.SetPositionAndRotation(Vector3.Lerp(Vector3.Lerp(Point(new Vector3(0,1.22f,.24f)),held,raise),
+                action.Source,lower),Body.rotation);
+            if(lower<.06f)Grips(crateLeft.position,crateRight.position,crateLeft.rotation,crateRight.rotation);
+            else Grips(Point(new Vector3(-.2f,1.05f,.35f)),Point(new Vector3(.2f,1.05f,.35f)),Body.rotation,Body.rotation,false);
         }
         private void EnsureLanyard()
         {
@@ -176,10 +228,19 @@ namespace DeepDive.Composition
             cord=new Material(Shader.Find("Universal Render Pipeline/Unlit"));cord.color=new Color(.24f,.3f,.25f);
             lanyard.sharedMaterial=cord;
         }
+        private void EnsureStrap()
+        {
+            if(shoulderStrap!=null)return;
+            EnsureLanyard();lanyard.enabled=false;
+            var obj=new GameObject("Satchel shoulder strap");obj.transform.SetParent(transform,false);
+            shoulderStrap=obj.AddComponent<LineRenderer>();shoulderStrap.positionCount=4;
+            shoulderStrap.startWidth=.032f;shoulderStrap.endWidth=.032f;
+            shoulderStrap.receiveShadows=false;shoulderStrap.sharedMaterial=cord;
+        }
         private void ClearFish()
         {if(fish!=null)Destroy(fish);fish=null;if(lanyard!=null)lanyard.enabled=false;}
         private void Hide()
-        {if(bag!=null)bag.SetActive(false);if(crate!=null)crate.SetActive(false);ClearFish();}
+        {until=0;seatTransition=0;ActiveKind=PlayerVisualAction.None;ContactExpected=false;if(bag!=null)bag.SetActive(false);if(crate!=null)crate.SetActive(false);if(shoulderStrap!=null)shoulderStrap.enabled=false;ClearFish();}
         private void OnDisable(){Hide();if(player!=null)player.SetVisualBoatSeated(false);}
         private void OnDestroy()
         {

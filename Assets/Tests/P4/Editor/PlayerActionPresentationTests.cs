@@ -5,11 +5,59 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEditor;
+using System.Reflection;
 
 namespace DeepDive.P4.Tests
 {
     public sealed class PlayerActionPresentationTests
     {
+        [TestCase("CoastalDiver",false)] [TestCase("CoastalArms",false)]
+        [TestCase("CoastalDiver",true)] [TestCase("CoastalArms",true)]
+        public void RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(string name,bool swimming)
+        {
+            var rig=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/DeepDive/Player/Character/"+name+".prefab"));
+            var bag=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.BagResource));
+            var crate=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.CrateResource));
+            try
+            {
+                var pose=rig.GetComponent<CoastalDiverPose>();
+                typeof(CoastalDiverPose).GetMethod("Awake",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(pose,null);
+                var frame=pose.Model;
+                frame.rotation=Quaternion.Euler(swimming?78:0,35,0);
+                var rootBefore=rig.transform.position;
+                bag.transform.SetPositionAndRotation(frame.TransformPoint(new Vector3(0,.87f,.32f)),frame.rotation);
+                crate.transform.SetPositionAndRotation(frame.TransformPoint(new Vector3(0,1.30f,.26f)),frame.rotation);
+                foreach(var prop in new[]{bag,crate})
+                {
+                    var left=prop.transform.Find("Grip_Left");var right=prop.transform.Find("Grip_Right");
+                    pose.PresentRepair(left.position,right.position,left.rotation,right.rotation,true);
+                    Assert.That(Vector3.Distance(pose.RepairLeftPalmPosition,left.position),Is.LessThan(.025f),prop.name+" left");
+                    Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,right.position),Is.LessThan(.025f),prop.name+" right");
+                }
+                var fish=frame.TransformPoint(new Vector3(.135f,1.3f,.43f));
+                pose.PresentRepair(bag.transform.Find("Grip_Left").position,fish,frame.rotation,frame.rotation,true);
+                Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,fish),Is.LessThan(.025f),"fish");
+                Assert.That(rig.transform.position,Is.EqualTo(rootBefore));
+            }
+            finally {Object.DestroyImmediate(rig);Object.DestroyImmediate(bag);Object.DestroyImmediate(crate);}
+        }
+        [Test] public void StowedSatchelUsesMetresAndTracksThePosedHipDespiteImportScale()
+        {
+            var hip=new GameObject("Imported hip");
+            try
+            {
+                hip.transform.localScale=Vector3.one*100;
+                foreach(var pitch in new[]{0f,78f,-8f})
+                {
+                    hip.transform.SetPositionAndRotation(new Vector3(2,3,4),Quaternion.Euler(pitch,30,0));
+                    var pose=PlayerActionView.StowedSatchelPose(hip.transform);
+                    Assert.That(Vector3.Distance(pose.position,hip.transform.position),Is.InRange(.44f,.49f));
+                    Assert.That(Quaternion.Angle(pose.rotation,hip.transform.rotation),Is.LessThan(.001f));
+                }
+            }
+            finally {Object.DestroyImmediate(hip);}
+        }
         private static PlayerActionMessage Accepted()=>new PlayerActionMessage{PlayerObject=18,Sequence=1,At=10,
             Kind=PlayerVisualAction.Collect,Source=new Vector3(2,3,4),Species=new FixedString64Bytes("tuna"),Count=1};
         [Test] public void ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence()

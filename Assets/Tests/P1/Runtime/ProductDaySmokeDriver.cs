@@ -60,6 +60,8 @@ namespace DeepDive.P1.Lab
             public int actionKinds;
             public int actionVisibleKinds;
             public bool actionProps,actionSeatedEye,actionStandingEye;
+            public int contactKinds,satchelPoses;
+            public float maxActionGripError,maxSatchelError;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
             public int oceanBands, oceanVideoFrames;
             public string oceanGpu="";
@@ -1046,9 +1048,9 @@ namespace DeepDive.P1.Lab
             {
                 var actionsOk=report.actionProps && report.actionCollects==2 && report.actionDeliveries==2 &&
                     report.actionBoards>=2 && report.actionExits>=2 && report.actionKinds==15 && (Host||report.actionVisibleKinds==15) && report.actionVideoFrames>=30 &&
-                    report.actionSeatedEye && report.actionStandingEye;
+                    report.actionSeatedEye && report.actionStandingEye && report.contactKinds==3 && report.maxActionGripError<.035f && report.maxSatchelError<.005f;
                 if(!actionsOk && report.errors.Count==0)
-                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds}/{report.actionVisibleKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye}";report.errors.Add(report.failure);}
+                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds}/{report.actionVisibleKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye} contact={report.contactKinds}/{report.maxActionGripError} satchel={report.satchelPoses}/{report.maxSatchelError}";report.errors.Add(report.failure);}
                 report.passed &= actionsOk;
             }
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
