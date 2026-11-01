@@ -28,14 +28,17 @@ Gerekçe ve sınırlar:
 - 2/2/1 dağılımı R05'te Utku ile netleşmeden uygulanmaz; kıyıdaki iki başlangıç türünün (şu an sığ olanlar) kamerasız/sandal tamirsiz erişimi korunmalıdır.
 - Fiyat tablosu eklemek `EconomyManager` ve kayıt geriye uyumunu etkiler. Bu Mert'in dosyasıdır; uygulama ayrı PR'dır.
 
-## Kaynak adayı ve engeller
+## Kaynak: indirildi, repoya alınmadı
 
-- **Kaynak (onay bekliyor):** Quaternius ücretsiz balık paketleri (resmî sayfada CC0 kaydı okunup doğrulanacak). İndirme için kullanıcı onayı gerekir; dosya adı, kaynak ve boyut onay sorusunda bildirilecek. Ücretli paket alınmaz.
-- **Unity:** 1 Kasım'da yerel Unity lisansı geçersiz (`No valid Unity Editor license found`, çıkış 198). Prefab/rig/klip üretimi ve EditMode testi bu yüzden koşulamadı; lisans girişi kullanıcıdadır.
-- **Yapılmayan:** hiçbir model indirilmedi, prefab üretilmedi, sahneye yerleşim yapılmadı, kod/fiyat değişmedi.
+- Kullanıcı onayıyla (1 Kasım 2026) Quaternius **Animated Cute Fish Pack** (Feb 2020) FBX klasörü indirildi: [resmî sayfa](https://quaternius.com/packs/cutefish.html), Drive klasörü, 52 FBX, ZIP 3,5 MB. Sayfada lisans **CC0** yazıyor (1 Kasım 2026'da okundu). Daha önce depoya alınan `CoralGrouper`, `RedSnapper`, `Tuna` aynı paketten.
+- ZIP depo dışında tutuluyor (`%TEMP%cutefish-20261101`, Downloads'taki `drive-download-20261101T142039Z-1-001.zip`). **Depoya hiçbir dosya eklenmedi**: Unity lisansı geçersiz olduğu için FBX'ler importlanıp `.meta` dosyaları üretilemiyor.
+- Bayt taramasında paketteki balıkların (Anglerfish, Tang, Humphead, Turbot, Swordfish, CoralGrouper, Tuna, Sunfish) aynı `Fish_Armature` rigini ve aynı klip adlarını taşıdığı görüldü: `Swimming_Impulse`, `Swimming_Fast`, `Attack`, `Death`, `Out_Of_Water`. Bu, yüzme, hızlanma/kaçış, ölüm ve sudan çıkma klibi tablosunun (#218 3. madde) tek rig üzerinden kurulabileceğini gösterir; Unity'de klip uzunlukları ve pivotlar henüz ölçülmedi.
+- **Fener balığı:** `Anglerfish.fbx` (318 KB) kahverengi, dişli, başında ışıklı olta uzantılı: derin türün açık siluet adayı.
+- **Levrek:** Pakette adı levrek olan model yok. Tanıtım görselindeki balıkların hepsi iri gözlü, kısa gövdeli çizgi film biçiminde; `Tang`, `Humphead`, `Turbot`, `Swordfish` aday olarak not edildi ama hangisinin levrek gibi okunduğu Unity'de aynı kadrajda, yan yana ve tür rengiyle denenmeden seçilmedi. Aynı modelin renk kopyası tür sayılmaz (#218).
+- Orijinal Drive sayfasında `License.txt` (364 bayt) ve `Preview.jpg` da var; lisans dosyası indirmeye dahil edilmedi, CC0 kaydı yalnız resmî sayfaya dayanır.
 
 ## Sonraki adım (sırayla)
 
 1. Utku/Mehmet bu tabloyu onaylar veya düzeltir (R05).
-2. Kullanıcı kaynak indirmesini onaylar; Unity lisansı yeniden etkinleştirilir.
+2. Unity lisansı yeniden etkinleştirilir; Anglerfish ve levrek adayı FBX'leri içe alınır (`.meta` ile), `CREDITS.md` kaydı eklenir.
 3. Önce bir tür uçtan uca (levrek yeni siluet), sonra fener balığı ve orfoz ayrımı; her biri için av → kıyıya dönüş → tek satış → çekim → ansiklopedi zinciri ve 1/2/4 süreç görünürlüğü ölçülür.
