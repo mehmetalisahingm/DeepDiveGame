@@ -18,6 +18,7 @@ namespace DeepDive.Composition
         private PlayerActionReceipt receipt=new PlayerActionReceipt();
         private ServicePresentationReceipt serviceRequests=new ServicePresentationReceipt();
         private ulong sequence;
+        private bool wasListening;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Install()
         {
@@ -39,13 +40,25 @@ namespace DeepDive.Composition
         private void Update()
         {
             var current=NetworkManager.Singleton;
-            if(current!=manager || current?.CustomMessagingManager!=messages)
+            var listening=current!=null && current.IsListening;
+            var transportChanged=current!=manager || current?.CustomMessagingManager!=messages;
+            if(transportChanged)
             {
                 if(messages!=null)messages.UnregisterNamedMessageHandler(MessageName);
                 manager=current;messages=manager!=null?manager.CustomMessagingManager:null;
-                receipt=new PlayerActionReceipt();serviceRequests=new ServicePresentationReceipt();sequence=0;
                 messages?.RegisterNamedMessageHandler(MessageName,Receive);
             }
+            // A stopped room can restart on the very SAME NetworkManager/dispatcher:
+            // NGO object and request IDs can be reused by the fresh room. Keep the
+            // anti-replay receipts during an active room, but discard them at an
+            // actual listening transition so the first legitimate sale/collect is visible.
+            if(PlayerActionSessionRules.ShouldResetReceipts(transportChanged,wasListening,listening))
+            {
+                receipt=new PlayerActionReceipt();
+                serviceRequests=new ServicePresentationReceipt();
+                sequence=0;
+            }
+            wasListening=listening;
             if(manager==null || !manager.IsListening || manager.SpawnManager==null)return;
             foreach(var obj in manager.SpawnManager.SpawnedObjectsList)
             {
