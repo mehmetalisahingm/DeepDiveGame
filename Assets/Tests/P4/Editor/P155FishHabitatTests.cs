@@ -24,6 +24,14 @@ namespace DeepDive.P4.Tests
                 var fish = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<FishActor>(true)).ToArray();
                 Assert.AreEqual(15, fish.Length);
                 var failures = new List<string>();
+                var counts = fish.GroupBy(f => f.Species.SpeciesId).ToDictionary(g => g.Key, g => g.Count());
+                // Accept only one of two whole-scene layouts during migration.
+                // Never allow a partially imported hybrid to pass as five species.
+                var fiveSpecies = counts.Count == 5 && P411FiveSpeciesRoster.SpeciesIds.All(id =>
+                    counts.TryGetValue(id, out var total) && total == 3);
+                var legacy = counts.Count == 3 && new[] { "sea_bass", "tuna", "red_snapper" }.All(id =>
+                    counts.TryGetValue(id, out var total) && total == 5);
+                Assert.IsTrue(legacy || fiveSpecies, "Expected 5/5/5 legacy or 3/3/3/3/3 complete species scene");
                 foreach (var f in fish)
                 {
                     var home = f.transform.position;
@@ -41,20 +49,45 @@ namespace DeepDive.P4.Tests
                                 failures.Add($"{f.name} red snapper at {home} is not over the reef shelf in the reef band");
                             break;
                         case "tuna":
-                            if (depth - r * 0.5f < DiveDepthBands.ReefMinDepth || home.z - r < DeepDropOffStartZ)
-                                failures.Add($"{f.name} tuna at {home} is not in open water past the reef edge");
+                            if (fiveSpecies)
+                            {
+                                if (depth + r * .5f > DiveDepthBands.ShallowMaxDepth || home.z > ReefDropOffStartZ)
+                                    failures.Add($"{f.name} tuna at {home} leaves the newly authored shallow coast");
+                            }
+                            else
+                            {
+                                if (depth - r * .5f < DiveDepthBands.ReefMinDepth || home.z - r < DeepDropOffStartZ)
+                                    failures.Add($"{f.name} tuna at {home} is not in open water past the reef edge");
+                                if (Vector3.Distance(home, DeepEncounterWorld.ArenaPosition) < 12f)
+                                    failures.Add($"{f.name} tuna at {home} sits by the boss arena");
+                            }
+                            break;
+                        case "grouper":
+                            if (!fiveSpecies || depth - r * .5f < DiveDepthBands.ReefMinDepth ||
+                                depth + r * .5f > DiveDepthBands.ReefMaxDepth ||
+                                home.z < ReefShelfStartZ || home.z > DeepDropOffStartZ)
+                                failures.Add($"{f.name} grouper at {home} leaves the reef band");
+                            break;
+                        case "lanternfish":
+                            if (!fiveSpecies || depth - r * .5f < DiveDepthBands.ReefMaxDepth ||
+                                home.z < 46f || home.z >= 65f)
+                                failures.Add($"{f.name} lanternfish at {home} leaves the deep basin");
                             if (Vector3.Distance(home, DeepEncounterWorld.ArenaPosition) < 12f)
-                                failures.Add($"{f.name} tuna at {home} sits by the boss arena");
+                                failures.Add($"{f.name} lanternfish at {home} enters the boss arena");
                             break;
                         default:
                             failures.Add($"{f.name} has unexpected species {f.Species.SpeciesId}");
                             break;
                     }
                 }
-                var counts = fish.GroupBy(f => f.Species.SpeciesId).ToDictionary(g => g.Key, g => g.Count());
-                Assert.AreEqual(5, counts["sea_bass"]);
-                Assert.AreEqual(5, counts["red_snapper"]);
-                Assert.AreEqual(5, counts["tuna"]);
+                Assert.AreEqual(fiveSpecies ? 3 : 5, counts["sea_bass"]);
+                Assert.AreEqual(fiveSpecies ? 3 : 5, counts["red_snapper"]);
+                Assert.AreEqual(fiveSpecies ? 3 : 5, counts["tuna"]);
+                if (fiveSpecies)
+                {
+                    Assert.AreEqual(3, counts["grouper"]);
+                    Assert.AreEqual(3, counts["lanternfish"]);
+                }
                 Assert.IsEmpty(failures, string.Join("\n", failures));
             }, false);
         }
