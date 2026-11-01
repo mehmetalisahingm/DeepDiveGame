@@ -688,10 +688,17 @@ namespace DeepDive.P1.Lab
         {
             if (substep == 0)
             {
+                // B is a real proximity-checked request. Do not wait for a centimetre-perfect
+                // water/shore waypoint once the host already accepts boarding from this side.
+                if(trip.IsSeated){substep=1;route=null;}
+                else
+                {
                 if (route == null) SetRoute(new[] { P(9f, -12.5f), P(9f, -9f),
                     P(expected==4 ? 8.1f+report.slot*.8f : 8.6f+(report.slot%2)*.8f, -3.6f) });
+                if(waypoint>=2)Act(trip.RequestBoardNearestLocal);
                 if (!Follow()) return;
                 substep = 1;
+                }
             }
             Stop();
             if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
