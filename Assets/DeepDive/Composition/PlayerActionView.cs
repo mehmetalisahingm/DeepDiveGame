@@ -63,9 +63,24 @@ namespace DeepDive.Composition
             if(crate!=null)crate.SetActive(false);
             if(trip!=null)
             {
-                seated=trip.IsSeated;player.SetVisualBoatSeated(seated);
+                seated=trip.IsSeated;RestoreBoatSeatPresentation(player,seated);
                 trip.MySeatId.OnValueChanged+=SeatChanged;
             }
+        }
+        // OnDisable clears the visual camera lift, but the authoritative seat ID
+        // can stay unchanged while this cosmetic component is re-enabled.
+        // Reconcile from the live NGO value rather than waiting for OnValueChanged;
+        // restoring an existing seat is NOT another board/disembark event.
+        private void OnEnable()
+        {
+            if(player==null || trip==null)return; // initial OnEnable precedes Awake
+            seated=trip.IsSeated;
+            seatTransition=0;
+            RestoreBoatSeatPresentation(player,seated);
+        }
+        public static void RestoreBoatSeatPresentation(NetworkPlayer target,bool seatAssigned)
+        {
+            if(target!=null)target.SetVisualBoatSeated(seatAssigned);
         }
         private void SeatChanged(FixedString32Bytes before,FixedString32Bytes after)
         {
