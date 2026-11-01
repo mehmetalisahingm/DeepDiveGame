@@ -26,6 +26,7 @@ namespace DeepDive.P1.Lab
             if ((value == 3 || value == 5) && local != null && local.transform.position.z < -39f) substep = 0;
             route = null; waypoint = part = 0; aimAt = 0;
             repairApproach = repairAtDock = repairExit = partRoute = engineEntered = false;
+            repairRackRoute=repairRackReached=false;
             stageDeadline = Time.realtimeSinceStartup + 170f;
             Debug.Log("P187_ACCEPTANCE phase=" + value + " winner=" + repairWinner);
         }

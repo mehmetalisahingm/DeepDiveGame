@@ -237,6 +237,26 @@ namespace DeepDive.P4.Tests
             }, furnitureProxies: true);
         }
 
+        [Test]
+        public void FirstWorkPointWalksBackBehindSternAndSouthToRecoverCancelledMaterial()
+        {
+            WithScenery(scene=>
+            {
+                var site=BuildSite(scene);var work=WorkPoints();
+                var crew=work.Select((w,i)=>Worker(scene,w,i)).ToArray();
+                try
+                {
+                    crew[0].SetActive(false);Physics.SyncTransforms();
+                    var west=Cradle.x-(2.5f+BoatRepairNetworkBinding.RoutePad);
+                    var south=Cradle.z-(1.2f+BoatRepairNetworkBinding.RoutePad);
+                    var rackStand=Drop+Vector3.right*.65f;
+                    Assert.That(WalkWithController(scene,new[]{work[0],P(west,work[0].z),P(west,south),P(rackStand.x,south),P(rackStand.x,rackStand.z)},out var why),Is.True,why);
+                }
+                finally
+                {foreach(var worker in crew)Object.DestroyImmediate(worker);Object.DestroyImmediate(site);Physics.SyncTransforms();}
+            },furnitureProxies:true);
+        }
+
         // ---- helpers -----------------------------------------------------------------------------
 
         private static Pose CradlePose()

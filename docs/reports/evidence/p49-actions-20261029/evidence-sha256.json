@@ -1,0 +1,237 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 53,
+    "sha256": "6aab71409329e9e4151f4853496ceeba453702405a68902b88032e9f1050ee30"
+  },
+  {
+    "path": "actions-player0.csv",
+    "bytes": 3992,
+    "sha256": "0e55f8955f493d3f5a1f427afd4b464e05ff66be6f0e6a80ee192cb75f0d1cf9"
+  },
+  {
+    "path": "actions-player0.mp4",
+    "bytes": 1096172,
+    "sha256": "a2d3629d00b41d1e5e73dfe42776b4e6e00e2e6383bb9496d134e19a65137546"
+  },
+  {
+    "path": "actions-player0.segments.json",
+    "bytes": 1556,
+    "sha256": "0586a85791e704be6128ef63c7ad23cd29a5d45174276f69b70f9d05e6fe427b"
+  },
+  {
+    "path": "actions-player1.csv",
+    "bytes": 3742,
+    "sha256": "32236f58e26c6cf187f64ac42bd7544337fac2ac1a7e5f0fd2beb9ee5d50f5ab"
+  },
+  {
+    "path": "actions-player1.mp4",
+    "bytes": 1292846,
+    "sha256": "97272b9b9d4f459d94bff4021669043ebe2a63b422f984acbe1ab29faf2e60e6"
+  },
+  {
+    "path": "actions-player1.segments.json",
+    "bytes": 1550,
+    "sha256": "c33156ab23a03f053b42cdefab0caae53b5b34e70dff18badbaebf0f86277afc"
+  },
+  {
+    "path": "boat-observer.png",
+    "bytes": 509646,
+    "sha256": "76cb7b664e97be0c78eae4ceb8aec96ef0069063a09090d2a373de9ef48ed7a1"
+  },
+  {
+    "path": "boat-owner.png",
+    "bytes": 437121,
+    "sha256": "9fef6ee026bd1922c53c99800e36dc7a90c209724b94b0f3a701e8a780d98783"
+  },
+  {
+    "path": "build-manifest.json",
+    "bytes": 56913,
+    "sha256": "955b1d27728d6d6a3ee4662bf6014ae22b33492a7d7b9cb6f588e50205783866"
+  },
+  {
+    "path": "ci-original-product-failure.zip",
+    "bytes": 1943464,
+    "sha256": "7f3893fa6a1eea9af75d5bbf5fd58546c453bae6f6f44ed289821b5eae60d3f5"
+  },
+  {
+    "path": "collect-observer.png",
+    "bytes": 676159,
+    "sha256": "55e410cbf5002303a1fce94c8d659adc60645d7777723dad597858aabfc50712"
+  },
+  {
+    "path": "collect-owner.png",
+    "bytes": 592789,
+    "sha256": "76206febeaffa7eb54a509d68589d7f7be0122db27060d9a580edda0c542dfc5"
+  },
+  {
+    "path": "crate-before.xml",
+    "bytes": 5079,
+    "sha256": "f67d186f14f899047f1606fd5658884e420e6911c49cf0abfa5a23ef05df0114"
+  },
+  {
+    "path": "deliver-observer.png",
+    "bytes": 306592,
+    "sha256": "d18ad3d2b479ca9fb8cd5b546121f7d302e5e66b06978e9ac90694b25f547847"
+  },
+  {
+    "path": "deliver-owner.png",
+    "bytes": 166030,
+    "sha256": "bb604569a523d208d5f116897056aafeb363ceaea99959e91b96b14949cc2516"
+  },
+  {
+    "path": "editmode.xml",
+    "bytes": 1072864,
+    "sha256": "83aafaf7b9e759fa356cb3d6991dadcaea52a3558c338197935ef72599bc72e7"
+  },
+  {
+    "path": "failed-four-gpu-rack-path.zip",
+    "bytes": 146264,
+    "sha256": "04b049760cc2499554751ee56545427c1a0da94daa683de9c6b4ea337664b22d"
+  },
+  {
+    "path": "failed-null-guest-launch.zip",
+    "bytes": 14785,
+    "sha256": "54b2ba1979147d9f3434744ce7104e0a14d1475eaeba01fffec0e018e20647c1"
+  },
+  {
+    "path": "failed-shore-approach.zip",
+    "bytes": 58679,
+    "sha256": "8b449e2b5428637e6e0a38cc2b998a0843fa686c07b46167aa6a25f57b3caa52"
+  },
+  {
+    "path": "final-build-manifest.json",
+    "bytes": 56913,
+    "sha256": "aa9ef6ec386b3c10e936776a2e66765e318fc75ef656f7f708981a9920a76e10"
+  },
+  {
+    "path": "final-normal-product-20261030.zip",
+    "bytes": 72250,
+    "sha256": "b1e7b4287495d972f971e0a355d19de4739748ded0a8a8ae4688bdace005c012"
+  },
+  {
+    "path": "final-product-day.zip",
+    "bytes": 74763,
+    "sha256": "0a2f1212d8800f34d4bf566856c34279329fa6f5858bdb77085cf7dc4fce2d70"
+  },
+  {
+    "path": "final-windows-build.log",
+    "bytes": 386205,
+    "sha256": "25fbc2b7108d03776d7c1701feeaaca651eb9a66df98d3bbeaf7874913bc3c70"
+  },
+  {
+    "path": "final-windows-zip.json",
+    "bytes": 266,
+    "sha256": "a38183eb5527e97f21ed9acae84def5562329db6d31daeb26510aab59f55e2d6"
+  },
+  {
+    "path": "first-probe-pass.zip",
+    "bytes": 73323,
+    "sha256": "04a6190ab409e35699449f100a96484a5feba75456f329172dbcf91ee5ab9946"
+  },
+  {
+    "path": "first-visible-probe-pass.zip",
+    "bytes": 74888,
+    "sha256": "3c046ac1f2f2e6a8db8b9fd7fe7cf672b525bb69f1e018242a56bc13a54474e5"
+  },
+  {
+    "path": "four-gpu-repair-20261030.zip",
+    "bytes": 108460,
+    "sha256": "f56a66558f820d3edfa7616e6f38e0678923f4d4116af8cc1ffec3157cf4a3e4"
+  },
+  {
+    "path": "game-tree-equivalence.json",
+    "bytes": 736,
+    "sha256": "9688c123994cfa6284fa1efae657d38838214816a218f702dfc55b06ad40ba20"
+  },
+  {
+    "path": "normal-player0.json",
+    "bytes": 66588,
+    "sha256": "ee312a5ad84cb5cbe65916834444e7b4c29d0942c759653439ea9a50b10e5d10"
+  },
+  {
+    "path": "normal-player1.json",
+    "bytes": 66740,
+    "sha256": "f713d9ab64a1ebdd151e32667ba6d1b76b5d8540c7aa2e332f4edfe3791f8d65"
+  },
+  {
+    "path": "normal-reload.json",
+    "bytes": 2378,
+    "sha256": "190202a2839d201e4468fa05fcf994d243c1661e6c5a7b8cc23eb26c498fdc81"
+  },
+  {
+    "path": "player0.json",
+    "bytes": 66450,
+    "sha256": "d182651db6ac26be48397e831fa6751faee80bcb9197ecf801509eafe7366945"
+  },
+  {
+    "path": "player1.json",
+    "bytes": 66610,
+    "sha256": "8bc5fa9b42b9232872fdfe64ceec8efeee759163eb39a866796c7c0b74b239b2"
+  },
+  {
+    "path": "provenance.json",
+    "bytes": 1138,
+    "sha256": "24631acc82ffa112c64b1f4a45620c812e7fd4d082e2196f0c94e09313d7ffbb"
+  },
+  {
+    "path": "reload.json",
+    "bytes": 2378,
+    "sha256": "190202a2839d201e4468fa05fcf994d243c1661e6c5a7b8cc23eb26c498fdc81"
+  },
+  {
+    "path": "repair-build-manifest.json",
+    "bytes": 56913,
+    "sha256": "dc7902bd6dd9e069f57f1350b5501bce837451532bcca419eda598b24e039130"
+  },
+  {
+    "path": "repair-editmode.xml",
+    "bytes": 1073682,
+    "sha256": "fcdb043879fc888094835ce32a08cba400ab6a52706de47309ffb94ca480e77a"
+  },
+  {
+    "path": "repair-player0.json",
+    "bytes": 68837,
+    "sha256": "1280f46e21d240b54d52ad1890df37f3b534f59628b211941fbd445734a15105"
+  },
+  {
+    "path": "repair-player1.json",
+    "bytes": 68834,
+    "sha256": "acc122b53435b02a5553fca5f0b445f06381db524e173c4f81064fab7fc8d724"
+  },
+  {
+    "path": "repair-player2.json",
+    "bytes": 68889,
+    "sha256": "18943a960493fb9f646df91e0cedd3d69ff31bdc58883141dbdd8886bafa2696"
+  },
+  {
+    "path": "repair-player3.json",
+    "bytes": 68571,
+    "sha256": "4b65df380562f12a4b2368353db7080312866d3c3ddb96b2e63576ae8c2b6b0b"
+  },
+  {
+    "path": "repair-reload.json",
+    "bytes": 2376,
+    "sha256": "9a77434429824eeb44f62293c02e21d0166b396cc027cb5804d96338560e1568"
+  },
+  {
+    "path": "repair-windows-build.log",
+    "bytes": 384102,
+    "sha256": "2fa2f868833daa54a54def38daf0f4d736a887796c070fe6be851c79626b5d1e"
+  },
+  {
+    "path": "repair-worksite-update-sample.png",
+    "bytes": 268215,
+    "sha256": "c8c25bf359caa95b3369b8a8aeb9b79ef17b3592dd3e6a226773ffdb935e61df"
+  },
+  {
+    "path": "windows-build.log",
+    "bytes": 387325,
+    "sha256": "b04d060181ed574d4c6a10d9587d6cbac4cf707b617f6c115344a58dfd55ad5b"
+  },
+  {
+    "path": "windows-zip.json",
+    "bytes": 348,
+    "sha256": "0ba2caf0b212d42ea06c6754f755553d8a1f0cdad52f69cfe4eb62d4fee243db"
+  }
+]

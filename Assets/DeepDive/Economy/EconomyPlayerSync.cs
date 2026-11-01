@@ -9,6 +9,8 @@ namespace DeepDive.Economy
     [RequireComponent(typeof(NetworkObject))]
     public sealed class EconomyPlayerSync : NetworkBehaviour
     {
+        // Notification after the service transaction/save has returned its actual outcome.
+        public static event System.Action<EconomyPlayerSync, TownServiceOutcome> ServiceOutcomeForPresentation;
         public readonly NetworkVariable<int> SharedBalance = new NetworkVariable<int>();
         public readonly NetworkVariable<ulong> LastRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<bool> LastAccepted = new NetworkVariable<bool>();
@@ -141,6 +143,7 @@ namespace DeepDive.Economy
             LastServiceItems.Value = outcome.ItemCount;
             // Written last so the owner sees a consistent outcome when it observes the id change.
             LastServiceRequestId.Value = outcome.RequestId;
+            ServiceOutcomeForPresentation?.Invoke(this, outcome);
         }
 
         public void SetActiveService(string serviceId)

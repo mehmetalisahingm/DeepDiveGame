@@ -110,7 +110,7 @@ namespace DeepDive.Composition
                 else if(motes.isPlaying)motes.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             }
             if(Time.unscaledTime>=nextActors){UpdateActors();nextActors=Time.unscaledTime+.1f;}
-            if(position.y>SurfaceY+.05f && Time.unscaledTime>=nextReflection)
+            if(SystemInfo.graphicsDeviceType!=GraphicsDeviceType.Null && position.y>SurfaceY+.05f && Time.unscaledTime>=nextReflection)
             {RenderReflection(ownerCamera);nextReflection=Time.unscaledTime+.083f;}
         }
 

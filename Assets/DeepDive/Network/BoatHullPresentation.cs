@@ -26,6 +26,11 @@ namespace DeepDive.Network
                 if (art != null)
                 {
                     Instantiate(art, model.transform, false);
+                    if(kind==BoatHullKind.Rowboat)
+                    {
+                        var benches=Resources.Load<GameObject>("PlayerActions/RowboatBenches");
+                        if(benches!=null)Instantiate(benches,model.transform,false);
+                    }
                     continue;
                 }
                 Part(model, material, "Deck", Vector3.zero, new Vector3(size.Width, 0.4f, size.Length));

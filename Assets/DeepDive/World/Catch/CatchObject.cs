@@ -24,6 +24,8 @@ namespace DeepDive.World
 
         // Host-side notification, raised only after a bag has accepted the catch.
         public event Action<CatchObject, CaptureResult> Claimed;
+        // Read-only presentation notification. Never sent for a refused or replayed claim.
+        public static event Action<CatchObject, PlayerId, CaptureResult> CollectedForPresentation;
 
         public bool IsAvailable => available.Value;
         public bool IsClaimed => state.IsClaimed;
@@ -72,6 +74,7 @@ namespace DeepDive.World
             Debug.Log($"P2_CATCH_TAKEN capture={capture.CaptureId} dive={capture.DiveId} " +
                       $"species={capture.SpeciesId} grams={capture.WeightGrams} player={player}");
             Claimed?.Invoke(this, capture);
+            CollectedForPresentation?.Invoke(this, player, capture);
             // Keep the authored scene object for the next dive. Destroying it used to work
             // only because the whole world was reloaded between trips.
             if (NetworkObject != null && NetworkObject.IsSpawned) NetworkObject.Despawn(NetworkObject.IsSceneObject != true);
