@@ -34,8 +34,22 @@ Gerekçe ve sınırlar:
 - ZIP depo dışında tutuluyor (`%TEMP%cutefish-20261101`, Downloads'taki `drive-download-20261101T142039Z-1-001.zip`). **Depoya hiçbir dosya eklenmedi**: Unity lisansı geçersiz olduğu için FBX'ler importlanıp `.meta` dosyaları üretilemiyor.
 - Bayt taramasında paketteki balıkların (Anglerfish, Tang, Humphead, Turbot, Swordfish, CoralGrouper, Tuna, Sunfish) aynı `Fish_Armature` rigini ve aynı klip adlarını taşıdığı görüldü: `Swimming_Impulse`, `Swimming_Fast`, `Attack`, `Death`, `Out_Of_Water`. Bu, yüzme, hızlanma/kaçış, ölüm ve sudan çıkma klibi tablosunun (#218 3. madde) tek rig üzerinden kurulabileceğini gösterir; Unity'de klip uzunlukları ve pivotlar henüz ölçülmedi.
 - **Fener balığı:** `Anglerfish.fbx` (318 KB) kahverengi, dişli, başında ışıklı olta uzantılı: derin türün açık siluet adayı.
-- **Levrek:** Pakette adı levrek olan model yok. Tanıtım görselindeki balıkların hepsi iri gözlü, kısa gövdeli çizgi film biçiminde; `Tang`, `Humphead`, `Turbot`, `Swordfish` aday olarak not edildi ama hangisinin levrek gibi okunduğu Unity'de aynı kadrajda, yan yana ve tür rengiyle denenmeden seçilmedi. Aynı modelin renk kopyası tür sayılmaz (#218).
+- **Levrek:** Pakette adı levrek olan model yok ve hepsi iri gözlü, kısa gövdeli çizgi film balıkları; uzun ince bir levrek gövdesi yok. Beş aday Unity'de depodaki üç balıkla aynı kadrajda çizildi (aşağıdaki kanıt). Bulgular, **yalnız görsel ayrışmaya göre ve türün gerçek biyolojisine değil**:
+  - `Anglerfish`: silüeti en ayırt edilir (başta olta uzantısı, dişli geniş ağız). Fener balığı için uygun.
+  - `Tang`: yuvarlak disk gövde, belirgin çatal kuyruk; ayrışır ama levrek gibi okunmaz.
+  - `Turbot`: yassı elmas gövde (yassı balık); ayrışır, levrek değil.
+  - `Swordfish`: gagalı küçük gri gövde; ayrışır, levrek değil.
+  - `Humphead`: yeşil, çıkık alınlı, orta uzun gövde; mevcut `CoralGrouper`'dan renk ve alın hatları ile ayrılır. Levrek için en yakın ve çalışma adayı olarak önerilir, ama sadece bu görüntüye dayanarak; renk ve ölçek Unity'de oyun ışığında yine denenmelidir.
+  - Mevcut `CoralGrouper`, `Tuna` ve `RedSnapper` birbirine yakın tıknaz silüetlere sahip; bu üçü uzaktan yalnız renkle ayrışıyor. Yeni türlerin gerçekten ayrı silüet getirmesi bu yüzden önemli.
+  - Aynı modelin renk kopyası tür sayılmaz (#218).
 - Orijinal Drive sayfasında `License.txt` (364 bayt) ve `Preview.jpg` da var; lisans dosyası indirmeye dahil edilmedi, CC0 kaydı yalnız resmî sayfaya dayanır.
+
+## Kanıt (editör önizlemesi, Windows oyuncusu görüntüsü değil)
+
+- [Işıklı sıra](evidence/p411-species/species-lineup-lit.png) ve [siluet sırası](evidence/p411-species/species-lineup-silhouette.png): soldan sağa `CoralGrouper`, `Tuna`, `RedSnapper` (depoda), `Anglerfish`, `Tang`, `Humphead`, `Turbot`, `Swordfish` (aday). Hepsi depodaki fish hattıyla (`SuppliedKitImport.Make`, 1,05 m uzunluk) ölçeklendi, `Swimming_Impulse` klibinin %30'unda örneklendi, yandan, ortografik kamerayla çizildi. Kadrajı zenginleştirilmiş mercan/su ışığı yok; düz mavi zemin ve tek yönlü ışık.
+- [`species-candidates.csv`](evidence/p411-species/species-candidates.csv): her modelde altı klip; `Swimming_Impulse` 1,17 s, `Swimming_Fast` 1,04 s, `Death` 3,00 s. Klipler sekiz modelde de aynı süredeler.
+- Betik: `Assets/Editor/P411SpeciesPreview.cs` (`-executeMethod DeepDive.EditorTools.P411SpeciesPreview.PreviewBatch -previewOut <klasör>`). Çalışması için beş aday FBX'in (`Anglerfish`, `Tang`, `Humphead`, `Turbot`, `Swordfish`) geçici olarak `Assets/DeepDive/Art/Supplied/Fish/` içine kopyalanması gerekir; bunlar depoya **eklenmedi**, önizleme sonrası silindi. Geçici `Cand_*` prefab ve materyalleri betik kendisi siler.
+- Ölçülmedi: oyun içi ışıkta, sualtı sisinde, gece ve uzak/yakın kadrajda okunurluk; ölüm/av görselinde canlı yüzme döngüsünün durması; çok oyunculu görünürlük. Bunlar türler gerçekten bağlandığında ölçülür.
 
 ## Sonraki adım (sırayla)
 
