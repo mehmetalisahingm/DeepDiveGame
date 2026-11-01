@@ -212,8 +212,17 @@ namespace DeepDive.P1.Lab
                         // The exit row is also the waiting sleepers' eye-to-bed ray.
                         // Walk the lane south of it, then turn north at one's own bed
                         // (the already exercised product-day HuntFirst approach).
-                        SetRoute(new[] { H(4.95f,-2.5f),new Vector3(H(4.95f,0).x,exit.y,exit.z-.9f),
-                            exit-Vector3.forward*.9f,exit });
+                        // Four players use independent bed approaches. The return step finishes
+                        // at distinct southern home slots, and sending everyone through
+                        // the shared east corridor caused physical body blocking in CI.
+                        // Keep the proven one/two-player route untouched.
+                        if (expected == 4)
+                            SetRoute(new[] { H(2f + slot * .8f, -2.4f),
+                                new Vector3(exit.x, exit.y, exit.z - .9f), exit });
+                        else
+                            SetRoute(new[] { H(4.95f, -2.5f),
+                                new Vector3(H(4.95f, 0).x, exit.y, exit.z - .9f),
+                                exit - Vector3.forward * .9f, exit });
                         // Four bodies converging on the identical narrow corridor waypoint
                         // can physically block one another. Stage bed approaches from the
                         // already-authored distinct return slots; keep real movement/raycast.
