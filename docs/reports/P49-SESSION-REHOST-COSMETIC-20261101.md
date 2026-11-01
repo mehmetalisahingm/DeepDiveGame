@@ -10,3 +10,7 @@
 
 ## Sınır
 Bu değişiklik yalnızca görsel olayı etkiler. Oyuncunun envanter/satış işlemlerini ya da hareketini değiştirmez. Eşzamanlı istemci kopmaları, görsel kayıtlar ve iki fiziksel bilgisayarın uzun oyun günü denemeleri bu PR'ın tek başına PASS iddiası değildir.
+
+## Oyuncunun yerel HUD'u da sıfırlanır
+
+`NetworkPlayer.OnNetworkDespawn` ve `OnNetworkSpawn` artık yalnız görsel-geri-bildirim alanlarını temizleyen `ResetTransientActionFeedback` fonksiyonunu çağırır: eski pickup/hit metni ve retikül zamanlayıcısı, son gözlenen istek ID'si, son yerel ses/mesaj türü. İstek sayacı `actionSequence` özellikle **sıfırlanmaz**; böylece aktif uygulamadaki RPC istek otoritesi ve tekrar korumasına dokunulmaz. `PlayerFeedbackSessionResetTests` temizliğin idempotent olduğunu ve istek sayacının aynı kaldığını sınar. Bu test yeni bir gerçek host kopma/sahne koşusu değildir; CI ve ayrı bilgisayar son kabulü ayrıca izlenir.
