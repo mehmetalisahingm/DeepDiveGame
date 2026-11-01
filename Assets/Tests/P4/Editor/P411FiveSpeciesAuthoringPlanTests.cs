@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using DeepDive.World.Editor;
+using DeepDive.World;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -13,19 +13,19 @@ namespace DeepDive.P4.Tests
         [Test]
         public void FiveSpeciesEachHaveThreeDedicatedNetworkSceneSlots()
         {
-            Assert.AreEqual(15, P411FiveSpeciesSceneSetup.Population);
-            Assert.AreEqual(15, P411FiveSpeciesSceneSetup.Homes.Length);
-            Assert.AreEqual(5, P411FiveSpeciesSceneSetup.SpeciesIds.Distinct().Count());
+            Assert.AreEqual(15, P411FiveSpeciesRoster.Population);
+            Assert.AreEqual(15, P411FiveSpeciesRoster.Homes.Length);
+            Assert.AreEqual(5, P411FiveSpeciesRoster.SpeciesIds.Distinct().Count());
             var expected = new[] { "sea_bass", "tuna", "red_snapper", "grouper", "lanternfish" };
-            CollectionAssert.AreEqual(expected, P411FiveSpeciesSceneSetup.SpeciesIds);
+            CollectionAssert.AreEqual(expected, P411FiveSpeciesRoster.SpeciesIds);
             for (var i = 0; i < 15; i++)
-                Assert.AreEqual(expected[i / 3], P411FiveSpeciesSceneSetup.SpeciesForSlot(i));
+                Assert.AreEqual(expected[i / 3], P411FiveSpeciesRoster.SpeciesForSlot(i));
         }
 
         [Test]
         public void HomesRemainWithinExistingCoastReefAndDeepWaterColumns()
         {
-            var homes = P411FiveSpeciesSceneSetup.Homes;
+            var homes = P411FiveSpeciesRoster.Homes;
             for (var i = 0; i < homes.Length; i++)
             {
                 Assert.Greater(homes[i].x, -14.75f);
