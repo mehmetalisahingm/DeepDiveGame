@@ -8,7 +8,7 @@ Durum: **ÖNERİ.** R05 sahibi Utku'dur (`docs/plan/EXPERIENCE_DESIGN.md` R05); 
 - Görsel yolları `PlayerActionView.cs:61-62` içinde: `sea_bass → SuppliedKit/CoastalFish`, `tuna → SuppliedKit/Tuna`, `red_snapper → SuppliedKit/RedSnapper`.
 - `CoastalFish` prefabı `Assets/DeepDive/Art/Supplied/Fish/CoralGrouper.fbx` modelinden üretilir (`SuppliedKitImport.cs:42`). Yani levrek, adı orfoz olan modelin görselini kullanıyor; #218'in söylediği levrek–orfoz karışıklığı budur.
 - `Assets/DeepDive/Art/Supplied/Fish/` içinde yalnız `CoralGrouper`, `RedSnapper`, `Tuna` (ve tekne) FBX'i var. Elimdeki iki Quaternius ZIP'inde (`FBX-20261016…`, `Pirate Kit…`) yalnız durağan `Prop_Fish_Mackerel` ve `Prop_Fish_Tuna` var; bunlar rig/yüzme klibi içermez, Q10'u karşılamaz.
-- Dolayısıyla eksik iki tür için **depoda kaynak model yok**. "Animated Cute Fish" paketinin ZIP'i bu bilgisayarda bulunamadı.
+- Dolayısıyla eksik iki tür için **depoda kaynak model yok**. "Animated Cute Fish" paketinin ZIP'i başlangıçta bu bilgisayarda yoktu; onayla resmî sayfadan indirildi (aşağıda).
 
 ## Önerilen tablo (Q11 dağılımı: sığ 2, resif 2, derin 1)
 
@@ -31,7 +31,7 @@ Gerekçe ve sınırlar:
 ## Kaynak: indirildi, repoya alınmadı
 
 - Kullanıcı onayıyla (1 Kasım 2026) Quaternius **Animated Cute Fish Pack** (Feb 2020) FBX klasörü indirildi: [resmî sayfa](https://quaternius.com/packs/cutefish.html), Drive klasörü, 52 FBX, ZIP 3,5 MB. Sayfada lisans **CC0** yazıyor (1 Kasım 2026'da okundu). Daha önce depoya alınan `CoralGrouper`, `RedSnapper`, `Tuna` aynı paketten.
-- ZIP depo dışında tutuluyor (`%TEMP%cutefish-20261101`, Downloads'taki `drive-download-20261101T142039Z-1-001.zip`). **Depoya hiçbir dosya eklenmedi**: Unity lisansı geçersiz olduğu için FBX'ler importlanıp `.meta` dosyaları üretilemiyor.
+- ZIP depo dışında tutuluyor (kullanıcının `Downloads` klasöründe `drive-download-20261101T142039Z-1-001.zip`). **Depoya hiçbir model dosyası eklenmedi**: önizleme için beş aday FBX geçici olarak içe alındı ve silindi; hangi modellerin kalıcı olacağı R05 onayına bağlı.
 - Bayt taramasında paketteki balıkların (Anglerfish, Tang, Humphead, Turbot, Swordfish, CoralGrouper, Tuna, Sunfish) aynı `Fish_Armature` rigini ve aynı klip adlarını taşıdığı görüldü: `Swimming_Impulse`, `Swimming_Fast`, `Attack`, `Death`, `Out_Of_Water`. Bu, yüzme, hızlanma/kaçış, ölüm ve sudan çıkma klibi tablosunun (#218 3. madde) tek rig üzerinden kurulabileceğini gösterir; Unity'de klip uzunlukları ve pivotlar henüz ölçülmedi.
 - **Fener balığı:** `Anglerfish.fbx` (318 KB) kahverengi, dişli, başında ışıklı olta uzantılı: derin türün açık siluet adayı.
 - **Levrek:** Pakette adı levrek olan model yok ve hepsi iri gözlü, kısa gövdeli çizgi film balıkları; uzun ince bir levrek gövdesi yok. Beş aday Unity'de depodaki üç balıkla aynı kadrajda çizildi (aşağıdaki kanıt). Bulgular, **yalnız görsel ayrışmaya göre ve türün gerçek biyolojisine değil**:
@@ -54,5 +54,5 @@ Gerekçe ve sınırlar:
 ## Sonraki adım (sırayla)
 
 1. Utku/Mehmet bu tabloyu onaylar veya düzeltir (R05).
-2. Unity lisansı yeniden etkinleştirilir; Anglerfish ve levrek adayı FBX'leri içe alınır (`.meta` ile), `CREDITS.md` kaydı eklenir.
+2. Onaylanan modeller (şimdilik Anglerfish ve levrek adayı) `.meta` dosyalarıyla içe alınır, `CREDITS.md` kaydı eklenir.
 3. Önce bir tür uçtan uca (levrek yeni siluet), sonra fener balığı ve orfoz ayrımı; her biri için av → kıyıya dönüş → tek satış → çekim → ansiklopedi zinciri ve 1/2/4 süreç görünürlüğü ölçülür.
