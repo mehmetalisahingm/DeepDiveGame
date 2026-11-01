@@ -117,10 +117,10 @@ namespace DeepDive.Composition
         }
         private Transform Body=>hands!=null&&hands.ActionBodyFrame!=null?hands.ActionBodyFrame:transform;
         private Vector3 Point(Vector3 local)=>Body.TransformPoint(local);
-        public static Pose StowedSatchelPose(Transform hip)
+        public static Pose StowedSatchelPose(Transform hip,bool sitting=false)
         {
             // Outside the thigh/tank and forward of the bench; the long sack lies along the leg.
-            return new Pose(hip.position+hip.rotation*new Vector3(-.43f,-.12f,.13f),hip.rotation);
+            return new Pose(hip.position+hip.rotation*new Vector3(-.43f,-.12f,sitting?.58f:.13f),hip.rotation);
         }
         private void Grips(Vector3 left,Vector3 right,Quaternion leftRotation,Quaternion rightRotation,bool contact=true)
         {
@@ -149,7 +149,7 @@ namespace DeepDive.Composition
             {
                 bag.SetActive(!player.Passive.Value);
                 var hip=SatchelHip;
-                var stowed=hip!=null?StowedSatchelPose(hip):new Pose(Point(new Vector3(-.43f,.75f,.13f)),Body.rotation);
+                var stowed=hip!=null?StowedSatchelPose(hip,seated):new Pose(Point(new Vector3(-.43f,.75f,.13f)),Body.rotation);
                 bag.transform.SetPositionAndRotation(holdingBag?Point(new Vector3(0,.87f,.32f)):stowed.position,holdingBag?Body.rotation:stowed.rotation);
                 foreach(var renderer in bagRenderers)
                     renderer.shadowCastingMode=player.IsOwner&&!holdingBag?ShadowCastingMode.ShadowsOnly:ShadowCastingMode.On;

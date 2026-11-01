@@ -60,6 +60,33 @@ namespace DeepDive.P4.Tests
         }
         private static PlayerActionMessage Accepted()=>new PlayerActionMessage{PlayerObject=18,Sequence=1,At=10,
             Kind=PlayerVisualAction.Collect,Source=new Vector3(2,3,4),Species=new FixedString64Bytes("tuna"),Count=1};
+        [Test] public void SeatedSatchelClearsBothActualBenchRowsForEveryStableSeat()
+        {
+            var rig=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/DeepDive/Player/Character/CoastalDiver.prefab"));
+            var bag=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.BagResource));
+            try
+            {
+                var pose=rig.GetComponent<CoastalDiverPose>();
+                typeof(CoastalDiverPose).GetMethod("Awake",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(pose,null);
+                foreach(var seat in BoatSeatLayoutRules.SeatIds)
+                {
+                    BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat,seat,out var offset);rig.transform.position=offset;
+                    pose.Present(new PlayerPresentationState(LocomotionMode.Seated,HeldEquipmentMode.None,false),0,0,0,true);
+                    typeof(CoastalDiverPose).GetMethod("LateUpdate",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(pose,null);
+                    var target=PlayerActionView.StowedSatchelPose(pose.Hip,true);
+                    bag.transform.SetPositionAndRotation(target.position,target.rotation);
+                    var renderers=bag.GetComponentsInChildren<Renderer>();var bounds=renderers[0].bounds;
+                    foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+                    foreach(var row in new[]{BoatSeatLayoutRules.SeatIds[0],BoatSeatLayoutRules.SeatIds[2]})
+                    {
+                        BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat,row,out var center);
+                        var bench=new Bounds(new Vector3(0,.63f,center.z),new Vector3(1.9f,.08f,.502f));
+                        Assert.That(bounds.Intersects(bench),Is.False,$"{seat}: satchel {bounds} crosses bench {bench}");
+                    }
+                }
+            }
+            finally {Object.DestroyImmediate(bag);Object.DestroyImmediate(rig);}
+        }
         [Test] public void ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence()
         {
             var gate=new PlayerActionReceipt();var message=Accepted();

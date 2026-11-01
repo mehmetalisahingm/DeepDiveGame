@@ -63,7 +63,7 @@ namespace DeepDive.P1.Lab
             report.actionBoards=view.BoardCount;report.actionExits=view.ExitCount;report.actionProps|=view.AuthoredProps;
             if(view.ActiveKind==PlayerVisualAction.None && view.Satchel!=null && view.SatchelHip!=null)
             {
-                var expected=PlayerActionView.StowedSatchelPose(view.SatchelHip);
+                var expected=PlayerActionView.StowedSatchelPose(view.SatchelHip,worker.VisualBoatSeated);
                 report.maxSatchelError=Mathf.Max(report.maxSatchelError,Vector3.Distance(expected.position,view.Satchel.position));
                 var mode=worker.VisualBoatSeated?8:1<<(int)worker.CurrentLocomotion;
                 report.satchelPoses|=mode;
