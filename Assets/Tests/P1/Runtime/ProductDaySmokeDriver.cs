@@ -689,7 +689,7 @@ namespace DeepDive.P1.Lab
             if (substep == 0)
             {
                 if (route == null) SetRoute(new[] { P(9f, -12.5f), P(9f, -9f),
-                    P(8.6f + (report.slot % 2) * 0.8f, -3.6f) });
+                    P(expected==4 ? 8.1f+report.slot*.8f : 8.6f+(report.slot%2)*.8f, -3.6f) });
                 if (!Follow()) return;
                 substep = 1;
             }
