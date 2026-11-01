@@ -46,7 +46,7 @@ namespace DeepDive.P1.Lab
         {
             actionObserverEntered=false;
             var anchor=FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a=>a.Definition.ServiceId==TownServiceCatalog.FishBuyerId);
-            var target=anchor.WorldPosition+anchor.transform.forward*2.25f+anchor.transform.right*1.8f;
+            var target=anchor.WorldPosition+anchor.transform.forward*2.25f+anchor.transform.right*(1.8f+Mathf.Max(0,report.slot-1)*1.2f);
             var delta=target-local.transform.position;delta.y=0;
             if(delta.magnitude>.25f){MoveToward(Around(CoastTarget(target)));return;}
             var worker=ActionWorker;if(worker==null)return;
