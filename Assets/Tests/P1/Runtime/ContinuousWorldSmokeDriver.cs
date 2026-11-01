@@ -89,7 +89,7 @@ namespace DeepDive.P1.Lab
         {
             if (finished || adapter == null) return;
             if (Time.realtimeSinceStartup > deadline)
-            { Fail($"Timed out at step {step} waypoint {waypoint} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed}"); return; }
+            { Fail($"Timed out at step {step} waypoint {waypoint} position={local?.transform.position} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
             if (leaving)
             {
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
@@ -214,10 +214,16 @@ namespace DeepDive.P1.Lab
                         // (the already exercised product-day HuntFirst approach).
                         SetRoute(new[] { H(4.95f,-2.5f),new Vector3(H(4.95f,0).x,exit.y,exit.z-.9f),
                             exit-Vector3.forward*.9f,exit });
+                        // Four bodies converging on the identical narrow corridor waypoint
+                        // can physically block one another. Stage bed approaches from the
+                        // already-authored distinct return slots; keep real movement/raycast.
+                        // Solo and two-player acceptance retain their existing timing.
+                        waitUntil = Time.realtimeSinceStartup + (expected == 4 ? slot * 6f : 0f);
                         SetStep(7);
                     }
                     break;
                 case 7:
+                    if (Time.realtimeSinceStartup < waitUntil) { Stop(); return; }
                     if (!Follow()) { aimAt=0; return; }
                     Aim(Bed().GetComponent<Collider>().bounds.center);
                     if (aimAt == 0) aimAt = Time.realtimeSinceStartup + 0.8f;
