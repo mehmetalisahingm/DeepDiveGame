@@ -579,9 +579,11 @@ namespace DeepDive.P1.Lab
                 MoveToward(stand); aimAt = 0; return;
             }
             Aim(target);
-            if(ActionVideo && available && delta.magnitude<=2.2f)
+            if(ActionVideo && expected>1 && available && delta.magnitude<=2.2f)
             {
-                var observer=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&!p.IsOwner);
+                // Slot 1 owns this camera mark. Spawn enumeration order is not a player identity;
+                // slots 2/3 deliberately stand elsewhere, and solo has no camera crew to wait for.
+                var observer=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&p.OwnerClientId==1);
                 if(observer==null || Vector3.Distance(observer.transform.position,local.transform.position+new Vector3(3,0,2))>1.2f)return;
             }
             if (Settled())
