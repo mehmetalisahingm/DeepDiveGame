@@ -110,6 +110,11 @@ namespace DeepDive.Network
         private float visualWaterSurface=float.NaN;
         private Vector3 cameraRest;
         private bool cameraRestBound;
+        private bool visualBoatSeated;
+        public const float BoatSeatedVisualOffset = -.52f;
+        public bool VisualBoatSeated => visualBoatSeated;
+        public void SetVisualBoatSeated(bool value)
+        { visualBoatSeated=value; UpdateWaterEye(); }
         public float WaterViewLift=>controller!=null && !Seated.Value && !Passive.Value
             ? SurfaceCameraRules.Lift(CurrentLocomotion,transform.position.y+
                 (controller.center.y+controller.height*.5f)*transform.lossyScale.y,visualWaterSurface):0;
@@ -119,7 +124,7 @@ namespace DeepDive.Network
         {
             if(viewCamera==null)return;
             if(!cameraRestBound){cameraRest=viewCamera.transform.localPosition;cameraRestBound=true;}
-            viewCamera.transform.localPosition=cameraRest+Vector3.up*WaterViewLift;
+            viewCamera.transform.localPosition=cameraRest+Vector3.up*(visualBoatSeated ? BoatSeatedVisualOffset : WaterViewLift);
         }
 
         public Vector3 RecordingEyePosition {get{UpdateWaterEye();return viewCamera != null ? viewCamera.transform.position : transform.position + Vector3.up * 1.55f;}}

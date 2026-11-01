@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0,1051681">
+  <test-suite type="TestSuite" id="1000" name="DeepDiveGame-P0" fullname="DeepDiveGame-P0" runstate="Runnable" testcasecount="1405" result="Failed" site="Child" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.105168" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1795" name="DeepDive.P4.Tests.dll" fullname="C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame/Library/ScriptAssemblies/DeepDive.P4.Tests.dll" runstate="Runnable" testcasecount="394" result="Failed" site="Child" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.083942" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="26740" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1796" name="DeepDive" fullname="DeepDive" runstate="Runnable" testcasecount="391" result="Failed" site="Child" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.078253" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1799" name="P4" fullname="DeepDive.P4" runstate="Runnable" testcasecount="388" result="Failed" site="Child" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.073377" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1800" name="Tests" fullname="DeepDive.P4.Tests" runstate="Runnable" testcasecount="388" result="Failed" site="Child" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.067657" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1684" name="PlayerActionPresentationTests" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" testcasecount="15" result="Failed" site="Child" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.049782" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1701" name="ClosedCrateHasARealMeshSurfaceOnAllSixSides" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ClosedCrateHasARealMeshSurfaceOnAllSixSides" methodname="ClosedCrateHasARealMeshSurfaceOnAllSixSides" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="950027015" result="Failed" start-time="2026-10-29 16:36:26Z" end-time="2026-10-29 16:36:26Z" duration="0.033626" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[  Crate has no visible shell from (-1.00, 0.00, 0.00)
+  Expected: True
+  But was:  False
+]]></message>
+                  <stack-trace><![CDATA[at DeepDive.P4.Tests.PlayerActionPresentationTests.ClosedCrateHasARealMeshSurfaceOnAllSixSides () [0x00122] in C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Assets\Tests\P4\Editor\PlayerActionPresentationTests.cs:98
+]]></stack-trace>
+                </failure>
+                <output><![CDATA[Saving results to: C:/Users/mehmet/AppData/LocalLow/DeepDiveTeam/DeepDiveGame-P0\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

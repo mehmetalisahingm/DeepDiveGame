@@ -20,6 +20,9 @@ MonoBehaviour:
   repairPlankPrefab: {fileID: 6975697637128387368, guid: e7caf13a06e374946bf7f65662e46711, type: 3}
   repairHatchetPrefab: {fileID: 5577821249519443857, guid: 2319c1460cfdd75499fa1d44fadb90a3, type: 3}
   repairImpactClip: {fileID: 8300000, guid: 48d0db9b3c46ac74283d7316d16d2f34, type: 3}
+  repairLiftClip: {fileID: 8300000, guid: 13701094f81b3f64786c6786b5e2b31f, type: 3}
+  repairDropClip: {fileID: 8300000, guid: 30d32c81327c50d41a591a08f5216e88, type: 3}
+  repairSeatClip: {fileID: 8300000, guid: fb59e81ea10b83a4cac90e44e57fca89, type: 3}
   repairPlacedPlankPrefab: {fileID: 5825006792438271029, guid: 119a16d83c93af44c889849705868eb8, type: 3}
   repairNailPrefab: {fileID: 236114339887868848, guid: 29762a197f18a1647bdb8e063616217e, type: 3}
   firstPersonArmsPrefab: {fileID: 2943060407666905239, guid: d3f2d4572f313eb489fcd061ac5a3eb0, type: 3}

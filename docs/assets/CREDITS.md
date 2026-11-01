@@ -12,7 +12,7 @@ Konum: `Assets/DeepDive/Art/MegaKit/`. `Models/` kaynak FBX'ler (176), `Textures
 
 ## Yerel üretim — tamir alanı seti — 26 Ekim 2026
 
-`Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
+`Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Kaldırma/yerleştirme/bırakma sesleri (`Art/RepairTools/OakPlank*.wav`) `Assets/Editor/P48RepairAudioBuilder.cs` ile sentezlendi; kayıt, örnek veya indirme yoktur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
 
 ## Kullanıcının sağladığı Quaternius FBX paketleri — 18 Ekim 2026
 
@@ -21,6 +21,12 @@ Konum: `Assets/DeepDive/Art/MegaKit/`. `Models/` kaynak FBX'ler (176), `Textures
 - `FBX-20261017T212537Z-1-001.zip`: [Ultimate House Interior](https://quaternius.com/packs/ultimatehomeinterior.html), ev eşyaları. İçindeki tekrar balık ZIP'i kullanılmadı.
 
 Üç resmî Quaternius paket sayfasındaki **CC0** kaydı 18 Ekim 2026'da okundu. Kaynak FBX'ler `Assets/DeepDive/Art/Supplied/`, yerel URP materyalleri ve metreye uyarlanmış prefablar `Assets/DeepDive/Art/Resources/SuppliedKit/` içindedir; model dosyaları Git LFS'tedir. Arşivlerde harici atlas dokuları yoktur; FBX materyal renkleri URP'ye taşındı, eksik atlas varmış gibi davranılmadı. Levrek için CoralGrouper modeli geçici görsel vekildir; bunun yeni biyolojik tür kabulü olduğu iddia edilmez. Tuna ve RedSnapper kendi kimlikleriyle oyundadır. Atıf zorunlu olmamakla birlikte Quaternius'a teşekkürler.
+
+## Kullanıcının Quaternius Pirate Kit paketi (kıyı seti) — 30 Ekim 2026
+
+Kaynak: kullanıcının depo dışında sağladığı `Pirate Kit - Nov 2023-20261016T191140Z-1-001.zip` (dosya adındaki damga 16 Ekim 2026; 18 Ekim 2026 kararıyla kıyı parçaları için seçildi), [resmî paket sayfası](https://quaternius.com/packs/piratekit.html). Sayfada 30 Ekim 2026'da okundu: **CC0**, 71 model, FBX/OBJ/Blend/glTF, ücretsiz. ZIP'in içinde lisans dosyası yoktur; CC0 kaydı yalnız resmî sayfaya dayanır. Atıf zorunlu değil; Quaternius'a teşekkürler.
+
+Depoya yalnız 16 kıyı parçası ve atlas dokusu alındı: `Assets/DeepDive/Art/Supplied/PirateKit/` (`Models/` 16 FBX, `Textures/Atlas_Pirate.png`; model ve doku Git LFS'te). URP atlas malzemesi, importer eşlemesi ve metre ölçekli prefablar (`Assets/DeepDive/Art/Resources/ShoreKit/`) kodla üretilir: `Assets/Editor/P47ShoreKitSetup.cs`. Karakter, silah, gemi, ev ve diğer 55 model alınmadı. Stil notu: Pirate Kit düz renk atlaslıdır, ev cephesi için seçilen MegaKit dokuludur; yan yana uyum #211 birleşince ayrıca değerlendirilir. Ayrıntı: [P47-SHORE-KIT-20261030.md](../reports/P47-SHORE-KIT-20261030.md).
 
 ## Kullanıcının Tripo motorbotu — 18 Ekim 2026
 

@@ -56,6 +56,10 @@ namespace DeepDive.P1.Lab
             public bool runnerAbortReceived, injectedFailure;
             public bool equipmentLoweredSeen,equipmentRaisedSeen,equipmentCancelled,unownedCameraRefused;
             public int equipmentVideoFrames;
+            public int actionVideoFrames,actionCollects,actionDeliveries,actionBoards,actionExits;
+            public int actionKinds;
+            public int actionVisibleKinds;
+            public bool actionProps,actionSeatedEye,actionStandingEye;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
             public int oceanBands, oceanVideoFrames;
             public string oceanGpu="";
@@ -88,6 +92,7 @@ namespace DeepDive.P1.Lab
 
         private bool Host => report.slot == 0;
         private bool repairApproach, repairAtDock, repairExit;
+        private bool repairRackRoute,repairRackReached;
         private bool RepairOnly => Arg("-p187-repair-only") == "1";
         // #188: catch and sell first, repair afterwards in the same day (the repair must not gate the first catch).
         private bool HuntFirst => Arg("-p188-hunt-first") == "1";
@@ -220,7 +225,11 @@ namespace DeepDive.P1.Lab
                 }
             }
             if (!localDone) Tick();
-            else if (step != 14) Stop();
+            else if (step != 14)
+            {
+                if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
+                else if(ActionVideo)HoldActionView();else Stop();
+            }
             if (Host) AdvanceHost();
         }
         private void LateUpdate()
@@ -231,6 +240,7 @@ namespace DeepDive.P1.Lab
             CaptureRepairVideo();
             CaptureEquipmentVideo();
             CaptureOceanVideo();
+            CaptureActionVideo();
         }
         private void Broadcast(float now)
         {
@@ -334,7 +344,7 @@ namespace DeepDive.P1.Lab
                     CollectParts(); break;
                 case 2: case 5:
                     if(step==2 && OceanVideo && !OceanSurvey())return;
-                    if (!Host) { WaitInWater(); return; }
+                    if (!Host) { if(ActionVideo)ActionObserver();else WaitInWater(); return; }
                     Hunt(); break;
                 case 3: case 6: case 9:
                     if (route == null) SetRoute(new[] { P(-6.5f, -11.2f), P(0f, -12.5f), P(9f, -12.5f),
@@ -343,7 +353,7 @@ namespace DeepDive.P1.Lab
                     if (!local.GetComponent<InventoryPlayerSync>().SafelyReturned.Value) return;
                     localDone = !local.Swimming.Value; break;
                 case 4: case 7:
-                    if (!Host) { localDone = true; return; }
+                    if (!Host) { if(ActionVideo)ActionSaleObserver();else localDone = true; return; }
                     SellAndBuy(); break;
                 case 8:
                     if (!Host) { if(EquipmentVideo)EquipmentObserver();else WaitInWater(); return; }
@@ -351,7 +361,9 @@ namespace DeepDive.P1.Lab
                 case 10: TripOut(); break;
                 case 11:
                     Stop();
+                    if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
                     if (trip.IsSeated) { Act(trip.RequestDisembarkLocal); return; }
+                    if(ActionVideo && local.GetComponent<PlayerActionView>().ActiveKind==PlayerVisualAction.Disembark)return;
                     localDone = true; break;
                 case 12: TripBack(); break;
                 case 13: HomePc(); break;
@@ -406,7 +418,7 @@ namespace DeepDive.P1.Lab
                 Aim(site.SlotPosition(part));
                 if (!Settled()) return;
                 if(RepairOnly && !cancelSent && !local.RepairPlaced.Value)
-                { Act(()=>{cancelSent=true;local.SubmitRepairCancelLocal();}); return; }
+                { Act(()=>{cancelSent=true;repairRackRoute=repairRackReached=false;local.SubmitRepairCancelLocal();}); return; }
                 if(cancelObserved)report.cancelRecovered=true;
                 if (!local.RepairPlaced.Value) Act(local.SubmitPickupLocal);
                 else
@@ -420,6 +432,31 @@ namespace DeepDive.P1.Lab
             }
             if(site!=null && (sync.BoatMaterialsMask.Value&(1<<part))!=0)
             {
+                // R03's first work point is behind the north half of the stern. Returning
+                // to the rack through the narrow north rim can fall onto the ramp; walk
+                // back behind the stern, then along the same dry south lane used by the crew.
+                if(site.OnCradle && part==0 && !repairRackReached &&
+                    WorldAnchors.TryGetPose(RepairAnchorIds.Cradle,out var cradle))
+                {
+                    if(!repairRackRoute)
+                    {
+                        BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat,out var hull);
+                        var south=hull.Width*.5f+BoatRepairNetworkBinding.RoutePad;
+                        var west=-hull.Length*.5f-BoatRepairNetworkBinding.RoutePad;
+                        var start=Quaternion.Inverse(cradle.rotation)*(local.transform.position-cradle.position);
+                        var rackGoal=site.RackPosition(0)+Vector3.right*.65f;rackGoal.y=ContinuousTownLayout.WalkSurfaceY;
+                        var path=new List<Vector3>();
+                        Vector3 Ground(Vector3 p){var world=cradle.position+cradle.rotation*p;return P(world.x,world.z);}
+                        if(start.z < -hull.Length*.5f)
+                        {path.Add(Ground(new Vector3(start.x,0,west)));path.Add(Ground(new Vector3(south,0,west)));}
+                        else path.AddRange(site.RouteAround(local.transform.position,Ground(new Vector3(south,0,start.z))));
+                        var rackLocal=Quaternion.Inverse(cradle.rotation)*(rackGoal-cradle.position);
+                        path.Add(Ground(new Vector3(south,0,rackLocal.z)));path.Add(rackGoal);
+                        SetRoute(path);repairRackRoute=true;
+                    }
+                    if(!Follow())return;
+                    repairRackReached=true;repairAtDock=true;repairApproach=false;route=null;
+                }
                 if(cancelSent)cancelObserved=true;
                 if(!repairAtDock)
                 {
@@ -477,12 +514,25 @@ namespace DeepDive.P1.Lab
         }
         private void Hunt()
         {
+            if(ActionVideo)
+            {
+                var actionView=local.GetComponent<PlayerActionView>();
+                if(actionView!=null&&actionView.ActiveKind==PlayerVisualAction.Collect)
+                {Stop();Aim(actionView.ActionFocus);return;}
+            }
             var inventory = adapter.GetComponent<InventoryManager>();
             if (inventory.Bags.TryGetValue(new PlayerId(0), out var bag) && bag.Items.Count > 0)
             { HoldForShore(); return; }
             if (substep == 0)
             {
-                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
+                if (route == null)
+                {
+                    var approach=new List<Vector3>{P(9f,-12.5f),P(-6.5f,-11.2f),new Vector3(-6.5f,6f,-5f)};
+                    // Cross the wade's north toe before descending to a catch. CI's ordinary
+                    // two-player hunt hit the same solid fill as the video crew's first run.
+                    approach.Add(new Vector3(-6.5f,6f,0));approach.Add(new Vector3(-6.5f,4f,2));
+                    SetRoute(approach);
+                }
                 if (!Follow(true)) return;
                 substep = 1;
             }
@@ -500,6 +550,17 @@ namespace DeepDive.P1.Lab
                     $"available={fish?.GetComponent<CatchObject>().IsAvailable} eye={eye} " +
                     $"lastAction={local.LastActionRequestId.Value}/{local.LastActionResult.Value} " +
                     $"swimming={local.Swimming.Value} passive={local.Passive.Value}");
+                if(ActionVideo && fish==null)
+                {
+                    var nearest=FindObjectsByType<CatchObject>(FindObjectsSortMode.None).Where(c=>c.IsSpawned&&c.IsAvailable)
+                        .OrderBy(c=>(c.transform.position-eye).sqrMagnitude).FirstOrDefault();
+                    if(nearest!=null)
+                    {
+                        var center=nearest.GetComponent<Collider>().bounds.center;
+                        Physics.Linecast(eye,center,out var obstruction,~0,QueryTriggerInteraction.Ignore);
+                        Debug.Log($"P49_HUNT_BLOCKER catch={nearest.name} target={center} blocker={obstruction.collider?.name} hit={obstruction.point}");
+                    }
+                }
             }
             if (fish == null) { Stop(); return; }
             local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
@@ -516,6 +577,11 @@ namespace DeepDive.P1.Lab
                 MoveToward(stand); aimAt = 0; return;
             }
             Aim(target);
+            if(ActionVideo && available && delta.magnitude<=2.2f)
+            {
+                var observer=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&!p.IsOwner);
+                if(observer==null || Vector3.Distance(observer.transform.position,local.transform.position+new Vector3(3,0,2))>1.2f)return;
+            }
             if (Settled())
             {
                 if (available) Act(local.SubmitPickupLocal);
@@ -524,6 +590,8 @@ namespace DeepDive.P1.Lab
         }
         private void SellAndBuy()
         {
+            if(ActionVideo && local.GetComponent<PlayerActionView>()?.ActiveKind==PlayerVisualAction.Deliver)
+            {Aim(local.GetComponent<PlayerActionView>().ActionFocus);return;}
             var economy = adapter.GetComponent<EconomyManager>();
             if (substep == 0)
             {
@@ -622,6 +690,7 @@ namespace DeepDive.P1.Lab
                 substep = 1;
             }
             Stop();
+            if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
             var phase = (BoatTripPhase)trip.Phase.Value;
             if (!trip.IsSeated) { Act(trip.RequestBoardNearestLocal); return; }
             if (trip.SeatedCount.Value < expected) return;
@@ -631,6 +700,7 @@ namespace DeepDive.P1.Lab
         private void TripBack()
         {
             Stop();
+            if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
             var phase = (BoatTripPhase)trip.Phase.Value;
             if (phase == BoatTripPhase.Anchored)
             {
@@ -641,6 +711,7 @@ namespace DeepDive.P1.Lab
             if (phase == BoatTripPhase.Docked && report.tripPhases.Contains("Inbound"))
             {
                 if (trip.IsSeated) { Act(trip.RequestDisembarkLocal); return; }
+                if(ActionVideo && local.GetComponent<PlayerActionView>().ActiveKind==PlayerVisualAction.Disembark)return;
                 localDone = trip.SeatedCount.Value == 0;
             }
         }
@@ -970,6 +1041,15 @@ namespace DeepDive.P1.Lab
                 if(!equipmentOk && report.errors.Count==0)
                 {report.failure="Equipment transition/cancel/refusal visual proof missing";report.errors.Add(report.failure);}
                 report.passed &= equipmentOk;
+            }
+            if(ActionVideo && !report.reload)
+            {
+                var actionsOk=report.actionProps && report.actionCollects==2 && report.actionDeliveries==2 &&
+                    report.actionBoards>=2 && report.actionExits>=2 && report.actionKinds==15 && (Host||report.actionVisibleKinds==15) && report.actionVideoFrames>=30 &&
+                    report.actionSeatedEye && report.actionStandingEye;
+                if(!actionsOk && report.errors.Count==0)
+                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds}/{report.actionVisibleKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye}";report.errors.Add(report.failure);}
+                report.passed &= actionsOk;
             }
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;
             report.motionSamples=motionHistory.ToList();

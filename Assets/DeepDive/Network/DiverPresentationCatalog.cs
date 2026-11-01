@@ -17,11 +17,17 @@ namespace DeepDive.Network
         [SerializeField] private GameObject repairPlankPrefab;
         [SerializeField] private GameObject repairHatchetPrefab;
         [SerializeField] private AudioClip repairImpactClip;
+        [SerializeField] private AudioClip repairLiftClip;
+        [SerializeField] private AudioClip repairDropClip;
+        [SerializeField] private AudioClip repairSeatClip;
         [SerializeField] private GameObject repairPlacedPlankPrefab;
         [SerializeField] private GameObject repairNailPrefab;
         public GameObject RepairPlankPrefab => ExistingOrNull(repairPlankPrefab);
         public GameObject RepairHatchetPrefab => ExistingOrNull(repairHatchetPrefab);
         public AudioClip RepairImpactClip => repairImpactClip ? repairImpactClip : null;
+        public AudioClip RepairLiftClip => repairLiftClip ? repairLiftClip : null;
+        public AudioClip RepairDropClip => repairDropClip ? repairDropClip : null;
+        public AudioClip RepairSeatClip => repairSeatClip ? repairSeatClip : null;
         public GameObject RepairPlacedPlankPrefab => ExistingOrNull(repairPlacedPlankPrefab);
         public GameObject RepairNailPrefab => ExistingOrNull(repairNailPrefab);
 

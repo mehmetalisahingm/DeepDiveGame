@@ -39,8 +39,9 @@ namespace DeepDive.Network
         }
         private float equipmentLowering;
         private float waterLift;
-        public void Present(PlayerPresentationState value, float normalizedSpeed,float lowering=0,float surfaceLift=0)
-        { state = value; speed = Mathf.Clamp01(normalizedSpeed);equipmentLowering=Mathf.Clamp01(lowering);waterLift=surfaceLift; }
+        private bool boatSeated;
+        public void Present(PlayerPresentationState value, float normalizedSpeed,float lowering=0,float surfaceLift=0,bool sittingInBoat=false)
+        { state = value; speed = Mathf.Clamp01(normalizedSpeed);equipmentLowering=Mathf.Clamp01(lowering);waterLift=surfaceLift;boatSeated=sittingInBoat; }
 
         public void PresentRepair(Vector3 left, Vector3 right, Quaternion rotation)
         {PresentRepair(left,right,rotation,rotation,true);}
@@ -107,6 +108,16 @@ namespace DeepDive.Network
             Model.localRotation = rotation;
             Model.localPosition = underwater ? new Vector3(0, 0.9f, 0) - rotation * new Vector3(0, 0.9f, 0) : Vector3.zero;
             if(!FirstPerson)Model.localPosition+=Vector3.up*waterLift;
+            if(boatSeated && !FirstPerson)
+            {
+                Model.localPosition=Vector3.up*NetworkPlayer.BoatSeatedVisualOffset;
+                Aim(leftLeg,leftKnee,new Vector3(-.12f,-.18f,.9f));
+                Aim(rightLeg,rightKnee,new Vector3(.12f,-.18f,.9f));
+                Aim(leftKnee,leftFoot,new Vector3(0,-1,.08f));
+                Aim(rightKnee,rightFoot,new Vector3(0,-1,.08f));
+                Hold(leftArm,leftElbow,leftHand,new Vector3(-.23f,.93f,.38f),-1);
+                Hold(rightArm,rightElbow,rightHand,new Vector3(.23f,.93f,.38f),1);
+            }
             if (swimming)
             {
                 var kick = Mathf.Sin(cycle) * Mathf.Lerp(0.10f, 0.40f, speed);
