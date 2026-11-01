@@ -35,7 +35,7 @@ namespace DeepDive.P1.Lab
                 if(route==null)SetRoute(new[]{P(9,-12.5f),P(-5.5f,-11.2f),new Vector3(-5.5f,6,-5),new Vector3(-5.5f,6,0),new Vector3(-5.5f,4,2)});
                 if(!Follow(true))return;actionObserverEntered=true;
             }
-            var offset=new Vector3(3,0,2);var target=worker.transform.position+offset;
+            var offset=new Vector3(3+Mathf.Max(0,report.slot-1)*1.2f,0,2);var target=worker.transform.position+offset;
             if(Vector3.Distance(local.transform.position,target)>1.1f)
             {MoveWatching(target,worker.GetComponent<PlayerActionView>().ActionFocus);return;}
             Stop();Aim(worker.GetComponent<PlayerActionView>()?.ActionFocus??worker.transform.position+Vector3.up*.95f);
@@ -46,7 +46,7 @@ namespace DeepDive.P1.Lab
         {
             actionObserverEntered=false;
             var anchor=FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a=>a.Definition.ServiceId==TownServiceCatalog.FishBuyerId);
-            var target=anchor.WorldPosition+anchor.transform.forward*2.25f+anchor.transform.right*1.8f;
+            var target=anchor.WorldPosition+anchor.transform.forward*2.25f+anchor.transform.right*(1.8f+Mathf.Max(0,report.slot-1)*1.2f);
             var delta=target-local.transform.position;delta.y=0;
             if(delta.magnitude>.25f){MoveToward(Around(CoastTarget(target)));return;}
             var worker=ActionWorker;if(worker==null)return;
@@ -61,6 +61,27 @@ namespace DeepDive.P1.Lab
             var view=worker.GetComponent<PlayerActionView>();if(view==null)return;
             report.actionCollects=view.CollectCount;report.actionDeliveries=view.DeliveryCount;
             report.actionBoards=view.BoardCount;report.actionExits=view.ExitCount;report.actionProps|=view.AuthoredProps;
+            if(view.ActiveKind==PlayerVisualAction.None && view.Satchel!=null && view.SatchelHip!=null)
+            {
+                var expected=PlayerActionView.StowedSatchelPose(view.SatchelHip,worker.VisualBoatSeated);
+                report.maxSatchelError=Mathf.Max(report.maxSatchelError,Vector3.Distance(expected.position,view.Satchel.position));
+                var mode=worker.VisualBoatSeated?8:1<<(int)worker.CurrentLocomotion;
+                report.satchelPoses|=mode;
+                if(!Host && !File.Exists(output+".satchel-"+mode+".png"))
+                {
+                    var satchelCamera=local.GetComponentInChildren<Camera>(true);
+                    if(InView(satchelCamera.WorldToViewportPoint(view.Satchel.position)))CaptureView(".satchel-"+mode+".png");
+                }
+            }
+            if(view.ContactExpected)
+            {
+                var error=Host?view.OwnerGripError:view.BodyGripError;
+                report.maxActionGripError=Mathf.Max(report.maxActionGripError,error);
+                // Require both palms in the actual camera view, not just small IK error off screen.
+                var lens=local.GetComponentInChildren<Camera>(true);
+                var left=lens.WorldToViewportPoint(view.LeftGripPosition);var right=lens.WorldToViewportPoint(view.RightGripPosition);
+                if(error<.035f && InView(left)&&InView(right))report.contactKinds|=1<<((int)view.ActiveKind-1);
+            }
             if(worker.VisualBoatSeated)
                 report.actionSeatedEye|=Mathf.Abs(worker.RecordingEyePosition.y-worker.transform.position.y-1.55f-NetworkPlayer.BoatSeatedVisualOffset)<.07f;
             else if(report.actionSeatedEye && !worker.Seated.Value)
@@ -79,7 +100,10 @@ namespace DeepDive.P1.Lab
             CaptureView(".action-frames/"+actionFrame.ToString("D5")+".png");
             File.AppendAllText(Path.Combine(folder,"frames.csv"),System.FormattableString.Invariant(
                 $"{actionFrame},{Time.realtimeSinceStartup:F4},{(int)view.ActiveKind},{view.ActionAge:F4},{worker.VisualBoatSeated},{worker.OwnerClientId}\n"));
+            File.AppendAllText(Path.Combine(folder,"contact.csv"),System.FormattableString.Invariant(
+                $"{actionFrame},{view.ContactExpected},{view.BodyGripError:F5},{view.OwnerGripError:F5},{view.LeftGripPosition},{view.RightGripPosition}\n"));
             actionFrame++;report.actionVideoFrames=actionFrame;
         }
+        private static bool InView(Vector3 point)=>point.z>0&&point.x>.02f&&point.x<.98f&&point.y>.02f&&point.y<.98f;
     }
 }

@@ -60,6 +60,8 @@ namespace DeepDive.P1.Lab
             public int actionKinds;
             public int actionVisibleKinds;
             public bool actionProps,actionSeatedEye,actionStandingEye;
+            public int contactKinds,satchelPoses;
+            public float maxActionGripError,maxSatchelError;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
             public int oceanBands, oceanVideoFrames;
             public string oceanGpu="";
@@ -577,9 +579,11 @@ namespace DeepDive.P1.Lab
                 MoveToward(stand); aimAt = 0; return;
             }
             Aim(target);
-            if(ActionVideo && available && delta.magnitude<=2.2f)
+            if(ActionVideo && expected>1 && available && delta.magnitude<=2.2f)
             {
-                var observer=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&!p.IsOwner);
+                // Slot 1 owns this camera mark. Spawn enumeration order is not a player identity;
+                // slots 2/3 deliberately stand elsewhere, and solo has no camera crew to wait for.
+                var observer=FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&p.OwnerClientId==1);
                 if(observer==null || Vector3.Distance(observer.transform.position,local.transform.position+new Vector3(3,0,2))>1.2f)return;
             }
             if (Settled())
@@ -684,10 +688,17 @@ namespace DeepDive.P1.Lab
         {
             if (substep == 0)
             {
+                // B is a real proximity-checked request. Do not wait for a centimetre-perfect
+                // water/shore waypoint once the host already accepts boarding from this side.
+                if(trip.IsSeated){substep=1;route=null;}
+                else
+                {
                 if (route == null) SetRoute(new[] { P(9f, -12.5f), P(9f, -9f),
-                    P(8.6f + (report.slot % 2) * 0.8f, -3.6f) });
+                    P(expected==4 ? 8.1f+report.slot*.8f : 8.6f+(report.slot%2)*.8f, -3.6f) });
+                if(waypoint>=2)Act(trip.RequestBoardNearestLocal);
                 if (!Follow()) return;
                 substep = 1;
+                }
             }
             Stop();
             if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
@@ -1046,9 +1057,9 @@ namespace DeepDive.P1.Lab
             {
                 var actionsOk=report.actionProps && report.actionCollects==2 && report.actionDeliveries==2 &&
                     report.actionBoards>=2 && report.actionExits>=2 && report.actionKinds==15 && (Host||report.actionVisibleKinds==15) && report.actionVideoFrames>=30 &&
-                    report.actionSeatedEye && report.actionStandingEye;
+                    report.actionSeatedEye && report.actionStandingEye && report.contactKinds==3 && report.maxActionGripError<.035f && report.maxSatchelError<.005f;
                 if(!actionsOk && report.errors.Count==0)
-                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds}/{report.actionVisibleKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye}";report.errors.Add(report.failure);}
+                {report.failure=$"Action proof missing collect={report.actionCollects} delivery={report.actionDeliveries} board={report.actionBoards} exit={report.actionExits} kinds={report.actionKinds}/{report.actionVisibleKinds} frames={report.actionVideoFrames} eye={report.actionSeatedEye}/{report.actionStandingEye} contact={report.contactKinds}/{report.maxActionGripError} satchel={report.satchelPoses}/{report.maxSatchelError}";report.errors.Add(report.failure);}
                 report.passed &= actionsOk;
             }
             report.observedCarry=sawCarry;report.observedPlaced=sawPlaced;

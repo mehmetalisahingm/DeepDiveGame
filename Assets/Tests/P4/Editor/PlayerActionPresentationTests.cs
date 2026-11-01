@@ -5,13 +5,88 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEditor;
+using System.Reflection;
 
 namespace DeepDive.P4.Tests
 {
     public sealed class PlayerActionPresentationTests
     {
+        [TestCase("CoastalDiver",false)] [TestCase("CoastalArms",false)]
+        [TestCase("CoastalDiver",true)] [TestCase("CoastalArms",true)]
+        public void RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(string name,bool swimming)
+        {
+            var rig=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/DeepDive/Player/Character/"+name+".prefab"));
+            var bag=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.BagResource));
+            var crate=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.CrateResource));
+            try
+            {
+                var pose=rig.GetComponent<CoastalDiverPose>();
+                typeof(CoastalDiverPose).GetMethod("Awake",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(pose,null);
+                var frame=pose.Model;
+                frame.rotation=Quaternion.Euler(swimming?78:0,35,0);
+                var rootBefore=rig.transform.position;
+                bag.transform.SetPositionAndRotation(frame.TransformPoint(new Vector3(0,.87f,.32f)),frame.rotation);
+                crate.transform.SetPositionAndRotation(frame.TransformPoint(new Vector3(0,1.30f,.26f)),frame.rotation);
+                foreach(var prop in new[]{bag,crate})
+                {
+                    var left=prop.transform.Find("Grip_Left");var right=prop.transform.Find("Grip_Right");
+                    pose.PresentRepair(left.position,right.position,left.rotation,right.rotation,true);
+                    Assert.That(Vector3.Distance(pose.RepairLeftPalmPosition,left.position),Is.LessThan(.025f),prop.name+" left");
+                    Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,right.position),Is.LessThan(.025f),prop.name+" right");
+                }
+                var fish=frame.TransformPoint(new Vector3(.135f,1.3f,.43f));
+                pose.PresentRepair(bag.transform.Find("Grip_Left").position,fish,frame.rotation,frame.rotation,true);
+                Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,fish),Is.LessThan(.025f),"fish");
+                Assert.That(rig.transform.position,Is.EqualTo(rootBefore));
+            }
+            finally {Object.DestroyImmediate(rig);Object.DestroyImmediate(bag);Object.DestroyImmediate(crate);}
+        }
+        [Test] public void StowedSatchelUsesMetresAndTracksThePosedHipDespiteImportScale()
+        {
+            var hip=new GameObject("Imported hip");
+            try
+            {
+                hip.transform.localScale=Vector3.one*100;
+                foreach(var pitch in new[]{0f,78f,-8f})
+                {
+                    hip.transform.SetPositionAndRotation(new Vector3(2,3,4),Quaternion.Euler(pitch,30,0));
+                    var pose=PlayerActionView.StowedSatchelPose(hip.transform);
+                    Assert.That(Vector3.Distance(pose.position,hip.transform.position),Is.InRange(.44f,.49f));
+                    Assert.That(Quaternion.Angle(pose.rotation,hip.transform.rotation),Is.LessThan(.001f));
+                }
+            }
+            finally {Object.DestroyImmediate(hip);}
+        }
         private static PlayerActionMessage Accepted()=>new PlayerActionMessage{PlayerObject=18,Sequence=1,At=10,
             Kind=PlayerVisualAction.Collect,Source=new Vector3(2,3,4),Species=new FixedString64Bytes("tuna"),Count=1};
+        [Test] public void SeatedSatchelClearsBothActualBenchRowsForEveryStableSeat()
+        {
+            var rig=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/DeepDive/Player/Character/CoastalDiver.prefab"));
+            var bag=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.BagResource));
+            try
+            {
+                var pose=rig.GetComponent<CoastalDiverPose>();
+                typeof(CoastalDiverPose).GetMethod("Awake",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(pose,null);
+                foreach(var seat in BoatSeatLayoutRules.SeatIds)
+                {
+                    BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat,seat,out var offset);rig.transform.position=offset;
+                    pose.Present(new PlayerPresentationState(LocomotionMode.Seated,HeldEquipmentMode.None,false),0,0,0,true);
+                    typeof(CoastalDiverPose).GetMethod("LateUpdate",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(pose,null);
+                    var target=PlayerActionView.StowedSatchelPose(pose.Hip,true);
+                    bag.transform.SetPositionAndRotation(target.position,target.rotation);
+                    var renderers=bag.GetComponentsInChildren<Renderer>();var bounds=renderers[0].bounds;
+                    foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+                    foreach(var row in new[]{BoatSeatLayoutRules.SeatIds[0],BoatSeatLayoutRules.SeatIds[2]})
+                    {
+                        BoatHullSeatRules.TryResolveLocalOffset(BoatHullKind.Rowboat,row,out var center);
+                        var bench=new Bounds(new Vector3(0,.63f,center.z),new Vector3(1.9f,.08f,.502f));
+                        Assert.That(bounds.Intersects(bench),Is.False,$"{seat}: satchel {bounds} crosses bench {bench}");
+                    }
+                }
+            }
+            finally {Object.DestroyImmediate(bag);Object.DestroyImmediate(rig);}
+        }
         [Test] public void ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence()
         {
             var gate=new PlayerActionReceipt();var message=Accepted();

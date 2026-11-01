@@ -29,6 +29,7 @@ namespace DeepDive.P1.Lab
             public string position, phase;
             public string bedRay="",bedAnswer="";
             public float bedDistance;
+            public int bedAttempts;
             public bool inBed;
             public List<string> trace = new List<string>(), errors = new List<string>();
         }
@@ -40,7 +41,7 @@ namespace DeepDive.P1.Lab
         private NetworkPlayer local;
         private int expected, slot, step, waypoint, firstDay;
         private string output;
-        private float deadline, nextReport, waitUntil, aimAt, nextTrace;
+        private float deadline, nextReport, waitUntil, aimAt, nextTrace, nextBedRetry;
         private Vector3 previous;
         private bool tracking, finished, leaving;
         private List<Vector3> route;
@@ -88,7 +89,7 @@ namespace DeepDive.P1.Lab
         {
             if (finished || adapter == null) return;
             if (Time.realtimeSinceStartup > deadline)
-            { Fail($"Timed out at step {step} waypoint {waypoint} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed}"); return; }
+            { Fail($"Timed out at step {step} waypoint {waypoint} position={local?.transform.position} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
             if (leaving)
             {
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
@@ -211,12 +212,27 @@ namespace DeepDive.P1.Lab
                         // The exit row is also the waiting sleepers' eye-to-bed ray.
                         // Walk the lane south of it, then turn north at one's own bed
                         // (the already exercised product-day HuntFirst approach).
-                        SetRoute(new[] { H(4.95f,-2.5f),new Vector3(H(4.95f,0).x,exit.y,exit.z-.9f),
-                            exit-Vector3.forward*.9f,exit });
+                        // Four players use independent bed approaches. The return step finishes
+                        // at distinct southern home slots, and sending everyone through
+                        // the shared east corridor caused physical body blocking in CI.
+                        // Keep the proven one/two-player route untouched.
+                        if (expected == 4)
+                            SetRoute(new[] { H(2f + slot * .8f, -2.4f),
+                                new Vector3(exit.x, exit.y, exit.z - .9f), exit });
+                        else
+                            SetRoute(new[] { H(4.95f, -2.5f),
+                                new Vector3(H(4.95f, 0).x, exit.y, exit.z - .9f),
+                                exit - Vector3.forward * .9f, exit });
+                        // Four bodies converging on the identical narrow corridor waypoint
+                        // can physically block one another. Stage bed approaches from the
+                        // already-authored distinct return slots; keep real movement/raycast.
+                        // Solo and two-player acceptance retain their existing timing.
+                        waitUntil = Time.realtimeSinceStartup + (expected == 4 ? slot * 6f : 0f);
                         SetStep(7);
                     }
                     break;
                 case 7:
+                    if (Time.realtimeSinceStartup < waitUntil) { Stop(); return; }
                     if (!Follow()) { aimAt=0; return; }
                     Aim(Bed().GetComponent<Collider>().bounds.center);
                     if (aimAt == 0) aimAt = Time.realtimeSinceStartup + 0.8f;
@@ -229,11 +245,27 @@ namespace DeepDive.P1.Lab
                     HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(),"");
                     typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
                         .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                    report.bedAttempts++;
+                    nextBedRetry = Time.realtimeSinceStartup + 1.25f;
                     SetStep(8); break;
                 case 8:
                     report.inBed=local.Seated.Value;
                     var bedAnswer=HomeStatusField.GetValue(adapter.GetComponent<HomePlayerInteractionBinding>()) as string;
                     if(!string.IsNullOrEmpty(bedAnswer))report.bedAnswer=bedAnswer;
+                    // A first H request can be rejected while the host is still receiving
+                    // the owner's view direction. Re-aim and issue a NEW genuine H request
+                    // only for InvalidTarget, never fake sleep or bypass the server ray.
+                    // The existing overall deadline still bounds every retry.
+                    if (!local.Seated.Value && bedAnswer == "ETKILESIM HEDEFI YOK" &&
+                        Time.realtimeSinceStartup >= nextBedRetry)
+                    {
+                        Aim(Bed().GetComponent<Collider>().bounds.center);
+                        HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(), "");
+                        typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
+                            .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                        report.bedAttempts++;
+                        nextBedRetry = Time.realtimeSinceStartup + 1.25f;
+                    }
                     report.slept |= local.Seated.Value || HomePlayerInteractionBinding.TryGetBed(local.OwnerClientId, out _);
                     // The last/solo H request can synchronously complete the morning before the
                     // next frame. The authoritative early-sleep summary proves that acceptance.

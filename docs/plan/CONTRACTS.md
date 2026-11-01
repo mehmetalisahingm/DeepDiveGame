@@ -432,6 +432,8 @@ Kullanıcı Mehmet'in kalan işlerini ve ek görsel ayrıntıları uygulamayı i
 
 Tekne sunumu mevcut `BoatTripPlayerSync.MySeatId` aynasından sürülür; ilk spawn/late join oturmuşsa eski binme animasyonu tekrarlanmaz. Yatakta kullanılan genel `Seated` tek başına tekne pozu başlatmaz. Tekne oturuşunda beden ve göz -0.52 m görsel offset alır; root/koltuk/rota değişmez ve etkileşim ışını aynı gerçek göz noktasını kullanır. Eldeki torba/kasa ve kabul edilmiş av kopyası collider/NetworkObject taşımaz. Kayıt, tamir, pasiflik veya ekipman değişimi görsel toparlanmayı keser; giriş/hareket/ekonomi animasyonu beklemez. Ses ve son insan/ayrı PC kabulü #164'te kalır.
 
+1 Kasım #220: kalıcı torba gerçek pozlanmış kalça kemiğine metre cinsinden bağlanır; oturuşta bankonun önünde asılır. Görsel askı ve birinci/üçüncü şahıs avuç IK'sı aynı pozlanmış beden çerçevesini tüketir. Faz değişimi ve disable/despawn eski eşyayı ve binme toparlanmasını temizler. Mesaj/şema/otorite sınırları yukarıdakiyle aynıdır; kalça/IK ölçümü gameplay konum yazarı değildir.
+
 [Somut öneri ve sekiz eski kayıt geçişi](P48_REPAIR_CONTRACT_PROPOSAL.md), mevcut pickup/purchase katkısından edinme–taşıma–son darbe ayrımına geçişi açıklar. R01/R02/R11 kesinleşmiş karar veya uygulanmış ürün API'si değildir. `BoatPartClaim`, `TryContributeBoatPart`, v8 kayıt ve mevcut üç teknik ID bu hazırlıkla değiştirilmez. #187 Mehmet, #188 Utku ve #189 Mert aynı dar sözleşmeyi tüketir; #141/#159 başlama ve gerçek ekip kabulü sınırları korunur.
 
 ### 18 Ekim #187 dar kullanıcı istisnası

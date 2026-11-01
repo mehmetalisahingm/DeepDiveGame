@@ -1,0 +1,67 @@
+[
+  {
+    "path": ".gitattributes",
+    "bytes": 53,
+    "sha256": "6aab71409329e9e4151f4853496ceeba453702405a68902b88032e9f1050ee30"
+  },
+  {
+    "path": "aborted-four-gpu-before-seat-fix.zip",
+    "bytes": 4070179,
+    "sha256": "eff680dec7b0e36309382c5a4c291a349d1ad911252a0fbc4e358ee41573d824"
+  },
+  {
+    "path": "editmode.xml",
+    "bytes": 1078810,
+    "sha256": "9d2295e0283525a55ca346325ca5014ddbe2c0a387c88e656dce452399fa7357"
+  },
+  {
+    "path": "final-build-manifest.json",
+    "bytes": 56913,
+    "sha256": "0d4065b1d38b658bd4baab763aa0d50b94b5380e3e1fbd8353dd374d36c22606"
+  },
+  {
+    "path": "grip-before.xml",
+    "bytes": 23991,
+    "sha256": "e7ed03f14b9d98cff6b4117233c2ef50a0e9a215d75095eac2ba82b6ef9efb1c"
+  },
+  {
+    "path": "initial-collect.png",
+    "bytes": 840095,
+    "sha256": "f99b9867fa607fb823a021b486b4926a41724bc2d0600d91bc9dc5c3131a1b3e"
+  },
+  {
+    "path": "initial-delivery.png",
+    "bytes": 301887,
+    "sha256": "f8bf923db88478ca10029301d02a66ffc4fa1626864c6406288c3d748af81510"
+  },
+  {
+    "path": "initial-observer.mp4",
+    "bytes": 1350542,
+    "sha256": "06bdb56ad4f632637e0be4dcc843a2ed7816bb3d8baa63277edf519aa932e2dc"
+  },
+  {
+    "path": "initial-observer.segments.json",
+    "bytes": 1548,
+    "sha256": "20914eaffaf67a70a867c43240bffe8f93a22d6c0c4c4dd79530f32645697c31"
+  },
+  {
+    "path": "initial-owner.mp4",
+    "bytes": 1019937,
+    "sha256": "b5eeaadd1aca0d51a86bf6381bf795171cade9a450b9c7720472b46c73527aae"
+  },
+  {
+    "path": "initial-owner.segments.json",
+    "bytes": 1550,
+    "sha256": "3d8e5b5317e5ab96540214e6893fbb7101dc8eac20df5c40dc3793e5717c2c2a"
+  },
+  {
+    "path": "initial-two-gpu.zip",
+    "bytes": 3420191,
+    "sha256": "66dc8c872403fa724bb7ed66801fd46436c75615fa18bf370d08d8bd31d99244"
+  },
+  {
+    "path": "windows-build.log",
+    "bytes": 385076,
+    "sha256": "02a33e3a3ad4f34bbc629f779ed3c6c6c3ef202e949a2e2c400d0ee2841aaee8"
+  }
+]

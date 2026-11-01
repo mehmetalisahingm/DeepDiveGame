@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="21" result="Failed(Child)" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0,6642823">
+  <test-suite type="TestSuite" id="1000" name="DeepDiveGame-P0" fullname="DeepDiveGame-P0" runstate="Runnable" testcasecount="1412" result="Failed" site="Child" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.664282" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1803" name="DeepDive.P4.Tests.dll" fullname="C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame/Library/ScriptAssemblies/DeepDive.P4.Tests.dll" runstate="Runnable" testcasecount="401" result="Failed" site="Child" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.643095" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="27732" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1804" name="DeepDive" fullname="DeepDive" runstate="Runnable" testcasecount="398" result="Failed" site="Child" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.637704" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1807" name="P4" fullname="DeepDive.P4" runstate="Runnable" testcasecount="395" result="Failed" site="Child" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.632644" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1808" name="Tests" fullname="DeepDive.P4.Tests" runstate="Runnable" testcasecount="395" result="Failed" site="Child" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.628013" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1685" name="PlayerActionPresentationTests" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" testcasecount="21" result="Failed" site="Child" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.622446" total="21" passed="17" failed="4" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-suite type="ParameterizedMethod" id="1703" name="AuthoredPropsHaveTwoGripsAndNoGameplayComponents" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.AuthoredPropsHaveTwoGripsAndNoGameplayComponents" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:01Z" duration="0.148798" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1701" name="AuthoredPropsHaveTwoGripsAndNoGameplayComponents(&quot;PlayerActions/CatchSatchel&quot;)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.AuthoredPropsHaveTwoGripsAndNoGameplayComponents(&quot;PlayerActions/CatchSatchel&quot;)" methodname="AuthoredPropsHaveTwoGripsAndNoGameplayComponents" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="727871496" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:01Z" duration="0.077527" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1702" name="AuthoredPropsHaveTwoGripsAndNoGameplayComponents(&quot;PlayerActions/FishCrate&quot;)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.AuthoredPropsHaveTwoGripsAndNoGameplayComponents(&quot;PlayerActions/FishCrate&quot;)" methodname="AuthoredPropsHaveTwoGripsAndNoGameplayComponents" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1443104818" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:01Z" duration="0.051096" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1709" name="BoatEyePresentationNeverMovesAuthoritativeRoot" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.BoatEyePresentationNeverMovesAuthoritativeRoot" methodname="BoatEyePresentationNeverMovesAuthoritativeRoot" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1361775496" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:01Z" duration="0.028220" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1707" name="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.111762" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1704" name="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(&quot;sea_bass&quot;)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(&quot;sea_bass&quot;)" methodname="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="147987278" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:01Z" duration="0.019105" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1705" name="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(&quot;tuna&quot;)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(&quot;tuna&quot;)" methodname="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="8576889" result="Passed" start-time="2026-11-01 10:07:01Z" end-time="2026-11-01 10:07:02Z" duration="0.037966" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1706" name="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(&quot;red_snapper&quot;)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(&quot;red_snapper&quot;)" methodname="CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="2109859388" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.053295" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1692" name="ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence" methodname="ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1084125900" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.003019" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1708" name="ClosedCrateHasARealMeshSurfaceOnAllSixSides" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ClosedCrateHasARealMeshSurfaceOnAllSixSides" methodname="ClosedCrateHasARealMeshSurfaceOnAllSixSides" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="2130431590" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.054984" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1700" name="EnvelopeRoundTripAndTruncationAndTrailingData" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.EnvelopeRoundTripAndTruncationAndTrailingData" methodname="EnvelopeRoundTripAndTruncationAndTrailingData" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1934412226" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.016723" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1696" name="ExpiredFutureAndNonFiniteActionsAreNotPlayed" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ExpiredFutureAndNonFiniteActionsAreNotPlayed" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.003513" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1693" name="ExpiredFutureAndNonFiniteActionsAreNotPlayed(8.0d)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ExpiredFutureAndNonFiniteActionsAreNotPlayed(8.0d)" methodname="ExpiredFutureAndNonFiniteActionsAreNotPlayed" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="332085297" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.000761" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1694" name="ExpiredFutureAndNonFiniteActionsAreNotPlayed(12.0d)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ExpiredFutureAndNonFiniteActionsAreNotPlayed(12.0d)" methodname="ExpiredFutureAndNonFiniteActionsAreNotPlayed" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="782561619" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.000257" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1695" name="ExpiredFutureAndNonFiniteActionsAreNotPlayed(double.NaN)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.ExpiredFutureAndNonFiniteActionsAreNotPlayed(double.NaN)" methodname="ExpiredFutureAndNonFiniteActionsAreNotPlayed" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="244970147" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.000117" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1697" name="InvalidPayloadDoesNotPoisonNextValidAction" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.InvalidPayloadDoesNotPoisonNextValidAction" methodname="InvalidPayloadDoesNotPoisonNextValidAction" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="584733991" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.000498" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1698" name="NewPlayerSequenceIsIndependentAndOldActionCannotReplaceNewer" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.NewPlayerSequenceIsIndependentAndOldActionCannotReplaceNewer" methodname="NewPlayerSequenceIsIndependentAndOldActionCannotReplaceNewer" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1452951284" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.000362" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1690" name="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" testcasecount="4" result="Failed" site="Child" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.191522" total="4" passed="0" failed="4" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1686" name="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalDiver&quot;,False)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalDiver&quot;,False)" methodname="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1645289973" result="Failed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.181090" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  CatchSatchel(Clone) left
+  Expected: less than 0.0250000004f
+  But was:  0.0490505658f
+]]></message>
+                    <stack-trace><![CDATA[at DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame (System.String name, System.Boolean swimming) [0x00156] in C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Assets\Tests\P4\Editor\PlayerActionPresentationTests.cs:35
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1687" name="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalArms&quot;,False)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalArms&quot;,False)" methodname="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1598264216" result="Failed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.004782" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  CatchSatchel(Clone) left
+  Expected: less than 0.0250000004f
+  But was:  0.0490505658f
+]]></message>
+                    <stack-trace><![CDATA[at DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame (System.String name, System.Boolean swimming) [0x00156] in C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Assets\Tests\P4\Editor\PlayerActionPresentationTests.cs:35
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1688" name="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalDiver&quot;,True)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalDiver&quot;,True)" methodname="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="447092862" result="Failed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.002586" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  CatchSatchel(Clone) left
+  Expected: less than 0.0250000004f
+  But was:  0.0490504988f
+]]></message>
+                    <stack-trace><![CDATA[at DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame (System.String name, System.Boolean swimming) [0x00156] in C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Assets\Tests\P4\Editor\PlayerActionPresentationTests.cs:35
+]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1689" name="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalArms&quot;,True)" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame(&quot;CoastalArms&quot;,True)" methodname="RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="594338745" result="Failed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.001673" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[  CatchSatchel(Clone) left
+  Expected: less than 0.0250000004f
+  But was:  0.0490504988f
+]]></message>
+                    <stack-trace><![CDATA[at DeepDive.P4.Tests.PlayerActionPresentationTests.RealRigReachesBagFishAndCrateGripsInWorldShoulderFrame (System.String name, System.Boolean swimming) [0x00156] in C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Assets\Tests\P4\Editor\PlayerActionPresentationTests.cs:35
+]]></stack-trace>
+                  </failure>
+                </test-case>
+              </test-suite>
+              <test-case id="1699" name="RefusedEmptyAndReplayedOldSaleNeverShowAnotherCrate" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.RefusedEmptyAndReplayedOldSaleNeverShowAnotherCrate" methodname="RefusedEmptyAndReplayedOldSaleNeverShowAnotherCrate" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="306510465" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.002782" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1691" name="StowedSatchelUsesMetresAndTracksThePosedHipDespiteImportScale" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.StowedSatchelUsesMetresAndTracksThePosedHipDespiteImportScale" methodname="StowedSatchelUsesMetresAndTracksThePosedHipDespiteImportScale" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="814001062" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.001632" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1710" name="SuppliedRowboatHasAVisibleBenchUnderAllFourStableSeats" fullname="DeepDive.P4.Tests.PlayerActionPresentationTests.SuppliedRowboatHasAVisibleBenchUnderAllFourStableSeats" methodname="SuppliedRowboatHasAVisibleBenchUnderAllFourStableSeats" classname="DeepDive.P4.Tests.PlayerActionPresentationTests" runstate="Runnable" seed="1652716357" result="Passed" start-time="2026-11-01 10:07:02Z" end-time="2026-11-01 10:07:02Z" duration="0.047823" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/mehmet/AppData/LocalLow/DeepDiveTeam/DeepDiveGame-P0\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
