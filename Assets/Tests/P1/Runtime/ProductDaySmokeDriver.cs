@@ -482,15 +482,7 @@ namespace DeepDive.P1.Lab
             { HoldForShore(); return; }
             if (substep == 0)
             {
-                if (route == null)
-                {
-                    var approach = new List<Vector3> { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) };
-                    // Follow the validated route around the wade's solid fill.
-                    // No teleport, physics or assertion bypass.
-                    approach.Add(new Vector3(-6.5f, 6f, 0));
-                    approach.Add(new Vector3(-6.5f, 4f, 2));
-                    SetRoute(approach);
-                }
+                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f), new Vector3(-6.5f, 6f, -5f) });
                 if (!Follow(true)) return;
                 substep = 1;
             }
