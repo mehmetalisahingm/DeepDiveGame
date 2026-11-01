@@ -33,6 +33,26 @@ namespace DeepDive.World.Editor
                 finally { Object.DestroyImmediate(root); }
             }
         }
+        // P4.11: prepare genuine, animated and visually distinct fish art.
+        // The official CC0 files must be in Assets/DeepDive/Art/Supplied/Fish first.
+        // Validate all three source assets BEFORE generating anything; no fake
+        // species art is silently substituted on a missing model.
+        public static void BuildFiveSpeciesArt()
+        {
+            foreach (var model in new[] { "Humphead", "CoralGrouper", "Anglerfish" })
+            {
+                var path = "Assets/DeepDive/Art/Supplied/Fish/" + model + ".fbx";
+                if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null)
+                    throw new FileNotFoundException("P411_FISH_ART_MISSING: " + path);
+            }
+            Directory.CreateDirectory(Output);
+            Directory.CreateDirectory(Output + "/Materials");
+            Make("Fish/Humphead", "SeaBass", new Vector3(.3f, .5f, 1.05f), true);
+            Make("Fish/CoralGrouper", "Grouper", new Vector3(.45f, .55f, 1.25f), true);
+            Make("Fish/Anglerfish", "Lanternfish", new Vector3(.55f, .65f, 1.20f), true);
+            AssetDatabase.SaveAssets();
+        }
+
         public static void Apply()
         {
             Directory.CreateDirectory(Output);

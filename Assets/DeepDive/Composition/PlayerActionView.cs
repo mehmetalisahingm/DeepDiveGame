@@ -77,8 +77,19 @@ namespace DeepDive.Composition
         public static string FishResource(string species)
         {
             switch(species)
-            {case "sea_bass":return "SuppliedKit/CoastalFish";case "tuna":return "SuppliedKit/Tuna";
-                case "red_snapper":return "SuppliedKit/RedSnapper";default:return null;}
+            {
+                // Legacy three-species campaigns must keep their existing visuals.
+                // New authored FBX packs can be imported without changing the
+                // network SpeciesId or falling back to a misleading fish silhouette.
+                case "sea_bass":
+                    return Resources.Load<GameObject>("SuppliedKit/SeaBass") != null
+                        ? "SuppliedKit/SeaBass" : "SuppliedKit/CoastalFish";
+                case "tuna": return "SuppliedKit/Tuna";
+                case "red_snapper": return "SuppliedKit/RedSnapper";
+                case "grouper": return "SuppliedKit/Grouper";
+                case "lanternfish": return "SuppliedKit/Lanternfish";
+                default: return null;
+            }
         }
         public void Play(PlayerActionMessage value)
         {
