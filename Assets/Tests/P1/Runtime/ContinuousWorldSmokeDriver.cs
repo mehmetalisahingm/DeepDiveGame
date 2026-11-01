@@ -29,6 +29,7 @@ namespace DeepDive.P1.Lab
             public string position, phase;
             public string bedRay="",bedAnswer="";
             public float bedDistance;
+            public int bedAttempts;
             public bool inBed;
             public List<string> trace = new List<string>(), errors = new List<string>();
         }
@@ -40,7 +41,7 @@ namespace DeepDive.P1.Lab
         private NetworkPlayer local;
         private int expected, slot, step, waypoint, firstDay;
         private string output;
-        private float deadline, nextReport, waitUntil, aimAt, nextTrace;
+        private float deadline, nextReport, waitUntil, aimAt, nextTrace, nextBedRetry;
         private Vector3 previous;
         private bool tracking, finished, leaving;
         private List<Vector3> route;
@@ -229,11 +230,27 @@ namespace DeepDive.P1.Lab
                     HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(),"");
                     typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
                         .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                    report.bedAttempts++;
+                    nextBedRetry = Time.realtimeSinceStartup + 1.25f;
                     SetStep(8); break;
                 case 8:
                     report.inBed=local.Seated.Value;
                     var bedAnswer=HomeStatusField.GetValue(adapter.GetComponent<HomePlayerInteractionBinding>()) as string;
                     if(!string.IsNullOrEmpty(bedAnswer))report.bedAnswer=bedAnswer;
+                    // A first H request can be rejected while the host is still receiving
+                    // the owner's view direction. Re-aim and issue a NEW genuine H request
+                    // only for InvalidTarget, never fake sleep or bypass the server ray.
+                    // The existing overall deadline still bounds every retry.
+                    if (!local.Seated.Value && bedAnswer == "ETKILESIM HEDEFI YOK" &&
+                        Time.realtimeSinceStartup >= nextBedRetry)
+                    {
+                        Aim(Bed().GetComponent<Collider>().bounds.center);
+                        HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(), "");
+                        typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
+                            .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                        report.bedAttempts++;
+                        nextBedRetry = Time.realtimeSinceStartup + 1.25f;
+                    }
                     report.slept |= local.Seated.Value || HomePlayerInteractionBinding.TryGetBed(local.OwnerClientId, out _);
                     // The last/solo H request can synchronously complete the morning before the
                     // next frame. The authoritative early-sleep summary proves that acceptance.
