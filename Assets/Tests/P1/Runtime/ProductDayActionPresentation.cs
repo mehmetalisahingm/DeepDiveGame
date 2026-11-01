@@ -81,6 +81,8 @@ namespace DeepDive.P1.Lab
                 var lens=local.GetComponentInChildren<Camera>(true);
                 var left=lens.WorldToViewportPoint(view.LeftGripPosition);var right=lens.WorldToViewportPoint(view.RightGripPosition);
                 if(error<.035f && InView(left)&&InView(right))report.contactKinds|=1<<((int)view.ActiveKind-1);
+                if(view.ActiveKind==PlayerVisualAction.Collect && view.HasCaughtFish)
+                    report.caughtFishVisible|=InView(lens.WorldToViewportPoint(view.CaughtFishPosition));
             }
             if(worker.VisualBoatSeated)
                 report.actionSeatedEye|=Mathf.Abs(worker.RecordingEyePosition.y-worker.transform.position.y-1.55f-NetworkPlayer.BoatSeatedVisualOffset)<.07f;

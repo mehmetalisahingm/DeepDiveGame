@@ -35,7 +35,7 @@ namespace DeepDive.P4.Tests
                     Assert.That(Vector3.Distance(pose.RepairLeftPalmPosition,left.position),Is.LessThan(.025f),prop.name+" left");
                     Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,right.position),Is.LessThan(.025f),prop.name+" right");
                 }
-                var fish=frame.TransformPoint(new Vector3(.135f,1.3f,.43f));
+                var fish=frame.TransformPoint(new Vector3(.135f,1.44f,.22f));
                 pose.PresentRepair(bag.transform.Find("Grip_Left").position,fish,frame.rotation,frame.rotation,true);
                 Assert.That(Vector3.Distance(pose.RepairRightPalmPosition,fish),Is.LessThan(.025f),"fish");
                 Assert.That(rig.transform.position,Is.EqualTo(rootBefore));
@@ -148,6 +148,28 @@ namespace DeepDive.P4.Tests
             Assert.That(prefab.GetComponentsInChildren<NetworkBehaviour>(true),Is.Empty);
             Assert.That(prefab.GetComponentsInChildren<Rigidbody>(true),Is.Empty);
             Assert.That(prefab.GetComponentsInChildren<Renderer>(true).Length,Is.InRange(1,6));
+        }
+        [TestCase("sea_bass")] [TestCase("tuna")] [TestCase("red_snapper")]
+        public void FrozenCatchHasRealStaticGeometryAndKeepsItsCentreInHand(string species)
+        {
+            var fish=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.FishResource(species)));
+            Mesh[] owned=new Mesh[0];
+            try
+            {
+                fish.transform.SetPositionAndRotation(new Vector3(100,20,-50),Quaternion.Euler(0,35,0));
+                fish.transform.localScale*=.62f;
+                var center=PlayerActionView.FreezeCaughtMesh(fish,out owned);
+                Assert.That(center.magnitude,Is.LessThan(3),"Uninitialised world bounds must not become a huge local offset");
+                foreach(var skin in fish.GetComponentsInChildren<SkinnedMeshRenderer>())Assert.That(skin.enabled,Is.False);
+                var target=new Vector3(3,4,5);
+                fish.transform.position+=target-fish.transform.TransformPoint(center);
+                var renderers=System.Array.FindAll(fish.GetComponentsInChildren<MeshRenderer>(),r=>r.enabled);
+                Assert.That(renderers,Is.Not.Empty);
+                var bounds=renderers[0].bounds;foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+                Assert.That(bounds.size.magnitude,Is.InRange(.1f,3f));
+                Assert.That(Vector3.Distance(bounds.center,target),Is.LessThan(.01f),"Actual visible mesh must follow the hand, not an imported animation bound");
+            }
+            finally {Object.DestroyImmediate(fish);foreach(var mesh in owned)Object.DestroyImmediate(mesh);}
         }
         [TestCase("sea_bass")] [TestCase("tuna")] [TestCase("red_snapper")]
         public void CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(string species)
