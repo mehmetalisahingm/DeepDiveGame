@@ -28,6 +28,9 @@ namespace DeepDive.Composition
         private HeldEquipmentMode equipmentAtStart;
         private ulong requestAtStart;
         private Vector3 fishCenter;
+        private Mesh[] frozenMeshes=new Mesh[0];
+        public bool HasCaughtFish=>fish!=null && fish.activeInHierarchy;
+        public Vector3 CaughtFishPosition=>fish!=null?fish.transform.TransformPoint(fishCenter):Vector3.zero;
         private Renderer[] bagRenderers;
         private SessionNetworkAdapter session;
         private SessionPhase phase;
@@ -88,15 +91,8 @@ namespace DeepDive.Composition
                 if(resource!=null)fish=Spawn(resource);
                 if(fish!=null)
                 {
-                    foreach(var animation in fish.GetComponentsInChildren<Animation>(true))animation.enabled=false;
-                    foreach(var animator in fish.GetComponentsInChildren<Animator>(true))animator.enabled=false;
                     fish.transform.localScale*=.62f;
-                    var renderers=fish.GetComponentsInChildren<Renderer>(true);
-                    if(renderers.Length>0)
-                    {
-                        var bounds=renderers[0].bounds;foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
-                        fishCenter=fish.transform.InverseTransformPoint(bounds.center);
-                    }
+                    fishCenter=FreezeCaughtMesh(fish,out frozenMeshes);
                 }
             }
             else DeliveryCount++;
@@ -114,6 +110,36 @@ namespace DeepDive.Composition
             if(root==null)return null;
             foreach(var t in root.GetComponentsInChildren<Transform>(true))if(t.name==name)return t;
             return null;
+        }
+        public static Vector3 FreezeCaughtMesh(GameObject root,out Mesh[] ownedMeshes)
+        {
+            foreach(var animation in root.GetComponentsInChildren<Animation>(true)){animation.Stop();animation.enabled=false;}
+            foreach(var animator in root.GetComponentsInChildren<Animator>(true))animator.enabled=false;
+            var meshes=new System.Collections.Generic.List<Mesh>();
+            foreach(var skin in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                var mesh=new Mesh{name="Frozen caught fish"};skin.BakeMesh(mesh,false);mesh.RecalculateBounds();
+                var baked=new GameObject("Frozen catch mesh");baked.transform.SetParent(skin.transform,false);
+                baked.AddComponent<MeshFilter>().sharedMesh=mesh;
+                baked.AddComponent<MeshRenderer>().sharedMaterials=skin.sharedMaterials;
+                skin.enabled=false;meshes.Add(mesh);
+            }
+            // A newly spawned skinned renderer may not have valid world bounds yet.
+            // Derive the centre from real mesh geometry in the clone's root frame.
+            var bounds=new Bounds();bool found=false;
+            foreach(var filter in root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                var renderer=filter.GetComponent<Renderer>();
+                if(filter.sharedMesh==null || renderer==null || !renderer.enabled || !filter.gameObject.activeInHierarchy)continue;
+                var local=filter.sharedMesh.bounds;var matrix=root.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
+                for(int i=0;i<8;i++)
+                {
+                    var corner=local.center+Vector3.Scale(local.extents,new Vector3((i&1)==0?-1:1,(i&2)==0?-1:1,(i&4)==0?-1:1));
+                    var point=matrix.MultiplyPoint3x4(corner);
+                    if(!found){bounds=new Bounds(point,Vector3.zero);found=true;}else bounds.Encapsulate(point);
+                }
+            }
+            ownedMeshes=meshes.ToArray();return found?bounds.center:Vector3.zero;
         }
         private Transform Body=>hands!=null&&hands.ActionBodyFrame!=null?hands.ActionBodyFrame:transform;
         private Vector3 Point(Vector3 local)=>Body.TransformPoint(local);
@@ -187,7 +213,7 @@ namespace DeepDive.Composition
         {
             if(bag==null || bagLeft==null || bagRight==null)return;
             var age=ActionAge;
-            var held=Point(new Vector3(.10f,1.30f,.43f));
+            var held=Point(new Vector3(.10f,1.44f,.22f));
             var arrive=Mathf.SmoothStep(0,1,Mathf.Clamp01(age/.35f));
             var stow=Mathf.SmoothStep(0,1,Mathf.Clamp01((age-.48f)/.42f));
             // A constant-size fish is lowered through the open mouth into the opaque cloth sack.
@@ -238,7 +264,7 @@ namespace DeepDive.Composition
             shoulderStrap.receiveShadows=false;shoulderStrap.sharedMaterial=cord;
         }
         private void ClearFish()
-        {if(fish!=null)Destroy(fish);fish=null;if(lanyard!=null)lanyard.enabled=false;}
+        {if(fish!=null)Destroy(fish);fish=null;foreach(var mesh in frozenMeshes)if(mesh!=null)Destroy(mesh);frozenMeshes=new Mesh[0];if(lanyard!=null)lanyard.enabled=false;}
         private void Hide()
         {until=0;seatTransition=0;ActiveKind=PlayerVisualAction.None;ContactExpected=false;if(bag!=null)bag.SetActive(false);if(crate!=null)crate.SetActive(false);if(shoulderStrap!=null)shoulderStrap.enabled=false;ClearFish();}
         private void OnDisable(){Hide();if(player!=null)player.SetVisualBoatSeated(false);}
