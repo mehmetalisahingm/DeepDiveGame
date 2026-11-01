@@ -45,6 +45,14 @@ namespace DeepDive.Composition
         }
     }
 
+    // Keep this separate from NetworkManager so a room's stop/rehost
+    // transition is testable without creating an NGO runtime.
+    public static class PlayerActionSessionRules
+    {
+        public static bool ShouldResetReceipts(bool transportChanged,bool wasListening,bool listening)
+            => transportChanged || wasListening != listening;
+    }
+
     public sealed class PlayerActionReceipt
     {
         private readonly Dictionary<ulong,ulong> last=new Dictionary<ulong,ulong>();

@@ -141,6 +141,9 @@ namespace DeepDive.Network
 
         public override void OnNetworkSpawn()
         {
+            // NGO can reuse this behaviour after a room restart. Do not show a
+            // successful pickup/hit message or shot reticle from the previous life.
+            ResetTransientActionFeedback();
             controller = GetComponent<CharacterController>();
             networkTransform = GetComponent<NetworkTransform>();
             session = NetworkManager.GetComponent<NetworkSession>();
@@ -933,8 +936,20 @@ namespace DeepDive.Network
             lastPresentationPosition = pose.position;
         }
 
+        // Presentation-only: no request, inventory, movement or network state writes.
+        // Used at BOTH session boundaries so an old feedback window never survives.
+        private void ResetTransientActionFeedback()
+        {
+            observedActionRequestId = 0;
+            actionMessage = "";
+            actionCue = default;
+            actionMessageUntil = 0f;
+            shotFeedbackUntil = 0f;
+        }
+
         public override void OnNetworkDespawn()
         {
+            ResetTransientActionFeedback();
             if (session != null) session.Unregister(this);
             if (IsOwner)
             {
