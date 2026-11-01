@@ -41,6 +41,9 @@ namespace DeepDive.P4.Tests
             try
             {
                 var economy = host.AddComponent<EconomyManager>();
+                // EditMode AddComponent does not guarantee MonoBehaviour.Awake.
+                // This public API initializes defaults before the private catalog is inspected.
+                economy.SetPrice("__p411_test_bootstrap__", 0);
                 var field = typeof(EconomyManager).GetField("_priceBySpeciesId", BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert.NotNull(field);
                 var prices = (Dictionary<string, int>)field.GetValue(economy);
