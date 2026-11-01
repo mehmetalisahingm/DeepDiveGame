@@ -69,7 +69,7 @@ namespace DeepDive.P4.Tests
                                 failures.Add($"{f.name} grouper at {home} leaves the reef band");
                             break;
                         case "lanternfish":
-                            if (!fiveSpecies || depth - r * .5f < DiveDepthBands.DeepMinDepth ||
+                            if (!fiveSpecies || depth - r * .5f < DiveDepthBands.ReefMaxDepth ||
                                 home.z < 46f || home.z >= 65f)
                                 failures.Add($"{f.name} lanternfish at {home} leaves the deep basin");
                             if (Vector3.Distance(home, DeepEncounterWorld.ArenaPosition) < 12f)
