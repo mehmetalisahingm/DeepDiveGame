@@ -1,0 +1,46 @@
+name: P4.11 CC0 animated fish source integrity and importable package
+
+on:
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - 'tools/Fetch-P411FishAssets.ps1'
+      - '.github/workflows/p411-cc0-fish-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Fetch verified Quaternius CC0 rigged FBX models
+        shell: pwsh
+        run: |
+          ./tools/Fetch-P411FishAssets.ps1
+      - name: Verify both original assets and their Unity import metadata
+        shell: pwsh
+        run: |
+          $folder='Assets/DeepDive/Art/Supplied/Fish'
+          foreach($name in @('Humphead','Anglerfish')) {
+            if(-not (Test-Path "$folder/$name.fbx") -or -not (Test-Path "$folder/$name.fbx.meta")) {
+              throw "Missing $name or its Unity .meta"
+            }
+          }
+      - name: Keep original FBX and stable Unity metadata as reviewable download
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p411-cc0-animated-fish-hash-verified
+          path: |
+            Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx
+            Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx.meta
+            Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx
+            Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta
+          if-no-files-found: error
+          retention-days: 7
