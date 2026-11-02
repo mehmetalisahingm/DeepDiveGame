@@ -56,6 +56,7 @@ namespace DeepDive.P1.Lab
             Aim(local.RecordingEyePosition+new Vector3(1,oceanWaypoint==2||oceanWaypoint==8?0:-2,12));
             if(oceanHold==0)oceanHold=Time.realtimeSinceStartup+2;
             if(Time.realtimeSinceStartup<oceanHold)return false;
+            if(SeabedFrames && oceanWaypoint>=3 && oceanWaypoint<=5 && !SeabedFrameStop())return false;
             if(oceanWaypoint>=3 && oceanWaypoint<=5)
             {report.oceanBands++;CaptureView(".ocean-band-"+report.oceanBands+".png");}
             if(oceanWaypoint==2 || oceanWaypoint==8)CaptureView(".ocean-surface-"+oceanWaypoint+".png");
@@ -69,7 +70,7 @@ namespace DeepDive.P1.Lab
 
         private void CaptureOceanVideo()
         {
-            if(!OceanVideo || finished || !oceanCapturing || local==null || !local.IsSpawned)return;
+            if(!OceanVideo || SeabedFrames || finished || !oceanCapturing || local==null || !local.IsSpawned)return;
             var ocean=OceanPresentation.Active;if(ocean==null)return;
             report.oceanReady|=ocean.IsReady;report.oceanReflection|=ocean.ReflectionReady;
             report.oceanSurfaceEye|=local.Swimming.Value && local.RecordingEyePosition.y>ocean.SurfaceY+.015f;

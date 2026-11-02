@@ -1043,7 +1043,8 @@ namespace DeepDive.P1.Lab
                 report.passed &= visuals;
             }
             if (report.reload && RepairOnly) report.passed=report.reloadClean && report.homeSpawn && report.worldLoads==1 && report.errors.Count==0;
-            if(OceanVideo && !report.reload)
+            // The frame measurement turns the video capture off, so it has no video proof to check.
+            if(OceanVideo && !SeabedFrames && !report.reload)
             {
                 var oceanOk=report.oceanReady && report.oceanReflection && report.oceanAnimated &&
                     report.oceanSurfaceEye && report.oceanBands==3 && report.oceanVideoFrames>=30;

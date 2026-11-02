@@ -1178,6 +1178,20 @@ namespace DeepDive.Editor
 
         private static Candidate ApplyCandidate(Ctx ctx)
         {
+            // Once the setup has run, the floor and the fish are the scene's own: only the runtime kit is added.
+            if (Root(ctx.Scene, "Seabed_Shallow") != null)
+            {
+                ReefHabitatVisuals.Build(ctx.Scene);
+                Physics.SyncTransforms();
+                return new Candidate
+                {
+                    note = "the real scene and runtime kit placement, closed unsaved.",
+                    disabledPieces = OldFloor,
+                    solids = SeabedProfile.Solids.Select(s => new Rock { id = $"{s.KitId}@{s.Scale}", role = "", min = R(s.Box.min), max = R(s.Box.max) }).ToArray(),
+                    centreProfile = Enumerable.Range(-15, 81).Select(z => new Vector2(z, R(FloorHeight(0f, z)))).ToArray()
+                };
+            }
+
             foreach (var name in OldFloor) Root(ctx.Scene, name).SetActive(false);
 
             // Sea bass leave the toe: the apron needs the water their old row used. Same four fish, north of the sand slope.
