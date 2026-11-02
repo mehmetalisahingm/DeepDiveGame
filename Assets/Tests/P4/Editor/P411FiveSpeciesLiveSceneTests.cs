@@ -1,6 +1,7 @@
 using System.Linq;
 using DeepDive.World;
 using NUnit.Framework;
+using UnityEditor;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -30,8 +31,12 @@ namespace DeepDive.P4.Tests
                     Assert.NotNull(network, actor.name + " is not a scene NetworkObject");
                     Assert.AreEqual(1, actor.GetComponentsInChildren<NetworkObject>(true).Length,
                         actor.name + " must not nest a second network identity");
-                    Assert.AreNotEqual(0u, network.GlobalObjectIdHash, actor.name + " lost its authored NGO identity");
-                    return network.GlobalObjectIdHash;
+                    // NGO keeps the authored hash serialized but does not
+                    // expose the field as a public C# API in this package.
+                    var hash = new SerializedObject(network).FindProperty("GlobalObjectIdHash");
+                    Assert.NotNull(hash, actor.name + " has no serialized NGO scene hash");
+                    Assert.AreNotEqual(0u, hash.uintValue, actor.name + " lost its authored NGO identity");
+                    return hash.uintValue;
                 }).ToArray();
                 Assert.AreEqual(P411FiveSpeciesRoster.Population, ids.Distinct().Count(),
                     "Duplicate NGO scene identifiers after five-species authoring");
