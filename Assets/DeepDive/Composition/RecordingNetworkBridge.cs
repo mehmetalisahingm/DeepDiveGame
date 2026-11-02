@@ -192,7 +192,8 @@ namespace DeepDive.Composition
             var camera = OwnerCamera(player);
             if (camera == null) return false;
             var ray = camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-            if (!Physics.Raycast(ray, out var hit, TargetRange, ~0, QueryTriggerInteraction.Ignore)) return false;
+            if (!EyeRay.Raycast(ray.origin, ray.direction, TargetRange, QueryTriggerInteraction.Ignore,
+                    player.GetComponent<CharacterController>(), out var hit)) return false;
             var networkObject = hit.collider.GetComponentInParent<NetworkObject>();
             if (networkObject == null || !networkObject.IsSpawned || networkObject == player.NetworkObject)
                 return false;

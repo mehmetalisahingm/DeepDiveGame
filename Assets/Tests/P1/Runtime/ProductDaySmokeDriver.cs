@@ -542,8 +542,7 @@ namespace DeepDive.P1.Lab
             var eye=local.RecordingEyePosition;
             var fish = FindObjectsByType<FishActor>(FindObjectsSortMode.None)
                 .Where(f=>f.IsSpawned && (!f.IsDead || f.GetComponent<CatchObject>().IsAvailable))
-                .Where(f=>!Physics.Linecast(eye,f.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
-                    blocker.collider.GetComponentInParent<FishActor>()==f)
+                .Where(ClearFishLine)
                 .OrderByDescending(f=>f.GetComponent<CatchObject>().IsAvailable)
                 .ThenBy(f=>(f.transform.position-eye).sqrMagnitude).FirstOrDefault();
             if (Time.realtimeSinceStartup >= nextHuntTrace)
@@ -677,8 +676,13 @@ namespace DeepDive.P1.Lab
             else if (Settled()) { recordingAt = 0; Act(bridge.ToggleRecordingLocal); }
         }
         private bool ClearFishLine(FishActor fish) =>
-            !Physics.Linecast(local.RecordingEyePosition,fish.GetComponent<Collider>().bounds.center,out var blocker,~0,QueryTriggerInteraction.Ignore) ||
-            blocker.collider.GetComponentInParent<FishActor>()==fish;
+            ClearFishLine(local.RecordingEyePosition,fish.GetComponent<Collider>().bounds.center,fish);
+        private bool ClearFishLine(Vector3 eye,Vector3 target,FishActor fish)
+        {
+            var line=target-eye;
+            return !EyeRay.Raycast(eye,line.normalized,line.magnitude,QueryTriggerInteraction.Ignore,local.GetComponent<CharacterController>(),out var blocker) ||
+                blocker.collider.GetComponentInParent<FishActor>()==fish;
+        }
         private void HoldForShore()
         {
             var stand = new Vector3(-7.6f, 5.5f, -5f);

@@ -17,7 +17,7 @@ namespace DeepDive.Network
             bool diveActive, bool repairPart) =>
             connected && !sceneLoading && !passive && !dayClosing && (diveActive || repairPart);
 
-        public static Collider SelectFirstPickupOrBlocker(RaycastHit[] hits)
+        public static Collider SelectFirstPickupOrBlocker(RaycastHit[] hits, Collider self = null)
         {
             if (hits == null || hits.Length == 0) return null;
 
@@ -25,7 +25,8 @@ namespace DeepDive.Network
             foreach (var hit in hits)
             {
                 var collider = hit.collider;
-                if (collider == null) continue;
+                // See EyeRay: the eye can sit just above the diver's own capsule.
+                if (collider == null || collider == self) continue;
 
                 if (IsPickupTarget(collider)) return collider;
 

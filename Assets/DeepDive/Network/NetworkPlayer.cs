@@ -298,7 +298,7 @@ namespace DeepDive.Network
             var origin = RecordingEyePosition;
             var hits = Physics.RaycastAll(origin, Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward,
                 pickupRange, ~0, QueryTriggerInteraction.Collide);
-            var collider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits);
+            var collider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits, controller);
             var slot = collider != null ? FindTarget<IBoatRepairSlot>(collider) : null;
             if (slot == null) return false;
             index = slot.PartIndex; return true;
@@ -594,7 +594,7 @@ namespace DeepDive.Network
             var effectiveRange = CrewRoleEffectRules.ResolveHarpoonRange(
                 P4EquipmentEffectRules.ResolveHarpoonRange(harpoonRange, EquippedHarpoonLevel.Value),
                 CurrentCrewRole);
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, effectiveRange), ~0, QueryTriggerInteraction.Ignore))
+            if (!EyeRay.Raycast(origin, direction, Mathf.Max(0.1f, effectiveRange), QueryTriggerInteraction.Ignore, controller, out var hit))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
@@ -636,7 +636,7 @@ namespace DeepDive.Network
             // ambient trigger volumes (notably SwimVolume) cannot consume the ray before a real pickup target,
             // while non-trigger geometry still acts as a hard line-of-sight blocker.
             var hits = Physics.RaycastAll(origin, direction, Mathf.Max(0.1f, pickupRange), ~0, QueryTriggerInteraction.Collide);
-            var pickupCollider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits);
+            var pickupCollider = PickupRaycastRules.SelectFirstPickupOrBlocker(hits, controller);
             if (pickupCollider == null)
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
@@ -707,8 +707,8 @@ namespace DeepDive.Network
             var frame = input.Read(Time.realtimeSinceStartupAsDouble);
             var origin = RecordingEyePosition;
             var direction = Quaternion.Euler(frame.Pitch, frame.Yaw, 0f) * Vector3.forward;
-            if (!Physics.Raycast(origin, direction, out var hit, Mathf.Max(0.1f, serviceInteractionRange), ~0,
-                    QueryTriggerInteraction.Collide))
+            if (!EyeRay.Raycast(origin, direction, Mathf.Max(0.1f, serviceInteractionRange),
+                    QueryTriggerInteraction.Collide, controller, out var hit))
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
                 return;
