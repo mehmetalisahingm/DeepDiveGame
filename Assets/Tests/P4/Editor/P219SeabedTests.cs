@@ -220,6 +220,175 @@ namespace DeepDive.P4.Tests
             });
         }
 
+        // ---- the five-species plan ----------------------------------------------------------------------
+
+        // P411FiveSpeciesRoster against the floor, before the scene step runs it: every home is allowed, most of the
+        // wander set is open water, no push reaches the floor or a solid, and the deep evidence stays clear.
+        [Test]
+        public void TheFiveSpeciesHomesFitTheFloor()
+        {
+            var names = new[] { "SeaBass", "Tuna", "RedSnapper", "Grouper", "Lanternfish" };
+            var failures = new List<string>();
+            var report = new List<string>();
+            for (var i = 0; i < P411FiveSpeciesRoster.Homes.Length; i++)
+            {
+                var home = P411FiveSpeciesRoster.Homes[i];
+                var species = UnityEditor.AssetDatabase.LoadAssetAtPath<SpeciesDefinition>($"Assets/DeepDive/World/Fish/Species/{names[i / 3]}.asset");
+                var tuning = species.Swim;
+                var label = $"{species.SpeciesId} {home}";
+                var habitat = new HabitatWaterBounds(Water, home);
+                if (!habitat.Contains(home)) failures.Add(label + ": home refused");
+
+                var r = tuning.WanderRadius;
+                int total = 0, open = 0;
+                for (var x = -r; x <= r + 1e-3f; x += 0.5f)
+                for (var y = -r * 0.5f; y <= r * 0.5f + 1e-3f; y += 0.5f)
+                for (var z = -r; z <= r + 1e-3f; z += 0.5f)
+                {
+                    if (x * x + y * y + z * z > r * r + 1e-3f) continue;
+                    total++;
+                    if (habitat.Contains(home + new Vector3(x, y, z))) open++;
+                }
+                var openShare = (float)open / total;
+                var nearestTrace = DeepEncounterWorld.TracePositions.Min(t => Vector3.Distance(t, home));
+                report.Add($"{label}: open {openShare:P0}, floor {SeabedProfile.FloorHeight(home.x, home.z):0.0}, trace {nearestTrace:0.0} m");
+                if (openShare < MinOpenWander) failures.Add($"{label}: only {openShare:P0} of the wander set is open");
+                if (nearestTrace < DeepEncounterWorld.TraceRadius + MinTraceGap) failures.Add($"{label}: {nearestTrace:0.0} m from a boss trace");
+                if (Vector3.Distance(home, DeepEncounterWorld.ArenaPosition) < 12f) failures.Add($"{label}: by the boss arena");
+
+                foreach (var run in Pushes(home, tuning, habitat, label))
+                {
+                    if (run.BelowFloor > 0) failures.Add($"{run.Label}: {run.BelowFloor} frames under the floor");
+                    if (run.InSolid > 0) failures.Add($"{run.Label}: {run.InSolid} frames in a solid");
+                    if (run.Stalled > run.Frames / 10) failures.Add($"{run.Label}: stalled {run.Stalled}/{run.Frames}");
+                }
+            }
+            Debug.Log("P219_FIVE_SPECIES\n" + string.Join("\n", report));
+            Assert.IsEmpty(failures, string.Join("\n", failures) + "\n--\n" + string.Join("\n", report));
+        }
+
+        private const float MinOpenWander = 0.7f;
+        private const float MinTraceGap = 3f;
+
+        // ---- the scene --------------------------------------------------------------------------------
+
+        [Test]
+        public void TheSceneFloorIsTheProfile()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var chunks = new[] { "Seabed_Shallow", "Seabed_Reef", "Seabed_Deep" }
+                    .Select(n => scene.GetRootGameObjects().Single(r => r.name == n).GetComponent<MeshCollider>()).ToArray();
+                Assert.AreEqual(4800, chunks.Sum(c => (int)c.sharedMesh.GetIndexCount(0)) / 3, "triangles");
+                for (var x = -14.75f; x < 15f; x += 0.5f)
+                for (var z = -14.75f; z < 65f; z += 0.5f)
+                {
+                    var hit = default(RaycastHit);
+                    Assert.IsTrue(chunks.Any(c => c.Raycast(new Ray(new Vector3(x, 12f, z), Vector3.down), out hit, 60f)), $"a hole at {x},{z}");
+                    // The fish bounds keep FloorMargin off the profile: a fish on that limit is still above the mesh.
+                    Assert.Less(hit.point.y, SeabedProfile.FloorHeight(x, z) + HabitatWaterBounds.FloorMargin - 0.1f, $"at {x},{z}");
+                }
+            }, false);
+        }
+
+        // Real CharacterController and the host's underwater rule over the real terrain: north along the bed from the
+        // wade's foot to the basin and back, on five lines. A swimmer who is blocked for 1.5 s fails the line.
+        [Test]
+        public void ADiverSwimsTheWholeFloorBothWays()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                SwitchOffMovingColliders(scene);
+                var failures = new List<string>();
+                foreach (var x in new[] { -10f, -5f, 0f, 5f, 10f })
+                {
+                    var line = new List<Vector3>();
+                    for (var z = -3f; z <= 63f; z += 1f)
+                    {
+                        var top = Mathf.Max(SeabedProfile.FloorHeight(x, z - 1f), SeabedProfile.FloorHeight(x, z), SeabedProfile.FloorHeight(x, z + 1f));
+                        foreach (var solid in SeabedProfile.Solids)
+                        {
+                            var box = solid.Box;
+                            if (x >= box.min.x - 0.5f && x <= box.max.x + 0.5f && z >= box.min.z - 1f && z <= box.max.z + 1f) top = Mathf.Max(top, box.max.y);
+                        }
+                        line.Add(new Vector3(x, Mathf.Min(top + 1.5f, SurfaceY - 2.3f), z));
+                    }
+                    Swim(scene, line, $"x {x} north", failures);
+                    line.Reverse();
+                    Swim(scene, line, $"x {x} south", failures);
+                }
+                Assert.IsEmpty(failures, string.Join("\n", failures));
+            }, false);
+        }
+
+        // From 1.5 m over the bed on a 5 m grid, holding "up" or "up + toward the shore", a diver reaches the surface.
+        [Test]
+        public void EveryDiveEndsAtTheSurface()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                SwitchOffMovingColliders(scene);
+                var failures = new List<string>();
+                foreach (var input in new[] { Vector3.up, new Vector3(0f, 1f, -1f).normalized })
+                    for (var x = -12.5f; x <= 12.5f; x += 5f)
+                    for (var z = -2.5f; z <= 62.5f; z += 5f)
+                    {
+                        var feet = new Vector3(x, Mathf.Min(SeabedProfile.FloorHeight(x, z) + 1.5f, SurfaceY - 2.3f), z);
+                        var capsule = Physics.OverlapCapsule(feet + Vector3.up * 0.35f, feet + Vector3.up * 1.45f, 0.35f, ~0, QueryTriggerInteraction.Ignore);
+                        if (capsule.Length > 0) continue;
+                        var cc = Diver(scene, feet);
+                        try
+                        {
+                            for (var frame = 0; frame < 30f / Dt && cc.transform.position.y + 1.8f < SurfaceY; frame++) cc.Move(input * SwimSpeed * Dt);
+                            if (cc.transform.position.y + 1.8f < SurfaceY) failures.Add($"{feet} holding {input} stopped at {cc.transform.position}");
+                        }
+                        finally { UnityEngine.Object.DestroyImmediate(cc.gameObject); }
+                    }
+                Assert.IsEmpty(failures, string.Join("\n", failures));
+            }, false);
+        }
+
+        private static void SwitchOffMovingColliders(UnityEngine.SceneManagement.Scene scene)
+        {
+            DeepDive.Composition.ReefHabitatVisuals.Build(scene);
+            foreach (var collider in scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Collider>(true)))
+                if (collider.GetComponentInParent<Unity.Netcode.NetworkObject>() != null) collider.enabled = false;
+            Physics.SyncTransforms();
+        }
+
+        private static CharacterController Diver(UnityEngine.SceneManagement.Scene scene, Vector3 feet)
+        {
+            var go = new GameObject("P219_Diver");
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go, scene);
+            var cc = go.AddComponent<CharacterController>();
+            cc.height = 1.8f; cc.radius = 0.35f; cc.center = new Vector3(0f, 0.9f, 0f); cc.skinWidth = 0.08f; cc.stepOffset = 0.3f; cc.slopeLimit = 45f;
+            go.transform.position = feet;
+            Physics.SyncTransforms();
+            return cc;
+        }
+
+        private static void Swim(UnityEngine.SceneManagement.Scene scene, List<Vector3> line, string label, List<string> failures)
+        {
+            var cc = Diver(scene, line[0]);
+            try
+            {
+                var t = cc.transform;
+                var lastMove = t.position;
+                var still = 0f;
+                for (var i = 1; i < line.Count; i++)
+                    for (var frame = 0; frame < 10f / Dt && Vector3.Distance(t.position, line[i]) > 0.45f; frame++)
+                    {
+                        cc.Move((line[i] - t.position).normalized * SwimSpeed * Dt);
+                        still = Vector3.Distance(t.position, lastMove) > 0.05f ? 0f : still + Dt;
+                        if (still == 0f) lastMove = t.position;
+                        if (still <= 1.5f) continue;
+                        failures.Add($"{label} blocked at {t.position} on the way to {line[i]}");
+                        return;
+                    }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(cc.gameObject); }
+        }
+
         // ---- helpers ----------------------------------------------------------------------------------
 
         private sealed class Run
