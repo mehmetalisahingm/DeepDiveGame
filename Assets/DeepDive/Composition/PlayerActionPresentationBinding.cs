@@ -69,18 +69,20 @@ namespace DeepDive.Composition
         }
         private void Collected(CatchObject fish,PlayerId player,CaptureResult capture)
         {
-            if(manager==null || !manager.IsServer)return;
+            if(manager==null || !manager.IsListening || !manager.IsServer || manager.SpawnManager==null)return;
             foreach(var obj in manager.SpawnManager.SpawnedObjectsList)
             {
                 var actor=obj.GetComponent<NetworkPlayer>();
-                if(actor==null || actor.OwnerClientId!=player.Value)continue;
+                if(actor==null || !actor.IsSpawned || actor.OwnerClientId!=player.Value)continue;
                 Publish(actor,PlayerVisualAction.Collect,fish.transform.position,capture.SpeciesId,1);break;
             }
         }
         private void Delivered(EconomyPlayerSync actor,TownServiceOutcome outcome)
         {
-            if(manager==null || !manager.IsServer || !serviceRequests.Accept(actor.NetworkObjectId,outcome))return;
-            var player=actor.GetComponent<NetworkPlayer>();if(player==null)return;
+            if(manager==null || !manager.IsListening || !manager.IsServer || actor==null || !actor.IsSpawned)return;
+            var player=actor.GetComponent<NetworkPlayer>();
+            // Only consume the sale receipt once a real, spawned player can show it.
+            if(player==null || !player.IsSpawned || !serviceRequests.Accept(actor.NetworkObjectId,outcome))return;
             var source=player.transform.position+player.transform.forward*.75f+Vector3.up*.9f;
             foreach(var anchor in FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None))
                 if(anchor.Definition.ServiceId==outcome.ServiceId)
@@ -89,6 +91,7 @@ namespace DeepDive.Composition
         }
         private void Publish(NetworkPlayer player,PlayerVisualAction kind,Vector3 source,string species,int count)
         {
+            if(manager==null || !manager.IsListening || !player.IsSpawned)return;
             var message=new PlayerActionMessage{PlayerObject=player.NetworkObjectId,Sequence=++sequence,
                 At=manager.ServerTime.Time,Kind=kind,Source=source,Species=new FixedString64Bytes(species??""),Count=count};
             Show(NetworkManager.ServerClientId,message);
@@ -107,9 +110,12 @@ namespace DeepDive.Composition
         }
         private void Show(ulong sender,PlayerActionMessage message)
         {
-            if(!manager.SpawnManager.SpawnedObjects.TryGetValue(message.PlayerObject,out var obj) ||
-                !receipt.Accept(sender,message,manager.ServerTime.Time))return;
-            var player=obj.GetComponent<NetworkPlayer>();if(player==null)return;
+            if(manager==null || !manager.IsListening || manager.SpawnManager==null ||
+                !manager.SpawnManager.SpawnedObjects.TryGetValue(message.PlayerObject,out var obj))return;
+            var player=obj.GetComponent<NetworkPlayer>();
+            // A stale object ID or a not-yet-spawned player must not burn the
+            // first legitimate receipt before it can be presented.
+            if(player==null || !player.IsSpawned || !receipt.Accept(sender,message,manager.ServerTime.Time))return;
             var view=player.GetComponent<PlayerActionView>()??player.gameObject.AddComponent<PlayerActionView>();
             view.Play(message);
         }
