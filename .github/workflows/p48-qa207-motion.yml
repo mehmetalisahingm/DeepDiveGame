@@ -1,0 +1,69 @@
+name: QA #207 four-process repair/rejoin motion regression (NOT final P4.12)
+
+on:
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - '.github/workflows/p48-qa207-motion.yml'
+      - 'Assets/Tests/P1/Runtime/ProductDayMotionDiagnostics.cs'
+      - 'Assets/Tests/P1/Runtime/ProductDaySmokeDriver.cs'
+      - 'tools/Test-P46-ProductDay.ps1'
+      - 'tools/P46-ProcessEvidence.ps1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p48-qa207-motion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repair-rejoin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: Require licensed Unity CI
+        shell: bash
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
+            echo "::error::Unity CI license is not configured; motion QA cannot run."
+            exit 1
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Runner report preservation checks
+        shell: pwsh
+        run: ./tools/tests/Test-P46-ProcessEvidence.Tests.ps1
+      - name: Build integrated Linux Unity player
+        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
+        with:
+          unityVersion: 6000.3.23f1
+          targetPlatform: StandaloneLinux64
+          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildLinux
+          versioning: None
+      - name: Prepare native runner
+        shell: bash
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" Builds Logs 2>/dev/null || true
+          mkdir -p Logs
+          chmod +x ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Four REAL Unity processes - repair race, guest disconnect, rejoin, midnight, disk reload
+        shell: pwsh
+        run: |
+          & xvfb-run -a pwsh -NoProfile -File ./tools/Test-P46-ProductDay.ps1 -Players 4 -Port 25177 -RepairOnly -RepairInterruptions -Mute -BuildPath ./Builds/P1-Integrated/DeepDiveGame-P1.x86_64
+      - name: Preserve all player reports, motion samples and runner failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: qa207-four-process-${{ github.sha }}
+          path: Logs/P46-product-*
+          if-no-files-found: warn
+          retention-days: 7
