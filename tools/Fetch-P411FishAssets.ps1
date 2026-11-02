@@ -45,7 +45,7 @@ if ($template -notmatch '(?m)^guid: [0-9a-f]{32}$') { throw 'Source ModelImporte
 foreach ($model in $models) {
     $dest = Join-Path $target ($model.Name + '.fbx')
     if (-not (Test-Path -LiteralPath $dest)) {
-        $temp = Join-Path $target ('.' + $model.Name + '.download')
+        $temp = Join-Path $target ('P411_' + $model.Name + '.download')
         try {
             $url = "$baseUrl/$($model.Name).fbx"
             Write-Output "Fetching CC0 animation source $($model.Name) from pinned GitHub mirror..."
