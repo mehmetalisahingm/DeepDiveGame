@@ -9,17 +9,19 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-and-package:
+    if: github.event_name != 'pull_request' || (github.event.pull_request.number == 238 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'codex/p411-fish-cc0-import-pipeline-20261102')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
-          persist-credentials: false
+          ref: ${{ github.head_ref || github.ref_name }}
+          persist-credentials: true
       - name: Fetch verified Quaternius CC0 rigged FBX models
         shell: pwsh
         run: |
@@ -33,6 +35,18 @@ jobs:
               throw "Missing $name or its Unity .meta"
             }
           }
+      - name: Commit hash-verified CC0 FBX through Git LFS to the PR branch
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          git lfs install --local
+          git add -- Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx.meta Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta
+          if git diff --cached --quiet; then
+            echo 'Verified originals are already committed.'
+          else
+            git -c user.name='DeepDive CI source importer' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'assets(P4.11/#218): add two verified CC0 animated fish sources via LFS'
+            git push origin HEAD:refs/heads/codex/p411-fish-cc0-import-pipeline-20261102
+          fi
       - name: Keep original FBX and stable Unity metadata as reviewable download
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
