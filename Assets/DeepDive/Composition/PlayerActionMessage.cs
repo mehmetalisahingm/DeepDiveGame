@@ -22,7 +22,10 @@ namespace DeepDive.Composition
         public bool Valid(double now) => Sequence>0 && (Kind==PlayerVisualAction.Collect || Kind==PlayerVisualAction.Deliver) &&
             !double.IsNaN(At) && !double.IsInfinity(At) && now-At>=-.25 && now-At<1.8 &&
             Finite(Source.x) && Finite(Source.y) && Finite(Source.z) && Source.sqrMagnitude<100000000 &&
-            Count>0 && Count<=4096;
+            Count>0 && Count<=4096 &&
+            // A successful catch with no species cannot display the actual fish.
+            // Keep legitimate accepted sales independent of this field.
+            (Kind!=PlayerVisualAction.Collect || Species.Length>0);
         private static bool Finite(float v)=>!float.IsNaN(v)&&!float.IsInfinity(v);
         public void Write(ref FastBufferWriter writer)
         {
