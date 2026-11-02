@@ -68,7 +68,7 @@ namespace DeepDive.Composition
                 seabed=new Material(bedSource);
                 foreach(var r in FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
                     if(r.name=="SeaFloor" || r.name.StartsWith("Wall_") || r.name=="Reef_Shelf" ||
-                        r.name=="Reef_DropOff" || r.name=="Deep_DropOff" || r.name=="Deep_Basin" || r.name.StartsWith("Reef_Head_"))
+                        r.name=="Reef_DropOff" || r.name=="Deep_DropOff" || r.name=="Deep_Basin" || r.name.StartsWith("Reef_Head_") || r.name.StartsWith("Seabed_"))
                     {originalBeds[r]=r.sharedMaterials;r.sharedMaterial=seabed;}
             }
             RenderSettings.skybox=sky;
