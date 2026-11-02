@@ -99,11 +99,23 @@ namespace DeepDive.World.Tests
             var hashes = new HashSet<uint>();
             var homes = new HashSet<Vector3>();
             var water = FindAll<SwimVolume>(scene)[0].GetComponent<BoxCollider>();
+            var counts = fishes.GroupBy(f => f.Species?.SpeciesId)
+                .ToDictionary(group => group.Key, group => group.Count());
+            var authoredFive = counts.Count == P411FiveSpeciesRoster.SpeciesIds.Length &&
+                P411FiveSpeciesRoster.SpeciesIds.All(id =>
+                    counts.TryGetValue(id, out var count) && count == 3);
+            var legacyThree = counts.Count == 3 &&
+                new[] { "sea_bass", "tuna", "red_snapper" }.All(id =>
+                    counts.TryGetValue(id, out var count) && count == 5);
+            Assert.IsTrue(authoredFive || legacyThree,
+                "Scene must have either 5/5/5 legacy or 3/3/3/3/3 real fish; hybrids fail");
             foreach (var fish in fishes)
             {
                 Assert.NotNull(fish.Species, fish.name);
                 Assert.IsTrue(fish.Species.IsValid(out var error), error);
-                Assert.Contains(fish.Species.SpeciesId, new[] { "sea_bass", "tuna", "red_snapper" });
+                Assert.Contains(fish.Species.SpeciesId, authoredFive
+                    ? P411FiveSpeciesRoster.SpeciesIds
+                    : new[] { "sea_bass", "tuna", "red_snapper" });
                 Assert.IsTrue(hashes.Add(fish.GetComponent<NetworkObject>().PrefabIdHash), fish.name + " duplicate NGO hash");
                 Assert.AreNotEqual(0u, fish.GetComponent<NetworkObject>().PrefabIdHash, fish.name);
                 Assert.IsTrue(homes.Add(fish.transform.position), fish.name + " overlaps another home");
@@ -126,8 +138,10 @@ namespace DeepDive.World.Tests
                         fish.name + " wander envelope leaves water: " + point);
                 }
             }
-            foreach (var id in new[] { "sea_bass", "tuna", "red_snapper" })
-                Assert.AreEqual(5, fishes.Count(f => f.Species.SpeciesId == id), id);
+            foreach (var id in authoredFive ? P411FiveSpeciesRoster.SpeciesIds
+                         : new[] { "sea_bass", "tuna", "red_snapper" })
+                Assert.AreEqual(authoredFive ? 3 : 5,
+                    fishes.Count(f => f.Species.SpeciesId == id), id);
         }
 
         [Test]

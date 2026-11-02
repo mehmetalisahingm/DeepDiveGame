@@ -138,6 +138,14 @@ namespace DeepDive.Editor
             Debug.Log("P1_BUILD_SUCCEEDED integrated=true target=windows");
         }
 
+        // #218: CI authoring path only. The normal BuildLinux/Windows methods
+        // remain unchanged for released three-species campaign branches.
+        public static void BuildP411AuthoredFiveFishLinux()
+        {
+            DeepDive.World.Editor.P411FiveSpeciesSceneSetup.Apply();
+            BuildLinux();
+        }
+
         public static void BuildLinux()
         {
             var path = "Builds/P1-Integrated/DeepDiveGame-P1.x86_64";

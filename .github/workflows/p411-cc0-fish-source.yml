@@ -1,0 +1,41 @@
+name: P4.11 verified CC0 animated fish source integrity
+
+on:
+  pull_request:
+    branches: ['codex/p4-integration']
+    paths:
+      - 'tools/Fetch-P411FishAssets.ps1'
+      - '.github/workflows/p411-cc0-fish-source.yml'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx.meta'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          lfs: true
+          persist-credentials: false
+      - name: Verify original rigged FBX binary hashes, sizes, and stable Unity import metadata
+        shell: pwsh
+        run: |
+          ./tools/Fetch-P411FishAssets.ps1
+      - name: Preserve the reviewed originals and their stable import metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p411-cc0-animated-fish-hash-verified
+          path: |
+            Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx
+            Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx.meta
+            Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx
+            Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta
+          if-no-files-found: error
+          retention-days: 7

@@ -36,7 +36,7 @@ namespace DeepDive.World
             // Lanternfish / deep open-water column, west of boss & boat.
             new Vector3(-8f, -18f, 49f),
             new Vector3(-9f, -18f, 56f),
-            new Vector3(-8f, -18f, 62f)
+            new Vector3(-8f, -18f, 60f)
         };
 
         public static string SpeciesForSlot(int index) => SpeciesIds[index / 3];

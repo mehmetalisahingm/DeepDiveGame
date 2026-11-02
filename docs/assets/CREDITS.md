@@ -14,13 +14,23 @@ Konum: `Assets/DeepDive/Art/MegaKit/`. `Models/` kaynak FBX'ler (176), `Textures
 
 `Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Kaldırma/yerleştirme/bırakma sesleri (`Art/RepairTools/OakPlank*.wav`) `Assets/Editor/P48RepairAudioBuilder.cs` ile sentezlendi; kayıt, örnek veya indirme yoktur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
 
+## P4.11 / #218 — doğrulanmış balık kaynaklarını getirme komutu (2 Kasım 2026)
+
+- **Model lisansı:** [Quaternius Animated Cute Fish Pack](https://quaternius.com/packs/cutefish.html), Şubat 2020, **CC0**. Orijinal rig+klipler; iki seçili dosya `Humphead.fbx` (levrek çalışma silueti) ve `Anglerfish.fbx` (fener balığı). Quaternius'a teşekkürler.
+- **Güvenli kaynak kopyası:** Herkese açık [algosup proje deposu, sabit commit](https://github.com/algosup/2024-2025-project-2-serious-game-team-1/tree/25c512ed6c7c70b904671ba2be76353f26c332ab/src/assets/designs/Fishs/FBX). Bu bağımsız bir topluluk aynasıdır, Quaternius'un kendi yayın deposu değildir.
+- `tools/Fetch-P411FishAssets.ps1` dosyayı yalnız **sabit commit** üzerinden getirir, gerçek Git **blob SHA-1** ve bayt uzunluğunu kontrol eder; mevcut farklı dosyaları asla ezmez, ayrı kararlı Unity `.meta` GUID'lerini üretir.
+- **İçe alındı:** `Humphead.fbx` ve `Anglerfish.fbx` (ayrı kararlı `.meta` dosyalarıyla **Git LFS**), `SeaBass.prefab`, `Grouper.prefab`, `Lanternfish.prefab`, bunların URP materyalleri ve `DiveTestArea.unity` sahnesindeki **15 mevcut NGO balığın beş tür × üç birey** olacak şekilde düzenlenmiş sürümü, PR #238'de. Otomatik Unity 6000.3.23f1 sahne oluşturma ve Linux player build'i başarılı çalıştı. Bu teknik teslim **oyun/Windows/görsel kabulünün tamamlandığı anlamına gelmez**.
+- `.github/workflows/p411-cc0-fish-source.yml` artık **yalnız okuma** izniyle mevcut FBX baytlarını/Unity metalarını doğrular ve 7 günlük kontrol artifact'i üretir. Sınırlı ilk üretimden sonra GitHub Actions'ın sahneyi/assetleri otomatik commit etme yetkisi kaldırıldı.
+- Unity Editor 6000.3.23f1 kurulu çalışma kopyasında `pwsh tools/Fetch-P411FishAssets.ps1 -AuthorScene -UnityEditor '<Unity.exe>'` önce iki FBX'i getirir, sonra `P411FiveSpeciesSceneSetup.Apply` ile 15 mevcut NGO balığını beş gerçek tür modeline yeniden yazar; sahne/prefab/meta değişikliklerinin tekrar repo kaydı ve runtime testi zorunludur.
+- Binary kaynak ve sahne üretimi teknik olarak kaydedildi; **yeni beş türün gerçek av/ölüm/çantaya alma/satış/çekim/ansiklopedi zinciri, kamera yakın/uzak okunurluğu, 1/2/4 süreç ve son Windows/human görsel kabulü** ayrı koşullarda incelenmeden #218/#164 kapanmaz.
+
 ## Kullanıcının sağladığı Quaternius FBX paketleri — 18 Ekim 2026
 
 - `FBX-20261017T212443Z-1-001.zip`: [Ultimate Buildings](https://quaternius.com/packs/ultimatetexturedbuildings.html), bina FBX/materyal sürümü.
 - `FBX-20261017T212451Z-1-001.zip`: [Animated Cute Fish](https://quaternius.com/packs/cutefish.html), balıklar/ahşap sandal/iskele.
 - `FBX-20261017T212537Z-1-001.zip`: [Ultimate House Interior](https://quaternius.com/packs/ultimatehomeinterior.html), ev eşyaları. İçindeki tekrar balık ZIP'i kullanılmadı.
 
-Üç resmî Quaternius paket sayfasındaki **CC0** kaydı 18 Ekim 2026'da okundu. Kaynak FBX'ler `Assets/DeepDive/Art/Supplied/`, yerel URP materyalleri ve metreye uyarlanmış prefablar `Assets/DeepDive/Art/Resources/SuppliedKit/` içindedir; model dosyaları Git LFS'tedir. Arşivlerde harici atlas dokuları yoktur; FBX materyal renkleri URP'ye taşındı, eksik atlas varmış gibi davranılmadı. Levrek için CoralGrouper modeli geçici görsel vekildir; bunun yeni biyolojik tür kabulü olduğu iddia edilmez. Tuna ve RedSnapper kendi kimlikleriyle oyundadır. Atıf zorunlu olmamakla birlikte Quaternius'a teşekkürler.
+Üç resmî Quaternius paket sayfasındaki **CC0** kaydı 18 Ekim 2026'da okundu. Kaynak FBX'ler `Assets/DeepDive/Art/Supplied/`, yerel URP materyalleri ve metreye uyarlanmış prefablar `Assets/DeepDive/Art/Resources/SuppliedKit/` içindedir; model dosyaları Git LFS'tedir. Arşivlerde harici atlas dokuları yoktur; FBX materyal renkleri URP'ye taşındı, eksik atlas varmış gibi davranılmadı. 18 Ekim tarihli üç tür sürümünde Levrek için CoralGrouper modeli geçici vekildi; 2 Kasım #238 yazarlık paketinde levrek çalışma silueti Humphead, orfoz CoralGrouper, fener balığı Anglerfish olarak ayrıldı. Tuna ve RedSnapper kendi kimlikleriyle korunur. Atıf zorunlu olmamakla birlikte Quaternius'a teşekkürler.
 
 ## Kullanıcının Quaternius Pirate Kit paketi (kıyı seti) — 30 Ekim 2026
 
