@@ -103,6 +103,26 @@ namespace DeepDive.P4.Tests
             var gate=new PlayerActionReceipt();var message=Accepted();message.Source.x=float.NaN;
             Assert.That(gate.Accept(0,message,10),Is.False);Assert.That(gate.Accept(0,Accepted(),10),Is.True);
         }
+        [Test] public void SpeciesLessCatchCannotShowEmptyFishOrConsumeAValidSequence()
+        {
+            var gate=new PlayerActionReceipt();
+            var invalid=Accepted();invalid.Species=default;
+            Assert.That(gate.Accept(NetworkManager.ServerClientId,invalid,10.1),Is.False);
+            // The same sequence is still available for the real accepted catch.
+            Assert.That(gate.Accept(NetworkManager.ServerClientId,Accepted(),10.1),Is.True);
+        }
+        [Test] public void FishBuyerDeliveryCanLegitimatelyHaveNoSpeciesField()
+        {
+            var sale=Accepted();sale.Kind=PlayerVisualAction.Deliver;sale.Species=default;
+            Assert.That(new PlayerActionReceipt().Accept(NetworkManager.ServerClientId,sale,10.1),Is.True);
+        }
+        [Test] public void UnsupportedVisualKindNeverConsumesTheLegitimateReceipt()
+        {
+            var gate=new PlayerActionReceipt();
+            var invalid=Accepted();invalid.Kind=PlayerVisualAction.Board;
+            Assert.That(gate.Accept(NetworkManager.ServerClientId,invalid,10.1),Is.False);
+            Assert.That(gate.Accept(NetworkManager.ServerClientId,Accepted(),10.1),Is.True);
+        }
         [Test] public void NewPlayerSequenceIsIndependentAndOldActionCannotReplaceNewer()
         {
             var gate=new PlayerActionReceipt();var message=Accepted();message.Sequence=6;
