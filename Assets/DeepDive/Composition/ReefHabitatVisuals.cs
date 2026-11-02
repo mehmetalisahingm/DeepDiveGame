@@ -80,8 +80,26 @@ namespace DeepDive.Composition
                 }
             }
 
+            // The sand contour mesh is cosmetic. Reuse the authored floor
+            // material so shoreline/reef/deep shading stays consistent.
+            Material floorMaterial = null;
+            foreach (var existing in scene.GetRootGameObjects())
+                if (existing.name == "SeaFloor")
+                    floorMaterial = existing.GetComponent<Renderer>()?.sharedMaterial;
+            if (floorMaterial == null)
+            {
+                Debug.LogError("P411_SEABED_MATERIAL_MISSING: SeaFloor");
+                return;
+            }
+
             var root = new GameObject(RootName);
             SceneManager.MoveGameObjectToScene(root, scene);
+            foreach (var band in NaturalSeabedContourMesh.Bands)
+            {
+                var patch = new GameObject("SeabedContour_" + band.Name);
+                patch.transform.SetParent(root.transform, false);
+                patch.AddComponent<NaturalSeabedContourMesh>().Configure(band, floorMaterial);
+            }
             for (var i = 0; i < Spots.Count; i++)
             {
                 var spot = Spots[i];
@@ -89,7 +107,7 @@ namespace DeepDive.Composition
                 visual.name = "ReefVisual_" + i.ToString("00") + "_" + spot.PrefabId;
                 visual.transform.SetPositionAndRotation(spot.Position, Quaternion.Euler(0f, spot.Yaw, 0f));
             }
-            Debug.Log("P411_REEF_VISUALS_READY count=" + Spots.Count + " reef=6 deep=4");
+            Debug.Log("P411_REEF_VISUALS_READY count=" + Spots.Count + " reef=6 deep=4 seabed=4 render-only");
         }
     }
 }
