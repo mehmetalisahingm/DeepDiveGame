@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DeepDive.Composition;
+using DeepDive.World;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -30,6 +31,35 @@ namespace DeepDive.P4.Tests
                     Assert.Greater(spot.Position.x, 8f, "Deep visuals must not overwrite the western tuna row");
                     Assert.GreaterOrEqual(spot.Position.z, 46f);
                 }
+            }
+        }
+
+        [Test]
+        public void ProposedFiveSpeciesHomesStayClearOfPlacedReefKitCenters()
+        {
+            // The pending #218 authoring step moves 3 grouper into the WESTERN
+            // reef, which the older three-species placement test did not model.
+            // This protects home positions, not the full AI wander envelope or
+            // rendered-mesh clearance; those still require real gameplay review.
+            foreach (var spot in ReefHabitatVisuals.Spots)
+                foreach (var home in P411FiveSpeciesRoster.Homes)
+                    Assert.Greater(Vector3.Distance(spot.Position, home), 3.0f,
+                        $"Fish home {home} would visually overlap {spot.PrefabId} at {spot.Position}");
+        }
+
+        [Test]
+        public void EveryPlacedReefPrefabContainsRealRenderableMesh()
+        {
+            foreach (var spot in ReefHabitatVisuals.Spots)
+            {
+                var prefab=ReefKitPiece.Load(spot.PrefabId);
+                Assert.NotNull(prefab, spot.PrefabId);
+                Assert.IsTrue(prefab.GetComponentsInChildren<MeshFilter>(true)
+                    .Any(filter=>filter.sharedMesh!=null && filter.sharedMesh.vertexCount>=3),
+                    spot.PrefabId+" needs actual mesh geometry, not an empty placeholder");
+                Assert.IsTrue(prefab.GetComponentsInChildren<MeshRenderer>(true)
+                    .Any(renderer=>renderer.sharedMaterial!=null),
+                    spot.PrefabId+" needs a material-backed mesh");
             }
         }
 
