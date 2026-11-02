@@ -1,4 +1,4 @@
-name: P4.11 CC0 animated fish source integrity and importable package
+name: P4.11 verified CC0 animated fish source integrity
 
 on:
   pull_request:
@@ -6,48 +6,29 @@ on:
     paths:
       - 'tools/Fetch-P411FishAssets.ps1'
       - '.github/workflows/p411-cc0-fish-source.yml'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx'
+      - 'Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx.meta'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  verify-and-package:
-    if: github.event_name != 'pull_request' || (github.event.pull_request.number == 238 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'codex/p411-fish-cc0-import-pipeline-20261102')
+  verify-source:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           lfs: true
-          ref: ${{ github.head_ref || github.ref_name }}
-          persist-credentials: true
-      - name: Fetch verified Quaternius CC0 rigged FBX models
+          persist-credentials: false
+      - name: Verify original rigged FBX binary hashes, sizes, and stable Unity import metadata
         shell: pwsh
         run: |
           ./tools/Fetch-P411FishAssets.ps1
-      - name: Verify both original assets and their Unity import metadata
-        shell: pwsh
-        run: |
-          $folder='Assets/DeepDive/Art/Supplied/Fish'
-          foreach($name in @('Humphead','Anglerfish')) {
-            if(-not (Test-Path "$folder/$name.fbx") -or -not (Test-Path "$folder/$name.fbx.meta")) {
-              throw "Missing $name or its Unity .meta"
-            }
-          }
-      - name: Commit hash-verified CC0 FBX through Git LFS to the PR branch
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          git lfs install --local
-          git add -- Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx Assets/DeepDive/Art/Supplied/Fish/Humphead.fbx.meta Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta
-          if git diff --cached --quiet; then
-            echo 'Verified originals are already committed.'
-          else
-            git -c user.name='DeepDive CI source importer' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'assets(P4.11/#218): add two verified CC0 animated fish sources via LFS'
-            git push origin HEAD:refs/heads/codex/p411-fish-cc0-import-pipeline-20261102
-          fi
-      - name: Keep original FBX and stable Unity metadata as reviewable download
+      - name: Preserve the reviewed originals and their stable import metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: p411-cc0-animated-fish-hash-verified
@@ -57,70 +38,4 @@ jobs:
             Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx
             Assets/DeepDive/Art/Supplied/Fish/Anglerfish.fbx.meta
           if-no-files-found: error
-          retention-days: 7
-
-  author-five-fish-scene:
-    needs: verify-and-package
-    if: github.event_name == 'pull_request' && github.event.pull_request.number == 238 && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-    env:
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-      UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-    steps:
-      - name: Require Unity CI license
-        shell: bash
-        run: |
-          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" || ( -z "$UNITY_LICENSE" && -z "$UNITY_SERIAL" ) ]]; then
-            echo '::error::Unity CI license missing: scene cannot be authored.'
-            exit 1
-          fi
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          lfs: true
-          ref: ${{ github.head_ref }}
-          persist-credentials: true
-      - name: Confirm original animated fish binaries from the pinned hashes
-        shell: pwsh
-        run: ./tools/Fetch-P411FishAssets.ps1
-      - name: Author the existing 15 NGO fish scene objects and compile Linux gameplay
-        uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
-        with:
-          unityVersion: 6000.3.23f1
-          targetPlatform: StandaloneLinux64
-          buildMethod: DeepDive.Editor.P1IntegratedBuild.BuildP411AuthoredFiveFishLinux
-          versioning: None
-      - name: Require all three generated species prefabs and saved scene
-        shell: bash
-        run: |
-          for name in SeaBass Grouper Lanternfish; do
-            test -f "Assets/DeepDive/Art/Resources/SuppliedKit/$name.prefab"
-            test -f "Assets/DeepDive/Art/Resources/SuppliedKit/$name.prefab.meta"
-          done
-          test -f Assets/DeepDive/World/Scenes/DiveTestArea.unity
-      - name: Commit generated five-species prefabs, scene and materials only
-        shell: bash
-        run: |
-          git add -- Assets/DeepDive/World/Scenes/DiveTestArea.unity
-          git add -- Assets/DeepDive/Art/Resources/SuppliedKit/SeaBass.prefab Assets/DeepDive/Art/Resources/SuppliedKit/SeaBass.prefab.meta
-          git add -- Assets/DeepDive/Art/Resources/SuppliedKit/Grouper.prefab Assets/DeepDive/Art/Resources/SuppliedKit/Grouper.prefab.meta
-          git add -- Assets/DeepDive/Art/Resources/SuppliedKit/Lanternfish.prefab Assets/DeepDive/Art/Resources/SuppliedKit/Lanternfish.prefab.meta
-          git add -- Assets/DeepDive/Art/Resources/SuppliedKit/Materials/
-          if git diff --cached --quiet; then
-            echo 'Five animated species were already fully authored.'
-          else
-            git -c user.name='DeepDive Unity scene author' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'scene(P4.11/#218): author five animated species into 15 original NGO fish slots'
-            git push origin HEAD:refs/heads/codex/p411-fish-cc0-import-pipeline-20261102
-          fi
-      - name: Preserve source build and scene-authoring logs
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: p411-five-fish-authoring-${{ github.sha }}
-          path: |
-            Logs/
-            Builds/P1-Integrated/
-          if-no-files-found: warn
           retention-days: 7
