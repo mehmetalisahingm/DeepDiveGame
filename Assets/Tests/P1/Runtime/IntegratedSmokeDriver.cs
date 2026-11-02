@@ -214,6 +214,7 @@ namespace DeepDive.P1.Lab
         }
         private IEnumerator Start()
         {
+            if (Arg("-p46-mute") == "1") AudioListener.volume = 0f;
             result.mode = Arg("-p1-integrated"); path = Arg("-p1-report");
             var expected = int.Parse(Arg("-p1-count", "4"));
             var port = ushort.Parse(Arg("-p1-port", "17777"));
