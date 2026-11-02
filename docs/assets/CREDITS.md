@@ -14,6 +14,15 @@ Konum: `Assets/DeepDive/Art/MegaKit/`. `Models/` kaynak FBX'ler (176), `Textures
 
 `Assets/DeepDive/Art/Resources/RepairSet/` (kırık sandal gövdesi, üç R01 onarım parçası, malzeme tezgâhı) projeye özgü kodla üretildi: `Assets/Editor/P48RepairSetBuilder.cs`. Dış model, doku veya ses indirilmedi/yeniden paketlenmedi; lisans yükümlülüğü yok. Parçalar `Art/RepairTools/OakRepairPatch` (25 Ekim, yerel üretim) üzerine kuruludur. Kaldırma/yerleştirme/bırakma sesleri (`Art/RepairTools/OakPlank*.wav`) `Assets/Editor/P48RepairAudioBuilder.cs` ile sentezlendi; kayıt, örnek veya indirme yoktur. Ayrıntı: [P48-REPAIR-SET-20261026.md](../reports/P48-REPAIR-SET-20261026.md).
 
+## P4.11 / #218 — doğrulanmış balık kaynaklarını getirme komutu (2 Kasım 2026)
+
+- **Model lisansı:** [Quaternius Animated Cute Fish Pack](https://quaternius.com/packs/cutefish.html), Şubat 2020, **CC0**. Orijinal rig+klipler; iki seçili dosya `Humphead.fbx` (levrek çalışma silueti) ve `Anglerfish.fbx` (fener balığı). Quaternius'a teşekkürler.
+- **Güvenli kaynak kopyası:** Herkese açık [algosup proje deposu, sabit commit](https://github.com/algosup/2024-2025-project-2-serious-game-team-1/tree/25c512ed6c7c70b904671ba2be76353f26c332ab/src/assets/designs/Fishs/FBX). Bu bağımsız bir topluluk aynasıdır, Quaternius'un kendi yayın deposu değildir.
+- `tools/Fetch-P411FishAssets.ps1` dosyayı yalnız **sabit commit** üzerinden getirir, gerçek Git **blob SHA-1** ve bayt uzunluğunu kontrol eder; mevcut farklı dosyaları asla ezmez, ayrı kararlı Unity `.meta` GUID'lerini üretir.
+- `.github/workflows/p411-cc0-fish-source.yml` kaynakları ücretsiz ağ indirmesiyle doğrulayıp dört dosyayı kısa ömürlü CI **artifact** olarak hazırlar. **CI artifact'i repo içindeki FBX commit'i veya yapılmış sahne entegrasyonu değildir.** Gerçek asset dosyaları, prefablar ve `DiveTestArea.unity` oyun kaynak ağacına dahil edilmeden #218 tamam sayılmaz.
+- Unity Editor 6000.3.23f1 kurulu çalışma kopyasında `pwsh tools/Fetch-P411FishAssets.ps1 -AuthorScene -UnityEditor '<Unity.exe>'` önce iki FBX'i getirir, sonra `P411FiveSpeciesSceneSetup.Apply` ile 15 mevcut NGO balığını beş gerçek tür modeline yeniden yazar; sahne/prefab/meta değişikliklerinin tekrar repo kaydı ve runtime testi zorunludur.
+- Yeni kaynak dosyalarının Git LFS kurallarına göre commit edilmesi ve Unity rig/ölüm/av, yakın/uzak kamera ile 1/2/4 süreç görsel kabulü ayrı aşamadır. Bu satırda henüz PASS beyanı yoktur.
+
 ## Kullanıcının sağladığı Quaternius FBX paketleri — 18 Ekim 2026
 
 - `FBX-20261017T212443Z-1-001.zip`: [Ultimate Buildings](https://quaternius.com/packs/ultimatetexturedbuildings.html), bina FBX/materyal sürümü.
