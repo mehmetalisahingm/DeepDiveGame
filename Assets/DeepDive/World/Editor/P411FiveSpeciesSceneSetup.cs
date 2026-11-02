@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using Unity.Netcode;
@@ -37,14 +36,31 @@ namespace DeepDive.World.Editor
                 if (AssetDatabase.LoadAssetAtPath<GameObject>(
                     "Assets/DeepDive/Art/Supplied/Fish/" + source + ".fbx") == null)
                     throw new FileNotFoundException("P411_FISH_SOURCE_MISSING: " + source);
-            SuppliedKitImport.BuildFiveSpeciesArt();
+            // Validate every authored fish before generating any new art assets.
+            // Never infer slot order from an incomplete, duplicated or renamed roster.
             var scene = EditorSceneManager.OpenScene(ScenePath);
-            var fish = scene.GetRootGameObjects().SelectMany(root =>
-                    root.GetComponentsInChildren<FishActor>(true))
-                .OrderBy(actor => actor.name == DiveTestAreaSetup.FishName ? 0 :
-                    ParseFishIndex(actor.name)).ToArray();
-            if (fish.Length != Population || fish[0].name != DiveTestAreaSetup.FishName)
-                throw new InvalidDataException("P411_FISH_SCENE_COUNT_OR_ROOT_INVALID");
+            var actors = scene.GetRootGameObjects()
+                .SelectMany(root => root.GetComponentsInChildren<FishActor>(true)).ToArray();
+            if (actors.Length != Population)
+                throw new InvalidDataException("P411_FISH_SCENE_COUNT_INVALID expected=" +
+                    Population + " actual=" + actors.Length);
+            var fish = new FishActor[Population];
+            for (var i = 0; i < Population; i++)
+            {
+                var name = i == 0 ? DiveTestAreaSetup.FishName : $"Fish_SeaBass_{i + 1:00}";
+                var matches = actors.Where(actor => actor.name == name).ToArray();
+                if (matches.Length != 1)
+                    throw new InvalidDataException("P411_FISH_SCENE_SLOT_INVALID name=" +
+                        name + " count=" + matches.Length);
+                var actor = matches[0];
+                // Removing all old visual children must not remove a nested NGO identity.
+                if (actor.GetComponent<NetworkObject>() == null ||
+                    actor.GetComponentsInChildren<NetworkObject>(true).Length != 1)
+                    throw new InvalidDataException("P411_FISH_NETWORK_HIERARCHY_INVALID name=" + name);
+                fish[i] = actor;
+            }
+
+            SuppliedKitImport.BuildFiveSpeciesArt();
 
             var definitions = AssetNames.Select(name => AssetDatabase.LoadAssetAtPath<SpeciesDefinition>(
                 "Assets/DeepDive/World/Fish/Species/" + name + ".asset")).ToArray();
@@ -84,13 +100,5 @@ namespace DeepDive.World.Editor
             Debug.Log("P411_FIVE_SPECIES_SCENE_READY sea_bass=3 tuna=3 red_snapper=3 grouper=3 lanternfish=3");
         }
 
-        private static int ParseFishIndex(string name)
-        {
-            const string prefix = "Fish_SeaBass_";
-            if (!name.StartsWith(prefix, StringComparison.Ordinal) ||
-                !int.TryParse(name.Substring(prefix.Length), out var value))
-                throw new InvalidDataException("P411_FISH_NAME_INVALID " + name);
-            return value - 1;
-        }
     }
 }
