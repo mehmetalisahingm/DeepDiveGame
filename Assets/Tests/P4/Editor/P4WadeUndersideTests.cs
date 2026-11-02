@@ -201,9 +201,17 @@ namespace DeepDive.P4.Tests
                     new[] { "Fish_SeaBass" }.Concat(Enumerable.Range(2, 14).Select(i => $"Fish_SeaBass_{i:00}")).ToArray(),
                     fish.Select(f => f.name).ToArray());
                 var species = fish.GroupBy(f => f.Species.SpeciesId).ToDictionary(g => g.Key, g => g.Count());
-                Assert.AreEqual(5, species["sea_bass"]);
-                Assert.AreEqual(5, species["tuna"]);
-                Assert.AreEqual(5, species["red_snapper"]);
+                // The legacy scene contains three kinds (5 each). The P4.11
+                // authored scene contains five kinds (3 each). A partial
+                // conversion must never pass this population integrity test.
+                var fiveSpecies = species.Count == P411FiveSpeciesRoster.SpeciesIds.Length &&
+                    P411FiveSpeciesRoster.SpeciesIds.All(id =>
+                        species.TryGetValue(id, out var count) && count == 3);
+                var legacySpecies = species.Count == 3 &&
+                    new[] { "sea_bass", "tuna", "red_snapper" }.All(id =>
+                        species.TryGetValue(id, out var count) && count == 5);
+                Assert.IsTrue(fiveSpecies || legacySpecies,
+                    "Expected 15 whole-scene fish: legacy 5/5/5 or authored 3/3/3/3/3");
                 var hashes = fish.Select(f => new UnityEditor.SerializedObject(f.GetComponent<NetworkObject>()).FindProperty("GlobalObjectIdHash").uintValue).ToArray();
                 Assert.IsTrue(hashes.All(h => h != 0), "every fish has an NGO identity");
                 Assert.AreEqual(15, hashes.Distinct().Count(), "every fish has its own NGO identity");
