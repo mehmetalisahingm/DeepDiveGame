@@ -883,11 +883,7 @@ namespace DeepDive.P1.Lab
             {
                 report.distance += distance; report.maxTravelStep = Mathf.Max(report.maxTravelStep, distance);
                 if (distance > 1.5f)
-                    Fail(FormattableString.Invariant(
-                        $"Unexpected travel discontinuity: {distance:F6}; realGap={motionGap:F6}; fixedGap={motionFixedGap:F6}; " +
-                        $"serverGap={motionServerGap:F6}; frameGap={motionFrameGap}; networkObject={local.NetworkObjectId}; " +
-                        $"owner={local.IsOwner}; host={manager.IsServer}; phase={adapter.Session.State.Phase}; " +
-                        $"step={step}; substep={substep}; waypoint={waypoint}; from={previous}; to={local.transform.position}"));
+                    Fail(FormattableString.Invariant($"Unexpected travel discontinuity: {distance:F6}; realGap={motionGap:F6}; fixedGap={motionFixedGap:F6}; serverGap={motionServerGap:F6}; frameGap={motionFrameGap}; networkObject={local.NetworkObjectId}; owner={local.IsOwner}; host={manager.IsServer}; phase={adapter.Session.State.Phase}; step={step}; substep={substep}; waypoint={waypoint}; from={previous}; to={local.transform.position}"));
             }
             previous = local.transform.position; wasSeated = seat; previousDay = sync.DayNumber.Value;
             if (report.worldLoads != 1 && !(RepairInterruptions && disconnectSent && report.worldLoads == 2))
