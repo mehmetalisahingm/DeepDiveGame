@@ -192,25 +192,18 @@ namespace DeepDive.World.Tests
         [Test]
         public void TheSeaBedFollowsTheDocumentedProfile()
         {
-            Assert.AreEqual(ReefShelfTopY, BoxOf(Require("Reef_Shelf")).max.y, 1e-3f, "reef shelf top");
-            Assert.AreEqual(DeepBasinTopY, BoxOf(Require("Deep_Basin")).max.y, 1e-3f, "deep basin top");
+            // #219: the boxes stay in the scene for the older setups, switched off; the terrain is the floor now.
+            foreach (var name in new[] { "SeaFloor", "Reef_DropOff", "Reef_Shelf", "Deep_DropOff", "Deep_Basin", "Reef_Head_0", "Reef_Head_1", "Reef_Head_2" })
+                Assert.IsFalse(Require(name).activeSelf, name + " must be off");
 
-            var reefDrop = TopEdge(Require("Reef_DropOff"));
-            Assert.AreEqual(new Vector3(0f, 0f, 15f).y, reefDrop.Near.y, 1e-3f);
-            Assert.AreEqual(15f, reefDrop.Near.z, 1e-3f);
-            Assert.AreEqual(ReefShelfTopY, reefDrop.Far.y, 1e-3f);
-            Assert.AreEqual(19f, reefDrop.Far.z, 1e-3f);
+            Assert.AreEqual(ReefShelfTopY, SeabedProfile.FloorHeight(ReefAnchor.x, ReefAnchor.z), 0.31f, "reef shelf");
+            Assert.AreEqual(DeepBasinTopY, SeabedProfile.FloorHeight(DeepAnchor.x, DeepAnchor.z), 0.5f, "deep basin");
 
-            var deepDrop = TopEdge(Require("Deep_DropOff"));
-            Assert.AreEqual(ReefShelfTopY, deepDrop.Near.y, 1e-3f);
-            Assert.AreEqual(40f, deepDrop.Near.z, 1e-3f);
-            Assert.AreEqual(DeepBasinTopY, deepDrop.Far.y, 1e-3f);
-            Assert.AreEqual(46f, deepDrop.Far.z, 1e-3f);
-
-            foreach (var name in new[] { "Reef_DropOff", "Reef_Shelf", "Deep_DropOff", "Deep_Basin", "Reef_Head_0", "Reef_Head_1", "Reef_Head_2" })
+            foreach (var name in new[] { "Seabed_Shallow", "Seabed_Reef", "Seabed_Deep" })
             {
                 var piece = Require(name);
-                Assert.IsFalse(piece.GetComponent<BoxCollider>().isTrigger, name + " must be solid");
+                Assert.IsTrue(piece.activeSelf, name + " must be on");
+                Assert.IsFalse(piece.GetComponent<MeshCollider>().isTrigger, name + " must be solid");
                 Assert.IsNull(piece.GetComponent<NetworkObject>(), name + " is scenery, not networked");
                 Assert.AreEqual(0, piece.layer, name + " must be on Default, the occluder layer");
             }
@@ -220,16 +213,19 @@ namespace DeepDive.World.Tests
         public void TheReefShelfBottomIsReefAndTheBasinBottomIsDeep()
         {
             var water = Field().Bodies;
-            Assert.IsTrue(WaterDepth.TryClassify(water, new Vector3(ReefAnchor.x, ReefShelfTopY + 0.1f, ReefAnchor.z), out var reef));
+            var reefBed = SeabedProfile.FloorHeight(ReefAnchor.x, ReefAnchor.z);
+            Assert.IsTrue(WaterDepth.TryClassify(water, new Vector3(ReefAnchor.x, reefBed + 0.1f, ReefAnchor.z), out var reef));
             Assert.AreEqual(DepthBandIds.Reef, reef);
-            Assert.IsTrue(WaterDepth.TryClassify(water, new Vector3(DeepAnchor.x, DeepBasinTopY + 0.1f, DeepAnchor.z), out var deep));
+            var deepBed = SeabedProfile.FloorHeight(DeepAnchor.x, DeepAnchor.z);
+            Assert.IsTrue(WaterDepth.TryClassify(water, new Vector3(DeepAnchor.x, deepBed + 0.1f, DeepAnchor.z), out var deep));
             Assert.AreEqual(DepthBandIds.Deep, deep);
 
-            foreach (var head in new[] { "Reef_Head_0", "Reef_Head_1", "Reef_Head_2" })
+            // The rock where the three reef cubes stood.
+            foreach (var (x, z) in new[] { (-8f, 24f), (-5f, 35f), (10f, 22f) })
             {
-                var top = BoxOf(Require(head)).max;
-                Assert.IsTrue(WaterDepth.TryClassify(water, new Vector3(top.x - 0.1f, top.y + 0.1f, top.z - 0.1f), out var band));
-                Assert.AreEqual(DepthBandIds.Reef, band, head + " top must still be reef water");
+                var top = SeabedProfile.FloorHeight(x, z);
+                Assert.IsTrue(WaterDepth.TryClassify(water, new Vector3(x, top + 0.1f, z), out var band));
+                Assert.AreEqual(DepthBandIds.Reef, band, $"the outcrop at {x},{z} must still be reef water");
             }
         }
 
@@ -253,9 +249,9 @@ namespace DeepDive.World.Tests
         public void NoReachableWaterIsDeeperThan35Metres()
         {
             Assert.AreEqual(WaterBottomY, BoxOf(Require("SwimVolume")).min.y, 1e-3f, "the water's floor is the 35 m edge");
-            foreach (var name in new[] { "Reef_Shelf", "Deep_Basin" })
-                Assert.GreaterOrEqual(BoxOf(Require(name)).max.y, SurfaceY - DiveDepthBands.DeepMaxDepth, name);
-            Assert.LessOrEqual(SurfaceY - DeepBasinTopY, DiveDepthBands.DeepMaxDepth);
+            for (var x = -15f; x <= 15f; x += 1f)
+            for (var z = -15f; z <= 65f; z += 1f)
+                Assert.GreaterOrEqual(SeabedProfile.FloorHeight(x, z), SurfaceY - DiveDepthBands.DeepMaxDepth, $"{x},{z}");
         }
 
         // --- Water authority, walls, surface ------------------------------------------------------------------
@@ -376,12 +372,17 @@ namespace DeepDive.World.Tests
             foreach (var root in scene.GetRootGameObjects())
             foreach (var collider in root.GetComponentsInChildren<Collider>(true))
             {
-                if (collider.isTrigger) continue;
+                if (collider.isTrigger || collider.name.StartsWith("Seabed_")) continue;
                 var b = BoxOrBounds(collider);
                 if (b.max.y <= seaBedY + 0.01f) continue;
                 var overlaps = column.min.x < b.max.x && b.min.x < column.max.x && column.min.z < b.max.z && b.min.z < column.max.z;
                 Assert.IsFalse(overlaps, collider.name + " stands in " + anchorId + "'s water column");
             }
+
+            // The terrain's box spans its whole chunk, so its height is read where the hull actually floats.
+            for (var x = column.min.x; x <= column.max.x; x += 0.5f)
+            for (var z = column.min.z; z <= column.max.z; z += 0.5f)
+                Assert.LessOrEqual(SeabedProfile.FloorHeight(x, z), SurfaceY - HullDraft - 5f, $"the floor reaches the hull of {anchorId} at {x},{z}");
         }
 
         [TestCase("anchor-reef-1")]

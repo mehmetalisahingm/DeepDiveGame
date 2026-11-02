@@ -17,26 +17,26 @@ namespace DeepDive.World
         // The existing 15 NGO scene identities survive; no extra prefab registrations.
         public static readonly Vector3[] Homes =
         {
-            // Shallow / the original game-day hunting approach.
+            // Sea bass / shallows, north of the sand slope that rises to the wade (#219).
             new Vector3(0f, 4f, 8f),
-            new Vector3(-8f, 3.5f, 2.5f),
-            new Vector3(-5.3333f, 3.5f, 2.5f),
+            new Vector3(-8f, 4f, 8f),
+            new Vector3(-4f, 4f, 8f),
             // Tuna / open shallows.
-            new Vector3(-5f, 3.5f, 10f),
-            new Vector3(0f, 3.5f, 11f),
-            new Vector3(5f, 3.5f, 10f),
+            new Vector3(-5f, 4f, 11f),
+            new Vector3(0f, 4f, 11.5f),
+            new Vector3(5f, 4f, 10f),
             // Red snapper / eastern reef shelf.
             new Vector3(7f, -4f, 30.5f),
             new Vector3(8f, -4f, 35f),
             new Vector3(6f, -4f, 38f),
             // Grouper / western reef band, above reef floor.
-            new Vector3(-10f, -4.5f, 28f),
+            new Vector3(-10.5f, -3.5f, 26.5f),
             new Vector3(-10f, -4.5f, 33f),
             new Vector3(-10f, -4.5f, 38f),
-            // Lanternfish / deep open-water column, west of boss & boat.
-            new Vector3(-8f, -18f, 49f),
-            new Vector3(-9f, -18f, 56f),
-            new Vector3(-8f, -18f, 60f)
+            // Lanternfish / over the basin floor, west of boss & boat and off the boss traces.
+            new Vector3(-10f, -22f, 58f),
+            new Vector3(-9.5f, -21.5f, 60f),
+            new Vector3(-4f, -21f, 60f)
         };
 
         public static string SpeciesForSlot(int index) => SpeciesIds[index / 3];

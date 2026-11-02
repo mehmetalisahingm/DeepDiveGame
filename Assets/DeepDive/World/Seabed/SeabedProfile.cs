@@ -81,6 +81,7 @@ namespace DeepDive.World
             new Solid(Boulder, 2.5f, -4.3f, 39.5f, new Vector3(4.5f, 1.5f, 3.25f)),
             new Solid(Boulder, 2f, 9.5f, 44f, new Vector3(3.6f, 1.2f, 2.6f)),
             new Solid(Boulder, 2.5f, 12f, 61f, new Vector3(4.5f, 1.5f, 3.25f)),
+            new Solid(Boulder, 1f, 10f, 50f, new Vector3(1.8f, 0.6f, 1.3f)),
             new Solid(Boulder, 1f, -12.5f, -8f, new Vector3(1.8f, 0.6f, 1.3f)),
             new Solid(Boulder, 1f, 12.5f, -3f, new Vector3(1.8f, 0.6f, 1.3f))
         };
