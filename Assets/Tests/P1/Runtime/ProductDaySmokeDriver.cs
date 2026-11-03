@@ -31,6 +31,8 @@ namespace DeepDive.P1.Lab
         private const string DoneMessage = "test/p46/product-done";
         [Serializable] public sealed class Report
         {
+            public List<string> habitatSeen = new List<string>(), habitatViews = new List<string>(), habitatCaught = new List<string>();
+            public int habitatBalance, habitatRewards, habitatFishSamples, habitatBelowFloor;
             public bool passed, reload, initialClean, homeSpawn, repaired, cameraBought, realClip,
                 clipPlayed, clipAdvanced, published, duplicateRefused, slept, morningHome, reloadClean, mapMoved, mapDocked;
             public int slot, players, step, worldLoads, diveCount, soldCount, day, balance, income, boatParts, mapPlayers;
@@ -303,7 +305,7 @@ namespace DeepDive.P1.Lab
                     adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Dive) SetStep(2); break;
                 case 2: SetStep(3); break;
                 case 3: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(4); break;
-                case 4: CycleDive(5); break;
+                case 4: if (HabitatHunt) { FinishHabitatSale(); break; } CycleDive(5); break;
                 case 5: SetStep(6); break;
                 case 6: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(7); break;
                 case 7: CycleDive(8); break;
@@ -343,10 +345,11 @@ namespace DeepDive.P1.Lab
                         substep = 1; route = null; purchaseHomeExited = true;
                     }
                     if(OceanVideo && !OceanShore())return;
-                    if ((!Host && !RepairOnly) || HuntFirst) { localDone = true; return; }
+                    if ((!Host && !RepairOnly) || HuntFirst || HabitatHunt) { localDone = true; return; }
                     CollectParts(); break;
                 case 2: case 5:
                     if(step==2 && OceanVideo && !OceanSurvey())return;
+                    if(HabitatHunt){localDone=HabitatTick();return;}
                     if (!Host) { if(ActionVideo)ActionObserver();else WaitInWater(); return; }
                     Hunt(); break;
                 case 3: case 6: case 9:
@@ -371,7 +374,7 @@ namespace DeepDive.P1.Lab
                 case 12: TripBack(); break;
                 case 13: HomePc(); break;
                 case 14: Sleep(); break;
-                case 15: Snapshot(); localDone = report.income > 0; break;
+                case 15: Snapshot(); localDone = report.income > 0 || HabitatHunt; break;
             }
         }
 
@@ -931,7 +934,7 @@ namespace DeepDive.P1.Lab
             if (flat < tolerance && (!depth || waypoint != route.Count - 1 || Mathf.Abs(delta.y) < 0.45f))
             { waypoint++; return waypoint >= route.Count; }
             // #188 hunt-first: the unrepaired hull still lies on the beach cradle, so dry legs go round it.
-            if (HuntFirst && !local.Swimming.Value) { MoveToward(Around(target)); return false; }
+            if ((HuntFirst || HabitatHunt) && !local.Swimming.Value) { MoveToward(Around(target)); return false; }
             MoveToward(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target);
             return false;
         }
@@ -1027,6 +1030,7 @@ namespace DeepDive.P1.Lab
                 report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused &&
                 report.cameraHudRecording && report.cameraHudTimerAdvanced && report.cameraHudStopped;
             if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
+            if (HabitatHunt) report.passed = HabitatPassed();
             report.huntFirst = HuntFirst;
             if (HuntFirst && Host) report.passed &= report.partsAtFirstSale == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
