@@ -1,0 +1,17 @@
+{
+  "huntTargetFish": "Fish_SeaBass_04",
+  "passed": true,
+  "huntBagSpecies": "tuna",
+  "huntBagGrams": 1807,
+  "huntMinDistance": 1.6655791997909546,
+  "huntPlayerPos": "(-3.6, 1.4, 10.2)",
+  "catchObserved": true,
+  "catchDespawned": true,
+  "inventoryAdded": true,
+  "inventoryReplicated": true,
+  "huntOtherFishRemain": true,
+  "fishMoved": true,
+  "huntPopulationObserved": 15,
+  "returned": true,
+  "errors": []
+}

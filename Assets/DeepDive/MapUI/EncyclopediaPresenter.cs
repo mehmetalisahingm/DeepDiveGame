@@ -48,7 +48,9 @@ namespace DeepDive.MapUI
             {
                 ["sea_bass"] = ("Levrek", "Kiyi baligi"),
                 ["tuna"] = ("Ton baligi", "Deniz baligi"),
-                ["red_snapper"] = ("Kirmizi mercan", "Deniz baligi")
+                ["red_snapper"] = ("Kirmizi mercan", "Deniz baligi"),
+                ["grouper"] = ("Orfoz", "Resif baligi"),
+                ["lanternfish"] = ("Fener baligi", "Derin su baligi")
             };
 
         public static IReadOnlyList<EncyclopediaEntry> Build(in ExplorationSnapshot snapshot)

@@ -1,0 +1,17 @@
+{
+  "huntTargetFish": "Fish_SeaBass_07",
+  "passed": true,
+  "huntBagSpecies": "red_snapper",
+  "huntBagGrams": 1666,
+  "huntMinDistance": 1.6049145460128784,
+  "huntPlayerPos": "(9.0, -5.2, 28.5)",
+  "catchObserved": true,
+  "catchDespawned": true,
+  "inventoryAdded": true,
+  "inventoryReplicated": true,
+  "huntOtherFishRemain": true,
+  "fishMoved": true,
+  "huntPopulationObserved": 15,
+  "returned": true,
+  "errors": []
+}

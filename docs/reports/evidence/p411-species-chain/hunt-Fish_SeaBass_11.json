@@ -1,0 +1,17 @@
+{
+  "huntTargetFish": "Fish_SeaBass_11",
+  "passed": true,
+  "huntBagSpecies": "grouper",
+  "huntBagGrams": 3384,
+  "huntMinDistance": 1.66043221950531,
+  "huntPlayerPos": "(-9.9, -5.2, 31.0)",
+  "catchObserved": true,
+  "catchDespawned": true,
+  "inventoryAdded": true,
+  "inventoryReplicated": true,
+  "huntOtherFishRemain": true,
+  "fishMoved": true,
+  "huntPopulationObserved": 15,
+  "returned": true,
+  "errors": []
+}
