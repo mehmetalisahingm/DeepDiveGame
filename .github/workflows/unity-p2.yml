@@ -45,6 +45,14 @@ jobs:
           testMode: EditMode
           artifactsPath: Logs/CI-Tests
           githubToken: ''
+      - name: Release unused test editor image before Windows build
+        shell: bash
+        run: |
+          # Linux test and Windows build editor images otherwise coexist on the
+          # same hosted runner. Keep the workspace/results and any live container.
+          df -h /
+          docker image prune --all --force
+          df -h /
       - name: Existing Windows build method
         uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # v4
         with:

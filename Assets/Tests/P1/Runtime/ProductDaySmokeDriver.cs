@@ -63,6 +63,7 @@ namespace DeepDive.P1.Lab
             public int actionVisibleKinds;
             public bool actionProps,actionSeatedEye,actionStandingEye;
             public bool caughtFishVisible;
+            public bool shelfSelectionSeen, shelfSelectionNoSpend, shelfCancelRecovered, cashierSelectionCleared;
             public int contactKinds,satchelPoses;
             public float maxActionGripError,maxSatchelError;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
@@ -94,6 +95,7 @@ namespace DeepDive.P1.Lab
         private int previousDay;
         private ulong publishRequest;
         private Report baseline;
+        private int shelfStage, shelfBalance;
 
         private bool Host => report.slot == 0;
         private bool repairApproach, repairAtDock, repairExit;
@@ -161,6 +163,7 @@ namespace DeepDive.P1.Lab
                 if (Host) messages.RegisterNamedMessageHandler(DoneMessage, ReceiveDone);
             }
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
+            if (players.Any(p => p.SelectedShopItem.Value.Length > 0)) report.shelfSelectionSeen = true;
             report.players = Math.Max(report.players, players.Length);
             local = players.FirstOrDefault(p => p.IsOwner);
             if (local == null) return;
@@ -628,11 +631,47 @@ namespace DeepDive.P1.Lab
                 route = null; substep = 3;
             }
             if (substep == 3) { CollectParts(); return; }
+            if (!economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId) && !SelectCameraFromShelf()) return;
             if (!GoToService(TownServiceCatalog.EquipmentShopId)) return;
             if (!sync.ShopOpen) { Act(local.SubmitServiceInteractionLocal); return; }
             if (!economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId))
             { Act(() => sync.RequestPurchase(EconomyManager.CameraBasicId)); return; }
+            report.cashierSelectionCleared = local.SelectedShopItem.Value.Length == 0;
+            if (!report.cashierSelectionCleared) { Fail("Paid camera left an unpaid shelf selection"); return; }
             report.cameraBought = true; localDone = true;
+        }
+        private bool SelectCameraFromShelf()
+        {
+            if (shelfStage == 4) return true;
+            var sample = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None)
+                .SingleOrDefault(s => s.ItemId == EconomyManager.CameraBasicId);
+            if (sample == null) { Fail("Physical camera shelf missing"); return false; }
+            var stand = sample.transform.position + Vector3.forward;
+            stand.y = ContinuousTownLayout.WalkSurfaceY;
+            var delta = stand - local.transform.position; delta.y = 0;
+            if (delta.magnitude > .17f) { MoveToward(Around(stand)); aimAt = 0; return false; }
+            Aim(sample.transform.position);
+            if (!Settled()) return false;
+            var selected = local.SelectedShopItem.Value.ToString();
+            var economy = adapter.GetComponent<EconomyManager>();
+            if (shelfStage == 0) { shelfBalance = economy.SharedBalance; shelfStage = 1; }
+            if (shelfStage == 1)
+            {
+                if (selected != EconomyManager.CameraBasicId) { Act(local.SubmitServiceInteractionLocal); return false; }
+                report.shelfSelectionSeen = true;
+                report.shelfSelectionNoSpend = economy.SharedBalance == shelfBalance &&
+                    !economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId);
+                if (!report.shelfSelectionNoSpend) { Fail("Shelf selection spent money or granted equipment"); return false; }
+                CaptureView(".shelf-selected.png");
+                shelfStage = 2;
+            }
+            if (shelfStage == 2)
+            {
+                if (selected.Length > 0) { Act(local.CancelShopSelectionLocal); return false; }
+                report.shelfCancelRecovered = true; shelfStage = 3;
+            }
+            if (selected != EconomyManager.CameraBasicId) { Act(local.SubmitServiceInteractionLocal); return false; }
+            shelfStage = 4; aimAt = 0; return true;
         }
         private void Record()
         {
@@ -1034,6 +1073,14 @@ namespace DeepDive.P1.Lab
             report.huntFirst = HuntFirst;
             if (HuntFirst && Host) report.passed &= report.partsAtFirstSale == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
+            if (!RepairOnly && !report.reload)
+            {
+                var shopping = report.shelfSelectionSeen && (!Host ||
+                    (report.shelfSelectionNoSpend && report.shelfCancelRecovered && report.cashierSelectionCleared));
+                if (!shopping && report.errors.Count == 0)
+                { report.failure = "Physical shelf selection/cancellation/cashier proof missing"; report.errors.Add(report.failure); }
+                report.passed &= shopping;
+            }
             if (RepairInterruptions && Host) report.passed &= report.repairRace && report.repairDisconnect && report.repairRejoin && report.repairMidnight;
             if (RepairPurchase && Host) report.passed &= report.purchasedMaterial && report.purchaseDidNotRepair && report.saveFaultRefused && report.saveFaultRecovered;
             if (Arg("-p187-video")=="1" && !report.reload)

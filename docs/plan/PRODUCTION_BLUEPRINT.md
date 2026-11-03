@@ -59,6 +59,8 @@ Animasyon root motion mevcut fiziksel hareketi ikinci kez yürütmez. Yeni input
 
 ### P4.10 / #162 — Kasaba ve ev
 
+3 Kasım kullanıcı önceliği: #241 Mehmet ilk raf seçimi → kasada ayrı ödeme bağlantısını uygular. Seçimde para/edinim yok; host hedef doğrular, mevcut ekonomi ödeme yapar. Bu ilk paket tamamlanmış iç mimari veya elde taşıma animasyonu değildir; Mert raf/ürün/satıcı sanatını, Utku şehir ölçeği ve yolları kendi mevcut işlerinde tamamlar. Gerçek dükkân tesliminde görünür fiyatlar, ürün seçme/inceleme/geri bırakma, elde/sepetle taşıma ve kasada tek ödeme birlikte gösterilir; yalnız dekor rafı veya uzaktan menü yeterli değildir.
+
 | Sıra | Alan işi | Sahip | Girdi | Çıktı / kabul |
 |---|---|---|---|---|
 | 10-1 | Kısa örneği geniş yerleşime yayma | Utku + Mert | P4.7 kit/ölçek | Meydan/yan yollar/kıyı; tekrar ve boşluk kontrolü |
