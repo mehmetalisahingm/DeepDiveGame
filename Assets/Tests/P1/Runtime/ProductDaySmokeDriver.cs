@@ -62,6 +62,8 @@ namespace DeepDive.P1.Lab
             public bool actionProps,actionSeatedEye,actionStandingEye;
             public bool caughtFishVisible;
             public bool shelfSelectionSeen, shelfSelectionNoSpend, shelfCancelRecovered, cashierSelectionCleared;
+            public bool shelfCarrySeen, shelfCarryInView, shelfCarryWalkSeen;
+            public float maxShelfCarryGripError;
             public int contactKinds,satchelPoses;
             public float maxActionGripError,maxSatchelError;
             public bool oceanReady, oceanReflection, oceanAnimated, oceanSurfaceEye;
@@ -94,6 +96,7 @@ namespace DeepDive.P1.Lab
         private ulong publishRequest;
         private Report baseline;
         private int shelfStage, shelfBalance;
+        private float shelfLookUntil;
 
         private bool Host => report.slot == 0;
         private bool repairApproach, repairAtDock, repairExit;
@@ -247,6 +250,7 @@ namespace DeepDive.P1.Lab
             CaptureEquipmentVideo();
             CaptureOceanVideo();
             CaptureActionVideo();
+            CaptureShopCarry();
         }
         private void Broadcast(float now)
         {
@@ -659,6 +663,12 @@ namespace DeepDive.P1.Lab
                 report.shelfSelectionNoSpend = economy.SharedBalance == shelfBalance &&
                     !economy.LoadoutFor(new PlayerId(0)).Contains(EconomyManager.CameraBasicId);
                 if (!report.shelfSelectionNoSpend) { Fail("Shelf selection spent money or granted equipment"); return false; }
+                var carry = local.GetComponent<ShopCarryView>();
+                if (carry == null || !carry.Visible) return false;
+                Aim(carry.Focus);
+                if (shelfLookUntil == 0) shelfLookUntil = Time.realtimeSinceStartup + 1.25f;
+                if (Time.realtimeSinceStartup < shelfLookUntil) return false;
+                if (ActionVideo && (!report.shelfCarryInView || !ShopObserverNear())) return false;
                 CaptureView(".shelf-selected.png");
                 shelfStage = 2;
             }
@@ -1071,8 +1081,9 @@ namespace DeepDive.P1.Lab
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
             if (!RepairOnly && !report.reload)
             {
-                var shopping = report.shelfSelectionSeen && (!Host ||
+                var shopping = report.shelfSelectionSeen && report.shelfCarrySeen && report.maxShelfCarryGripError < .035f && (!Host ||
                     (report.shelfSelectionNoSpend && report.shelfCancelRecovered && report.cashierSelectionCleared));
+                if (ActionVideo) shopping &= report.shelfCarryInView && report.shelfCarryWalkSeen;
                 if (!shopping && report.errors.Count == 0)
                 { report.failure = "Physical shelf selection/cancellation/cashier proof missing"; report.errors.Add(report.failure); }
                 report.passed &= shopping;

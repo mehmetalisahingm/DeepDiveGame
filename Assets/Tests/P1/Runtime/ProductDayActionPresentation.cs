@@ -45,6 +45,9 @@ namespace DeepDive.P1.Lab
         private void ActionSaleObserver()
         {
             actionObserverEntered=false;
+            if (step == 7 && ActionWorker != null && ActionWorker.GetComponent<PlayerActionView>()?.DeliveryCount >= 2 &&
+                ActionWorker.GetComponent<PlayerActionView>().ActiveKind == PlayerVisualAction.None)
+            { WatchShopCarry(); return; }
             var anchor=FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a=>a.Definition.ServiceId==TownServiceCatalog.FishBuyerId);
             var target=anchor.WorldPosition+anchor.transform.forward*2.25f+anchor.transform.right*(1.8f+Mathf.Max(0,report.slot-1)*1.2f);
             var delta=target-local.transform.position;delta.y=0;
