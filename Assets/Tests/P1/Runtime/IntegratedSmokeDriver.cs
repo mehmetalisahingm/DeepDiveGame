@@ -33,6 +33,10 @@ namespace DeepDive.P1.Lab
             public bool huntShooter, inventoryReplicated;
             public int huntPopulationObserved;
             public bool huntOtherFishRemain;
+            public string huntTargetFish = "", huntBagSpecies = "";   // #218: which scene fish -p2-hunt chased and the species the host's bag then held
+            public int huntBagGrams;
+            public float huntMinDistance = 9999f;   // closest the shooter's camera got to the target fish
+            public string huntPlayerPos = "";
             public bool recordingStarted, recordingStopped, recordingClaimed, recordingViews, recordingPending;
             public bool recordingViewActive, recordingSafe;
             public bool recordingRoleResolved, recordingRecorder;
@@ -133,6 +137,8 @@ namespace DeepDive.P1.Lab
         private float nextAction;
         private Vector3? firstFishPosition;
         private bool Hunt => Arg("-p2-hunt") == "1";
+        // #218: extra seconds for -p2-hunt when the chosen fish lives far from the dive start (-p411-hunt-extra); 0 keeps the original timing.
+        private int HuntExtra => int.TryParse(Arg("-p411-hunt-extra"), out var seconds) && seconds > 0 ? seconds : 0;
         private bool Event => Arg("-p3-event") == "1";
         private bool Record => Arg("-p3-record") == "1" || Event || Acceptance;
         // #106 acceptance: NO fixture. The real -Record capture produces the clip; the recorder does not sell it to the NPC but
@@ -241,7 +247,7 @@ namespace DeepDive.P1.Lab
             bool rejoinLeft = false, reconnectSent = false, sawOffline = false, lobbyLogged = false, unauthorizedSent = false, screenshot = false;
             bool diveScreenshot = false, shoreScreenshot = false;
             var leaveAt = 0f;
-            var duration = Shops ? 125f : LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : WorldConditions ? 85f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f : 46f;
+            var duration = Shops ? 125f : LivingReload ? 40f : Living ? 230f : BossAcceptanceReload ? 50f : BossAcceptance ? 360f : RoleEffects ? 72f : WorldConditions ? 85f : DeepReload ? 40f : Deep ? 200f : FleetReload ? 40f : Fleet ? 200f : AcceptanceReload ? 40f : Acceptance ? 200f : MediaReload ? 40f : MediaFlow ? 120f : Explore ? 60f : Storage ? 100f : Home ? 96f : DayReload ? 40f : Day ? 90f : FleetRoute ? 260f : Trip ? 134f : Boat ? 78f : Town ? 76f : Event ? 114f : Record ? 100f : Hunt ? 58f + HuntExtra : 46f;
             if (CoastParts) duration = 360f;
             else if (Trip && !FleetRoute) duration = 400f;
             else if (Boat && !FleetRoute) duration = 250f;
@@ -366,7 +372,7 @@ namespace DeepDive.P1.Lab
                 // Purchased-fleet routes load an already repaired campaign and exercise the
                 // roundtrip in Return. They must not spend the physical-repair window waiting
                 // in Dive: that leaves too little of the scenario budget for the deep route.
-                var returnAfter = Shops ? 34 : MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : FleetRoute ? 33 : Boat ? 180 : WorldConditions ? 65 : Hunt || Record ? 44 : 33;
+                var returnAfter = Shops ? 34 : MediaFlow ? 34 : Explore ? 36 : Storage ? 40 : Home ? 72 : Day ? 999 : Town ? 34 : Event ? 92 : FleetRoute ? 33 : Boat ? 180 : WorldConditions ? 65 : Hunt ? 44 + HuntExtra : Record ? 44 : 33;
                 var returnCeiling = Fleet || Deep || Living ? 100f : Record && !MediaFlow ? (Event ? 140f : 70f) : WorldConditions ? 65f : returnAfter;
                 if (Boat && !FleetRoute && !CoastParts)
                 {
@@ -388,7 +394,7 @@ namespace DeepDive.P1.Lab
                 // Plain -Record keeps the fixed P3 schedule relative to when Return REALLY began (20 s to walk to the buyer and hand in, +4 s to leave),
                 // because the dive now ends when the recorder is safe, not at a fixed second.
                 var recordRelative = Record && !MediaFlow && !Event && !Acceptance && returnPhaseAt > 0;
-                var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (Shops ? 98 : MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 188 : Record ? 56 : Hunt ? 48 : 36);
+                var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (Shops ? 98 : MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 188 : Record ? 56 : Hunt ? 48 + HuntExtra : 36);
                 if (CoastParts) lobbyDue = result.boatRepaired && result.boatPartsHidden && result.boatHintGone &&
                     boatFinalAt > 0 && Time.realtimeSinceStartup - boatFinalAt > 2f;
                 else if (Trip && !FleetRoute) lobbyDue = result.tripDone && result.tripSaveReload;
@@ -403,7 +409,7 @@ namespace DeepDive.P1.Lab
                     result.readyReset |= adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(value => !value) &&
                         string.IsNullOrEmpty(state.DiveId);
                 }
-                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (Shops ? 106 : MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 195 : Record ? 60 : Hunt ? 54 : WorldConditions ? 78 : 41);
+                var leaveDue = Living ? (result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 10f) || elapsed > 215f : BossAcceptance ? result.returned : Deep ? (result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 10f) || elapsed > 190f : Fleet ? (result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 10f) || elapsed > 190f : Acceptance ? (result.acceptHostDone && Time.realtimeSinceStartup - acceptDoneAt > 8f) || elapsed > 190f : FleetRoute ? result.returned : recordRelative ? lobbySent && Time.realtimeSinceStartup - returnPhaseAt > 24f : elapsed > (Shops ? 106 : MediaFlow ? 114 : Explore ? 54 : Storage ? 94 : Home ? 86 : Day ? 76 : Town ? 68 : Event ? 108 : Trip ? 128 : Boat ? 195 : Record ? 60 : Hunt ? 54 + HuntExtra : WorldConditions ? 78 : 41);
                 if (CoastParts) leaveDue = (result.returned && Time.realtimeSinceStartup - observedReturnLobbyAt > 3f) || elapsed > 330f;
                 else if (Trip && !FleetRoute) leaveDue = (result.returned && Time.realtimeSinceStartup - observedReturnLobbyAt > 3f) || elapsed > 390f;
                 else if (Boat && !FleetRoute) leaveDue = (result.returned && Time.realtimeSinceStartup - observedReturnLobbyAt > 3f) || elapsed > 240f;
@@ -1050,11 +1056,16 @@ namespace DeepDive.P1.Lab
                 result.inventoryReplicated |= bagSync != null && bagSync.BagItemCount.Value == 1 && bagSync.BagWeightGrams.Value > 0;
             }
             if (adapter.IsAuthority && adapter.GetComponent<InventoryManager>().Bags.TryGetValue(new PlayerId(shooter), out var bag))
+            {
                 result.inventoryAdded |= bag.Items.Count == 1;
+                if (bag.Items.Count == 1) { result.huntBagSpecies = bag.Items[0].SpeciesId; result.huntBagGrams = bag.Items[0].WeightGrams; }
+            }
             var population = FindObjectsByType<FishActor>(FindObjectsSortMode.None);
             result.huntPopulationObserved = Math.Max(result.huntPopulationObserved, population.Count(f => f.IsSpawned));
             // Scene identity is stable across processes; Unity instance/enumeration order is not.
-            var fish = population.FirstOrDefault(f => f.name == "Fish_SeaBass");
+            var huntFish = Arg("-p411-hunt-fish").Length > 0 ? Arg("-p411-hunt-fish") : "Fish_SeaBass";   // #218: default unchanged
+            result.huntTargetFish = huntFish;
+            var fish = population.FirstOrDefault(f => f.name == huntFish);
             if (fish == null || !fish.IsSpawned)
             {
                 result.catchDespawned |= result.catchObserved;
@@ -1067,9 +1078,13 @@ namespace DeepDive.P1.Lab
             result.catchObserved |= available;
             if (local.OwnerClientId != shooter) { local.SubmitLocalInput(Vector3.zero, 0); return; }
             var delta = fish.GetComponent<Collider>().bounds.center - local.GetComponentInChildren<Camera>(true).transform.position;
+            result.huntMinDistance = Mathf.Min(result.huntMinDistance, delta.magnitude);
+            result.huntPlayerPos = local.transform.position.ToString("0.0");
             var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             var pitch = -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg;
-            var move = available && delta.magnitude > 1.7f ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * delta.normalized : Vector3.zero;
+            // #218: a chosen far fish is swum toward until it is within 8 m (the harpoon reaches 22 m, but a reef lip can hide a fish behind it) (the default Fish_SeaBass starts in reach).
+            var approach = !available && Arg("-p411-hunt-fish").Length > 0 && delta.magnitude > 8f;
+            var move = (available && delta.magnitude > 1.7f) || approach ? Quaternion.Inverse(Quaternion.Euler(0, yaw, 0)) * delta.normalized : Vector3.zero;
             local.SubmitLocalInput(move, yaw, pitch);
             if (nextAction == 0) nextAction = Time.realtimeSinceStartup + 0.2f;
             if (Time.realtimeSinceStartup < nextAction) return;

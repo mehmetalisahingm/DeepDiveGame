@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$CoastParts, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Shops, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '')
+param([ValidateSet(1,2,4)][int]$Players = 4, [int]$Port = 18777, [switch]$Capture, [switch]$Hunt, [switch]$Record, [switch]$Event, [switch]$Town, [switch]$Boat, [switch]$CoastParts, [switch]$Trip, [switch]$Day, [switch]$HomeSleep, [switch]$Storage, [switch]$Explore, [switch]$Media, [switch]$Acceptance, [switch]$Fleet, [switch]$Deep, [switch]$Living, [switch]$RoleEffects, [switch]$WorldConditions, [switch]$Shops, [switch]$Unified, [string]$BuildPath = '', [string]$TripVehicle = '', [string]$TripRoute = '', [string]$CampaignSeed = '', [string]$HuntFish = '', [int]$HuntExtra = 0)
 $ErrorActionPreference = 'Stop'
 if ($CoastParts -and $Players -ne 2) { throw 'CoastParts senaryosu host + guest (Players 2) gerektirir.' }
 $p1Root = Split-Path -Parent $PSScriptRoot
@@ -40,6 +40,8 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
     if (-not $Unified) {
         if ($Reason) { $p1Args += @('-p1-reason', $Reason) }
         if ($Hunt) { $p1Args += @('-p2-hunt', '1') }
+        if ($HuntExtra -gt 0) { $p1Args += @('-p411-hunt-extra', $HuntExtra) }
+        if ($HuntFish) { $p1Args += @('-p411-hunt-fish', $HuntFish) }   # #218: hunt this scene fish (e.g. Fish_SeaBass_10) instead of Fish_SeaBass
         if ($Record) { $p1Args += @('-p3-record', '1') }
         if ($Event) { $p1Args += @('-p3-event', '1') }
         if ($Town) { $p1Args += @('-p3-town', '1') }
@@ -89,7 +91,7 @@ try {
         Wait-P1Marker 'P1_SCENE name=DiveTestArea success=True' 40
         Start-P1Integrated 'late-dive' 'reject' 'WrongPhase'
     }
-    $seconds = if ($Unified) { 360 } elseif ($Shops) { 150 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 230 } elseif ($Record) { 130 } elseif ($Hunt) { 90 } else { 60 }
+    $seconds = if ($Unified) { 360 } elseif ($Shops) { 150 } elseif ($RoleEffects -or $WorldConditions) { 105 } elseif ($Town) { 105 } elseif ($Event) { 150 } elseif ($Storage) { 150 } elseif ($Living) { 240 } elseif ($Deep) { 230 } elseif ($Fleet) { 230 } elseif ($Acceptance) { 230 } elseif ($Media) { 150 } elseif ($Explore) { 95 } elseif ($HomeSleep) { 150 } elseif ($Day) { 125 } elseif ($Trip -and $TripVehicle) { 310 } elseif ($Trip) { 175 } elseif ($Boat) { 230 } elseif ($Record) { 130 } elseif ($Hunt) { 90 + $HuntExtra } else { 60 }
     if ($CoastParts) { $seconds = 390 }
     elseif ($Trip -and -not $TripVehicle) { $seconds = 430 }
     elseif ($Boat -and -not $Trip) { $seconds = 280 }

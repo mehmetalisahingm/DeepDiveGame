@@ -1,0 +1,17 @@
+{
+  "huntTargetFish": "Fish_SeaBass_15",
+  "passed": true,
+  "huntBagSpecies": "lanternfish",
+  "huntBagGrams": 557,
+  "huntMinDistance": 1.6447592973709106,
+  "huntPlayerPos": "(-6.6, -18.1, 59.5)",
+  "catchObserved": true,
+  "catchDespawned": true,
+  "inventoryAdded": true,
+  "inventoryReplicated": true,
+  "huntOtherFishRemain": true,
+  "fishMoved": true,
+  "huntPopulationObserved": 15,
+  "returned": true,
+  "errors": []
+}
