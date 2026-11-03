@@ -79,6 +79,7 @@ namespace DeepDive.World
         private RecordingTuning tuning;
         private readonly List<ulong> recorders = new List<ulong>();
         private readonly RaycastHit[] occlusionBuffer = new RaycastHit[8];
+        private const float OwnCapsuleReach = 0.1f;
         private string resolvedSubjectId = "";
 
         // Light and depth for the camera tier's low-light rule (P4.3). The water is WaterField's
@@ -301,6 +302,9 @@ namespace DeepDive.World
                 var hit = occlusionBuffer[i].collider;
                 if (hit == null) continue;
                 if (hit.transform.IsChildOf(transform)) continue;
+                // Just under the water line the eye sits right above the diver's own capsule (#219). This check
+                // is given the eye, not the diver, but no other diver's capsule can be this close to it.
+                if (hit is CharacterController && occlusionBuffer[i].distance <= OwnCapsuleReach) continue;
                 return true;
             }
             return false;
