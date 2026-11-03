@@ -127,7 +127,7 @@ namespace DeepDive.Composition
             if (text.Length > 0) GUI.Box(new Rect(Mathf.Max(10, (Screen.width - 620) / 2f), Screen.height - 105, Mathf.Min(620, Screen.width - 20), 32), text);
         }
 
-        private static void AddSample(Transform parent, string id, DiverPresentationCatalog catalog)
+        public static void AddSample(Transform parent, string id, DiverPresentationCatalog catalog)
         {
             GameObject prefab = null;
             if (catalog != null)

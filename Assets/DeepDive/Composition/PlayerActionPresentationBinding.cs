@@ -65,6 +65,8 @@ namespace DeepDive.Composition
                 var player=obj.GetComponent<NetworkPlayer>();
                 if(player!=null && player.IsSpawned && player.GetComponent<PlayerActionView>()==null)
                     player.gameObject.AddComponent<PlayerActionView>();
+                if(player!=null && player.IsSpawned && player.GetComponent<ShopCarryView>()==null)
+                    player.gameObject.AddComponent<ShopCarryView>();
             }
         }
         private void Collected(CatchObject fish,PlayerId player,CaptureResult capture)
