@@ -47,6 +47,18 @@ namespace DeepDive.P4.Tests
             Assert.IsTrue(samples.All(s => !string.IsNullOrWhiteSpace(ShopShelfPresentation.Label(s.ItemId))));
         }
 
+        [Test] public void EveryDisplayedProductResolvesToTheActualEconomyCatalog()
+        {
+            var economy = root.AddComponent<EconomyManager>();
+            foreach (var id in ShopShelfAnchor.ItemIds)
+            {
+                if (BoatRepairParts.IsPart(id)) { Assert.Greater(economy.BoatPartPrice, 0); continue; }
+                Assert.IsTrue(economy.TryGetEquipmentDefinition(id, out var definition), "display is not purchasable: " + id);
+                Assert.Greater(definition.Price, 0, id);
+            }
+            CollectionAssert.Contains(ShopShelfAnchor.ItemIds, EconomyManager.CameraProId);
+        }
+
         [Test] public void ShelfAimStillRespectsAWallAndTheExactProductCollider()
         {
             var view = ShopShelfPresentation.Build(shop, root.transform);

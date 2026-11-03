@@ -132,9 +132,9 @@ namespace DeepDive.Composition
             GameObject prefab = null;
             if (catalog != null)
             {
-                if (id == "camera-basic") prefab = catalog.CameraPropPrefab;
-                if (id == "camera-advanced") prefab = catalog.CameraAdvancedPropPrefab;
-                if (id == "camera-pro") prefab = catalog.CameraProfessionalPropPrefab;
+                if (id == EconomyManager.CameraBasicId) prefab = catalog.CameraPropPrefab;
+                if (id == EconomyManager.CameraAdvancedId) prefab = catalog.CameraAdvancedPropPrefab;
+                if (id == EconomyManager.CameraProId) prefab = catalog.CameraProfessionalPropPrefab;
                 if (id == "harpoon-1") prefab = catalog.HarpoonPropPrefab;
                 if (BoatRepairParts.IsPart(id)) prefab = catalog.RepairPlankPrefab;
             }
@@ -148,8 +148,9 @@ namespace DeepDive.Composition
                 var bounds = renderers[0].bounds;
                 foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
                 var scale = .36f / Mathf.Max(.001f, bounds.size.x, bounds.size.y, bounds.size.z);
+                var offset = bounds.center - model.transform.position;
                 model.transform.localScale *= scale;
-                model.transform.position += parent.position - (bounds.center - model.transform.position) * scale - model.transform.position;
+                model.transform.position = parent.position - offset * scale;
                 return;
             }
             // Limited display geometry for products without a standalone art asset.

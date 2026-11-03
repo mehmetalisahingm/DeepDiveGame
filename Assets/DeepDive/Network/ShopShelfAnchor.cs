@@ -9,7 +9,7 @@ namespace DeepDive.Network
     public sealed class ShopShelfAnchor : MonoBehaviour
     {
         public static readonly string[] ItemIds = {
-            "tube-1", "tube-2", "tube-3", "camera-basic", "camera-advanced", "camera-pro",
+            "tube-1", "tube-2", "tube-3", "camera-basic", "camera-advanced", "camera-professional",
             "fins-1", "bag-1", "harpoon-1", BoatRepairParts.Hull, BoatRepairParts.Engine, BoatRepairParts.FuelTank
         };
         public string ItemId { get; private set; }
