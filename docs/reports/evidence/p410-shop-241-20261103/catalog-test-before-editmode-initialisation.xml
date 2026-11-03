@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="4" result="Failed(Child)" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0,2802447">
+  <test-suite type="TestSuite" id="1000" name="DeepDiveGame-P0" fullname="DeepDiveGame-P0" runstate="Runnable" testcasecount="1483" result="Failed" site="Child" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.280245" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1890" name="DeepDive.P4.Tests.dll" fullname="C:/Users/mehmet/.codex/worktrees/p45-final-acceptance/DeepDiveGame/Library/ScriptAssemblies/DeepDive.P4.Tests.dll" runstate="Runnable" testcasecount="471" result="Failed" site="Child" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.259951" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="6784" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1891" name="DeepDive" fullname="DeepDive" runstate="Runnable" testcasecount="468" result="Failed" site="Child" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.253835" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1894" name="P4" fullname="DeepDive.P4" runstate="Runnable" testcasecount="465" result="Failed" site="Child" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.247755" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1895" name="Tests" fullname="DeepDive.P4.Tests" runstate="Runnable" testcasecount="465" result="Failed" site="Child" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.241783" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1822" name="ShopShelfTests" fullname="DeepDive.P4.Tests.ShopShelfTests" classname="DeepDive.P4.Tests.ShopShelfTests" runstate="Runnable" testcasecount="4" result="Failed" site="Child" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.231585" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1823" name="ADisplayCannotGrantEquipmentAndRejectsInvalidSelections" fullname="DeepDive.P4.Tests.ShopShelfTests.ADisplayCannotGrantEquipmentAndRejectsInvalidSelections" methodname="ADisplayCannotGrantEquipmentAndRejectsInvalidSelections" classname="DeepDive.P4.Tests.ShopShelfTests" runstate="Runnable" seed="1605263154" result="Passed" start-time="2026-11-03 15:06:41Z" end-time="2026-11-03 15:06:42Z" duration="0.051523" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1825" name="EveryDisplayedProductResolvesToTheActualEconomyCatalog" fullname="DeepDive.P4.Tests.ShopShelfTests.EveryDisplayedProductResolvesToTheActualEconomyCatalog" methodname="EveryDisplayedProductResolvesToTheActualEconomyCatalog" classname="DeepDive.P4.Tests.ShopShelfTests" runstate="Runnable" seed="1872669307" result="Failed" start-time="2026-11-03 15:06:42Z" end-time="2026-11-03 15:06:42Z" duration="0.008353" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[  display is not purchasable: tube-1
+  Expected: True
+  But was:  False
+]]></message>
+                  <stack-trace><![CDATA[at DeepDive.P4.Tests.ShopShelfTests.EveryDisplayedProductResolvesToTheActualEconomyCatalog () [0x00030] in C:\Users\mehmet\.codex\worktrees\p45-final-acceptance\DeepDiveGame\Assets\Tests\P4\Editor\ShopShelfTests.cs:56
+]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1824" name="RacksAreIdempotentAndNeverAddSolidWalkObstacles" fullname="DeepDive.P4.Tests.ShopShelfTests.RacksAreIdempotentAndNeverAddSolidWalkObstacles" methodname="RacksAreIdempotentAndNeverAddSolidWalkObstacles" classname="DeepDive.P4.Tests.ShopShelfTests" runstate="Runnable" seed="932748731" result="Passed" start-time="2026-11-03 15:06:42Z" end-time="2026-11-03 15:06:42Z" duration="0.155105" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1826" name="ShelfAimStillRespectsAWallAndTheExactProductCollider" fullname="DeepDive.P4.Tests.ShopShelfTests.ShelfAimStillRespectsAWallAndTheExactProductCollider" methodname="ShelfAimStillRespectsAWallAndTheExactProductCollider" classname="DeepDive.P4.Tests.ShopShelfTests" runstate="Runnable" seed="1816271726" result="Passed" start-time="2026-11-03 15:06:42Z" end-time="2026-11-03 15:06:42Z" duration="0.004548" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/mehmet/AppData/LocalLow/DeepDiveTeam/DeepDiveGame-P0\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

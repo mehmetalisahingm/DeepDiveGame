@@ -50,6 +50,9 @@ namespace DeepDive.P4.Tests
         [Test] public void EveryDisplayedProductResolvesToTheActualEconomyCatalog()
         {
             var economy = root.AddComponent<EconomyManager>();
+            // EditMode does not run this MonoBehaviour's Awake; use its public
+            // read query to initialise the same default catalog as a real player.
+            economy.RecordingRewardFor(1);
             foreach (var id in ShopShelfAnchor.ItemIds)
             {
                 if (BoatRepairParts.IsPart(id)) { Assert.Greater(economy.BoatPartPrice, 0); continue; }
