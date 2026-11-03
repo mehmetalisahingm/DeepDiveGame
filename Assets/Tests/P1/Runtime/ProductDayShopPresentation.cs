@@ -41,6 +41,11 @@ namespace DeepDive.P1.Lab
             if (!sawShopCarryPosition) { firstShopCarryPosition = worker.transform.position; sawShopCarryPosition = true; }
             if (Vector3.Distance(firstShopCarryPosition, worker.transform.position) > .3f) report.shelfCarryWalkSeen = true;
             var lens = local.GetComponentInChildren<Camera>(true);
+            if (Host && !File.Exists(output + ".shop-carry-diagnostic.png") && SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
+            {
+                CaptureView(".shop-carry-diagnostic.png");
+                Debug.Log($"P246_VIEW left={lens.WorldToViewportPoint(carry.LeftGrip)} right={lens.WorldToViewportPoint(carry.RightGrip)} product={lens.WorldToViewportPoint(carry.Focus)} error={error}");
+            }
             var visible = error < .035f && InView(lens.WorldToViewportPoint(carry.LeftGrip)) &&
                 InView(lens.WorldToViewportPoint(carry.RightGrip)) && InView(lens.WorldToViewportPoint(carry.Focus));
             if (!visible) return;

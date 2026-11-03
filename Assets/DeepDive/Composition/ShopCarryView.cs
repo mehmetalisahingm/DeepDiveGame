@@ -30,7 +30,7 @@ namespace DeepDive.Composition
             hands = GetComponent<PlayerPresentationView>();
             actions = GetComponent<PlayerActionView>();
         }
-        public static Pose HeldPose(Transform frame) => new Pose(frame.TransformPoint(new Vector3(0, 1.30f, .26f)), frame.rotation);
+        public static Pose HeldPose(Transform frame) => new Pose(frame.TransformPoint(new Vector3(0, 1.30f, .29f)), frame.rotation);
 
         public static GameObject CreateBasket(Transform parent, string itemId)
         {
@@ -42,7 +42,7 @@ namespace DeepDive.Composition
             tray.name = "Tray";
             // A shallow version of the existing authored wooden market crate.
             // Products keep their own metre scale as a sibling, not under this scale.
-            tray.transform.localScale = new Vector3(1f, .55f, 1f);
+            tray.transform.localScale = new Vector3(.82f, .55f, 1f);
             var sample = new GameObject("SelectedProduct"); sample.transform.SetParent(root.transform, false);
             ShopShelfPresentation.AddSample(sample.transform, itemId,
                 Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName));
