@@ -91,6 +91,8 @@ namespace DeepDive.Composition
             // The clerk's old colour plate hung at 2.9 m, right where the roof and the sign are now.
             var oldSign = anchor.transform.Find("Sign");
             if (oldSign != null) foreach (var r in oldSign.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
+            if (type == ServicePointType.EquipmentShop && anchor.transform.position.z < -20f)
+                ShopShelfPresentation.Build(anchor, root);
             return front;
         }
 
