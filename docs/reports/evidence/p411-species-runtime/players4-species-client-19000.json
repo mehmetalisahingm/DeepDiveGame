@@ -1,0 +1,10 @@
+{
+  "role": "client", "pid": 19000, "graphics": false, "spawnedFish": 15,
+  "species": [
+    { "id": "sea_bass", "spawned": 3, "withVisibleRenderer": 3 },
+    { "id": "tuna", "spawned": 3, "withVisibleRenderer": 3 },
+    { "id": "red_snapper", "spawned": 3, "withVisibleRenderer": 3 },
+    { "id": "grouper", "spawned": 3, "withVisibleRenderer": 3 },
+    { "id": "lanternfish", "spawned": 3, "withVisibleRenderer": 3 }
+  ]
+}
