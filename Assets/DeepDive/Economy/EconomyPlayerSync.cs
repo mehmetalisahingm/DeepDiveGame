@@ -11,6 +11,9 @@ namespace DeepDive.Economy
     {
         // Notification after the service transaction/save has returned its actual outcome.
         public static event System.Action<EconomyPlayerSync, TownServiceOutcome> ServiceOutcomeForPresentation;
+        // Composition may render the physical shelf/cashier panel. False retains
+        // the legacy panel in scenes where no physical shelves were constructed.
+        public static System.Func<EconomyPlayerSync, bool> DrawPhysicalShop;
         public readonly NetworkVariable<int> SharedBalance = new NetworkVariable<int>();
         public readonly NetworkVariable<ulong> LastRequestId = new NetworkVariable<ulong>();
         public readonly NetworkVariable<bool> LastAccepted = new NetworkVariable<bool>();
@@ -359,6 +362,7 @@ namespace DeepDive.Economy
 
             if (VendorOpen) { DrawVendor(); return; }
             if (!ShopOpen) return;
+            if (DrawPhysicalShop != null && DrawPhysicalShop(this)) return;
             GUI.Box(new Rect(270, 20, 590, 296), "EKIPMAN DUKKANI");
             ShopRow(50, "Tup I  | +30 sn | 100", "TUP I AL", "tube-1");
             ShopRow(88, "Tup II | +60 sn | 250", "TUP II AL", "tube-2");

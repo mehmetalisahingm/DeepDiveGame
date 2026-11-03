@@ -93,7 +93,7 @@ namespace DeepDive.Composition
             handler.OutcomeReady += ForwardOutcome;
             handler.ShopClosed += player => SyncFor(player)?.SetActiveService(string.Empty);
             interactionDelegate = handler.HandleInteraction;
-            purchaseDelegate = handler.HandlePurchase;
+            purchaseDelegate = PurchaseAtCashier;
             foundPartDelegate = handler.HandleFoundPart;
             selectVehicleDelegate = handler.HandleSelectVehicle;
         }
@@ -104,6 +104,15 @@ namespace DeepDive.Composition
             EconomyPurchaseAuthority.Bind(purchaseDelegate);
             BoatPartClaim.Bind(foundPartDelegate);
             VehicleSelectionAuthority.Bind(selectVehicleDelegate);
+        }
+
+        private TransactionResult PurchaseAtCashier(PlayerId player, string itemId, ulong requestId)
+        {
+            var result = handler.HandlePurchase(player, itemId, requestId);
+            var actor = SyncFor(player)?.GetComponent<NetworkPlayer>();
+            if (result.Accepted && actor != null && actor.SelectedShopItem.Value.ToString() == itemId)
+                actor.ClearShopSelectionServer();
+            return result;
         }
 
         private void Unbind()

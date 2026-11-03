@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Unity.Collections;
 
 namespace DeepDive.Network
 {
@@ -65,6 +66,21 @@ namespace DeepDive.Network
         public readonly NetworkVariable<int> LastActionResult = new NetworkVariable<int>();
         public readonly NetworkVariable<byte> LastActionKind = new NetworkVariable<byte>();
         public readonly NetworkVariable<int> RepairPartIndex = new NetworkVariable<int>(-1);
+        public readonly NetworkVariable<FixedString32Bytes> SelectedShopItem = new NetworkVariable<FixedString32Bytes>();
+        private ServicePointAnchor selectedShop;
+        public void ClearShopSelectionServer()
+        {
+            if (!IsServer) return;
+            SelectedShopItem.Value = default;
+            selectedShop = null;
+        }
+        public void CancelShopSelectionLocal()
+        {
+            if (!IsSpawned || !IsOwner) return;
+            CancelShopSelectionRpc();
+        }
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+        private void CancelShopSelectionRpc() => ClearShopSelectionServer();
         public readonly NetworkVariable<bool> RepairPlaced = new NetworkVariable<bool>();
         public readonly NetworkVariable<int> RepairHits = new NetworkVariable<int>();
         public readonly NetworkVariable<uint> RepairStroke = new NetworkVariable<uint>();
@@ -160,6 +176,7 @@ namespace DeepDive.Network
             if (IsServer)
             {
                 actionGate.Reset();
+                ClearShopSelectionServer();
                 Seated.Value = false;
                 RecordingPresentation.Value = false;
                 EquippedCameraTier.Value = (byte)CameraTier.None;
@@ -374,9 +391,13 @@ namespace DeepDive.Network
 
         private void FixedUpdate()
         {
+            if (IsSpawned && IsServer && session != null && session.IsSceneLoading) ClearShopSelectionServer();
             if (!IsSpawned || !IsServer || session == null || session.IsSceneLoading) return;
             var now = Time.realtimeSinceStartupAsDouble;
             var frame = input.Read(now);
+            if (SelectedShopItem.Value.Length > 0 && (selectedShop == null || session.DiveActive ||
+                Passive.Value || Seated.Value || RepairHandsBusy || DayLock.IsLocked ||
+                (transform.position - selectedShop.WorldPosition).sqrMagnitude > 25f)) ClearShopSelectionServer();
             transform.rotation = Quaternion.Euler(0, frame.Yaw, 0);
 
             if (!externalEnvironmentBound)
@@ -714,6 +735,21 @@ namespace DeepDive.Network
                 return;
             }
 
+            var shelf = hit.collider.GetComponentInParent<ShopShelfAnchor>();
+            if (shelf != null)
+            {
+                var available = !session.IsSceneLoading && !Seated.Value && !RepairHandsBusy &&
+                    !DayLock.IsLocked && !RecordingPresentation.Value;
+                result = shelf.CanSelect(transform.position, available)
+                    ? PlayerActionResult.Accepted : PlayerActionResult.InvalidTarget;
+                if (result == PlayerActionResult.Accepted)
+                {
+                    selectedShop = shelf.Shop;
+                    SelectedShopItem.Value = new FixedString32Bytes(shelf.ItemId);
+                }
+                PublishAction(requestId, kind, result);
+                return;
+            }
             var target = hit.collider.GetComponentInParent<ServicePointAnchor>();
             if (target == null)
             {
