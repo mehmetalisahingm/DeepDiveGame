@@ -1045,6 +1045,42 @@ namespace DeepDive.P1.Lab
             return new Vector3(aheadX, targetY, laneZ);
         }
 
+        // #218: what the real player camera shows while a chosen fish is hunted (-p411-hunt-shots <dir>, graphics host only): the approach at
+        // 20/14/9 m, the fish once it is shot, and the carried catch about 1.5 s after it entered the bag. World view only (no IMGUI HUD).
+        private readonly HashSet<string> huntShotsTaken = new HashSet<string>();
+        private float huntCarriedAt;
+        private string huntShotLabel = "";
+        private void HuntShots(NetworkPlayer local, FishActor fish, float distance, bool shot)
+        {
+            if (Arg("-p411-hunt-shots").Length == 0 || SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null) return;
+            huntShotLabel = fish.Species.SpeciesId + "-" + fish.name;
+            if (!shot) foreach (var mark in new[] { 20, 14, 9 }) if (distance <= mark) HuntShot(local, "approach-" + mark + "m");
+            if (shot) HuntShot(local, "shot");
+        }
+        private void HuntCarried(NetworkPlayer local)
+        {
+            if (Arg("-p411-hunt-shots").Length == 0 || SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null) return;
+            if (huntCarriedAt == 0) huntCarriedAt = Time.realtimeSinceStartup;
+            if (Time.realtimeSinceStartup - huntCarriedAt > 1.5f) HuntShot(local, "carried");
+        }
+        private void HuntShot(NetworkPlayer local, string tag)
+        {
+            if (!huntShotsTaken.Add(tag)) return;
+            var cam = local.GetComponentInChildren<Camera>(true);
+            if (cam == null) return;
+            var dir = Arg("-p411-hunt-shots");
+            Directory.CreateDirectory(dir);
+            var rt = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGB32);
+            var previous = cam.targetTexture;
+            cam.targetTexture = rt; cam.Render(); cam.targetTexture = previous;
+            RenderTexture.active = rt;
+            var tex = new Texture2D(1280, 720, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); tex.Apply();
+            RenderTexture.active = null;
+            File.WriteAllBytes(Path.Combine(dir, huntShotLabel + "-" + tag + ".png"), tex.EncodeToPNG());
+            Destroy(tex); Destroy(rt);
+        }
+
         private void ProbeHunt(NetworkPlayer local, NetworkPlayer[] players)
         {
             // Real owner inputs/RPCs, live fish AI and real inventory; no injected catch.
@@ -1065,6 +1101,7 @@ namespace DeepDive.P1.Lab
             // Scene identity is stable across processes; Unity instance/enumeration order is not.
             var huntFish = Arg("-p411-hunt-fish").Length > 0 ? Arg("-p411-hunt-fish") : "Fish_SeaBass";   // #218: default unchanged
             result.huntTargetFish = huntFish;
+            if (local.OwnerClientId == shooter && result.huntBagSpecies.Length > 0) HuntCarried(local);
             var fish = population.FirstOrDefault(f => f.name == huntFish);
             if (fish == null || !fish.IsSpawned)
             {
@@ -1079,6 +1116,7 @@ namespace DeepDive.P1.Lab
             if (local.OwnerClientId != shooter) { local.SubmitLocalInput(Vector3.zero, 0); return; }
             var delta = fish.GetComponent<Collider>().bounds.center - local.GetComponentInChildren<Camera>(true).transform.position;
             result.huntMinDistance = Mathf.Min(result.huntMinDistance, delta.magnitude);
+            if (local.OwnerClientId == shooter) HuntShots(local, fish, delta.magnitude, available);
             result.huntPlayerPos = local.transform.position.ToString("0.0");
             var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             var pitch = -Mathf.Atan2(delta.y, new Vector2(delta.x, delta.z).magnitude) * Mathf.Rad2Deg;

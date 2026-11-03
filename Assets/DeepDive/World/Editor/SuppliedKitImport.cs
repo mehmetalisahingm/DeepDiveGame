@@ -215,6 +215,12 @@ namespace DeepDive.World.Editor
             var color = source != null && source.HasProperty("_Color") ? source.GetColor("_Color") : Color.white;
             result.SetColor("_BaseColor", color);
             result.SetFloat("_Smoothness", 0.25f);
+            // #218: the lanternfish's lure is the one thing that reads in the dark deep water, so the bulb glows (the body stays dark).
+            if (model == "Lanternfish" && source != null && source.name == "Light")
+            {
+                result.EnableKeyword("_EMISSION");
+                result.SetColor("_EmissionColor", new Color(0.45f, 1.5f, 1.9f) * 2.5f);
+            }
             EditorUtility.SetDirty(result);
             return result;
         }

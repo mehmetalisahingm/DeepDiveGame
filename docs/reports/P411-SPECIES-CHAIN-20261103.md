@@ -26,6 +26,14 @@ Geçen koşularda: balık vuruldu, toplandı, istemci çantası çoğaldı, diğ
 
 **Açık:** `Fish_SeaBass_10` (orfoz, ev noktası (-10, -4,5, 28)) iki ayrı koşuda 12 m'de, 8 m eşiğiyle 6,5 m'de dalgıç (-8,6, -3,1, 21,5) civarında takıldı ve hiç yakalanmadı. Neden araştırılmadı: probun düz çizgi yaklaşması bir engele mi takılıyor yoksa balık zıpkın görüşünün dışında mı kalıyor, bilmiyorum. Gerçek bir oyuncunun oraya erişip erişemediği bu koşulardan çıkarılamaz; Utku'nun resif yerleşimine bakması gerekir. Sahne, ev noktası veya engel değiştirilmedi.
 
+## Gerçek oyuncu kamerasından kareler (kamera okunurluğu, 3 Kasım 2026)
+
+`-Capture -HuntFish <ad>` birlikte: grafikli host'ta avlanan balığa yaklaşırken 20/14/9 m, vurulduğunda ve çantaya girdikten 1,5 sn sonra gerçek oyuncu kamerasından dünya görüntüsü (HUD yok). Kare dosyaları `evidence/p411-species-chain/player-camera/`, özet [player-camera-contact-sheet.png](evidence/p411-species-chain/player-camera-contact-sheet.png). Orfoz 11 (4104 g) ve fener balığı 13 (885 g; ampul değişikliğinden sonraki koşuda 762 g) geçti; fener balığı kareleri ampul değişikliğinden sonraki koşudan.
+
+Resimlerden okunan (yorum): zıpkın menzilinde (yaklaşık 14–20 m) **orfoz küçük turuncu bir benek, fener balığı koyu suda neredeyse hiç görünmüyor**; kadrajdaki iki mor nokta balık değil. Taşınan av karesinde fener balığı elde okunmadı, orfozun yalnız bir parçası kadrajın köşesinde sarı görünüyor. Yani bu koşularda iki yeni türün uzaktan okunurluğu zayıf; bu, önceki 9 m geçici kamera bulgusunu doğrular ve su/sis ışık kararı Utku/Mehmet'le birlikte verilmelidir.
+
+**Yapılan küçük sanat değişikliği (Mert):** fener balığının ampulü (`Lanternfish_Light.mat`, `SuppliedKitImport.Material`) artık emisyonlu (HDR camgöbeği), gövde koyu kaldı. Önce/sonra: [lanternfish-lure-before-after.png](evidence/p411-species-chain/lanternfish-lure-before-after.png). 2,5 m'de ampul belirgin beyaz bir nokta; 9 m'de balık küçük bir benek olarak seçiliyor, ama iki koşu farklı balık konumlarında alındı (bire bir kıyas değil), oyuncu kamerasında 14–20 m'de değişiklik görünmüyor. Okunurluk sorunu çözüldü denmez.
+
 ## Veri zinciri (EditMode, gerçek bileşenler)
 
 - `P411SpeciesSaleTests` (P3 derlemesi; oturum + envanter + ekonomi): beş tür güvenli dönüşte kuyruğa girer (5 bekleyen, 0 ödeme); tek satış 120+120+120+180+320 öder; ikinci istek `NothingToTurnIn`; kayıt dışa aktarılıp yeni ekonomiye yüklenince aynı yakalamalar bir daha kuyruğa girmez, bakiye aynı kalır.
@@ -35,7 +43,7 @@ Geçen koşularda: balık vuruldu, toplandı, istemci çantası çoğaldı, diğ
 ## Denenmedi
 
 - Gerçek NPC'ye yürüyerek satış ve çekim (kamera) akışı yeni iki tür için; ödül ve satış kâğıdı yalnız bileşen düzeyinde.
-- Ölüm/av pozu ve animasyon son kareleri; oyuncu kamerası ve el feneriyle uzak okunurluk (bkz. `P411-SPECIES-RUNTIME-20261103.md`).
+- Ölüm/av pozu ve animasyon son kareleri; el feneri/ekipmanla uzak okunurluk (oyuncu kamerası kareleri yukarıda).
 - 2 ve 4 süreçte yeni tür avı (yalnız varsayılan levrek avı 2 süreçte denendi); ayrı PC.
 - Eski kayıt dosyasıyla gerçek yükleme (yalnız EditMode dışa/içe aktarma).
 - Tuna'nın sığ kıyıdaki yolu ve NPC/kasa görüşü. #218, #164, #207 açık kalır.

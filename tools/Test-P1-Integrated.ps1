@@ -31,6 +31,7 @@ function Start-P1Integrated([string]$Name, [string]$Mode, [string]$Reason = '') 
     } elseif ($Capture -and $Name -eq 'host') {
         $capturePath = Join-Path $p1Run 'room.png'
         $p1Args += @('-screen-width', '1280', '-screen-height', '720', '-screen-fullscreen', '0')
+        if ($HuntFish) { $p1Args += @('-p411-hunt-shots', ('"{0}"' -f (Join-Path $p1Run 'hunt-shots'))) }   # #218: real player-camera frames of the hunt
         if ($Unified) { $p1Args += @('-p3-unified-screenshot', ('"{0}"' -f $capturePath)) }
         else { $p1Args += @('-p1-screenshot', ('"{0}"' -f $capturePath)) }
     } else {
