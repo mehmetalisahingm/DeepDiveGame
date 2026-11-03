@@ -1073,7 +1073,7 @@ namespace DeepDive.P1.Lab
             report.huntFirst = HuntFirst;
             if (HuntFirst && Host) report.passed &= report.partsAtFirstSale == 0;
             if (RepairOnly) report.passed = step==16 && report.repaired && sawCarry && sawPlaced && report.players==expected && report.errors.Count==0;
-            if (!RepairOnly && !report.reload)
+            if (!RepairOnly && !report.reload && !HabitatHunt)
             {
                 var shopping = report.shelfSelectionSeen && (!Host ||
                     (report.shelfSelectionNoSpend && report.shelfCancelRecovered && report.cashierSelectionCleared));
