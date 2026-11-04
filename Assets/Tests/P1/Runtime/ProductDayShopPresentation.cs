@@ -11,6 +11,97 @@ namespace DeepDive.P1.Lab
     {
         private Vector3 firstShopCarryPosition;
         private bool sawShopCarryPosition;
+        private int lateShopStage;
+        private float lateShopObservedAt;
+        private float lateShopNextPhase;
+        private float lateShopSpawnSettlesAt;
+
+        // Development-only probe: the host uses the real shelf interaction before the
+        // guest process starts. No selection or position is written by the probe.
+        private void LateShopTick()
+        {
+            var inWorld = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName;
+            if (Time.realtimeSinceStartup > nextTrace)
+            {
+                nextTrace = Time.realtimeSinceStartup + 5f;
+                Debug.Log($"P246_LATE slot={report.slot} phase={adapter.Session.State.Phase} world={inWorld} stage={lateShopStage} wp={waypoint} pos={local.transform.position}");
+            }
+            if (Host && (!inWorld || adapter.Session.State.Phase != DeepDive.Session.SessionPhase.Lobby))
+            {
+                if (Time.realtimeSinceStartup < lateShopNextPhase) return;
+                lateShopNextPhase = Time.realtimeSinceStartup + 1f;
+                if (adapter.Session.State.Phase == DeepDive.Session.SessionPhase.Lobby &&
+                    adapter.Session.Roster.TryGetValue(new PlayerId(local.OwnerClientId), out var ready) && !ready)
+                    adapter.ToggleReady();
+                else adapter.AdvancePhase();
+                return;
+            }
+            if (!inWorld) return;
+            var marker = Arg("-p246-sync");
+            if (string.IsNullOrEmpty(marker)) { Fail("Missing late-shop rendezvous path"); return; }
+            if (lateShopStage == 0)
+            {
+                if (!Host)
+                {
+                    if (lateShopSpawnSettlesAt == 0) lateShopSpawnSettlesAt = Time.realtimeSinceStartup + 4f;
+                    if (Time.realtimeSinceStartup < lateShopSpawnSettlesAt) return;
+                    // A joining player may be placed outside the house by the live
+                    // session; do not route it through the home's interior wall.
+                    if (local.transform.position.z > -39f) { lateShopStage = 1; route = null; }
+                }
+            }
+            if (lateShopStage == 0)
+            {
+                if (route == null) SetRoute(Outward().Take(5));
+                if (!Follow()) return;
+                route = null; lateShopStage = 1;
+            }
+            var shelf = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None)
+                .SingleOrDefault(s => s.ItemId == "camera-basic");
+            if (shelf == null) { Fail("Missing camera shelf"); return; }
+            if (Host)
+            {
+                if (lateShopStage == 1)
+                {
+                    var stand = shelf.transform.position + Vector3.forward;
+                    stand.y = ContinuousTownLayout.WalkSurfaceY;
+                    var delta = stand - local.transform.position; delta.y = 0;
+                    if (delta.magnitude > .17f) { MoveToward(Around(stand)); aimAt = 0; return; }
+                    Aim(shelf.transform.position);
+                    if (!Settled()) return;
+                    if (local.SelectedShopItem.Value.ToString() != "camera-basic")
+                    { Act(local.SubmitServiceInteractionLocal); return; }
+                    var basket = local.GetComponent<ShopCarryView>();
+                    if (basket == null || !basket.Visible) return;
+                    report.lateShopSawSelection = report.lateShopSawBasket = true;
+                    File.WriteAllText(marker + ".ready", "selected-before-join");
+                    lateShopStage = 2;
+                }
+                Stop();
+                report.lateShopJoined = manager.ConnectedClientsIds.Count == 2;
+                if (report.lateShopJoined && File.Exists(marker + ".observed")) Finish();
+                return;
+            }
+            var host = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .FirstOrDefault(p => p.IsSpawned && p.OwnerClientId == 0);
+            if (host == null) return;
+            report.lateShopJoined = true;
+            report.lateShopSawSelection = host.SelectedShopItem.Value.ToString() == "camera-basic";
+            var carry = host.GetComponent<ShopCarryView>();
+            if (!report.lateShopSawSelection || carry == null || !carry.Visible) return;
+            var target = host.transform.position + Vector3.forward * 2f;
+            var distance = target - local.transform.position; distance.y = 0;
+            if (distance.magnitude > .3f) { MoveToward(Around(CoastTarget(target))); return; }
+            Aim(carry.Focus);
+            if (lateShopObservedAt == 0) lateShopObservedAt = Time.realtimeSinceStartup;
+            if (Time.realtimeSinceStartup - lateShopObservedAt < 1f) return;
+            var lens = local.GetComponentInChildren<Camera>(true);
+            if (!InView(lens.WorldToViewportPoint(carry.Focus))) return;
+            report.lateShopSawBasket = true;
+            CaptureView(".late-shop.png");
+            File.WriteAllText(marker + ".observed", "guest-saw-live-selection");
+            Finish();
+        }
         private bool ShopObserverNear()
         {
             if (expected == 1) return true;

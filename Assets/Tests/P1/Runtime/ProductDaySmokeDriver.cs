@@ -63,6 +63,7 @@ namespace DeepDive.P1.Lab
             public bool caughtFishVisible;
             public bool shelfSelectionSeen, shelfSelectionNoSpend, shelfCancelRecovered, cashierSelectionCleared;
             public bool shelfCarrySeen, shelfCarryInView, shelfCarryWalkSeen;
+            public bool lateShopJoined, lateShopSawSelection, lateShopSawBasket;
             public float maxShelfCarryGripError;
             public int contactKinds,satchelPoses;
             public float maxActionGripError,maxSatchelError;
@@ -170,6 +171,7 @@ namespace DeepDive.P1.Lab
             if (local == null) return;
             local.ReadKeyboard = false;
             sync = local.GetComponent<EconomyPlayerSync>(); trip = local.GetComponent<BoatTripPlayerSync>();
+            if (Arg("-p246-late-shop") == "1") { LateShopTick(); return; }
             if (adapter.Session.State.Phase == SessionPhase.Lobby && step < 14 &&
                 adapter.Session.Roster.TryGetValue(new PlayerId(local.OwnerClientId), out var ready) && !ready)
                 adapter.ToggleReady();
@@ -1066,6 +1068,13 @@ namespace DeepDive.P1.Lab
         {
             if (finished) return;
             finished = true;
+            if (Arg("-p246-late-shop") == "1")
+            {
+                report.passed = report.lateShopJoined && report.lateShopSawSelection && report.lateShopSawBasket && report.errors.Count == 0;
+                File.WriteAllText(output, JsonUtility.ToJson(report, true));
+                if (quit) Application.Quit(report.passed ? 0 : 1);
+                return;
+            }
             report.passed = step == 15 && report.players == expected && report.worldLoads == 1 && report.homeSpawn &&
                 report.repaired && report.diveCount == 3 && report.primaryFishIds.Count >= 3 &&
                 report.fullyPopulatedDives.Count == 3 && report.realClip &&
