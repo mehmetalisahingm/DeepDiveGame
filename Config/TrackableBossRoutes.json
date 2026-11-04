@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "bossId": "leviathan_abyss_01",
+  "minDepthMeters": 180,
+  "clueNodes": [
+    {
+      "nodeId": "clue_01",
+      "depthMeters": 185,
+      "clueType": "biolume_mucus",
+      "nextBearingDeg": 140
+    },
+    {
+      "nodeId": "clue_02",
+      "depthMeters": 230,
+      "clueType": "low_freq_sonar_pulse",
+      "nextBearingDeg": 165
+    },
+    {
+      "nodeId": "clue_03",
+      "depthMeters": 275,
+      "clueType": "crushed_rov_debris",
+      "triggersEncounter": true
+    }
+  ]
+}
