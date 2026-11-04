@@ -13,10 +13,13 @@ namespace DeepDive.Core.Contracts
         public readonly int WeightGrams;
         public readonly int? Quality;
         public readonly ulong CatchObjectId;
+        // #254: the animal this catch was. "" for a capture not built from a live FishActor.
+        public readonly string SpecimenId;
 
         public CaptureResult(string captureId, string diveId, string speciesId, int weightGrams,
-            ulong catchObjectId, int? quality = null)
+            ulong catchObjectId, int? quality = null, string specimenId = "")
         {
+            SpecimenId = specimenId ?? string.Empty;
             CaptureId = captureId;
             DiveId = diveId;
             SpeciesId = speciesId;

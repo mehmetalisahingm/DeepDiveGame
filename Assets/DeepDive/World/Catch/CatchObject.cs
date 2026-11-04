@@ -26,6 +26,8 @@ namespace DeepDive.World
         public event Action<CatchObject, CaptureResult> Claimed;
         // Read-only presentation notification. Never sent for a refused or replayed claim.
         public static event Action<CatchObject, PlayerId, CaptureResult> CollectedForPresentation;
+        // #254, host only: a bag accepted this catch. What ties a catch to the film of the same animal.
+        public static event Action<CaptureResult> CollectedOnHost;
 
         public bool IsAvailable => available.Value;
         public bool IsClaimed => state.IsClaimed;
@@ -40,11 +42,11 @@ namespace DeepDive.World
 
         // Called by FishActor on death. Builds the capture with this object's own network id so
         // CatchObjectId points at the thing a diver can actually pick up.
-        public bool TryBecomeCatch(string speciesId, int weightGrams, out CaptureResult capture)
+        public bool TryBecomeCatch(string speciesId, int weightGrams, out CaptureResult capture, string specimenId = "")
         {
             capture = default;
             if (!IsSpawned || !IsServer) return false;
-            if (!CaptureBuilder.TryCreate(DiveContext.Source, speciesId, weightGrams, NetworkObjectId, out capture))
+            if (!CaptureBuilder.TryCreate(DiveContext.Source, speciesId, weightGrams, NetworkObjectId, out capture, specimenId))
                 return false;
             if (!state.Hold(capture)) return false;
 
@@ -74,6 +76,7 @@ namespace DeepDive.World
             Debug.Log($"P2_CATCH_TAKEN capture={capture.CaptureId} dive={capture.DiveId} " +
                       $"species={capture.SpeciesId} grams={capture.WeightGrams} player={player}");
             Claimed?.Invoke(this, capture);
+            CollectedOnHost?.Invoke(capture);
             CollectedForPresentation?.Invoke(this, player, capture);
             // Keep the authored scene object for the next dive. Destroying it used to work
             // only because the whole world was reloaded between trips.

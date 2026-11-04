@@ -16,7 +16,7 @@ namespace DeepDive.World
         // ("capture.DiveId != Session.State.DiveId" -> InvalidTarget), so refusing here keeps
         // the failure at the place that can explain it.
         public static bool TryCreate(IDiveContext dive, string speciesId, int weightGrams,
-            ulong catchObjectId, out CaptureResult capture)
+            ulong catchObjectId, out CaptureResult capture, string specimenId = "")
         {
             capture = default;
             if (dive == null || !dive.IsDiveActive) return false;
@@ -27,7 +27,7 @@ namespace DeepDive.World
 
             // Quality stays null in P2: it belongs to P3 recording evaluation, and an invented
             // value here would become a payout input ("Utku kaliteyi, Mert krediyi belirler").
-            capture = new CaptureResult(NewCaptureId(), diveId, speciesId, weightGrams, catchObjectId);
+            capture = new CaptureResult(NewCaptureId(), diveId, speciesId, weightGrams, catchObjectId, null, specimenId);
             return true;
         }
 

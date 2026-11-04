@@ -18,10 +18,15 @@ namespace DeepDive.World
         public readonly int Quality;
         public readonly float ValidSeconds;
         public readonly float Score01;
+        // #254: the animal in this shot, as the host knows it. "" and 0 for an event.
+        public readonly string SpecimenId;
+        public readonly int WeightGrams;
 
         public RecordingTake(string diveId, PlayerId playerId, string subjectId, int quality,
-            float validSeconds, float score01)
+            float validSeconds, float score01, string specimenId = "", int weightGrams = 0)
         {
+            SpecimenId = specimenId ?? "";
+            WeightGrams = weightGrams;
             DiveId = diveId;
             PlayerId = playerId;
             SubjectId = subjectId;
@@ -29,6 +34,9 @@ namespace DeepDive.World
             ValidSeconds = validSeconds;
             Score01 = score01;
         }
+
+        public RecordingTake WithSpecimen(string specimenId, int weightGrams) =>
+            new RecordingTake(DiveId, PlayerId, SubjectId, Quality, ValidSeconds, Score01, specimenId, weightGrams);
 
         // Quality 0 means the shot was taken but earns nothing. Such a take is still a valid
         // outcome of a stop call; it simply never reaches the ledger.

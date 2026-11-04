@@ -27,6 +27,8 @@ namespace DeepDive.World
         public bool IsSettled { get; private set; }
         private readonly Dictionary<string, RecordingResult> pendingResults = new Dictionary<string, RecordingResult>();
         private readonly HashSet<string> paidSubjects = new HashSet<string>();
+        // #254: specimen id -> the catch a bag accepted in this dive, and that catch's dive.
+        private readonly Dictionary<string, CaptureResult> catches = new Dictionary<string, CaptureResult>(StringComparer.Ordinal);
 
         public int Count => best.Count;
 
@@ -44,6 +46,27 @@ namespace DeepDive.World
             return true;
         }
 
+        // #254: a bag accepted this catch. Nothing is proved yet: only a catch the dive summary preserves counts.
+        public void NoteCatch(CaptureResult capture)
+        {
+            if (string.IsNullOrWhiteSpace(capture.SpecimenId) || string.IsNullOrWhiteSpace(capture.CaptureId)) return;
+            catches[capture.SpecimenId] = capture;
+        }
+
+        // #254: preserved catches of this dive with no film of the same animal in any diver's kept take. They stay
+        // ordinary catches; this only tells the host log, and later the channel, that they prove no recording.
+        public IReadOnlyList<string> CatchesWithoutFilm(string diveId, IReadOnlyCollection<string> preservedCaptureIds)
+        {
+            var result = new List<string>();
+            var filmed = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var take in best.Values) if (take.DiveId == diveId) filmed.Add(take.SpecimenId);
+            foreach (var entry in catches)
+                if (entry.Value.DiveId == diveId && !filmed.Contains(entry.Key) && Contains(preservedCaptureIds, entry.Value.CaptureId))
+                    result.Add(entry.Value.CaptureId);
+            result.Sort(StringComparer.Ordinal);
+            return result;
+        }
+
         public bool TryGetBest(PlayerId player, string subjectId, out RecordingTake take) =>
             best.TryGetValue((player.Value, subjectId ?? ""), out take);
 
@@ -53,7 +76,7 @@ namespace DeepDive.World
         // The sink is passed in rather than read from RecordingClaim, matching
         // CatchState.TryClaim: the rules stay pure and the tests stay honest about who paid.
         public IReadOnlyList<RecordingResult> Settle(IRecordingSink sink, string diveId,
-            IReadOnlyCollection<PlayerId> safelyReturned)
+            IReadOnlyCollection<PlayerId> safelyReturned, IReadOnlyCollection<string> preservedCaptureIds = null)
         {
             if (IsSettled) return Array.Empty<RecordingResult>();
 
@@ -87,7 +110,8 @@ namespace DeepDive.World
 
                     if (!pendingResults.TryGetValue(subject, out var result))
                         pendingResults[subject] = result = new RecordingResult(NewRecordingId(), diveId, candidate.PlayerId,
-                            candidate.SubjectId, candidate.Quality, candidate.ValidSeconds);
+                            candidate.SubjectId, candidate.Quality, candidate.ValidSeconds,
+                            ProofFor(candidate, preservedCaptureIds));
                     var answer = sink.TryClaim(result);
                     if (answer == PlayerActionResult.Accepted || answer == PlayerActionResult.DuplicateRequest)
                     {
@@ -113,8 +137,26 @@ namespace DeepDive.World
         {
             best.Clear();
             pendingResults.Clear();
+            catches.Clear();
             paidSubjects.Clear();
             IsSettled = false;
+        }
+
+        // #254: the catch counts only from the same dive and only if it came home; a catch lost with a drowned diver
+        // leaves the film as film alone. Who shot and who filmed do not matter: one diver may film while another hunts.
+        private RecordingSpecimenProof ProofFor(RecordingTake take, IReadOnlyCollection<string> preservedCaptureIds)
+        {
+            if (catches.TryGetValue(take.SpecimenId, out var capture) && capture.DiveId == take.DiveId &&
+                Contains(preservedCaptureIds, capture.CaptureId))
+                return RecordingSpecimenProof.FilmedAndCaught(take.SpecimenId, take.WeightGrams, capture.CaptureId);
+            return RecordingSpecimenProof.Filmed(take.SpecimenId, take.WeightGrams);
+        }
+
+        private static bool Contains(IReadOnlyCollection<string> ids, string id)
+        {
+            if (ids == null) return false;
+            foreach (var entry in ids) if (entry == id) return true;
+            return false;
         }
 
         // Better means: higher tier first, then the better-looking shot, then the longer one.

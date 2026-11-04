@@ -8,6 +8,9 @@ namespace DeepDive.Core.Contracts
     // consumed for payment (see EconomyManager) until P3-B produces real recordings.
     public readonly struct RecordingResult
     {
+        // #254: which real animal the host saw in this take. Default (None) for an event or an older caller.
+        public readonly RecordingSpecimenProof Specimen;
+
         public readonly string RecordingId;
         public readonly string DiveId;
         public readonly PlayerId PlayerId;
@@ -16,14 +19,56 @@ namespace DeepDive.Core.Contracts
         public readonly float ValidDurationSeconds;
 
         public RecordingResult(string recordingId, string diveId, PlayerId playerId, string subjectId,
-            int quality, float validDurationSeconds)
+            int quality, float validDurationSeconds, in RecordingSpecimenProof specimen = default)
         {
+            Specimen = specimen;
             RecordingId = recordingId;
             DiveId = diveId;
             PlayerId = playerId;
             SubjectId = subjectId;
             Quality = quality;
             ValidDurationSeconds = validDurationSeconds;
+        }
+    }
+
+    // #254. Explicit values: a save may store the byte, so a later kind is added, never renumbered.
+    public enum SpecimenProofKind : byte
+    {
+        None = 0,          // no animal behind this recording: an event, or a result without a specimen
+        FilmOnly = 1,      // this animal was filmed; no catch of it came home in the same dive
+        FilmAndCatch = 2   // this animal was filmed and its catch came home in the same dive
+    }
+
+    // #254: what the host knows about the animal a recording shows. A close-up cannot change it: the weight is the
+    // one rolled when this animal spawned, and SpecimenId names that one life, not the species and not the network
+    // object (the same scene fish comes back as a new specimen next dive). CaptureId is set only for FilmAndCatch.
+    //
+    // Members are properties so default(RecordingSpecimenProof) reads as None with "" ids.
+    public readonly struct RecordingSpecimenProof
+    {
+        private readonly string specimenId;
+        private readonly string captureId;
+
+        public SpecimenProofKind Kind { get; }
+        public string SpecimenId => specimenId ?? string.Empty;
+        public int WeightGrams { get; }
+        public string CaptureId => captureId ?? string.Empty;
+
+        public static RecordingSpecimenProof Filmed(string specimenId, int weightGrams) =>
+            new RecordingSpecimenProof(specimenId, weightGrams, null);
+
+        public static RecordingSpecimenProof FilmedAndCaught(string specimenId, int weightGrams, string captureId) =>
+            new RecordingSpecimenProof(specimenId, weightGrams, captureId);
+
+        // An animal with no id or no real weight proves nothing, so it folds to None rather than half a proof.
+        private RecordingSpecimenProof(string specimenId, int weightGrams, string captureId)
+        {
+            var valid = !string.IsNullOrWhiteSpace(specimenId) && weightGrams > 0;
+            var caught = valid && !string.IsNullOrWhiteSpace(captureId);
+            Kind = !valid ? SpecimenProofKind.None : caught ? SpecimenProofKind.FilmAndCatch : SpecimenProofKind.FilmOnly;
+            this.specimenId = valid ? specimenId : string.Empty;
+            WeightGrams = valid ? weightGrams : 0;
+            this.captureId = caught ? captureId : string.Empty;
         }
     }
 

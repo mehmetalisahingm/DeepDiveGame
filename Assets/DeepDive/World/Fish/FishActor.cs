@@ -20,7 +20,7 @@ namespace DeepDive.World
     // Swimming runs on the host only and moves the transform; NetworkTransform replicates the
     // result, so a client never runs the AI and never decides where a fish is.
     [RequireComponent(typeof(NetworkObject), typeof(NetworkTransform), typeof(CatchObject))]
-    public sealed class FishActor : NetworkBehaviour, IHarpoonTarget
+    public sealed class FishActor : NetworkBehaviour, IHarpoonTarget, IFishSpecimen
     {
         [SerializeField] private SpeciesDefinition species;
         [Tooltip("Which colliders may count as a diver. Divers are recognised by their CharacterController.")]
@@ -41,6 +41,7 @@ namespace DeepDive.World
         private IWaterBounds habitat;
         private SwimTuning tuning;
         private int weightGrams;
+        private string specimenId = "";
         private Renderer[] visuals;
         private Collider[] colliders;
         private bool[] visualEnabled, colliderEnabled;
@@ -64,6 +65,7 @@ namespace DeepDive.World
         public SpeciesDefinition Species => species;
         public float Health => health.Value;
         public int WeightGrams => weightGrams;
+        public string SpecimenId => specimenId;
         public bool IsDead => state != null && state.IsDead;
         public bool NightActive => nightActive.Value;
         public bool NightGlowVisible => nightGlow != null && nightGlow.enabled;
@@ -97,6 +99,7 @@ namespace DeepDive.World
             state = new FishHealth(species.MaxHealth);
             // Rolled once at spawn so the weight does not depend on when the fish dies.
             weightGrams = species.RollWeightGrams(random);
+            specimenId = Guid.NewGuid().ToString("N");
             tuning = species.Swim;
             // Where the fish was placed is the home it wanders around.
             motion = new FishMotion(tuning, transform.position, random);
@@ -208,7 +211,7 @@ namespace DeepDive.World
             // The capture is built by the catch object so CatchObjectId is the id of the thing a
             // diver can actually pick up. Fails when no dive is live: nothing Mert's bag could
             // accept, so no capture is invented. The fish is still dead, it just leaves nothing.
-            if (!catchObject.TryBecomeCatch(species.SpeciesId, weightGrams, out var capture))
+            if (!catchObject.TryBecomeCatch(species.SpeciesId, weightGrams, out var capture, specimenId))
             {
                 Debug.LogWarning($"P2_FISH_DEAD_NO_DIVE object={name} species={species.SpeciesId} killer={killer}", this);
                 return;
