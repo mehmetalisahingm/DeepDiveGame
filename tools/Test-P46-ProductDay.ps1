@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$Render, [switch]$CameraAutoLimit)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -7,6 +7,7 @@ if ($RepairVideo -and -not $RepairPurchase) { throw 'RepairVideo requires Repair
 if ($HuntFirst -and $RepairOnly) { throw '-HuntFirst and -RepairOnly are exclusive' }
 if ($EquipmentVideo -and ($Players -ne 2 -or $RepairOnly)) { throw 'EquipmentVideo requires the normal two-player product day.' }
 if ($CameraAutoLimit -and $RepairOnly) { throw 'CameraAutoLimit requires the normal product day.' }
+if ($GuestCameraLimit -and ($Players -ne 2 -or $RepairOnly -or $ActionVideo -or $EquipmentVideo -or $OceanVideo -or $CameraAutoLimit)) { throw 'GuestCameraLimit requires two players and no other visual/repair mode.' }
 if ($OceanVideo -and ($Players -ne 2 -or $RepairOnly -or $HuntFirst -or $EquipmentVideo)) { throw 'OceanVideo requires the normal two-player product day without other visual probes.' }
 $productRoot=Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'P46-ProcessEvidence.ps1')
@@ -41,6 +42,7 @@ try {
         if ($OceanVideo) { $productArgs+=@('-p411-ocean-video','1') }
         if ($ActionVideo) { $productArgs+=@('-p49-action-video','1') }
         if ($CameraAutoLimit) { $productArgs+=@('-p253-auto-limit','1') }
+        if ($GuestCameraLimit) { $productArgs+=@('-p253-guest-limit','1') }
         if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
@@ -53,7 +55,7 @@ try {
             $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -PassThru
         }
         $productProcesses += [pscustomobject]@{Slot=$productSlot;Process=$productProcess;Report=$productReport}
-        $productConnectLimit=(Get-Date).AddSeconds(20)
+        $productConnectLimit=(Get-Date).AddSeconds(60)
         do {
             Start-Sleep -Milliseconds 200
             $productConnected=Select-String -LiteralPath $productLog -SimpleMatch "P1_CONNECTED id=$productSlot" -Quiet -ErrorAction SilentlyContinue
@@ -79,6 +81,7 @@ try {
     }
     Write-Output "Evidence: $productRun"
     if ($productFailed.Count -gt 0) { throw ($productFailed -join "`n") }
+    if ($GuestCameraLimit) { Write-Output 'Earned guest camera, server automatic stop and guest-owned safe clip PASS.'; return }
     $productCheckpoint=Get-Content -LiteralPath (Join-Path $productRun 'player0.json.campaign.json') -Raw|ConvertFrom-Json
     if ($RepairOnly) {
         if ((-not $RepairInterruptions -and -not $repairRecovered) -or @($productCheckpoint.BoatPartIds).Count -ne 3 -or

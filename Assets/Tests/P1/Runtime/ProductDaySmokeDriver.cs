@@ -38,6 +38,8 @@ namespace DeepDive.P1.Lab
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public bool cameraAutomaticLimit;
+            public bool guestCameraPurchased, guestCameraClipVerified;
+            public float guestCameraClipSeconds;
             public bool purchasedMaterial, purchaseDidNotRepair, saveFaultRefused, saveFaultRecovered;
             public int repairVideoFrames;
             public bool repairArtSeen, repairToolContactSeen, repairGripVerified;
@@ -101,6 +103,7 @@ namespace DeepDive.P1.Lab
         private float shelfLookUntil;
 
         private bool Host => report.slot == 0;
+        private bool GuestCameraLimit => Arg("-p253-guest-limit") == "1";
         private bool repairApproach, repairAtDock, repairExit;
         private bool repairRackRoute,repairRackReached;
         private bool RepairOnly => Arg("-p187-repair-only") == "1";
@@ -239,7 +242,13 @@ namespace DeepDive.P1.Lab
             if (!localDone) Tick();
             else if (step != 14)
             {
-                if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
+                if (GuestCameraLimit && Host && step == 7)
+                {
+                    var park = P(-12f, -23f);
+                    var delta = park - local.transform.position; delta.y = 0;
+                    if (delta.magnitude > .3f) MoveToward(park); else Stop();
+                }
+                else if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
                 else if(ActionVideo)HoldActionView();else Stop();
             }
             if (Host) AdvanceHost();
@@ -319,7 +328,7 @@ namespace DeepDive.P1.Lab
                 case 7: CycleDive(8); break;
                 case 8: SetStep(9); break;
                 case 9: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(10); break;
-                case 10: SetStep(11); break;
+                case 10: SetStep(GuestCameraLimit ? 16 : 11); break;
                 case 11: SetStep(12); break;
                 case 12: SetStep(13); break;
                 case 13:
@@ -366,12 +375,15 @@ namespace DeepDive.P1.Lab
                     if (!local.GetComponent<InventoryPlayerSync>().SafelyReturned.Value) return;
                     localDone = !local.Swimming.Value; break;
                 case 4: case 7:
-                    if (!Host) { if(ActionVideo)ActionSaleObserver();else localDone = true; return; }
+                    if (!Host) { if (GuestCameraLimit && step == 7) GuestBuyCamera(); else if(ActionVideo)ActionSaleObserver();else localDone = true; return; }
                     SellAndBuy(); break;
                 case 8:
+                    if (GuestCameraLimit) { if (Host) WaitInWater(); else Record(); return; }
                     if (!Host) { if(EquipmentVideo)EquipmentObserver();else WaitInWater(); return; }
                     Record(); break;
-                case 10: TripOut(); break;
+                case 10:
+                    if (GuestCameraLimit) { GuestCameraProof(); return; }
+                    TripOut(); break;
                 case 11:
                     Stop();
                     if(ActionVideo&&!Host&&ActionWorker!=null)Aim(ActionWorker.GetComponent<PlayerActionView>().ActionFocus);
@@ -687,9 +699,9 @@ namespace DeepDive.P1.Lab
         {
             var bridge = adapter.GetComponent<RecordingNetworkBridge>();
             if (recordingAt > 0 && !bridge.IsRecordingLocal &&
-                adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0)
+                ((GuestCameraLimit && !Host) || adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0))
             {
-                if (Arg("-p253-auto-limit") == "1")
+                if (Arg("-p253-auto-limit") == "1" || GuestCameraLimit)
                     report.cameraAutomaticLimit = Time.realtimeSinceStartup - recordingAt >= 13f;
                 report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
                 if (!File.Exists(output + ".camera-standby.png")) CaptureView(".camera-standby.png");
@@ -725,7 +737,7 @@ namespace DeepDive.P1.Lab
                 if (bridge.RecordingElapsedSeconds >= 3f && !File.Exists(output + ".camera-rec.png"))
                     CaptureView(".camera-rec.png");
                 if (recordingAt == 0) recordingAt = Time.realtimeSinceStartup;
-                if (Arg("-p253-auto-limit") != "1" &&
+                if (Arg("-p253-auto-limit") != "1" && !GuestCameraLimit &&
                     Time.realtimeSinceStartup - recordingAt > 12f) Act(bridge.ToggleRecordingLocal);
             }
             else if (Settled()) { recordingAt = 0; Act(bridge.ToggleRecordingLocal); }
@@ -743,6 +755,31 @@ namespace DeepDive.P1.Lab
             var stand = new Vector3(-7.6f, 5.5f, -5f);
             if (Vector3.Distance(local.transform.position, stand) > 0.45f) { MoveToward(stand); return; }
             Stop(); localDone = true;
+        }
+
+        // Guest buys a real camera with the shared balance earned earlier in this run.
+        private void GuestBuyCamera()
+        {
+            var host = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .FirstOrDefault(p => p.IsSpawned && p.OwnerClientId == 0);
+            if (host == null || host.CurrentCameraTier == CameraTier.None) { Stop(); return; }
+            if (!GoToService(TownServiceCatalog.EquipmentShopId)) return;
+            if (!sync.ShopOpen) { Act(local.SubmitServiceInteractionLocal); return; }
+            if (local.CurrentCameraTier == CameraTier.None)
+            { Act(() => sync.RequestPurchase(EconomyManager.CameraBasicId)); return; }
+            report.guestCameraPurchased = local.CurrentCameraTier == CameraTier.Basic;
+            localDone = report.guestCameraPurchased;
+        }
+
+        private void GuestCameraProof()
+        {
+            Stop();
+            if (!Host) { localDone = report.cameraAutomaticLimit && report.guestCameraPurchased; return; }
+            var clip = MediaNetworkBinding.Mirrored.Clips.FirstOrDefault(c => c.OwnerPlayerId == 1 && c.MediaReady && c.SafeReturned);
+            if (clip == null) return;
+            report.guestCameraClipSeconds = clip.DurationSeconds;
+            report.guestCameraClipVerified = clip.DurationSeconds > 13f && clip.DurationSeconds <= 15f && clip.SizeBytes > 0;
+            localDone = report.guestCameraClipVerified;
         }
         private void TripOut()
         {
@@ -1075,6 +1112,14 @@ namespace DeepDive.P1.Lab
             if (Arg("-p246-late-shop") == "1")
             {
                 report.passed = report.lateShopJoined && report.lateShopSawSelection && report.lateShopSawBasket && report.errors.Count == 0;
+                File.WriteAllText(output, JsonUtility.ToJson(report, true));
+                if (quit) Application.Quit(report.passed ? 0 : 1);
+                return;
+            }
+            if (GuestCameraLimit)
+            {
+                report.passed = step == 16 && report.players == 2 && report.errors.Count == 0 &&
+                    (Host ? report.guestCameraClipVerified : report.guestCameraPurchased && report.cameraAutomaticLimit);
                 File.WriteAllText(output, JsonUtility.ToJson(report, true));
                 if (quit) Application.Quit(report.passed ? 0 : 1);
                 return;
