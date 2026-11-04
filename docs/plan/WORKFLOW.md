@@ -1,5 +1,7 @@
 # Birlikte çalışma düzeni
 
+4 Kasım bütünlüklü teslim ilkesi: İşler sahiplik ve güvenli entegrasyon için alt görevlere bölünebilir; oyuncuya gelişme olarak sunulan paket, gerçek oynanışta bir uçtan diğer uca görülen, anlamlı görsel ve işlevsel büyüme olmalıdır. Şehir için ev–şehir–mağaza–sahil; deniz için su–habitat–balık–av/çekim örnekleri #162/#163’te. Altyapı ve hata düzeltmeleri dürüstçe ayrı raporlanır; bireysel tamam kaydı faz veya ortak deneyim kabulü değildir.
+
 4 Kasım kalite ilkesi: Oyuncuya görünen her işte kendi alanında somut bir görüntü veya gerçekçilik iyileştirmesi seç, uygun kaynak/ölçek/ışık/hareket/okunurluk tutarlılığını değerlendir ve değişen sahneyi gerçek build görüntüsüyle göster. Teknik veya görünmeyen işlerde gereksiz kozmetik değişiklik şartı aranmaz; görsel regresyon etkisi ve kalan eksik açıkça yazılır. Kanıt, test ve nihai insan kabulü ayrı tutulur.
 
 Plan 3.2 — 25 Ekim 2026. Kullanıcının kararıyla eski P4.6/P4.7 ara-kabulleri [ertelenerek idari kapatıldı](DEFERRED_ACCEPTANCE.md). P4.7–P4.11 üretimi ortak kabul bekleyişi olmadan küçük paketlerle ilerler; öncelik tamir/görsel kit ve taşınan yerleşimdir. Son ortak/ayrı PC/çok gün/nihai görsel kabul P4.12/#164'tedir. Önceki PASS yeni build kabulü sayılmaz; P5/P6 nihai P4 kapanışını bekler.

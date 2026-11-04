@@ -1,5 +1,7 @@
 # Mehmet, Utku ve Mert — faz planı
 
+4 Kasım teslim büyüklüğü kararı: Oyuncuya sunulan her yeni üretim adımı tek başına fark edilir, ilgili görsel/oynanış/entegrasyon parçalarıyla bütünlüklü bir deneyim olmalıdır. Şehir ve deniz sonuçları #162/#163 altında gerçek build üzerinden birlikte gösterilir. Ekip sahipliği ve teknik ara PR’lar korunur; alt teslimler üst deneyimi otomatik kapatmaz.
+
 4 Kasım P4.10 kararı: Şehir sahilden anlamlı uzak, dolu ve yürünebilir olacak; esnaf dükkânları gerçek binaların girilebilir zemin katlarında bulunacak. Önce ekipman dükkânında raf–sepet–içeride kasa akışı ve ev–şehir–sahil bağlantısı teslim edilir; diğer hizmetler kendi işlevlerine göre izler. Her oyuncuya görünen iş ilgili görüntü/gerçekçilik iyileştirmesi ve gerçek build kanıtı içerir. #153/#162 sahiplik ve kontrolleri belirtir. Bu ek yeni faz açmaz veya bitmişlik kaydı değildir.
 
 Plan sürümü: **3.0 — 15 Eylül 2026**. Kullanıcının yeni isteği: yaşayan kıyı dünyası; ilk sandal görevi ve alternatif kıyı avı; ayrı satın alınan kamera; canlı tekne konumlu keşif haritası; ortak ev, yataklar, gün/saat ve gün özeti; gerçekten izlenebilir klipler ve ev PC'sinden oyun içi kanal; daha büyük tekneler; ansiklopedi, boss, sponsorlar, kasaba gelişimi ve günlük çeşitlilik.
