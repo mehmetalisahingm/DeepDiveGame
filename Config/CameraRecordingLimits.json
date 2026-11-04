@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "tiers": [
+    {
+      "tier": "BasicActionCam",
+      "maxClipSeconds": 15,
+      "maxStorageClips": 3,
+      "resolution": "720p"
+    },
+    {
+      "tier": "ProDiverCam",
+      "maxClipSeconds": 30,
+      "maxStorageClips": 6,
+      "resolution": "1080p"
+    },
+    {
+      "tier": "AbyssCinemaRig",
+      "maxClipSeconds": 60,
+      "maxStorageClips": 10,
+      "resolution": "4K"
+    }
+  ]
+}
