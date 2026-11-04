@@ -56,6 +56,7 @@ namespace DeepDive.P1.Lab
         private static void Install()
         {
             if (Arg("-p46-world-role").Length == 0) return;
+            if (Arg("-p46-mute") == "1") AudioListener.volume = 0f;
             var go = new GameObject(nameof(ContinuousWorldSmokeDriver));
             DontDestroyOnLoad(go); go.AddComponent<ContinuousWorldSmokeDriver>();
         }

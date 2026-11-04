@@ -1,0 +1,13 @@
+stop,scenario,frames,mean_ms,p95_ms,max_ms,gpu
+3,seabed,180,1.596,2.266,2.900,NVIDIA GeForce RTX 4060 Laptop GPU
+3,old-floor,180,1.538,2.049,2.829,NVIDIA GeForce RTX 4060 Laptop GPU
+3,seabed,180,1.584,2.174,4.102,NVIDIA GeForce RTX 4060 Laptop GPU
+3,old-floor,180,1.560,2.121,2.598,NVIDIA GeForce RTX 4060 Laptop GPU
+4,seabed,180,1.884,2.538,3.418,NVIDIA GeForce RTX 4060 Laptop GPU
+4,old-floor,180,1.967,2.613,3.270,NVIDIA GeForce RTX 4060 Laptop GPU
+4,seabed,180,1.909,2.605,3.325,NVIDIA GeForce RTX 4060 Laptop GPU
+4,old-floor,180,1.915,2.474,3.327,NVIDIA GeForce RTX 4060 Laptop GPU
+5,seabed,180,1.965,2.707,4.250,NVIDIA GeForce RTX 4060 Laptop GPU
+5,old-floor,180,1.951,2.733,3.390,NVIDIA GeForce RTX 4060 Laptop GPU
+5,seabed,180,1.924,2.485,3.364,NVIDIA GeForce RTX 4060 Laptop GPU
+5,old-floor,180,1.958,2.588,3.548,NVIDIA GeForce RTX 4060 Laptop GPU

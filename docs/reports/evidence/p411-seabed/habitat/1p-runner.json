@@ -1,0 +1,14 @@
+﻿{
+    "passed":  false,
+    "requestedPlayers":  1,
+    "failure":  "",
+    "processes":  [
+                      {
+                          "slot":  0,
+                          "report":  "player0.json",
+                          "exitCode":  0,
+                          "passed":  true,
+                          "runnerGenerated":  false
+                      }
+                  ]
+}

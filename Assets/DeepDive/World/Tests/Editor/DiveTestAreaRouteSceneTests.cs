@@ -461,12 +461,18 @@ namespace DeepDive.World.Tests
 
             foreach (var collider in SolidColliders())
             {
+                // #219's terrain spans its whole chunk; its height where the hull floats is read below.
+                if (collider.name.StartsWith("Seabed_")) continue;
                 var bounds = collider.bounds;
                 if (bounds.max.y <= SeaBedY + 0.01f) continue;
                 Assert.IsFalse(FlatIntersects(column, bounds),
                     collider.name + " stands in the anchorage's water column " + bounds +
                     "; the anchorage must be open water, not a shelf");
             }
+
+            for (var x = column.min.x; x <= column.max.x; x += 0.5f)
+            for (var z = column.min.z; z <= column.max.z; z += 0.5f)
+                Assert.LessOrEqual(SeabedProfile.FloorHeight(x, z), 1f, $"a shelf under the boat at {x},{z}");
         }
 
         // 25

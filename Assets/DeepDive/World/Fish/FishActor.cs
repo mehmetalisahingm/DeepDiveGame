@@ -38,6 +38,7 @@ namespace DeepDive.World
 
         private FishHealth state;
         private FishMotion motion;
+        private IWaterBounds habitat;
         private SwimTuning tuning;
         private int weightGrams;
         private Renderer[] visuals;
@@ -99,6 +100,7 @@ namespace DeepDive.World
             tuning = species.Swim;
             // Where the fish was placed is the home it wanders around.
             motion = new FishMotion(tuning, transform.position, random);
+            habitat = new HabitatWaterBounds(SwimVolumeBounds.Instance, transform.position);
             health.Value = state.Health;
         }
 
@@ -118,7 +120,7 @@ namespace DeepDive.World
             nightActive.Value = activity > 1f;
             GatherThreats();
             var position = transform.position;
-            var next = motion.Step(position, threats, Time.fixedDeltaTime, SwimVolumeBounds.Instance, activity);
+            var next = motion.Step(position, threats, Time.fixedDeltaTime, habitat, activity);
             LastSwimSpeed = Vector3.Distance(position, next) / Time.fixedDeltaTime;
             if (next == position) return;
 
