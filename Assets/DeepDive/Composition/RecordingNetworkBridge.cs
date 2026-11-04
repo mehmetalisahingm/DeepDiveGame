@@ -24,11 +24,15 @@ namespace DeepDive.Composition
         {
             public readonly ulong NetworkObjectId;
             public readonly IRecordingTarget Target;
+            public readonly double StartedAt;
+            public readonly float MaxSeconds;
 
-            public ActiveRecordingTarget(ulong networkObjectId, IRecordingTarget target)
+            public ActiveRecordingTarget(ulong networkObjectId, IRecordingTarget target, double startedAt, float maxSeconds)
             {
                 NetworkObjectId = networkObjectId;
                 Target = target;
+                StartedAt = startedAt;
+                MaxSeconds = maxSeconds;
             }
         }
 
@@ -41,6 +45,7 @@ namespace DeepDive.Composition
 
         private ulong localRequestSequence;
         private ulong localLastAppliedRequest;
+        private ulong automaticStopSequence;
         private bool cameraMode;
         private bool localRecording;
         private ulong localRecordingTarget;
@@ -98,8 +103,12 @@ namespace DeepDive.Composition
                 localRequestSequence = localLastAppliedRequest = 0;
                 lastRequestByPlayer.Clear();
                 activeTargetByPlayer.Clear();
+                automaticStopSequence = 0;
                 return;
             }
+
+            if (adapter.IsAuthority && adapter.Session.State.Phase == SessionPhase.Dive)
+                StopExpiredRecordings();
 
             var player = LocalPlayer();
             if (player == null) { if (cameraHud != null) cameraHud.Hide(); return; }
@@ -287,6 +296,9 @@ namespace DeepDive.Composition
                 (player == null || !player.IsSpawned || player.Passive.Value || player.RepairHandsBusy ||
                  player.CurrentHeldEquipment != HeldEquipmentMode.Camera))
                 result = PlayerActionResult.InvalidState;
+            if (result == PlayerActionResult.Accepted && command == RecordingCommand.Start &&
+                CameraRecordingLimits.MaxSeconds(player.CurrentCameraTier) <= 0f)
+                result = PlayerActionResult.InvalidState;
 
             IRecordingTarget recordingTarget = null;
             var lockedNetworkObjectId = 0UL;
@@ -329,7 +341,8 @@ namespace DeepDive.Composition
             if (result == PlayerActionResult.Accepted)
             {
                 if (command == RecordingCommand.Start)
-                    activeTargetByPlayer[sender] = new ActiveRecordingTarget(lockedNetworkObjectId, recordingTarget);
+                    activeTargetByPlayer[sender] = new ActiveRecordingTarget(lockedNetworkObjectId, recordingTarget,
+                        Time.realtimeSinceStartupAsDouble, CameraRecordingLimits.MaxSeconds(player.CurrentCameraTier));
                 else
                     activeTargetByPlayer.Remove(sender);
             }
@@ -341,6 +354,33 @@ namespace DeepDive.Composition
                 player.SetRecordingPresentationServer(activeTargetByPlayer.ContainsKey(sender));
 
             SendResult(sender, requestId, command, result);
+        }
+
+        private void StopExpiredRecordings()
+        {
+            var now = Time.realtimeSinceStartupAsDouble;
+            foreach (var entry in new List<KeyValuePair<ulong, ActiveRecordingTarget>>(activeTargetByPlayer))
+            {
+                var owner = entry.Key;
+                var take = entry.Value;
+                if (now - take.StartedAt < take.MaxSeconds) continue;
+                var result = PlayerActionResult.InvalidTarget;
+                if (IsUsableTarget(take.Target))
+                {
+                    // Reserve a host-only request id, separate from the owner's monotonic sequence.
+                    // This still reaches the normal evaluator, ledger and real clip callback.
+                    var id = ulong.MaxValue - ++automaticStopSequence;
+                    var candidate = new RecordingCandidate(id, adapter.Session.State.DiveId,
+                        new PlayerId(owner), take.Target);
+                    result = RecordingEvaluation.TryStop(candidate);
+                }
+                activeTargetByPlayer.Remove(owner);
+                if (manager.ConnectedClients.TryGetValue(owner, out var client) && client.PlayerObject != null &&
+                    client.PlayerObject.TryGetComponent<NetworkPlayer>(out var player) && player.IsSpawned)
+                    player.SetRecordingPresentationServer(false);
+                // Request id 0 is reserved for server-initiated stops, not a client request.
+                SendResult(owner, 0, RecordingCommand.Stop, result);
+            }
         }
 
         private void SendResult(ulong receiver, ulong requestId, RecordingCommand command, PlayerActionResult result)
@@ -378,8 +418,8 @@ namespace DeepDive.Composition
         private void ApplyLocalResult(ulong requestId, RecordingCommand command, PlayerActionResult result,
             bool active, ulong targetId)
         {
-            if (requestId <= localLastAppliedRequest) return;
-            localLastAppliedRequest = requestId;
+            if (requestId != 0 && requestId <= localLastAppliedRequest) return;
+            if (requestId != 0) localLastAppliedRequest = requestId;
             if (active && !localRecording) recordingStartedAt = Time.unscaledTimeAsDouble;
             else if (!active) recordingStartedAt = 0;
             localRecording = active;
@@ -389,7 +429,9 @@ namespace DeepDive.Composition
             if (player != null)
                 player.SetHeldEquipmentLocal(active || cameraMode ? HeldEquipmentMode.Camera : HeldEquipmentMode.Harpoon);
 
-            if (result == PlayerActionResult.Accepted)
+            if (requestId == 0 && command == RecordingCommand.Stop)
+                ShowStatus("KAYIT SURESI DOLDU");
+            else if (result == PlayerActionResult.Accepted)
                 ShowStatus(command == RecordingCommand.Start ? "RECORDING STARTED" : "RECORDING STOPPED");
             else if (result == PlayerActionResult.InvalidTarget)
                 ShowStatus("NO RECORD TARGET");

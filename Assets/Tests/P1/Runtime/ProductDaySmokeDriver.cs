@@ -37,6 +37,7 @@ namespace DeepDive.P1.Lab
             public bool observedCarry, observedPlaced, cancelRecovered;
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
+            public bool cameraAutomaticLimit;
             public bool purchasedMaterial, purchaseDidNotRepair, saveFaultRefused, saveFaultRecovered;
             public int repairVideoFrames;
             public bool repairArtSeen, repairToolContactSeen, repairGripVerified;
@@ -688,6 +689,8 @@ namespace DeepDive.P1.Lab
             if (recordingAt > 0 && !bridge.IsRecordingLocal &&
                 adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0)
             {
+                if (Arg("-p253-auto-limit") == "1")
+                    report.cameraAutomaticLimit = Time.realtimeSinceStartup - recordingAt >= 13f;
                 report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
                 if (!File.Exists(output + ".camera-standby.png")) CaptureView(".camera-standby.png");
                 HoldForShore(); return;
@@ -722,7 +725,8 @@ namespace DeepDive.P1.Lab
                 if (bridge.RecordingElapsedSeconds >= 3f && !File.Exists(output + ".camera-rec.png"))
                     CaptureView(".camera-rec.png");
                 if (recordingAt == 0) recordingAt = Time.realtimeSinceStartup;
-                if (Time.realtimeSinceStartup - recordingAt > 12f) Act(bridge.ToggleRecordingLocal);
+                if (Arg("-p253-auto-limit") != "1" &&
+                    Time.realtimeSinceStartup - recordingAt > 12f) Act(bridge.ToggleRecordingLocal);
             }
             else if (Settled()) { recordingAt = 0; Act(bridge.ToggleRecordingLocal); }
         }
@@ -1084,6 +1088,7 @@ namespace DeepDive.P1.Lab
             if (Host) report.passed &= report.initialClean && report.cameraBought && report.soldCount == 2 &&
                 report.clipPlayed && report.clipAdvanced && report.published && report.duplicateRefused &&
                 report.cameraHudRecording && report.cameraHudTimerAdvanced && report.cameraHudStopped;
+            if (Host && Arg("-p253-auto-limit") == "1") report.passed &= report.cameraAutomaticLimit;
             if (report.reload) report.passed = report.reloadClean && report.clipAdvanced && report.errors.Count == 0;
             report.huntFirst = HuntFirst;
             if (HuntFirst && Host) report.passed &= report.partsAtFirstSale == 0;

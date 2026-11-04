@@ -1,5 +1,7 @@
 # Yaşayan dünya: ev, gün, kanal, keşif ve boss
 
+4 Kasım kullanıcı kararı: Ortak kanalın ana hedefi 10.000.000 abone; gerçek av/çekim, balık büyüklüğü ve kamera seviyesi oynanabilir döngüye bağlanır. [10M döngü hedefi](CHANNEL_GOAL_10M.md), #252–#255. Bu hedef kaydı tamamlanmış özellik veya tarih taahhüdü değildir.
+
 26 Ekim dar su görsel teslimi Q07/Q08: mevcut tek deniz bölgesinde ufka uzanan optik yüzey, yansıma/kırılma, sakin/rüzgârlı dalga ve gün/gece gökyüzü; dalışta renk soğurması, taban ışığı ve parçacık uygulanır. Kullanıcı işi tek uygulayıcı olarak Mehmet'e devretti. Görsel yüzeyin genişliği oynanabilir alan veya ikinci bölge değildir; mevcut su hacmi, görünür dünya collider'ları, host kampanyası ve sabit rota korunur. Mercan/habitat, yeni balık ve boss bu su paketinin tamam kaydı değildir.
 
 25 Ekim 2026 kullanıcı kararı: eski P4.6/P4.7 ortak kabul bekleyişleri ertelenerek idari kapalıdır. P4.7–P4.11 mevcut dünya/eylem/görsel üretimi gerçek kod/varlık girdileriyle ilerler. Ayrı PC/çok gün/son görsel testler P4.12/#164 [erteleme defterine](DEFERRED_ACCEPTANCE.md) taşınır; eski “yalnız #187 uygulama izni” sıra sınırının yerini bu karar alır. D06 host kampanyası, tek aktif tekne/sabit rota, kayıt ve tek ödeme kuralları korunur. Üretilmemiş sanat yapılmış sayılmaz; #207 açık kusurdur.

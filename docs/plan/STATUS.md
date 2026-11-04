@@ -1,5 +1,7 @@
 # Güncel durum ve görev takibi
 
+4 Kasım kullanıcı kararı: Ortak kanalın ana hedefi 10.000.000 abone; gerçek av/çekim, balık büyüklüğü ve kamera seviyesi oynanabilir döngüye bağlanır. [10M döngü hedefi](CHANNEL_GOAL_10M.md), #252–#255. Bu hedef kaydı tamamlanmış özellik veya tarih taahhüdü değildir.
+
 Plan **3.2 — 25 Ekim 2026**. Temel içerik bütçesi korunur; eski ara-kabuller son gelişmiş sürüme ertelendi.
 
 3 Kasım devamı: #242 `7be9ec8` ile entegrasyona birleşti, #241 kapalı. #245 kullanılmayan test Docker imajını Windows build öncesi boşaltma koruması kendi Unity/Windows CI SUCCESS sonrası `28bdeae` ile birleşti; #243'teki eski disk/exit125 FAIL'leri korunur. Mehmet #246 seçilen ürünü iki elde sepette taşıma sunumunu uyguluyor: ilk gerçek rig testi 3.2 cm erişim açığını yakaladı, eşik gevşetilmeden tutuş yüksekliği düzeltildi; 3/3 odaklı ve 1486/1486 tam EditMode PASS. Windows/iki kamera runtime kanıtı ve CI henüz bu notla verilmez. Tam şehir/iç mekân, #164 ve #207 açık kalır.

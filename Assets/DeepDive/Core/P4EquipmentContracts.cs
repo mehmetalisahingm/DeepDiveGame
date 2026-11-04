@@ -10,6 +10,19 @@ namespace DeepDive.Core.Contracts
         Professional = 3
     }
 
+    // Short capture budgets are working values; the server locks the tier at start.
+    // None and unknown tiers are not allowed to produce an unbounded recording.
+    public static class CameraRecordingLimits
+    {
+        public static float MaxSeconds(CameraTier tier) => tier switch
+        {
+            CameraTier.Basic => 15f,
+            CameraTier.Advanced => 30f,
+            CameraTier.Professional => 45f,
+            _ => 0f
+        };
+    }
+
     // Player-facing capability snapshot derived from the authoritative LoadoutState + catalog.
     // It contains no prices or world validation rules: Mert owns catalog/ownership, Utku owns
     // capture/world validation, and Mehmet consumes this result in player/network presentation.
