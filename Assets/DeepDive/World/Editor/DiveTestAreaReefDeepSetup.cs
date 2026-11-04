@@ -540,6 +540,8 @@ namespace DeepDive.World.Editor
             {
                 var bounds = collider.bounds;
                 if (bounds.max.y <= seaBedY + 0.01f) continue;
+                // #219's terrain slopes under the anchorage; only what could reach a hull counts as land.
+                if (bounds.max.y <= SurfaceY - DiveTestAreaRouteSetup.HullDraft - WallMargin) continue;
                 if (!FlatIntersects(column, bounds)) continue;
                 throw new InvalidOperationException(
                     $"P4_REEFDEEP_ANCHOR_HAS_LAND anchor={anchor.AnchorId} collider={collider.name} bounds={bounds}");

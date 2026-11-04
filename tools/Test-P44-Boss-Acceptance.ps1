@@ -21,6 +21,7 @@ function Start-Game([string]$name, [string]$mode, [int]$count, [int]$port, [swit
         '-p1-count', $count,
         '-p1-port', $port,
         '-p1-report', $report,
+        '-p46-mute', 1,
         '-logFile', $log
     )
     if ($isWindowsPlatform) { $args += '-nographics' }
@@ -93,6 +94,7 @@ try {
                 '-p1-port', ($Port + 1),
                 '-p1-report', $reloadReport,
                 '-logFile', $reloadLog,
+                '-p46-mute', 1,
                 '-p4-boss-acceptance-reload', '1'
             )
             $options = @{ FilePath=$BuildPath; ArgumentList=$reloadArgs; PassThru=$true }

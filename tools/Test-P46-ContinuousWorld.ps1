@@ -16,7 +16,7 @@ try {
         $worldGraphics = if ($worldIsWindows -and -not $Render) { @('-nographics') }
             else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
         $worldArgs = @('-batchmode') + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
-            '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port,
+            '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port, '-p46-mute', 1,
             '-p1-report', ('"{0}"' -f $worldReport), '-logFile', ('"{0}"' -f $worldLog))
         if ($worldIsWindows) { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -WindowStyle Hidden -PassThru }
         else { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -PassThru }
@@ -51,7 +51,7 @@ try {
     $worldReloadGraphics = if ($worldIsWindows -and -not $Render) { @('-nographics') }
         else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
     $worldReloadArgs = @('-batchmode') + $worldReloadGraphics + @('-p46-world-role', 'host', '-p46-world-count', 1,
-        '-p46-world-slot', 0, '-p46-world-port', ($Port + 1), '-p46-world-reload-day', $worldHost.morningDay,
+        '-p46-world-slot', 0, '-p46-world-port', ($Port + 1), '-p46-world-reload-day', $worldHost.morningDay, '-p46-mute', 1,
         '-p1-report', ('"{0}"' -f $worldReloadReport), '-logFile', ('"{0}"' -f (Join-Path $worldRun 'reload.log')))
     if ($worldIsWindows) { $worldReloadProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldReloadArgs -WindowStyle Hidden -PassThru }
     else { $worldReloadProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldReloadArgs -PassThru }
