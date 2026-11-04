@@ -4,6 +4,7 @@ using DeepDive.Core.Contracts;
 using DeepDive.Inventory;
 using DeepDive.Session;
 using DeepDive.World;
+using UnityEngine;
 
 namespace DeepDive.Composition
 {
@@ -100,8 +101,18 @@ namespace DeepDive.Composition
 
         private void ForwardTakeRegistered(RecordingTake take) => TakeRegistered?.Invoke(take);
 
+        // #254: reaches the current dive's director only; a catch from another dive proves nothing here.
+        public void NoteCatch(CaptureResult capture)
+        {
+            if (disposed || !isAuthority() || Director == null || capture.DiveId != diveId) return;
+            Director.NoteCatch(capture);
+        }
+
         private void SummaryReady(DiveSummary summary)
         {
+            if (!disposed && isAuthority() && Director != null && summary.DiveId == diveId)
+                foreach (var captureId in Director.CatchesWithoutFilm(summary))
+                    Debug.Log($"P4_SPECIMEN_PROOF dive={summary.DiveId} kind=CatchOnly capture={captureId}");
             if (disposed || !isAuthority() || Director == null || summary.DiveId != diveId || Director.IsSettled || Director.ClaimCount == 0)
                 return;
             pending[summary.DiveId] = (Director, summary);
@@ -132,6 +143,9 @@ namespace DeepDive.Composition
                 return PlayerActionResult.InvalidState;
 
             var answer = payment(result);
+            Debug.Log($"P4_SPECIMEN_PROOF dive={result.DiveId} kind={result.Specimen.Kind} recording={result.RecordingId} " +
+                      $"species={result.SubjectId} specimen={result.Specimen.SpecimenId} grams={result.Specimen.WeightGrams} " +
+                      $"capture={result.Specimen.CaptureId} player={result.PlayerId} answer={answer}");
             // Accepted is the normal path; DuplicateRequest is a retry of the same persistent
             // RecordingId. Exploration is idempotent by that id, so replaying the notification is safe
             // and lets it repair a missed observation without minting a second encyclopedia entry.
