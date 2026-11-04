@@ -1,5 +1,11 @@
 # Güncel durum ve görev takibi
 
+4 Kasım kullanıcı, [şehir–mağaza–deniz konseptinin](VISUAL_TARGET_20261104.md) genel görsel yönünü onayladı. Konsept yapay zekâ ile üretilmiştir; mevcut oyun veya kesin teslim tarihi değildir. Sahilin şehirden anlamlı uzak olması ve birinci kişi/oyun sözleşmeleri korunur.
+
+4 Kasım kullanıcı önceliği: Teslimler oyuncunun tek sürümde hissedeceği büyük ve bütünlüklü gelişmeler olarak değerlendirilir. Şehir örneği #162: ev–dolu sokak–girilebilir mağaza–raf/sepet/kasa–sahil; deniz örneği #163: su–habitat–ayırt edilir balık–av/çekim ve dönüş. #249/#250/#172 gibi görevler alanlara göre yürütülür; tek alt görevin kapanışı ortak deneyimin bittiği anlamına gelmez. Bunlar henüz uygulanmış sonuç değildir.
+
+4 Kasım kullanıcı ürün kararı: P4.10’da dükkânlar sahilden anlamlı uzak şehir bölgesindeki gerçek binaların girilebilir zemin katlarıdır. İlk örnek ekipman mağazası; açık giriş, dolu raf, esnaf ve içeride ayrı kasada ödeme, kesintisiz ev–şehir–sahil yürüyüşüyle tamamlanır. #153/#162 güncellendi. Bu kapsam/öncelik kaydıdır; dünya veya bina uygulanmış değildir. Oyuncuya görünen işlerde görüntü ve gerçekçilik geliştirilip gerçek oyun kanıtıyla değerlendirilir. P4.12/#164 son kabulü korunur.
+
 Plan **3.2 — 25 Ekim 2026**. Temel içerik bütçesi korunur; eski ara-kabuller son gelişmiş sürüme ertelendi.
 
 3 Kasım devamı: #242 `7be9ec8` ile entegrasyona birleşti, #241 kapalı. #245 kullanılmayan test Docker imajını Windows build öncesi boşaltma koruması kendi Unity/Windows CI SUCCESS sonrası `28bdeae` ile birleşti; #243'teki eski disk/exit125 FAIL'leri korunur. Mehmet #246 seçilen ürünü iki elde sepette taşıma sunumunu uyguluyor: ilk gerçek rig testi 3.2 cm erişim açığını yakaladı, eşik gevşetilmeden tutuş yüksekliği düzeltildi; 3/3 odaklı ve 1486/1486 tam EditMode PASS. Windows/iki kamera runtime kanıtı ve CI henüz bu notla verilmez. Tam şehir/iç mekân, #164 ve #207 açık kalır.
