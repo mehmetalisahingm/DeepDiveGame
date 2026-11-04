@@ -1,5 +1,7 @@
 # Mehmet, Utku ve Mert — faz planı
 
+4 Kasım kullanıcı kararı: Ortak kanalın ana hedefi 10.000.000 abone; gerçek av/çekim, balık büyüklüğü ve kamera seviyesi oynanabilir döngüye bağlanır. [10M döngü hedefi](CHANNEL_GOAL_10M.md), #252–#255. Bu hedef kaydı tamamlanmış özellik veya tarih taahhüdü değildir.
+
 4 Kasım teslim büyüklüğü kararı: Oyuncuya sunulan her yeni üretim adımı tek başına fark edilir, ilgili görsel/oynanış/entegrasyon parçalarıyla bütünlüklü bir deneyim olmalıdır. Şehir ve deniz sonuçları #162/#163 altında gerçek build üzerinden birlikte gösterilir. Ekip sahipliği ve teknik ara PR’lar korunur; alt teslimler üst deneyimi otomatik kapatmaz.
 
 4 Kasım P4.10 kararı: Şehir sahilden anlamlı uzak, dolu ve yürünebilir olacak; esnaf dükkânları gerçek binaların girilebilir zemin katlarında bulunacak. Önce ekipman dükkânında raf–sepet–içeride kasa akışı ve ev–şehir–sahil bağlantısı teslim edilir; diğer hizmetler kendi işlevlerine göre izler. Her oyuncuya görünen iş ilgili görüntü/gerçekçilik iyileştirmesi ve gerçek build kanıtı içerir. #153/#162 sahiplik ve kontrolleri belirtir. Bu ek yeni faz açmaz veya bitmişlik kaydı değildir.

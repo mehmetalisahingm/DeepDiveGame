@@ -6,6 +6,15 @@ namespace DeepDive.P4.Tests
 {
     public sealed class EquipmentVisualTransitionTests
     {
+        [Test]
+        public void RecordingLimitsGrowWithCameraAndRejectMissingOrUnknownEquipment()
+        {
+            Assert.AreEqual(0f, CameraRecordingLimits.MaxSeconds(CameraTier.None));
+            Assert.AreEqual(15f, CameraRecordingLimits.MaxSeconds(CameraTier.Basic));
+            Assert.AreEqual(30f, CameraRecordingLimits.MaxSeconds(CameraTier.Advanced));
+            Assert.AreEqual(45f, CameraRecordingLimits.MaxSeconds(CameraTier.Professional));
+            Assert.AreEqual(0f, CameraRecordingLimits.MaxSeconds((CameraTier)99));
+        }
         private static EquipmentVisualTransition Harpoon()
         {var view=new EquipmentVisualTransition();view.Tick(HeldEquipmentMode.Harpoon,CameraTier.Basic,0);return view;}
 

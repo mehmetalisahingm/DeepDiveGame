@@ -1,5 +1,7 @@
 # Yaşayan dünya: ev, gün, kanal, keşif ve boss
 
+4 Kasım kullanıcı kararı: Ortak kanalın ana hedefi 10.000.000 abone; gerçek av/çekim, balık büyüklüğü ve kamera seviyesi oynanabilir döngüye bağlanır. [10M döngü hedefi](CHANNEL_GOAL_10M.md), #252–#255. Bu hedef kaydı tamamlanmış özellik veya tarih taahhüdü değildir.
+
 4 Kasım P4.10 hedefi: Sahilden uzak şehirde her hizmet gerçek bir binanın zemin katında; mağazaya sokaktan kesintisiz yürünür. Ekipman mağazası ilk örnektir: okunabilir ve erişilebilir ürün rafları, taşıma, ayrı kasa ve esnaf iç mekânda. Dükkânları sahilden uzaklaştırmak tek başına boş yol uzatmak değildir; sokak/çevre içeriği, rota ve dört oyuncu erişimiyle birlikte ölçülür. Sahne, ortak anchor ve sanat işleri #153/#162 üzerinden Utku/Mert/Mehmet arasında koordine edilir. Hedef henüz uygulanmış veya kabul edilmiş değildir.
 
 26 Ekim dar su görsel teslimi Q07/Q08: mevcut tek deniz bölgesinde ufka uzanan optik yüzey, yansıma/kırılma, sakin/rüzgârlı dalga ve gün/gece gökyüzü; dalışta renk soğurması, taban ışığı ve parçacık uygulanır. Kullanıcı işi tek uygulayıcı olarak Mehmet'e devretti. Görsel yüzeyin genişliği oynanabilir alan veya ikinci bölge değildir; mevcut su hacmi, görünür dünya collider'ları, host kampanyası ve sabit rota korunur. Mercan/habitat, yeni balık ve boss bu su paketinin tamam kaydı değildir.

@@ -1,5 +1,7 @@
 # Güncel durum ve görev takibi
 
+4 Kasım kullanıcı kararı: Ortak kanalın ana hedefi 10.000.000 abone; gerçek av/çekim, balık büyüklüğü ve kamera seviyesi oynanabilir döngüye bağlanır. [10M döngü hedefi](CHANNEL_GOAL_10M.md), #252–#255. Bu hedef kaydı tamamlanmış özellik veya tarih taahhüdü değildir.
+
 4 Kasım kullanıcı, [şehir–mağaza–deniz konseptinin](VISUAL_TARGET_20261104.md) genel görsel yönünü onayladı. Konsept yapay zekâ ile üretilmiştir; mevcut oyun veya kesin teslim tarihi değildir. Sahilin şehirden anlamlı uzak olması ve birinci kişi/oyun sözleşmeleri korunur.
 
 4 Kasım kullanıcı önceliği: Teslimler oyuncunun tek sürümde hissedeceği büyük ve bütünlüklü gelişmeler olarak değerlendirilir. Şehir örneği #162: ev–dolu sokak–girilebilir mağaza–raf/sepet/kasa–sahil; deniz örneği #163: su–habitat–ayırt edilir balık–av/çekim ve dönüş. #249/#250/#172 gibi görevler alanlara göre yürütülür; tek alt görevin kapanışı ortak deneyimin bittiği anlamına gelmez. Bunlar henüz uygulanmış sonuç değildir.

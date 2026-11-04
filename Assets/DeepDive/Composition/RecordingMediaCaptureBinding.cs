@@ -27,6 +27,7 @@ namespace DeepDive.Composition
             public PlayerId Player;
             public string DiveId;
             public double StartedAt, NextFrameAt;
+            public float MaxSeconds;
             public readonly List<ClipFramePacket> Frames = new List<ClipFramePacket>();
         }
 
@@ -165,12 +166,14 @@ namespace DeepDive.Composition
                     capture = new Active
                     {
                         Player = new PlayerId(owner), DiveId = adapter.Session.State.DiveId,
-                        StartedAt = now, NextFrameAt = now
+                        StartedAt = now, NextFrameAt = now,
+                        MaxSeconds = CameraRecordingLimits.MaxSeconds(player.CurrentCameraTier)
                     };
                     active[owner] = capture;
                 }
                 if (capture.DiveId != adapter.Session.State.DiveId) { active.Remove(owner); continue; }
-                if (capture.Frames.Count < MaxFrames && now >= capture.NextFrameAt)
+                if (capture.MaxSeconds > 0f && now - capture.StartedAt < capture.MaxSeconds &&
+                    capture.Frames.Count < MaxFrames && now >= capture.NextFrameAt)
                 {
                     CaptureFrame(capture, player, now);
                     capture.NextFrameAt = now + FrameInterval;
@@ -184,7 +187,7 @@ namespace DeepDive.Composition
             if (adapter == null || !adapter.IsAuthority || !active.TryGetValue(take.PlayerId.Value, out var capture) ||
                 capture.DiveId != take.DiveId) return;
 
-            var now = Time.realtimeSinceStartupAsDouble;
+            var now = Math.Min(Time.realtimeSinceStartupAsDouble, capture.StartedAt + capture.MaxSeconds);
             var player = FindPlayer(take.PlayerId);
             if (player != null && capture.Frames.Count < MaxFrames) CaptureFrame(capture, player, now);
             active.Remove(take.PlayerId.Value);

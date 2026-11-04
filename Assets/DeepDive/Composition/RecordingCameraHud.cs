@@ -31,7 +31,9 @@ namespace DeepDive.Composition
             dot.color = recording ? new Color(red.r, red.g, red.b, .65f + .35f * (.5f + .5f * Mathf.Sin(Time.unscaledTime * 5)))
                 : new Color(.6f, .7f, .73f);
             var seconds = Mathf.Max(0, (int)elapsed);
-            timer.text = $"{seconds / 3600:00}:{seconds / 60 % 60:00}:{seconds % 60:00}";
+            var remaining = Mathf.CeilToInt(Mathf.Max(0f, CameraRecordingLimits.MaxSeconds(tier) - elapsed));
+            timer.text = recording ? $"{seconds:00} / {(int)CameraRecordingLimits.MaxSeconds(tier):00} sn" :
+                $"{remaining:00} sn";
             tierLabel.text = "CAM / " + (tier == CameraTier.Professional ? "PRO" : tier == CameraTier.Advanced ? "ADVANCED" : "BASIC");
             controls.text = recording ? "R  KAYDI DURDUR" : "R  KAYDI BASLAT     C  KAMERAYI KAPAT";
             status.text = message;
