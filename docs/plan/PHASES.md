@@ -2,6 +2,10 @@
 
 4 Kasım kullanıcı kararı: Ortak kanalın ana hedefi 10.000.000 abone; gerçek av/çekim, balık büyüklüğü ve kamera seviyesi oynanabilir döngüye bağlanır. [10M döngü hedefi](CHANNEL_GOAL_10M.md), #252–#255. Bu hedef kaydı tamamlanmış özellik veya tarih taahhüdü değildir.
 
+4 Kasım teslim büyüklüğü kararı: Oyuncuya sunulan her yeni üretim adımı tek başına fark edilir, ilgili görsel/oynanış/entegrasyon parçalarıyla bütünlüklü bir deneyim olmalıdır. Şehir ve deniz sonuçları #162/#163 altında gerçek build üzerinden birlikte gösterilir. Ekip sahipliği ve teknik ara PR’lar korunur; alt teslimler üst deneyimi otomatik kapatmaz.
+
+4 Kasım P4.10 kararı: Şehir sahilden anlamlı uzak, dolu ve yürünebilir olacak; esnaf dükkânları gerçek binaların girilebilir zemin katlarında bulunacak. Önce ekipman dükkânında raf–sepet–içeride kasa akışı ve ev–şehir–sahil bağlantısı teslim edilir; diğer hizmetler kendi işlevlerine göre izler. Her oyuncuya görünen iş ilgili görüntü/gerçekçilik iyileştirmesi ve gerçek build kanıtı içerir. #153/#162 sahiplik ve kontrolleri belirtir. Bu ek yeni faz açmaz veya bitmişlik kaydı değildir.
+
 Plan sürümü: **3.0 — 15 Eylül 2026**. Kullanıcının yeni isteği: yaşayan kıyı dünyası; ilk sandal görevi ve alternatif kıyı avı; ayrı satın alınan kamera; canlı tekne konumlu keşif haritası; ortak ev, yataklar, gün/saat ve gün özeti; gerçekten izlenebilir klipler ve ev PC'sinden oyun içi kanal; daha büyük tekneler; ansiklopedi, boss, sponsorlar, kasaba gelişimi ve günlük çeşitlilik.
 
 **25 Ekim 2026 revizyonu 3.2:** P0–P3 kapalı, P4 üretim açıktır. Kullanıcının kararıyla P4.6/P4.7 eski ara-kabul bekleyişleri ertelenerek idari kapatılır; PASS değildir. P4.7–P4.11 üretimi eski ayrı PC/çok gün/nihai görsel kabulünü beklemeden gerçek kod/varlık girdileriyle ilerler. Öncelik P4.8 ve taşınan görsel kit/yerleşimdir. Son gelişmiş sürümde P4.12/#164 [ertelenen testleri](DEFERRED_ACCEPTANCE.md) tamamlar. P5/P6 nihai P4 kapanışını bekler.
