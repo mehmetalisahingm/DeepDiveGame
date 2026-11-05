@@ -1,6 +1,6 @@
 # #257 ortak av ve çekim: çalışma kaydı
 
-Durum: **taslak, kabul değil**. Bir oyuncu avı topladığında sahneden kalkan hedef, başka oyuncunun açık kaydını iptal edebiliyordu. Bu değişiklik başarılı host toplama olayından önce aynı hedefin açık kayıtlarını normal değerlendirme ve gerçek klip yoluyla bitirmeyi dener. Kayıt/ödül koşulları değiştirilmez. Otomatik sonuç bildirimi nedeniyle protokol P4-8'dir; tüm katılımcıların build'i aynı olmalıdır.
+Durum: **dar teknik teslim, görev veya nihai kabul değil**. Bir oyuncu avı topladığında sahneden kalkan hedef, başka oyuncunun açık kaydını iptal edebiliyordu. Bu değişiklik başarılı host toplama olayından önce aynı hedefin açık kayıtlarını normal değerlendirme ve gerçek klip yoluyla bitirmeyi dener. Kayıt/ödül koşulları değiştirilmez. Otomatik sonuç bildirimi nedeniyle protokol P4-8'dir; tüm katılımcıların build'i aynı olmalıdır.
 
 ## 5 Kasım devamı — iki süreçli gerçek klip
 
