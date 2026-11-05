@@ -1,0 +1,31 @@
+{
+  "zones": [
+    {
+      "zoneId": "shallow_coral_shelf",
+      "depthRangeMeters": [
+        5,
+        35
+      ],
+      "coralDensity": 0.85,
+      "visibilityMeters": 42
+    },
+    {
+      "zoneId": "twilight_reef_wall",
+      "depthRangeMeters": [
+        35,
+        110
+      ],
+      "coralDensity": 0.55,
+      "visibilityMeters": 24
+    },
+    {
+      "zoneId": "natural_seabed_trench",
+      "depthRangeMeters": [
+        110,
+        260
+      ],
+      "coralDensity": 0.15,
+      "visibilityMeters": 12
+    }
+  ]
+}
