@@ -57,6 +57,7 @@ namespace DeepDive.Composition
         private RecordingCameraHud cameraHud;
 
         public bool IsRecordingLocal => localRecording;
+        public string CurrentStatus => Time.unscaledTime < localStatusUntil ? localStatus : string.Empty;
         public float RecordingElapsedSeconds => localRecording
             ? (float)System.Math.Max(0, Time.unscaledTimeAsDouble - recordingStartedAt) : 0f;
 
@@ -103,6 +104,7 @@ namespace DeepDive.Composition
                 caught == null || caught.NetworkObject == null || !caught.NetworkObject.IsSpawned ||
                 adapter.Session.State.Phase != SessionPhase.Dive) return;
             var objectId = caught.NetworkObject.NetworkObjectId;
+            Debug.Log($"P257_RECORDING_PICKUP target={objectId} active={activeTargetByPlayer.Count}");
             foreach (var entry in new List<KeyValuePair<ulong, ActiveRecordingTarget>>(activeTargetByPlayer))
                 if (entry.Value.NetworkObjectId == objectId)
                     StopOnServer(entry.Key, entry.Value, CollectedStopNotice);
@@ -399,6 +401,7 @@ namespace DeepDive.Composition
                 result = RecordingEvaluation.TryStop(candidate);
             }
             activeTargetByPlayer.Remove(owner);
+            Debug.Log($"P257_RECORDING_STOP owner={owner} target={take.NetworkObjectId} notice={notice} result={result} connected={connected}");
             if (connected && client.PlayerObject != null &&
                 client.PlayerObject.TryGetComponent<NetworkPlayer>(out var player) && player.IsSpawned)
                 player.SetRecordingPresentationServer(false);
@@ -441,6 +444,7 @@ namespace DeepDive.Composition
             bool active, ulong targetId)
         {
             var automatic = requestId == 0 || requestId == CollectedStopNotice;
+            if (automatic) Debug.Log($"P257_RECORDING_NOTICE notice={requestId} result={result} active={active}");
             if (!automatic && requestId <= localLastAppliedRequest) return;
             if (!automatic) localLastAppliedRequest = requestId;
             if (active && !localRecording) recordingStartedAt = Time.unscaledTimeAsDouble;

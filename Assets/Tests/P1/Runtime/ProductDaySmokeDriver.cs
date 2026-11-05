@@ -706,13 +706,22 @@ namespace DeepDive.P1.Lab
         private void Record()
         {
             var bridge = adapter.GetComponent<RecordingNetworkBridge>();
+            // The camera may be moving when pickup stops the take, before recordingAt
+            // is populated below. The host's accepted notice is the actual proof.
+            if (SharedHunt && !Host && !bridge.IsRecordingLocal &&
+                (report.sharedHuntAutoStopped || bridge.CurrentStatus == "AV ALINDI - KAYIT BITTI"))
+            {
+                report.sharedHuntAutoStopped = true;
+                report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
+                if (!File.Exists(output + ".camera-standby.png")) CaptureView(".camera-standby.png");
+                HoldForShore(); return;
+            }
             if (recordingAt > 0 && !bridge.IsRecordingLocal &&
                 ((GuestCameraLimit && !Host) || adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0))
             {
-                if (SharedHunt && Time.realtimeSinceStartup - recordingAt >= 14f)
+                if (SharedHunt)
                 { recordingAt = 0; aimAt = 0; return; }
-                if (SharedHunt) report.sharedHuntAutoStopped = Time.realtimeSinceStartup - recordingAt < 14f;
-                else if (Arg("-p253-auto-limit") == "1" || GuestCameraLimit)
+                if (Arg("-p253-auto-limit") == "1" || GuestCameraLimit)
                     report.cameraAutomaticLimit = Time.realtimeSinceStartup - recordingAt >= 13f;
                 report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
                 if (!File.Exists(output + ".camera-standby.png")) CaptureView(".camera-standby.png");
@@ -735,7 +744,7 @@ namespace DeepDive.P1.Lab
             var delta = fish.transform.position - local.RecordingEyePosition;
             // Start in the real basic-camera band before closing further on a moving subject.
             // The fish need not reach an exact 8 m approach distance to accept an actual take.
-            var filmingRange = SharedHunt ? 5f : 10f;
+            var filmingRange = SharedHunt ? 7.5f : 10f;
             if (delta.magnitude > filmingRange)
             {
                 var stand=fish.transform.position-Vector3.up*1.4f;stand.y=Mathf.Max(.1f,stand.y);
@@ -746,7 +755,7 @@ namespace DeepDive.P1.Lab
             {
                 var hunter = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                     .FirstOrDefault(p => p.IsSpawned && p.OwnerClientId == 0);
-                if (hunter == null || Vector3.Distance(hunter.RecordingEyePosition, fish.transform.position) > 4f)
+                if (hunter == null || Vector3.Distance(hunter.RecordingEyePosition, fish.transform.position) > 9f)
                     return;
             }
             if (bridge.IsRecordingLocal)

@@ -37,6 +37,7 @@ namespace DeepDive.P1.Lab
             {
                 sharedHuntFish = null;
                 sharedHuntSawAliveWhileFilming = false;
+                report.sharedHuntKilledWhileFilming = false;
                 if (sharedHuntTargetId != 0 && manager.SpawnManager.SpawnedObjects.TryGetValue(sharedHuntTargetId, out var selected))
                     sharedHuntFish = selected.GetComponent<FishActor>();
             }
@@ -49,10 +50,12 @@ namespace DeepDive.P1.Lab
                 if (!fish.IsDead) sharedHuntSawAliveWhileFilming = true;
                 else if (sharedHuntSawAliveWhileFilming) report.sharedHuntKilledWhileFilming = true;
             }
-            else sharedHuntSawAliveWhileFilming = false;
+            else { sharedHuntSawAliveWhileFilming = false; report.sharedHuntKilledWhileFilming = false; }
             var target = fish.GetComponent<Collider>().bounds.center;
             var delta = target - local.RecordingEyePosition;
-            var reach = catchObject.IsAvailable ? 2.2f : 3.5f;
+            // The actual harpoon reaches 22 m; approaching inside the flee radius can
+            // keep a healthy fish circling indefinitely. Pickup still needs 2.5 m.
+            var reach = catchObject.IsAvailable ? 2.2f : 8f;
             if (delta.magnitude > reach || !ClearFishLine(local.RecordingEyePosition, target, fish))
             {
                 var stand = target - (local.RecordingEyePosition - local.transform.position);

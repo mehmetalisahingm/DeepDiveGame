@@ -274,8 +274,15 @@ namespace DeepDive.Composition
             if (forward.sqrMagnitude < 0.001f) return false;
 
             var sourceCameras = player.GetComponentsInChildren<Camera>(true);
+            // The host sees remote divers in third person. A clip rendered from a remote
+            // diver's eye would otherwise render the inside of that same diver's body.
+            var ownerRenderers = player.GetComponentsInChildren<Renderer>(true);
+            var ownerRenderingOff = new bool[ownerRenderers.Length];
+            for (var i = 0; i < ownerRenderers.Length; i++) ownerRenderingOff[i] = ownerRenderers[i].forceRenderingOff;
+            var old = RenderTexture.active;
             try
             {
+                for (var i = 0; i < ownerRenderers.Length; i++) ownerRenderers[i].forceRenderingOff = true;
                 if (sourceCameras.Length > 0) captureCamera.CopyFrom(sourceCameras[0]);
                 captureCamera.enabled = false;
                 captureCamera.cullingMask &= ~(1 << 5); // Owner viewfinder belongs on screen, not in the archived footage.
@@ -284,13 +291,11 @@ namespace DeepDive.Composition
                 captureCamera.aspect = Width / (float)Height;
                 captureCamera.transform.SetPositionAndRotation(player.RecordingEyePosition, Quaternion.LookRotation(forward.normalized, Vector3.up));
 
-                var old = RenderTexture.active;
                 captureCamera.Render();
                 RenderTexture.active = captureTarget;
                 readback.ReadPixels(new Rect(0, 0, Width, Height), 0, 0, false);
                 readback.Apply(false, false);
                 var jpeg = readback.EncodeToJPG(JpegQuality);
-                RenderTexture.active = old;
                 if (jpeg == null || jpeg.Length == 0) return false;
                 capture.Frames.Add(new ClipFramePacket((float)(now - capture.StartedAt), jpeg));
                 return true;
@@ -299,6 +304,12 @@ namespace DeepDive.Composition
             {
                 Debug.LogWarning("P4 media frame capture failed: " + e.Message);
                 return false;
+            }
+            finally
+            {
+                RenderTexture.active = old;
+                for (var i = 0; i < ownerRenderers.Length; i++)
+                    if (ownerRenderers[i] != null) ownerRenderers[i].forceRenderingOff = ownerRenderingOff[i];
             }
         }
 
