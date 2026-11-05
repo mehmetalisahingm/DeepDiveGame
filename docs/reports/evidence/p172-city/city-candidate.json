@@ -1,0 +1,399 @@
+{
+    "note": "Empty throwaway scene, flat ground, real diver controller values. Not a played result.",
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "skin": 0.07999999821186066,
+    "stepOffset": 0.30000001192092898,
+    "slopeLimit": 45.0,
+    "walkSpeed": 4.0,
+    "walks": [
+        {
+            "id": "home-spawn -> square (H part)",
+            "metres": 228.14390563964845,
+            "seconds": 57.03999710083008,
+            "stuck": false
+        },
+        {
+            "id": "square -> shop door -> shelf -> cash -> door -> square",
+            "metres": 41.700077056884769,
+            "seconds": 10.4399995803833,
+            "stuck": false
+        },
+        {
+            "id": "buyer -> shore gate (C)",
+            "metres": 84.62594604492188,
+            "seconds": 21.15999984741211,
+            "stuck": false
+        },
+        {
+            "id": "buyer -> pier (one way of a sale)",
+            "metres": 101.39630126953125,
+            "seconds": 25.35999870300293,
+            "stuck": false
+        },
+        {
+            "id": "direct: home-spawn -> pier",
+            "metres": 360.4812927246094,
+            "seconds": 90.13999938964844,
+            "stuck": false
+        },
+        {
+            "id": "shopping: home-spawn -> shop inside -> pier",
+            "metres": 388.185546875,
+            "seconds": 97.07999420166016,
+            "stuck": false
+        }
+    ],
+    "doors": [
+        {
+            "test": "fourEnter",
+            "width": 0.6000000238418579,
+            "depth": 0.30000001192092898,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7762
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 0.6000000238418579,
+            "depth": 0.30000001192092898,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7779
+        },
+        {
+            "test": "fourEnter",
+            "width": 0.800000011920929,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 16
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 0.800000011920929,
+            "depth": 0.30000001192092898,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7769
+        },
+        {
+            "test": "fourEnter",
+            "width": 0.8999999761581421,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 0.8999999761581421,
+            "depth": 0.30000001192092898,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7766
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.0,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.0,
+            "depth": 0.30000001192092898,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7768
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.2000000476837159,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.2000000476837159,
+            "depth": 0.30000001192092898,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7763
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.5,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.5,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.119999885559082,
+            "blockedFrames": 2
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.7999999523162842,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.7999999523162842,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.119999885559082,
+            "blockedFrames": 0
+        },
+        {
+            "test": "fourEnter",
+            "width": 2.200000047683716,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 2.200000047683716,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.1399998664855959,
+            "blockedFrames": 0
+        },
+        {
+            "test": "fourEnter",
+            "width": 2.5999999046325685,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 2.5999999046325685,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.1399998664855959,
+            "blockedFrames": 0
+        },
+        {
+            "test": "fourEnter",
+            "width": 3.0,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.819999933242798,
+            "blockedFrames": 15
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 3.0,
+            "depth": 0.30000001192092898,
+            "allThrough": true,
+            "seconds": 3.1399998664855959,
+            "blockedFrames": 0
+        },
+        {
+            "test": "fourEnter",
+            "width": 0.6000000238418579,
+            "depth": 4.0,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7858
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 0.6000000238418579,
+            "depth": 4.0,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7872
+        },
+        {
+            "test": "fourEnter",
+            "width": 0.800000011920929,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.859999895095825,
+            "blockedFrames": 25
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 0.800000011920929,
+            "depth": 4.0,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7768
+        },
+        {
+            "test": "fourEnter",
+            "width": 0.8999999761581421,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 21
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 0.8999999761581421,
+            "depth": 4.0,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7771
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.0,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.0,
+            "depth": 4.0,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7770
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.2000000476837159,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.2000000476837159,
+            "depth": 4.0,
+            "allThrough": false,
+            "seconds": 40.0,
+            "blockedFrames": 7768
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.5,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.5,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.179999828338623,
+            "blockedFrames": 7
+        },
+        {
+            "test": "fourEnter",
+            "width": 1.7999999523162842,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 1.7999999523162842,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.1999998092651369,
+            "blockedFrames": 6
+        },
+        {
+            "test": "fourEnter",
+            "width": 2.200000047683716,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 2.200000047683716,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.2200000286102297,
+            "blockedFrames": 2
+        },
+        {
+            "test": "fourEnter",
+            "width": 2.5999999046325685,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 2.5999999046325685,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.2200000286102297,
+            "blockedFrames": 0
+        },
+        {
+            "test": "fourEnter",
+            "width": 3.0,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.8399999141693117,
+            "blockedFrames": 19
+        },
+        {
+            "test": "twoInTwoOut",
+            "width": 3.0,
+            "depth": 4.0,
+            "allThrough": true,
+            "seconds": 3.2200000286102297,
+            "blockedFrames": 0
+        }
+    ],
+    "steps": [
+        {
+            "height": 0.05000000074505806,
+            "climbed": true
+        },
+        {
+            "height": 0.10000000149011612,
+            "climbed": true
+        },
+        {
+            "height": 0.20000000298023225,
+            "climbed": true
+        },
+        {
+            "height": 0.25,
+            "climbed": true
+        },
+        {
+            "height": 0.30000001192092898,
+            "climbed": true
+        },
+        {
+            "height": 0.3499999940395355,
+            "climbed": true
+        },
+        {
+            "height": 0.5,
+            "climbed": false
+        }
+    ]
+}
