@@ -81,7 +81,7 @@ namespace DeepDive.Composition
             BindHost();
             if (!bound || channel.Revision == sentRevision) return;
             sentRevision = channel.Revision;
-            Mirrored = channel.ExportMedia();
+            Mirrored = channel.ExportMirror();   // clients get the clips and the recent history; the host's save keeps all of it
             MirroredRevision = channel.Revision;
             HasMirror = true;
             foreach (var client in manager.ConnectedClientsIds)
@@ -103,6 +103,7 @@ namespace DeepDive.Composition
             store.Media = channel;   // hands the channel what the file already held
             submitDelegate = SubmitClip;
             ClipArchive.Bind(submitDelegate);
+            channel.OnClipEvicted += RecordingMediaCaptureBinding.DeleteClipFile;   // #255: the media goes, the publication record stays
             bound = true;
         }
 
@@ -110,6 +111,7 @@ namespace DeepDive.Composition
         {
             if (!bound) return;
             ClipArchive.Unbind(submitDelegate);
+            channel.OnClipEvicted -= RecordingMediaCaptureBinding.DeleteClipFile;
             if (store != null) store.Media = null;
             bound = false;
             sentRevision = -1;

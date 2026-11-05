@@ -60,48 +60,66 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
-        public void TheEvidenceRuleWithNoBonusIsExactlyTheCurrentPayout()
+        public void TheEvidencePercentOnlyScalesTheClipsOwnViewsAndNoBonusIsTheSameAsTheThreeArgumentRule()
         {
             foreach (var quality in new[] { 0, 1, 2, 3, 4 })
             foreach (var novel in new[] { false, true })
             foreach (var followers in new[] { 0, 1, 99, 5000, 1000000 })
             {
                 ChannelResultRules.Evaluate(quality, novel, followers, out var v, out var f, out var i);
-                ChannelEvidenceRules.Evaluate(quality, novel, followers, 100, out var v2, out var f2, out var i2);
+                ChannelResultRules.Evaluate(quality, novel, followers, 100, out var v2, out var f2, out var i2);
                 Assert.AreEqual((v, f, i), (v2, f2, i2), $"q{quality} novel={novel} followers={followers}");
             }
-            ChannelEvidenceRules.Evaluate(4, false, 0, 187, out var big, out _, out _);
-            ChannelResultRules.Evaluate(4, false, 0, out var plain, out _, out _);
-            Assert.Greater(big, plain);
+            ChannelResultRules.Evaluate(4, false, 0, 187, out var big, out _, out _);
+            ChannelResultRules.Evaluate(4, false, 0, 100, out var plain, out _, out _);
+            Assert.AreEqual(640, plain);
+            Assert.AreEqual(1196, big, "187% of the 640 base views");
+            ChannelResultRules.Evaluate(4, false, 100000, 187, out var withFollowers, out _, out _);
+            Assert.AreEqual(1196 + 120000, withFollowers, "followers feed views the same way, the evidence scales only the clip's own views");
         }
 
-        // Finding for #255: under the CURRENT rules (views = 40*q^2 (x1.5 for a new subject) + followers/2, followers += views/20) and the
-        // archive's lifetime cap of ChannelAuthority.MaxArchivedClips clips (a full archive refuses new clips), even 128 platinum clips
-        // reach a tiny fraction of 10,000,000. This characterises the present behaviour; it is not a balance claim.
         [Test]
-        public void CurrentRulesCannotReachTheGoalWithinTheArchiveCap()
+        public void ANewChannelStartsWhereTheOldRulesDid()
         {
-            int Simulate(int publications, bool firstOfEachFiveNovel, out int reachedAt)
+            // With no followers the payout is unchanged by #255: the first clips of a campaign earn what they always did.
+            ChannelResultRules.Evaluate(3, true, 0, out var views, out var followers, out var income);
+            Assert.AreEqual(540, views);
+            Assert.AreEqual(27, followers);
+            Assert.AreEqual(135, income);
+        }
+
+        [Test]
+        public void IncomeStaysOnThePriceScaleEvenForAHugeChannel()
+        {
+            ChannelResultRules.Evaluate(4, true, ChannelGoal.TargetFollowers, out var views, out _, out var income);
+            Assert.Greater(views, 10000000, "a ten million channel draws millions of views");
+            Assert.LessOrEqual(income, (960 + ChannelResultRules.IncomeFeedbackCapViews) / 4, "but a post pays at most a clip's own views plus the capped feedback");
+            Assert.Less(income, 1000, "well under the dearest purchases (a few thousand credits)");
+        }
+
+        // #255: the goal must be reachable. Pure rule simulation (no archive involved): how many publications of one quality it takes, and that
+        // it is neither instant nor out of reach. A working-value characterisation, not a time promise: days depend on real play.
+        [Test]
+        public void TheGoalIsReachableButNotInstant()
+        {
+            int Publications(int quality)
             {
                 var followers = 0;
-                reachedAt = 0;
-                for (var n = 1; n <= publications; n++)
+                for (var n = 1; n <= 5000; n++)
                 {
-                    ChannelResultRules.Evaluate(4, firstOfEachFiveNovel && n <= 5, followers, out _, out var gained, out _);
+                    ChannelResultRules.Evaluate(quality, n <= 5, followers, out _, out var gained, out _);
                     followers += gained;
-                    if (followers >= ChannelGoal.TargetFollowers) { reachedAt = n; break; }
+                    if (followers >= ChannelGoal.TargetFollowers) return n;
                 }
-                return followers;
+                return 0;
             }
 
-            var ceiling = Simulate(ChannelAuthority.MaxArchivedClips, true, out var reachedWithinCap);
-            TestContext.Out.WriteLine($"P411_CHANNEL_CEILING publications={ChannelAuthority.MaxArchivedClips} followers={ceiling} percentOfGoal={ceiling * 100.0 / ChannelGoal.TargetFollowers:0.00}");
-            Assert.AreEqual(0, reachedWithinCap, "the goal is not reachable inside the archive cap with all-platinum clips and every subject new");
-            Assert.Less(ceiling, ChannelGoal.TargetFollowers / 100, "under 1% of the goal");
-
-            Simulate(100000, true, out var uncappedReachedAt);
-            TestContext.Out.WriteLine($"P411_CHANNEL_UNCAPPED_REACHED_AT publications={uncappedReachedAt}");
-            Assert.Greater(uncappedReachedAt, ChannelAuthority.MaxArchivedClips, "without the cap it would take more publications than the archive can ever hold");
+            var platinum = Publications(4);
+            var silver = Publications(2);
+            TestContext.Out.WriteLine($"P411_CHANNEL_REACH platinum={platinum} silver={silver} feedback={ChannelResultRules.FeedbackPercent}");
+            Assert.Greater(platinum, 60, "not instant");
+            Assert.Greater(silver, platinum, "a lower quality takes longer");
+            Assert.Less(silver, 500, "still reachable with ordinary clips");
         }
     }
 }

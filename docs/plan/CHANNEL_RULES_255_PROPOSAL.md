@@ -1,35 +1,30 @@
-# #255 — Kanal kuralları: 10 milyon hedefi için ölçüm ve öneri (5 Kasım 2026)
+# #255 — Kanal kuralları: 10 milyon hedefi, arşiv ve büyüme (5 Kasım 2026)
 
-Durum: **ÖNERİ + ölçüm; uygulanmış denge değildir.** Sahibi Mert (kanal/ekonomi/save, #255); ortak sözleşme Utku (#254 doğrulanmış balık örneği/ağırlığı) ve Mehmet (#253 gerçek klip, depolama) ile koordine edilmeden `ClipManifest`, `PublicationSave` veya kayıt şeması değişmedi. Bütün sayılar çalışma değeridir; 10M'e ulaşma süresi sözü verilmez (`CHANNEL_GOAL_10M.md`).
+Durum: **Uygulandı (çalışma değerleriyle); denge iddiası değildir.** Sahibi Mert (kanal/ekonomi/save, #255). Mehmet'in 5 Kasım kararı: yayınlanmış ve sonucu kesinleşmiş klibin medya dosyası depolama gerektiğinde silinebilir; yayın geçmişi, konu, yayın kimliği, abone, izlenme ve gelir kalıcı korunur; medya sınırı kanalı engellemez; 10 milyon abone gerçekten ulaşılabilir olmalı; büyüme eğrisi ve ekonomi yeniden dengelenir; hedefe ulaşmak oyunu bitirmez; eski kayıt uyumu, tekrar yayın koruması ve yeniden yükleme test edilir. Bütün sayılar çalışma değeridir; hedefe ulaşma süresi sözü verilmez (`CHANNEL_GOAL_10M.md`).
 
-## Ölçüm: mevcut kurallarla hedefe ulaşılamıyor
+## Önceki ölçüm (değişiklikten önce)
 
-Mevcut `ChannelResultRules.Evaluate`: izlenme = `40·q²` (yeni konuda ×1,5) + takipçi/2; abone kazancı = izlenme/20; gelir = izlenme/4. `ChannelAuthority.MaxArchivedClips = 128`: arşiv doluyken yeni klip arşivlenmez (`RecordingMediaCaptureBinding` dosyayı siler), yani yayınlanamaz. Kampanya boyunca en fazla 128 klip yayınlanabilir.
+`ChannelResultRules`: izlenme = `40·q²` (yeni konuda ×1,5) + takipçi/2; abone = izlenme/20; gelir = izlenme/4. `MaxArchivedClips = 128` ve dolu arşivde yeni klip arşivlenmeden siliniyordu: en iyi durumda 128 platin klip **30.252 abone, hedefin %0,30'u**; sınırsız olsa bile 362 yayın gerekirdi. Hedef kampanya içinde ulaşılamazdı.
 
-`ChannelGoalTests.CurrentRulesCannotReachTheGoalWithinTheArchiveCap` bunu gerçek kural fonksiyonuyla simüle eder (EditMode; çıktı satırları `P411_CHANNEL_CEILING` ve `P411_CHANNEL_UNCAPPED_REACHED_AT`):
+## Ne değişti
 
-| Durum | Sonuç |
-|---|---|
-| 128 platin (q4) klip, ilk beş konu yeni | **30.252 abone, hedefin %0,30'u** |
-| Arşiv sınırı olmasa, aynı koşul | 10.000.000'a **362. yayında** ulaşır |
+1. **Arşiv kanalı engellemez** (`ChannelAuthority`). Arşiv doluyken yeni klip gelince en eski klibin **medyası** atılır: önce yayını sonuçlanmış (settled) klip, yoksa hiçbir zaman yayınlanamayacak (ticari olmayan, yayınlanmamış) klip. Henüz yayınlanabilecek ya da yayınlanıp sonuçlanmamış klip asla atılmaz (böyle bir klipten başka yer yoksa eskisi gibi `ArchiveFull`). Atılan klibin dosyası host'ta silinir (`OnClipEvicted` → `RecordingMediaCaptureBinding.DeleteClipFile`).
+2. **Yayın geçmişi kalıcı.** Atılan klibin `PublicationSave` kaydı (kimlik, konu, başlık, izlenme, abone, gelir, settle kimliği) kalır; kayıt dosyasına yazılır ve yeniden yüklenince geri gelir. Kaydın klibi yoksa yalnız o klibin kendi `SettleId`'sini taşıyan sonuçlanmış kayıt geçmiş sayılır; uydurma kayıt hâlâ atılır. Atılmış klip yeniden arşivlenemez (`AlreadyArchived`) ve yeniden yayınlanamaz; ödeme bir kez, `SettleId` ile korunur.
+3. **İstemciye giden mirror** (`ExportMirror`): bütün klipler ve yayınları, medyası atılmış kayıtlardan yalnız en yeni 12'si; abone sayısı tam. Kayıt dosyası (`ExportMedia`) tüm geçmişi tutar. Böylece uzun kampanyada ağ mesajı sınırsız büyümez.
+4. **Büyüme eğrisi** (`ChannelResultRules`, çalışma değeri): takipçilerin yeni yayınlara katkısı `FeedbackPercent = 120` (önceden 50). Takipçi yokken sonuç eskisiyle aynı (ilk klipler aynı kazanır). Abone aynı oranla: izlenme/20.
+5. **Gelir ekonomiye sığar:** gelir = (klibin kendi izlenmesi + en fazla `IncomeFeedbackCapViews = 1200` takipçi kaynaklı izlenme) / 4. Büyük kanal izlenmeyi milyonlara taşır ama bir yayın en fazla birkaç yüz kredi öder; en pahalı satın alma birkaç bin kredi (araştırma teknesi 2.400). Eskiden gelir izlenmeyle sınırsız büyüyecekti.
+6. **Hedef modeli** (`ChannelGoal`) ve ev PC panelinde ilerleme çubuğu: 10.000.000 ve kilometre taşları 100 … 10.000.000; hedefe ulaşınca "hedef tamam", kanal büyümeye devam eder.
+7. `ChannelEvidenceRules` (**ödemeye bağlı değil**): doğrulanmış ağırlık %100–150, eşleşen çekim +%25, yalnız çekim kanala girmez; Utku (#254) doğrulanmış ağırlık ve av kimliğini klibe taşıyınca `ChannelResultRules.Evaluate`'in `viewsPercent` girdisine bağlanabilir.
 
-Yani sınır, hedefi kampanya içinde ulaşılamaz kılıyor. Bu bir denge iddiası değil, mevcut davranışın ölçümü. Kural veya sınır değişince bu test gözden geçirilecek test.
+## Ölçümler (EditMode, gerçek `ChannelAuthority` + gerçek `EconomyManager`/`EconomySaveStore`)
 
-## Bu PR'da ne var (kayıt şeması ve ödeme değişmedi)
+- **Gerçek kanal, canlı ekip** (günde 3 yayınlanabilir klip, kalite 3, her konu bir kez yeni): hedef **59. günde** aşıldı, 177 yayın, arşiv 128 klipte sabit, 49 kez medya atıldı, hiçbir klip/yayın reddedilmedi, bakiye ~65 bin kredi (fiyat ölçeğinde). Hedefe ulaşıldıktan sonra yeni yayın alındı ve kanal büyüdü. Test: `P411_CHANNEL_REAL`.
+- **Yalnız kural** (arşivsiz): tek kaliteli yayınlarla hedefe platin 168, gümüş 192 yayında ulaşılıyor, yani anlık değil, ulaşılamaz da değil (`P411_CHANNEL_REACH`).
+- **Oyun stili duyarlılığı** (yalnız kural modeli, ilk beş konu yeni): günde 3 klip kalite 3 için `FeedbackPercent` 50 → 129 gün, 120 → 59 gün, 200 → 38 gün; `FeedbackPercent` 120'de günde 2 klip kalite 2–3 → 92 gün, günde 1 klip kalite 2 → 192 gün, günde 4 klip kalite 3–4 → 43 gün. Bunlar süre sözü değil, ayar için duyarlılık; gerçek çok günlük oyunda ayarlanır.
 
-- `ChannelGoal`: 10.000.000 hedefi ve altı kilometre taşı (100, 1.000, 10.000, 100.000, 1.000.000, 10.000.000), ilerleme oranı, sonraki kilometre taşı, "hedef tamam" durumu (oyun bitmez, kanal büyümeye devam eder). Girdi yalnız host'un takipçi sayısı; istemci aynısını yansıtır.
-- Ev PC paneli (`HomePcView`): "KANAL" satırı artık hedef yüzdesini, sonraki kilometre taşını ve bir ilerleme çubuğunu gösterir. Çizelge doğrusal: başlangıç ilerlemesi küçük görünür, 10 milyonun dürüst ölçeği budur.
-- `ChannelEvidenceRules` (**bağlı değil**): büyük gerçek av ve eşleşen çekim için izlenme çarpanı önerisi. Doğrulanmış ağırlık türün kendi aralığında %100–150; aynı oyuncunun aynı hedefinin doğrulanmış avıyla eşleşen çekim +%25; yalnız çekim (eşleşmeyen) bugünkü kural (%100); yalnız av kanala girmez, bugünkü gibi alıcıya satılır. Doğrulanmamış ağırlık (0) nötr: büyük görünen yakın çekim ağırlık sayılmaz. Bonus yoksa `ChannelResultRules.Evaluate` ile aynı sonucu verir (testle kanıtlı).
+## Açık kalanlar
 
-## Ortak sözleşme için açık sorular (kimin kararı)
-
-1. **Arşiv sınırı (Mehmet #253, Mert):** yayını sonuçlanmış klibin medya dosyası silinip kayıt defteri (konu, yayın, abone) saklanabilir mi? Depolama sınırıyla birlikte karar verilmeli; kayıt şeması değişir.
-2. **Büyüme eğrisi (Mert):** yalnız sınırı kaldırmak 362 platin yayın demek, yani yine çok uzun; çarpan/kilometre taşı bonusu gibi bir eğri gerekir. Hangi sürede ulaşıldığı çok günlük gerçek oyunla ölçülmeden söz verilmez.
-3. **Doğrulanmış balık (Utku #254):** klip bildirimine host'un doğruladığı av kimliği ve ağırlık gerekir (`ClipManifest`/dünya bağlamı). Sırf tür kimliği ağırlık değildir.
-4. **Eşleşmenin tüketimi (Mert, kayıt):** eşleşme bonusu bir avla ilk yayında harcanmalı; harcandığı bilgisi `PublicationSave`'e yeni alan olarak yazılacak. Eski kayıtlarda alan boş (0) = bonus yok, eski sonuçlar değişmez.
-5. **Aynı klip/av/ödül tekrarı:** mevcut yayın kimliği (`PublicationId` klipten türetilir), tek ticari hak ve `SettleId` korunur; bu öneri onları gevşetmez.
-
-## Denenmedi
-
-- Gerçek iki oyuncu: av → gerçek kayıt → PC'de yayın → ertesi gün sonuç → reload (#255 kabulü); kural bağlanmadığı için ürün koşusu yok.
-- Ev PC panelinin gerçek Windows build'indeki görüntüsü (yalnız derleme ve EditMode); ayrı PC/insan kabulü ve #164 açık.
+1. **Utku #254:** klibe doğrulanmış av kimliği ve ağırlık; sonra `ChannelEvidenceRules` ödemeye bağlanır. Eşleşme bonusunun bir avla tek kez harcanması için `PublicationSave`'e yeni alan (eski kayıtta boş = bonus yok).
+2. **Mehmet #253:** gerçek klip boyutu ve depolama kotası; medya atma politikasının gerçek dosya boyutlarıyla (disk kotası) doğrulanması. Şimdi sınır klip sayısıdır (128).
+3. **Gerçek ürün koşuları:** iki gerçek oyuncu av → gerçek kayıt → PC'de yayın → ertesi gün → reload (smoke sonuçları PR'da), 4 süreç, ayrı PC/insan kabulü ve #164 açık.
+4. **Denge:** hedefe ulaşma süresi ve gelir ölçeği çok günlük gerçek oyunla ayarlanır; bu belgedeki gün sayıları yalnız modeldir.

@@ -2,7 +2,7 @@ using System;
 
 namespace DeepDive.Media
 {
-    // #255 proposal, NOT wired into the payout yet: how host-verified catch evidence could scale a publication's views. Pure and
+    // #255 proposal, NOT wired into the payout yet (nothing calls it outside tests): how host-verified catch evidence could scale a publication's views. Pure and
     // deterministic. Every number is a working value for playtests. It needs two inputs that do not exist on the clip yet and that
     // belong to others (#254 Utku: the verified catch's weight and id; #253 Mehmet: the real clip), so nothing here changes a result
     // until the shared contract is agreed. See docs/plan/CHANNEL_RULES_255_PROPOSAL.md.
@@ -42,18 +42,7 @@ namespace DeepDive.Media
             }
         }
 
-        // The existing rule with the evidence multiplier applied to the base views only (followers keep feeding views the same way).
-        // With RecordingOnly it returns exactly ChannelResultRules.Evaluate.
-        public static void Evaluate(int quality, bool novelSubject, int currentFollowers, int viewsPercent,
-            out int views, out int followersGained, out int income)
-        {
-            var q = Math.Max(0, Math.Min(4, quality));
-            var baseViews = q == 0 ? 0 : 40 * q * q;
-            if (novelSubject) baseViews = baseViews * 3 / 2;
-            baseViews = baseViews * Math.Max(0, viewsPercent) / 100;
-            views = baseViews + currentFollowers / 2;
-            followersGained = views / 20;
-            income = views / 4;
-        }
+        // The payout takes this percent as ChannelResultRules.Evaluate's viewsPercent (it scales the clip's own base views only;
+        // followers keep feeding views the same way). 100 = no evidence bonus = the rule without evidence.
     }
 }
