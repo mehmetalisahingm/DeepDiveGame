@@ -1,0 +1,7 @@
+{
+  "version": "1.0",
+  "defaultFovDeg": 68,
+  "sharedCatchFocusFovDeg": 52,
+  "transitionDurationSec": 0.65,
+  "highlightAssistPlayers": true
+}
