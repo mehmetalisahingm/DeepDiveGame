@@ -88,17 +88,20 @@ namespace DeepDive.P4.Tests
         public void TheFloorLeavesTheBossVolumesAndTheRoutesOpen()
         {
             var failures = new List<string>();
-            void Sphere(string id, Vector3 c, float r)
+            // clear = how far under the centre the floor must stay across r. The boss capsule must not touch the sand.
+            // The traces and the arena stand on the bed of a steep slope (#258): their trigger radius runs into the
+            // slope above them by design, so only the marker's own half metre must stay out of the sand.
+            void Sphere(string id, Vector3 c, float r, float clear)
             {
                 for (var dx = -r; dx <= r; dx += 0.5f)
                 for (var dz = -r; dz <= r; dz += 0.5f)
-                    if (SeabedProfile.FloorHeight(c.x + dx, c.z + dz) > c.y - r) failures.Add($"{id} at {dx},{dz}");
+                    if (SeabedProfile.FloorHeight(c.x + dx, c.z + dz) > c.y - clear) failures.Add($"{id} at {dx},{dz}");
             }
 
-            Sphere("arena", DeepEncounterWorld.ArenaPosition, DeepEncounterWorld.ArenaRadius);
-            Sphere("boss", DeepEncounterWorld.BossPosition, 2.4f);
+            Sphere("arena", DeepEncounterWorld.ArenaPosition, 0.5f, 0.5f);
+            Sphere("boss", DeepEncounterWorld.BossPosition, 0.85f, 2.4f);
             for (var i = 0; i < DeepEncounterWorld.TracePositions.Length; i++)
-                Sphere(DeepEncounterWorld.TraceIds[i], DeepEncounterWorld.TracePositions[i], DeepEncounterWorld.TraceRadius);
+                Sphere(DeepEncounterWorld.TraceIds[i], DeepEncounterWorld.TracePositions[i], 0.5f, 0.5f);
 
             var keel = SurfaceY - 0.5f - 5f;
             foreach (var (from, to) in new[]

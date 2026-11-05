@@ -28,6 +28,51 @@ namespace DeepDive.World.Tests
             }
         }
 
+        // #258: on the bed, not floating over it.
+        [Test]
+        public void TracesArenaAndBossStandOnTheBed()
+        {
+            foreach (var trace in DeepEncounterWorld.TracePositions)
+                Assert.AreEqual(DeepEncounterWorld.TraceLift, trace.y - SeabedProfile.FloorHeight(trace.x, trace.z), 1e-4f);
+            var arena = DeepEncounterWorld.ArenaPosition;
+            Assert.AreEqual(DeepEncounterWorld.ArenaLift, arena.y - SeabedProfile.FloorHeight(arena.x, arena.z), 1e-4f);
+            var boss = DeepEncounterWorld.BossPosition;
+            var clearance = boss.y - 2.4f - SeabedProfile.FloorHeight(boss.x, boss.z);
+            Assert.That(clearance, Is.InRange(0.3f, 1f), "boss capsule bottom over the sand");
+            // A diver's feet on the bed reach the trigger: CharacterController feet, radius from the trigger centre.
+            Assert.Less(DeepEncounterWorld.TraceLift, DeepEncounterWorld.TraceRadius);
+            Assert.Less(DeepEncounterWorld.ArenaLift, DeepEncounterWorld.ArenaRadius);
+        }
+
+        // #258: the host checks the cell of the diver's own position, so a trigger that crosses a cell edge pays
+        // nothing on the far side of it. Every trigger sits wholly inside its cell.
+        [Test]
+        public void EveryTriggerSitsWhollyInsideItsExplorationCell()
+        {
+            void Inside(string id, Vector3 c, float r)
+            {
+                var size = ExplorationIds.CellSizeMetres;
+                var fx = Mathf.Repeat(c.x, size); var fz = Mathf.Repeat(c.z, size);
+                Assert.GreaterOrEqual(Mathf.Min(fx, size - fx), r, id + " x edge");
+                Assert.GreaterOrEqual(Mathf.Min(fz, size - fz), r, id + " z edge");
+            }
+            for (var i = 0; i < DeepEncounterWorld.TracePositions.Length; i++)
+                Inside(DeepEncounterWorld.TraceIds[i], DeepEncounterWorld.TracePositions[i], DeepEncounterWorld.TraceRadius);
+            Inside(DeepEncounterWorld.ArenaId, DeepEncounterWorld.ArenaPosition, DeepEncounterWorld.ArenaRadius);
+        }
+
+        [Test]
+        public void TheTrailLeadsFromTheReefToTheArenaInFogSizedSteps()
+        {
+            var path = DeepEncounterWorld.TrailWithStops();
+            Assert.AreEqual(DeepEncounterWorld.ArenaPosition, path[path.Count - 1]);
+            for (var i = 1; i < path.Count; i++)
+                Assert.LessOrEqual(Vector3.Distance(path[i - 1], path[i]), DeepEncounterWorld.TrailMaxStep, "step " + i);
+            Assert.Less(path[0].z, 40f, "starts at the reef's deep edge");
+            foreach (var point in DeepEncounterWorld.TrailPoints)
+                Assert.IsTrue(Bounds.Contains(point.x, point.y), point.ToString());
+        }
+
         [Test]
         public void AuthoredTracesAndArenaAreInDeepWater()
         {
