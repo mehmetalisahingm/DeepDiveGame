@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
+using DeepDive.Media;
 using DeepDive.Network;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -143,7 +144,14 @@ namespace DeepDive.Composition
                 status = MediaNetworkBinding.LastResultAccepted ? "YAYIN SIRAYA ALINDI (sonuc yarin sabah)" : Friendly(MediaNetworkBinding.LastResultReason);
             GUI.Label(new Rect(box.x + 340, box.y + 152, 310, 20), status);
 
-            GUI.Label(new Rect(box.x + 10, box.y + 270, 640, 20), "KANAL");
+            // #255: the shared goal and where the channel stands (the host's follower count, as mirrored).
+            var goal = ChannelGoal.Of(data.Followers);
+            GUI.Label(new Rect(box.x + 10, box.y + 270, 380, 20), ChannelGoal.Describe(data.Followers));
+            GUI.Box(new Rect(box.x + 400, box.y + 274, 250, 12), GUIContent.none);
+            var barColor = GUI.color;
+            GUI.color = goal.Reached ? new Color(0.45f, 0.95f, 0.45f) : new Color(0.35f, 0.8f, 0.95f);
+            GUI.DrawTexture(new Rect(box.x + 401, box.y + 275, 248f * Mathf.Max(goal.Ratio, goal.Followers > 0 ? 0.01f : 0f), 10), Texture2D.whiteTexture);
+            GUI.color = barColor;
             y = box.y + 290;
             for (var i = data.Publications.Count - 1; i >= 0 && y < box.y + 410; i--, y += 20)
             {
