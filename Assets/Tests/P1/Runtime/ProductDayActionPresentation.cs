@@ -3,6 +3,8 @@ using System.Linq;
 using DeepDive.Composition;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
+using DeepDive.Inventory;
+using DeepDive.World;
 using UnityEngine;
 
 namespace DeepDive.P1.Lab
@@ -13,6 +15,60 @@ namespace DeepDive.P1.Lab
         private int actionFrame;
         private float nextActionFrame;
         private bool actionObserverEntered;
+        private bool sharedHuntArrived;
+        private bool sharedHuntSawAliveWhileFilming;
+        private FishActor sharedHuntFish;
+        private ulong sharedHuntTargetId;
+
+        // Host's real spear/pickup input against the exact subject the guest films.
+        private void SharedHuntTick()
+        {
+            var inventory = adapter.GetComponent<InventoryManager>();
+            if (inventory.Bags.TryGetValue(new PlayerId(0), out var bag) && bag.Items.Count > 0)
+            { report.sharedHuntCaught = true; HoldForShore(); return; }
+            if (!sharedHuntArrived)
+            {
+                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(-6.5f, -11.2f),
+                    new Vector3(-6.5f, 6f, -5f), new Vector3(-3.5f, 5.3f, -3.5f) });
+                if (!Follow(true)) return;
+                sharedHuntArrived = true; route = null;
+            }
+            if (sharedHuntFish == null || !sharedHuntFish.IsSpawned || sharedHuntFish.NetworkObjectId != sharedHuntTargetId)
+            {
+                sharedHuntFish = null;
+                sharedHuntSawAliveWhileFilming = false;
+                if (sharedHuntTargetId != 0 && manager.SpawnManager.SpawnedObjects.TryGetValue(sharedHuntTargetId, out var selected))
+                    sharedHuntFish = selected.GetComponent<FishActor>();
+            }
+            var fish = sharedHuntFish;
+            if (fish == null || !fish.IsSpawned) { Stop(); return; }
+            var catchObject = fish.GetComponent<CatchObject>();
+            var subject = fish.GetComponent<RecordingSubject>();
+            if (subject != null && subject.IsRecording(new PlayerId(1)))
+            {
+                if (!fish.IsDead) sharedHuntSawAliveWhileFilming = true;
+                else if (sharedHuntSawAliveWhileFilming) report.sharedHuntKilledWhileFilming = true;
+            }
+            else sharedHuntSawAliveWhileFilming = false;
+            var target = fish.GetComponent<Collider>().bounds.center;
+            var delta = target - local.RecordingEyePosition;
+            var reach = catchObject.IsAvailable ? 2.2f : 3.5f;
+            if (delta.magnitude > reach || !ClearFishLine(local.RecordingEyePosition, target, fish))
+            {
+                var stand = target - (local.RecordingEyePosition - local.transform.position);
+                stand.y = Mathf.Max(.1f, stand.y); MoveToward(stand); aimAt = 0; return;
+            }
+            local.SetHeldEquipmentLocal(HeldEquipmentMode.Harpoon);
+            Aim(target);
+            if (subject == null || !subject.IsRecording(new PlayerId(1)) || subject.ValidSecondsFor(new PlayerId(1)) < 2.2f) return;
+            if (!Settled()) return;
+            if (catchObject.IsAvailable)
+            {
+                report.sharedHuntFilmingAtPickup |= subject != null && subject.IsRecording(new PlayerId(1));
+                if (report.sharedHuntFilmingAtPickup) Act(local.SubmitPickupLocal);
+            }
+            else Act(local.SubmitHarpoonLocal);
+        }
         private NetworkPlayer ActionWorker=>FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).FirstOrDefault(p=>p.IsSpawned&&p.OwnerClientId==0);
         private void HoldActionView()
         {

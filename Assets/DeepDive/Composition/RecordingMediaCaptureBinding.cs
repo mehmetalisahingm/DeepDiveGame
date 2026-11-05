@@ -19,7 +19,7 @@ namespace DeepDive.Composition
     [DisallowMultipleComponent]
     public sealed class RecordingMediaCaptureBinding : MonoBehaviour
     {
-        private const int Width = 320, Height = 180, JpegQuality = 58, MaxFrames = 300;
+        private const int Width = 640, Height = 360, JpegQuality = 65, MaxFrames = 300;
         private const double FrameInterval = 0.2; // 5 fps prototype footage.
 
         private sealed class Active

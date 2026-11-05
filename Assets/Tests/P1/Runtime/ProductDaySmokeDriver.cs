@@ -41,6 +41,7 @@ namespace DeepDive.P1.Lab
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public bool cameraAutomaticLimit;
             public bool guestCameraPurchased, guestCameraClipVerified;
+            public bool sharedHuntCaught, sharedHuntFilmingAtPickup, sharedHuntKilledWhileFilming, sharedHuntAutoStopped;
             public float guestCameraClipSeconds;
             public bool purchasedMaterial, purchaseDidNotRepair, saveFaultRefused, saveFaultRecovered;
             public int repairVideoFrames;
@@ -105,7 +106,8 @@ namespace DeepDive.P1.Lab
         private float shelfLookUntil;
 
         private bool Host => report.slot == 0;
-        private bool GuestCameraLimit => Arg("-p253-guest-limit") == "1";
+        private bool SharedHunt => Arg("-p257-shared-hunt") == "1";
+        private bool GuestCameraLimit => Arg("-p253-guest-limit") == "1" || SharedHunt;
         private bool repairApproach, repairAtDock, repairExit;
         private bool repairRackRoute,repairRackReached;
         private bool RepairOnly => Arg("-p187-repair-only") == "1";
@@ -282,6 +284,7 @@ namespace DeepDive.P1.Lab
             else
             {
                 writer.WriteValueSafe(localDone);
+                if (SharedHunt) writer.WriteValueSafe(recordingFish != null && recordingFish.IsSpawned ? recordingFish.NetworkObjectId : 0UL);
                 messages.SendNamedMessage(DoneMessage, 0, writer, NetworkDelivery.ReliableSequenced);
             }
         }
@@ -299,6 +302,7 @@ namespace DeepDive.P1.Lab
         private void ReceiveDone(ulong sender, FastBufferReader reader)
         {
             reader.ReadValueSafe(out int value); reader.ReadValueSafe(out bool completed);
+            if (SharedHunt && sender == 1) { reader.ReadValueSafe(out ulong selected); sharedHuntTargetId = selected; }
             if (value == step && completed && manager.ConnectedClients.ContainsKey(sender)) done.Add(sender);
         }
         private bool AllReady() => adapter.Session.Roster.Count == expected && adapter.Session.Roster.Values.All(x => x);
@@ -381,6 +385,7 @@ namespace DeepDive.P1.Lab
                     if (!Host) { if (GuestCameraLimit && step == 7) GuestBuyCamera(); else if(ActionVideo)ActionSaleObserver();else localDone = true; return; }
                     SellAndBuy(); break;
                 case 8:
+                    if (SharedHunt) { if (Host) SharedHuntTick(); else Record(); return; }
                     if (GuestCameraLimit) { if (Host) WaitInWater(); else Record(); return; }
                     if (!Host) { if(EquipmentVideo)EquipmentObserver();else WaitInWater(); return; }
                     Record(); break;
@@ -704,7 +709,10 @@ namespace DeepDive.P1.Lab
             if (recordingAt > 0 && !bridge.IsRecordingLocal &&
                 ((GuestCameraLimit && !Host) || adapter.GetComponent<RecordingWorldBinding>().Binding.Director.ClaimCount > 0))
             {
-                if (Arg("-p253-auto-limit") == "1" || GuestCameraLimit)
+                if (SharedHunt && Time.realtimeSinceStartup - recordingAt >= 14f)
+                { recordingAt = 0; aimAt = 0; return; }
+                if (SharedHunt) report.sharedHuntAutoStopped = Time.realtimeSinceStartup - recordingAt < 14f;
+                else if (Arg("-p253-auto-limit") == "1" || GuestCameraLimit)
                     report.cameraAutomaticLimit = Time.realtimeSinceStartup - recordingAt >= 13f;
                 report.cameraHudStopped = bridge.RecordingElapsedSeconds == 0;
                 if (!File.Exists(output + ".camera-standby.png")) CaptureView(".camera-standby.png");
@@ -717,7 +725,7 @@ namespace DeepDive.P1.Lab
                 substep = 1;
             }
             if(EquipmentVideo && !EquipmentSwitchProbe())return;
-            if(recordingFish==null || !recordingFish.IsSpawned || recordingFish.IsDead ||
+            if(recordingFish==null || !recordingFish.IsSpawned || (!SharedHunt && recordingFish.IsDead) ||
                 (!bridge.IsRecordingLocal && !ClearFishLine(recordingFish)))
                 recordingFish=FindObjectsByType<FishActor>(FindObjectsSortMode.None)
                     .Where(f=>f.IsSpawned && !f.IsDead && ClearFishLine(f))
@@ -727,12 +735,20 @@ namespace DeepDive.P1.Lab
             var delta = fish.transform.position - local.RecordingEyePosition;
             // Start in the real basic-camera band before closing further on a moving subject.
             // The fish need not reach an exact 8 m approach distance to accept an actual take.
-            if (delta.magnitude > 10f)
+            var filmingRange = SharedHunt ? 5f : 10f;
+            if (delta.magnitude > filmingRange)
             {
                 var stand=fish.transform.position-Vector3.up*1.4f;stand.y=Mathf.Max(.1f,stand.y);
                 MoveToward(stand);aimAt=0;return;
             }
             Aim(fish.transform.position);
+            if (SharedHunt && !bridge.IsRecordingLocal)
+            {
+                var hunter = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                    .FirstOrDefault(p => p.IsSpawned && p.OwnerClientId == 0);
+                if (hunter == null || Vector3.Distance(hunter.RecordingEyePosition, fish.transform.position) > 4f)
+                    return;
+            }
             if (bridge.IsRecordingLocal)
             {
                 report.cameraHudRecording = true;
@@ -755,7 +771,7 @@ namespace DeepDive.P1.Lab
         }
         private void HoldForShore()
         {
-            var stand = new Vector3(-7.6f, 5.5f, -5f);
+            var stand = new Vector3(SharedHunt && Host ? -9.2f : -7.6f, 5.5f, -5f);
             if (Vector3.Distance(local.transform.position, stand) > 0.45f) { MoveToward(stand); return; }
             Stop(); localDone = true;
         }
@@ -777,11 +793,13 @@ namespace DeepDive.P1.Lab
         private void GuestCameraProof()
         {
             Stop();
-            if (!Host) { localDone = report.cameraAutomaticLimit && report.guestCameraPurchased; return; }
+            if (!Host) { localDone = (SharedHunt ? report.sharedHuntAutoStopped : report.cameraAutomaticLimit) && report.guestCameraPurchased; return; }
             var clip = MediaNetworkBinding.Mirrored.Clips.FirstOrDefault(c => c.OwnerPlayerId == 1 && c.MediaReady && c.SafeReturned);
             if (clip == null) return;
             report.guestCameraClipSeconds = clip.DurationSeconds;
-            report.guestCameraClipVerified = clip.DurationSeconds > 13f && clip.DurationSeconds <= 15f && clip.SizeBytes > 0;
+            report.guestCameraClipVerified = clip.DurationSeconds > (SharedHunt ? 2f : 13f) &&
+                clip.DurationSeconds <= 15f && clip.SizeBytes > 0 &&
+                (!SharedHunt || (report.sharedHuntCaught && report.sharedHuntFilmingAtPickup && report.sharedHuntKilledWhileFilming));
             localDone = report.guestCameraClipVerified;
         }
         private void TripOut()
@@ -1122,7 +1140,8 @@ namespace DeepDive.P1.Lab
             if (GuestCameraLimit)
             {
                 report.passed = step == 16 && report.players == 2 && report.errors.Count == 0 &&
-                    (Host ? report.guestCameraClipVerified : report.guestCameraPurchased && report.cameraAutomaticLimit);
+                    (Host ? report.guestCameraClipVerified : report.guestCameraPurchased &&
+                        (SharedHunt ? report.sharedHuntAutoStopped : report.cameraAutomaticLimit));
                 File.WriteAllText(output, JsonUtility.ToJson(report, true));
                 if (quit) Application.Quit(report.passed ? 0 : 1);
                 return;
