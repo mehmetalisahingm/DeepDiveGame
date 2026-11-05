@@ -1,0 +1,29 @@
+{
+  "targetSubscribers": 10000000,
+  "milestones": [
+    {
+      "rank": 1,
+      "subscribers": 10000,
+      "title": "Derinlik Meraklısı",
+      "adRevenueMultiplier": 1.0
+    },
+    {
+      "rank": 2,
+      "subscribers": 250000,
+      "title": "Okyanus Kaşifi",
+      "adRevenueMultiplier": 1.45
+    },
+    {
+      "rank": 3,
+      "subscribers": 2000000,
+      "title": "Abis Fenomeni",
+      "adRevenueMultiplier": 2.1
+    },
+    {
+      "rank": 4,
+      "subscribers": 10000000,
+      "title": "10M Efsane Dalgıç",
+      "adRevenueMultiplier": 3.5
+    }
+  ]
+}
