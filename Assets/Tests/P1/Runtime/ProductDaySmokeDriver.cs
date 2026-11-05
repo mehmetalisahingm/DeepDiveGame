@@ -334,10 +334,11 @@ namespace DeepDive.P1.Lab
                 case 7: CycleDive(8); break;
                 case 8: SetStep(9); break;
                 case 9: adapter.AdvancePhase(); if (adapter.Session.State.Phase == SessionPhase.Return) SetStep(10); break;
-                case 10: SetStep(GuestCameraLimit ? 16 : 11); break;
+                case 10: SetStep(SharedHunt ? 13 : GuestCameraLimit ? 16 : 11); break;
                 case 11: SetStep(12); break;
                 case 12: SetStep(13); break;
                 case 13:
+                    if (SharedHunt) { SetStep(16); break; }
                     if (adapter.Session.State.Phase == SessionPhase.Return) adapter.AdvancePhase();
                     if (adapter.Session.State.Phase == SessionPhase.Lobby) SetStep(14);
                     break;
@@ -861,12 +862,18 @@ namespace DeepDive.P1.Lab
             if (!Follow()) return;
             Stop();
             if (!HomePcView.PanelOpen) return;
-            var clip = MediaNetworkBinding.Mirrored.Clips.FirstOrDefault(c => c != null && c.MediaReady && c.SafeReturned);
+            var clip = MediaNetworkBinding.Mirrored.Clips.FirstOrDefault(c => c != null && c.MediaReady && c.SafeReturned &&
+                (!SharedHunt || c.OwnerPlayerId == 1));
             if (clip == null) return;
             report.realClip = clip.SizeBytes > 0 && clip.ContentHash.Length == 64 && clip.RecordingId.Length > 0 &&
                 clip.ClipId == RecordingClipFile.ClipIdForRecording(clip.RecordingId);
             report.clipId = clip.ClipId; report.recordingId = clip.RecordingId; report.hash = clip.ContentHash; report.clipBytes = clip.SizeBytes;
-            if (!Host) { localDone = report.realClip; return; }
+            if (!Host)
+            {
+                if (SharedHunt) Publish(clip.ClipId);
+                else localDone = report.realClip;
+                return;
+            }
             if (!report.clipPlayed)
             {
                 report.clipPlayed = ClipPlayback.CanPlay(clip.ClipId) && ClipPlayback.TryPlay(clip.ClipId);
@@ -874,6 +881,7 @@ namespace DeepDive.P1.Lab
             }
             if (!report.clipPlayed) return;
             if (!PlaybackAdvanced()) return;
+            if (SharedHunt) { localDone = true; return; }
             Publish(clip.ClipId);
         }
         private void Publish(string clipId)
@@ -1149,8 +1157,9 @@ namespace DeepDive.P1.Lab
             if (GuestCameraLimit)
             {
                 report.passed = step == 16 && report.players == 2 && report.errors.Count == 0 &&
-                    (Host ? report.guestCameraClipVerified : report.guestCameraPurchased &&
-                        (SharedHunt ? report.sharedHuntAutoStopped : report.cameraAutomaticLimit));
+                    (Host ? report.guestCameraClipVerified && (!SharedHunt || (report.realClip && report.clipPlayed)) :
+                        report.guestCameraPurchased && (SharedHunt ? report.sharedHuntAutoStopped && report.realClip &&
+                            report.published && report.duplicateRefused : report.cameraAutomaticLimit));
                 File.WriteAllText(output, JsonUtility.ToJson(report, true));
                 if (quit) Application.Quit(report.passed ? 0 : 1);
                 return;
