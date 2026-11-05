@@ -22,7 +22,7 @@ namespace DeepDive.Network
         // P4-1 keeps the daily session in one world and uses its home spawn contract.
         // P4-2 retains authored fish across dives; older clients would leave despawned visuals active.
         // P4-6 adds the host-written, unpaid shelf selection to NetworkPlayer.
-        public const string Protocol = "DeepDive-P4-7";
+        public const string Protocol = "DeepDive-P4-8";
         [SerializeField] private string offlineScene = "";
         private NetworkManager manager;
         private UnityTransport transport;
