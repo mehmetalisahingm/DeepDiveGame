@@ -1,0 +1,293 @@
+{
+    "note": "Scene opened additively and closed unsaved. Geometric line of sight with the deep fog formula; no light, contrast or model.",
+    "swimSpeed": 3.0,
+    "maxOxygen": 120.0,
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "surfaceY": 8.0,
+    "deepFogDensity": 0.06499999761581421,
+    "fogHalfVisibleMetres": 12.808533668518067,
+    "fogTenPercentMetres": 23.345033645629884,
+    "stops": [
+        {
+            "id": "dive-exit",
+            "position": {
+                "x": 9.0,
+                "y": 7.400000095367432,
+                "z": -9.0
+            },
+            "bedY": 7.420000076293945,
+            "clearance": -0.019999980926513673,
+            "depth": 0.5999999046325684,
+            "band": "shallow",
+            "bedPiece": "Shore_Ledge_Fill",
+            "insideSolid": true,
+            "insideSwimVolume": true
+        },
+        {
+            "id": "deep-trace-1",
+            "position": {
+                "x": -7.5,
+                "y": -21.66655731201172,
+                "z": 52.5
+            },
+            "bedY": -22.865570068359376,
+            "clearance": 1.1990127563476563,
+            "depth": 29.66655731201172,
+            "band": "deep",
+            "bedPiece": "Seabed_Deep",
+            "insideSolid": false,
+            "insideSwimVolume": true
+        },
+        {
+            "id": "deep-trace-2",
+            "position": {
+                "x": 7.5,
+                "y": -22.02364158630371,
+                "z": 52.5
+            },
+            "bedY": -23.21483039855957,
+            "clearance": 1.1911888122558594,
+            "depth": 30.02364158630371,
+            "band": "deep",
+            "bedPiece": "Seabed_Deep",
+            "insideSolid": false,
+            "insideSwimVolume": true
+        },
+        {
+            "id": "deep-trace-3",
+            "position": {
+                "x": -7.5,
+                "y": -24.788843154907228,
+                "z": 57.5
+            },
+            "bedY": -25.97498321533203,
+            "clearance": 1.1861400604248047,
+            "depth": 32.788841247558597,
+            "band": "deep",
+            "bedPiece": "Seabed_Deep",
+            "insideSolid": false,
+            "insideSwimVolume": true
+        },
+        {
+            "id": "arena-deep-1",
+            "position": {
+                "x": 7.5,
+                "y": -24.5,
+                "z": 57.5
+            },
+            "bedY": -26.0,
+            "clearance": 1.5,
+            "depth": 32.5,
+            "band": "deep",
+            "bedPiece": "Seabed_Deep",
+            "insideSolid": false,
+            "insideSwimVolume": true
+        },
+        {
+            "id": "boss",
+            "position": {
+                "x": 7.5,
+                "y": -23.0,
+                "z": 59.0
+            },
+            "bedY": -26.0,
+            "clearance": 3.0,
+            "depth": 31.0,
+            "band": "deep",
+            "bedPiece": "Seabed_Deep",
+            "insideSolid": false,
+            "insideSwimVolume": true
+        }
+    ],
+    "legs": [
+        {
+            "from": "dive-exit",
+            "to": "deep-trace-1",
+            "straight": 69.9954605102539,
+            "swum": 76.2076187133789,
+            "seconds": 25.739999771118165,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": true,
+            "blocker": "Seabed_Shallow",
+            "fogVisibility01": 1.0237310998917338e-9
+        },
+        {
+            "from": "deep-trace-1",
+            "to": "deep-trace-2",
+            "straight": 15.004249572753907,
+            "swum": 14.9406156539917,
+            "seconds": 4.980000019073486,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.3862912654876709
+        },
+        {
+            "from": "deep-trace-2",
+            "to": "deep-trace-3",
+            "straight": 16.05136489868164,
+            "swum": 15.959993362426758,
+            "seconds": 5.319999694824219,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.33670249581336977
+        },
+        {
+            "from": "deep-trace-3",
+            "to": "arena-deep-1",
+            "straight": 15.00278091430664,
+            "swum": 14.940021514892579,
+            "seconds": 4.980000019073486,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.3863631784915924
+        },
+        {
+            "from": "arena-deep-1",
+            "to": "arena-deep-1 ascent",
+            "straight": 31.899999618530275,
+            "swum": 31.85988998413086,
+            "seconds": 10.619999885559082,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.013576678931713105
+        },
+        {
+            "from": "arena-deep-1 ascent",
+            "to": "dive-exit",
+            "straight": 66.51691436767578,
+            "swum": 60.62107467651367,
+            "seconds": 68.54000091552735,
+            "stuck": true,
+            "blockedFrames": 2417,
+            "lineBlocked": true,
+            "blocker": "Shore_Ledge",
+            "fogVisibility01": 7.612212193919277e-9
+        }
+    ],
+    "trail": [
+        {
+            "from": "trail-0",
+            "to": "trail-1",
+            "straight": 9.018924713134766,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7091659307479858
+        },
+        {
+            "from": "trail-1",
+            "to": "trail-2",
+            "straight": 7.997359752655029,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7632104158401489
+        },
+        {
+            "from": "trail-2",
+            "to": "trail-3",
+            "straight": 5.121676921844482,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.8950923681259155
+        },
+        {
+            "from": "trail-3",
+            "to": "trail-4",
+            "straight": 7.552806854248047,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7858300805091858
+        },
+        {
+            "from": "trail-4",
+            "to": "trail-5",
+            "straight": 7.51443338394165,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.787752091884613
+        },
+        {
+            "from": "trail-5",
+            "to": "trail-6",
+            "straight": 8.274535179138184,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7488047480583191
+        },
+        {
+            "from": "trail-6",
+            "to": "trail-7",
+            "straight": 8.015509605407715,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7622737884521484
+        },
+        {
+            "from": "trail-7",
+            "to": "trail-8",
+            "straight": 7.546780109405518,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7861323356628418
+        },
+        {
+            "from": "trail-8",
+            "to": "trail-9",
+            "straight": 7.5167412757873539,
+            "swum": 0.0,
+            "seconds": 0.0,
+            "stuck": false,
+            "blockedFrames": 0,
+            "lineBlocked": false,
+            "blocker": "",
+            "fogVisibility01": 0.7876366376876831
+        }
+    ],
+    "outSeconds": 41.02000045776367,
+    "backSeconds": 10.619999885559082,
+    "roundTripSeconds": 120.18000030517578,
+    "oxygenMarginSeconds": 68.36000061035156,
+    "bossBottomY": -25.399999618530275,
+    "bossBedY": -26.0
+}
