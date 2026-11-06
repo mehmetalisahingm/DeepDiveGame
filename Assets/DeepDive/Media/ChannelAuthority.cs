@@ -9,7 +9,10 @@ namespace DeepDive.Media
     // EconomyManager; the PC UI and the mirror only show what this class holds.
     //
     // Rules:
-    //  - Archive: a clip is added once per clipId (a capture retry is AlreadyArchived); full archive refuses.
+    //  - Archive: a clip is added once per clipId (a capture retry is AlreadyArchived). The archive holds the clips' MEDIA, so it is
+    //    bounded (MaxArchivedClips) but never blocks the channel: when it is full, the oldest clip whose publication already settled
+    //    (or that can never be published) is evicted and its media file deleted, while the publication record (subject, publication
+    //    id, views, followers, income, settle id) is kept for good. A clip that could still be published or settled is never evicted.
     //  - Publish: only the clip's owner, only a commercial candidate (complete, safely returned, real subject,
     //    quality 1..4), only while the day is running, only if the commercial right is still free. The
     //    publication id is a pure function of the clip, so a second click, a second player or a reload can only
@@ -37,6 +40,8 @@ namespace DeepDive.Media
         }
 
         public event Action OnChanged;
+        // #255: a clip's media was dropped to make room; the host deletes the file. The publication record stays.
+        public event Action<string> OnClipEvicted;
         // P4.5-C: a publication was accepted AND written (host). The manifest is the host's verified record of the clip (sponsors read it).
         public event Action<PublicationSave, ClipManifest> OnPublished;
 
@@ -76,12 +81,31 @@ namespace DeepDive.Media
         public ClipArchiveOutcome Submit(ClipManifest manifest)
         {
             if (!manifest.IsWellFormed) return ClipArchiveOutcome.Invalid;
-            if (_clips.ContainsKey(manifest.ClipId)) return ClipArchiveOutcome.AlreadyArchived;
-            if (_clipOrder.Count >= MaxArchivedClips) return ClipArchiveOutcome.ArchiveFull;
+            // A clip whose publication is already on record (even if its media was evicted) is never archived again.
+            if (_clips.ContainsKey(manifest.ClipId) || IsPublished(manifest.ClipId)) return ClipArchiveOutcome.AlreadyArchived;
+            if (_clipOrder.Count >= MaxArchivedClips && !TryEvictOne()) return ClipArchiveOutcome.ArchiveFull;
             _clips[manifest.ClipId] = manifest;
             _clipOrder.Add(manifest.ClipId);
             Changed();
             return ClipArchiveOutcome.Added;
+        }
+
+        // Oldest first: (1) a clip whose publication settled (its result is final, only the media goes), then (2) a clip that can never
+        // be published (not a commercial candidate, not published). A clip that is published and unsettled, or could still be published,
+        // is never evicted.
+        private bool TryEvictOne()
+        {
+            string victim = null;
+            foreach (var id in _clipOrder)
+                if (_publications.TryGetValue(ChannelIds.PublicationId(id), out var p) && !string.IsNullOrEmpty(p.SettledId)) { victim = id; break; }
+            if (victim == null)
+                foreach (var id in _clipOrder)
+                    if (!IsPublished(id) && !_clips[id].IsCommercialCandidate) { victim = id; break; }
+            if (victim == null) return false;
+            _clips.Remove(victim);
+            _clipOrder.Remove(victim);
+            OnClipEvicted?.Invoke(victim);
+            return true;
         }
 
         public bool TryGetClip(string clipId, out ClipManifest manifest)
@@ -200,7 +224,7 @@ namespace DeepDive.Media
                 p.Income = income;
                 p.ResultDay = closingDay + 1;
                 p.SettledId = settleId;
-                _followers += followers;
+                _followers = (int)Math.Min(int.MaxValue, (long)_followers + followers);
                 _publishedSubjects.Add(p.SubjectId);
                 settled++;
             }
@@ -218,7 +242,26 @@ namespace DeepDive.Media
             return data;
         }
 
-        // A publication without its clip, or a second publication of one clip, is dropped (never forced in).
+        // What clients need: every clip and its publications, plus only the most recent publications whose media is gone (the PC shows
+        // the last few). The follower count is exact. The save (ExportMedia) always keeps the whole history.
+        public MediaSaveData ExportMirror(int recentWithoutMedia = 12)
+        {
+            var data = new MediaSaveData { Followers = _followers };
+            foreach (var id in _clipOrder) data.Clips.Add(ClipSave.From(_clips[id]));
+            var kept = 0;
+            for (var i = _publicationOrder.Count - 1; i >= 0; i--)
+            {
+                var p = _publications[_publicationOrder[i]];
+                var hasMedia = _clips.ContainsKey(p.ClipId);
+                if (!hasMedia && kept >= recentWithoutMedia) continue;
+                if (!hasMedia) kept++;
+                data.Publications.Add(Copy(p));
+            }
+            data.Publications.Reverse();
+            return data;
+        }
+
+        // A publication without its clip (unless settled history), or a second publication of one clip, is dropped (never forced in).
         public bool RestoreMedia(MediaSaveData data)
         {
             if (data == null) return false;
@@ -243,8 +286,12 @@ namespace DeepDive.Media
             if (data.Publications != null)
                 foreach (var p in data.Publications)
                 {
-                    if (p == null || string.IsNullOrWhiteSpace(p.ClipId) || !_clips.ContainsKey(p.ClipId)) continue;
+                    if (p == null || string.IsNullOrWhiteSpace(p.ClipId)) continue;
                     var id = ChannelIds.PublicationId(p.ClipId);
+                    // A publication needs its clip, except a settled one whose media was evicted: its result is final history. Its settle
+                    // id must be the one this clip would get, so a made-up record cannot sneak in.
+                    var settledHistory = !string.IsNullOrEmpty(p.SettledId) && p.SettledId == ChannelIds.SettleId(id);
+                    if (!_clips.ContainsKey(p.ClipId) && !settledHistory) continue;
                     if (_publications.ContainsKey(id)) continue;
                     var copy = Copy(p);
                     copy.PublicationId = id;
@@ -275,14 +322,28 @@ namespace DeepDive.Media
     // tuned in playtests like every price in the plan; deterministic so a replay reproduces the same result.
     public static class ChannelResultRules
     {
-        public static void Evaluate(int quality, bool novelSubject, int currentFollowers, out int views, out int followersGained, out int income)
+        // #255 working values (balance is tuned in real multi-day play; no time-to-goal is promised, docs/plan/CHANNEL_RULES_255_PROPOSAL.md).
+        // Followers feed the views of every new post; before #255 this was 50, which with the old archive cap could not reach the goal.
+        public const int FeedbackPercent = 120;
+        // Income follows the clip's own base views plus at most this many follower-driven views, so a huge channel does not break the
+        // price scale of the game (the dearest purchase is a few thousand credits).
+        public const int IncomeFeedbackCapViews = 1200;
+
+        public static void Evaluate(int quality, bool novelSubject, int currentFollowers, out int views, out int followersGained, out int income) =>
+            Evaluate(quality, novelSubject, currentFollowers, 100, out views, out followersGained, out income);
+
+        // viewsPercent scales the clip's own base views (the evidence rule, ChannelEvidenceRules); 100 = no evidence bonus.
+        public static void Evaluate(int quality, bool novelSubject, int currentFollowers, int viewsPercent,
+            out int views, out int followersGained, out int income)
         {
             var q = Math.Max(0, Math.Min(4, quality));
             var baseViews = q == 0 ? 0 : 40 * q * q;               // 40 / 160 / 360 / 640
             if (novelSubject) baseViews = baseViews * 3 / 2;          // a first video of a subject draws more
-            views = baseViews + currentFollowers / 2;                 // followers watch new posts
+            baseViews = (int)((long)baseViews * Math.Max(0, viewsPercent) / 100);
+            var feedback = (int)Math.Min(int.MaxValue / 2, (long)Math.Max(0, currentFollowers) * FeedbackPercent / 100);   // followers watch new posts
+            views = baseViews + feedback;
             followersGained = views / 20;
-            income = views / 4;                                       // credits
+            income = (baseViews + Math.Min(feedback, IncomeFeedbackCapViews)) / 4;   // credits
         }
     }
 }

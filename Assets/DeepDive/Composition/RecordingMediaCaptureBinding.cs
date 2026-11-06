@@ -433,6 +433,9 @@ namespace DeepDive.Composition
             playing = null;
         }
 
+        // #255: the channel evicted this clip's media (its publication settled, or the archive needed room); the record stays.
+        public static void DeleteClipFile(string clipId) => DeleteQuietly(PathFor(clipId));
+
         private static void DeleteQuietly(string path)
         {
             try { if (!string.IsNullOrEmpty(path) && File.Exists(path)) File.Delete(path); }
