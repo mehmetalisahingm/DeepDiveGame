@@ -241,7 +241,7 @@ namespace DeepDive.Composition
         private void ReceiveMirrorRequest(ulong sender, FastBufferReader reader)
         {
             if (!manager.IsServer || !manager.IsListening || !adapter.IsAuthority ||
-                sender == NetworkManager.ServerClientId || reader.Length != 1) return;
+                sender == NetworkManager.ServerClientId || !reader.TryBeginRead(1)) return;
             reader.ReadValueSafe(out byte version);
             if (version != 1) return;
             // Never reply to a fabricated or disconnected sender.
