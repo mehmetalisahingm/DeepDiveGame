@@ -24,6 +24,9 @@ namespace DeepDive.Composition
         private const string PublishMessage = "DeepDive.P4.Publish.v1";
         private const string ResultMessage = "DeepDive.P4.PublishResult.v1";
         private const string MirrorMessage = "DeepDive.P4.Channel.v1";
+        // Late-joining clients may register the mirror handler AFTER the host's
+        // OnClientConnected send. Request a snapshot once the handler is ready.
+        private const string MirrorRequestMessage = "DeepDive.P4.Channel.Request.v1";
         private const float PcRange = 3.25f;
 
         // What this process shows (host: live authority; clients: the last mirrored state).
@@ -45,7 +48,18 @@ namespace DeepDive.Composition
         private bool bound, registered, registeredAsServer;
         private int sentRevision = -1;
         private ulong localRequest;
+        private double nextMirrorRequestAt;
         private Func<ClipManifest, ClipArchiveOutcome> submitDelegate;
+
+        public static bool MirrorRequestDue(bool listening, bool registered, bool server,
+            bool connected, bool hasMirror, double now, double nextAt)
+        {
+            return listening && registered && !server && connected && !hasMirror &&
+                !double.IsNaN(now) && !double.IsInfinity(now) && now >= nextAt;
+        }
+
+        public static bool AcceptMirrorRevision(int incoming, int current, bool hasMirror)
+            => incoming >= 0 && (!hasMirror || incoming >= current);
 
         public ChannelAuthority Channel => channel;
 
@@ -77,7 +91,17 @@ namespace DeepDive.Composition
             else if (!manager.IsListening && registered) Unregister();
             if (!manager.IsListening) return;
 
-            if (!manager.IsServer || !adapter.IsAuthority) { UnbindHost(); return; }
+            if (!manager.IsServer || !adapter.IsAuthority)
+            {
+                // Retry is a small client->host control message, not a gameplay
+                // authority or an archive upload. Stops as soon as a mirror arrives.
+                var now = Time.realtimeSinceStartupAsDouble;
+                if (MirrorRequestDue(manager.IsListening, registered, manager.IsServer,
+                    manager.IsConnectedClient, HasMirror, now, nextMirrorRequestAt))
+                    RequestMirror(now);
+                UnbindHost();
+                return;
+            }
             BindHost();
             if (!bound || channel.Revision == sentRevision) return;
             sentRevision = channel.Revision;
@@ -204,6 +228,39 @@ namespace DeepDive.Composition
 
         // ---- mirror ------------------------------------------------------------------------------------------
 
+        private void RequestMirror(double now)
+        {
+            nextMirrorRequestAt = now + 2.0; // retry if join raced with host binding
+            using var writer = new FastBufferWriter(4, Allocator.Temp);
+            writer.WriteValueSafe((byte)1);
+            manager.CustomMessagingManager.SendNamedMessage(
+                MirrorRequestMessage, NetworkManager.ServerClientId,
+                writer, NetworkDelivery.ReliableSequenced);
+        }
+
+        private void ReceiveMirrorRequest(ulong sender, FastBufferReader reader)
+        {
+            if (!manager.IsServer || !manager.IsListening || !adapter.IsAuthority ||
+                sender == NetworkManager.ServerClientId || reader.Length != 1) return;
+            reader.ReadValueSafe(out byte version);
+            if (version != 1) return;
+            // Never reply to a fabricated or disconnected sender.
+            var connected = false;
+            foreach (var id in manager.ConnectedClientsIds)
+                if (id == sender) { connected = true; break; }
+            if (!connected) return;
+
+            BindHost();
+            if (!bound) return; // guest retries when host campaign becomes ready
+            if (!HasMirror || MirroredRevision != channel.Revision)
+            {
+                Mirrored = channel.ExportMirror();
+                MirroredRevision = channel.Revision;
+                HasMirror = true;
+            }
+            SendMirror(sender);
+        }
+
         private void SendMirror(ulong clientId)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(Mirrored));
@@ -225,7 +282,7 @@ namespace DeepDive.Composition
             MediaSaveData data;
             try { data = JsonUtility.FromJson<MediaSaveData>(System.Text.Encoding.UTF8.GetString(bytes)); }
             catch (ArgumentException) { return; }
-            if (data == null) return;
+            if (data == null || !AcceptMirrorRevision(revision, MirroredRevision, HasMirror)) return;
             Mirrored = data;
             MirroredRevision = revision;
             HasMirror = true;
@@ -239,6 +296,7 @@ namespace DeepDive.Composition
             if (registeredAsServer)
             {
                 messages.RegisterNamedMessageHandler(PublishMessage, ReceivePublish);
+                messages.RegisterNamedMessageHandler(MirrorRequestMessage, ReceiveMirrorRequest);
                 manager.OnClientConnectedCallback += OnClientConnected;
             }
             else
@@ -254,7 +312,11 @@ namespace DeepDive.Composition
             var messages = manager.CustomMessagingManager;
             if (messages != null)
             {
-                if (registeredAsServer) messages.UnregisterNamedMessageHandler(PublishMessage);
+                if (registeredAsServer)
+                {
+                    messages.UnregisterNamedMessageHandler(PublishMessage);
+                    messages.UnregisterNamedMessageHandler(MirrorRequestMessage);
+                }
                 else
                 {
                     messages.UnregisterNamedMessageHandler(ResultMessage);
@@ -267,6 +329,7 @@ namespace DeepDive.Composition
             HasMirror = false;
             Mirrored = new MediaSaveData();
             MirroredRevision = -1;
+            nextMirrorRequestAt = 0;
             UnbindHost();
         }
 
