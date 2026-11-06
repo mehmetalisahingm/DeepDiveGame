@@ -216,6 +216,45 @@ namespace DeepDive.P4.Tests
             Assert.AreEqual("t39", mirror.Publications.Last().Title, "order is kept, newest last");
         }
 
+        // The host deletes an evicted clip's media only after the save that no longer lists it succeeded: until then the previous save still
+        // names the clip, so a failed write or a crash must leave the file in place.
+        [Test]
+        public void AnEvictedClipsFileIsDeletedOnlyAfterASuccessfulSave()
+        {
+            var rig = FullArchiveWithOneSettledClip();
+            var pending = new PendingMediaDeletes();
+            var deleted = new List<string>();
+            rig.Channel.OnClipEvicted += pending.Add;
+
+            Assert.AreEqual(ClipArchiveOutcome.Added, rig.Channel.Submit(Clip("new")));
+            Assert.AreEqual(1, pending.Count, "the eviction only queues the file");
+            Assert.IsEmpty(deleted, "nothing is deleted before a save succeeded");
+
+            // The save failed: the host does not flush, the file stays queued (and on disk).
+            Assert.AreEqual(1, pending.Count);
+            Assert.IsEmpty(deleted);
+
+            // The next save succeeded: now the file goes, exactly once.
+            Assert.AreEqual(1, pending.Flush(deleted.Add));
+            Assert.AreEqual(new[] { "c0" }, deleted.ToArray());
+            Assert.AreEqual(0, pending.Flush(deleted.Add), "a second flush deletes nothing");
+            Assert.AreEqual(0, pending.Count);
+        }
+
+        [Test]
+        public void ADeleteThatFailsStaysQueuedAndAClipIsQueuedOnce()
+        {
+            var pending = new PendingMediaDeletes();
+            pending.Add("a");
+            pending.Add("a");
+            pending.Add("b");
+            pending.Add("");
+            Assert.AreEqual(2, pending.Count);
+            var done = pending.Flush(id => { if (id == "a") throw new IOException("locked"); });
+            Assert.AreEqual(1, done);
+            Assert.AreEqual(1, pending.Count, "the file that could not be deleted is retried at the next save");
+        }
+
         // The goal through the REAL authority, economy and save: a lively crew (three publishable clips a day, quality 3, every subject new
         // once) with the archive evicting settled clips as it fills, reaches 10,000,000 followers, is never refused a publication, keeps its
         // income on the price scale, and keeps playing after the goal. Day count is a property of these inputs, not a promise.

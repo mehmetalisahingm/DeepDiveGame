@@ -14,7 +14,7 @@ Durum: **Uygulandı (çalışma değerleriyle); denge iddiası değildir.** Sahi
 4. **Büyüme eğrisi** (`ChannelResultRules`, çalışma değeri): takipçilerin yeni yayınlara katkısı `FeedbackPercent = 120` (önceden 50). Takipçi yokken sonuç eskisiyle aynı (ilk klipler aynı kazanır). Abone aynı oranla: izlenme/20.
 5. **Gelir ekonomiye sığar:** gelir = (klibin kendi izlenmesi + en fazla `IncomeFeedbackCapViews = 1200` takipçi kaynaklı izlenme) / 4. Büyük kanal izlenmeyi milyonlara taşır ama bir yayın en fazla birkaç yüz kredi öder; en pahalı satın alma birkaç bin kredi (araştırma teknesi 2.400). Eskiden gelir izlenmeyle sınırsız büyüyecekti.
 6. **Hedef modeli** (`ChannelGoal`) ve ev PC panelinde ilerleme çubuğu: 10.000.000 ve kilometre taşları 100 … 10.000.000; hedefe ulaşınca "hedef tamam", kanal büyümeye devam eder.
-7. `ChannelEvidenceRules` (**ödemeye bağlı değil**): doğrulanmış ağırlık %100–150, eşleşen çekim +%25, yalnız çekim kanala girmez; Utku (#254) doğrulanmış ağırlık ve av kimliğini klibe taşıyınca `ChannelResultRules.Evaluate`'in `viewsPercent` girdisine bağlanabilir.
+7. **Av–çekim kanıtı bağlandı (#254 ile):** Utku'nun `RecordingResult.Specimen` kanıtı (`FilmOnly`/`FilmAndCatch`, `SpecimenId`, ana makinede doğrulanmış `WeightGrams`, `CaptureId`) `ClipManifest` ve `ClipSave` ile taşınır (varsayılanlı alanlar, eski kayıtlar `None` yüklenir; yarım kayıt `None` olur). Gün sonu sonucunda yalnız **aynı hayvanın çekimi ve avı birlikte** (`FilmAndCatch`) `ChannelEvidenceRules` ile izlenmeyi artırır: türün kendi ağırlık aralığında %100–150 (boyut) × %125 (eşleşme); yalnız çekim (`FilmOnly`), kanıtsız veya eski klip bugünkü kural (%100). Bonus **hayvan başına bir kez** ödenir (`PublicationSave.SpecimenId` ve `EvidencePercent`, yeniden yüklemede korunur). Tür başına tek sonuç kuralı ve ödeme sayısı değişmedi; balık başına sonuç önerilmedi (ödeme sayısını artırırdı).
 
 ## Ölçümler (EditMode, gerçek `ChannelAuthority` + gerçek `EconomyManager`/`EconomySaveStore`)
 
@@ -22,9 +22,15 @@ Durum: **Uygulandı (çalışma değerleriyle); denge iddiası değildir.** Sahi
 - **Yalnız kural** (arşivsiz): tek kaliteli yayınlarla hedefe platin 168, gümüş 192 yayında ulaşılıyor, yani anlık değil, ulaşılamaz da değil (`P411_CHANNEL_REACH`).
 - **Oyun stili duyarlılığı** (yalnız kural modeli, ilk beş konu yeni): günde 3 klip kalite 3 için `FeedbackPercent` 50 → 129 gün, 120 → 59 gün, 200 → 38 gün; `FeedbackPercent` 120'de günde 2 klip kalite 2–3 → 92 gün, günde 1 klip kalite 2 → 192 gün, günde 4 klip kalite 3–4 → 43 gün. Bunlar süre sözü değil, ayar için duyarlılık; gerçek çok günlük oyunda ayarlanır.
 
+## Kanıt köprüsü doğrulaması
+
+- EditMode: kanıt klip kaydından geçer ve eski kayıt `None` yüklenir; `FilmAndCatch` en büyük hayvan %187, en küçük %125, `FilmOnly` ve kanıtsız %100; aynı hayvan başka klipte ve yeniden yüklemeden sonra ikinci bonus almaz; gün sonu tekrar çalıştırmak bir daha ödemez (`ChannelEvidenceWiringTests`).
+- Gerçek iki Windows süreci (`Test-P46-ProductDay.ps1 -Players 2 -SharedHunt -Mute`): misafir çekti, host aynı balığı avladı; Utku'nun kanıtı `kind=FilmAndCatch grams=2115`, klip `P4_MEDIA_CLIP archived ... specimen=FilmAndCatch:2115g` ile arşivlendi. İlk koşuda klip `None:0g` ile arşivlenmişti: `RecordingMediaCaptureBinding` dünya bağlamını eklemek için manifesti yeniden kurarken kanıtı düşürüyordu; düzeltildi. Gün sonu ödemesi bu smoke'ta koşmaz, ödeme ucu EditMode'da kanıtlıdır.
+- Medya dosyası silme sırası: tahliye edilen klibin dosyası yalnız onu artık listelemeyen kayıt **başarıyla yazıldıktan sonra** silinir (`PendingMediaDeletes`); başarısız yazımda dosya yerinde kalır (Mehmet'in #269 raporundaki atomik sıra bulgusu).
+
 ## Açık kalanlar
 
-1. **Utku #254:** klibe doğrulanmış av kimliği ve ağırlık; sonra `ChannelEvidenceRules` ödemeye bağlanır. Eşleşme bonusunun bir avla tek kez harcanması için `PublicationSave`'e yeni alan (eski kayıtta boş = bonus yok).
+1. **Utku #254:** `FilmAndCatch` gerçek süreçte kanıtlandı (aşağıda); 4 süreç, iki kamera ve küçük/büyük balık karşılaştırması gerçek süreçte hâlâ denenmedi. Balığın ağırlığına göre görünür ölçek farkı ayrı iş.
 2. **Mehmet #253:** gerçek klip boyutu ve depolama kotası; medya atma politikasının gerçek dosya boyutlarıyla (disk kotası) doğrulanması. Şimdi sınır klip sayısıdır (128).
 3. **Gerçek ürün koşuları:** iki gerçek oyuncu av → gerçek kayıt → PC'de yayın → ertesi gün → reload (smoke sonuçları PR'da), 4 süreç, ayrı PC/insan kabulü ve #164 açık.
 4. **Denge:** hedefe ulaşma süresi ve gelir ölçeği çok günlük gerçek oyunla ayarlanır; bu belgedeki gün sayıları yalnız modeldir.

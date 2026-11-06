@@ -72,7 +72,7 @@ namespace DeepDive.Media
 
             manifest = new ClipManifest(clipId, result.RecordingId, result.DiveId, dayNumber, result.PlayerId,
                 result.SubjectId, result.Quality, mediaDurationSeconds, contentHash, sizeBytes,
-                mediaReady: true, safeReturned: true);
+                mediaReady: true, safeReturned: true, default, result.Specimen);
             return true;
         }
 

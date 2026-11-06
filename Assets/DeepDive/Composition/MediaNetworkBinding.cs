@@ -123,11 +123,11 @@ namespace DeepDive.Composition
             if (economy == null || store == null || day == null) return;
 
             channel.Configure(this, () => day.Engine.DayNumber, () => DayLock.IsLocked, () => store.SaveNow(),
-                id => day.Engine.RecordPublicationQueued(id));
+                id => day.Engine.RecordPublicationQueued(id), ChannelSpeciesWeights.Range);
             store.Media = channel;   // hands the channel what the file already held
             submitDelegate = SubmitClip;
             ClipArchive.Bind(submitDelegate);
-            channel.OnClipEvicted += RecordingMediaCaptureBinding.DeleteClipFile;   // #255: the media goes, the publication record stays
+            channel.OnClipEvicted += pendingMediaDeletes.Add;   // #255: the media goes (after the next successful save), the publication record stays
             bound = true;
         }
 
@@ -135,16 +135,20 @@ namespace DeepDive.Composition
         {
             if (!bound) return;
             ClipArchive.Unbind(submitDelegate);
-            channel.OnClipEvicted -= RecordingMediaCaptureBinding.DeleteClipFile;
+            channel.OnClipEvicted -= pendingMediaDeletes.Add;
             if (store != null) store.Media = null;
             bound = false;
             sentRevision = -1;
         }
 
+        private readonly PendingMediaDeletes pendingMediaDeletes = new PendingMediaDeletes();
+
         private ClipArchiveOutcome SubmitClip(ClipManifest manifest)
         {
             var outcome = channel.Submit(manifest);
-            if (outcome == ClipArchiveOutcome.Added && store != null) store.SaveNow();
+            // An evicted clip's file is deleted only after the save that no longer lists it succeeded (a failed write keeps them queued).
+            if (outcome == ClipArchiveOutcome.Added && store != null && store.SaveNow())
+                pendingMediaDeletes.Flush(RecordingMediaCaptureBinding.DeleteClipFile);
             return outcome;
         }
 

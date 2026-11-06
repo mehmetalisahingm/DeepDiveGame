@@ -66,6 +66,7 @@ namespace DeepDive.Core.Contracts
         public readonly bool MediaReady;         // manifest complete: expected size/hash/duration all arrived
         public readonly bool SafeReturned;       // the recording made it back to safety (D07)
         public readonly RecordingWorldContext WorldContext; // #101; Empty when the capture had none
+        public readonly RecordingSpecimenProof Specimen;    // #254/#255: the host-verified animal behind the clip; None when there is no proof
 
         public ClipManifest(string clipId, string recordingId, string diveId, int dayNumber, PlayerId owner,
             string subjectId, int quality, float durationSeconds, string contentHash, long sizeBytes,
@@ -78,6 +79,14 @@ namespace DeepDive.Core.Contracts
         public ClipManifest(string clipId, string recordingId, string diveId, int dayNumber, PlayerId owner,
             string subjectId, int quality, float durationSeconds, string contentHash, long sizeBytes,
             bool mediaReady, bool safeReturned, in RecordingWorldContext worldContext)
+            : this(clipId, recordingId, diveId, dayNumber, owner, subjectId, quality, durationSeconds, contentHash,
+                sizeBytes, mediaReady, safeReturned, worldContext, default)
+        {
+        }
+
+        public ClipManifest(string clipId, string recordingId, string diveId, int dayNumber, PlayerId owner,
+            string subjectId, int quality, float durationSeconds, string contentHash, long sizeBytes,
+            bool mediaReady, bool safeReturned, in RecordingWorldContext worldContext, in RecordingSpecimenProof specimen)
         {
             ClipId = clipId ?? string.Empty;
             RecordingId = recordingId ?? string.Empty;
@@ -92,6 +101,7 @@ namespace DeepDive.Core.Contracts
             MediaReady = mediaReady;
             SafeReturned = safeReturned;
             WorldContext = worldContext;
+            Specimen = specimen;
         }
 
         public bool IsWellFormed => !string.IsNullOrWhiteSpace(ClipId) && DurationSeconds > 0f && SizeBytes >= 0;
@@ -187,19 +197,36 @@ namespace DeepDive.Core.Contracts
         public string DepthBandId = "";
         public bool FirstRecordingOfSubject;
 
+        // #254/#255 specimen proof. A save written before these fields loads them as their defaults: None (0), "", 0, "".
+        public byte SpecimenKind;
+        public string SpecimenId = "";
+        public int SpecimenWeightGrams;
+        public string SpecimenCaptureId = "";
+
         public static ClipSave From(in ClipManifest m) => new ClipSave
         {
             ClipId = m.ClipId, RecordingId = m.RecordingId, DiveId = m.DiveId, DayNumber = m.DayNumber,
             OwnerPlayerId = m.Owner.Value, SubjectId = m.SubjectId, Quality = m.Quality, DurationSeconds = m.DurationSeconds,
             ContentHash = m.ContentHash, SizeBytes = m.SizeBytes, MediaReady = m.MediaReady, SafeReturned = m.SafeReturned,
             SubjectKind = (byte)m.WorldContext.Kind, RegionId = m.WorldContext.RegionId, CellId = m.WorldContext.CellId,
-            DepthBandId = m.WorldContext.DepthBandId, FirstRecordingOfSubject = m.WorldContext.FirstRecordingOfSubject
+            DepthBandId = m.WorldContext.DepthBandId, FirstRecordingOfSubject = m.WorldContext.FirstRecordingOfSubject,
+            SpecimenKind = (byte)m.Specimen.Kind, SpecimenId = m.Specimen.SpecimenId, SpecimenWeightGrams = m.Specimen.WeightGrams,
+            SpecimenCaptureId = m.Specimen.CaptureId
         };
 
         // The context constructor folds an unknown kind to Unknown, null to "" and "first" off for a non-species.
         public ClipManifest ToManifest() => new ClipManifest(ClipId, RecordingId, DiveId, DayNumber, new PlayerId(OwnerPlayerId),
             SubjectId, Quality, DurationSeconds, ContentHash, SizeBytes, MediaReady, SafeReturned,
-            new RecordingWorldContext((RecordingSubjectKind)SubjectKind, RegionId, CellId, DepthBandId, FirstRecordingOfSubject));
+            new RecordingWorldContext((RecordingSubjectKind)SubjectKind, RegionId, CellId, DepthBandId, FirstRecordingOfSubject),
+            SpecimenProof());
+
+        // Only a complete proof is restored; a half record (unknown kind, no id or weight) folds to None, never to half a proof.
+        private RecordingSpecimenProof SpecimenProof()
+        {
+            if (SpecimenKind == (byte)SpecimenProofKind.FilmAndCatch) return RecordingSpecimenProof.FilmedAndCaught(SpecimenId, SpecimenWeightGrams, SpecimenCaptureId);
+            if (SpecimenKind == (byte)SpecimenProofKind.FilmOnly) return RecordingSpecimenProof.Filmed(SpecimenId, SpecimenWeightGrams);
+            return default;
+        }
     }
 
     // CONTRACTS "PublicationState": publicationId/clipId, rights, title, queuedDay/resultDay, views/followers/income, settledId.
@@ -218,6 +245,11 @@ namespace DeepDive.Core.Contracts
         public int FollowersGained;
         public int Income;
         public string SettledId = "";
+
+        // #255: the verified specimen behind this publication and the views percent its evidence earned at the settlement (0 = settled
+        // before #255 or no evidence = 100). The specimen id keeps a match bonus from being paid twice for the same animal.
+        public string SpecimenId = "";
+        public int EvidencePercent;
     }
 
     [Serializable]
