@@ -101,6 +101,9 @@ namespace DeepDive.P1.Lab
             public bool deepGuestSeqOk, deepMirrorUnlocked, deepLineShown, deepMirrorCompleted;
             public bool bossSighting, bossRumor, bossTraceStage, bossArenaUnlocked, bossActiveSeen, bossDamageSeen,
                 bossShotSent, bossDefeatedPending, bossPartySafe, bossCompletedSeen, bossTwoAttackers, bossSaved, bossHostDone, bossReloadPass;
+            // #258 diagnosis of the intermittent `walk` FAIL: per player, the room start, the furthest horizontal
+            // move seen and whether that sample stood on ground. Evidence only; the walk rule itself is unchanged.
+            public List<string> prepWalk = new List<string>();
             public bool p45RolesSeen, p45CarrierCapacity, p45NoStack, p45GuestCrossWriteRefused,
                 p45PingSeen, p45PingOnMap, p45PingServerStamped, p45CurrentSeen, p45CurrentCleared;
             public bool p45WorldWeatherMirror, p45WorldBuoyVisible, p45WorldCurrentSeen, p45WorldCurrentCleared;
@@ -806,6 +809,7 @@ namespace DeepDive.P1.Lab
                 // Count actual horizontal displacement while standing on solid ground in the room. Direction is
                 // not part of the locomotion contract; a client spawned near a north
                 // collider can walk sideways but have zero net positive Z displacement.
+                if (scene == SessionNetworkAdapter.PrepScene) NotePrepWalk(player, delta);
                 if (scene == SessionNetworkAdapter.PrepScene &&
                     new Vector2(delta.x, delta.z).magnitude > 0.5f &&
                     Physics.Raycast(player.transform.position + Vector3.up * .1f, Vector3.down, .3f, ~0, QueryTriggerInteraction.Ignore))
@@ -829,7 +833,11 @@ namespace DeepDive.P1.Lab
                     lowestSwimSamples.Remove(player.OwnerClientId);
                 }
             }
-            result.walk |= walked.Count >= expected;
+            // #258: a client enters the room after the host, so the host's own walk may be over before the client's
+            // clock starts and records its start (seen in P44 boss runs: start z 4.40, end 4.47, host's report 6.16 m).
+            // The host still has to see every diver walk; a client proves its own walk, which it only sees through
+            // the host's authoritative position, so replication stays covered.
+            result.walk |= adapter.IsAuthority ? walked.Count >= expected : local != null && walked.Contains(local.OwnerClientId);
             result.swim |= swam.Count >= expected;
             if (scene == SessionNetworkAdapter.PrepScene && elapsed > 6 && players.Length == expected)
                 result.collisions = players.All(p => Mathf.Abs(p.transform.position.x) < 4.9f && Mathf.Abs(p.transform.position.z) < 4.9f && p.transform.position.y > -0.5f);
@@ -2022,7 +2030,7 @@ namespace DeepDive.P1.Lab
                 if (adapter.IsAuthority)
                 {
                     var index = Mathf.Clamp(state.TracesFound, 0, DeepEncounterWorld.TracePositions.Length - 1);
-                    SwimAcceptance(local, DeepEncounterWorld.TracePositions[index], 0.75f, surfaceTransit: true);
+                    SwimAcceptance(local, DeepEncounterWorld.TracePositions[index], 0.75f, surfaceTransit: InShallows(local));
                 }
                 else local.SubmitLocalInput(Vector3.zero, 0f, 0f);
                 return;
@@ -2030,7 +2038,7 @@ namespace DeepDive.P1.Lab
 
             if (state.Stage == DeepProgressionStage.Trace)
             {
-                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: true);
+                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: InShallows(local));
                 return;
             }
 
@@ -2055,7 +2063,7 @@ namespace DeepDive.P1.Lab
             var toArena = BossFiringPosition(local) - local.transform.position;
             if (toArena.magnitude > 1.4f)
             {
-                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: true);
+                SwimAcceptance(local, BossFiringPosition(local), 0.8f, surfaceTransit: InShallows(local));
                 return;
             }
 
@@ -2087,6 +2095,29 @@ namespace DeepDive.P1.Lab
                 local.SubmitHarpoonLocal();
                 result.bossShotSent = true;
             }
+        }
+
+        // #258: the traces, arena and boss stand on the #219 bed, and the tank only refills ashore, so the whole
+        // trail is one breath. Leave the shallows over the surface, then swim trace to trace along the bottom the
+        // way a player would (the straight lines between the deep stops are clear, P258BossRouteAudit) instead of
+        // climbing back to the surface between every stop.
+        private const float DeepTransitBelowY = -5f;
+
+        private static bool InShallows(NetworkPlayer local) => local.transform.position.y > DeepTransitBelowY;
+
+        private readonly Dictionary<ulong, float> prepWalkBest = new Dictionary<ulong, float>();
+
+        private void NotePrepWalk(NetworkPlayer player, Vector3 delta)
+        {
+            var id = player.OwnerClientId;
+            var moved = new Vector2(delta.x, delta.z).magnitude;
+            if (prepWalkBest.TryGetValue(id, out var best) && moved <= best + 0.05f) return;
+            prepWalkBest[id] = moved;
+            var start = starts[id];
+            var grounded = Physics.Raycast(player.transform.position + Vector3.up * .1f, Vector3.down, .3f, ~0, QueryTriggerInteraction.Ignore);
+            var line = $"player={id} start=({start.x:0.00},{start.y:0.00},{start.z:0.00}) moved={moved:0.00} at=({player.transform.position.x:0.00},{player.transform.position.y:0.00},{player.transform.position.z:0.00}) grounded={grounded} t={Time.realtimeSinceStartup - sceneStarted:0.0}";
+            result.prepWalk.RemoveAll(entry => entry.StartsWith($"player={id} ", StringComparison.Ordinal));
+            result.prepWalk.Add(line);
         }
 
         private void ReturnBossPartyToShore(NetworkPlayer local)

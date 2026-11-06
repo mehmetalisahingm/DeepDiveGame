@@ -33,9 +33,10 @@ namespace DeepDive.World
             new Vector3(-10.5f, -3.5f, 26.5f),
             new Vector3(-10f, -4.5f, 33f),
             new Vector3(-10f, -4.5f, 38f),
-            // Lanternfish / over the basin floor, west of boss & boat and off the boss traces.
-            new Vector3(-10f, -22f, 58f),
-            new Vector3(-9.5f, -21.5f, 60f),
+            // Lanternfish / over the basin floor, west of boss & boat and off the boss traces. #258: the first two
+            // rose 2.5 m when trace 3 went down to the bed, which put them 3.8 m from it; x/z keep them off the walls.
+            new Vector3(-10f, -19.5f, 58f),
+            new Vector3(-9.5f, -19f, 60f),
             new Vector3(-4f, -21f, 60f)
         };
 
