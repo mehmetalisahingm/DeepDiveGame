@@ -433,8 +433,16 @@ namespace DeepDive.Composition
             playing = null;
         }
 
-        // #255: the channel evicted this clip's media (its publication settled, or the archive needed room); the record stays.
-        public static void DeleteClipFile(string clipId) => DeleteQuietly(PathFor(clipId));
+        // #255: only called by PendingMediaDeletes AFTER a successful campaign save.
+        // Do not swallow filesystem errors: Flush must keep the clip id queued so a
+        // locked/denied file can be deleted after the next successful save.
+        // File.Delete is already idempotent for a missing file.
+        public static void DeleteClipFile(string clipId)
+        {
+            var path = PathFor(clipId);
+            if (string.IsNullOrEmpty(path)) throw new IOException("Invalid archived clip id");
+            File.Delete(path);
+        }
 
         private static void DeleteQuietly(string path)
         {
