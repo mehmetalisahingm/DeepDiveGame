@@ -230,7 +230,7 @@ namespace DeepDive.Composition
                 var manifest = new ClipManifest(baseManifest.ClipId, baseManifest.RecordingId, baseManifest.DiveId,
                     baseManifest.DayNumber, baseManifest.Owner, baseManifest.SubjectId, baseManifest.Quality,
                     baseManifest.DurationSeconds, baseManifest.ContentHash, baseManifest.SizeBytes,
-                    baseManifest.MediaReady, baseManifest.SafeReturned, worldContext);
+                    baseManifest.MediaReady, baseManifest.SafeReturned, worldContext, baseManifest.Specimen);
 
                 var path = PathFor(manifest.ClipId);
                 if (string.IsNullOrEmpty(path)) return;
@@ -249,7 +249,7 @@ namespace DeepDive.Composition
                     submitted.Add(result.RecordingId);
                     waiting.Remove(result.RecordingId);
                     pending.Remove(key);
-                    Debug.Log($"P4_MEDIA_CLIP archived clip={manifest.ClipId} recording={result.RecordingId} frames={media.Frames.Count} bytes={media.Encoded.Length}");
+                    Debug.Log($"P4_MEDIA_CLIP archived clip={manifest.ClipId} recording={result.RecordingId} frames={media.Frames.Count} bytes={media.Encoded.Length} specimen={manifest.Specimen.Kind}:{manifest.Specimen.WeightGrams}g");
                 }
                 else if (outcome == ClipArchiveOutcome.ArchiveFull)
                 {

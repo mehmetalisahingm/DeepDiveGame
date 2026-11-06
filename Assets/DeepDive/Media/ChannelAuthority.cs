@@ -50,6 +50,8 @@ namespace DeepDive.Media
         private readonly Dictionary<string, PublicationSave> _publications = new Dictionary<string, PublicationSave>(StringComparer.Ordinal);
         private readonly List<string> _publicationOrder = new List<string>();
         private readonly HashSet<string> _publishedSubjects = new HashSet<string>(StringComparer.Ordinal);
+        // #255: specimens whose film-and-catch bonus was already paid. One animal earns the bonus once, whatever clips show it.
+        private readonly HashSet<string> _bonusPaidSpecimens = new HashSet<string>(StringComparer.Ordinal);
         private readonly Dictionary<(PlayerId, ulong, byte), TransactionResult> _processed =
             new Dictionary<(PlayerId, ulong, byte), TransactionResult>();
 
@@ -58,6 +60,7 @@ namespace DeepDive.Media
         private Func<int> _dayNumber = () => 1;
         private Func<bool> _persist = () => true;
         private Action<string> _queued;
+        private Func<string, (int Min, int Max)> _weightRange = _ => (0, 0);
         private int _followers;
         private int _revision;
 
@@ -67,8 +70,12 @@ namespace DeepDive.Media
 
         // persist writes the campaign file once for a publication (right + publication together); queued tells the
         // day ledger a publication was queued today.
-        public void Configure(IRights rights, Func<int> dayNumber, Func<bool> dayLocked, Func<bool> persist = null, Action<string> queued = null)
+        // weightRange: a species' own weight range in grams (the host's species definitions); (0, 0) = unknown, which makes the size
+        // part of the evidence bonus neutral.
+        public void Configure(IRights rights, Func<int> dayNumber, Func<bool> dayLocked, Func<bool> persist = null, Action<string> queued = null,
+            Func<string, (int Min, int Max)> weightRange = null)
         {
+            _weightRange = weightRange ?? (_ => (0, 0));
             _persist = persist ?? (() => true);
             _queued = queued;
             _rights = rights;
@@ -215,7 +222,16 @@ namespace DeepDive.Media
                 if (!_clips.TryGetValue(p.ClipId, out var clip)) continue;
 
                 var novel = !_publishedSubjects.Contains(p.SubjectId);
-                ChannelResultRules.Evaluate(clip.Quality, novel, _followers, out var views, out var followers, out var income);
+                // #255: host-verified evidence. Only a film-and-catch of the same animal (same dive, catch safely home, #254) earns more,
+                // and once per animal; a filmed-only animal, an event, or an old clip without proof is today's rule (100%).
+                var evidence = 100;
+                var specimenId = clip.Specimen.SpecimenId;
+                if (clip.Specimen.Kind == SpecimenProofKind.FilmAndCatch && !_bonusPaidSpecimens.Contains(specimenId))
+                {
+                    var range = _weightRange(clip.SubjectId);
+                    evidence = ChannelEvidenceRules.ViewsPercent(ChannelEvidence.MatchedCatch, clip.Specimen.WeightGrams, range.Min, range.Max);
+                }
+                ChannelResultRules.Evaluate(clip.Quality, novel, _followers, evidence, out var views, out var followers, out var income);
                 var settleId = ChannelIds.SettleId(p.PublicationId);
                 if (_rights != null && income > 0 && !_rights.CreditChannelIncome(settleId, income)) continue;
 
@@ -224,6 +240,9 @@ namespace DeepDive.Media
                 p.Income = income;
                 p.ResultDay = closingDay + 1;
                 p.SettledId = settleId;
+                p.SpecimenId = specimenId;
+                p.EvidencePercent = evidence;
+                if (evidence > 100 && !string.IsNullOrEmpty(specimenId)) _bonusPaidSpecimens.Add(specimenId);
                 _followers = (int)Math.Min(int.MaxValue, (long)_followers + followers);
                 _publishedSubjects.Add(p.SubjectId);
                 settled++;
@@ -270,6 +289,7 @@ namespace DeepDive.Media
             _publications.Clear();
             _publicationOrder.Clear();
             _publishedSubjects.Clear();
+            _bonusPaidSpecimens.Clear();
             _processed.Clear();
             _followers = Math.Max(0, data.Followers);
 
@@ -298,6 +318,7 @@ namespace DeepDive.Media
                     _publications[id] = copy;
                     _publicationOrder.Add(id);
                     if (!string.IsNullOrEmpty(copy.SettledId)) _publishedSubjects.Add(copy.SubjectId);
+                    if (!string.IsNullOrEmpty(copy.SettledId) && copy.EvidencePercent > 100 && !string.IsNullOrEmpty(copy.SpecimenId)) _bonusPaidSpecimens.Add(copy.SpecimenId);
                 }
 
             Changed();
@@ -308,7 +329,8 @@ namespace DeepDive.Media
         {
             PublicationId = p.PublicationId, ClipId = p.ClipId, RecordingId = p.RecordingId, OwnerPlayerId = p.OwnerPlayerId,
             SubjectId = p.SubjectId, Title = p.Title, QueuedDay = p.QueuedDay, ResultDay = p.ResultDay, Views = p.Views,
-            FollowersGained = p.FollowersGained, Income = p.Income, SettledId = p.SettledId ?? string.Empty
+            FollowersGained = p.FollowersGained, Income = p.Income, SettledId = p.SettledId ?? string.Empty,
+            SpecimenId = p.SpecimenId ?? string.Empty, EvidencePercent = p.EvidencePercent
         };
 
         private void Changed()

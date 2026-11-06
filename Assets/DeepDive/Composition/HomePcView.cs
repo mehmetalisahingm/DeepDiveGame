@@ -111,6 +111,7 @@ namespace DeepDive.Composition
                 if (y > box.y + 250) break;
                 var mine = clip.OwnerPlayerId == me;
                 var tag = published.Contains(clip.ClipId) ? " [yayinda]" : clip.Quality >= 1 && clip.SafeReturned && clip.MediaReady ? "" : " [ticari degil]";
+                if (clip.SpecimenKind == (byte)SpecimenProofKind.FilmAndCatch) tag += " [av+cekim]";
                 if (GUI.Button(new Rect(box.x + 10, y, 320, 20),
                         $"{(mine ? "*" : " ")} gun {clip.DayNumber}  {Label(clip.SubjectId)}  {clip.DurationSeconds:0}s  Q{clip.Quality}{tag}"))
                     Select(clip.ClipId);
@@ -122,7 +123,8 @@ namespace DeepDive.Composition
             {
                 var dx = box.x + 340;
                 GUI.Label(new Rect(dx, box.y + 24, 310, 20), $"SECILI: {Label(selected.SubjectId)} (gun {selected.DayNumber})");
-                GUI.Label(new Rect(dx, box.y + 44, 310, 20), $"cekim: P{selected.OwnerPlayerId}  sure {selected.DurationSeconds:0.0}s  kalite {selected.Quality}");
+                GUI.Label(new Rect(dx, box.y + 44, 310, 20), $"cekim: P{selected.OwnerPlayerId}  sure {selected.DurationSeconds:0.0}s  kalite {selected.Quality}" +
+                    (selected.SpecimenKind == (byte)SpecimenProofKind.FilmAndCatch ? $"  av {selected.SpecimenWeightGrams / 1000f:0.0} kg" : ""));
                 if (ClipPlayback.CanPlay(selected.ClipId))
                 {
                     if (GUI.Button(new Rect(dx, box.y + 66, 150, 22), "OYNAT")) ClipPlayback.TryPlay(selected.ClipId);
@@ -156,7 +158,8 @@ namespace DeepDive.Composition
             for (var i = data.Publications.Count - 1; i >= 0 && y < box.y + 410; i--, y += 20)
             {
                 var p = data.Publications[i];
-                var result = string.IsNullOrEmpty(p.SettledId) ? "sonuc bekleniyor" : $"{p.Views} izlenme, +{p.FollowersGained} takipci, +{p.Income} kredi";
+                var result = string.IsNullOrEmpty(p.SettledId) ? "sonuc bekleniyor" : $"{p.Views} izlenme, +{p.FollowersGained} takipci, +{p.Income} kredi" +
+                             (p.EvidencePercent > 100 ? $"  (av+cekim %{p.EvidencePercent})" : "");
                 GUI.Label(new Rect(box.x + 10, y, 640, 20), $"\"{p.Title}\"  (P{p.OwnerPlayerId}, gun {p.QueuedDay})  -  {result}");
             }
         }
