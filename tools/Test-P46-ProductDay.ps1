@@ -9,6 +9,7 @@ if ($EquipmentVideo -and ($Players -ne 2 -or $RepairOnly)) { throw 'EquipmentVid
 if ($CameraAutoLimit -and ($RepairOnly -or $HabitatHunt)) { throw 'CameraAutoLimit requires the normal product day.' }
 if ($GuestCameraLimit -and ($Players -ne 2 -or $RepairOnly -or $ActionVideo -or $EquipmentVideo -or $OceanVideo -or $CameraAutoLimit -or $HabitatHunt -or $HuntFirst)) { throw 'GuestCameraLimit requires two players and no other visual/repair mode.' }
 if ($SharedHunt -and ($Players -ne 2 -or $RepairOnly -or $ActionVideo -or $EquipmentVideo -or $OceanVideo -or $CameraAutoLimit -or $GuestCameraLimit -or $HabitatHunt -or $HuntFirst)) { throw 'SharedHunt requires two players and no other visual/repair mode.' }
+if ($SharedHunt) { $Render = $true } # The guest captures an actual clip; a null graphics device cannot do so.
 if ($HabitatHunt -and ($RepairOnly -or $HuntFirst -or $OceanVideo -or $EquipmentVideo -or $ActionVideo)) { throw 'HabitatHunt is its own short session without other probes.' }
 if ($SeabedFrames -and -not $OceanVideo) { throw 'SeabedFrames measures the ocean survey and requires OceanVideo.' }
 if ($OceanVideo -and ($Players -ne 2 -or $RepairOnly -or $HuntFirst -or $EquipmentVideo)) { throw 'OceanVideo requires the normal two-player product day without other visual probes.' }

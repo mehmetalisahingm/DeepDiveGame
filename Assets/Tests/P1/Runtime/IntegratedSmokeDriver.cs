@@ -861,6 +861,11 @@ namespace DeepDive.P1.Lab
                 var z = local.transform.position.z;
                 homeTransferStep = z < -42f ? 7 : z < -25f ? 4 : z < -17f ? 3 : z < -14f ? 2 : 0;
             }
+            // The wade helper leads swimmers onto the western landing regardless of their
+            // starting x. Once there, keep that side of the hull instead of crossing it.
+            if (homeTransferStep == 0 && local.transform.position.x < -4f &&
+                local.transform.position.z < -10f && local.transform.position.y >= 8f)
+                homeTransferWest = true;
             // The S1 broken rowboat blocks the former (0,-12.5) home waypoint.
             // Approach from the actual shore side, then cross the south (town)
             // corridor at z=-16. Preserve every PC/playback/publish assertion.
