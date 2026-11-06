@@ -405,13 +405,16 @@ namespace DeepDive.Composition
             if (connected && client.PlayerObject != null &&
                 client.PlayerObject.TryGetComponent<NetworkPlayer>(out var player) && player.IsSpawned)
                 player.SetRecordingPresentationServer(false);
-            if (connected) SendResult(owner, notice, RecordingCommand.Stop, result);
+            if (connected) SendResult(owner, notice, RecordingCommand.Stop, result, take.NetworkObjectId);
         }
 
-        private void SendResult(ulong receiver, ulong requestId, RecordingCommand command, PlayerActionResult result)
+        private void SendResult(ulong receiver, ulong requestId, RecordingCommand command, PlayerActionResult result,
+            ulong finishedTargetId = 0)
         {
             var active = activeTargetByPlayer.TryGetValue(receiver, out var locked);
-            var targetId = active ? locked.NetworkObjectId : 0UL;
+            // Automatic stop notices must identify the take they closed. Otherwise
+            // a delayed notice for fish A can clear a newer take on fish B.
+            var targetId = active ? locked.NetworkObjectId : finishedTargetId;
             if (receiver == manager.LocalClientId)
             {
                 ApplyLocalResult(requestId, command, result, active, targetId);
@@ -440,10 +443,16 @@ namespace DeepDive.Composition
                 (PlayerActionResult)resultInt, active, targetId);
         }
 
+        public static bool ShouldApplyAutomaticStop(bool currentlyRecording, ulong currentTargetId, ulong finishedTargetId)
+            => !currentlyRecording || (finishedTargetId != 0 && currentTargetId == finishedTargetId);
+
         private void ApplyLocalResult(ulong requestId, RecordingCommand command, PlayerActionResult result,
             bool active, ulong targetId)
         {
             var automatic = requestId == 0 || requestId == CollectedStopNotice;
+            // Out-of-order reliable notifications from a previous take cannot
+            // reset a new active take or force its equipment/owner HUD to stop.
+            if (automatic && !ShouldApplyAutomaticStop(localRecording, localRecordingTarget, targetId)) return;
             if (automatic) Debug.Log($"P257_RECORDING_NOTICE notice={requestId} result={result} active={active}");
             if (!automatic && requestId <= localLastAppliedRequest) return;
             if (!automatic) localLastAppliedRequest = requestId;
