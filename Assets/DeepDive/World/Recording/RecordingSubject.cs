@@ -12,6 +12,13 @@ namespace DeepDive.World
     // It extends Core's IRecordingTarget so a subject is automatically the marker P3-A's
     // RecordingNetworkBridge scans for; Core's own interface stays empty on purpose, which is
     // why the subject id lives here in World rather than travelling in RecordingCandidate.
+    // #254: the one animal behind a filmable fish, for this life only. Host-side values: a client never supplies them.
+    public interface IFishSpecimen
+    {
+        string SpecimenId { get; }
+        int WeightGrams { get; }
+    }
+
     public interface IRecordingSubject : IRecordingTarget
     {
         // The species/event id that ends up in RecordingResult.SubjectId. Empty means the
@@ -217,6 +224,11 @@ namespace DeepDive.World
 
             var result = session.TryStop(DiveContext.Source, player, requestId, out take);
             SyncRecorder(player);
+            // Read at stop, not cached at spawn: FishActor rolls its specimen in its own OnNetworkSpawn, whose order
+            // against ours is not defined. A despawn aborts open takes, so this is still the animal the take started on.
+            // An explicit subject id on a fish films as something else, and that is not a statement about this animal.
+            if (take.IsPayable && string.IsNullOrWhiteSpace(subjectId) && TryGetComponent<IFishSpecimen>(out var fish))
+                take = take.WithSpecimen(fish.SpecimenId, fish.WeightGrams);
             return result;
         }
 

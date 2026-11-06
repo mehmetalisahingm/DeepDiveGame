@@ -78,7 +78,13 @@ namespace DeepDive.World
         // left unbound nothing is paid and the ledger stays open, so a late binding can still
         // settle the dive instead of the recordings being silently burned.
         public IReadOnlyList<RecordingResult> SettleDive(DiveSummary summary) =>
-            ledger.Settle(RecordingClaim.Sink, summary.DiveId, summary.SafelyReturned);
+            ledger.Settle(RecordingClaim.Sink, summary.DiveId, summary.SafelyReturned, summary.PreservedCaptureIds);
+
+        // #254: Composition reports each catch a bag accepted; settlement ties it to a film of the same animal.
+        public void NoteCatch(CaptureResult capture) => ledger.NoteCatch(capture);
+
+        public IReadOnlyList<string> CatchesWithoutFilm(DiveSummary summary) =>
+            ledger.CatchesWithoutFilm(summary.DiveId, summary.PreservedCaptureIds);
 
         // For reuse across dives, matching CatchState.Reset and RecordingSession.Reset: no claim
         // and no settled flag from the finished dive may survive into the next one.

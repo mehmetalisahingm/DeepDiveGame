@@ -46,7 +46,10 @@ namespace DeepDive.Composition
             binding = new RecordingDiveBinding(adapter.Session, inventory,
                 () => isActiveAndEnabled && adapter.IsAuthority && manager.IsListening);
             BindPayment();
+            CatchObject.CollectedOnHost += NoteCatch;
         }
+
+        private void NoteCatch(CaptureResult capture) => binding?.NoteCatch(capture);
 
         public void SetPaymentHandler(Func<RecordingResult, PlayerActionResult> handler) =>
             binding?.SetPaymentHandler(handler);
@@ -81,6 +84,7 @@ namespace DeepDive.Composition
 
         private void OnDisable()
         {
+            CatchObject.CollectedOnHost -= NoteCatch;
             binding?.Dispose();
             binding = null;
             views.Clear();
