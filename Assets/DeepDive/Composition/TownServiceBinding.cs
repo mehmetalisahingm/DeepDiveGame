@@ -118,7 +118,8 @@ namespace DeepDive.Composition
             // Shelved items still require host-selected basket proof. The few
             // catalog items missing from the visual prefab may be bought at the
             // same real cashier, under the existing host/session/range checks.
-            if (authoredStore != null && !EquipmentStoreShopBinding.MatchesCheckoutSelection(
+            if (authoredStore != null && EquipmentStoreShopBinding.RequiresEquipmentBasket(itemId) &&
+                !EquipmentStoreShopBinding.MatchesCheckoutSelection(
                     true, actor != null ? actor.SelectedShopItem.Value.ToString() : string.Empty, itemId,
                     authoredStore.IsCatalogOnlyItem(itemId)))
                 return TransactionResult.Reject(requestId, "SelectItemFirst", economy.Revision);
