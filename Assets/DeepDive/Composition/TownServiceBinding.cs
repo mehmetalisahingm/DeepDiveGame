@@ -146,6 +146,16 @@ namespace DeepDive.Composition
             if (!manager.ConnectedClients.TryGetValue(player.Value, out var client) || client.PlayerObject == null)
                 return false;
             var reach = shop.InteractionDistance * ShopRangeSlack;
+            // A genuine placed store can be 10 x 8 metres. The original
+            // street service marker is not its physical cash register; check
+            // the customer's real position at the authored cashier instead.
+            // Other services and placeholder shops keep their old range rule.
+            if (shop.ServiceType == ServicePointType.EquipmentShop)
+            {
+                var store = anchor.GetComponent<EquipmentStoreShopBinding>();
+                if (store != null && store.Layout != null)
+                    return store.AtCashier(client.PlayerObject.transform.position, reach);
+            }
             return (client.PlayerObject.transform.position - anchor.WorldPosition).sqrMagnitude <= reach * reach;
         }
 
