@@ -64,6 +64,13 @@ namespace DeepDive.Composition
             return binding;
         }
 
+        // Only the authored physical store requires that the owner's basket
+        // actually holds the product being paid for. Existing legacy shops
+        // keep their old direct-catalog purchase behaviour.
+        public static bool MatchesCheckoutSelection(bool authoredStore, string selectedId, string requestedId)
+            => !authoredStore || (!string.IsNullOrWhiteSpace(requestedId) &&
+                string.Equals(selectedId, requestedId, StringComparison.Ordinal));
+
         public bool ContainsCustomer(Vector3 worldFeet)
         {
             if (layout == null) return false;
