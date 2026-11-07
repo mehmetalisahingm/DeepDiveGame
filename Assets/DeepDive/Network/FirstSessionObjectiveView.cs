@@ -55,7 +55,9 @@ namespace DeepDive.Network
             var feedback = ActionFeedbackRules.Resolve(
                 (PlayerActionKind)player.LastActionKind.Value,
                 (PlayerActionResult)player.LastActionResult.Value);
-            if (feedback.Cue != PlayerFeedbackCue.PickupAccepted) return;
+            // This is a first-session milestone, not a celebration for
+            // every future catch. Do not resurrect onboarding after it expires.
+            if (confirmedPickup || feedback.Cue != PlayerFeedbackCue.PickupAccepted) return;
             confirmedPickup = true;
             successUntil = Time.unscaledTime + 6f;
         }
