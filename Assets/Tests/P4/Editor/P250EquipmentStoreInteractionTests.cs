@@ -94,6 +94,19 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void VehicleVendorPurchasesDoNotRequireAnEquipmentBasket()
+        {
+            Assert.IsTrue(EquipmentStoreShopBinding.RequiresEquipmentBasket("tube-1"));
+            Assert.IsTrue(EquipmentStoreShopBinding.RequiresEquipmentBasket(BoatRepairParts.Hull));
+            Assert.IsFalse(EquipmentStoreShopBinding.RequiresEquipmentBasket(""));
+            Assert.IsFalse(EquipmentStoreShopBinding.RequiresEquipmentBasket("nonexistent-item"));
+            Assert.IsTrue(VehicleIds.All.Count >= 3, "starter, motor and research boats belong to the vehicle catalog");
+            foreach (var boatId in VehicleIds.All)
+                Assert.IsFalse(EquipmentStoreShopBinding.RequiresEquipmentBasket(boatId),
+                    "boat purchases must continue through the vendor, not equipment-shelf selection");
+        }
+
+        [Test]
         public void MissingAuthoredProductsKeepTheExistingHostValidatedCashierAlternative()
         {
             var binding = EquipmentStoreShopBinding.Bind(shop, layout);
