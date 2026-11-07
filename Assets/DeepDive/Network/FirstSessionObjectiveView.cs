@@ -11,6 +11,15 @@ namespace DeepDive.Network
         public static bool ShouldCelebratePickup(bool previouslyCelebrated, PlayerFeedbackCue cue)
             => !previouslyCelebrated && cue == PlayerFeedbackCue.PickupAccepted;
 
+        // The default map lives in the top-right 220 x 220 area.
+        // Keep onboarding beneath the player's top-left health/O2 HUD,
+        // away from the map and the store's top-right cashier overlay.
+        public static Rect ObjectivePanelRect(float screenWidth)
+        {
+            var width = Mathf.Min(380f, screenWidth - 40f);
+            return new Rect(20f, screenWidth >= 640f ? 145f : 252f, width, 74f);
+        }
+
         public static string Next(bool passive, bool selectedProduct, bool recording,
             bool swimming, bool confirmedPickup)
         {
@@ -70,9 +79,11 @@ namespace DeepDive.Network
             if (player == null || !player.IsSpawned || !player.IsOwner || !enabledByPlayer ||
                 (Time.unscaledTime > visibleUntil && Time.unscaledTime > successUntil)) return;
 
-            var width = Mathf.Min(380f, Screen.width - 24f);
+            // Narrow windows cannot fit the map and the guidance below it.
+            if (Screen.width < 640 && Screen.height < 340) return;
+            var panel = FirstSessionObjectiveRules.ObjectivePanelRect(Screen.width);
+            var width = panel.width;
             if (width <= 180f) return;
-            var panel = new Rect(Screen.width - width - 12f, 20f, width, 74f);
             var previous = GUI.color;
             GUI.color = new Color(0.07f, 0.16f, 0.20f, 0.87f);
             GUI.DrawTexture(panel, Texture2D.whiteTexture);
