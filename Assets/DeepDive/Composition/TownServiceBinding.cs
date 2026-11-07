@@ -108,8 +108,23 @@ namespace DeepDive.Composition
 
         private TransactionResult PurchaseAtCashier(PlayerId player, string itemId, ulong requestId)
         {
-            var result = handler.HandlePurchase(player, itemId, requestId);
             var actor = SyncFor(player)?.GetComponent<NetworkPlayer>();
+            // The authored #274 store is explicitly shelf -> basket -> till.
+            // A caller must not pay for an unselected/other product with a
+            // direct RPC. The old storefront still accepts its original shop
+            // session and has no additional gating.
+            var authoredStore = anchors.TryGetValue(TownServiceCatalog.EquipmentShopId, out var shopAnchor) &&
+                shopAnchor != null ? shopAnchor.GetComponent<EquipmentStoreShopBinding>() : null;
+            // Shelved items still require host-selected basket proof. The few
+            // catalog items missing from the visual prefab may be bought at the
+            // same real cashier, under the existing host/session/range checks.
+            if (authoredStore != null && EquipmentStoreShopBinding.RequiresEquipmentBasket(itemId) &&
+                !EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                    true, actor != null ? actor.SelectedShopItem.Value.ToString() : string.Empty, itemId,
+                    authoredStore.IsCatalogOnlyItem(itemId)))
+                return TransactionResult.Reject(requestId, "SelectItemFirst", economy.Revision);
+
+            var result = handler.HandlePurchase(player, itemId, requestId);
             if (result.Accepted && actor != null && actor.SelectedShopItem.Value.ToString() == itemId)
                 actor.ClearShopSelectionServer();
             return result;
@@ -146,6 +161,16 @@ namespace DeepDive.Composition
             if (!manager.ConnectedClients.TryGetValue(player.Value, out var client) || client.PlayerObject == null)
                 return false;
             var reach = shop.InteractionDistance * ShopRangeSlack;
+            // A genuine placed store can be 10 x 8 metres. The original
+            // street service marker is not its physical cash register; check
+            // the customer's real position at the authored cashier instead.
+            // Other services and placeholder shops keep their old range rule.
+            if (shop.ServiceType == ServicePointType.EquipmentShop)
+            {
+                var store = anchor.GetComponent<EquipmentStoreShopBinding>();
+                if (store != null && store.Layout != null)
+                    return store.AtCashier(client.PlayerObject.transform.position, reach);
+            }
             return (client.PlayerObject.transform.position - anchor.WorldPosition).sqrMagnitude <= reach * reach;
         }
 

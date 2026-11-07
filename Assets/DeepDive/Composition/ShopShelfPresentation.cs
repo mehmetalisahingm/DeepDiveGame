@@ -62,6 +62,19 @@ namespace DeepDive.Composition
             return view;
         }
 
+        // #250: the prefab already has authored products and shelves. Reuse only
+        // this view's payment/selection UI; do not construct a second set of racks.
+        public static ShopShelfPresentation BindStore(ServicePointAnchor shop, EquipmentStoreLayout store)
+        {
+            if (shop == null || store == null) return null;
+            var view = store.GetComponent<ShopShelfPresentation>();
+            if (view == null) view = store.gameObject.AddComponent<ShopShelfPresentation>();
+            view.shop = shop;
+            view.economy = FindFirstObjectByType<EconomyManager>();
+            EconomyPlayerSync.DrawPhysicalShop = view.DrawCashier;
+            return view;
+        }
+
         private void OnEnable() => EconomyPlayerSync.DrawPhysicalShop = DrawCashier;
         private void OnDisable()
         {
@@ -94,7 +107,14 @@ namespace DeepDive.Composition
             if (shop == null || localPlayer == null || sync != localSync) return false;
             var width = Mathf.Min(410f, Screen.width - 30f);
             var x = Screen.width - width - 15f;
-            GUI.Box(new Rect(x, 30, width, 188), "EKIPMAN KASASI");
+            var authoredStore = shop.GetComponent<EquipmentStoreShopBinding>();
+            var catalogOnlyCount = 0;
+            if (authoredStore != null)
+                foreach (var productId in ShopShelfAnchor.ItemIds)
+                    if (authoredStore.IsCatalogOnlyItem(productId)) catalogOnlyCount++;
+            var catalogRows = (catalogOnlyCount + 1) / 2;
+            GUI.Box(new Rect(x, 30, width, catalogOnlyCount > 0 ? 205 + catalogRows * 52 : 188),
+                "EKIPMAN KASASI");
             var id = localPlayer.SelectedShopItem.Value.ToString();
             GUI.Label(new Rect(x + 14, 62, width - 28, 40), id.Length == 0
                 ? "Once raftaki urune bakip F ile sec.\nUrun secmek para harcamaz."
@@ -109,6 +129,33 @@ namespace DeepDive.Composition
             }
             GUI.enabled = enabled && id.Length > 0 && !pending;
             if (GUI.Button(new Rect(x + 14, 151, width - 28, 26), "SECIMI IPTAL ET")) localPlayer.CancelShopSelectionLocal();
+
+            // The visual prefab presently lacks a few catalog products. Preserve
+            // their old purchase alternative at this physical cashier only.
+            // Existing shelf products never appear here and still need F selection.
+            if (catalogOnlyCount > 0)
+            {
+                GUI.enabled = enabled;
+                GUI.Label(new Rect(x + 14, 185, width - 28, 25), "RAFTA OLMAYAN URUNLER - KASADAN AL");
+                var index = 0;
+                var buttonWidth = (width - 38f) / 2f;
+                foreach (var productId in ShopShelfAnchor.ItemIds)
+                {
+                    if (!authoredStore.IsCatalogOnlyItem(productId)) continue;
+                    var column = index % 2;
+                    var row = index / 2;
+                    GUI.enabled = enabled && !pending;
+                    if (GUI.Button(new Rect(x + 14 + column * (buttonWidth + 10),
+                            215 + row * 52, buttonWidth, 44),
+                            Label(productId) + "\n" + Price(productId) + " KR"))
+                    {
+                        receipt = sync.LastRequestId.Value;
+                        pending = true;
+                        sync.RequestPurchase(productId);
+                    }
+                    index++;
+                }
+            }
             GUI.enabled = enabled;
             return true;
         }

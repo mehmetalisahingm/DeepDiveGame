@@ -1,4 +1,6 @@
 using System;
+using DeepDive.Core.Contracts;
+using DeepDive.Network;
 using UnityEngine;
 
 namespace DeepDive.Composition
@@ -31,5 +33,15 @@ namespace DeepDive.Composition
         public Display[] Displays = new Display[0];
         public float OpeningWidth;        // clear width of the door opening in metres
         public float OpeningHeight;       // clear height of the door opening in metres
+
+        // A placed instance may be parented beneath the EXISTING service point
+        // by Utku's world setup. Runtime bindings are opt-in and never modify
+        // the isolated prefab or secretly place a new shop in the scene.
+        private void Start()
+        {
+            var shop = GetComponentInParent<ServicePointAnchor>();
+            if (shop != null && shop.Definition.ServiceType == ServicePointType.EquipmentShop)
+                EquipmentStoreShopBinding.Bind(shop, this);
+        }
     }
 }

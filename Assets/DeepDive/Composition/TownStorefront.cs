@@ -69,6 +69,18 @@ namespace DeepDive.Composition
             if (existing != null) return existing;
             var type = anchor.Definition.ServiceType;
             if (string.IsNullOrEmpty(LabelFor(type)) || anchor.transform.Find(RootName) != null) return null;
+            // Once Utku places the authored shop as a child of the real
+            // service point, bind its exhibits and counter instead of drawing
+            // the old overlapping placeholder storefront/shelves.
+            if (type == ServicePointType.EquipmentShop)
+            {
+                var placed = anchor.GetComponentInChildren<EquipmentStoreLayout>(true);
+                if (placed != null)
+                {
+                    EquipmentStoreShopBinding.Bind(anchor, placed);
+                    return null;
+                }
+            }
 
             var root = new GameObject(RootName).transform;
             root.SetParent(anchor.transform, false);
