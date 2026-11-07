@@ -144,7 +144,10 @@ namespace DeepDive.Media
                 {
                     var time = reader.ReadSingle();
                     var length = reader.ReadInt32();
+                    // Mirror Encode's timestamp bound: a structurally readable
+                    // file cannot contain frames beyond its claimed clip duration.
                     if (float.IsNaN(time) || float.IsInfinity(time) || time < 0f || time < priorTime ||
+                        time > duration + 0.001f ||
                         length <= 0 || length > MaxFrameBytes || length > stream.Length - stream.Position)
                         return false;
                     var payload = reader.ReadBytes(length);
