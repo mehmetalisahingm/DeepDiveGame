@@ -1,4 +1,5 @@
 using DeepDive.Network;
+using DeepDive.Core.Contracts;
 using NUnit.Framework;
 
 namespace DeepDive.P4.Tests
@@ -18,6 +19,14 @@ namespace DeepDive.P4.Tests
                 FirstSessionObjectiveRules.Next(false, false, false, true, false));
             StringAssert.Contains("TOPLAMA",
                 FirstSessionObjectiveRules.Next(false, false, false, false, true));
+        }
+
+        [Test]
+        public void FirstPickupCelebrationDoesNotRepeatOnLaterCatches()
+        {
+            Assert.IsTrue(FirstSessionObjectiveRules.ShouldCelebratePickup(false, PlayerFeedbackCue.PickupAccepted));
+            Assert.IsFalse(FirstSessionObjectiveRules.ShouldCelebratePickup(true, PlayerFeedbackCue.PickupAccepted));
+            Assert.IsFalse(FirstSessionObjectiveRules.ShouldCelebratePickup(false, PlayerFeedbackCue.HarpoonHit));
         }
 
         [Test]
