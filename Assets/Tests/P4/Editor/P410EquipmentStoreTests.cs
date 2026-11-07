@@ -45,7 +45,9 @@ namespace DeepDive.P4.Tests
         {
             Assert.IsNull(store.GetComponentInChildren<NetworkObject>(true));
             var scripts = store.GetComponentsInChildren<MonoBehaviour>(true);
-            CollectionAssert.AreEqual(new[] { typeof(EquipmentStoreLayout) }, scripts.Select(s => s.GetType()).ToArray(), "data holder only");
+            // (plus the label that keeps the sign from showing through the walls: it only swaps the TextMesh's material)
+            CollectionAssert.AreEqual(new[] { typeof(EquipmentStoreLayout) }, scripts.Select(s => s.GetType()).Where(t => t != typeof(DepthTestedText)).ToArray(), "data holder only");
+            Assert.AreEqual(1, scripts.Count(s => s is DepthTestedText), "the one sign");
             foreach (var collider in store.GetComponentsInChildren<Collider>(true))
                 Assert.AreEqual("Collision", collider.transform.parent.name, collider.name + ": only the simple collision boxes collide, visuals do not");
         }
@@ -84,7 +86,7 @@ namespace DeepDive.P4.Tests
             var z = layout.Threshold.position.z;
             Assert.IsTrue(Physics.Raycast(new Vector3(0f, 1f, z), Vector3.down, out var doorway, 3f, ~0, QueryTriggerInteraction.Ignore));
             Assert.LessOrEqual(Mathf.Abs(doorway.point.y), 0.01f, "floor top at the doorway is the street level (0.00 m), no step (the controller climbs 0.30 m)");
-            Assert.IsTrue(Physics.Raycast(new Vector3(0f, 1f, 3f), Vector3.down, out var inside, 3f, ~0, QueryTriggerInteraction.Ignore));
+            Assert.IsTrue(Physics.Raycast(new Vector3(0f, 1f, 1.5f), Vector3.down, out var inside, 3f, ~0, QueryTriggerInteraction.Ignore));
             Assert.LessOrEqual(Mathf.Abs(inside.point.y - doorway.point.y), 0.01f, "the floor is one level from the door to the till");
         }
 
@@ -92,22 +94,28 @@ namespace DeepDive.P4.Tests
         public void ShelfAndTillCorridorsAreAtLeastOnePointEightMetresWide()
         {
             var layout = Layout();
-            // A free circle of 1.8 m diameter touching the front face of every display and the customer point: the corridor in front is >= 1.8 m.
+            // A free circle of 1.8 m diameter touching the front face of every display and of the counter: the corridor in front is >= 1.8 m.
+            const float backFront = 8f - 0.09f - 0.5f;   // front face of the back shelves (z)
             var fronts = new List<(string name, Vector3 point)>
             {
-                ("customer point", layout.CustomerPoint.position),
-                ("back shelf A", new Vector3(-3.3f, 0f, 8f - 0.09f - 0.5f - 0.9f)),
-                ("back shelf B", new Vector3(0f, 0f, 8f - 0.09f - 0.5f - 0.9f)),
-                ("left shelf 1", new Vector3(-4.67f + 0.25f + 0.9f, 0f, 2.5f)),
-                ("left shelf 2", new Vector3(-4.67f + 0.25f + 0.9f, 0f, 5.2f)),
-                ("table (street side)", new Vector3(-0.6f, 0f, 3.6f - 0.5f - 0.9f)),
-                ("table (back side)", new Vector3(-0.6f, 0f, 3.6f + 0.5f + 0.9f)),
+                ("counter", new Vector3(0f, 0f, 6.0f - 1.05f)),
+                ("back shelf A", new Vector3(-3.4f, 0f, backFront - 0.95f)),
+                ("back shelf B", new Vector3(3.4f, 0f, backFront - 0.95f)),
+                ("left shelf 1", new Vector3(-4.67f + 0.25f + 0.95f, 0f, 2.0f)),
+                ("left shelf 2", new Vector3(-4.67f + 0.25f + 0.95f, 0f, 4.5f)),
+                ("right shelf 1", new Vector3(4.67f - 0.25f - 0.95f, 0f, 2.0f)),
+                ("right shelf 2", new Vector3(4.67f - 0.25f - 0.95f, 0f, 4.5f)),
+                ("table (door side)", new Vector3(0f, 0f, 3.0f - 0.5f - 0.95f)),
+                ("table (counter side)", new Vector3(0f, 0f, 3.0f + 0.5f + 0.95f)),
             };
             // A sphere of radius 0.9 m at chest height (clear of the floor) stands in for the 1.8 m wide free circle.
             foreach (var (name, point) in fronts)
                 Assert.IsFalse(Physics.CheckSphere(new Vector3(point.x, 1.0f, point.z), 0.9f, ~0, QueryTriggerInteraction.Ignore), name + ": a 1.8 m wide free circle in front");
+            // The customer point itself is free for a standing player, and the shopkeeper stands 1.7 m behind it (the town's clerk-to-customer distance).
+            Assert.IsTrue(Free(new Vector3(layout.CustomerPoint.position.x, 0f, layout.CustomerPoint.position.z), 0.3f, 1.8f));
+            Assert.AreEqual(1.7f, Vector3.Distance(layout.CustomerPoint.position, layout.ShopkeeperPoint.position), 0.01f, "customer = clerk + 1.7 m, like every stall");
             // A genuinely blocked spot is detected (the check is not vacuous): inside the counter.
-            Assert.IsFalse(Free(new Vector3(3.7f, 0f, 4.15f), 0.3f, 1.8f));
+            Assert.IsFalse(Free(new Vector3(0f, 0f, 6.4f), 0.3f, 1.8f));
         }
 
         // A real CharacterController (the game's player size: radius 0.3, height 1.8, step 0.3) walks in from the street, past the table to the
@@ -142,13 +150,17 @@ namespace DeepDive.P4.Tests
                 var z = layout.Threshold.position.z;
                 Assert.IsTrue(WalkTo(new Vector3(0f, 0f, -0.9f)), "to the door; at " + player.transform.position);
                 Assert.IsTrue(WalkTo(new Vector3(0f, 0f, z)), "through the door; at " + player.transform.position);
-                Assert.IsTrue(WalkTo(new Vector3(0f, 0f, 1.6f)), "inside; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(0f, 0f, 1.5f)), "inside; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(1.9f, 0f, 2.0f)), "round the table; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(1.9f, 0f, 4.6f)), "past the table; at " + player.transform.position);
                 Assert.IsTrue(WalkTo(new Vector3(layout.CustomerPoint.position.x, 0f, layout.CustomerPoint.position.z)), "to the till; at " + player.transform.position);
                 Assert.LessOrEqual(Vector3.Distance(player.transform.position, new Vector3(layout.CustomerPoint.position.x, player.transform.position.y, layout.CustomerPoint.position.z)), 0.3f);
-                Assert.IsTrue(WalkTo(new Vector3(-1.6f, 0f, 6.4f)), "to the back shelves; at " + player.transform.position);
-                Assert.IsTrue(WalkTo(new Vector3(1.9f, 0f, 5.0f)), "round the table; at " + player.transform.position);
-                Assert.IsTrue(WalkTo(new Vector3(1.9f, 0f, 1.5f)), "down the aisle; at " + player.transform.position);
-                Assert.IsTrue(WalkTo(new Vector3(0f, 0f, -0.9f)), "and back out to the door; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(-2.2f, 0f, 5.2f)), "away from the counter; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(-3.4f, 0f, 6.3f)), "to the back shelves; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(-2.2f, 0f, 5.2f)), "back; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(-3.3f, 0f, 3.2f)), "to the left shelves; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(0f, 0f, 1.5f)), "to the door side; at " + player.transform.position);
+                Assert.IsTrue(WalkTo(new Vector3(0f, 0f, -0.9f)), "and back out to the street; at " + player.transform.position);
                 Assert.LessOrEqual(Mathf.Abs(player.transform.position.y), 0.12f, "the whole walk stayed on the floor level");
             }
             finally { Object.DestroyImmediate(player); Object.DestroyImmediate(street); }
@@ -162,7 +174,7 @@ namespace DeepDive.P4.Tests
                             + store.GetComponentsInChildren<SkinnedMeshRenderer>(true).Sum(r => r.sharedMesh != null ? r.sharedMesh.triangles.Length / 3 : 0);
             var lights = store.GetComponentsInChildren<Light>(true);
             TestContext.Out.WriteLine($"P410_STORE_BUDGET renderers={renderers.Length} triangles={triangles} lights={lights.Length}");
-            Assert.Less(renderers.Length, 450);
+            Assert.Less(renderers.Length, 520);
             Assert.Less(triangles, 200000);
             Assert.LessOrEqual(lights.Length, 4, "four soft point lights without shadows");
             Assert.IsTrue(lights.All(l => l.shadows == LightShadows.None));

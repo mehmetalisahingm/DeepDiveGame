@@ -87,11 +87,11 @@ Hiçbir rotada düşme, sıkışma veya engellenen kare yok (blockedFrames 0).
 | a1 doğrudan: spawn-1 → iskele | 58,6 m | 14,7 s | iskeleye vardı | 1,56 m — yatak-3 / PlotNorth çiti |
 | a2 doğrudan: spawn-2 → iskele | 57,4 m | 14,4 s | iskeleye vardı | 1,56 m |
 | a3 doğrudan: spawn-3 → iskele | 57,4 m | 14,4 s | iskeleye vardı | 1,56 m |
-| b alışveriş: ev → ekipman → iskele | 69,7 m | 17,5 s | vardı | 1,56 m; ev dışı 2,0 m (iskele) |
+| b alışveriş: ev → ekipman mağazası (kapı, tezgâh çevresi koridor, kasa) → iskele | 96,6 m | 24,1 s | vardı | 1,56 m; ev dışı 2,0 m (iskele) |
 | c satış: iskele/DiveExit → balık → kayıt → ev PC → yatak-3 | 67,9 m | 17,0 s | vardı | 1,56 m; ev dışı 2,0 m (iskele) |
 | d1 su girişi: ev → wade → su | 52,1 m (suya kadar) | 13,0 s | denize girdi | ev dışı 4,8 m (tezgâh arası) |
 | d2 su çıkışı: rampa su çizgisi → DiveExit → ev | 56,4 m | 14,1 s | eve vardı | ev dışı 3,95 m (rampa) |
-| e isteğe bağlı gezinti: kasaba çevresi + ev içi + iskele kolu | 155,0 m | 38,8 s | başlangıca döndü | ev dışı 2,0 m (iskele) |
+| e isteğe bağlı gezinti: kasaba çevresi (mağaza batı kenarı artık bina: çevresi sokak tarafından) + ev içi + iskele kolu | 181,7 m | 45,4 s | başlangıca döndü | ev dışı 2,0 m (iskele) |
 
 Birleşik gün (kara kısmı): **b + c = 137,7 m ≈ 34,5 s**. Su içi yüzme, tekne yolculuğu ve tezgâh/PC/uyku etkileşim süresi dahil değil.
 

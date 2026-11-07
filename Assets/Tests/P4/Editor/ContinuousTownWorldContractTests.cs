@@ -45,7 +45,7 @@ namespace DeepDive.P4.Tests
             finally
             {
                 if (proxies != null) Object.DestroyImmediate(proxies);
-                foreach (var name in new[] { HomeSceneSetup.RootName, HomePcAnchor.PcName })
+                foreach (var name in new[] { HomeSceneSetup.RootName, HomePcAnchor.PcName, HomeDressing.RootName })
                 foreach (var leftover in scene.GetRootGameObjects().Where(r => r.name == name).ToArray())
                     Object.DestroyImmediate(leftover);
                 foreach (var item in positions)
@@ -289,7 +289,7 @@ namespace DeepDive.P4.Tests
                 var root = scene.GetRootGameObjects().Single(r => r.name == ContinuousTownLayout.RootName).transform;
                 var blocks = ContinuousTownLayout.AllBlocks.ToArray();
                 CollectionAssert.AllItemsAreUnique(blocks.Select(b => b.Name));
-                var children = Enumerable.Range(0, root.childCount).Select(root.GetChild).ToArray();
+                var children = Enumerable.Range(0, root.childCount).Select(root.GetChild).Where(c => c.name != TownDressing.Name).ToArray();   // #171: the baked, collider-free dressing is not a layout block
                 CollectionAssert.AreEqual(
                     blocks.Select(b => b.Name).Concat(new[] { ContinuousTownLayout.AnchorsName, ContinuousTownLayout.ZonesName }),
                     children.Select(c => c.name));

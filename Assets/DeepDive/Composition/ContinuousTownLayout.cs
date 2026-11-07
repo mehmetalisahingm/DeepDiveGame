@@ -33,6 +33,20 @@ namespace DeepDive.Composition
             new Vector3(10.1f, WalkSurfaceY, -29f)
         };
 
+        // #249: the real, enterable equipment store (Resources/CityKit/EquipmentStore) replaces the equipment stall. It is placed as a child of the
+        // equipment service anchor (slot 0) so Mehmet's EquipmentStoreShopBinding binds its shelves and till: the shopkeeper point is the anchor, the
+        // customer point stays the town's usual 1.7 m (+Z) in front of it, and the door faces +Z, towards the main street and the beach.
+        public const string EquipmentStoreResource = "CityKit/EquipmentStore";
+        public const string EquipmentStoreName = "EquipmentStore";
+        public static readonly Vector3 EquipmentStoreOffset = new Vector3(0f, 0f, 7.15f);   // anchor -> store origin (the front wall's outer line)
+        public const float EquipmentStoreYaw = 180f;
+        // Where a walker enters: one point on the street in front of the door, one just inside (world, on the walk surface).
+        public static readonly Vector3 EquipmentStoreDoorOutside = new Vector3(-10f, WalkSurfaceY, -19.6f);
+        public static readonly Vector3 EquipmentStoreDoorInside = new Vector3(-10f, WalkSurfaceY, -23.2f);
+        // From the door to the counter round the display table in the middle of the shop (the aisle on its east side, 1.9 m from the axis).
+        public static readonly Vector3 EquipmentStoreAisleNear = new Vector3(-11.9f, WalkSurfaceY, -23.85f);
+        public static readonly Vector3 EquipmentStoreAisleFar = new Vector3(-11.9f, WalkSurfaceY, -26.45f);
+
         public const string AnchorsName = "Anchors";
         public const string ZonesName = "Zones";
         public static readonly Vector3 TownSquareCenter = new Vector3(0f, WalkSurfaceY, -29f);
@@ -78,7 +92,7 @@ namespace DeepDive.Composition
             public static readonly Vector3 HomeMax = new Vector3(5.825f, 11.4f, -42f);
             public static readonly Vector3 DockMin = new Vector3(7f, 7.9f, -11f);
             public static readonly Vector3 DockMax = new Vector3(11f, 13f, -3.5f);
-            public static readonly Vector3 TownMin = new Vector3(-14.75f, 7.9f, -55.8f);
+            public static readonly Vector3 TownMin = new Vector3(-15.75f, 7.9f, -55.8f);
             public static readonly Vector3 TownMax = new Vector3(14.75f, 13f, -14.75f);
             public static readonly Vector3 CoastMin = new Vector3(-15f, 4.5f, -14.75f);
             public static readonly Vector3 CoastMax = new Vector3(15f, 13f, -3.5f);
@@ -129,8 +143,7 @@ namespace DeepDive.Composition
         // below (HomeSceneSetup).
         public static readonly IReadOnlyList<TownBlock> Structures = new[]
         {
-            new TownBlock("MainBuilding_West", new Vector3(-18f, 11.0f, -28f), new Vector3(7f, 5.2f, 8f), BlockMaterial.Building, true),
-            new TownBlock("TownRoof_West", new Vector3(-18f, 13.65f, -28f), new Vector3(8f, 0.4f, 9f), BlockMaterial.Sand, false),
+            // (The west backdrop block stood where the equipment store is now: the real store replaces it.)
             new TownBlock("MainBuilding_East", new Vector3(18f, 11.0f, -28f), new Vector3(7f, 5.2f, 8f), BlockMaterial.Building, true),
             new TownBlock("TownRoof_East", new Vector3(18f, 13.65f, -28f), new Vector3(8f, 0.4f, 9f), BlockMaterial.Sand, false),
             new TownBlock("HomeBack", HomeOrigin + new Vector3(0f, 1.5f, -6f), new Vector3(12f, 3f, 0.35f), BlockMaterial.Building, true),
@@ -163,7 +176,13 @@ namespace DeepDive.Composition
                 var side = mirror > 0 ? "West" : "East";
                 edges.Add(Edge("Edge_Beach" + side, mirror, -15.05f, -14.75f, -15.8f, -11.0f));
                 edges.Add(Edge("Edge_BackFillSouth" + side, mirror, -14.75f, -14.0f, -15.8f, -15.5f));
-                edges.Add(Edge("Edge_Town" + side, mirror, -14.3f, -14.0f, -36.3f, -15.5f));
+                if (mirror > 0)
+                {
+                    // West: the equipment store (z -30.16 .. -21.54, its own walls) stands on this edge; the fence runs up to it on both sides.
+                    edges.Add(Edge("Edge_Town" + side + "South", mirror, -14.3f, -14.0f, -36.3f, -30.4f));
+                    edges.Add(Edge("Edge_Town" + side + "North", mirror, -14.3f, -14.0f, -21.3f, -15.5f));
+                }
+                else edges.Add(Edge("Edge_Town" + side, mirror, -14.3f, -14.0f, -36.3f, -15.5f));
                 edges.Add(Edge("Edge_SquareSouth" + side, mirror, -14.3f, -3.75f, -36.3f, -36.0f));
                 edges.Add(Edge("Edge_Approach" + side, mirror, -4.05f, -3.75f, -42.0f, -36.0f));
                 // Outside the facade line (z -42), so the house front stays open between the walls.
@@ -232,6 +251,7 @@ namespace DeepDive.Composition
 
             BuildAnchors(parent);
             SuppliedTownArt.Town(parent);
+            TownDressing.Place(parent);   // #171: fences, paving, lamps and props over the bare blocks (visual only)
             BuildZones(scene, parent);
 
             var services = FindRoot(scene, "TownServices");
@@ -259,8 +279,29 @@ namespace DeepDive.Composition
             }
             if (moved != StorefrontPositions.Length)
                 Debug.LogError($"P46_SHOP_ANCHORS_INCOMPLETE moved={moved}/{StorefrontPositions.Length}");
+            foreach (var anchor in anchors)
+                if (anchor.Definition.ServiceId == "shop-equipment") PlaceEquipmentStore(anchor);
 
             Debug.Log($"P46_CONTINUOUS_TOWN_READY shops={moved} home={HomeOrigin} scene={scene.name}");
+        }
+
+        // Idempotent. The store is a child of the equipment anchor, so a store that is already there (an authored one, or a second Build) is kept.
+        private static void PlaceEquipmentStore(ServicePointAnchor anchor)
+        {
+            if (anchor.GetComponentInChildren<EquipmentStoreLayout>(true) != null) return;
+            var prefab = Resources.Load<GameObject>(EquipmentStoreResource);
+            if (prefab == null)
+            {
+                Debug.LogError("P410_STORE_MISSING " + EquipmentStoreResource);
+                return;
+            }
+            var store = UnityEngine.Object.Instantiate(prefab, anchor.transform);
+            store.name = EquipmentStoreName;
+            store.transform.localPosition = EquipmentStoreOffset;
+            store.transform.localRotation = Quaternion.Euler(0f, EquipmentStoreYaw, 0f);
+            // The clerk's old colour plate hangs 2.9 m up: inside the store it would float under the ceiling.
+            var oldSign = anchor.transform.Find("Sign");
+            if (oldSign != null) foreach (var r in oldSign.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
         }
 
         // Empty transforms: no collider, renderer or NetworkObject. HomeSceneSetup consumes

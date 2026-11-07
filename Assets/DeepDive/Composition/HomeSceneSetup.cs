@@ -70,6 +70,7 @@ namespace DeepDive.Composition
             Storage(root, poses.Storage.position, poses.Storage.rotation);
             HomePcAnchor.EnsurePc(scene, poses.Pc);
             SuppliedTownArt.Home(root);
+            HomeDressing.Place(scene);   // #259: the baked, collider-free house art over the rig
         }
 
         private static void EnsureLegacyRig(Scene scene)

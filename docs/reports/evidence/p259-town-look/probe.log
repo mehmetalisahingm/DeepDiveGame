@@ -1,0 +1,3 @@
+renderers=1557 developmentVisuals=4 store=True house=True
+overview_frames=300 mean_ms=1,51 p95_ms=1,81 max_ms=2,44
+gpu=NVIDIA GeForce RTX 4050 Laptop GPU api=Direct3D11 quality=Ultra

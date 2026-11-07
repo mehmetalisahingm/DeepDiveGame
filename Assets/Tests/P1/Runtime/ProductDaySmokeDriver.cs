@@ -95,6 +95,8 @@ namespace DeepDive.P1.Lab
         private List<Vector3> route;
         private string output;
         private int expected, step, substep, waypoint, part, firstDay;
+        private int sleepAttempts;
+        private float sleepRetryAt;
         private bool localDone, finished, leaving, homeChecked, engineEntered, partRoute;
         private float deadline, stageDeadline, nextBroadcast, nextAction, nextTrace, aimAt, recordingAt, finishAt, moveAfter, playbackAt;
         private Vector3 previous;
@@ -310,6 +312,7 @@ namespace DeepDive.P1.Lab
         private void SetStep(int value)
         {
             step = value; report.step = value; localDone = false; substep = waypoint = 0;
+            sleepAttempts = 0; sleepRetryAt = 0f;
             route = null; aimAt = recordingAt = 0; publishRequest = 0; done.Clear();
             stageDeadline = Time.realtimeSinceStartup + 170f;
             nextAction = Time.realtimeSinceStartup + report.slot * 0.7f;
@@ -668,13 +671,12 @@ namespace DeepDive.P1.Lab
         private bool SelectCameraFromShelf()
         {
             if (shelfStage == 4) return true;
-            var sample = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None)
-                .SingleOrDefault(s => s.ItemId == EconomyManager.CameraBasicId);
+            // The real store stocks several copies of the camera; take the one nearest the door and stand in front of it.
+            var sample = TownStoreRoute.Shelf(EconomyManager.CameraBasicId);
             if (sample == null) { Fail("Physical camera shelf missing"); return false; }
-            var stand = sample.transform.position + Vector3.forward;
-            stand.y = ContinuousTownLayout.WalkSurfaceY;
+            var stand = TownStoreRoute.Stand(sample);
             var delta = stand - local.transform.position; delta.y = 0;
-            if (delta.magnitude > .17f) { MoveToward(Around(stand)); aimAt = 0; return false; }
+            if (delta.magnitude > .17f) { MoveToward(StoreAware(Around(stand))); aimAt = 0; return false; }
             Aim(sample.transform.position);
             if (!Settled()) return false;
             var selected = local.SelectedShopItem.Value.ToString();
@@ -920,9 +922,37 @@ namespace DeepDive.P1.Lab
                 typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
                     .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
                 substep = 1;
+                sleepAttempts = 1;
+                sleepRetryAt = Time.realtimeSinceStartup + 2f;
             }
             report.inBed = local.Seated.Value;
             if (!string.IsNullOrEmpty(HomeStatus)) report.bedAnswer = HomeStatus;
+            // Real 2-player network play can reject a one-shot bed ray while a
+            // remote look/position update is in flight. Re-approach the REAL bed
+            // exit and retry the normal host-validated input, never set sleep
+            // or advance the day directly. Bounded retries keep genuine
+            // collision/range failures visible in the CI report.
+            if (substep == 1 && !local.Seated.Value && sync.DayNumber.Value <= firstDay &&
+                Time.realtimeSinceStartup >= sleepRetryAt && sleepAttempts < 4)
+            {
+                var exit = bed.ExitPose.position;
+                var delta = exit - local.transform.position;
+                delta.y = 0f;
+                if (delta.magnitude > 0.35f)
+                {
+                    MoveToward(StoreAware(Around(exit)));
+                    aimAt = 0;
+                    return;
+                }
+                Aim(bed.GetComponent<Collider>().bounds.center);
+                if (!Settled()) return;
+                typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                sleepAttempts++;
+                sleepRetryAt = Time.realtimeSinceStartup + 2f;
+                aimAt = 0;
+                Debug.Log($"P46_BED_RETRY slot={report.slot} attempt={sleepAttempts} pos={local.transform.position} target={bed.name}");
+            }
             if (sync.DayNumber.Value <= firstDay || local.Seated.Value || DayLock.IsLocked) return;
             report.slept = sync.SummaryDayNumber.Value == firstDay && sync.SummaryReason.Value == (byte)DayCloseReason.EarlySleep;
             report.morningHome = Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) < 0.7f;
@@ -1061,8 +1091,8 @@ namespace DeepDive.P1.Lab
             if (flat < tolerance && (!depth || waypoint != route.Count - 1 || Mathf.Abs(delta.y) < 0.45f))
             { waypoint++; return waypoint >= route.Count; }
             // #188 hunt-first: the unrepaired hull still lies on the beach cradle, so dry legs go round it.
-            if ((HuntFirst || HabitatHunt) && !local.Swimming.Value) { MoveToward(Around(target)); return false; }
-            MoveToward(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target);
+            if ((HuntFirst || HabitatHunt) && !local.Swimming.Value) { MoveToward(StoreAware(Around(target))); return false; }
+            MoveToward(StoreAware(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target));
             return false;
         }
         private Vector3 CoastTarget(Vector3 stand)
@@ -1085,10 +1115,12 @@ namespace DeepDive.P1.Lab
             var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a => a.Definition.ServiceId == id);
             var stand = anchor.WorldPosition + anchor.transform.forward * 1.6f;
             var delta = stand - local.transform.position; delta.y = 0f;
-            if (delta.magnitude > 0.2f) { MoveToward(Around(CoastTarget(stand))); aimAt = 0; return false; }
+            if (delta.magnitude > 0.2f) { MoveToward(StoreAware(Around(CoastTarget(stand)))); aimAt = 0; return false; }
             Aim(anchor.WorldPosition + Vector3.up);
             return Settled();
         }
+        // #249: the equipment shop is a building with one door: steer through the door and the aisle (a no-op everywhere else).
+        private Vector3 StoreAware(Vector3 target) => local.Swimming.Value ? target : TownStoreRoute.Next(local.transform.position, target, report.slot);
         private void MoveToward(Vector3 target)
         {
             var delta = target - local.transform.position;

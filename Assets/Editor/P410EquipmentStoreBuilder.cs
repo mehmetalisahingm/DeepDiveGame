@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DeepDive.Composition;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -26,7 +27,6 @@ namespace DeepDive.EditorTools
         public const float Width = 10f, Depth = 8f, Storey = 3.12f;
         public const float OpeningWidth = 2.6f, OpeningHeight = 2.6f;
         public const float WallOuter = -0.31f, WallInner = 0.09f;
-        public const float TableX = -0.6f;   // the display table sits left of the door so the aisle to the till stays 2.65 m wide
 
         private static readonly Dictionary<string, Material> Cache = new Dictionary<string, Material>();
         private static readonly List<(string id, Transform anchor, int items)> Displays = new List<(string, Transform, int)>();
@@ -59,7 +59,7 @@ namespace DeepDive.EditorTools
 
         // The kit's FBX roots carry their own axis fix-up and scale, so a module is never scaled through its own transform: a scale goes on a
         // wrapper (world axes, no rotation) and the module sits unchanged inside it. Use it for non-uniform fills only (plain plaster).
-        private static GameObject Part(Transform parent, string model, Vector3 position, float yaw = 0f, Vector3? scale = null)
+        internal static GameObject Part(Transform parent, string model, Vector3 position, float yaw = 0f, Vector3? scale = null)
         {
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(Models + model + ".fbx");
             if (asset == null) throw new FileNotFoundException("P410_STORE_MODEL_MISSING " + model);
@@ -97,9 +97,9 @@ namespace DeepDive.EditorTools
             return material;
         }
 
-        private static Material Kit(string name) => AssetDatabase.LoadAssetAtPath<Material>(KitMaterials + name + ".mat");
+        internal static Material Kit(string name) => AssetDatabase.LoadAssetAtPath<Material>(KitMaterials + name + ".mat");
 
-        private static GameObject Prim(Transform parent, PrimitiveType type, string name, Vector3 position, Vector3 scale, Material material, Vector3? euler = null)
+        internal static GameObject Prim(Transform parent, PrimitiveType type, string name, Vector3 position, Vector3 scale, Material material, Vector3? euler = null)
         {
             var go = GameObject.CreatePrimitive(type);
             go.name = name;
@@ -112,7 +112,7 @@ namespace DeepDive.EditorTools
             return go;
         }
 
-        private static Transform Empty(Transform parent, string name, Vector3 position, float yaw = 0f)
+        internal static Transform Empty(Transform parent, string name, Vector3 position, float yaw = 0f)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -152,8 +152,9 @@ namespace DeepDive.EditorTools
             text.transform.localRotation = Quaternion.identity;
             var mesh = text.AddComponent<TextMesh>();
             mesh.text = "EKIPMAN";
+            text.AddComponent<DepthTestedText>();
             mesh.anchor = TextAnchor.MiddleCenter; mesh.alignment = TextAlignment.Center;
-            mesh.characterSize = 0.1f; mesh.fontSize = 100; mesh.color = new Color(0.97f, 0.93f, 0.8f);
+            mesh.characterSize = 0.066f; mesh.fontSize = 100; mesh.color = new Color(0.97f, 0.93f, 0.8f);
 
             // Ground floor sides and back (2 m modules), ground floor slab.
             for (var i = 0; i < 4; i++)
@@ -220,44 +221,61 @@ namespace DeepDive.EditorTools
             Displays.Add((equipmentId, group, count));
         }
 
+        // Layout (prefab frame, door at z = 0, depth +Z): the counter runs across the back wall, centred, so a customer who walks in from the
+        // street meets it head on; shelf units line both side walls and flank the counter on the back wall; one display table stands in
+        // the middle. The shopkeeper stands 1.7 m behind the customer point, exactly like the town's stalls (customer = clerk + 1.7 m).
+        public const float CounterZ = 6.4f, CounterHalfLength = 1.6f, CounterDepth = 0.8f;
+        public const float CustomerZ = 5.45f, KeeperZ = 7.15f, TableZ = 3.0f;
+        public const float SideShelfX = 4.67f, BackShelfX = 3.4f;
+        public static readonly float[] SideShelfZ = { 2.0f, 4.5f };
+
         private static void Interior(Transform root)
         {
             var interior = Empty(root, "Interior", Vector3.zero);
             var wood = Kit("MI_WoodTrim");
             var wear = Kit("MI_WoodTrim_Wear");
 
-            // Back wall: two shelf units, harpoons on brackets above the right one.
-            var shelfA = Shelf(interior, "Shelf_Back_A", new Vector3(-3.3f, 0f, Depth - 0.09f - 0.25f), 0f, 2.2f);
-            var shelfB = Shelf(interior, "Shelf_Back_B", new Vector3(0f, 0f, Depth - 0.09f - 0.25f), 0f, 2.2f);
+            // Back wall: a shelf unit on each side of the counter, harpoons on brackets above the right one.
+            var backZ = Depth - 0.09f - 0.25f;
+            var shelfA = Shelf(interior, "Shelf_Back_A", new Vector3(-BackShelfX, 0f, backZ), 0f, 2.2f);
+            var shelfB = Shelf(interior, "Shelf_Back_B", new Vector3(BackShelfX, 0f, backZ), 0f, 2.2f);
             Stock(shelfA, "tube-2", 0, -0.85f, 0.85f, 5);
             Stock(shelfA, "tube-1", 1, -0.9f, 0.9f, 6);
             Stock(shelfA, "bag-1", 2, -0.75f, 0.75f, 4);
             Stock(shelfB, "fins-1", 0, -0.85f, 0.85f, 5);
             Stock(shelfB, "tube-1", 1, -0.9f, 0.9f, 5);
             Stock(shelfB, "camera-basic", 2, -0.85f, 0.85f, 4);
-            var rack = Empty(interior, "Display_harpoon-1_rack", new Vector3(0f, 0f, Depth - 0.09f - 0.1f));
-            var brackets = Empty(interior, "Harpoon_Brackets", new Vector3(0f, 0f, Depth - 0.09f - 0.1f));
+            var rack = Empty(interior, "Display_harpoon-1_rack", new Vector3(BackShelfX, 0f, Depth - 0.09f - 0.1f));
+            var brackets = Empty(interior, "Harpoon_Brackets", new Vector3(BackShelfX, 0f, Depth - 0.09f - 0.1f));
             for (var i = 0; i < 3; i++)
             {
                 var harpoon = Product(rack, "harpoon-1");
                 harpoon.localPosition = new Vector3(0f, 2.3f + 0.28f * i, 0f);
-                harpoon.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                harpoon.localRotation = Quaternion.identity;
                 foreach (var bx in new[] { -0.55f, 0.55f }) Prim(brackets, PrimitiveType.Cube, "Bracket", new Vector3(bx, 2.3f + 0.28f * i - 0.05f, 0.04f), new Vector3(0.05f, 0.05f, 0.1f), wear);
             }
             Displays.Add(("harpoon-1", rack, 3));
 
-            // Left wall: two shelf units facing the room.
-            var left1 = Shelf(interior, "Shelf_Left_1", new Vector3(-Width * 0.5f + 0.33f, 0f, 2.5f), -90f, 2.0f);
-            var left2 = Shelf(interior, "Shelf_Left_2", new Vector3(-Width * 0.5f + 0.33f, 0f, 5.2f), -90f, 2.0f);
+            // Side walls: two shelf units each, facing the room.
+            var left1 = Shelf(interior, "Shelf_Left_1", new Vector3(-SideShelfX, 0f, SideShelfZ[0]), -90f, 2.0f);
+            var left2 = Shelf(interior, "Shelf_Left_2", new Vector3(-SideShelfX, 0f, SideShelfZ[1]), -90f, 2.0f);
+            var right1 = Shelf(interior, "Shelf_Right_1", new Vector3(SideShelfX, 0f, SideShelfZ[0]), 90f, 2.0f);
+            var right2 = Shelf(interior, "Shelf_Right_2", new Vector3(SideShelfX, 0f, SideShelfZ[1]), 90f, 2.0f);
             Stock(left1, "tube-2", 0, -0.8f, 0.8f, 4);
             Stock(left1, "tube-1", 1, -0.8f, 0.8f, 5);
             Stock(left1, "bag-1", 2, -0.7f, 0.7f, 3);
             Stock(left2, "fins-1", 0, -0.8f, 0.8f, 4);
             Stock(left2, "bag-1", 1, -0.8f, 0.8f, 4);
             Stock(left2, "camera-basic", 2, -0.7f, 0.7f, 3);
+            Stock(right1, "tube-1", 0, -0.8f, 0.8f, 5);
+            Stock(right1, "fins-1", 1, -0.8f, 0.8f, 4);
+            Stock(right1, "bag-1", 2, -0.7f, 0.7f, 3);
+            Stock(right2, "tube-2", 0, -0.8f, 0.8f, 4);
+            Stock(right2, "camera-basic", 1, -0.8f, 0.8f, 4);
+            Stock(right2, "fins-1", 2, -0.7f, 0.7f, 3);
 
             // Central display table with the three camera tiers on plinths.
-            var table = Empty(interior, "Table_Center", new Vector3(TableX, 0f, 3.6f));
+            var table = Empty(interior, "Table_Center", new Vector3(0f, 0f, TableZ));
             Prim(table, PrimitiveType.Cube, "Top", new Vector3(0f, 0.82f, 0f), new Vector3(2.4f, 0.06f, 1.0f), wood);
             foreach (var lx in new[] { -1.05f, 1.05f })
                 foreach (var lz in new[] { -0.4f, 0.4f }) Prim(table, PrimitiveType.Cube, "Leg", new Vector3(lx, 0.4f, lz), new Vector3(0.08f, 0.8f, 0.08f), wear);
@@ -276,18 +294,18 @@ namespace DeepDive.EditorTools
                 Displays.Add((tiers[i], group, 2));
             }
 
-            // Counter along the right wall with the till, a lamp, and crates behind it.
-            var counter = Empty(interior, "Counter", new Vector3(3.7f, 0f, 4.15f));
-            Prim(counter, PrimitiveType.Cube, "Body", new Vector3(0f, 0.5f, 0f), new Vector3(0.8f, 1.0f, 3.3f), wear);
-            Prim(counter, PrimitiveType.Cube, "Top", new Vector3(-0.02f, 1.02f, 0f), new Vector3(0.92f, 0.05f, 3.4f), wood);
-            var till = Empty(counter, "Till", new Vector3(0f, 1.045f, -0.4f));
+            // Counter across the back wall with the till, a bell and a lamp.
+            var counter = Empty(interior, "Counter", new Vector3(0f, 0f, CounterZ));
+            Prim(counter, PrimitiveType.Cube, "Body", new Vector3(0f, 0.5f, 0f), new Vector3(CounterHalfLength * 2f, 1.0f, CounterDepth), wear);
+            Prim(counter, PrimitiveType.Cube, "Top", new Vector3(0f, 1.02f, -0.02f), new Vector3(CounterHalfLength * 2f + 0.12f, 0.05f, CounterDepth + 0.12f), wood);
+            var till = Empty(counter, "Till", new Vector3(0.6f, 1.045f, 0f));
             Prim(till, PrimitiveType.Cube, "Box", new Vector3(0f, 0.1f, 0f), new Vector3(0.34f, 0.2f, 0.3f), Mat("TillBody", new Color(0.28f, 0.28f, 0.3f)));
-            Prim(till, PrimitiveType.Cube, "Screen", new Vector3(0f, 0.25f, 0.05f), new Vector3(0.3f, 0.14f, 0.03f), Mat("TillScreen", new Color(0.2f, 0.5f, 0.4f), 0.5f, new Color(0.1f, 0.5f, 0.4f)), new Vector3(-20f, 0f, 0f));
-            Prim(counter, PrimitiveType.Cylinder, "BellBase", new Vector3(0f, 1.07f, 0.9f), new Vector3(0.14f, 0.015f, 0.14f), Mat("Brass", new Color(0.78f, 0.6f, 0.25f), 0.6f));
-            Part(interior, "Prop_Crate", new Vector3(4.5f, 0f, 7.0f), 20f, Vector3.one * 0.7f);
-            Part(interior, "Prop_Crate", new Vector3(4.55f, 0.74f, 7.0f), 5f, Vector3.one * 0.5f);
-            Part(interior, "Prop_Crate", new Vector3(3.7f, 0f, 7.35f), -15f, Vector3.one * 0.6f);
-            // A floor mat inside the door so the entrance reads from the street.
+            Prim(till, PrimitiveType.Cube, "Screen", new Vector3(0f, 0.25f, -0.05f), new Vector3(0.3f, 0.14f, 0.03f), Mat("TillScreen", new Color(0.2f, 0.5f, 0.4f), 0.5f, new Color(0.1f, 0.5f, 0.4f)), new Vector3(20f, 0f, 0f));
+            Prim(counter, PrimitiveType.Cylinder, "BellBase", new Vector3(-0.7f, 1.07f, -0.1f), new Vector3(0.14f, 0.015f, 0.14f), Mat("Brass", new Color(0.78f, 0.6f, 0.25f), 0.6f));
+            // Crates by the door and a floor mat inside it so the entrance reads from the street.
+            Part(interior, "Prop_Crate", new Vector3(-4.45f, 0f, 0.55f), 20f, Vector3.one * 0.7f);
+            Part(interior, "Prop_Crate", new Vector3(-4.48f, 0.74f, 0.55f), 5f, Vector3.one * 0.5f);
+            Part(interior, "Prop_Crate", new Vector3(4.2f, 0f, 0.6f), -15f, Vector3.one * 0.6f);
             Prim(interior, PrimitiveType.Cube, "DoorMat", new Vector3(0f, 0.02f, 0.9f), new Vector3(2.0f, 0.02f, 1.1f), Mat("DoorMat", new Color(0.42f, 0.16f, 0.14f), 0.1f));
         }
 
@@ -380,13 +398,17 @@ namespace DeepDive.EditorTools
             Box(c, "Back", new Vector3(0f, Storey * 0.5f, Depth - wallMid), new Vector3(reach * 2f, Storey, thick));
             Box(c, "Left", new Vector3(-half + wallMid, Storey * 0.5f, Depth * 0.5f), new Vector3(thick, Storey, Depth));
             Box(c, "Right", new Vector3(half - wallMid, Storey * 0.5f, Depth * 0.5f), new Vector3(thick, Storey, Depth));
-            Box(c, "Counter", new Vector3(3.7f, 0.52f, 4.15f), new Vector3(0.9f, 1.04f, 3.4f));
-            Box(c, "Table", new Vector3(TableX, 0.41f, 3.6f), new Vector3(2.4f, 0.82f, 1.0f));
-            Box(c, "ShelfBackA", new Vector3(-3.3f, 1.05f, Depth - 0.09f - 0.25f), new Vector3(2.2f, 2.1f, 0.5f));
-            Box(c, "ShelfBackB", new Vector3(0f, 1.05f, Depth - 0.09f - 0.25f), new Vector3(2.2f, 2.1f, 0.5f));
-            Box(c, "ShelfLeft1", new Vector3(-half + 0.33f, 1.05f, 2.5f), new Vector3(0.5f, 2.1f, 2.0f));
-            Box(c, "ShelfLeft2", new Vector3(-half + 0.33f, 1.05f, 5.2f), new Vector3(0.5f, 2.1f, 2.0f));
-            Box(c, "Crates", new Vector3(4.2f, 0.6f, 7.15f), new Vector3(1.4f, 1.2f, 0.9f));
+            Box(c, "Counter", new Vector3(0f, 0.52f, CounterZ), new Vector3(CounterHalfLength * 2f + 0.1f, 1.04f, CounterDepth + 0.1f));
+            Box(c, "Table", new Vector3(0f, 0.41f, TableZ), new Vector3(2.4f, 0.82f, 1.0f));
+            var backZ = Depth - 0.09f - 0.25f;
+            Box(c, "ShelfBackA", new Vector3(-BackShelfX, 1.05f, backZ), new Vector3(2.2f, 2.1f, 0.5f));
+            Box(c, "ShelfBackB", new Vector3(BackShelfX, 1.05f, backZ), new Vector3(2.2f, 2.1f, 0.5f));
+            Box(c, "ShelfLeft1", new Vector3(-SideShelfX, 1.05f, SideShelfZ[0]), new Vector3(0.5f, 2.1f, 2.0f));
+            Box(c, "ShelfLeft2", new Vector3(-SideShelfX, 1.05f, SideShelfZ[1]), new Vector3(0.5f, 2.1f, 2.0f));
+            Box(c, "ShelfRight1", new Vector3(SideShelfX, 1.05f, SideShelfZ[0]), new Vector3(0.5f, 2.1f, 2.0f));
+            Box(c, "ShelfRight2", new Vector3(SideShelfX, 1.05f, SideShelfZ[1]), new Vector3(0.5f, 2.1f, 2.0f));
+            Box(c, "CratesLeft", new Vector3(-4.45f, 0.45f, 0.55f), new Vector3(0.8f, 0.9f, 0.8f));
+            Box(c, "CratesRight", new Vector3(4.2f, 0.4f, 0.6f), new Vector3(0.7f, 0.8f, 0.7f));
         }
 
         // ---- lights, anchors -------------------------------------------------------------------------------
@@ -415,9 +437,9 @@ namespace DeepDive.EditorTools
             var anchors = Empty(root, "Anchors", Vector3.zero);
             var entrance = Empty(anchors, "Entrance", new Vector3(0f, 0f, WallOuter - 0.05f));
             var threshold = Empty(anchors, "Threshold", new Vector3(0f, 0f, (WallOuter + WallInner) * 0.5f));
-            var customer = Empty(anchors, "CustomerPoint", new Vector3(2.3f, 0f, 4.0f), 90f);
-            var register = Empty(anchors, "Register", new Vector3(3.7f, 1.05f, 3.75f), 270f);
-            var keeper = Empty(anchors, "ShopkeeperPoint", new Vector3(4.55f, 0f, 4.0f), 270f);
+            var customer = Empty(anchors, "CustomerPoint", new Vector3(0f, 0f, CustomerZ), 0f);
+            var register = Empty(anchors, "Register", new Vector3(0.6f, 1.05f, CounterZ), 0f);
+            var keeper = Empty(anchors, "ShopkeeperPoint", new Vector3(0f, 0f, KeeperZ), 180f);
             var exit = Empty(anchors, "ExitPoint", new Vector3(0f, 0f, -1.2f), 180f);
 
             var layout = root.gameObject.AddComponent(AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/DeepDive/Composition/EquipmentStoreLayout.cs").GetClass());

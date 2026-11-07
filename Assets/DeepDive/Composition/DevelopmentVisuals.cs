@@ -32,7 +32,7 @@ namespace DeepDive.Composition
         private static void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (scene.name == HomeSceneName) BuildHome();
-            else if (scene.name == TownSceneName) BuildTown();
+            else if (scene.name == TownSceneName) { BuildTown(); BuildTownHome(); }
         }
 
         // ---- home level 2: a display shelf with trophies between the storage and the PC ---------------------------------
@@ -63,7 +63,7 @@ namespace DeepDive.Composition
             {
                 var id = anchor.Definition.ServiceId;
                 if (id == TownServiceCatalog.FishBuyerId && GameObject.Find(RootPrefix + DevelopmentIds.TownFisher) == null) BuildFisher(anchor.WorldPosition);
-                else if (id == TownServiceCatalog.EquipmentShopId && GameObject.Find(RootPrefix + DevelopmentIds.TownShop) == null) BuildShop(anchor.WorldPosition);
+                else if (id == TownServiceCatalog.EquipmentShopId && GameObject.Find(RootPrefix + DevelopmentIds.TownShop) == null) BuildShop();
             }
             var dock = GameObject.Find("Dock_Town");
             if (dock != null && GameObject.Find(RootPrefix + DevelopmentIds.TownDock) == null) BuildDock(dock);
@@ -84,9 +84,45 @@ namespace DeepDive.Composition
             root.AddComponent<DevelopmentVisual>().Init(DevelopmentIds.TownFisher, built, plot);
         }
 
-        private static void BuildShop(Vector3 npc)
+        // #259: the shared house in the continuous town. Level 2 puts two display shelves with trophies on the back wall above the couch (wall
+        // shelves, so no floor space in the walking lanes is taken); until then four brackets show where they will hang.
+        public static readonly Vector3 TownHomeShelfLocal = new Vector3(0f, 0f, -5.7f);
+
+        private static void BuildTownHome()
         {
-            var root = Make(DevelopmentIds.TownShop, npc + new Vector3(0f, 0f, -1.5f));
+            if (GameObject.Find(RootPrefix + DevelopmentIds.Home2) != null) return;
+            var root = Make(DevelopmentIds.Home2, ContinuousTownLayout.HomeOrigin + TownHomeShelfLocal);
+            var built = Group(root, "Built");
+            foreach (var y in new[] { 1.5f, 2.15f })
+            {
+                Prim(built, PrimitiveType.Cube, "Shelf" + y, new Vector3(0f, y, 0.17f), new Vector3(2.6f, 0.06f, 0.3f), Tint.ShelfWood);
+                foreach (var x in new[] { -1.05f, 1.05f }) Prim(built, PrimitiveType.Cube, "Bracket" + y + x, new Vector3(x, y - 0.12f, 0.1f), new Vector3(0.06f, 0.2f, 0.16f), Tint.Wood);
+            }
+            Prim(built, PrimitiveType.Sphere, "TrophyA", new Vector3(-0.8f, 1.7f, 0.17f), new Vector3(0.3f, 0.3f, 0.3f), Tint.Gold);
+            Prim(built, PrimitiveType.Cube, "TrophyB", new Vector3(0f, 1.69f, 0.17f), new Vector3(0.25f, 0.35f, 0.25f), Tint.Cyan);
+            Prim(built, PrimitiveType.Cylinder, "TrophyC", new Vector3(0.8f, 1.69f, 0.17f), new Vector3(0.22f, 0.22f, 0.22f), Tint.Rose);
+            Prim(built, PrimitiveType.Cube, "PlaqueFrame", new Vector3(-0.6f, 2.45f, 0.1f), new Vector3(0.9f, 0.5f, 0.04f), Tint.Wood);
+            Prim(built, PrimitiveType.Cube, "Plaque", new Vector3(-0.6f, 2.45f, 0.13f), new Vector3(0.8f, 0.4f, 0.02f), Tint.Cyan);
+            Prim(built, PrimitiveType.Cube, "BookA", new Vector3(0.5f, 2.26f, 0.17f), new Vector3(0.18f, 0.28f, 0.2f), Tint.Red);
+            Prim(built, PrimitiveType.Cube, "BookB", new Vector3(0.72f, 2.25f, 0.17f), new Vector3(0.16f, 0.26f, 0.2f), Tint.Green);
+            Prim(built, PrimitiveType.Cube, "BookC", new Vector3(0.92f, 2.27f, 0.17f), new Vector3(0.18f, 0.3f, 0.2f), Tint.Blue);
+            var plot = Group(root, "Plot");
+            foreach (var x in new[] { -1.05f, 1.05f })
+                foreach (var y in new[] { 1.5f, 2.15f }) Prim(plot, PrimitiveType.Cube, "Peg" + x + y, new Vector3(x, y, 0.06f), new Vector3(0.07f, 0.07f, 0.1f), Tint.Plot);
+            root.AddComponent<DevelopmentVisual>().Init(DevelopmentIds.Home2, built, plot);
+        }
+
+        // #249: the shop upgrade is a second rack inside the real equipment store, against the street wall on the west side of the door (store
+        // frame x -3.2, z 0.45), facing into the shop. The store is placed by ContinuousTownLayout; its frame is derived from the same constants,
+        // so this does not depend on which scene-load callback runs first.
+        public static readonly Vector3 StoreRackLocal = new Vector3(-2.8f, 0f, 0.45f);
+
+        private static void BuildShop()
+        {
+            var yaw = Quaternion.Euler(0f, ContinuousTownLayout.EquipmentStoreYaw, 0f);
+            var origin = ContinuousTownLayout.StorefrontPositions[0] + ContinuousTownLayout.EquipmentStoreOffset;
+            var root = Make(DevelopmentIds.TownShop, origin + yaw * StoreRackLocal);
+            root.transform.rotation = yaw;
             var built = Group(root, "Built");
             Prim(built, PrimitiveType.Cube, "Rack", new Vector3(0f, 0.95f, 0f), new Vector3(2.2f, 1.9f, 0.45f), Tint.Blue);
             Prim(built, PrimitiveType.Cube, "BoxA", new Vector3(-0.6f, 1.3f, 0.3f), new Vector3(0.4f, 0.4f, 0.3f), Tint.Butter);
