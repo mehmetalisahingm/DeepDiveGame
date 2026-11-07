@@ -652,6 +652,26 @@ namespace DeepDive.P4.Tests
             public int Samples;
         }
 
+        [Test]
+        public void SmokeDriverCoopShopAislesSplitAndExitTheFormerCornerTrap()
+        {
+            var door = ContinuousTownLayout.EquipmentStoreDoorInside;
+            var counter = ContinuousTownLayout.StorefrontPositions[0] + Vector3.forward * 1.6f;
+            var host = DeepDive.P1.Lab.TownStoreRoute.Next(door, counter, 0);
+            var guest = DeepDive.P1.Lab.TownStoreRoute.Next(door, counter, 1);
+            Assert.AreEqual(ContinuousTownLayout.EquipmentStoreAisleNear.x, host.x, 0.01f);
+            Assert.AreEqual(2f * door.x - host.x, guest.x, 0.01f,
+                "two real shoppers can take opposite sides of the center table");
+            Assert.AreEqual(host.z, guest.z, 0.01f);
+            // Exact coordinates observed in the failed 2-process world run.
+            // Previously the stateless 0.4 m corner threshold oscillated here.
+            var stuck = new Vector3(-11.98f, door.y, -24.25f);
+            var leaving = DeepDive.P1.Lab.TownStoreRoute.Next(
+                stuck, new Vector3(0f, door.y, -24f), 0);
+            Assert.AreEqual(door.x, leaving.x, 0.01f);
+            Assert.AreEqual(door.z, leaving.z, 0.01f);
+        }
+
         // The smoke drivers steer with TownStoreRoute.Next; whatever line it draws between two places must be a walk the capsule can actually make
         // (door, aisle round the display table, no wall), in both directions.
         [Test]
