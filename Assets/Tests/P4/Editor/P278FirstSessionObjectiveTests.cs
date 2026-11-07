@@ -40,3 +40,4 @@ namespace DeepDive.P4.Tests
                 FirstSessionObjectiveRules.Next(false, false, true, true, true));
         }
     }
+}
