@@ -114,7 +114,11 @@ namespace DeepDive.P1.Lab
                 if (d < bestDistance) { bestDistance = d; best = i; }
             }
             var end = path[best + 1];
-            if (new Vector2(position.x - end.x, position.z - end.z).magnitude < 0.55f)
+            // Keep the tighter clearance on entry (the display table is solid).
+            // The exit needs a slightly wider corner window to prevent the
+            // back-and-forth jitter observed with two real player capsules.
+            var cornerReach = inwards ? 0.4f : 0.55f;
+            if (new Vector2(position.x - end.x, position.z - end.z).magnitude < cornerReach)
             {
                 if (best + 2 >= path.Length)
                     return inwards || !(target.z < Line && target.x > Inside.x + Half - 0.3f) ? target : Flat(StreetMiddle, position);   // out of the door: on south-east round the store
