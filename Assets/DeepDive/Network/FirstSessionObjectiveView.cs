@@ -8,6 +8,9 @@ namespace DeepDive.Network
     // rewards, publishes progress, or changes input/network/save authority.
     public static class FirstSessionObjectiveRules
     {
+        public static bool ShouldCelebratePickup(bool previouslyCelebrated, PlayerFeedbackCue cue)
+            => !previouslyCelebrated && cue == PlayerFeedbackCue.PickupAccepted;
+
         public static string Next(bool passive, bool selectedProduct, bool recording,
             bool swimming, bool confirmedPickup)
         {
@@ -57,7 +60,7 @@ namespace DeepDive.Network
                 (PlayerActionResult)player.LastActionResult.Value);
             // This is a first-session milestone, not a celebration for
             // every future catch. Do not resurrect onboarding after it expires.
-            if (confirmedPickup || feedback.Cue != PlayerFeedbackCue.PickupAccepted) return;
+            if (!FirstSessionObjectiveRules.ShouldCelebratePickup(confirmedPickup, feedback.Cue)) return;
             confirmedPickup = true;
             successUntil = Time.unscaledTime + 6f;
         }
