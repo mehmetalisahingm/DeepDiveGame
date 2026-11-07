@@ -95,11 +95,18 @@ namespace DeepDive.Media
                 writer.Write(height);
                 writer.Write(durationSeconds);
                 writer.Write(frames.Count);
+                var previousTime = -1f;
                 for (var i = 0; i < frames.Count; i++)
                 {
                     var frame = frames[i];
-                    if (float.IsNaN(frame.TimeSeconds) || float.IsInfinity(frame.TimeSeconds) || frame.TimeSeconds < 0f)
-                        throw new ArgumentException("Frame time is invalid.", nameof(frames));
+                    // The reader already refuses out-of-order timestamps. Reject
+                    // them BEFORE creating/persisting a clip: the channel must
+                    // never accept a file its own PC cannot play.
+                    if (float.IsNaN(frame.TimeSeconds) || float.IsInfinity(frame.TimeSeconds) ||
+                        frame.TimeSeconds < 0f || frame.TimeSeconds < previousTime ||
+                        frame.TimeSeconds > durationSeconds + 0.001f)
+                        throw new ArgumentException("Frame timestamps must be ordered and within clip duration.", nameof(frames));
+                    previousTime = frame.TimeSeconds;
                     var bytes = frame.JpegBytes ?? Array.Empty<byte>();
                     if (bytes.Length == 0 || bytes.Length > MaxFrameBytes)
                         throw new ArgumentException("Frame payload is invalid.", nameof(frames));
