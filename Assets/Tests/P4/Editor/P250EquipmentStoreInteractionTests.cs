@@ -83,6 +83,17 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void AuthoredCheckoutCannotBuyAnUnselectedItemOrBypassTheBasket()
+        {
+            Assert.IsFalse(EquipmentStoreShopBinding.MatchesCheckoutSelection(true, "", "camera-basic"));
+            Assert.IsFalse(EquipmentStoreShopBinding.MatchesCheckoutSelection(true, "camera-basic", "camera-professional"));
+            Assert.IsFalse(EquipmentStoreShopBinding.MatchesCheckoutSelection(true, "camera-basic", ""));
+            Assert.IsTrue(EquipmentStoreShopBinding.MatchesCheckoutSelection(true, "camera-basic", "camera-basic"));
+            Assert.IsTrue(EquipmentStoreShopBinding.MatchesCheckoutSelection(false, "", "camera-basic"),
+                "old equipment shop keeps its direct-catalog purchase contract");
+        }
+
+        [Test]
         public void ASelectionCanTravelFromBackShelvesToCashierButNotOutsideStore()
         {
             var binding = EquipmentStoreShopBinding.Bind(shop, layout);
