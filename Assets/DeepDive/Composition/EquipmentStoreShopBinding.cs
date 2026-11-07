@@ -11,9 +11,6 @@ namespace DeepDive.Composition
     [DisallowMultipleComponent]
     public sealed class EquipmentStoreShopBinding : MonoBehaviour
     {
-        private const float HalfWidthWithMargin = 5.75f;
-        private const float FrontWithMargin = -2.1f;
-        private const float BackWithMargin = 8.9f;
         private EquipmentStoreLayout layout;
 
         public EquipmentStoreLayout Layout => layout;
@@ -29,6 +26,9 @@ namespace DeepDive.Composition
             if (binding != null && binding.layout != null && binding.layout != store) return null;
             if (binding == null) binding = shop.gameObject.AddComponent<EquipmentStoreShopBinding>();
             binding.layout = store;
+            var area = shop.GetComponent<EquipmentStoreAreaAnchor>();
+            if (area == null) area = shop.gameObject.AddComponent<EquipmentStoreAreaAnchor>();
+            area.Configure(store.transform, store.CustomerPoint);
 
             foreach (var display in store.Displays)
             {
@@ -73,28 +73,14 @@ namespace DeepDive.Composition
 
         public bool ContainsCustomer(Vector3 worldFeet)
         {
-            if (layout == null) return false;
-            var pos = layout.transform.InverseTransformPoint(worldFeet);
-            return Mathf.Abs(pos.x) <= HalfWidthWithMargin &&
-                pos.z >= FrontWithMargin && pos.z <= BackWithMargin &&
-                pos.y >= -1.0f && pos.y <= 2.8f;
+            var area = GetComponent<EquipmentStoreAreaAnchor>();
+            return area != null && area.ContainsCustomer(worldFeet);
         }
 
         public bool AtCashier(Vector3 worldFeet, float reach)
         {
-            if (layout == null || layout.CustomerPoint == null || !ContainsCustomer(worldFeet))
-                return false;
-            var flat = worldFeet - layout.CustomerPoint.position;
-            return flat.sqrMagnitude <= reach * reach;
+            var area = GetComponent<EquipmentStoreAreaAnchor>();
+            return area != null && area.AtCashier(worldFeet, reach);
         }
-    }
-
-    // Physical hit target attached to the prefab's actual counter collider.
-    // NetworkPlayer still checks distance/host and delegates to the ONLY
-    // existing ServiceInteractionAuthority/TownServiceHandler.
-    public sealed class EquipmentStoreCashierTarget : MonoBehaviour
-    {
-        public ServicePointAnchor Shop { get; private set; }
-        public void Configure(ServicePointAnchor shop) => Shop = shop;
     }
 }
