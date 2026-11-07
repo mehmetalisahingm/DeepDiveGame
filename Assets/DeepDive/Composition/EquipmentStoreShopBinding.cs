@@ -64,12 +64,24 @@ namespace DeepDive.Composition
             return binding;
         }
 
-        // Only the authored physical store requires that the owner's basket
-        // actually holds the product being paid for. Existing legacy shops
-        // keep their old direct-catalog purchase behaviour.
-        public static bool MatchesCheckoutSelection(bool authoredStore, string selectedId, string requestedId)
+        // Authored displays may not yet cover the full existing equipment catalog.
+        // Only truly absent catalog items use the original cashier purchase path;
+        // represented shelf items still require the host-approved basket selection.
+        public bool IsCatalogOnlyItem(string itemId)
+        {
+            if (layout == null || layout.Displays == null || string.IsNullOrWhiteSpace(itemId) ||
+                Array.IndexOf(ShopShelfAnchor.ItemIds, itemId) < 0) return false;
+            foreach (var display in layout.Displays)
+                if (display.Anchor != null && display.Items > 0 &&
+                    string.Equals(display.EquipmentId, itemId, StringComparison.Ordinal))
+                    return false;
+            return true;
+        }
+
+        public static bool MatchesCheckoutSelection(bool authoredStore, string selectedId, string requestedId,
+            bool catalogOnlyAtCashier = false)
             => !authoredStore || (!string.IsNullOrWhiteSpace(requestedId) &&
-                string.Equals(selectedId, requestedId, StringComparison.Ordinal));
+                (string.Equals(selectedId, requestedId, StringComparison.Ordinal) || catalogOnlyAtCashier));
 
         public bool ContainsCustomer(Vector3 worldFeet)
         {
