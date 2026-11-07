@@ -108,8 +108,18 @@ namespace DeepDive.Composition
 
         private TransactionResult PurchaseAtCashier(PlayerId player, string itemId, ulong requestId)
         {
-            var result = handler.HandlePurchase(player, itemId, requestId);
             var actor = SyncFor(player)?.GetComponent<NetworkPlayer>();
+            // The authored #274 store is explicitly shelf -> basket -> till.
+            // A caller must not pay for an unselected/other product with a
+            // direct RPC. The old storefront still accepts its original shop
+            // session and has no additional gating.
+            var authoredStore = anchors.TryGetValue(TownServiceCatalog.EquipmentShopId, out var shopAnchor) &&
+                shopAnchor != null && shopAnchor.GetComponent<EquipmentStoreShopBinding>() != null;
+            if (authoredStore && !EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                    true, actor != null ? actor.SelectedShopItem.Value.ToString() : string.Empty, itemId))
+                return TransactionResult.Reject(requestId, "SelectItemFirst", economy.Revision);
+
+            var result = handler.HandlePurchase(player, itemId, requestId);
             if (result.Accepted && actor != null && actor.SelectedShopItem.Value.ToString() == itemId)
                 actor.ClearShopSelectionServer();
             return result;
