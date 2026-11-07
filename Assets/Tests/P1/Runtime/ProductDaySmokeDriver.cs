@@ -1089,7 +1089,7 @@ namespace DeepDive.P1.Lab
             return Settled();
         }
         // #249: the equipment shop is a building with one door: steer through the door and the aisle (a no-op everywhere else).
-        private Vector3 StoreAware(Vector3 target) => local.Swimming.Value ? target : TownStoreRoute.Next(local.transform.position, target);
+        private Vector3 StoreAware(Vector3 target) => local.Swimming.Value ? target : TownStoreRoute.Next(local.transform.position, target, report.slot);
         private void MoveToward(Vector3 target)
         {
             var delta = target - local.transform.position;
