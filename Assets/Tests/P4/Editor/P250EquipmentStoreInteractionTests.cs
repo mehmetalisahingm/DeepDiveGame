@@ -94,6 +94,31 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void MissingAuthoredProductsKeepTheExistingHostValidatedCashierAlternative()
+        {
+            var binding = EquipmentStoreShopBinding.Bind(shop, layout);
+            var catalogOnly = ShopShelfAnchor.ItemIds.Where(binding.IsCatalogOnlyItem).ToArray();
+            CollectionAssert.AreEquivalent(
+                new[] { "tube-3", BoatRepairParts.Hull, BoatRepairParts.Engine, BoatRepairParts.FuelTank },
+                catalogOnly, "the authored eight-product prefab must not hide the other four catalog products");
+            foreach (var id in layout.Displays.Select(x => x.EquipmentId))
+                Assert.IsFalse(binding.IsCatalogOnlyItem(id), "authored shelf items cannot bypass the basket");
+            Assert.IsFalse(binding.IsCatalogOnlyItem("nonexistent-item"), "unknown catalog entries are never eligible");
+            Assert.IsTrue(EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                true, "", "tube-3", binding.IsCatalogOnlyItem("tube-3")),
+                "the absent tank remains purchasable at the real host-validated cashier");
+            Assert.IsTrue(EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                true, "", BoatRepairParts.Engine, binding.IsCatalogOnlyItem(BoatRepairParts.Engine)),
+                "repair parts must remain purchasable as an alternative to finding them");
+            Assert.IsFalse(EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                true, "", "camera-basic", binding.IsCatalogOnlyItem("camera-basic")),
+                "present items must still be physically selected");
+            Assert.IsFalse(EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                true, "", "nonexistent-item", binding.IsCatalogOnlyItem("nonexistent-item")),
+                "unknown items cannot skip host basket verification");
+        }
+
+        [Test]
         public void ASelectionCanTravelFromBackShelvesToCashierButNotOutsideStore()
         {
             var binding = EquipmentStoreShopBinding.Bind(shop, layout);
