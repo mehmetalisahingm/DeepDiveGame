@@ -36,11 +36,4 @@ namespace DeepDive.Network
         }
     }
 
-    // A physical target on the prefab's existing counter collider. The
-    // cashier still sends the normal shop service interaction to the host.
-    public sealed class EquipmentStoreCashierTarget : MonoBehaviour
-    {
-        public ServicePointAnchor Shop { get; private set; }
-        public void Configure(ServicePointAnchor shop) => Shop = shop;
-    }
 }
