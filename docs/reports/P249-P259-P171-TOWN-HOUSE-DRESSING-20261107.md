@@ -58,3 +58,35 @@ Smoke (tek oyuncu, gerçek entegre Windows oynatıcısı, mağaza + ev + dekorlu
 - Mağazanın Mehmet'in raf seçimi/sepet/kasa akışı gerçek süreçte yalnız ProductDay sürücüsünün yoluyla (kamera rafından seç → kasada öde) denendi; çoklu oyunculu geç katılım (`Test-P410-ShopLateJoin`) bu dalda yeniden koşulmadı.
 - Dekor yalnız Windows'ta bakıldı; ses/yan etkiler (#278) ve #217/#218/#189 oyun içi kabulleri ayrı iştir.
 - Ev ve kasaba dekoru kutu/çit/primitif + Quaternius MegaKit + Shore kit karışımıdır; nihai sanat yönü değil, "boş değil" seviyesidir.
+
+## 6. Varlık kaynağı ve lisans
+
+| Varlık | Kaynak / lisans | Nerede |
+|---|---|---|
+| Medieval Village MegaKit (duvar, zemin, çatı, pencere, sandık modülleri) | Quaternius, **CC0 1.0** (`Assets/DeepDive/Art/MegaKit/LICENSE-Quaternius-MedievalVillage.txt`); ücretsiz sürüm, depoda zaten vardı | mağaza, ev dış kaplaması/çatısı, kasaba parkesi, sandıklar |
+| Shore kit (palmiye, kaya, varil, kova, çapa, sandık) | Depodaki `ShoreKit` prefab'ları (Pirate Kit türevi, kaynak ve CC0 notu `docs/reports/P4-7-KIT-PREP.md`) | ev köşeleri, kasaba dekoru |
+| Supplied kit (yatak, kanepe, kitaplık, bitki, masa lambası) | Depoda mevcut; bu işte değişmedi | ev içi |
+| Pencere, perde, halı, lamba, bank, saksı, çit, bayrak, monitör, mağaza rafı/ürünleri | Bu işte üretilen küp/silindir/küre ilkelleri; harici varlık yok | `P4SharedHouseBuilder`, `P4TownDressingBuilder`, `P410EquipmentStoreBuilder` |
+| `DepthText.shader` | Bu işte yazıldı (yerleşik `GUI/Text Shader`'ın derinlik testli eşi) | `CityKit/DepthText.shader` |
+| Başarı kartı sesi (#278) | Kodla üretilen sinüs çanı; ses dosyası yok | `SuccessFeedbackRules.CreateChime` |
+
+Konsept görseli kullanılmadı; bütün görüntüler gerçek Windows oynatıcısından.
+
+## 7. Performans notu
+
+`DiveTestArea` tek başına, RTX 4050 Laptop / D3D11 / Ultra: 1557 renderer, bütün kasaba üstten gündüz ort. 1,51 ms (p95 1,81 ms). Önceki (mağazasız/ev dekorsuz) ölçüm 1,23 ms idi; ev + kasaba dekoru yaklaşık 0,3 ms ekledi. Dekor draw-call sayısı kalem kalem ölçülmedi; düşük donanım ölçümü yapılmadı.
+
+## 8. Hangi doğrulamalar yapıldı / yapılmadı
+
+| Doğrulama | Durum |
+|---|---|
+| Tam EditMode | yapıldı, 1612/1612 |
+| 1 oyunculu gerçek Windows smoke (`ContinuousWorld`, `ProductDay`) | yapıldı, ikisi geçti |
+| Gündüz/alacakaranlık/gece görüntüleri, gerçek Windows oynatıcısı | yapıldı |
+| İlk başarı kartı: ekran görüntüsü + gerçek ağ satışında günlük | yapıldı (`P278-SUCCESS-CARD-20261107.md`) |
+| **Sesli kısa video** | **yapılmadı**: makinede ekran/ses kaydedici ve ffmpeg yok; çan yalnız üretim testiyle (uzunluk, tepe, kırpma) doğrulandı, kulakla değerlendirilmedi |
+| 2 oyunculu gerçek av–çekim | yapılmadı |
+| Teknik 1/2/4 süreç regresyonu | yalnız 1 süreç yapıldı; 2 ve 4 yapılmadı |
+| Mağaza geç katılım (`Test-P410-ShopLateJoin`) | bu dalda yeniden koşulmadı |
+| Ayrı PC / insan kabulü (#164) | yapılmadı |
+| #255 10M dengelemesi | bu işin kapsamında değil, tamamlandı gösterilmiyor |
