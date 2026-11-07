@@ -50,6 +50,24 @@ namespace DeepDive.P4.Tests
         private static Vector2 HomeLocal(float x, float z) => XZ(ContinuousTownLayout.HomeOrigin) + new Vector2(x, z);
         private static Vector2 Customer(Vector3 shop) => new Vector2(shop.x, shop.z + TownStorefront.CustomerSpot);
 
+        // #249: the equipment shop (slot 0) is a real building with a door on the main street side, so its customer point is reached through
+        // the door, not across its walls. The other three stalls are open counters.
+        private static readonly Vector2 StoreDoorOutside = XZ(ContinuousTownLayout.EquipmentStoreDoorOutside);
+        private static readonly Vector2 StoreDoorInside = XZ(ContinuousTownLayout.EquipmentStoreDoorInside);
+        private static readonly Vector2 StoreAisleNear = XZ(ContinuousTownLayout.EquipmentStoreAisleNear);
+        private static readonly Vector2 StoreAisleFar = XZ(ContinuousTownLayout.EquipmentStoreAisleFar);
+        private static readonly Vector2 StreetMiddle = new Vector2(0f, StoreDoorOutside.y);
+
+        private static Vector2[] ShopRoute(Vector2 from, int slot)
+        {
+            var customer = Customer(ContinuousTownLayout.StorefrontPositions[slot]);
+            if (slot != 0) return new[] { from, customer };
+            var route = new List<Vector2> { from };
+            if (from.y < StoreDoorOutside.y - 1f) route.Add(StreetMiddle);   // from the square: up through the gap between the stalls first
+            route.AddRange(new[] { StoreDoorOutside, StoreDoorInside, StoreAisleNear, StoreAisleFar, customer });
+            return route.ToArray();
+        }
+
         private static readonly Vector2 HomeInside = HomeLocal(0f, -2f);
         private static readonly Vector2 Square = XZ(ContinuousTownLayout.TownSquareCenter) + new Vector2(0f, 5f);
 
@@ -111,8 +129,7 @@ namespace DeepDive.P4.Tests
         {
             ContinuousTownScene.With(_ =>
             {
-                var shop = ContinuousTownLayout.StorefrontPositions[slot];
-                var walk = Walk(Square, Customer(shop));
+                var walk = Walk(ShopRoute(Square, slot));
                 Assert.IsEmpty(walk.Failures, Report("square -> slot " + slot, walk));
                 Assert.IsFalse(walk.ReachedSea);
             }, furnitureProxies: true);
@@ -139,7 +156,13 @@ namespace DeepDive.P4.Tests
                 route.AddRange(HomeToWater.Skip(1).Take(5)); // room corridor -> home door -> town square
                 for (var shop = 0; shop < ContinuousTownLayout.StorefrontPositions.Length; shop++)
                 {
-                    route.Add(Customer(ContinuousTownLayout.StorefrontPositions[shop]));
+                    if (shop == 0)
+                    {
+                        // The equipment store: up to the street, in through the door to the counter, and back out the same way.
+                        route.AddRange(new[] { StreetMiddle, StoreDoorOutside, StoreDoorInside, StoreAisleNear, StoreAisleFar,
+                            Customer(ContinuousTownLayout.StorefrontPositions[0]), StoreAisleFar, StoreAisleNear, StoreDoorInside, StoreDoorOutside, StreetMiddle });
+                    }
+                    else route.Add(Customer(ContinuousTownLayout.StorefrontPositions[shop]));
                     route.Add(Square); // no jumps between distant customer points
                 }
                 route.Add(HomeToWater[6]); // main street -> coast
@@ -240,8 +263,7 @@ namespace DeepDive.P4.Tests
         {
             ContinuousTownScene.With(_ =>
             {
-                var shop = ContinuousTownLayout.StorefrontPositions[slot];
-                var walk = Walk(new Vector2(fromX, fromZ), Customer(shop));
+                var walk = Walk(ShopRoute(new Vector2(fromX, fromZ), slot));
                 Assert.IsEmpty(walk.Failures, Report($"({fromX}, {fromZ}) -> slot {slot}", walk));
                 Assert.IsFalse(walk.ReachedSea);
             }, furnitureProxies: true);
@@ -377,6 +399,7 @@ namespace DeepDive.P4.Tests
                             var q = p + seam.across * side;
                             Assert.IsTrue(Physics.Raycast(new Vector3(q.x, RayStartY, q.y), Vector3.down, out var hit,
                                 RayLength, ~0, QueryTriggerInteraction.Ignore), $"no ground at seam ({q.x:0.##}, {q.y:0.##})");
+                            if (hit.collider.GetComponentInParent<EquipmentStoreLayout>() != null) continue;   // inside the store: its own floor and fixtures
                             Assert.AreEqual(WalkY, hit.point.y, 1e-3f, $"seam step at ({q.x:0.##}, {q.y:0.##}) on {hit.collider.name}");
                         }
                     }
@@ -579,9 +602,11 @@ namespace DeepDive.P4.Tests
             return surface;
         }
 
+        // Inside the equipment store the ground is the store's own floor (its counter and shelves are fixtures on it).
         private static bool HasWalkGround(Vector2 p) =>
             Physics.Raycast(new Vector3(p.x, RayStartY, p.y), Vector3.down, out var hit, RayLength, ~0,
-                QueryTriggerInteraction.Ignore) && Mathf.Abs(hit.point.y - WalkY) <= 0.03f;
+                QueryTriggerInteraction.Ignore) &&
+            (Mathf.Abs(hit.point.y - WalkY) <= 0.03f || hit.collider.GetComponentInParent<EquipmentStoreLayout>() != null);
 
         private static bool FencedAt(Vector2 p)
         {

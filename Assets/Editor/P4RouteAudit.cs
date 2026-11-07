@@ -203,6 +203,13 @@ namespace DeepDive.Editor
                 var store = s.GetComponent<TownStorefront>();
                 if (store != null && store.CustomerPoint != null)
                     list.Add(P(ctx, id + ":customer", "serviceCustomer", "TownStorefront.CustomerSpot", store.CustomerPoint.position));
+                else
+                {
+                    // #249: a real building (the equipment store) has no stall; its customer point stands at the counter.
+                    var building = s.GetComponentInChildren<EquipmentStoreLayout>(true);
+                    if (building != null && building.CustomerPoint != null)
+                        list.Add(P(ctx, id + ":customer", "serviceCustomer", "EquipmentStoreLayout.CustomerPoint", building.CustomerPoint.position));
+                }
             }
             foreach (var name in new[] { "Dock_Town_Anchor", "DiveExit", "Beach_TownGate" })
             {
@@ -304,8 +311,16 @@ namespace DeepDive.Editor
             }
 
             // b) shopping: spawn 0 -> equipment counter -> pier
+            // #249: the equipment shop is a real building: up to the main street through the gap between the stalls, in by its door (+Z side)
+            // to the counter, and back out the same way.
+            var storeOutside = XZ(ContinuousTownLayout.EquipmentStoreDoorOutside);
+            var storeInside = XZ(ContinuousTownLayout.EquipmentStoreDoorInside);
+            var aisleNear = XZ(ContinuousTownLayout.EquipmentStoreAisleNear);
+            var aisleFar = XZ(ContinuousTownLayout.EquipmentStoreAisleFar);
+            var streetMiddle = new Vector2(0f, storeOutside.y);
             var b = Leave(A(WorldAnchorIds.HomeSpawn(0)));
-            b.AddRange(new[] { Customer("shop-equipment"), new Vector2(-6f, -16f), ledgeTurn, exit, dock });
+            b.AddRange(new[] { new Vector2(0f, ContinuousTownLayout.TownSquareCenter.z + 5f), streetMiddle, storeOutside, storeInside, aisleNear, aisleFar,
+                Customer("shop-equipment"), aisleFar, aisleNear, storeInside, storeOutside, new Vector2(-6f, -16f), ledgeTurn, exit, dock });
             yield return Drive(ctx, "b", "shopping: home -> equipment -> pier", b, false);
 
             // c) selling: pier/dive exit -> fish buyer -> recording buyer -> home PC -> bed
@@ -328,7 +343,10 @@ namespace DeepDive.Editor
             // e) optional walk: the reachable town perimeter once, with the ledge/pier spur, back to the beach
             var e = new List<Vector2>
             {
-                beach, new Vector2(-13.8f, -13.8f), new Vector2(-13.4f, -15.2f), new Vector2(-13.4f, -35.4f),
+                // The west edge of the square is the equipment store now: round the street side, down through the gap between the stalls,
+                // then along the south edge to the west corner and back.
+                beach, new Vector2(-13.8f, -13.8f), new Vector2(-13.4f, -15.2f), new Vector2(-13.4f, -20.6f), new Vector2(0f, -20.6f),
+                new Vector2(0f, -35.4f), new Vector2(-13.4f, -35.4f),
                 new Vector2(-3.2f, -35.4f), new Vector2(-3.2f, -42.6f), Corridor(-1f, -43f), Corridor(-1f, -50.5f),
                 new Vector2(-2.5f, -50.5f), new Vector2(-2.5f, -53f), new Vector2(2.5f, -53f), new Vector2(2.5f, -50.5f),
                 Corridor(1f, -50.5f), Corridor(1f, -43f), new Vector2(3.2f, -42.6f), new Vector2(3.2f, -35.4f),
