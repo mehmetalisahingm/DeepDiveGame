@@ -95,6 +95,8 @@ namespace DeepDive.P1.Lab
         private List<Vector3> route;
         private string output;
         private int expected, step, substep, waypoint, part, firstDay;
+        private int sleepAttempts;
+        private float sleepRetryAt;
         private bool localDone, finished, leaving, homeChecked, engineEntered, partRoute;
         private float deadline, stageDeadline, nextBroadcast, nextAction, nextTrace, aimAt, recordingAt, finishAt, moveAfter, playbackAt;
         private Vector3 previous;
@@ -310,6 +312,7 @@ namespace DeepDive.P1.Lab
         private void SetStep(int value)
         {
             step = value; report.step = value; localDone = false; substep = waypoint = 0;
+            sleepAttempts = 0; sleepRetryAt = 0f;
             route = null; aimAt = recordingAt = 0; publishRequest = 0; done.Clear();
             stageDeadline = Time.realtimeSinceStartup + 170f;
             nextAction = Time.realtimeSinceStartup + report.slot * 0.7f;
@@ -919,9 +922,37 @@ namespace DeepDive.P1.Lab
                 typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
                     .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
                 substep = 1;
+                sleepAttempts = 1;
+                sleepRetryAt = Time.realtimeSinceStartup + 2f;
             }
             report.inBed = local.Seated.Value;
             if (!string.IsNullOrEmpty(HomeStatus)) report.bedAnswer = HomeStatus;
+            // Real 2-player network play can reject a one-shot bed ray while a
+            // remote look/position update is in flight. Re-approach the REAL bed
+            // exit and retry the normal host-validated input, never set sleep
+            // or advance the day directly. Bounded retries keep genuine
+            // collision/range failures visible in the CI report.
+            if (substep == 1 && !local.Seated.Value && sync.DayNumber.Value <= firstDay &&
+                Time.realtimeSinceStartup >= sleepRetryAt && sleepAttempts < 4)
+            {
+                var exit = bed.ExitPose.position;
+                var delta = exit - local.transform.position;
+                delta.y = 0f;
+                if (delta.magnitude > 0.35f)
+                {
+                    MoveToward(StoreAware(Around(exit)));
+                    aimAt = 0;
+                    return;
+                }
+                Aim(bed.GetComponent<Collider>().bounds.center);
+                if (!Settled()) return;
+                typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
+                    .Invoke(adapter.GetComponent<HomePlayerInteractionBinding>(), new object[] { (byte)1 });
+                sleepAttempts++;
+                sleepRetryAt = Time.realtimeSinceStartup + 2f;
+                aimAt = 0;
+                Debug.Log($"P46_BED_RETRY slot={report.slot} attempt={sleepAttempts} pos={local.transform.position} target={bed.name}");
+            }
             if (sync.DayNumber.Value <= firstDay || local.Seated.Value || DayLock.IsLocked) return;
             report.slept = sync.SummaryDayNumber.Value == firstDay && sync.SummaryReason.Value == (byte)DayCloseReason.EarlySleep;
             report.morningHome = Vector3.Distance(local.transform.position, ContinuousTownLayout.HomeRig.Spawn(report.slot)) < 0.7f;
