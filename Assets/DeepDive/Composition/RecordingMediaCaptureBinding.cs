@@ -260,6 +260,15 @@ namespace DeepDive.Composition
             }
             catch (IOException e) { Debug.LogWarning("P4 media clip write failed: " + e.Message); }
             catch (UnauthorizedAccessException e) { Debug.LogWarning("P4 media clip access failed: " + e.Message); }
+            catch (ArgumentException e)
+            {
+                // Structurally invalid frames are not an IO retry: no hash,
+                // manifest or channel right may be minted for unplayable media.
+                // Retrying the same corrupt capture every 0.5s cannot fix it.
+                waiting.Remove(result.RecordingId);
+                pending.Remove(key);
+                Debug.LogWarning("P4 media clip invalid; not archived: " + e.Message);
+            }
         }
 
         private bool CaptureFrame(Active capture, NetworkPlayer player, double now)

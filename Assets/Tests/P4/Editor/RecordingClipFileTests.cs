@@ -73,11 +73,21 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
-        public void EncodeRefusesEmptyOrNonMonotonicInput()
+        public void EncodeRefusesEmptyNonMonotonicOrOutOfDurationInput()
         {
             Assert.Throws<ArgumentException>(() => RecordingClipFile.Encode(320, 180, 1f, Array.Empty<ClipFramePacket>()));
-            var bytes = RecordingClipFile.Encode(320, 180, 1f, new[] { Frame(0.5f, 1), Frame(0.1f, 2) });
-            Assert.IsFalse(RecordingClipFile.TryDecode(bytes, out _), "decoder rejects a time-regressing clip even if bytes were locally constructed");
+            Assert.Throws<ArgumentException>(() => RecordingClipFile.Encode(
+                320, 180, 1f, new[] { Frame(0.5f, 1), Frame(0.1f, 2) }),
+                "encoder must not write a file the decoder would reject");
+            Assert.Throws<ArgumentException>(() => RecordingClipFile.Encode(
+                320, 180, .3f, new[] { Frame(0f, 1), Frame(.5f, 2) }),
+                "a captured frame cannot claim time beyond the clip's own playable duration");
+            Assert.Throws<ArgumentException>(() => RecordingClipFile.Encode(
+                320, 180, 1f, new[] { Frame(float.NaN, 1) }));
+            var valid = RecordingClipFile.Encode(320, 180, .4f,
+                new[] { Frame(0f, 1), Frame(.2f, 2), Frame(.4f, 3) });
+            Assert.IsTrue(RecordingClipFile.TryDecode(valid, out var decoded));
+            Assert.AreEqual(.4f, decoded.Frames[decoded.Frames.Count - 1].TimeSeconds, .0001f);
         }
     }
 }
