@@ -62,6 +62,19 @@ namespace DeepDive.Composition
             return view;
         }
 
+        // #250: the prefab already has authored products and shelves. Reuse only
+        // this view's payment/selection UI; do not construct a second set of racks.
+        public static ShopShelfPresentation BindStore(ServicePointAnchor shop, EquipmentStoreLayout store)
+        {
+            if (shop == null || store == null) return null;
+            var view = store.GetComponent<ShopShelfPresentation>();
+            if (view == null) view = store.gameObject.AddComponent<ShopShelfPresentation>();
+            view.shop = shop;
+            view.economy = FindFirstObjectByType<EconomyManager>();
+            EconomyPlayerSync.DrawPhysicalShop = view.DrawCashier;
+            return view;
+        }
+
         private void OnEnable() => EconomyPlayerSync.DrawPhysicalShop = DrawCashier;
         private void OnDisable()
         {
