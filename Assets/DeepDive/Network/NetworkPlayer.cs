@@ -710,8 +710,8 @@ namespace DeepDive.Network
         private bool CanKeepShopSelection(Vector3 feet)
         {
             if (selectedShop == null) return false;
-            var store = selectedShop.GetComponent<DeepDive.Composition.EquipmentStoreShopBinding>();
-            return store != null && store.Layout != null
+            var store = selectedShop.GetComponent<EquipmentStoreAreaAnchor>();
+            return store != null && store.StoreRoot != null
                 ? store.ContainsCustomer(feet)
                 : (feet - selectedShop.WorldPosition).sqrMagnitude <= 25f;
         }
@@ -759,7 +759,7 @@ namespace DeepDive.Network
                 PublishAction(requestId, kind, result);
                 return;
             }
-            var cashier = hit.collider.GetComponentInParent<DeepDive.Composition.EquipmentStoreCashierTarget>();
+            var cashier = hit.collider.GetComponentInParent<EquipmentStoreCashierTarget>();
             var target = cashier != null ? cashier.Shop : hit.collider.GetComponentInParent<ServicePointAnchor>();
             if (target == null)
             {
