@@ -222,6 +222,9 @@ namespace DeepDive.Network
                 if (IsOwner) bodyRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
             }
             if (GetComponent<RepairCarryView>() == null) gameObject.AddComponent<RepairCarryView>();
+            // First-session guidance is owner-only, local, and has no network/save authority.
+            if (IsOwner && GetComponent<FirstSessionObjectiveView>() == null)
+                gameObject.AddComponent<FirstSessionObjectiveView>();
             session.Register(this);
         }
 
