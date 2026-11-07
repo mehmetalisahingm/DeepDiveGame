@@ -80,10 +80,13 @@ namespace DeepDive.P4.Tests
             Assert.IsTrue(RecordingClipFile.TryDecode(bytes, out _),
                 "untampered clip is accepted");
 
-            // Header: magic, version, width, height, duration, frame count
-            // (24 bytes), then first float timestamp. Keep the payload intact.
+            // Header is 24 bytes. Each frame starts with a 4-byte time,
+            // a 4-byte JPEG length, then its payload. Corrupt the LAST
+            // timestamp, not the first: order stays monotonic (.2 -> 1.5),
+            // so only the new duration bound can reject the clip.
             var outOfDuration = (byte[])bytes.Clone();
-            Buffer.BlockCopy(BitConverter.GetBytes(1.5f), 0, outOfDuration, 24, 4);
+            var secondFrameTimeOffset = 24 + 4 + 4 + Frame(.2f, 10).JpegBytes.Length;
+            Buffer.BlockCopy(BitConverter.GetBytes(1.5f), 0, outOfDuration, secondFrameTimeOffset, 4);
             Assert.IsFalse(RecordingClipFile.TryDecode(outOfDuration, out _),
                 "decoder must not play a frame beyond the advertised duration");
 
