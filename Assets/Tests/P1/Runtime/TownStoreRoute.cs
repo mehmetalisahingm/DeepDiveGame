@@ -15,6 +15,8 @@ namespace DeepDive.P1.Lab
         private static Vector3 Inside => ContinuousTownLayout.EquipmentStoreDoorInside;
         private static Vector3 AisleNear => ContinuousTownLayout.EquipmentStoreAisleNear;
         private static Vector3 AisleFar => ContinuousTownLayout.EquipmentStoreAisleFar;
+        private static Vector3 NearFor(int lane) => (lane & 1) == 0 ? AisleNear : new Vector3(2f * Inside.x - AisleNear.x, AisleNear.y, AisleNear.z);
+        private static Vector3 FarFor(int lane) => (lane & 1) == 0 ? AisleFar : new Vector3(2f * Inside.x - AisleFar.x, AisleFar.y, AisleFar.z);
         private static Vector3 StreetMiddle => new Vector3(0f, Outside.y, Outside.z);
 
         // Past this z (the counter side of the table) the walker needs no more detour: the table is 1 m deep and ends at AisleFar.z + 1.2.
@@ -28,7 +30,7 @@ namespace DeepDive.P1.Lab
             return Mathf.Abs(p.x - Inside.x) <= Half && p.z >= back && p.z <= Line;
         }
 
-        public static Vector3 Next(Vector3 position, Vector3 target)
+        public static Vector3 Next(Vector3 position, Vector3 target, int lane = 0)
         {
             var from = InStore(position);
             var to = InStore(target);
@@ -47,8 +49,8 @@ namespace DeepDive.P1.Lab
                     if (position.z < -30.6f && Mathf.Abs(position.x) > 1.0f) return new Vector3(0f, position.y, position.z);
                     return Flat(StreetMiddle, position);
                 }
-                if (Mathf.Abs(position.x - Outside.x) > 0.6f && DistanceToPath(position) > 0.9f) return Flat(Outside, position);
-                return Along(position, target, true);
+                if (Mathf.Abs(position.x - Outside.x) > 0.6f && DistanceToPath(position, lane) > 0.9f) return Flat(Outside, position);
+                return Along(position, target, true, lane);
             }
             if (from && to)
             {
@@ -57,10 +59,10 @@ namespace DeepDive.P1.Lab
                 if (!HitsTable(position, target)) return target;
                 if (position.z <= SouthZone && target.z <= SouthZone) return target;
                 if (position.z >= Inside.z - 0.1f && target.z >= Inside.z - 0.1f) return target;
-                return Along(position, target, target.z < position.z);
+                return Along(position, target, target.z < position.z, lane);
             }
             // Inside to outside: back along the aisle and out of the door, then on to the target.
-            return Along(position, target, false);
+            return Along(position, target, false, lane);
         }
 
         // The display table in the middle of the store (store frame: 2.4 x 1.0 m at x 0, z 3.0, facing the door), grown by a walker's body.
@@ -77,11 +79,11 @@ namespace DeepDive.P1.Lab
         }
 
         // The door path, entrance first: street in front of the door, just inside, the near and the far end of the aisle round the table.
-        private static Vector3[] Path => new[] { Outside, Inside, AisleNear, AisleFar };
+        private static Vector3[] Path(int lane) => new[] { Outside, Inside, NearFor(lane), FarFor(lane) };
 
-        private static float DistanceToPath(Vector3 p)
+        private static float DistanceToPath(Vector3 p, int lane)
         {
-            var path = Path;
+            var path = Path(lane);
             var best = float.MaxValue;
             for (var i = 0; i + 1 < path.Length; i++) best = Mathf.Min(best, DistanceToSegment(p, path[i], path[i + 1]));
             return best;
@@ -95,14 +97,15 @@ namespace DeepDive.P1.Lab
         }
 
         // The next waypoint on the door path in the walking direction, from where the walker is now (stateless: the nearest segment decides, and a
-        // point counts as reached when the walker is within 0.4 m of it).
-        private static Vector3 Along(Vector3 position, Vector3 target, bool inwards)
+        // point counts as reached when the walker is within 0.55 m of it).
+        private static Vector3 Along(Vector3 position, Vector3 target, bool inwards, int lane)
         {
-            var path = Path;
+            var path = Path(lane);
+            var far = FarFor(lane);
             if (inwards && position.z <= Inside.z - 0.1f && InStore(target) && !HitsTable(position, target)) return target;   // past the door: straight if the table is clear
             if (!inwards) System.Array.Reverse(path);
             if (inwards && position.z <= SouthZone) return target;
-            if (!inwards && position.z <= SouthZone && position.x > AisleFar.x + 0.6f) return Flat(AisleFar, position);   // counter side: to the aisle end first, then up the aisle
+            if (!inwards && position.z <= SouthZone && ((lane & 1) == 0 ? position.x > far.x + 0.6f : position.x < far.x - 0.6f)) return Flat(far, position);   // counter side: to the aisle end first, then up the aisle
             var best = 0;
             var bestDistance = float.MaxValue;
             for (var i = 0; i + 1 < path.Length; i++)
@@ -111,7 +114,7 @@ namespace DeepDive.P1.Lab
                 if (d < bestDistance) { bestDistance = d; best = i; }
             }
             var end = path[best + 1];
-            if (new Vector2(position.x - end.x, position.z - end.z).magnitude < 0.4f)
+            if (new Vector2(position.x - end.x, position.z - end.z).magnitude < 0.55f)
             {
                 if (best + 2 >= path.Length)
                     return inwards || !(target.z < Line && target.x > Inside.x + Half - 0.3f) ? target : Flat(StreetMiddle, position);   // out of the door: on south-east round the store
