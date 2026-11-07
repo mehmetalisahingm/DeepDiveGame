@@ -397,7 +397,7 @@ namespace DeepDive.Network
             var frame = input.Read(now);
             if (SelectedShopItem.Value.Length > 0 && (selectedShop == null || session.DiveActive ||
                 Passive.Value || Seated.Value || RepairHandsBusy || DayLock.IsLocked ||
-                (transform.position - selectedShop.WorldPosition).sqrMagnitude > 25f)) ClearShopSelectionServer();
+                !CanKeepShopSelection(transform.position))) ClearShopSelectionServer();
             transform.rotation = Quaternion.Euler(0, frame.Yaw, 0);
 
             if (!externalEnvironmentBound)
@@ -707,6 +707,15 @@ namespace DeepDive.Network
             PublishAction(requestId, kind, result);
         }
 
+        private bool CanKeepShopSelection(Vector3 feet)
+        {
+            if (selectedShop == null) return false;
+            var store = selectedShop.GetComponent<DeepDive.Composition.EquipmentStoreShopBinding>();
+            return store != null && store.Layout != null
+                ? store.ContainsCustomer(feet)
+                : (feet - selectedShop.WorldPosition).sqrMagnitude <= 25f;
+        }
+
         private void HandleServiceInteraction(ulong requestId)
         {
             if (!IsServer) return;
@@ -750,7 +759,8 @@ namespace DeepDive.Network
                 PublishAction(requestId, kind, result);
                 return;
             }
-            var target = hit.collider.GetComponentInParent<ServicePointAnchor>();
+            var cashier = hit.collider.GetComponentInParent<DeepDive.Composition.EquipmentStoreCashierTarget>();
+            var target = cashier != null ? cashier.Shop : hit.collider.GetComponentInParent<ServicePointAnchor>();
             if (target == null)
             {
                 PublishAction(requestId, kind, PlayerActionResult.InvalidTarget);
@@ -758,7 +768,11 @@ namespace DeepDive.Network
             }
 
             var definition = target.Definition;
-            result = ServiceInteractionRules.Validate(definition, transform.position, target.WorldPosition,
+            // On an authored store, the player actually aims at the cash
+            // counter inside the building, not the old street service marker.
+            // Same host gate, real eye ray and no new purchase authority.
+            var interactionPosition = cashier != null ? cashier.transform.position : target.WorldPosition;
+            result = ServiceInteractionRules.Validate(definition, transform.position, interactionPosition,
                 hasClearLineOfSight: true);
             if (result == PlayerActionResult.Accepted)
                 result = ServiceInteractionAuthority.TryInteract(new PlayerId(OwnerClientId), definition, requestId);
