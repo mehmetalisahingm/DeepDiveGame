@@ -136,6 +136,18 @@ namespace DeepDive.Composition
                 for (var f = 0; f < 300; f++) { yield return null; samples.Add(Time.unscaledDeltaTime * 1000f); }
                 samples.Sort();
                 log.AppendLine($"overview_frames={samples.Count} mean_ms={samples.Average():0.00} p95_ms={samples[(int)(samples.Count * .95f)]:0.00} max_ms={samples[samples.Count - 1]:0.00}");
+                // The #278 success card (IMGUI is not in the camera render, so an outside screen grab takes it): markers tell the grabber when to look
+                var demo = new GameObject("SuccessCardDemo").AddComponent<SuccessFeedbackView>();
+                SuccessFeedbackRules.TryBuild(ServicePointType.FishBuyer, true, 240, 3, 360, 0, true, out var firstCard);
+                demo.Show(firstCard);
+                yield return new WaitForSecondsRealtime(1.4f);
+                File.WriteAllText(Path.Combine(output, "card-first.ready"), "1");
+                yield return new WaitForSecondsRealtime(2.5f);
+                SuccessFeedbackRules.TryBuild(ServicePointType.RecordingBuyer, true, 90, 1, 450, 1, false, out var plainCard);
+                demo.Show(plainCard);
+                yield return new WaitForSecondsRealtime(1.4f);
+                File.WriteAllText(Path.Combine(output, "card-plain.ready"), "1");
+                yield return new WaitForSecondsRealtime(2.5f);
                 log.AppendLine($"gpu={SystemInfo.graphicsDeviceName} api={SystemInfo.graphicsDeviceType} quality={QualitySettings.names[QualitySettings.GetQualityLevel()]}");
             }
 
