@@ -45,7 +45,9 @@ namespace DeepDive.P4.Tests
         {
             Assert.IsNull(store.GetComponentInChildren<NetworkObject>(true));
             var scripts = store.GetComponentsInChildren<MonoBehaviour>(true);
-            CollectionAssert.AreEqual(new[] { typeof(EquipmentStoreLayout) }, scripts.Select(s => s.GetType()).ToArray(), "data holder only");
+            // (plus the label that keeps the sign from showing through the walls: it only swaps the TextMesh's material)
+            CollectionAssert.AreEqual(new[] { typeof(EquipmentStoreLayout) }, scripts.Select(s => s.GetType()).Where(t => t != typeof(DepthTestedText)).ToArray(), "data holder only");
+            Assert.AreEqual(1, scripts.Count(s => s is DepthTestedText), "the one sign");
             foreach (var collider in store.GetComponentsInChildren<Collider>(true))
                 Assert.AreEqual("Collision", collider.transform.parent.name, collider.name + ": only the simple collision boxes collide, visuals do not");
         }

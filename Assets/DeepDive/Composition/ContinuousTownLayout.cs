@@ -251,6 +251,7 @@ namespace DeepDive.Composition
 
             BuildAnchors(parent);
             SuppliedTownArt.Town(parent);
+            TownDressing.Place(parent);   // #171: fences, paving, lamps and props over the bare blocks (visual only)
             BuildZones(scene, parent);
 
             var services = FindRoot(scene, "TownServices");

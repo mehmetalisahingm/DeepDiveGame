@@ -279,6 +279,7 @@ namespace DeepDive.Composition
             mesh.color = new Color(0.1f, 0.1f, 0.12f);
             var renderer = go.GetComponent<MeshRenderer>();
             if (font != null) renderer.sharedMaterial = font.material;
+            DepthTestedText.Apply(mesh);   // a label must not show through the building in front of it
             // fit the 1.9 m board whatever the label length is
             var width = renderer.bounds.size.x;
             var fit = Mathf.Min(1f, 1.8f / Mathf.Max(0.01f, width));

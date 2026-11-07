@@ -652,6 +652,47 @@ namespace DeepDive.P4.Tests
             public int Samples;
         }
 
+        // The smoke drivers steer with TownStoreRoute.Next; whatever line it draws between two places must be a walk the capsule can actually make
+        // (door, aisle round the display table, no wall), in both directions.
+        [Test]
+        public void SmokeDriverStoreRouteIsWalkableBothWays()
+        {
+            ContinuousTownScene.With(_ => AssertSmokeDriverStoreRouteIsWalkable(), furnitureProxies: true);
+        }
+
+        private static void AssertSmokeDriverStoreRouteIsWalkable()
+        {
+            Vector3 At(float x, float z) => new Vector3(x, ContinuousTownLayout.WalkSurfaceY, z);
+            var stand = ContinuousTownLayout.StorefrontPositions[0] + new Vector3(0f, 0f, 1.6f);
+            var places = new (string name, Vector3 point)[]
+            {
+                ("home door", ContinuousTownLayout.HomeRig.Door), ("street lane south", At(0f, -36f)), ("street lane", At(0f, -24f)),
+                ("square", new Vector3(Square.x, ContinuousTownLayout.WalkSurfaceY, Square.y)), ("beach", At(0f, -16f)), ("east of the cradle", At(9f, -16f)),
+                ("west beach", At(-6.5f, -11.3f)), ("in the store, at the till", stand), ("in the store, beside the till", At(-10f, -26.2f)), ("in the store, second customer", At(-9.1f, -26.2f)), ("in the store, in front of the table (east)", At(-9.2f, -23.85f)), ("in the store, in front of the table (west)", At(-10.8f, -23.85f)), ("east of the store", At(-3.0f, -24f)), ("fish buyer stand", At(10.1f, -27.3f)),
+            };
+            foreach (var a in places)
+                foreach (var b in places)
+                {
+                    if (a.name == b.name) continue;
+                    var inside = DeepDive.P1.Lab.TownStoreRoute.InStore(a.point) || DeepDive.P1.Lab.TownStoreRoute.InStore(b.point);
+                    if (!inside) continue;   // only legs that start or end in the store are the helper's business
+                    var path = new List<Vector2> { XZ(a.point) };
+                    var p = a.point;
+                    for (var i = 0; i < 1200 && Vector2.Distance(XZ(p), XZ(b.point)) > 0.3f; i++)
+                    {
+                        var next = DeepDive.P1.Lab.TownStoreRoute.Next(p, b.point);
+                        var step = new Vector2(next.x - p.x, next.z - p.z);
+                        if (step.magnitude < 0.01f) break;
+                        step = step.normalized * Mathf.Min(0.25f, step.magnitude);
+                        p = new Vector3(p.x + step.x, p.y, p.z + step.y);
+                        path.Add(XZ(p));
+                    }
+                    Assert.LessOrEqual(Vector2.Distance(XZ(p), XZ(b.point)), 0.3f, a.name + " -> " + b.name + ": the steering reaches the target (stopped at " + p + ")");
+                    var walk = Walk(path.ToArray());   // every 0.25 m step, so no chord cuts a corner the walker would not
+                    Assert.IsEmpty(walk.Failures, a.name + " -> " + b.name + ": " + Report(a.name + " -> " + b.name, walk));
+                }
+        }
+
         internal static WalkResult Walk(params Vector2[] waypoints) => WalkWithRadius(Radius, waypoints);
 
         // #138 PR-2: the home corridors are checked with Radius + Skin, the clearance a real CharacterController

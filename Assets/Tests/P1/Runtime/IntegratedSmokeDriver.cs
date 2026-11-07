@@ -3658,7 +3658,8 @@ namespace DeepDive.P1.Lab
             if (toStand.magnitude > 0.35f)
             {
                 townSettleAt = 0;
-                var target = NextBeachWaypoint(local.transform.position, stand);
+                // #249: the equipment shop is a building with one door.
+                var target = TownStoreRoute.Next(local.transform.position, NextBeachWaypoint(local.transform.position, stand));
                 var heading = target - local.transform.position;
                 var flatHeading = heading; flatHeading.y = 0;
                 var walkYaw = Mathf.Atan2(flatHeading.x, flatHeading.z) * Mathf.Rad2Deg;

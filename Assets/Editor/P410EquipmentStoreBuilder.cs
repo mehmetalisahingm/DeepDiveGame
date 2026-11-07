@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DeepDive.Composition;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -58,7 +59,7 @@ namespace DeepDive.EditorTools
 
         // The kit's FBX roots carry their own axis fix-up and scale, so a module is never scaled through its own transform: a scale goes on a
         // wrapper (world axes, no rotation) and the module sits unchanged inside it. Use it for non-uniform fills only (plain plaster).
-        private static GameObject Part(Transform parent, string model, Vector3 position, float yaw = 0f, Vector3? scale = null)
+        internal static GameObject Part(Transform parent, string model, Vector3 position, float yaw = 0f, Vector3? scale = null)
         {
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(Models + model + ".fbx");
             if (asset == null) throw new FileNotFoundException("P410_STORE_MODEL_MISSING " + model);
@@ -96,9 +97,9 @@ namespace DeepDive.EditorTools
             return material;
         }
 
-        private static Material Kit(string name) => AssetDatabase.LoadAssetAtPath<Material>(KitMaterials + name + ".mat");
+        internal static Material Kit(string name) => AssetDatabase.LoadAssetAtPath<Material>(KitMaterials + name + ".mat");
 
-        private static GameObject Prim(Transform parent, PrimitiveType type, string name, Vector3 position, Vector3 scale, Material material, Vector3? euler = null)
+        internal static GameObject Prim(Transform parent, PrimitiveType type, string name, Vector3 position, Vector3 scale, Material material, Vector3? euler = null)
         {
             var go = GameObject.CreatePrimitive(type);
             go.name = name;
@@ -111,7 +112,7 @@ namespace DeepDive.EditorTools
             return go;
         }
 
-        private static Transform Empty(Transform parent, string name, Vector3 position, float yaw = 0f)
+        internal static Transform Empty(Transform parent, string name, Vector3 position, float yaw = 0f)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -151,8 +152,9 @@ namespace DeepDive.EditorTools
             text.transform.localRotation = Quaternion.identity;
             var mesh = text.AddComponent<TextMesh>();
             mesh.text = "EKIPMAN";
+            text.AddComponent<DepthTestedText>();
             mesh.anchor = TextAnchor.MiddleCenter; mesh.alignment = TextAlignment.Center;
-            mesh.characterSize = 0.1f; mesh.fontSize = 100; mesh.color = new Color(0.97f, 0.93f, 0.8f);
+            mesh.characterSize = 0.066f; mesh.fontSize = 100; mesh.color = new Color(0.97f, 0.93f, 0.8f);
 
             // Ground floor sides and back (2 m modules), ground floor slab.
             for (var i = 0; i < 4; i++)
@@ -301,8 +303,8 @@ namespace DeepDive.EditorTools
             Prim(till, PrimitiveType.Cube, "Screen", new Vector3(0f, 0.25f, -0.05f), new Vector3(0.3f, 0.14f, 0.03f), Mat("TillScreen", new Color(0.2f, 0.5f, 0.4f), 0.5f, new Color(0.1f, 0.5f, 0.4f)), new Vector3(20f, 0f, 0f));
             Prim(counter, PrimitiveType.Cylinder, "BellBase", new Vector3(-0.7f, 1.07f, -0.1f), new Vector3(0.14f, 0.015f, 0.14f), Mat("Brass", new Color(0.78f, 0.6f, 0.25f), 0.6f));
             // Crates by the door and a floor mat inside it so the entrance reads from the street.
-            Part(interior, "Prop_Crate", new Vector3(-4.2f, 0f, 0.55f), 20f, Vector3.one * 0.7f);
-            Part(interior, "Prop_Crate", new Vector3(-4.25f, 0.74f, 0.55f), 5f, Vector3.one * 0.5f);
+            Part(interior, "Prop_Crate", new Vector3(-4.45f, 0f, 0.55f), 20f, Vector3.one * 0.7f);
+            Part(interior, "Prop_Crate", new Vector3(-4.48f, 0.74f, 0.55f), 5f, Vector3.one * 0.5f);
             Part(interior, "Prop_Crate", new Vector3(4.2f, 0f, 0.6f), -15f, Vector3.one * 0.6f);
             Prim(interior, PrimitiveType.Cube, "DoorMat", new Vector3(0f, 0.02f, 0.9f), new Vector3(2.0f, 0.02f, 1.1f), Mat("DoorMat", new Color(0.42f, 0.16f, 0.14f), 0.1f));
         }
@@ -405,7 +407,7 @@ namespace DeepDive.EditorTools
             Box(c, "ShelfLeft2", new Vector3(-SideShelfX, 1.05f, SideShelfZ[1]), new Vector3(0.5f, 2.1f, 2.0f));
             Box(c, "ShelfRight1", new Vector3(SideShelfX, 1.05f, SideShelfZ[0]), new Vector3(0.5f, 2.1f, 2.0f));
             Box(c, "ShelfRight2", new Vector3(SideShelfX, 1.05f, SideShelfZ[1]), new Vector3(0.5f, 2.1f, 2.0f));
-            Box(c, "CratesLeft", new Vector3(-4.2f, 0.45f, 0.55f), new Vector3(0.8f, 0.9f, 0.8f));
+            Box(c, "CratesLeft", new Vector3(-4.45f, 0.45f, 0.55f), new Vector3(0.8f, 0.9f, 0.8f));
             Box(c, "CratesRight", new Vector3(4.2f, 0.4f, 0.6f), new Vector3(0.7f, 0.8f, 0.7f));
         }
 

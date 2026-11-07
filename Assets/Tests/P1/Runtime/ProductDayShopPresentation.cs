@@ -56,17 +56,15 @@ namespace DeepDive.P1.Lab
                 if (!Follow()) return;
                 route = null; lateShopStage = 1;
             }
-            var shelf = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None)
-                .SingleOrDefault(s => s.ItemId == "camera-basic");
+            var shelf = TownStoreRoute.Shelf("camera-basic");
             if (shelf == null) { Fail("Missing camera shelf"); return; }
             if (Host)
             {
                 if (lateShopStage == 1)
                 {
-                    var stand = shelf.transform.position + Vector3.forward;
-                    stand.y = ContinuousTownLayout.WalkSurfaceY;
+                    var stand = TownStoreRoute.Stand(shelf);
                     var delta = stand - local.transform.position; delta.y = 0;
-                    if (delta.magnitude > .17f) { MoveToward(Around(stand)); aimAt = 0; return; }
+                    if (delta.magnitude > .17f) { MoveToward(StoreAware(Around(stand))); aimAt = 0; return; }
                     Aim(shelf.transform.position);
                     if (!Settled()) return;
                     if (local.SelectedShopItem.Value.ToString() != "camera-basic")
@@ -91,7 +89,7 @@ namespace DeepDive.P1.Lab
             if (!report.lateShopSawSelection || carry == null || !carry.Visible) return;
             var target = host.transform.position + Vector3.forward * 2f;
             var distance = target - local.transform.position; distance.y = 0;
-            if (distance.magnitude > .3f) { MoveToward(Around(CoastTarget(target))); return; }
+            if (distance.magnitude > .3f) { MoveToward(StoreAware(Around(CoastTarget(target)))); return; }
             Aim(carry.Focus);
             if (lateShopObservedAt == 0) lateShopObservedAt = Time.realtimeSinceStartup;
             if (Time.realtimeSinceStartup - lateShopObservedAt < 1f) return;
@@ -116,7 +114,7 @@ namespace DeepDive.P1.Lab
             var carry = worker.GetComponent<ShopCarryView>();
             var focus = carry != null && carry.Visible ? carry.Focus : worker.transform.position + Vector3.up * 1.2f;
             var delta = target - local.transform.position; delta.y = 0;
-            if (delta.magnitude > .25f) { MoveWatching(Around(CoastTarget(target)), focus); return; }
+            if (delta.magnitude > .25f) { MoveWatching(StoreAware(Around(CoastTarget(target))), focus); return; }
             Stop(); Aim(focus);
             localDone = report.shelfCarryInView && report.shelfCarryWalkSeen && worker.EquippedCameraTier.Value > 0;
         }

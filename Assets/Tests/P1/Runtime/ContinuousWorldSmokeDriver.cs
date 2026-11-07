@@ -384,6 +384,12 @@ namespace DeepDive.P1.Lab
                 heading = repair.NextAround(local.transform.position, target) - local.transform.position;
                 flat = new Vector2(heading.x, heading.z).magnitude;
             }
+            // #249: the equipment shop is a building with one door: steer through the door and the aisle, but count arrival at the real waypoint.
+            if (!local.Swimming.Value)
+            {
+                var steer = TownStoreRoute.Next(local.transform.position, target);
+                if (steer != target) { heading = steer - local.transform.position; flat = new Vector2(heading.x, heading.z).magnitude; }
+            }
             var yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
             var move = Vector3.forward;
             if (local.Swimming.Value)

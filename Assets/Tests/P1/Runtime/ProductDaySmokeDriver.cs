@@ -668,13 +668,12 @@ namespace DeepDive.P1.Lab
         private bool SelectCameraFromShelf()
         {
             if (shelfStage == 4) return true;
-            var sample = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None)
-                .SingleOrDefault(s => s.ItemId == EconomyManager.CameraBasicId);
+            // The real store stocks several copies of the camera; take the one nearest the door and stand in front of it.
+            var sample = TownStoreRoute.Shelf(EconomyManager.CameraBasicId);
             if (sample == null) { Fail("Physical camera shelf missing"); return false; }
-            var stand = sample.transform.position + Vector3.forward;
-            stand.y = ContinuousTownLayout.WalkSurfaceY;
+            var stand = TownStoreRoute.Stand(sample);
             var delta = stand - local.transform.position; delta.y = 0;
-            if (delta.magnitude > .17f) { MoveToward(Around(stand)); aimAt = 0; return false; }
+            if (delta.magnitude > .17f) { MoveToward(StoreAware(Around(stand))); aimAt = 0; return false; }
             Aim(sample.transform.position);
             if (!Settled()) return false;
             var selected = local.SelectedShopItem.Value.ToString();
@@ -1061,8 +1060,8 @@ namespace DeepDive.P1.Lab
             if (flat < tolerance && (!depth || waypoint != route.Count - 1 || Mathf.Abs(delta.y) < 0.45f))
             { waypoint++; return waypoint >= route.Count; }
             // #188 hunt-first: the unrepaired hull still lies on the beach cradle, so dry legs go round it.
-            if ((HuntFirst || HabitatHunt) && !local.Swimming.Value) { MoveToward(Around(target)); return false; }
-            MoveToward(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target);
+            if ((HuntFirst || HabitatHunt) && !local.Swimming.Value) { MoveToward(StoreAware(Around(target))); return false; }
+            MoveToward(StoreAware(waypoint == 0 && target.z < -10f && local.transform.position.z > -11f && local.Swimming.Value ? CoastTarget(target) : target));
             return false;
         }
         private Vector3 CoastTarget(Vector3 stand)
@@ -1085,10 +1084,12 @@ namespace DeepDive.P1.Lab
             var anchor = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None).Single(a => a.Definition.ServiceId == id);
             var stand = anchor.WorldPosition + anchor.transform.forward * 1.6f;
             var delta = stand - local.transform.position; delta.y = 0f;
-            if (delta.magnitude > 0.2f) { MoveToward(Around(CoastTarget(stand))); aimAt = 0; return false; }
+            if (delta.magnitude > 0.2f) { MoveToward(StoreAware(Around(CoastTarget(stand)))); aimAt = 0; return false; }
             Aim(anchor.WorldPosition + Vector3.up);
             return Settled();
         }
+        // #249: the equipment shop is a building with one door: steer through the door and the aisle (a no-op everywhere else).
+        private Vector3 StoreAware(Vector3 target) => local.Swimming.Value ? target : TownStoreRoute.Next(local.transform.position, target);
         private void MoveToward(Vector3 target)
         {
             var delta = target - local.transform.position;
