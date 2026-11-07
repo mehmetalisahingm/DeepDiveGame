@@ -78,6 +78,13 @@ namespace DeepDive.Composition
             return true;
         }
 
+        // The shared purchase RPC also carries motor/research boat orders.
+        // Only items from this equipment/repair catalog participate in shelf
+        // selection; vessel purchases retain their vendor-specific authority.
+        public static bool RequiresEquipmentBasket(string itemId)
+            => !string.IsNullOrWhiteSpace(itemId) &&
+               Array.IndexOf(ShopShelfAnchor.ItemIds, itemId) >= 0;
+
         public static bool MatchesCheckoutSelection(bool authoredStore, string selectedId, string requestedId,
             bool catalogOnlyAtCashier = false)
             => !authoredStore || (!string.IsNullOrWhiteSpace(requestedId) &&
