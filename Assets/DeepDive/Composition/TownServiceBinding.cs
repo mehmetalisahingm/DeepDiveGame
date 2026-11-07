@@ -114,9 +114,13 @@ namespace DeepDive.Composition
             // direct RPC. The old storefront still accepts its original shop
             // session and has no additional gating.
             var authoredStore = anchors.TryGetValue(TownServiceCatalog.EquipmentShopId, out var shopAnchor) &&
-                shopAnchor != null && shopAnchor.GetComponent<EquipmentStoreShopBinding>() != null;
-            if (authoredStore && !EquipmentStoreShopBinding.MatchesCheckoutSelection(
-                    true, actor != null ? actor.SelectedShopItem.Value.ToString() : string.Empty, itemId))
+                shopAnchor != null ? shopAnchor.GetComponent<EquipmentStoreShopBinding>() : null;
+            // Shelved items still require host-selected basket proof. The few
+            // catalog items missing from the visual prefab may be bought at the
+            // same real cashier, under the existing host/session/range checks.
+            if (authoredStore != null && !EquipmentStoreShopBinding.MatchesCheckoutSelection(
+                    true, actor != null ? actor.SelectedShopItem.Value.ToString() : string.Empty, itemId,
+                    authoredStore.IsCatalogOnlyItem(itemId)))
                 return TransactionResult.Reject(requestId, "SelectItemFirst", economy.Revision);
 
             var result = handler.HandlePurchase(player, itemId, requestId);
