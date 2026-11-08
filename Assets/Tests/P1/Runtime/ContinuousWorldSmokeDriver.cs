@@ -387,7 +387,7 @@ namespace DeepDive.P1.Lab
             // #249: the equipment shop is a building with one door: steer through the door and the aisle, but count arrival at the real waypoint.
             if (!local.Swimming.Value)
             {
-                var steer = TownStoreRoute.Next(local.transform.position, target);
+                var steer = TownStoreRoute.Next(local.transform.position, target, slot);
                 if (steer != target) { heading = steer - local.transform.position; flat = new Vector2(heading.x, heading.z).magnitude; }
             }
             var yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
