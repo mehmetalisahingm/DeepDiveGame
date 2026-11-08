@@ -24,6 +24,13 @@ namespace DeepDive.P1.Lab
         private const float Half = 5.4f;   // half the store width plus the wall
         private static float Line => Inside.z + 1.8f;   // the store's front wall: north of it the walker is on the street in front of the store, south of it inside, or beside and behind the building
 
+        // Slow down near a physical waypoint. Four headless Unity processes can
+        // have long Update frames while the server continues fixed movement;
+        // a full-speed command through that interval overshoots short turns.
+        // This only changes smoke-driver steering, not the player speed,
+        // authoritative movement, collision, or the 1.5 m QA failure threshold.
+        public static float ApproachThrottle(float metres) => Mathf.Clamp01(Mathf.Max(0f, metres) / 2.5f);
+
         public static bool InStore(Vector3 p)
         {
             var back = ContinuousTownLayout.StorefrontPositions[0].z - 1.3f;
