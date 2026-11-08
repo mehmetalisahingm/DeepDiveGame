@@ -15,6 +15,7 @@ using DeepDive.Trip;
 using DeepDive.MapUI;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
@@ -314,6 +315,10 @@ namespace DeepDive.P1.Lab
                     if (!host && !unauthorizedSent && state.Phase == SessionPhase.Lobby && elapsed > 4)
                     { unauthorizedSent = true; adapter.AdvancePhase(); }
                 }
+                // P207: the host must not finish the trip while a guest's own
+                // replicated seat count still says somebody is aboard.
+                if (Trip && !FleetRoute && connection.Status == ConnectionStatus.Connected)
+                    ObserveTripGuestCompletion(host, expected);
                 if (rejoin && elapsed > 8 && !rejoinLeft)
                 { rejoinLeft = true; leaveAt = elapsed; adapter.LeaveRoom(); }
                 if (rejoinLeft && connection.Status == ConnectionStatus.Offline) sawOffline = true;
@@ -401,7 +406,8 @@ namespace DeepDive.P1.Lab
                 var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (Shops ? 98 : MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 188 : Record ? 56 : Hunt ? 48 + HuntExtra : 36);
                 if (CoastParts) lobbyDue = result.boatRepaired && result.boatPartsHidden && result.boatHintGone &&
                     boatFinalAt > 0 && Time.realtimeSinceStartup - boatFinalAt > 2f;
-                else if (Trip && !FleetRoute) lobbyDue = result.tripDone && result.tripSaveReload;
+                else if (Trip && !FleetRoute)
+                    lobbyDue = CanAdvanceTripLobby(result.tripDone, result.tripSaveReload, expected, tripGuestWitnesses.Count);
                 else if (Boat && !FleetRoute) lobbyDue = result.boatRepaired && result.boatPartsHidden && result.boatHintGone &&
                     boatFinalAt > 0 && Time.realtimeSinceStartup - boatFinalAt > 2f;
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
@@ -3318,6 +3324,58 @@ namespace DeepDive.P1.Lab
         // Walks the beach to the dock, boards through BoatTripPlayerSync's owner RPCs (host resolves the seat), the
         // trip owner starts the route, the non-owner steps off at the anchorage (return marker must show) and back on,
         // the owner recalls, everybody steps off at the dock. Every process samples ITS OWN map (BoatMapView.LastIcons).
+        // Test-only reliable completion acknowledgment: the peer must personally see
+        // the boat Docked AND the replicated seat count reach zero. The host cannot
+        // close the return session on its own local state alone. No product RPC,
+        // game economy, scene authority or acceptance threshold is changed.
+        private const string TripGuestCompletedMessage = "P207_TEST_TRIP_GUEST_COMPLETED";
+        private readonly HashSet<ulong> tripGuestWitnesses = new HashSet<ulong>();
+        private CustomMessagingManager tripWitnessMessages;
+        private bool tripWitnessRegistered, tripGuestWitnessSent;
+
+        public static bool CanAdvanceTripLobby(bool hostDone, bool saved, int expectedPlayers, int confirmedGuests)
+            => hostDone && saved && expectedPlayers >= 1 && confirmedGuests >= expectedPlayers - 1;
+
+        private void ObserveTripGuestCompletion(bool host, int expectedPlayers)
+        {
+            var manager = adapter != null ? adapter.GetComponent<NetworkManager>() : null;
+            if (manager == null || !manager.IsListening || manager.CustomMessagingManager == null) return;
+            if (host)
+            {
+                if (!tripWitnessRegistered)
+                {
+                    tripWitnessMessages = manager.CustomMessagingManager;
+                    tripWitnessMessages.RegisterNamedMessageHandler(TripGuestCompletedMessage, TripGuestWitnessReceived);
+                    tripWitnessRegistered = true;
+                }
+                return;
+            }
+
+            // The guest's own proof is mandatory: the host's seat count is not
+            // a substitute for successful mirror delivery to that guest.
+            if (tripGuestWitnessSent || !result.tripDone || !result.tripDockedEmpty ||
+                !result.tripReturnMarkerSeen || !result.tripReboarded) return;
+            using (var writer = new FastBufferWriter(4, Allocator.Temp))
+            {
+                writer.WriteValueSafe((byte)1);
+                manager.CustomMessagingManager.SendNamedMessage(
+                    TripGuestCompletedMessage, NetworkManager.ServerClientId, writer);
+            }
+            tripGuestWitnessSent = true;
+            Debug.Log("P207_TRIP_GUEST_WITNESS_SENT client=" + manager.LocalClientId);
+        }
+
+        private void TripGuestWitnessReceived(ulong sender, FastBufferReader reader)
+        {
+            var manager = adapter != null ? adapter.GetComponent<NetworkManager>() : null;
+            if (manager == null || !manager.IsServer || sender == NetworkManager.ServerClientId ||
+                !manager.ConnectedClients.ContainsKey(sender) || reader.Length > 8 || !reader.TryBeginRead(1))
+                return;
+            reader.ReadValueSafe(out byte completed);
+            if (completed == 1 && tripGuestWitnesses.Add(sender))
+                Debug.Log("P207_TRIP_GUEST_WITNESS_RECEIVED client=" + sender);
+        }
+
         private int tripStep;
         private float tripStepAt, tripNext, tripDisembarkedAt;
         private bool tripDupSent, tripDropSeen, tripOnBeach;
