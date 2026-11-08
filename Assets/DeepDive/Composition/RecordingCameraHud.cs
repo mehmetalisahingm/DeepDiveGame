@@ -69,7 +69,10 @@ namespace DeepDive.Composition
             var clock = RecordingCountdownRules.Evaluate(tier, recording, elapsed);
             timer.text = recording ? $"{clock.RemainingSeconds:00} sn KALDI" :
                 $"LIMIT {clock.LimitSeconds:00} sn";
-            countdownFill.fillAmount = clock.RemainingRatio;
+            // A Unity UI Image with no sprite does not implement Filled geometry.
+            // Simple Image + physical RectTransform width renders an actual shrinking bar.
+            countdownFill.rectTransform.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal, 206f * clock.RemainingRatio);
             countdownFill.color = clock.WarnLastSeconds || clock.ReachedLimit ? red :
                 recording ? new Color(.42f, .94f, .78f) : new Color(.60f, .75f, .81f);
             tierLabel.text = "CAM / " + (tier == CameraTier.Professional ? "PRO" : tier == CameraTier.Advanced ? "ADVANCED" : "BASIC");
@@ -107,9 +110,7 @@ namespace DeepDive.Composition
             Panel(countdownTrack, new Color(.20f, .29f, .33f, 1f));
             var countdownBar = CreateRect(countdownTrack, "TimeRemainingFill", 0, 0, 206, 4);
             countdownFill = Panel(countdownBar, new Color(.42f, .94f, .78f));
-            countdownFill.type = Image.Type.Filled;
-            countdownFill.fillMethod = Image.FillMethod.Horizontal;
-            countdownFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            countdownFill.type = Image.Type.Simple;
             var tier = CreateRect(frame, "CameraModel", -165, 22, 150, 26);
             tier.anchorMin = tier.anchorMax = new Vector2(1, 1);
             tierLabel = Label(tier, 14);
