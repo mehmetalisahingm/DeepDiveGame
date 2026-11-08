@@ -47,6 +47,76 @@ namespace DeepDive.Composition
         }
     }
 
+    // P4/#278: pure view-only summary of host-settled publications.
+    // Only a previously observed queued publication may trigger a new celebration;
+    // a reconnect, reload, or historical mirror never creates a fake fresh result.
+    public readonly struct ChannelSettlementCard
+    {
+        public readonly int Count;
+        public readonly string Title;
+        public readonly int Views;
+        public readonly int FollowersGained;
+        public readonly int Income;
+        public readonly int FollowersBefore;
+        public readonly int FollowersAfter;
+
+        public ChannelSettlementCard(int count, string title, int views, int gained, int income, int before, int after)
+        {
+            Count = count;
+            Title = title;
+            Views = views;
+            FollowersGained = gained;
+            Income = income;
+            FollowersBefore = before;
+            FollowersAfter = after;
+        }
+    }
+
+    public static class ChannelSettlementFeedbackRules
+    {
+        public static HashSet<string> Pending(MediaSaveData snapshot)
+        {
+            var pending = new HashSet<string>(System.StringComparer.Ordinal);
+            if (snapshot?.Publications == null) return pending;
+            foreach (var publication in snapshot.Publications)
+                if (publication != null && !string.IsNullOrEmpty(publication.PublicationId) &&
+                    string.IsNullOrEmpty(publication.SettledId))
+                    pending.Add(publication.PublicationId);
+            return pending;
+        }
+
+        public static ChannelSettlementCard NewlySettled(MediaSaveData snapshot, ISet<string> previouslyQueued, int followersBefore)
+        {
+            if (snapshot?.Publications == null || previouslyQueued == null || previouslyQueued.Count == 0)
+                return default;
+
+            var count = 0;
+            long views = 0, gained = 0, income = 0;
+            string title = "";
+            foreach (var publication in snapshot.Publications)
+            {
+                if (publication == null || string.IsNullOrEmpty(publication.PublicationId) ||
+                    !previouslyQueued.Contains(publication.PublicationId) ||
+                    string.IsNullOrEmpty(publication.SettledId) ||
+                    publication.SettledId != ChannelIds.SettleId(publication.PublicationId))
+                    continue;
+                count++;
+                if (count == 1) title = publication.Title ?? "";
+                views += System.Math.Max(0, publication.Views);
+                gained += System.Math.Max(0, publication.FollowersGained);
+                income += System.Math.Max(0, publication.Income);
+            }
+
+            if (count == 0) return default;
+            return new ChannelSettlementCard(count, title,
+                (int)System.Math.Min(int.MaxValue, views),
+                (int)System.Math.Min(int.MaxValue, gained),
+                (int)System.Math.Min(int.MaxValue, income),
+                System.Math.Max(0, followersBefore),
+                System.Math.Max(0, snapshot.Followers));
+        }
+    }
+
     // The PC screen (#102): archive list, clip details/preview, title + publish, and the shared channel feed.
     // Shows only what the host mirrored (MediaNetworkBinding.Mirrored) and sends publish requests; the host
     // decides everything (owner, commercial right, PC proximity). No world or fish position is on this screen.
@@ -63,6 +133,12 @@ namespace DeepDive.Composition
         private float nextLookup;
         private string title = "";
         private string status = "";
+        private bool settlementInitialized;
+        private int observedMediaRevision = -1;
+        private int previousFollowerCount;
+        private HashSet<string> queuedPublications = new HashSet<string>(System.StringComparer.Ordinal);
+        private ChannelSettlementCard latestSettlement;
+        private float settlementCardUntil;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -89,12 +165,71 @@ namespace DeepDive.Composition
                     if (p.IsSpawned && p.IsOwner) { local = p; break; }
             }
             PanelOpen = pc != null && local != null && Vector3.Distance(local.transform.position, pc.transform.position) <= ShowRange;
+            ObserveSettledPublications();
+        }
+
+        private void ObserveSettledPublications()
+        {
+            if (!MediaNetworkBinding.HasMirror)
+            {
+                settlementInitialized = false;
+                observedMediaRevision = -1;
+                queuedPublications.Clear();
+                settlementCardUntil = 0f;
+                return;
+            }
+
+            var revision = MediaNetworkBinding.MirroredRevision;
+            if (revision == observedMediaRevision) return;
+            var snapshot = MediaNetworkBinding.Mirrored;
+            if (settlementInitialized)
+            {
+                var card = ChannelSettlementFeedbackRules.NewlySettled(
+                    snapshot, queuedPublications, previousFollowerCount);
+                if (card.Count > 0)
+                {
+                    latestSettlement = card;
+                    settlementCardUntil = Time.unscaledTime + 9f;
+                }
+            }
+            queuedPublications = ChannelSettlementFeedbackRules.Pending(snapshot);
+            previousFollowerCount = snapshot?.Followers ?? 0;
+            observedMediaRevision = revision;
+            settlementInitialized = true;
+        }
+
+        private void DrawSettlementCard()
+        {
+            if (local == null || Time.unscaledTime >= settlementCardUntil) return;
+            var width = Mathf.Min(560f, Screen.width - 24f);
+            if (width < 280f || Screen.height < 150f) return;
+            var x = (Screen.width - width) * 0.5f;
+            var y = Screen.height - 120f;
+            var oldColor = GUI.color;
+            GUI.color = new Color(0.08f, 0.18f, 0.23f, 0.94f);
+            GUI.DrawTexture(new Rect(x, y, width, 102f), Texture2D.whiteTexture);
+            GUI.color = new Color(1f, 0.86f, 0.49f);
+            GUI.Label(new Rect(x + 12f, y + 7f, width - 24f, 23f),
+                latestSettlement.Count == 1 ? "YAYIN SONUCU KESINLESTI" :
+                latestSettlement.Count + " YAYININ SONUCU KESINLESTI");
+            GUI.color = Color.white;
+            GUI.Label(new Rect(x + 12f, y + 30f, width - 24f, 24f),
+                latestSettlement.Count == 1 ? latestSettlement.Title :
+                "Birlikte yayinlanan kliplerin toplu sonucu");
+            GUI.Label(new Rect(x + 12f, y + 52f, width - 24f, 22f),
+                latestSettlement.Views + " izlenme   +" + latestSettlement.FollowersGained +
+                " takipci   +" + latestSettlement.Income + " kredi");
+            GUI.Label(new Rect(x + 12f, y + 77f, width - 24f, 20f),
+                "Kanal: " + latestSettlement.FollowersBefore + " > " + latestSettlement.FollowersAfter +
+                " takipci  |  Sonuc host tarafindan dogrulandi");
+            GUI.color = oldColor;
         }
 
         public static void Select(string clipId) => Selected = clipId ?? "";
 
         private void OnGUI()
         {
+            DrawSettlementCard();
             if (!PanelOpen || local == null) return;
             var me = local.OwnerClientId;
             var data = MediaNetworkBinding.Mirrored;
