@@ -1127,7 +1127,11 @@ namespace DeepDive.P1.Lab
             var yaw = Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg;
             var move = Quaternion.Inverse(Quaternion.Euler(0f, yaw, 0f)) * delta.normalized;
             if (!local.Swimming.Value) move.y = 0f;
-            local.SubmitLocalInput(move, yaw, 0f);
+            // At low multi-process frame rates the host can execute several
+            // fixed ticks between client steering updates. Ease into real
+            // waypoints instead of commanding a full-speed turn past them.
+            var distance = local.Swimming.Value ? delta.magnitude : new Vector2(delta.x, delta.z).magnitude;
+            local.SubmitLocalInput(move * TownStoreRoute.ApproachThrottle(distance), yaw, 0f);
         }
         private void Aim(Vector3 target)
         {
