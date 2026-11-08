@@ -42,6 +42,18 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RealProcessWaypointSteeringEasesIntoShortTurnsWithoutSkippingTargets()
+        {
+            // Full speed on long streets; progressively less input close to a
+            // physical doorway/bed. No change to the travel-discontinuity gate.
+            Assert.AreEqual(1f, TownStoreRoute.ApproachThrottle(4f), 1e-4f);
+            Assert.AreEqual(1f, TownStoreRoute.ApproachThrottle(2.5f), 1e-4f);
+            Assert.AreEqual(0.4f, TownStoreRoute.ApproachThrottle(1f), 1e-4f);
+            Assert.Less(TownStoreRoute.ApproachThrottle(0.08f), 0.04f);
+            Assert.AreEqual(0f, TownStoreRoute.ApproachThrottle(-1f), 1e-4f);
+        }
+
+        [Test]
         public void ItIsAnIsolatedPrefabWithNoNetworkObjectAndOnlyTheLayoutScript()
         {
             Assert.IsNull(store.GetComponentInChildren<NetworkObject>(true));
