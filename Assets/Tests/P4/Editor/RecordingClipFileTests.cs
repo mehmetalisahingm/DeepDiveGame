@@ -73,6 +73,30 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void DecodeRejectsTamperedFrameAfterClaimedDuration()
+        {
+            var bytes = RecordingClipFile.Encode(320, 180, 1f,
+                new[] { Frame(.2f, 10), Frame(.8f, 20) });
+            Assert.IsTrue(RecordingClipFile.TryDecode(bytes, out _),
+                "untampered clip is accepted");
+
+            // Header is 24 bytes. Each frame starts with a 4-byte time,
+            // a 4-byte JPEG length, then its payload. Corrupt the LAST
+            // timestamp, not the first: order stays monotonic (.2 -> 1.5),
+            // so only the new duration bound can reject the clip.
+            var outOfDuration = (byte[])bytes.Clone();
+            var secondFrameTimeOffset = 24 + 4 + 4 + Frame(.2f, 10).JpegBytes.Length;
+            Buffer.BlockCopy(BitConverter.GetBytes(1.5f), 0, outOfDuration, secondFrameTimeOffset, 4);
+            Assert.IsFalse(RecordingClipFile.TryDecode(outOfDuration, out _),
+                "decoder must not play a frame beyond the advertised duration");
+
+            var validBoundary = RecordingClipFile.Encode(320, 180, 1f,
+                new[] { Frame(.2f, 10), Frame(1f, 20) });
+            Assert.IsTrue(RecordingClipFile.TryDecode(validBoundary, out _),
+                "last frame at the clip boundary remains valid");
+        }
+
+        [Test]
         public void EncodeRefusesEmptyNonMonotonicOrOutOfDurationInput()
         {
             Assert.Throws<ArgumentException>(() => RecordingClipFile.Encode(320, 180, 1f, Array.Empty<ClipFramePacket>()));
