@@ -271,7 +271,7 @@ namespace DeepDive.P4.Tests
             }
             finally
             {
-                foreach (var name in new[] { HomeSceneSetup.RootName, HomePcAnchor.PcName })
+                foreach (var name in new[] { HomeSceneSetup.RootName, HomePcAnchor.PcName, HomeDressing.RootName })
                 foreach (var leftover in prep.GetRootGameObjects().Where(r => r.name == name).ToArray())
                     Object.DestroyImmediate(leftover);
                 if (opened) EditorSceneManager.CloseScene(prep, true);

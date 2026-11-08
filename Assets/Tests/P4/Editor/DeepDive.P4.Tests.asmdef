@@ -13,6 +13,7 @@
     "DeepDive.Composition",
     "DeepDive.Media",
     "DeepDive.Network",
+    "DeepDive.P1.Lab",
     "Unity.Netcode.Runtime",
     "Unity.Collections",
     "Unity.RenderPipelines.Universal.Runtime",

@@ -15,6 +15,7 @@ using DeepDive.Trip;
 using DeepDive.MapUI;
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Rendering;
@@ -314,6 +315,10 @@ namespace DeepDive.P1.Lab
                     if (!host && !unauthorizedSent && state.Phase == SessionPhase.Lobby && elapsed > 4)
                     { unauthorizedSent = true; adapter.AdvancePhase(); }
                 }
+                // P207: the host must not finish the trip while a guest's own
+                // replicated seat count still says somebody is aboard.
+                if (Trip && !FleetRoute && connection.Status == ConnectionStatus.Connected)
+                    ObserveTripGuestCompletion(host, expected);
                 if (rejoin && elapsed > 8 && !rejoinLeft)
                 { rejoinLeft = true; leaveAt = elapsed; adapter.LeaveRoom(); }
                 if (rejoinLeft && connection.Status == ConnectionStatus.Offline) sawOffline = true;
@@ -401,7 +406,8 @@ namespace DeepDive.P1.Lab
                 var lobbyDue = Living ? result.livingHostDone && Time.realtimeSinceStartup - livingDoneAt > 3f : BossAcceptance ? result.bossHostDone && returnPhaseAt > 0 && Time.realtimeSinceStartup - returnPhaseAt > 3f : Deep ? result.deepHostDone && Time.realtimeSinceStartup - deepDoneAt > 3f : Fleet ? result.fleetHostDone && Time.realtimeSinceStartup - fleetDoneAt > 3f : Acceptance ? AcceptanceLobbyReady() : FleetRoute ? result.tripDone && result.tripSaveReload : recordRelative ? Time.realtimeSinceStartup - returnPhaseAt > 20f : elapsed > (Shops ? 98 : MediaFlow ? 44 : Explore ? 48 : Storage ? 52 : Home ? 82 : Day ? 72 : Town ? 64 : Event ? 104 : Trip ? 124 : Boat ? 188 : Record ? 56 : Hunt ? 48 + HuntExtra : 36);
                 if (CoastParts) lobbyDue = result.boatRepaired && result.boatPartsHidden && result.boatHintGone &&
                     boatFinalAt > 0 && Time.realtimeSinceStartup - boatFinalAt > 2f;
-                else if (Trip && !FleetRoute) lobbyDue = result.tripDone && result.tripSaveReload;
+                else if (Trip && !FleetRoute)
+                    lobbyDue = CanAdvanceTripLobby(result.tripDone, result.tripSaveReload, expected, tripGuestWitnesses.Count);
                 else if (Boat && !FleetRoute) lobbyDue = result.boatRepaired && result.boatPartsHidden && result.boatHintGone &&
                     boatFinalAt > 0 && Time.realtimeSinceStartup - boatFinalAt > 2f;
                 if (host && lobbyDue && !lobbySent && state.Phase == SessionPhase.Return && !connection.IsSceneLoading)
@@ -3318,6 +3324,58 @@ namespace DeepDive.P1.Lab
         // Walks the beach to the dock, boards through BoatTripPlayerSync's owner RPCs (host resolves the seat), the
         // trip owner starts the route, the non-owner steps off at the anchorage (return marker must show) and back on,
         // the owner recalls, everybody steps off at the dock. Every process samples ITS OWN map (BoatMapView.LastIcons).
+        // Test-only reliable completion acknowledgment: the peer must personally see
+        // the boat Docked AND the replicated seat count reach zero. The host cannot
+        // close the return session on its own local state alone. No product RPC,
+        // game economy, scene authority or acceptance threshold is changed.
+        private const string TripGuestCompletedMessage = "P207_TEST_TRIP_GUEST_COMPLETED";
+        private readonly HashSet<ulong> tripGuestWitnesses = new HashSet<ulong>();
+        private CustomMessagingManager tripWitnessMessages;
+        private bool tripWitnessRegistered, tripGuestWitnessSent;
+
+        public static bool CanAdvanceTripLobby(bool hostDone, bool saved, int expectedPlayers, int confirmedGuests)
+            => hostDone && saved && expectedPlayers >= 1 && confirmedGuests >= expectedPlayers - 1;
+
+        private void ObserveTripGuestCompletion(bool host, int expectedPlayers)
+        {
+            var manager = adapter != null ? adapter.GetComponent<NetworkManager>() : null;
+            if (manager == null || !manager.IsListening || manager.CustomMessagingManager == null) return;
+            if (host)
+            {
+                if (!tripWitnessRegistered)
+                {
+                    tripWitnessMessages = manager.CustomMessagingManager;
+                    tripWitnessMessages.RegisterNamedMessageHandler(TripGuestCompletedMessage, TripGuestWitnessReceived);
+                    tripWitnessRegistered = true;
+                }
+                return;
+            }
+
+            // The guest's own proof is mandatory: the host's seat count is not
+            // a substitute for successful mirror delivery to that guest.
+            if (tripGuestWitnessSent || !result.tripDone || !result.tripDockedEmpty ||
+                !result.tripReturnMarkerSeen || !result.tripReboarded) return;
+            using (var writer = new FastBufferWriter(4, Allocator.Temp))
+            {
+                writer.WriteValueSafe((byte)1);
+                manager.CustomMessagingManager.SendNamedMessage(
+                    TripGuestCompletedMessage, NetworkManager.ServerClientId, writer);
+            }
+            tripGuestWitnessSent = true;
+            Debug.Log("P207_TRIP_GUEST_WITNESS_SENT client=" + manager.LocalClientId);
+        }
+
+        private void TripGuestWitnessReceived(ulong sender, FastBufferReader reader)
+        {
+            var manager = adapter != null ? adapter.GetComponent<NetworkManager>() : null;
+            if (manager == null || !manager.IsServer || sender == NetworkManager.ServerClientId ||
+                !manager.ConnectedClients.ContainsKey(sender) || reader.Length > 8 || !reader.TryBeginRead(1))
+                return;
+            reader.ReadValueSafe(out byte completed);
+            if (completed == 1 && tripGuestWitnesses.Add(sender))
+                Debug.Log("P207_TRIP_GUEST_WITNESS_RECEIVED client=" + sender);
+        }
+
         private int tripStep;
         private float tripStepAt, tripNext, tripDisembarkedAt;
         private bool tripDupSent, tripDropSeen, tripOnBeach;
@@ -3658,7 +3716,8 @@ namespace DeepDive.P1.Lab
             if (toStand.magnitude > 0.35f)
             {
                 townSettleAt = 0;
-                var target = NextBeachWaypoint(local.transform.position, stand);
+                // #249: the equipment shop is a building with one door.
+                var target = TownStoreRoute.Next(local.transform.position, NextBeachWaypoint(local.transform.position, stand), adapter.IsAuthority ? 0 : 1);
                 var heading = target - local.transform.position;
                 var flatHeading = heading; flatHeading.y = 0;
                 var walkYaw = Mathf.Atan2(flatHeading.x, flatHeading.z) * Mathf.Rad2Deg;
@@ -3821,7 +3880,8 @@ namespace DeepDive.P1.Lab
             {
                 case 0:   // the four storefronts stand in this player's own scene: sign, lantern, real materials, an aimable counter
                 {
-                    var good = fronts.Length == TownServiceCatalog.All.Count;
+                    // The equipment service is now an authored building, not a fourth placeholder stall.
+                    var good = fronts.Length == TownServiceCatalog.All.Count - 1;
                     result.shopsStorefronts = fronts.Length;
                     foreach (var f in fronts)
                     {
@@ -3834,7 +3894,10 @@ namespace DeepDive.P1.Lab
                     var anchors = FindObjectsByType<ServicePointAnchor>(FindObjectsSortMode.None);
                     var shop = anchors.FirstOrDefault(a => a.Definition.ServiceId == TownServiceCatalog.EquipmentShopId);
                     var vendor = anchors.FirstOrDefault(a => a.Definition.ServiceId == TownServiceCatalog.VehicleVendorId);
-                    good &= shop != null && vendor != null && Vector3.Distance(shop.WorldPosition, vendor.WorldPosition) > 4.5f * 1.1f;   // the two shops are out of each other's range
+                    var realStore = shop != null ? shop.GetComponentInChildren<EquipmentStoreLayout>(true) : null;
+                    good &= shop != null && realStore != null && realStore.Register != null && realStore.CustomerPoint != null &&
+                        shop.GetComponent<EquipmentStoreShopBinding>() != null && vendor != null &&
+                        Vector3.Distance(shop.WorldPosition, vendor.WorldPosition) > 4.5f * 1.1f;   // the two shops are out of each other's range
                     result.shopsBuilt = good;
                     if (!good) result.errors.Add($"storefronts incomplete count={fronts.Length}");
                     if (host) SetShopsClock(12 * 60);
@@ -3846,9 +3909,9 @@ namespace DeepDive.P1.Lab
                     if (fronts.Length > 0 && fronts.All(f => f.Lamp != null && !f.Lamp.enabled)) { result.shopsDayDark = true; ShopsStep(2); }
                     else if (host && !shopsClockSent) shopsClockSent = SetShopsClock(12 * 60);
                     return;
-                case 2:   // no shop session yet: a purchase is refused
+                case 2:   // no shop session: even a catalog-only item must be refused by host
                     local.SubmitLocalInput(Vector3.zero, 0);
-                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    if (!FleetCall(sync, () => sync.RequestPurchase("tube-3"), out ok, out reason)) return;
                     result.shopsFarPurchaseRefused = !ok && reason == "NotAtShop";
                     if (!result.shopsFarPurchaseRefused) result.errors.Add($"far purchase answer ok={ok} reason={reason}");
                     ShopsStep(3); return;
@@ -3862,9 +3925,9 @@ namespace DeepDive.P1.Lab
                     if (GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) InteractEvery(local, 1.2f);
                     if (sync.ShopOpen) { result.shopsShopOpened = true; ShopsStep(5); }
                     return;
-                case 5:   // standing at its counter the request reaches the rules (no money: refused, but NOT for distance)
+                case 5:   // real cashier: catalog-only item reaches host purchase validation (without shelf bypass)
                     local.SubmitLocalInput(Vector3.zero, 0);
-                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    if (!FleetCall(sync, () => sync.RequestPurchase("tube-3"), out ok, out reason)) return;
                     result.shopsShopNearReason = reason;
                     result.shopsShopNearReached = reason != "NotAtShop";
                     if (!result.shopsShopNearReached) result.errors.Add($"near purchase still out of range reason={reason}");
@@ -3876,7 +3939,7 @@ namespace DeepDive.P1.Lab
                 case 7:   // the equipment shop is now out of range: its purchase is refused
                     ShopsPeer(fronts);
                     local.SubmitLocalInput(Vector3.zero, 0);
-                    if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
+                    if (!FleetCall(sync, () => sync.RequestPurchase("tube-3"), out ok, out reason)) return;
                     result.shopsLeftShopRefused = !ok && reason == "NotAtShop";
                     if (!result.shopsLeftShopRefused) result.errors.Add($"left-shop purchase answer ok={ok} reason={reason}");
                     ShopsStep(8); return;

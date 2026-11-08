@@ -384,6 +384,12 @@ namespace DeepDive.P1.Lab
                 heading = repair.NextAround(local.transform.position, target) - local.transform.position;
                 flat = new Vector2(heading.x, heading.z).magnitude;
             }
+            // #249: the equipment shop is a building with one door: steer through the door and the aisle, but count arrival at the real waypoint.
+            if (!local.Swimming.Value)
+            {
+                var steer = TownStoreRoute.Next(local.transform.position, target, slot);
+                if (steer != target) { heading = steer - local.transform.position; flat = new Vector2(heading.x, heading.z).magnitude; }
+            }
             var yaw = Mathf.Atan2(heading.x, heading.z) * Mathf.Rad2Deg;
             var move = Vector3.forward;
             if (local.Swimming.Value)
@@ -392,7 +398,12 @@ namespace DeepDive.P1.Lab
                 move.y = Mathf.Clamp(heading.y, -1f, 1f);
                 if (flat < 0.15f) move.z = 0f;
             }
-            local.SubmitLocalInput(move.normalized * Mathf.Min(1f, Mathf.Max(flat, Mathf.Abs(heading.y))), yaw, 0f);
+            // Retain the submerged route's existing input, but ease into dry
+            // waypoints so slow 4-process frames cannot repeatedly overshoot
+            // the short home/store turns. Do not change the movement QA gate.
+            var throttle = local.Swimming.Value ? Mathf.Min(1f, Mathf.Max(flat, Mathf.Abs(heading.y)))
+                : TownStoreRoute.ApproachThrottle(flat);
+            local.SubmitLocalInput(move.normalized * throttle, yaw, 0f);
             return false;
         }
         private void Stop() => local.SubmitLocalInput(Vector3.zero, 0f, 0f);
