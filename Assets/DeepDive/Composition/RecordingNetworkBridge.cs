@@ -443,6 +443,15 @@ namespace DeepDive.Composition
                 (PlayerActionResult)resultInt, active, targetId);
         }
 
+        // #257: An automatic stop is not proof of a usable recording.
+        // The host's real action result decides whether the camera may claim the take succeeded.
+        public static string AutomaticStopStatus(bool caughtTarget, PlayerActionResult result)
+        {
+            if (result == PlayerActionResult.Accepted)
+                return caughtTarget ? "AV ALINDI - KAYIT BITTI" : "KAYIT SURESI DOLDU";
+            return caughtTarget ? "AV KAYDI OLUSTURULAMADI" : "SURE DOLDU - KAYIT GECERSIZ";
+        }
+
         public static bool ShouldApplyAutomaticStop(bool currentlyRecording, ulong currentTargetId, ulong finishedTargetId)
             => !currentlyRecording || (finishedTargetId != 0 && currentTargetId == finishedTargetId);
 
@@ -466,9 +475,9 @@ namespace DeepDive.Composition
                 player.SetHeldEquipmentLocal(active || cameraMode ? HeldEquipmentMode.Camera : HeldEquipmentMode.Harpoon);
 
             if (requestId == CollectedStopNotice && command == RecordingCommand.Stop)
-                ShowStatus(result == PlayerActionResult.Accepted ? "AV ALINDI - KAYIT BITTI" : "KAYIT KAYDEDILEMEDI");
+                ShowStatus(AutomaticStopStatus(true, result));
             else if (requestId == 0 && command == RecordingCommand.Stop)
-                ShowStatus("KAYIT SURESI DOLDU");
+                ShowStatus(AutomaticStopStatus(false, result));
             else if (result == PlayerActionResult.Accepted)
                 ShowStatus(command == RecordingCommand.Start ? "RECORDING STARTED" : "RECORDING STOPPED");
             else if (result == PlayerActionResult.InvalidTarget)
