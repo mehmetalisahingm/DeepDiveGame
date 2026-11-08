@@ -4,6 +4,42 @@ using UnityEngine.UI;
 
 namespace DeepDive.Composition
 {
+    // P4/#253: countdown comes from the exact tier limit used by the host.
+    // This is display-only; the server remains the sole authority for stopping and archiving.
+    public readonly struct RecordingCountdownState
+    {
+        public readonly int RemainingSeconds;
+        public readonly float RemainingRatio;
+        public readonly bool WarnLastSeconds;
+        public readonly bool ReachedLimit;
+        public readonly int LimitSeconds;
+
+        public RecordingCountdownState(int remainingSeconds, float remainingRatio, bool warnLastSeconds,
+            bool reachedLimit, int limitSeconds)
+        {
+            RemainingSeconds = remainingSeconds;
+            RemainingRatio = remainingRatio;
+            WarnLastSeconds = warnLastSeconds;
+            ReachedLimit = reachedLimit;
+            LimitSeconds = limitSeconds;
+        }
+    }
+
+    public static class RecordingCountdownRules
+    {
+        public static RecordingCountdownState Evaluate(CameraTier tier, bool recording, float elapsed)
+        {
+            var limit = Mathf.Max(1f, CameraRecordingLimits.MaxSeconds(tier));
+            var safeElapsed = float.IsNaN(elapsed) || float.IsInfinity(elapsed)
+                ? 0f : Mathf.Max(0f, elapsed);
+            var remaining = recording ? Mathf.CeilToInt(Mathf.Max(0f, limit - safeElapsed)) : Mathf.CeilToInt(limit);
+            var ratio = recording ? Mathf.Clamp01((limit - safeElapsed) / limit) : 1f;
+            return new RecordingCountdownState(remaining, ratio,
+                recording && remaining > 0 && remaining <= 5,
+                recording && remaining == 0, Mathf.CeilToInt(limit));
+        }
+    }
+
     // Owner-camera UI only. Layer 5 is excluded from the separate archive capture camera.
     internal sealed class RecordingCameraHud : MonoBehaviour
     {
@@ -11,7 +47,7 @@ namespace DeepDive.Composition
         private Canvas canvas;
         private RectTransform frame;
         private Text tally, timer, tierLabel, controls, status;
-        private Image dot;
+        private Image dot, countdownFill;
         private Texture2D dotTexture;
         private Sprite dotSprite;
         private readonly Color red = new Color(1f, .18f, .22f);
@@ -30,13 +66,20 @@ namespace DeepDive.Composition
             tally.color = recording ? red : Color.white;
             dot.color = recording ? new Color(red.r, red.g, red.b, .65f + .35f * (.5f + .5f * Mathf.Sin(Time.unscaledTime * 5)))
                 : new Color(.6f, .7f, .73f);
-            var seconds = Mathf.Max(0, (int)elapsed);
-            var remaining = Mathf.CeilToInt(Mathf.Max(0f, CameraRecordingLimits.MaxSeconds(tier) - elapsed));
-            timer.text = recording ? $"{seconds:00} / {(int)CameraRecordingLimits.MaxSeconds(tier):00} sn" :
-                $"{remaining:00} sn";
+            var clock = RecordingCountdownRules.Evaluate(tier, recording, elapsed);
+            timer.text = recording ? $"{clock.RemainingSeconds:00} sn KALDI" :
+                $"LIMIT {clock.LimitSeconds:00} sn";
+            // A Unity UI Image with no sprite does not implement Filled geometry.
+            // Simple Image + physical RectTransform width renders an actual shrinking bar.
+            countdownFill.rectTransform.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal, 206f * clock.RemainingRatio);
+            countdownFill.color = clock.WarnLastSeconds || clock.ReachedLimit ? red :
+                recording ? new Color(.42f, .94f, .78f) : new Color(.60f, .75f, .81f);
             tierLabel.text = "CAM / " + (tier == CameraTier.Professional ? "PRO" : tier == CameraTier.Advanced ? "ADVANCED" : "BASIC");
             controls.text = recording ? "R  KAYDI DURDUR" : "R  KAYDI BASLAT     C  KAMERAYI KAPAT";
-            status.text = message;
+            status.text = !string.IsNullOrEmpty(message) ? message :
+                clock.ReachedLimit ? "SURE DOLDU - SUNUCU KAYDI SONLANDIRIYOR" :
+                clock.WarnLastSeconds ? "SON 5 SANIYE - KAYIT OTOMATIK BITECEK" : "";
         }
         private void Build()
         {
@@ -62,7 +105,12 @@ namespace DeepDive.Composition
             dotSprite = Sprite.Create(dotTexture, new Rect(0, 0, 32, 32), new Vector2(.5f, .5f));
             dot = Panel(CreateRect(chip, "RecordingLight", 13, 14, 13, 13), red); dot.sprite = dotSprite;
             tally = Label(CreateRect(chip, "RecordingState", 37, 2, 76, 38), 22, FontStyle.Bold);
-            timer = Label(CreateRect(chip, "ElapsedTime", 116, 2, 110, 38), 20, FontStyle.Bold);
+            timer = Label(CreateRect(chip, "ElapsedTime", 116, 2, 110, 38), 17, FontStyle.Bold);
+            var countdownTrack = CreateRect(chip, "TimeRemainingTrack", 12, 36, 206, 4);
+            Panel(countdownTrack, new Color(.20f, .29f, .33f, 1f));
+            var countdownBar = CreateRect(countdownTrack, "TimeRemainingFill", 0, 0, 206, 4);
+            countdownFill = Panel(countdownBar, new Color(.42f, .94f, .78f));
+            countdownFill.type = Image.Type.Simple;
             var tier = CreateRect(frame, "CameraModel", -165, 22, 150, 26);
             tier.anchorMin = tier.anchorMax = new Vector2(1, 1);
             tierLabel = Label(tier, 14);
