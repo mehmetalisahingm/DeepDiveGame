@@ -1,4 +1,5 @@
 using DeepDive.Composition;
+using DeepDive.Core.Contracts;
 using NUnit.Framework;
 
 namespace DeepDive.P4.Tests
@@ -29,6 +30,18 @@ namespace DeepDive.P4.Tests
             // An idle HUD may always accept a late terminal status; no capture
             // state or reward is written by presentation-only notifications.
             Assert.IsTrue(RecordingNetworkBridge.ShouldApplyAutomaticStop(false, 0, fishA));
+        }
+
+        [TestCase(false, PlayerActionResult.Accepted, "KAYIT SURESI DOLDU")]
+        [TestCase(false, PlayerActionResult.InvalidTarget, "SURE DOLDU - KAYIT GECERSIZ")]
+        [TestCase(false, PlayerActionResult.InvalidState, "SURE DOLDU - KAYIT GECERSIZ")]
+        [TestCase(true, PlayerActionResult.Accepted, "AV ALINDI - KAYIT BITTI")]
+        [TestCase(true, PlayerActionResult.InvalidTarget, "AV KAYDI OLUSTURULAMADI")]
+        [TestCase(true, PlayerActionResult.Rejected, "AV KAYDI OLUSTURULAMADI")]
+        public void AutomaticStopStatusOnlyCelebratesHostAcceptedRecording(
+            bool caughtTarget, PlayerActionResult result, string expected)
+        {
+            Assert.AreEqual(expected, RecordingNetworkBridge.AutomaticStopStatus(caughtTarget, result));
         }
     }
 }
