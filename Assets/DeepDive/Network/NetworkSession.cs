@@ -31,6 +31,11 @@ namespace DeepDive.Network
         private readonly Dictionary<ulong, NetworkPlayer> players = new Dictionary<ulong, NetworkPlayer>();
         private readonly Dictionary<ulong, SceneLoadResult> completedLoads = new Dictionary<ulong, SceneLoadResult>();
         private readonly Dictionary<ulong, double> pendingConnections = new Dictionary<ulong, double>();
+        // The approval pose is the authoritative join contract. NGO can apply an
+        // older in-flight transform while a late guest synchronizes the world.
+        // Reassert it once, AFTER scene synchronization, with NetworkTransform.Teleport
+        // so the owner/observers reset interpolation to the correct home slot.
+        private readonly Dictionary<ulong, Pose> approvedJoinSpawns = new Dictionary<ulong, Pose>();
         private readonly List<ulong> expiredConnections = new List<ulong>();
         private bool joinAllowed;
         private bool manualLeave;
@@ -90,7 +95,7 @@ namespace DeepDive.Network
         private bool Prepare(ConnectionStatus status)
         {
             if (Status != ConnectionStatus.Offline || returningOffline || manager.IsListening || manager.ShutdownInProgress) return false;
-            admission.Clear(); players.Clear(); pendingConnections.Clear(); completedLoads.Clear();
+            admission.Clear(); players.Clear(); pendingConnections.Clear(); approvedJoinSpawns.Clear(); completedLoads.Clear();
             LastError = ""; manualLeave = false; joinAllowed = true; IsSceneLoading = false; DiveActive = false;
             activeRequest = 0; activeScene = null;
             Status = status; connectDeadline = Time.realtimeSinceStartupAsDouble + 12;
@@ -157,6 +162,7 @@ namespace DeepDive.Network
                 {
                     response.Position = pose.position; response.Rotation = pose.rotation;
                     pendingConnections[request.ClientNetworkId] = Time.realtimeSinceStartupAsDouble + 15;
+                    approvedJoinSpawns[request.ClientNetworkId] = pose;
                 }
                 else
                 {
@@ -179,7 +185,7 @@ namespace DeepDive.Network
 
         private void Disconnected(ulong id)
         {
-            admission.Release(id); pendingConnections.Remove(id); players.Remove(id);
+            admission.Release(id); pendingConnections.Remove(id); approvedJoinSpawns.Remove(id); players.Remove(id);
             if (!manager.IsServer && id == manager.LocalClientId && !manualLeave)
             {
                 LastError = string.IsNullOrEmpty(manager.DisconnectReason) ? "HostDisconnected" : manager.DisconnectReason;
@@ -208,7 +214,7 @@ namespace DeepDive.Network
         private void Stopped(bool wasHost)
         {
             UnsubscribeScenes();
-            admission.Clear(); pendingConnections.Clear(); players.Clear();
+            admission.Clear(); pendingConnections.Clear(); approvedJoinSpawns.Clear(); players.Clear();
             completedLoads.Clear(); activeRequest = 0; activeScene = null; IsSceneLoading = false; DiveActive = false;
             joinAllowed = false; Status = ConnectionStatus.Offline;
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
@@ -269,8 +275,22 @@ namespace DeepDive.Network
         private void SceneEvent(SceneEvent sceneEvent)
         {
             if (sceneEvent.SceneEventType == SceneEventType.Load) IsSceneLoading = true;
-            if (sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete && sceneEvent.ClientId == manager.LocalClientId)
-                IsSceneLoading = false;
+            if (sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete)
+            {
+                if (sceneEvent.ClientId == manager.LocalClientId) IsSceneLoading = false;
+                // Confirmation runs on the HOST, after the joining client's scene
+                // sync, not when approval is first sent. No world/route collider,
+                // movement rate or QA discontinuity threshold is modified.
+                if (IsHost && approvedJoinSpawns.TryGetValue(sceneEvent.ClientId, out var joinPose) &&
+                    players.TryGetValue(sceneEvent.ClientId, out var joiningPlayer) &&
+                    joiningPlayer != null && joiningPlayer.IsSpawned)
+                {
+                    approvedJoinSpawns.Remove(sceneEvent.ClientId);
+                    var before = joiningPlayer.transform.position;
+                    joiningPlayer.Teleport(joinPose);
+                    Debug.Log($"P207_JOIN_POSE_CONFIRMED client={sceneEvent.ClientId} object={joiningPlayer.NetworkObjectId} from={before} to={joinPose.position}");
+                }
+            }
             if (sceneEvent.SceneEventType != SceneEventType.LoadEventCompleted) return;
             IsSceneLoading = false;
             if (IsHost && activeRequest != 0)
