@@ -3369,7 +3369,7 @@ namespace DeepDive.P1.Lab
         {
             var manager = adapter != null ? adapter.GetComponent<NetworkManager>() : null;
             if (manager == null || !manager.IsServer || sender == NetworkManager.ServerClientId ||
-                !manager.ConnectedClients.ContainsKey(sender) || reader.Length > 8 || !reader.TryBeginRead(1))
+                !manager.ConnectedClients.ContainsKey(sender) || reader.Length - reader.Position != 1 || !reader.TryBeginRead(1))
                 return;
             reader.ReadValueSafe(out byte completed);
             if (completed == 1 && tripGuestWitnesses.Add(sender))

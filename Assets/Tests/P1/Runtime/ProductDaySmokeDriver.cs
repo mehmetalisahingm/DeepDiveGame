@@ -823,7 +823,8 @@ namespace DeepDive.P1.Lab
                 if(trip.IsSeated){substep=1;route=null;}
                 else
                 {
-                if (route == null) SetRoute(new[] { P(9f, -12.5f), P(9f, -9f),
+                var laneX = expected == 4 ? 8.1f + report.slot * .8f : 8.2f + (report.slot % 2) * 1.6f;
+                if (route == null) SetRoute(new[] { P(laneX, -12.5f), P(laneX, -9f),
                     P(expected==4 ? 8.1f+report.slot*.8f : 8.6f+(report.slot%2)*.8f, -3.6f) });
                 if(waypoint>=2)Act(trip.RequestBoardNearestLocal);
                 if (!Follow()) return;
