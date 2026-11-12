@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
+using DeepDive.Economy;
 using DeepDive.Media;
 using DeepDive.Network;
 using UnityEngine;
