@@ -112,7 +112,12 @@ namespace DeepDive.P1.Lab
             if (inwards && position.z <= Inside.z - 0.1f && InStore(target) && !HitsTable(position, target)) return target;   // past the door: straight if the table is clear
             if (!inwards) System.Array.Reverse(path);
             if (inwards && position.z <= SouthZone) return target;
-            if (!inwards && position.z <= SouthZone && ((lane & 1) == 0 ? position.x > far.x + 0.6f : position.x < far.x - 0.6f)) return Flat(far, position);   // counter side: to the aisle end first, then up the aisle
+            // Leaving the counter: first clear the far corner on the aisle's safe side.
+            // At (-11.31,-26.23) the former 0.6 m test considered the corner cleared,
+            // aimed diagonally at AisleNear, and cut across the solid display table.
+            // Keep a 0.25 m lateral clearance window before allowing the northbound leg;
+            // this changes driver path choice only, never gameplay collision or QA limits.
+            if (!inwards && position.z <= SouthZone && ((lane & 1) == 0 ? position.x > far.x + 0.25f : position.x < far.x - 0.25f)) return Flat(far, position);   // counter side: to the aisle end first, then up the aisle
             var best = 0;
             var bestDistance = float.MaxValue;
             for (var i = 0; i + 1 < path.Length; i++)
