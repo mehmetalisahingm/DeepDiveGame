@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DeepDive.Core.Contracts;
+using DeepDive.Economy;
 using DeepDive.Media;
 using DeepDive.Network;
 using UnityEngine;
@@ -85,6 +86,24 @@ namespace DeepDive.Composition
             return pending;
         }
 
+        // A mirrored settlement can precede disk persistence. DayNumber and SummaryDayNumber
+        // are broadcast only after DayEngine.TryPersistAndAdvance successfully saves the close.
+        // Retain previously observed queued IDs until that durable day acknowledgement arrives.
+        public static ChannelSettlementCard NewlyPersisted(MediaSaveData snapshot,
+            ISet<string> previouslyQueued, int followersBefore, int dayNumber, int lastSummaryDay)
+        {
+            if (snapshot?.Publications == null || previouslyQueued == null ||
+                lastSummaryDay < 1 || dayNumber != lastSummaryDay + 1)
+                return default;
+            var eligible = new HashSet<string>(System.StringComparer.Ordinal);
+            foreach (var publication in snapshot.Publications)
+                if (publication != null && publication.QueuedDay > 0 &&
+                    publication.QueuedDay <= lastSummaryDay &&
+                    previouslyQueued.Contains(publication.PublicationId))
+                    eligible.Add(publication.PublicationId);
+            return NewlySettled(snapshot, eligible, followersBefore);
+        }
+
         public static ChannelSettlementCard NewlySettled(MediaSaveData snapshot, ISet<string> previouslyQueued, int followersBefore)
         {
             if (snapshot?.Publications == null || previouslyQueued == null || previouslyQueued.Count == 0)
@@ -117,6 +136,60 @@ namespace DeepDive.Composition
         }
     }
 
+    // Pure state machine: mirror revisions may arrive before the durable day-close acknowledgement.
+    // Never consume queued IDs or emit a success card on an uncommitted in-memory settlement.
+    public sealed class ChannelSettlementFeedbackTracker
+    {
+        private readonly HashSet<string> queued = new HashSet<string>(System.StringComparer.Ordinal);
+        private int observedRevision = -1;
+        private int followersBefore;
+        private bool initialized;
+
+        public void Reset()
+        {
+            queued.Clear();
+            observedRevision = -1;
+            followersBefore = 0;
+            initialized = false;
+        }
+
+        public ChannelSettlementCard Observe(MediaSaveData snapshot, int revision, int dayNumber, int lastSummaryDay)
+        {
+            if (snapshot == null || revision < 0 || dayNumber <= 0)
+            {
+                Reset();
+                return default;
+            }
+            if (!initialized)
+            {
+                initialized = true;
+                observedRevision = revision;
+                followersBefore = snapshot.Followers;
+                queued.UnionWith(ChannelSettlementFeedbackRules.Pending(snapshot));
+                return default; // reconnect/reload/late-join cannot celebrate history
+            }
+
+            if (revision != observedRevision)
+            {
+                if (queued.Count == 0) followersBefore = snapshot.Followers;
+                queued.UnionWith(ChannelSettlementFeedbackRules.Pending(snapshot));
+                observedRevision = revision;
+            }
+
+            // Recheck even when the media revision has NOT changed: the successful day
+            // acknowledgement may arrive later than the prematurely mirrored settlement.
+            var card = ChannelSettlementFeedbackRules.NewlyPersisted(
+                snapshot, queued, followersBefore, dayNumber, lastSummaryDay);
+            if (card.Count > 0)
+            {
+                queued.Clear();
+                queued.UnionWith(ChannelSettlementFeedbackRules.Pending(snapshot));
+                followersBefore = snapshot.Followers;
+            }
+            return card;
+        }
+    }
+
     // The PC screen (#102): archive list, clip details/preview, title + publish, and the shared channel feed.
     // Shows only what the host mirrored (MediaNetworkBinding.Mirrored) and sends publish requests; the host
     // decides everything (owner, commercial right, PC proximity). No world or fish position is on this screen.
@@ -133,10 +206,7 @@ namespace DeepDive.Composition
         private float nextLookup;
         private string title = "";
         private string status = "";
-        private bool settlementInitialized;
-        private int observedMediaRevision = -1;
-        private int previousFollowerCount;
-        private HashSet<string> queuedPublications = new HashSet<string>(System.StringComparer.Ordinal);
+        private readonly ChannelSettlementFeedbackTracker settlementTracker = new ChannelSettlementFeedbackTracker();
         private ChannelSettlementCard latestSettlement;
         private float settlementCardUntil;
 
@@ -172,30 +242,20 @@ namespace DeepDive.Composition
         {
             if (!MediaNetworkBinding.HasMirror)
             {
-                settlementInitialized = false;
-                observedMediaRevision = -1;
-                queuedPublications.Clear();
+                settlementTracker.Reset();
                 settlementCardUntil = 0f;
                 return;
             }
 
-            var revision = MediaNetworkBinding.MirroredRevision;
-            if (revision == observedMediaRevision) return;
-            var snapshot = MediaNetworkBinding.Mirrored;
-            if (settlementInitialized)
-            {
-                var card = ChannelSettlementFeedbackRules.NewlySettled(
-                    snapshot, queuedPublications, previousFollowerCount);
-                if (card.Count > 0)
-                {
-                    latestSettlement = card;
-                    settlementCardUntil = Time.unscaledTime + 9f;
-                }
-            }
-            queuedPublications = ChannelSettlementFeedbackRules.Pending(snapshot);
-            previousFollowerCount = snapshot?.Followers ?? 0;
-            observedMediaRevision = revision;
-            settlementInitialized = true;
+            // Host-acknowledged day/summary state, not a speculative media revision,
+            // proves that the atomic day-close save actually succeeded.
+            var sync = local != null ? local.GetComponent<EconomyPlayerSync>() : null;
+            if (sync == null) return;
+            var card = settlementTracker.Observe(MediaNetworkBinding.Mirrored,
+                MediaNetworkBinding.MirroredRevision, sync.DayNumber.Value, sync.SummaryDayNumber.Value);
+            if (card.Count == 0) return;
+            latestSettlement = card;
+            settlementCardUntil = Time.unscaledTime + 9f;
         }
 
         private void DrawSettlementCard()
