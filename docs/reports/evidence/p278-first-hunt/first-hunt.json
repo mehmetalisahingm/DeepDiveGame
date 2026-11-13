@@ -1,0 +1,876 @@
+{
+    "note": "Static fish homes (fish wander around them), geometric line of sight with the underwater fog formula; no light, contrast or model.",
+    "swimSpeed": 3.0,
+    "maxOxygen": 120.0,
+    "harpoonRange": 22.0,
+    "horizontalFov": 91.49284362792969,
+    "verticalFov": 60.0,
+    "surfaceY": 8.0,
+    "fish": [
+        {
+            "species": "sea_bass",
+            "home": {
+                "x": 0.0,
+                "y": 4.0,
+                "z": 8.0
+            }
+        },
+        {
+            "species": "sea_bass",
+            "home": {
+                "x": -8.0,
+                "y": 4.0,
+                "z": 8.0
+            }
+        },
+        {
+            "species": "sea_bass",
+            "home": {
+                "x": -4.0,
+                "y": 4.0,
+                "z": 8.0
+            }
+        },
+        {
+            "species": "tuna",
+            "home": {
+                "x": -5.0,
+                "y": 4.0,
+                "z": 11.0
+            }
+        },
+        {
+            "species": "tuna",
+            "home": {
+                "x": 0.0,
+                "y": 4.0,
+                "z": 11.5
+            }
+        },
+        {
+            "species": "tuna",
+            "home": {
+                "x": 5.0,
+                "y": 4.0,
+                "z": 10.0
+            }
+        },
+        {
+            "species": "red_snapper",
+            "home": {
+                "x": 7.0,
+                "y": -4.0,
+                "z": 30.5
+            }
+        },
+        {
+            "species": "red_snapper",
+            "home": {
+                "x": 8.0,
+                "y": -4.0,
+                "z": 35.0
+            }
+        },
+        {
+            "species": "red_snapper",
+            "home": {
+                "x": 6.0,
+                "y": -4.0,
+                "z": 38.0
+            }
+        },
+        {
+            "species": "grouper",
+            "home": {
+                "x": -10.5,
+                "y": -3.5,
+                "z": 26.5
+            }
+        },
+        {
+            "species": "grouper",
+            "home": {
+                "x": -10.0,
+                "y": -4.5,
+                "z": 33.0
+            }
+        },
+        {
+            "species": "grouper",
+            "home": {
+                "x": -10.0,
+                "y": -4.5,
+                "z": 38.0
+            }
+        },
+        {
+            "species": "lanternfish",
+            "home": {
+                "x": -10.0,
+                "y": -19.5,
+                "z": 58.0
+            }
+        },
+        {
+            "species": "lanternfish",
+            "home": {
+                "x": -9.5,
+                "y": -19.0,
+                "z": 60.0
+            }
+        },
+        {
+            "species": "lanternfish",
+            "home": {
+                "x": -4.0,
+                "y": -21.0,
+                "z": 60.0
+            }
+        }
+    ],
+    "entries": [
+        {
+            "id": "wade-west",
+            "eye": {
+                "x": -6.5,
+                "y": 7.5,
+                "z": -3.5
+            },
+            "atEntry": [
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 13.665650367736817,
+                    "visibility01": 0.8240866661071777,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": -8.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 12.114041328430176,
+                    "visibility01": 0.8589555025100708,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": -4.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 12.278029441833496,
+                    "visibility01": 0.8554032444953919,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": -5.0,
+                        "y": 4.0,
+                        "z": 11.0
+                    },
+                    "distance": 14.991663932800293,
+                    "visibility01": 0.7922732830047607,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 11.5
+                    },
+                    "distance": 16.71825408935547,
+                    "visibility01": 0.7485840320587158,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": 5.0,
+                        "y": 4.0,
+                        "z": 10.0
+                    },
+                    "distance": 18.07622718811035,
+                    "visibility01": 0.712821364402771,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 7.0,
+                        "y": -4.0,
+                        "z": 30.5
+                    },
+                    "distance": 38.34709930419922,
+                    "visibility01": 0.2179499715566635,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 8.0,
+                        "y": -4.0,
+                        "z": 35.0
+                    },
+                    "distance": 42.71709442138672,
+                    "visibility01": 0.15099549293518067,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 6.0,
+                        "y": -4.0,
+                        "z": 38.0
+                    },
+                    "distance": 44.84138870239258,
+                    "visibility01": 0.12453009933233261,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.5,
+                        "y": -3.5,
+                        "z": 26.5
+                    },
+                    "distance": 32.202484130859378,
+                    "visibility01": 0.341513454914093,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.0,
+                        "y": -4.5,
+                        "z": 33.0
+                    },
+                    "distance": 38.581085205078128,
+                    "visibility01": 0.2139231413602829,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.0,
+                        "y": -4.5,
+                        "z": 38.0
+                    },
+                    "distance": 43.34166717529297,
+                    "visibility01": 0.14281690120697022,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -10.0,
+                        "y": -19.5,
+                        "z": 58.0
+                    },
+                    "distance": 67.25697326660156,
+                    "visibility01": 0.009218846447765828,
+                    "lineClear": false,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -9.5,
+                        "y": -19.0,
+                        "z": 60.0
+                    },
+                    "distance": 68.8730697631836,
+                    "visibility01": 0.007339881733059883,
+                    "lineClear": false,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -4.0,
+                        "y": -21.0,
+                        "z": 60.0
+                    },
+                    "distance": 69.64732360839844,
+                    "visibility01": 0.006567995995283127,
+                    "lineClear": false,
+                    "inView": true
+                }
+            ],
+            "readableAtEntry": 6,
+            "firstSightSeconds": 0.0,
+            "firstInRangeSeconds": 0.0,
+            "firstSightSpecies": "sea_bass",
+            "firstInRangeSpecies": "sea_bass",
+            "habitats": [
+                {
+                    "species": "sea_bass",
+                    "metres": 7.859996795654297,
+                    "seconds": 2.619999885559082,
+                    "tankFraction": 0.021833332255482675,
+                    "stuck": false
+                },
+                {
+                    "species": "tuna",
+                    "metres": 10.739991188049317,
+                    "seconds": 3.5799999237060549,
+                    "tankFraction": 0.02983333356678486,
+                    "stuck": false
+                },
+                {
+                    "species": "red_snapper",
+                    "metres": 34.08768844604492,
+                    "seconds": 11.380000114440918,
+                    "tankFraction": 0.09483333677053452,
+                    "stuck": false
+                },
+                {
+                    "species": "grouper",
+                    "metres": 28.02104377746582,
+                    "seconds": 9.399999618530274,
+                    "tankFraction": 0.07833333313465119,
+                    "stuck": false
+                },
+                {
+                    "species": "lanternfish",
+                    "metres": 63.87135696411133,
+                    "seconds": 21.69999885559082,
+                    "tankFraction": 0.18083332479000092,
+                    "stuck": false
+                }
+            ]
+        },
+        {
+            "id": "ramp-east",
+            "eye": {
+                "x": 4.5,
+                "y": 7.5,
+                "z": -6.5
+            },
+            "atEntry": [
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 15.580436706542969,
+                    "visibility01": 0.777635395526886,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": -8.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 19.46150016784668,
+                    "visibility01": 0.6754350066184998,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": -4.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 17.168285369873048,
+                    "visibility01": 0.7368496656417847,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": -5.0,
+                        "y": 4.0,
+                        "z": 11.0
+                    },
+                    "distance": 20.217567443847658,
+                    "visibility01": 0.6547646522521973,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 11.5
+                    },
+                    "distance": 18.881208419799806,
+                    "visibility01": 0.6911858916282654,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": 5.0,
+                        "y": 4.0,
+                        "z": 10.0
+                    },
+                    "distance": 16.874536514282228,
+                    "visibility01": 0.7445234060287476,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 7.0,
+                        "y": -4.0,
+                        "z": 30.5
+                    },
+                    "distance": 38.8265380859375,
+                    "visibility01": 0.20975333452224732,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 8.0,
+                        "y": -4.0,
+                        "z": 35.0
+                    },
+                    "distance": 43.205902099609378,
+                    "visibility01": 0.14456607401371003,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 6.0,
+                        "y": -4.0,
+                        "z": 38.0
+                    },
+                    "distance": 45.986412048339847,
+                    "visibility01": 0.1118098720908165,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.5,
+                        "y": -3.5,
+                        "z": 26.5
+                    },
+                    "distance": 37.88139343261719,
+                    "visibility01": 0.22611528635025025,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.0,
+                        "y": -4.5,
+                        "z": 33.0
+                    },
+                    "distance": 43.755001068115237,
+                    "visibility01": 0.13758832216262818,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.0,
+                        "y": -4.5,
+                        "z": 38.0
+                    },
+                    "distance": 48.31666564941406,
+                    "visibility01": 0.08904406428337097,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -10.0,
+                        "y": -19.5,
+                        "z": 58.0
+                    },
+                    "distance": 71.41078186035156,
+                    "visibility01": 0.00507585471495986,
+                    "lineClear": false,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -9.5,
+                        "y": -19.0,
+                        "z": 60.0
+                    },
+                    "distance": 72.94175720214844,
+                    "visibility01": 0.004037118051201105,
+                    "lineClear": false,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -4.0,
+                        "y": -21.0,
+                        "z": 60.0
+                    },
+                    "distance": 72.84744262695313,
+                    "visibility01": 0.004095036536455154,
+                    "lineClear": false,
+                    "inView": true
+                }
+            ],
+            "readableAtEntry": 6,
+            "firstSightSeconds": 0.0,
+            "firstInRangeSeconds": 0.0,
+            "firstSightSpecies": "sea_bass",
+            "firstInRangeSpecies": "sea_bass",
+            "habitats": [
+                {
+                    "species": "sea_bass",
+                    "metres": 11.340011596679688,
+                    "seconds": 3.7799999713897707,
+                    "tankFraction": 0.03150000050663948,
+                    "stuck": false
+                },
+                {
+                    "species": "tuna",
+                    "metres": 12.659995079040528,
+                    "seconds": 4.21999979019165,
+                    "tankFraction": 0.0351666659116745,
+                    "stuck": false
+                },
+                {
+                    "species": "red_snapper",
+                    "metres": 34.662559509277347,
+                    "seconds": 11.59999942779541,
+                    "tankFraction": 0.09666666388511658,
+                    "stuck": false
+                },
+                {
+                    "species": "grouper",
+                    "metres": 33.7581672668457,
+                    "seconds": 11.34000015258789,
+                    "tankFraction": 0.09449999779462815,
+                    "stuck": false
+                },
+                {
+                    "species": "lanternfish",
+                    "metres": 43.33545684814453,
+                    "seconds": 69.19999694824219,
+                    "tankFraction": 0.5766666531562805,
+                    "stuck": true
+                }
+            ]
+        },
+        {
+            "id": "dock-end",
+            "eye": {
+                "x": 9.0,
+                "y": 7.5,
+                "z": -2.5
+            },
+            "atEntry": [
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 14.265342712402344,
+                    "visibility01": 0.8099092245101929,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": -8.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 20.285463333129884,
+                    "visibility01": 0.6529018878936768,
+                    "lineClear": true,
+                    "inView": false
+                },
+                {
+                    "species": "sea_bass",
+                    "home": {
+                        "x": -4.0,
+                        "y": 4.0,
+                        "z": 8.0
+                    },
+                    "distance": 17.07337188720703,
+                    "visibility01": 0.7393348813056946,
+                    "lineClear": true,
+                    "inView": false
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": -5.0,
+                        "y": 4.0,
+                        "z": 11.0
+                    },
+                    "distance": 19.761072158813478,
+                    "visibility01": 0.6672625541687012,
+                    "lineClear": true,
+                    "inView": false
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": 0.0,
+                        "y": 4.0,
+                        "z": 11.5
+                    },
+                    "distance": 17.00735092163086,
+                    "visibility01": 0.7410604357719421,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "tuna",
+                    "home": {
+                        "x": 5.0,
+                        "y": 4.0,
+                        "z": 10.0
+                    },
+                    "distance": 13.583077430725098,
+                    "visibility01": 0.8260099291801453,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 7.0,
+                        "y": -4.0,
+                        "z": 30.5
+                    },
+                    "distance": 35.003570556640628,
+                    "visibility01": 0.28099963068962099,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 8.0,
+                        "y": -4.0,
+                        "z": 35.0
+                    },
+                    "distance": 39.2364616394043,
+                    "visibility01": 0.20291338860988618,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "red_snapper",
+                    "home": {
+                        "x": 6.0,
+                        "y": -4.0,
+                        "z": 38.0
+                    },
+                    "distance": 42.207820892333987,
+                    "visibility01": 0.15791527926921845,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.5,
+                        "y": -3.5,
+                        "z": 26.5
+                    },
+                    "distance": 36.6367301940918,
+                    "visibility01": 0.24892137944698335,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.0,
+                        "y": -4.5,
+                        "z": 33.0
+                    },
+                    "distance": 42.01487731933594,
+                    "visibility01": 0.16059640049934388,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "grouper",
+                    "home": {
+                        "x": -10.0,
+                        "y": -4.5,
+                        "z": 38.0
+                    },
+                    "distance": 46.31684494018555,
+                    "visibility01": 0.10833203047513962,
+                    "lineClear": true,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -10.0,
+                        "y": -19.5,
+                        "z": 58.0
+                    },
+                    "distance": 68.92205810546875,
+                    "visibility01": 0.007288734428584576,
+                    "lineClear": false,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -9.5,
+                        "y": -19.0,
+                        "z": 60.0
+                    },
+                    "distance": 70.36156463623047,
+                    "visibility01": 0.005921586416661739,
+                    "lineClear": false,
+                    "inView": true
+                },
+                {
+                    "species": "lanternfish",
+                    "home": {
+                        "x": -4.0,
+                        "y": -21.0,
+                        "z": 60.0
+                    },
+                    "distance": 69.91065979003906,
+                    "visibility01": 0.006322614382952452,
+                    "lineClear": false,
+                    "inView": true
+                }
+            ],
+            "readableAtEntry": 3,
+            "firstSightSeconds": 0.0,
+            "firstInRangeSeconds": 0.0,
+            "firstSightSpecies": "sea_bass",
+            "firstInRangeSpecies": "sea_bass",
+            "habitats": [
+                {
+                    "species": "sea_bass",
+                    "metres": 10.020000457763672,
+                    "seconds": 3.3399999141693117,
+                    "tankFraction": 0.027833333238959314,
+                    "stuck": false
+                },
+                {
+                    "species": "tuna",
+                    "metres": 9.30000114440918,
+                    "seconds": 3.0999999046325685,
+                    "tankFraction": 0.025833332911133767,
+                    "stuck": false
+                },
+                {
+                    "species": "red_snapper",
+                    "metres": 30.73749351501465,
+                    "seconds": 10.260000228881836,
+                    "tankFraction": 0.08550000190734863,
+                    "stuck": false
+                },
+                {
+                    "species": "grouper",
+                    "metres": 32.442626953125,
+                    "seconds": 10.859999656677246,
+                    "tankFraction": 0.09049999713897705,
+                    "stuck": false
+                },
+                {
+                    "species": "lanternfish",
+                    "metres": 66.22929382324219,
+                    "seconds": 22.34000015258789,
+                    "tankFraction": 0.1861666738986969,
+                    "stuck": false
+                }
+            ]
+        }
+    ],
+    "sizes": [
+        {
+            "species": "sea_bass",
+            "lengthMetres": 0.251312255859375,
+            "px720At12": 14.398605346679688,
+            "px720At17": 10.163908004760743,
+            "px720At22": 7.853986740112305,
+            "px1080At12": 21.59790802001953,
+            "px1080At22": 11.780980110168457
+        },
+        {
+            "species": "tuna",
+            "lengthMetres": 0.2531852722167969,
+            "px720At12": 14.505908966064454,
+            "px720At17": 10.239656448364258,
+            "px720At22": 7.912520408630371,
+            "px1080At12": 21.75886344909668,
+            "px1080At22": 11.868781089782715
+        },
+        {
+            "species": "red_snapper",
+            "lengthMetres": 0.24767112731933595,
+            "px720At12": 14.190007209777832,
+            "px720At17": 10.016653060913086,
+            "px720At22": 7.740196704864502,
+            "px1080At12": 21.285011291503908,
+            "px1080At22": 11.610295295715332
+        },
+        {
+            "species": "grouper",
+            "lengthMetres": 0.267059326171875,
+            "px720At12": 15.300741195678711,
+            "px720At17": 10.80074691772461,
+            "px720At22": 8.346100807189942,
+            "px1080At12": 22.95111083984375,
+            "px1080At22": 12.51915168762207
+        },
+        {
+            "species": "lanternfish",
+            "lengthMetres": 0.2687225341796875,
+            "px720At12": 15.396024703979493,
+            "px720At17": 10.868008613586426,
+            "px720At22": 8.398077964782715,
+            "px1080At12": 23.094038009643556,
+            "px1080At22": 12.597116470336914
+        }
+    ]
+}
