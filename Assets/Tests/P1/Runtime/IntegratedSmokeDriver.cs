@@ -2687,6 +2687,52 @@ namespace DeepDive.P1.Lab
         }
 
         // Sends one request and reports its host answer on a later frame (the host answer arrives through the player's own sync).
+        // #250 store: a shelved product is paid at the till only after the buyer picked it off a shelf (SelectItemFirst).
+        // Walk to the shelf, select it with the ordinary interaction, walk back to the till, open the shop, then buy.
+        // The host and the guest stand at different copies of the product so neither walks through the other.
+        private bool ReadyAtTill(NetworkPlayer local, Camera cam, EconomyPlayerSync sync, string itemId)
+        {
+            if (EquipmentStoreShopBinding.RequiresEquipmentBasket(itemId) &&
+                local.SelectedShopItem.Value.ToString() != itemId && ShelfFor(itemId) != null)
+            {
+                if (WalkToShelf(local, cam, ShelfFor(itemId))) InteractEvery(local, 1.2f);
+                return false;
+            }
+            if (!GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) return false;
+            if (!sync.ShopOpen) { InteractEvery(local, 1.2f); return false; }
+            return true;
+        }
+
+        private ShopShelfAnchor ShelfFor(string itemId)
+        {
+            var copies = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None).Where(s => s.ItemId == itemId)
+                .OrderBy(s => (s.transform.position - TownStoreRoute.Shelf(itemId).transform.position).sqrMagnitude).ToArray();
+            if (copies.Length == 0) return null;
+            return copies[adapter.IsAuthority || copies.Length == 1 ? 0 : 1];
+        }
+
+        private bool WalkToShelf(NetworkPlayer local, Camera cam, ShopShelfAnchor shelf)
+        {
+            var stand = TownStoreRoute.Stand(shelf);
+            var toStand = stand - local.transform.position; toStand.y = 0;
+            if (toStand.magnitude > 0.2f)
+            {
+                townSettleAt = 0;
+                var target = TownStoreRoute.Next(local.transform.position, NextBeachWaypoint(local.transform.position, stand), adapter.IsAuthority ? 0 : 1);
+                var heading = target - local.transform.position;
+                var flat = heading; flat.y = 0;
+                var walkYaw = Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg;
+                local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * heading.normalized, walkYaw, 0);
+                return false;
+            }
+            var toShelf = shelf.transform.position - cam.transform.position;
+            var yaw = Mathf.Atan2(toShelf.x, toShelf.z) * Mathf.Rad2Deg;
+            var pitch = -Mathf.Atan2(toShelf.y, new Vector2(toShelf.x, toShelf.z).magnitude) * Mathf.Rad2Deg;
+            local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+            if (townSettleAt == 0) townSettleAt = Time.realtimeSinceStartup + 0.6f;
+            return Time.realtimeSinceStartup >= townSettleAt;
+        }
+
         private bool FleetCall(EconomyPlayerSync sync, Action send, out bool accepted, out string reason)
         {
             accepted = false; reason = "";
@@ -2759,22 +2805,26 @@ namespace DeepDive.P1.Lab
                     if (sync.ShopOpen) { result.fleetShopOpened = true; FleetStep(1); }
                     return;
                 case 1:   // a tier cannot be bought on top of nothing
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.CameraAdvancedId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraAdvancedId), out ok, out reason)) return;
                     result.fleetTierGateRefused = !ok && reason == "RequirementMissing";
                     if (!result.fleetTierGateRefused) result.errors.Add($"tier gate answer ok={ok} reason={reason}");
                     FleetStep(2); return;
                 case 2:
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.CameraBasicId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
                     if (!ok) result.errors.Add("camera-basic refused: " + reason);
                     FleetStep(3); return;
                 case 3:
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.CameraAdvancedId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraAdvancedId), out ok, out reason)) return;
                     if (!ok) result.errors.Add("camera-advanced refused: " + reason);
                     FleetStep(4); return;
                 case 4:
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.FinsId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.FinsId), out ok, out reason)) return;
                     result.fleetTiersBought = ok;
