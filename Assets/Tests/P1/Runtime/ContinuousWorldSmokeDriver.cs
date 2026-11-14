@@ -384,6 +384,13 @@ namespace DeepDive.P1.Lab
                 heading = repair.NextAround(local.transform.position, target) - local.transform.position;
                 flat = new Vector2(heading.x, heading.z).magnitude;
             }
+            // #207: the aisle round the display table takes one diver. Lanes 0/2 share the west aisle and 1/3 the east one, so
+            // with four players one could walk in while another walks out of the same aisle and the two capsules locked face
+            // to face (player0 leaving at (-11.65, -26.30), player2 entering at (-12.00, -25.67), 0.72 m apart). A diver
+            // about to enter waits outside, as a person would, while someone is still inside on its side of the table.
+            if (!local.Swimming.Value && !TownStoreRoute.InStore(local.transform.position) && TownStoreRoute.InStore(target) &&
+                SameAisleOccupied())
+            { Stop(); return false; }
             // #249: the equipment shop is a building with one door: steer through the door and the aisle, but count arrival at the real waypoint.
             if (!local.Swimming.Value)
             {
@@ -407,6 +414,13 @@ namespace DeepDive.P1.Lab
             return false;
         }
         private void Stop() => local.SubmitLocalInput(Vector3.zero, 0f, 0f);
+        private bool SameAisleOccupied()
+        {
+            var west = (slot & 1) == 0;
+            var middle = ContinuousTownLayout.EquipmentStoreDoorInside.x;
+            return FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Any(p => p != local && p.IsSpawned &&
+                TownStoreRoute.InStore(p.transform.position) && (p.transform.position.x < middle) == west);
+        }
         private void Aim(Vector3 target)
         {
             var direction = target - local.GetComponentInChildren<Camera>(true).transform.position;
