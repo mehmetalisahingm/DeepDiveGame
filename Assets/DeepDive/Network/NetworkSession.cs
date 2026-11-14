@@ -31,6 +31,10 @@ namespace DeepDive.Network
         private readonly Dictionary<ulong, NetworkPlayer> players = new Dictionary<ulong, NetworkPlayer>();
         private readonly Dictionary<ulong, SceneLoadResult> completedLoads = new Dictionary<ulong, SceneLoadResult>();
         private readonly Dictionary<ulong, double> pendingConnections = new Dictionary<ulong, double>();
+        // Keep the exact admission pose until the remote NGO scene synchronization finishes.
+        // Connection approval alone is earlier than the first authoritative transform snapshot.
+        private readonly Dictionary<ulong, Pose> approvedJoinPoses = new Dictionary<ulong, Pose>();
+        private readonly HashSet<ulong> synchronizedJoiners = new HashSet<ulong>();
         private readonly List<ulong> expiredConnections = new List<ulong>();
         private bool joinAllowed;
         private bool manualLeave;
@@ -90,7 +94,7 @@ namespace DeepDive.Network
         private bool Prepare(ConnectionStatus status)
         {
             if (Status != ConnectionStatus.Offline || returningOffline || manager.IsListening || manager.ShutdownInProgress) return false;
-            admission.Clear(); players.Clear(); pendingConnections.Clear(); completedLoads.Clear();
+            admission.Clear(); players.Clear(); pendingConnections.Clear(); approvedJoinPoses.Clear(); synchronizedJoiners.Clear(); completedLoads.Clear();
             LastError = ""; manualLeave = false; joinAllowed = true; IsSceneLoading = false; DiveActive = false;
             activeRequest = 0; activeScene = null;
             Status = status; connectDeadline = Time.realtimeSinceStartupAsDouble + 12;
@@ -157,6 +161,8 @@ namespace DeepDive.Network
                 {
                     response.Position = pose.position; response.Rotation = pose.rotation;
                     pendingConnections[request.ClientNetworkId] = Time.realtimeSinceStartupAsDouble + 15;
+                    approvedJoinPoses[request.ClientNetworkId] = pose;
+                    synchronizedJoiners.Remove(request.ClientNetworkId);
                 }
                 else
                 {
@@ -172,14 +178,18 @@ namespace DeepDive.Network
         private void Connected(ulong id)
         {
             pendingConnections.Remove(id);
-            if (id == manager.LocalClientId) Status = ConnectionStatus.Connected;
+            if (id == manager.LocalClientId)
+            {
+                approvedJoinPoses.Remove(id); // The local host never needs remote spawn confirmation.
+                Status = ConnectionStatus.Connected;
+            }
             Debug.Log($"P1_CONNECTED id={id}");
             Changed?.Invoke();
         }
 
         private void Disconnected(ulong id)
         {
-            admission.Release(id); pendingConnections.Remove(id); players.Remove(id);
+            admission.Release(id); pendingConnections.Remove(id); approvedJoinPoses.Remove(id); synchronizedJoiners.Remove(id); players.Remove(id);
             if (!manager.IsServer && id == manager.LocalClientId && !manualLeave)
             {
                 LastError = string.IsNullOrEmpty(manager.DisconnectReason) ? "HostDisconnected" : manager.DisconnectReason;
@@ -208,7 +218,7 @@ namespace DeepDive.Network
         private void Stopped(bool wasHost)
         {
             UnsubscribeScenes();
-            admission.Clear(); pendingConnections.Clear(); players.Clear();
+            admission.Clear(); pendingConnections.Clear(); approvedJoinPoses.Clear(); synchronizedJoiners.Clear(); players.Clear();
             completedLoads.Clear(); activeRequest = 0; activeScene = null; IsSceneLoading = false; DiveActive = false;
             joinAllowed = false; Status = ConnectionStatus.Offline;
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
@@ -269,8 +279,19 @@ namespace DeepDive.Network
         private void SceneEvent(SceneEvent sceneEvent)
         {
             if (sceneEvent.SceneEventType == SceneEventType.Load) IsSceneLoading = true;
-            if (sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete && sceneEvent.ClientId == manager.LocalClientId)
-                IsSceneLoading = false;
+            if (sceneEvent.SceneEventType == SceneEventType.SynchronizeComplete)
+            {
+                if (sceneEvent.ClientId == manager.LocalClientId) IsSceneLoading = false;
+                // A returning guest can see its approval spawn for several client frames while
+                // a newer server transform arrives. Confirm the same approved pose on the
+                // actual server NetworkTransform as soon as NGO finishes synchronization.
+                if (IsHost && sceneEvent.ClientId != manager.LocalClientId &&
+                    approvedJoinPoses.ContainsKey(sceneEvent.ClientId))
+                {
+                    synchronizedJoiners.Add(sceneEvent.ClientId);
+                    ConfirmApprovedJoinPose(sceneEvent.ClientId);
+                }
+            }
             if (sceneEvent.SceneEventType != SceneEventType.LoadEventCompleted) return;
             IsSceneLoading = false;
             if (IsHost && activeRequest != 0)
@@ -299,8 +320,21 @@ namespace DeepDive.Network
                 player.ResetForDiveServer();
         }
 
+        private void ConfirmApprovedJoinPose(ulong clientId)
+        {
+            if (!IsHost || activeRequest != 0 || !synchronizedJoiners.Contains(clientId) ||
+                !approvedJoinPoses.TryGetValue(clientId, out var pose) ||
+                !players.TryGetValue(clientId, out var player) || player == null || !player.IsSpawned)
+                return;
+            var before = player.transform.position;
+            player.Teleport(pose); // Host only; clears stale input and synchronizes via NGO, not a test fixture.
+            approvedJoinPoses.Remove(clientId);
+            synchronizedJoiners.Remove(clientId);
+            Debug.Log($"P207_JOIN_POSE_CONFIRMED client={clientId} networkObject={player.NetworkObjectId} before={before} approved={pose.position}");
+        }
+
         internal void Register(NetworkPlayer player)
-        { players[player.OwnerClientId] = player; Changed?.Invoke(); }
+        { players[player.OwnerClientId] = player; ConfirmApprovedJoinPose(player.OwnerClientId); Changed?.Invoke(); }
         internal void Unregister(NetworkPlayer player)
         { players.Remove(player.OwnerClientId); Changed?.Invoke(); }
 
