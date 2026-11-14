@@ -89,6 +89,27 @@ namespace DeepDive.P4.Tests
         };
 
         [Test]
+        public void WorldSmokeReportSurvivesDestroyedOwnerAfterDisconnect()
+        {
+            // #207: NGO despawns the owner after a peer failure. Unity's destroyed object
+            // retains a managed wrapper, so null-conditional navigation is not safe.
+            Assert.AreEqual("missing", DeepDive.P1.Lab.ContinuousWorldSmokeDriver.PositionForReport(null));
+            var go = new GameObject("P207-despawned-owner");
+            DeepDive.Network.NetworkPlayer owner = null;
+            try
+            {
+                owner = go.AddComponent<DeepDive.Network.NetworkPlayer>();
+                Assert.AreNotEqual("missing", DeepDive.P1.Lab.ContinuousWorldSmokeDriver.PositionForReport(owner));
+                Object.DestroyImmediate(go);
+                Assert.AreEqual("missing", DeepDive.P1.Lab.ContinuousWorldSmokeDriver.PositionForReport(owner));
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
         public void DiverControllerMatchesTheWrittenWalkLimits()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefabPath);
