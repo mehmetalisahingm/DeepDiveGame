@@ -673,6 +673,27 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void FourPlayerSmokeShopWaitsOnlyForSomeoneInSamePhysicalAisle()
+        {
+            // #207: player0 leaving west, player2 entering west -> wait.
+            // An east-aisle player must not block west entries, and a player
+            // already outside the building must not keep the aisle occupied.
+            var door = ContinuousTownLayout.EquipmentStoreDoorInside;
+            var west = new Vector3(door.x - 1.0f, door.y, door.z - 2.0f);
+            var east = new Vector3(door.x + 1.0f, door.y, door.z - 2.0f);
+            var outside = new Vector3(door.x - 1.0f, door.y, door.z + 7.0f);
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.InStore(west));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.InStore(east));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.InStore(outside));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(2, west));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(0, west));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(2, east));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(3, east));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(3, west));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(0, outside));
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;
