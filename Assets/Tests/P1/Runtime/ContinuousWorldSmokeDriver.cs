@@ -416,10 +416,8 @@ namespace DeepDive.P1.Lab
         private void Stop() => local.SubmitLocalInput(Vector3.zero, 0f, 0f);
         private bool SameAisleOccupied()
         {
-            var west = (slot & 1) == 0;
-            var middle = ContinuousTownLayout.EquipmentStoreDoorInside.x;
             return FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Any(p => p != local && p.IsSpawned &&
-                TownStoreRoute.InStore(p.transform.position) && (p.transform.position.x < middle) == west);
+                TownStoreRoute.BlocksEntry(slot, p.transform.position));
         }
         private void Aim(Vector3 target)
         {
