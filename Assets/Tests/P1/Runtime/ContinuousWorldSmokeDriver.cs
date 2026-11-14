@@ -90,7 +90,7 @@ namespace DeepDive.P1.Lab
         {
             if (finished || adapter == null) return;
             if (Time.realtimeSinceStartup > deadline)
-            { Fail($"Timed out at step {step} waypoint {waypoint} position={local?.transform.position} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
+            { Fail($"Timed out at step {step} waypoint {waypoint} position={PositionForReport(local)} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
             if (leaving)
             {
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
@@ -293,7 +293,7 @@ namespace DeepDive.P1.Lab
 
         private void LateUpdate()
         {
-            if (!finished && step == 9 && !adapter.IsAuthority && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+            if (!finished && adapter != null && step == 9 && !adapter.IsAuthority && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
         }
 
         private void Track(EconomyPlayerSync sync)
@@ -419,13 +419,17 @@ namespace DeepDive.P1.Lab
         }
         private static readonly FieldInfo HomeStatusField=typeof(HomePlayerInteractionBinding)
             .GetField("statusMessage",BindingFlags.Instance|BindingFlags.NonPublic);
+        // A disconnected owner can be a destroyed Unity object with a live C# wrapper.
+        // `player?.transform` only checks managed null and can throw before the failure report is written.
+        public static string PositionForReport(NetworkPlayer player) =>
+            player != null ? player.transform.position.ToString() : "missing";
         private void Fail(string reason) { report.errors.Add(reason); Finish(); }
         private void Finish()
         {
             if (finished) return;
             finished = true;
-            if (local != null) report.position = local.transform.position.ToString();
-            report.phase = adapter != null ? adapter.Session.State.Phase.ToString() : "missing";
+            report.position = PositionForReport(local);
+            report.phase = adapter != null && adapter.Session != null ? adapter.Session.State.Phase.ToString() : "missing";
             report.passed = step == 9 && report.players == expected && report.worldLoads == 1 && report.homeSpawn &&
                 report.shopOpened && report.dockReached && report.swam && report.pcOpened && report.slept && report.morningHome &&
                 report.distance > 120f && report.errors.Count == 0;
