@@ -672,6 +672,57 @@ namespace DeepDive.P4.Tests
             Assert.AreEqual(door.z, leaving.z, 0.01f);
         }
 
+        [Test]
+        public void FourPlayerSmokeShopWaitsOnlyForSomeoneInSamePhysicalAisle()
+        {
+            // #207: player0 leaving west, player2 entering west -> wait.
+            // An east-aisle player must not block west entries, and a player
+            // already outside the building must not keep the aisle occupied.
+            var door = ContinuousTownLayout.EquipmentStoreDoorInside;
+            var west = new Vector3(door.x - 1.0f, door.y, door.z - 2.0f);
+            var east = new Vector3(door.x + 1.0f, door.y, door.z - 2.0f);
+            var outside = new Vector3(door.x - 1.0f, door.y, door.z + 7.0f);
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.InStore(west));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.InStore(east));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.InStore(outside));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(2, west));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(0, west));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(2, east));
+            Assert.IsTrue(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(3, east));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(3, west));
+            Assert.IsFalse(DeepDive.P1.Lab.TownStoreRoute.BlocksEntry(0, outside));
+        }
+
+        [Test]
+        public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
+        {
+            var y = ContinuousTownLayout.WalkSurfaceY;
+            var towardsStreet = new Vector3(0f, y, -24f);
+            var far = ContinuousTownLayout.EquipmentStoreAisleFar;
+
+            // #207 CI physical-world player0 timeout: waypoint 8, x=-11.31, z=-26.23.
+            // The old 0.6 m test steered towards AisleNear from here, clipping the table.
+            var blocked = new Vector3(-11.31f, y, -26.23f);
+            var next = DeepDive.P1.Lab.TownStoreRoute.Next(blocked, towardsStreet, 0);
+            Assert.AreEqual(far.x, next.x, 0.001f);
+            Assert.AreEqual(far.z, next.z, 0.001f,
+                "the actual four-process timeout position must clear the far aisle first");
+
+            // Once safely west of the fixture, the driver must keep progressing north;
+            // this is the existing real corridor, not a physics bypass or teleport.
+            var cleared = new Vector3(far.x + 0.12f, y, far.z + 0.12f);
+            var after = DeepDive.P1.Lab.TownStoreRoute.Next(cleared, towardsStreet, 0);
+            Assert.AreEqual(ContinuousTownLayout.EquipmentStoreAisleNear.x, after.x, 0.001f);
+            Assert.AreEqual(ContinuousTownLayout.EquipmentStoreAisleNear.z, after.z, 0.001f);
+
+            // Both physical co-op lanes retain their distinct far-corner sides.
+            var eastFar = new Vector3(2f * ContinuousTownLayout.EquipmentStoreDoorInside.x - far.x, y, far.z);
+            var eastBlocked = new Vector3(eastFar.x - 0.59f, y, far.z + 0.22f);
+            var eastNext = DeepDive.P1.Lab.TownStoreRoute.Next(eastBlocked, towardsStreet, 1);
+            Assert.AreEqual(eastFar.x, eastNext.x, 0.001f);
+            Assert.AreEqual(eastFar.z, eastNext.z, 0.001f);
+        }
+
         // The smoke drivers steer with TownStoreRoute.Next; whatever line it draws between two places must be a walk the capsule can actually make
         // (door, aisle round the display table, no wall), in both directions.
         [Test]
