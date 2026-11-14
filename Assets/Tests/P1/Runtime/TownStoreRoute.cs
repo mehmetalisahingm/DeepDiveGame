@@ -37,6 +37,11 @@ namespace DeepDive.P1.Lab
             return Mathf.Abs(p.x - Inside.x) <= Half && p.z >= back && p.z <= Line;
         }
 
+        // #207: lanes 0/2 share the west aisle; 1/3 the east. Only a diver
+        // inside the *same* physical aisle blocks a new entry. No gameplay/physics change.
+        public static bool BlocksEntry(int enteringSlot, Vector3 otherPosition) =>
+            InStore(otherPosition) && ((otherPosition.x < Inside.x) == ((enteringSlot & 1) == 0));
+
         public static Vector3 Next(Vector3 position, Vector3 target, int lane = 0)
         {
             var from = InStore(position);
