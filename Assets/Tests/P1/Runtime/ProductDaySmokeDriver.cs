@@ -794,12 +794,39 @@ namespace DeepDive.P1.Lab
             var host = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                 .FirstOrDefault(p => p.IsSpawned && p.OwnerClientId == 0);
             if (host == null || host.CurrentCameraTier == CameraTier.None) { Stop(); return; }
+            // #250 store: the till sells a shelved camera only after the buyer picked it off a shelf (SelectItemFirst).
+            if (local.CurrentCameraTier == CameraTier.None && !GuestPickCameraFromShelf()) return;
             if (!GoToService(TownServiceCatalog.EquipmentShopId)) return;
             if (!sync.ShopOpen) { Act(local.SubmitServiceInteractionLocal); return; }
             if (local.CurrentCameraTier == CameraTier.None)
-            { Act(() => sync.RequestPurchase(EconomyManager.CameraBasicId)); return; }
+            {
+                var answer = sync.LastReasonCode.Value.ToString();
+                if (answer != guestCameraAnswer) { guestCameraAnswer = answer; Debug.Log($"P254_GUEST_CAMERA_ANSWER accepted={sync.LastAccepted.Value} reason={answer} balance={sync.SharedBalance.Value}"); }
+                Act(() => sync.RequestPurchase(EconomyManager.CameraBasicId)); return;
+            }
             report.guestCameraPurchased = local.CurrentCameraTier == CameraTier.Basic;
             localDone = report.guestCameraPurchased;
+        }
+
+        private string guestCameraAnswer = "";
+
+        // The guest takes the camera copy furthest from the host's parking spot, stands in front of it and selects it
+        // with the ordinary interaction. Same walk as the host's SelectCameraFromShelf, without the host-only checks.
+        private bool GuestPickCameraFromShelf()
+        {
+            if (local.SelectedShopItem.Value.ToString() == EconomyManager.CameraBasicId) return true;
+            var park = P(-12f, -23f);
+            var shelf = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None)
+                .Where(s => s.ItemId == EconomyManager.CameraBasicId)
+                .OrderByDescending(s => (s.transform.position - park).sqrMagnitude).FirstOrDefault();
+            if (shelf == null) { Fail("Physical camera shelf missing"); return false; }
+            var stand = TownStoreRoute.Stand(shelf);
+            var delta = stand - local.transform.position; delta.y = 0;
+            if (delta.magnitude > .17f) { MoveToward(StoreAware(Around(stand))); aimAt = 0; return false; }
+            Aim(shelf.transform.position);
+            if (!Settled()) return false;
+            Act(local.SubmitServiceInteractionLocal);
+            return false;
         }
 
         private void GuestCameraProof()

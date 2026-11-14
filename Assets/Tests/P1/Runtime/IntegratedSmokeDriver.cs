@@ -2687,6 +2687,91 @@ namespace DeepDive.P1.Lab
         }
 
         // Sends one request and reports its host answer on a later frame (the host answer arrives through the player's own sync).
+        // #250 store: a shelved product is paid at the till only after the buyer picked it off a shelf (SelectItemFirst).
+        // Walk to the shelf, select it with the ordinary interaction, walk back to the till, open the shop, then buy.
+        // The host and the guest stand at different copies of the product so neither walks through the other.
+        private bool ReadyAtTill(NetworkPlayer local, Camera cam, EconomyPlayerSync sync, string itemId)
+        {
+            var store = FindObjectsByType<EquipmentStoreShopBinding>(FindObjectsSortMode.None).FirstOrDefault();
+            var catalogOnly = store != null && store.IsCatalogOnlyItem(itemId);   // not on display: the till sells it unselected
+            if (!catalogOnly && EquipmentStoreShopBinding.RequiresEquipmentBasket(itemId) &&
+                local.SelectedShopItem.Value.ToString() != itemId && ShelfFor(itemId) != null)
+            {
+                var shelf = ShelfFor(itemId);
+                if (fleetShelfLogged.Add(itemId))
+                {
+                    var stand = TownStoreRoute.Stand(shelf);
+                    result.fleetTrace.Add($"shelf item={itemId} at=({shelf.transform.position.x:0.00},{shelf.transform.position.z:0.00}) stand=({stand.x:0.00},{stand.z:0.00}) catalogOnly={catalogOnly}");
+                }
+                if (WalkToShelf(local, cam, shelf)) InteractEvery(local, 1.2f);
+                return false;
+            }
+            if (!GoToService(local, cam, TownServiceCatalog.EquipmentShopId)) return false;
+            if (!sync.ShopOpen) { InteractEvery(local, 1.2f); return false; }
+            return true;
+        }
+
+        private readonly HashSet<string> fleetShelfLogged = new HashSet<string>(), fleetShelfProbed = new HashSet<string>();
+
+        // Neighbouring displays can overlap (fins-1 and bag-1 meet at 1.00 m on the west wall), so aiming at the anchor
+        // centre may select the neighbour. Like a player, nudge the aim across the product until the host's own eye ray
+        // (EyeRay, the same ray the host uses) meets this display first.
+        private Vector3 ShelfAimPoint(NetworkPlayer local, ShopShelfAnchor shelf)
+        {
+            var eye = local.RecordingEyePosition;
+            var controller = local.GetComponent<CharacterController>();
+            var centre = shelf.transform.position;
+            var side = Vector3.Cross(Vector3.up, (centre - eye).normalized).normalized;
+            foreach (var across in new[] { 0f, 0.12f, -0.12f, 0.24f, -0.24f, 0.36f, -0.36f })
+                foreach (var up in new[] { 0f, 0.1f, -0.1f })
+                {
+                    var aim = centre + side * across + Vector3.up * up;
+                    var line = aim - eye;
+                    if (EyeRay.Raycast(eye, line.normalized, line.magnitude + 0.5f, QueryTriggerInteraction.Collide, controller, out var hit) &&
+                        hit.collider.GetComponentInParent<ShopShelfAnchor>()?.ItemId == shelf.ItemId)
+                        return aim;
+                }
+            return centre;
+        }
+
+        private ShopShelfAnchor ShelfFor(string itemId)
+        {
+            var copies = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None).Where(s => s.ItemId == itemId)
+                .OrderBy(s => (s.transform.position - TownStoreRoute.Shelf(itemId).transform.position).sqrMagnitude).ToArray();
+            if (copies.Length == 0) return null;
+            return copies[adapter.IsAuthority || copies.Length == 1 ? 0 : 1];
+        }
+
+        private bool WalkToShelf(NetworkPlayer local, Camera cam, ShopShelfAnchor shelf)
+        {
+            var stand = TownStoreRoute.Stand(shelf);
+            var toStand = stand - local.transform.position; toStand.y = 0;
+            if (toStand.magnitude > 0.35f)
+            {
+                townSettleAt = 0;
+                var target = TownStoreRoute.Next(local.transform.position, NextBeachWaypoint(local.transform.position, stand), adapter.IsAuthority ? 0 : 1);
+                var heading = target - local.transform.position;
+                var flat = heading; flat.y = 0;
+                var walkYaw = Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg;
+                local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * heading.normalized, walkYaw, 0);
+                return false;
+            }
+            var toShelf = ShelfAimPoint(local, shelf) - cam.transform.position;
+            if (fleetShelfProbed.Add(shelf.ItemId + ":" + local.LastActionResult.Value))
+            {
+                var eye = local.RecordingEyePosition;
+                var line = shelf.transform.position - eye;
+                var seen = Physics.RaycastAll(eye, line.normalized, line.magnitude + 0.5f, ~0, QueryTriggerInteraction.Collide)
+                    .OrderBy(h => h.distance).Take(3).Select(h => $"{h.collider.name}@{h.distance:0.00}");
+                result.fleetTrace.Add($"shelfray item={shelf.ItemId} last={local.LastActionResult.Value} kind={local.LastActionKind.Value} shelfY={shelf.transform.position.y:0.00} eye=({eye.x:0.00},{eye.y:0.00},{eye.z:0.00}) hits={string.Join(",", seen)}");
+            }
+            var yaw = Mathf.Atan2(toShelf.x, toShelf.z) * Mathf.Rad2Deg;
+            var pitch = -Mathf.Atan2(toShelf.y, new Vector2(toShelf.x, toShelf.z).magnitude) * Mathf.Rad2Deg;
+            local.SubmitLocalInput(Vector3.zero, yaw, pitch);
+            if (townSettleAt == 0) townSettleAt = Time.realtimeSinceStartup + 0.6f;
+            return Time.realtimeSinceStartup >= townSettleAt;
+        }
+
         private bool FleetCall(EconomyPlayerSync sync, Action send, out bool accepted, out string reason)
         {
             accepted = false; reason = "";
@@ -2759,22 +2844,26 @@ namespace DeepDive.P1.Lab
                     if (sync.ShopOpen) { result.fleetShopOpened = true; FleetStep(1); }
                     return;
                 case 1:   // a tier cannot be bought on top of nothing
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.CameraAdvancedId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraAdvancedId), out ok, out reason)) return;
                     result.fleetTierGateRefused = !ok && reason == "RequirementMissing";
                     if (!result.fleetTierGateRefused) result.errors.Add($"tier gate answer ok={ok} reason={reason}");
                     FleetStep(2); return;
                 case 2:
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.CameraBasicId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraBasicId), out ok, out reason)) return;
                     if (!ok) result.errors.Add("camera-basic refused: " + reason);
                     FleetStep(3); return;
                 case 3:
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.CameraAdvancedId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.CameraAdvancedId), out ok, out reason)) return;
                     if (!ok) result.errors.Add("camera-advanced refused: " + reason);
                     FleetStep(4); return;
                 case 4:
+                    if (!townAwaiting && !ReadyAtTill(local, cam, sync, EconomyManager.FinsId)) return;
                     local.SubmitLocalInput(Vector3.zero, 0);
                     if (!FleetCall(sync, () => sync.RequestPurchase(EconomyManager.FinsId), out ok, out reason)) return;
                     result.fleetTiersBought = ok;
