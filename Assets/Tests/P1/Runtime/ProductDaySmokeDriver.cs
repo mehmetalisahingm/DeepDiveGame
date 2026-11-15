@@ -365,6 +365,20 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
+                    // #207 repair/rejoin: there are only three actual parts for
+                    // four human players. After midnight the fourth (unassigned)
+                    // participant was walking into the same single-person home
+                    // aisle as the rejoined part-1 carrier; their .35m capsules
+                    // met on opposite sides of H(-4.7,-2) and both stalled.
+                    // Keep the fourth physically in the session and idle; do
+                    // not finish until the HOST has truly completed all 3 parts.
+                    if (RepairOnly && RepairInterruptions && repairPhase == 5 &&
+                        !HasRepairAssignment(report.slot, expected))
+                    {
+                        Stop();
+                        localDone = sync.BoatPartsDone.Value == 3;
+                        return;
+                    }
                     if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
