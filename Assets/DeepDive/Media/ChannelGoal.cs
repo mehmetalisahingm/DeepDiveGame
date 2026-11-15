@@ -28,6 +28,15 @@ namespace DeepDive.Media
 
             // 0..1 of the final goal (linear, so early progress looks small: that is the honest scale of 10 million).
             public float Ratio => Math.Max(0f, Math.Min(1f, Followers / (float)TargetFollowers));
+
+            // A SECOND, clearly labelled visual meter: actual progress between
+            // the previous earned milestone and the next one. The main 10M %
+            // stays linear and unchanged; this only makes the early game legible.
+            public int PreviousMilestone => MilestonesReached == 0 ? 0 : Milestones[MilestonesReached - 1];
+            public int RemainingToNext => Reached ? 0 : Math.Max(0, NextMilestone - Followers);
+            public float MilestoneRatio => Reached ? 1f :
+                Math.Max(0f, Math.Min(1f,
+                    (Followers - PreviousMilestone) / (float)Math.Max(1, NextMilestone - PreviousMilestone)));
         }
 
         public static Progress Of(int followers)
