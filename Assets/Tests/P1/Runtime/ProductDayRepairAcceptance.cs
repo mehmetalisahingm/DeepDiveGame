@@ -17,6 +17,13 @@ namespace DeepDive.P1.Lab
         private bool raceSent, disconnectSent, reconnectSent, midnightStarted;
         private float reconnectAt, clockRate, midnightObservedAt;
 
+        // A four-person repair only has three real material assignments. After
+        // reconnect/midnight, an unassigned fourth diver must not enter the
+        // house's one-person west aisle and obstruct the assigned repair worker.
+        // The host still requires all three actual repaired parts before completion.
+        public static bool HasRepairAssignment(int slot, int playerCount) =>
+            slot >= 0 && playerCount > 0 && slot < Mathf.Min(3, playerCount);
+
         private void SetRepairPhase(int value)
         {
             if (repairPhase == value) return;
