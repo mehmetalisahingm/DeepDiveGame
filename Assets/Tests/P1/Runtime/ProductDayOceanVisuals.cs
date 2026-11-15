@@ -13,6 +13,10 @@ namespace DeepDive.P1.Lab
         // its three band stops, looks at the reef arch's south mouth. Same owner input and host movement.
         private bool ReefGateFrames=>Arg("-p298-reef-gate-frames")=="1";
         private static readonly Vector3 ReefGateMouth=new Vector3(-7,-6.8f,29);
+        // #303 explicit development frames: the survey swims round the shallow wreck in front of the beach and looks
+        // at its hull from the wade side, the dock side and from seaward.
+        private bool WreckFrames=>Arg("-p303-wreck-frames")=="1";
+        private static readonly Vector3 WreckHull=new Vector3(1.5f,1f,3f);
         private int oceanWaypoint,oceanFrame;
         private float oceanHold,nextOceanFrame,oceanFirstTime,oceanFirstHeight;
         private bool oceanShoreDone,oceanShoreCaptured,oceanSurveyDone,oceanCapturing;
@@ -47,7 +51,14 @@ namespace DeepDive.P1.Lab
             if(oceanRoute==null)
             {
                 var x=-11+report.slot*1.3f;
-                if(ReefGateFrames)
+                if(WreckFrames)
+                {
+                    var wx=report.slot*0.8f;
+                    oceanRoute=new[]{P(9,-12.5f),P(-6.5f,-11.2f),new Vector3(-6.5f+report.slot,6.3f,-5),
+                        new Vector3(-4.5f+wx,4.2f,0),new Vector3(6.5f,3.6f,5.5f+wx),new Vector3(1.5f+wx,3.8f,8.5f),
+                        new Vector3(6.5f,3.6f,5.5f+wx),new Vector3(-4.5f+wx,4.2f,0),new Vector3(-6.5f+report.slot,6.3f,-5)};
+                }
+                else if(ReefGateFrames)
                 {
                     var gx=-7+report.slot*1.5f;
                     oceanRoute=new[]{P(9,-12.5f),P(-6.5f,-11.2f),new Vector3(-6.5f+report.slot,6.3f,-5),
@@ -64,13 +75,14 @@ namespace DeepDive.P1.Lab
                 MoveToward(oceanWaypoint<2?CoastTarget(Around(target)):target);oceanHold=0;return false;
             }
             if(oceanWaypoint<2){oceanWaypoint++;return false;}
-            if(ReefGateFrames && oceanWaypoint>=2 && oceanWaypoint<=5)Aim(ReefGateMouth);
+            if(WreckFrames && oceanWaypoint>=2 && oceanWaypoint<=5)Aim(WreckHull);
+            else if(ReefGateFrames && oceanWaypoint>=2 && oceanWaypoint<=5)Aim(ReefGateMouth);
             else Aim(local.RecordingEyePosition+new Vector3(1,oceanWaypoint==2||oceanWaypoint==8?0:-2,12));
             if(oceanHold==0)oceanHold=Time.realtimeSinceStartup+2;
             if(Time.realtimeSinceStartup<oceanHold)return false;
             if(SeabedFrames && oceanWaypoint>=3 && oceanWaypoint<=5 && !SeabedFrameStop())return false;
             if(oceanWaypoint>=3 && oceanWaypoint<=5)
-            {report.oceanBands++;CaptureView((ReefGateFrames?".reef-gate-":".ocean-band-")+report.oceanBands+".png");}
+            {report.oceanBands++;CaptureView((WreckFrames?".wreck-":ReefGateFrames?".reef-gate-":".ocean-band-")+report.oceanBands+".png");}
             if(oceanWaypoint==2 || oceanWaypoint==8)CaptureView(".ocean-surface-"+oceanWaypoint+".png");
             oceanWaypoint++;oceanHold=0;
             if(oceanWaypoint<oceanRoute.Length)return false;
