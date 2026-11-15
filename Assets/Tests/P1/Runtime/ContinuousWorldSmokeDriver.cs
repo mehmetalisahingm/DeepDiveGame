@@ -44,6 +44,7 @@ namespace DeepDive.P1.Lab
         private float deadline, nextReport, waitUntil, aimAt, nextTrace, nextBedRetry;
         private Vector3 previous;
         private bool tracking, finished, leaving;
+        private bool sawWorldOwner;
         private List<Vector3> route;
 
         private static string Arg(string key, string fallback = "")
@@ -96,6 +97,15 @@ namespace DeepDive.P1.Lab
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
                 return;
             }
+            // In a continuous-world test a disappearing connection after a live
+            // owner has joined is a failure, not a waypoint timeout. Final host
+            // shutdown is already handled by the 'leaving' path / step 9.
+            if (sawWorldOwner && step > 0 && step < 9 &&
+                adapter.Connection.Status == ConnectionStatus.Offline)
+            {
+                Fail($"Connection lost during world travel at step {step} waypoint {waypoint}");
+                return;
+            }
             if (adapter.Connection.Status != ConnectionStatus.Connected || adapter.Connection.IsSceneLoading) return;
             if (messages == null && manager.CustomMessagingManager != null)
             {
@@ -105,7 +115,14 @@ namespace DeepDive.P1.Lab
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
             report.players = Math.Max(report.players, players.Length);
             local = players.FirstOrDefault(p => p.IsOwner);
+            if (OwnerLostDuringWorld(step, sawWorldOwner, adapter.Connection.IsSceneLoading, local != null))
+            {
+                Fail($"Local owner despawned during world travel at step {step} waypoint {waypoint}: connected={manager.ConnectedClientsIds.Count}/{expected}");
+                return;
+            }
             if (local == null) return;
+            if (SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName)
+                sawWorldOwner = true;
             local.ReadKeyboard = false;
             var state = adapter.Session.State;
             var sync = local.GetComponent<EconomyPlayerSync>();
@@ -325,6 +342,10 @@ namespace DeepDive.P1.Lab
         // or change the required player count / 1.5m movement limit.
         public static bool RequiredParticipantDisconnected(int step, int expectedCount, int connectedCount) =>
             step > 0 && step < 9 && connectedCount < expectedCount;
+        // One peer can lose its own NetworkPlayer while NGO is shutting down.
+        // The test must still write a truthful per-process FAIL report.
+        public static bool OwnerLostDuringWorld(int step, bool ownerSeen, bool sceneLoading, bool ownerPresent) =>
+            step > 0 && step < 9 && ownerSeen && !sceneLoading && !ownerPresent;
         private bool AllAt(int value) => manager.ConnectedClientsIds.Count == expected &&
             manager.ConnectedClientsIds.All(id => progress.TryGetValue(id, out var p) && p >= value);
         private void SetStep(int value)
