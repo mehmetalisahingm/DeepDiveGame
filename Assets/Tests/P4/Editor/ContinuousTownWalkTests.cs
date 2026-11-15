@@ -110,6 +110,19 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void WorldSmokeMissingParticipantFailsBeforeMisleadingWaypointTimeout()
+        {
+            var lost = DeepDive.P1.Lab.ContinuousWorldSmokeDriver.RequiredParticipantDisconnected;
+            Assert.IsFalse(lost(0, 4, 3), "Lobby can still be connecting");
+            Assert.IsFalse(lost(1, 4, 4), "All required peers are present");
+            Assert.IsTrue(lost(1, 4, 3), "A lost peer invalidates the real walk");
+            Assert.IsTrue(lost(2, 4, 3), "Dock phase cannot advance without the guest");
+            Assert.IsTrue(lost(4, 4, 2), "Returning through water still requires four");
+            Assert.IsFalse(lost(9, 4, 3), "Final shutdown may intentionally disconnect peers");
+            Assert.IsFalse(lost(2, 1, 1), "Solo must remain valid");
+        }
+
+        [Test]
         public void DiverControllerMatchesTheWrittenWalkLimits()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefabPath);
