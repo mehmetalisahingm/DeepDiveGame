@@ -43,6 +43,10 @@ namespace DeepDive.P1.Lab
         private string output;
         private float deadline, nextReport, waitUntil, aimAt, nextTrace, nextBedRetry;
         private Vector3 previous;
+        // Diagnostic only: compare owner-visible samples with host transforms around the
+        // first home-spawn movement; never changes the existing 1.5 m QA gate.
+        private float motionTraceStart, motionSampleAt, motionLogAt, hostLogAt;
+        private int motionSampleFrame;
         private bool tracking, finished, leaving;
         private List<Vector3> route;
 
@@ -139,6 +143,9 @@ namespace DeepDive.P1.Lab
                     Finish(); return;
                 }
                 previous = local.transform.position; tracking = true;
+                motionTraceStart = motionSampleAt = motionLogAt = Time.realtimeSinceStartup;
+                motionSampleFrame = Time.frameCount;
+                Debug.Log($"P207_PREP_TRACK_START slot={slot} owner={local.OwnerClientId} object={local.NetworkObjectId} frame={Time.frameCount} t={Time.realtimeSinceStartupAsDouble:F6} position={previous} waitSeconds={slot * 2}");
                 waitUntil = Time.realtimeSinceStartup + slot * 2f;
                 SetRoute(Outward()); SetStep(1);
             }
@@ -299,12 +306,41 @@ namespace DeepDive.P1.Lab
         private void Track(EconomyPlayerSync sync)
         {
             if (!tracking) return;
-            var delta = Vector3.Distance(previous, local.transform.position);
-            previous = local.transform.position;
+            var now = Time.realtimeSinceStartup;
+            var current = local.transform.position;
+            var from = previous;
+            var delta = Vector3.Distance(from, current);
+            var sampleGap = now - motionSampleAt;
+            var frameGap = Time.frameCount - motionSampleFrame;
+            previous = current;
+            motionSampleAt = now;
+            motionSampleFrame = Time.frameCount;
+
+            // #207 forensic trace only. Rear-row guests begin walking after a six-second
+            // stagger; collect 12 seconds so the actual failing first movement is visible.
+            // Log host authoritative positions alongside each owner's visible transform.
+            if (now - motionTraceStart < 12f && (now - motionLogAt >= 0.12f || delta > 0.4f))
+            {
+                motionLogAt = now;
+                var controller = local.GetComponent<CharacterController>();
+                Debug.Log($"P207_OWNER_SAMPLE slot={slot} owner={local.OwnerClientId} object={local.NetworkObjectId} step={step} frame={Time.frameCount} frameGap={frameGap} t={Time.realtimeSinceStartupAsDouble:F6} dtReal={sampleGap:F6} dtFrame={Time.unscaledDeltaTime:F6} fixedDt={Time.fixedDeltaTime:F6} from={from} to={current} distance={delta:F6} controllerVelocity={controller.velocity} controllerEnabled={controller.enabled} grounded={controller.isGrounded}");
+            }
+            if (adapter.IsAuthority && now - motionTraceStart < 12f && now - hostLogAt >= 0.24f)
+            {
+                hostLogAt = now;
+                foreach (var player in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
+                    if (player != null && player.IsSpawned)
+                        Debug.Log($"P207_HOST_SAMPLE owner={player.OwnerClientId} object={player.NetworkObjectId} frame={Time.frameCount} t={Time.realtimeSinceStartupAsDouble:F6} position={player.transform.position}");
+            }
+
             if (step >= 8 || local.Seated.Value || sync.DayNumber.Value > firstDay) return;
             report.distance += delta;
             report.largestTravelStep = Mathf.Max(report.largestTravelStep, delta);
-            if (delta > 1.5f) Fail("Unexpected movement discontinuity: " + delta);
+            if (delta > 1.5f)
+            {
+                Debug.Log($"P207_OWNER_DISCONTINUITY slot={slot} owner={local.OwnerClientId} step={step} frame={Time.frameCount} frameGap={frameGap} t={Time.realtimeSinceStartupAsDouble:F6} dtReal={sampleGap:F6} from={from} to={current} delta={delta:F6}");
+                Fail("Unexpected movement discontinuity: " + delta);
+            }
             if (report.worldLoads != 1) Fail("World reloaded during daily travel: " + report.worldLoads);
         }
 
