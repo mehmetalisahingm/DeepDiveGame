@@ -65,6 +65,21 @@ namespace DeepDive.World
             new Vector4(10f, 22f, 3f, 2.5f)
         };
 
+        // #298: the first outcrop sat across the arch's south mouth, so a diver had to drop 4.3 m over the last 4 m
+        // into it. A sand gully cut into that outcrop's north-east side, along the arch axis (x = ArchAxisX), lets the
+        // approach go down over 5 m instead and arrive level with the opening. Rock either side, the outcrop's crest
+        // west of the gully and every other outcrop keep their heights; the arch, its boxes and the fish homes stay put.
+        public const float ArchAxisX = -7f;
+        private const float GullyFullHalfWidth = 1.2f, GullyEdgeHalfWidth = 3f, GullyStartZ = 18f, GullyFullZ = 25.5f;
+
+        // 0 = the outcrop as grown, 1 = cut away entirely.
+        public static float ArchApproachCut(float x, float z)
+        {
+            var across = Mathf.InverseLerp(GullyEdgeHalfWidth, GullyFullHalfWidth, Mathf.Abs(x - ArchAxisX));
+            var along = Mathf.InverseLerp(GullyStartZ, GullyFullZ, z);
+            return across * across * (3f - 2f * across) * along * along * (3f - 2f * along);
+        }
+
         private const string Boulder = "reef-rock-boulder", Branching = "reef-coral-branching", Arch = "reef-rock-arch";
 
         public static readonly IReadOnlyList<Solid> Solids = new[]
@@ -106,10 +121,14 @@ namespace DeepDive.World
             var amplitude = z < 15f ? 0.05f : z < 25f ? 0.1f : 0.3f;
             y += (Mathf.Sin(x * 0.61f + z * 0.23f) * 0.6f + Mathf.Sin(x * 0.17f - z * 0.47f + 1.3f) * 0.4f) * amplitude;
 
-            foreach (var outcrop in Outcrops)
+            for (var i = 0; i < Outcrops.Length; i++)
             {
+                var outcrop = Outcrops[i];
                 var d = new Vector2(x - outcrop.x, z - outcrop.y).magnitude / outcrop.z;
-                if (d < 1f) y += outcrop.w * (1f - d * d) * (1f - d * d);
+                if (d >= 1f) continue;
+                var rise = outcrop.w * (1f - d * d) * (1f - d * d);
+                if (i == 0) rise *= 1f - ArchApproachCut(x, z);
+                y += rise;
             }
 
             return Mathf.Max(y, MinFloorY);
