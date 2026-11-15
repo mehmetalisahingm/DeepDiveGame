@@ -104,6 +104,23 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RejoinedFourPlayerRepairOnlyUsesThreeRealPartAssignees()
+        {
+            // #207: after a real guest disconnect/rejoin and midnight, both
+            // owner 1 and owner 3 were sent through H(-4.7,-2). Their capsules
+            // faced each other 0.76m apart and prevented owner 1 from reaching
+            // the last unfinished repair part. Owner 3 has no fourth part.
+            System.Func<int, int, bool> assigned = DeepDive.P1.Lab.ProductDaySmokeDriver.HasRepairAssignment;
+            Assert.IsTrue(assigned(0, 4));
+            Assert.IsTrue(assigned(1, 4), "the rejoined carrier still has part 1");
+            Assert.IsTrue(assigned(2, 4));
+            Assert.IsFalse(assigned(3, 4), "fourth player stays connected but does not block the aisle");
+            Assert.IsTrue(assigned(0, 1), "solo still performs every part through the ordinary repair loop");
+            Assert.IsTrue(assigned(1, 2), "two-player repair keeps the second worker");
+            Assert.IsFalse(assigned(-1, 4));
+        }
+
+        [Test]
         public void RemoteDiverUsesLatencyAwareInterpolationWithoutRelaxingMovementOrPhysics()
         {
             // #207 world CI: a guest can receive 1.6m of authoritative snapshots
