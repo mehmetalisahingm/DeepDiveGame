@@ -112,7 +112,8 @@ namespace DeepDive.P4.Tests
         [Test]
         public void WorldSmokeMissingParticipantFailsBeforeMisleadingWaypointTimeout()
         {
-            var lost = DeepDive.P1.Lab.ContinuousWorldSmokeDriver.RequiredParticipantDisconnected;
+            System.Func<int, int, int, bool> lost =
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.RequiredParticipantDisconnected;
             Assert.IsFalse(lost(0, 4, 3), "Lobby can still be connecting");
             Assert.IsFalse(lost(1, 4, 4), "All required peers are present");
             Assert.IsTrue(lost(1, 4, 3), "A lost peer invalidates the real walk");
