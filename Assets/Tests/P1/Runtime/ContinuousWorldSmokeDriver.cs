@@ -118,6 +118,14 @@ namespace DeepDive.P1.Lab
                 return;
             }
             if (SceneManager.GetActiveScene().name != ContinuousTownLayout.SceneName) return;
+            // #207: once all players have entered the continuous world, a missing
+            // peer is an immediate regression failure. Do not misreport the next
+            // AllAt phase barrier as a dock / waypoint collision timeout.
+            if (adapter.IsAuthority && RequiredParticipantDisconnected(step, expected, manager.ConnectedClientsIds.Count))
+            {
+                Fail($"Required player disconnected at step {step} waypoint {waypoint}: connected={manager.ConnectedClientsIds.Count}/{expected} ids={string.Join(",", manager.ConnectedClientsIds)}");
+                return;
+            }
             if (step == 0)
             {
                 var home = ContinuousTownLayout.HomeRig.Spawn(slot);
@@ -313,6 +321,10 @@ namespace DeepDive.P1.Lab
             reader.ReadValueSafe(out int value);
             if (manager.ConnectedClients.ContainsKey(sender) && value >= 0 && value <= 9) progress[sender] = value;
         }
+        // Strict world-smoke fail-fast: never reinterpret a missing peer as success
+        // or change the required player count / 1.5m movement limit.
+        public static bool RequiredParticipantDisconnected(int step, int expectedCount, int connectedCount) =>
+            step > 0 && step < 9 && connectedCount < expectedCount;
         private bool AllAt(int value) => manager.ConnectedClientsIds.Count == expected &&
             manager.ConnectedClientsIds.All(id => progress.TryGetValue(id, out var p) && p >= value);
         private void SetStep(int value)
