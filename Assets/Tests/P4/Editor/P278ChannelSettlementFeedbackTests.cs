@@ -66,6 +66,73 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void FailedDayCloseDoesNotCelebrateAndSuccessfulRetryDoesSoOnce()
+        {
+            var tracker = new ChannelSettlementFeedbackTracker();
+            var queued = new MediaSaveData { Followers = 20 };
+            queued.Publications.Add(Publication("retry", "Kayit tekrar", false));
+
+            var settledInMemory = new MediaSaveData { Followers = 26 };
+            settledInMemory.Publications.Add(Publication("retry", "Kayit tekrar", true, 100, 6, 50));
+
+            Assert.AreEqual(0, tracker.Observe(queued, 1, 1, 0).Count);
+            // ChannelAuthority.SettleThrough already changed the mirror, but SaveNow failed.
+            Assert.AreEqual(0, tracker.Observe(settledInMemory, 2, 1, 0).Count);
+            Assert.AreEqual(0, tracker.Observe(settledInMemory, 2, 1, 0).Count,
+                "an unchanged speculative revision must not be shown as saved");
+
+            // A successful RetryClose advances the host day and publishes the durable summary,
+            // without necessarily changing the already mirrored media revision.
+            var card = tracker.Observe(settledInMemory, 2, 2, 1);
+            Assert.AreEqual(1, card.Count);
+            Assert.AreEqual(20, card.FollowersBefore);
+            Assert.AreEqual(26, card.FollowersAfter);
+            Assert.AreEqual(50, card.Income);
+            Assert.AreEqual(0, tracker.Observe(settledInMemory, 2, 2, 1).Count);
+            Assert.AreEqual(0, tracker.Observe(settledInMemory, 3, 2, 1).Count,
+                "replayed media revisions cannot celebrate twice");
+        }
+
+        [Test]
+        public void DurableDayCanArriveBeforeSettledMediaWithoutLosingTheEvent()
+        {
+            var tracker = new ChannelSettlementFeedbackTracker();
+            var queued = new MediaSaveData { Followers = 4 };
+            queued.Publications.Add(Publication("late-mirror", "Gecikmis ayna", false));
+            var settled = new MediaSaveData { Followers = 9 };
+            settled.Publications.Add(Publication("late-mirror", "Gecikmis ayna", true, 50, 5, 8));
+
+            Assert.AreEqual(0, tracker.Observe(queued, 10, 1, 0).Count);
+            Assert.AreEqual(0, tracker.Observe(queued, 10, 2, 1).Count,
+                "acknowledgement without a matching settlement has nothing to celebrate");
+            Assert.AreEqual(1, tracker.Observe(settled, 11, 2, 1).Count);
+            Assert.AreEqual(0, tracker.Observe(settled, 11, 2, 1).Count);
+        }
+
+        [Test]
+        public void OlderSummaryCannotConfirmCurrentDayOrReplayHistory()
+        {
+            var tracker = new ChannelSettlementFeedbackTracker();
+            var queued = new MediaSaveData { Followers = 10 };
+            var pending = Publication("today", "Bugun", false);
+            pending.QueuedDay = 2;
+            queued.Publications.Add(pending);
+            var settled = new MediaSaveData { Followers = 13 };
+            var settledPublication = Publication("today", "Bugun", true, 20, 3, 6);
+            settledPublication.QueuedDay = 2;
+            settled.Publications.Add(settledPublication);
+
+            Assert.AreEqual(0, tracker.Observe(queued, 1, 2, 1).Count);
+            Assert.AreEqual(0, tracker.Observe(settled, 2, 2, 1).Count,
+                "the previous day's durable summary cannot certify a new settlement");
+            Assert.AreEqual(1, tracker.Observe(settled, 2, 3, 2).Count);
+
+            tracker.Reset(); // disconnect and join on the persisted campaign
+            Assert.AreEqual(0, tracker.Observe(settled, 2, 3, 2).Count);
+            Assert.AreEqual(0, tracker.Observe(settled, 3, 3, 2).Count);
+        }
+
+        [Test]
         public void MultipleSettlementsAreGroupedWithoutDoubleCountingPendingItems()
         {
             var queued = new MediaSaveData { Followers = 10 };
