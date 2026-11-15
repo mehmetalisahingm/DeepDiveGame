@@ -1,0 +1,73 @@
+{
+    "note": "Real scene with the wreck built as at runtime, real diver controller values, closed unsaved.",
+    "hullBoxMin": {
+        "x": -0.9500000476837158,
+        "y": 0.22458165884017945,
+        "z": 1.9500000476837159
+    },
+    "hullBoxMax": {
+        "x": 3.950000047683716,
+        "y": 1.8245816230773926,
+        "z": 4.050000190734863
+    },
+    "hullVisualMin": {
+        "x": -1.125000238418579,
+        "y": -0.02937406301498413,
+        "z": 1.9730896949768067
+    },
+    "hullVisualMax": {
+        "x": 3.9917123317718508,
+        "y": 1.8393075466156006,
+        "z": 4.313598155975342
+    },
+    "keelClearance": 4.89879035949707,
+    "nearestFishHome3D": 4.50942850112915,
+    "nearestReefPiece": 4.648118019104004,
+    "roomOverHullToSurface": 6.175418376922607,
+    "swims": [
+        {
+            "id": "wade-round-south",
+            "through": true,
+            "metres": 17.94000244140625,
+            "seconds": 5.979995250701904,
+            "blockedFrames": 0,
+            "stuckOnLeg": ""
+        },
+        {
+            "id": "dock-round-north",
+            "through": true,
+            "metres": 18.719987869262697,
+            "seconds": 6.239995002746582,
+            "blockedFrames": 0,
+            "stuckOnLeg": ""
+        },
+        {
+            "id": "wade-over-top",
+            "through": true,
+            "metres": 10.080000877380371,
+            "seconds": 3.359997510910034,
+            "blockedFrames": 0,
+            "stuckOnLeg": ""
+        },
+        {
+            "id": "dock-over-top",
+            "through": true,
+            "metres": 10.079994201660157,
+            "seconds": 3.359997510910034,
+            "blockedFrames": 0,
+            "stuckOnLeg": ""
+        },
+        {
+            "id": "level-through-hull (expected blocked)",
+            "through": false,
+            "metres": 1.5700000524520875,
+            "seconds": 10.94006061553955,
+            "blockedFrames": 521,
+            "stuckOnLeg": "1 at (-1.38, 0.57, 3.00)"
+        }
+    ],
+    "sights": [
+        "wade-west: 12.1 m, visibility 0.59, blocked by WreckSolid_0",
+        "dock-end: 11.2 m, visibility 0.63, blocked by WreckSolid_0"
+    ]
+}

@@ -1,0 +1,234 @@
+{
+    "note": "Real scene opened additively and closed unsaved. Clearances are flat (x,z) metres unless named 3D.",
+    "hullSize": {
+        "x": 2.19345760345459,
+        "y": 1.5900001525878907,
+        "z": 5.116713047027588
+    },
+    "hullSource": "RepairSet/DamagedRowboat",
+    "minKeel": 3.5,
+    "minFishHome3D": 4.0,
+    "minReefPiece": 3.0,
+    "minWall": 2.5,
+    "maxFloorZ": 15.0,
+    "scanned": 525,
+    "eligible": 95,
+    "best": [
+        {
+            "xz": {
+                "x": 2.0,
+                "y": 2.0
+            },
+            "floorY": 0.7993289828300476,
+            "waterDepth": 7.200671195983887,
+            "keel": 7.142749309539795,
+            "fishHome3D": 6.838383674621582,
+            "reefPiece": 7.158910751342773,
+            "wall": 12.75,
+            "score": 6.006217956542969,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 11.6 m, visibility 0.63, clear",
+                "dock-end: 10.1 m, visibility 0.71, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 1.0,
+                "y": 2.0
+            },
+            "floorY": 0.7930499911308289,
+            "waterDepth": 7.2069501876831059,
+            "keel": 8.104272842407227,
+            "fishHome3D": 6.617868900299072,
+            "reefPiece": 7.746612071990967,
+            "wall": 13.75,
+            "score": 5.699990749359131,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 10.9 m, visibility 0.67, clear",
+                "dock-end: 10.8 m, visibility 0.67, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 0.0,
+                "y": 2.0
+            },
+            "floorY": 0.7769872546195984,
+            "waterDepth": 7.223012924194336,
+            "keel": 9.065796852111817,
+            "fishHome3D": 6.54829740524292,
+            "reefPiece": 6.768308639526367,
+            "wall": 14.75,
+            "score": 5.6968278884887699,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 10.3 m, visibility 0.70, clear",
+                "dock-end: 11.6 m, visibility 0.64, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 3.0,
+                "y": 2.0
+            },
+            "floorY": 0.7944798469543457,
+            "waterDepth": 7.205520153045654,
+            "keel": 6.181225776672363,
+            "fishHome3D": 7.196439266204834,
+            "reefPiece": 6.264982223510742,
+            "wall": 11.75,
+            "score": 5.431225776672363,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 12.4 m, visibility 0.60, clear",
+                "dock-end: 9.4 m, visibility 0.74, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 2.0,
+                "y": 3.0
+            },
+            "floorY": 0.5245596170425415,
+            "waterDepth": 7.475440502166748,
+            "keel": 6.868027687072754,
+            "fishHome3D": 6.104764938354492,
+            "reefPiece": 6.8007354736328129,
+            "wall": 12.75,
+            "score": 5.214540481567383,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 12.3 m, visibility 0.59, clear",
+                "dock-end: 10.7 m, visibility 0.67, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 3.0,
+                "y": 3.0
+            },
+            "floorY": 0.5169677138328552,
+            "waterDepth": 7.4830322265625,
+            "keel": 5.906504154205322,
+            "fishHome3D": 6.504757881164551,
+            "reefPiece": 5.852349758148193,
+            "wall": 11.75,
+            "score": 5.0384087562561039,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 13.0 m, visibility 0.55, clear",
+                "dock-end: 10.1 m, visibility 0.70, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": -1.0,
+                "y": 2.0
+            },
+            "floorY": 0.7559173703193665,
+            "waterDepth": 7.244082450866699,
+            "keel": 10.027320861816407,
+            "fishHome3D": 6.632584095001221,
+            "reefPiece": 5.797413349151611,
+            "wall": 13.75,
+            "score": 5.019596099853516,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 9.7 m, visibility 0.73, clear",
+                "dock-end: 12.4 m, visibility 0.60, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 1.0,
+                "y": 3.0
+            },
+            "floorY": 0.5218154788017273,
+            "waterDepth": 7.478184700012207,
+            "keel": 7.829552173614502,
+            "fishHome3D": 5.855249404907227,
+            "reefPiece": 7.616429328918457,
+            "wall": 13.75,
+            "score": 4.884425163269043,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 11.6 m, visibility 0.62, clear",
+                "dock-end: 11.4 m, visibility 0.63, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 0.0,
+                "y": 3.0
+            },
+            "floorY": 0.5086100101470947,
+            "waterDepth": 7.491390228271484,
+            "keel": 8.79107666015625,
+            "fishHome3D": 5.77582311630249,
+            "reefPiece": 6.618912220001221,
+            "wall": 14.75,
+            "score": 4.856584072113037,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 11.0 m, visibility 0.66, clear",
+                "dock-end: 12.1 m, visibility 0.60, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": -1.0,
+                "y": 3.0
+            },
+            "floorY": 0.48857977986335757,
+            "waterDepth": 7.511420249938965,
+            "keel": 9.752599716186524,
+            "fishHome3D": 5.871657848358154,
+            "reefPiece": 5.62227725982666,
+            "wall": 13.75,
+            "score": 4.77080774307251,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 10.4 m, visibility 0.68, clear",
+                "dock-end: 12.9 m, visibility 0.56, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 3.0,
+                "y": 4.0
+            },
+            "floorY": 0.4824778735637665,
+            "waterDepth": 7.51752233505249,
+            "keel": 5.6317830085754398,
+            "fishHome3D": 5.788949489593506,
+            "reefPiece": 5.590169906616211,
+            "wall": 11.75,
+            "score": 4.70557975769043,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 13.5 m, visibility 0.52, clear",
+                "dock-end: 10.7 m, visibility 0.67, clear"
+            ]
+        },
+        {
+            "xz": {
+                "x": 4.0,
+                "y": 2.0
+            },
+            "floorY": 0.7810488939285278,
+            "waterDepth": 7.218951225280762,
+            "keel": 5.220153331756592,
+            "fishHome3D": 7.671955585479736,
+            "reefPiece": 5.408327102661133,
+            "wall": 10.75,
+            "score": 4.54747200012207,
+            "nearestHome": "sea_bass@(0.00, 4.00, 8.00)",
+            "sights": [
+                "wade-west: 13.2 m, visibility 0.56, clear",
+                "dock-end: 8.8 m, visibility 0.77, clear"
+            ]
+        }
+    ]
+}
