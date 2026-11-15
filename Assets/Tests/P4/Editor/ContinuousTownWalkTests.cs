@@ -124,6 +124,20 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void WorldSmokeLostLocalOwnerWritesFailureInsteadOfTimingOut()
+        {
+            System.Func<int, bool, bool, bool, bool> lost =
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.OwnerLostDuringWorld;
+            Assert.IsFalse(lost(0, true, false, false), "Lobby should still join");
+            Assert.IsFalse(lost(2, false, false, false), "No owner has been observed yet");
+            Assert.IsFalse(lost(2, true, true, false), "Real scene synchronization may despawn temporarily");
+            Assert.IsFalse(lost(2, true, false, true), "Owner still present");
+            Assert.IsTrue(lost(2, true, false, false), "Despawned owner must report FAIL now");
+            Assert.IsTrue(lost(8, true, false, false), "Return leg still requires the owner");
+            Assert.IsFalse(lost(9, true, false, false), "Normal final shutdown is not a travel error");
+        }
+
+        [Test]
         public void DiverControllerMatchesTheWrittenWalkLimits()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefabPath);
