@@ -56,7 +56,7 @@ namespace DeepDive.Composition
         private float nextRefresh;
 
         public static string Label(bool hasMirror, int followers) =>
-            hasMirror ? "KANAL\\n" + ChannelGoal.Format(Mathf.Max(0, followers)) + "\\nTAKIPCI" : "KANAL";
+            hasMirror ? "KANAL\n" + ChannelGoal.Format(Mathf.Max(0, followers)) + "\nTAKIPCI" : "KANAL";
 
         private void Update()
         {
