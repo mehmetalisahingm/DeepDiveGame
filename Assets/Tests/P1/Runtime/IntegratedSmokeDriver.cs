@@ -2711,26 +2711,36 @@ namespace DeepDive.P1.Lab
             return true;
         }
 
-        private readonly HashSet<string> fleetShelfLogged = new HashSet<string>(), fleetShelfProbed = new HashSet<string>();
+        private readonly HashSet<string> fleetShelfLogged = new HashSet<string>(), fleetShelfProbed = new HashSet<string>(),
+            fleetShelfFallback = new HashSet<string>();
 
         // Neighbouring displays can overlap (fins-1 and bag-1 meet at 1.00 m on the west wall), so aiming at the anchor
         // centre may select the neighbour. Like a player, nudge the aim across the product until the host's own eye ray
         // (EyeRay, the same ray the host uses) meets this display first.
-        private Vector3 ShelfAimPoint(NetworkPlayer local, ShopShelfAnchor shelf)
+        private Vector3 ShelfAimPoint(NetworkPlayer local, ShopShelfAnchor shelf) => ShelfAimPoint(local, shelf, out _);
+
+        private Vector3 ShelfAimPoint(NetworkPlayer local, ShopShelfAnchor shelf, out bool clean)
         {
+            clean = true;
             var eye = local.RecordingEyePosition;
             var controller = local.GetComponent<CharacterController>();
             var centre = shelf.transform.position;
             var side = Vector3.Cross(Vector3.up, (centre - eye).normalized).normalized;
-            foreach (var across in new[] { 0f, 0.12f, -0.12f, 0.24f, -0.24f, 0.36f, -0.36f })
-                foreach (var up in new[] { 0f, 0.1f, -0.1f })
+            // The fins-1 and bag-1 displays meet in one plane, so a ray touching both is decided on the host by a hair. Only
+            // accept an aim that meets this product and no other product within 0.1 m behind it.
+            foreach (var across in new[] { 0f, 0.12f, -0.12f, 0.24f, -0.24f, 0.36f, -0.36f, 0.48f, -0.48f })
+                foreach (var up in new[] { 0f, 0.1f, -0.1f, 0.2f, -0.2f })
                 {
                     var aim = centre + side * across + Vector3.up * up;
                     var line = aim - eye;
-                    if (EyeRay.Raycast(eye, line.normalized, line.magnitude + 0.5f, QueryTriggerInteraction.Collide, controller, out var hit) &&
-                        hit.collider.GetComponentInParent<ShopShelfAnchor>()?.ItemId == shelf.ItemId)
-                        return aim;
+                    if (!EyeRay.Raycast(eye, line.normalized, line.magnitude + 0.5f, QueryTriggerInteraction.Collide, controller, out var hit) ||
+                        hit.collider.GetComponentInParent<ShopShelfAnchor>()?.ItemId != shelf.ItemId)
+                        continue;
+                    var rival = Physics.RaycastAll(eye, line.normalized, hit.distance + 0.1f, ~0, QueryTriggerInteraction.Collide)
+                        .Any(h => h.collider.GetComponentInParent<ShopShelfAnchor>() is ShopShelfAnchor other && other.ItemId != shelf.ItemId);
+                    if (!rival) return aim;
                 }
+            clean = false;
             return centre;
         }
 
@@ -2739,7 +2749,13 @@ namespace DeepDive.P1.Lab
             var copies = FindObjectsByType<ShopShelfAnchor>(FindObjectsSortMode.None).Where(s => s.ItemId == itemId)
                 .OrderBy(s => (s.transform.position - TownStoreRoute.Shelf(itemId).transform.position).sqrMagnitude).ToArray();
             if (copies.Length == 0) return null;
-            return copies[adapter.IsAuthority || copies.Length == 1 ? 0 : 1];
+            // The guest starts at the second copy; if no clean aim exists there it falls back to the host's copy once the host
+            // has moved on, so the two never stand on one spot.
+            if (adapter.IsAuthority || copies.Length == 1) return copies[0];
+            if (!fleetShelfFallback.Contains(itemId)) return copies[1];
+            var hostNear = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Any(p => p.IsSpawned && p.OwnerClientId == 0 &&
+                Vector3.Distance(p.transform.position, TownStoreRoute.Stand(copies[0])) < 1.5f);
+            return hostNear ? copies[1] : copies[0];
         }
 
         private bool WalkToShelf(NetworkPlayer local, Camera cam, ShopShelfAnchor shelf)
@@ -2756,7 +2772,9 @@ namespace DeepDive.P1.Lab
                 local.SubmitLocalInput(Quaternion.Inverse(Quaternion.Euler(0, walkYaw, 0)) * heading.normalized, walkYaw, 0);
                 return false;
             }
-            var toShelf = ShelfAimPoint(local, shelf) - cam.transform.position;
+            var aimPoint = ShelfAimPoint(local, shelf, out var clean);
+            if (!clean && !adapter.IsAuthority && fleetShelfFallback.Add(shelf.ItemId)) { townSettleAt = 0; return false; }
+            var toShelf = aimPoint - cam.transform.position;
             if (fleetShelfProbed.Add(shelf.ItemId + ":" + local.LastActionResult.Value))
             {
                 var eye = local.RecordingEyePosition;
