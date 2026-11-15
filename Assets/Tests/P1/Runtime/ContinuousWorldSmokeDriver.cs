@@ -44,6 +44,7 @@ namespace DeepDive.P1.Lab
         private float deadline, nextReport, waitUntil, aimAt, nextTrace, nextBedRetry;
         private Vector3 previous;
         private bool tracking, finished, leaving;
+        private bool sawWorldOwner;
         private List<Vector3> route;
 
         private static string Arg(string key, string fallback = "")
@@ -90,10 +91,19 @@ namespace DeepDive.P1.Lab
         {
             if (finished || adapter == null) return;
             if (Time.realtimeSinceStartup > deadline)
-            { Fail($"Timed out at step {step} waypoint {waypoint} position={local?.transform.position} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
+            { Fail($"Timed out at step {step} waypoint {waypoint} position={PositionForReport(local)} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
             if (leaving)
             {
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+                return;
+            }
+            // In a continuous-world test a disappearing connection after a live
+            // owner has joined is a failure, not a waypoint timeout. Final host
+            // shutdown is already handled by the 'leaving' path / step 9.
+            if (sawWorldOwner && step > 0 && step < 9 &&
+                adapter.Connection.Status == ConnectionStatus.Offline)
+            {
+                Fail($"Connection lost during world travel at step {step} waypoint {waypoint}");
                 return;
             }
             if (adapter.Connection.Status != ConnectionStatus.Connected || adapter.Connection.IsSceneLoading) return;
@@ -105,7 +115,14 @@ namespace DeepDive.P1.Lab
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
             report.players = Math.Max(report.players, players.Length);
             local = players.FirstOrDefault(p => p.IsOwner);
+            if (OwnerLostDuringWorld(step, sawWorldOwner, adapter.Connection.IsSceneLoading, local != null))
+            {
+                Fail($"Local owner despawned during world travel at step {step} waypoint {waypoint}: connected={manager.ConnectedClientsIds.Count}/{expected}");
+                return;
+            }
             if (local == null) return;
+            if (SceneManager.GetActiveScene().name == ContinuousTownLayout.SceneName)
+                sawWorldOwner = true;
             local.ReadKeyboard = false;
             var state = adapter.Session.State;
             var sync = local.GetComponent<EconomyPlayerSync>();
@@ -118,6 +135,14 @@ namespace DeepDive.P1.Lab
                 return;
             }
             if (SceneManager.GetActiveScene().name != ContinuousTownLayout.SceneName) return;
+            // #207: once all players have entered the continuous world, a missing
+            // peer is an immediate regression failure. Do not misreport the next
+            // AllAt phase barrier as a dock / waypoint collision timeout.
+            if (adapter.IsAuthority && RequiredParticipantDisconnected(step, expected, manager.ConnectedClientsIds.Count))
+            {
+                Fail($"Required player disconnected at step {step} waypoint {waypoint}: connected={manager.ConnectedClientsIds.Count}/{expected} ids={string.Join(",", manager.ConnectedClientsIds)}");
+                return;
+            }
             if (step == 0)
             {
                 var home = ContinuousTownLayout.HomeRig.Spawn(slot);
@@ -293,7 +318,7 @@ namespace DeepDive.P1.Lab
 
         private void LateUpdate()
         {
-            if (!finished && step == 9 && !adapter.IsAuthority && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
+            if (!finished && adapter != null && step == 9 && !adapter.IsAuthority && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
         }
 
         private void Track(EconomyPlayerSync sync)
@@ -313,6 +338,14 @@ namespace DeepDive.P1.Lab
             reader.ReadValueSafe(out int value);
             if (manager.ConnectedClients.ContainsKey(sender) && value >= 0 && value <= 9) progress[sender] = value;
         }
+        // Strict world-smoke fail-fast: never reinterpret a missing peer as success
+        // or change the required player count / 1.5m movement limit.
+        public static bool RequiredParticipantDisconnected(int step, int expectedCount, int connectedCount) =>
+            step > 0 && step < 9 && connectedCount < expectedCount;
+        // One peer can lose its own NetworkPlayer while NGO is shutting down.
+        // The test must still write a truthful per-process FAIL report.
+        public static bool OwnerLostDuringWorld(int step, bool ownerSeen, bool sceneLoading, bool ownerPresent) =>
+            step > 0 && step < 9 && ownerSeen && !sceneLoading && !ownerPresent;
         private bool AllAt(int value) => manager.ConnectedClientsIds.Count == expected &&
             manager.ConnectedClientsIds.All(id => progress.TryGetValue(id, out var p) && p >= value);
         private void SetStep(int value)
@@ -431,13 +464,17 @@ namespace DeepDive.P1.Lab
         }
         private static readonly FieldInfo HomeStatusField=typeof(HomePlayerInteractionBinding)
             .GetField("statusMessage",BindingFlags.Instance|BindingFlags.NonPublic);
+        // A disconnected owner can be a destroyed Unity object with a live C# wrapper.
+        // `player?.transform` only checks managed null and can throw before the failure report is written.
+        public static string PositionForReport(NetworkPlayer player) =>
+            player != null ? player.transform.position.ToString() : "missing";
         private void Fail(string reason) { report.errors.Add(reason); Finish(); }
         private void Finish()
         {
             if (finished) return;
             finished = true;
-            if (local != null) report.position = local.transform.position.ToString();
-            report.phase = adapter != null ? adapter.Session.State.Phase.ToString() : "missing";
+            report.position = PositionForReport(local);
+            report.phase = adapter != null && adapter.Session != null ? adapter.Session.State.Phase.ToString() : "missing";
             report.passed = step == 9 && report.players == expected && report.worldLoads == 1 && report.homeSpawn &&
                 report.shopOpened && report.dockReached && report.swam && report.pcOpened && report.slept && report.morningHome &&
                 report.distance > 120f && report.errors.Count == 0;

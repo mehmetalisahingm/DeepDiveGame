@@ -89,6 +89,55 @@ namespace DeepDive.P4.Tests
         };
 
         [Test]
+        public void WorldSmokeReportSurvivesDestroyedOwnerAfterDisconnect()
+        {
+            // #207: NGO despawns the owner after a peer failure. Unity's destroyed object
+            // retains a managed wrapper, so null-conditional navigation is not safe.
+            Assert.AreEqual("missing", DeepDive.P1.Lab.ContinuousWorldSmokeDriver.PositionForReport(null));
+            var go = new GameObject("P207-despawned-owner");
+            DeepDive.Network.NetworkPlayer owner = null;
+            try
+            {
+                owner = go.AddComponent<DeepDive.Network.NetworkPlayer>();
+                Assert.AreNotEqual("missing", DeepDive.P1.Lab.ContinuousWorldSmokeDriver.PositionForReport(owner));
+                Object.DestroyImmediate(go);
+                Assert.AreEqual("missing", DeepDive.P1.Lab.ContinuousWorldSmokeDriver.PositionForReport(owner));
+            }
+            finally
+            {
+                if (go != null) Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void WorldSmokeMissingParticipantFailsBeforeMisleadingWaypointTimeout()
+        {
+            System.Func<int, int, int, bool> lost =
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.RequiredParticipantDisconnected;
+            Assert.IsFalse(lost(0, 4, 3), "Lobby can still be connecting");
+            Assert.IsFalse(lost(1, 4, 4), "All required peers are present");
+            Assert.IsTrue(lost(1, 4, 3), "A lost peer invalidates the real walk");
+            Assert.IsTrue(lost(2, 4, 3), "Dock phase cannot advance without the guest");
+            Assert.IsTrue(lost(4, 4, 2), "Returning through water still requires four");
+            Assert.IsFalse(lost(9, 4, 3), "Final shutdown may intentionally disconnect peers");
+            Assert.IsFalse(lost(2, 1, 1), "Solo must remain valid");
+        }
+
+        [Test]
+        public void WorldSmokeLostLocalOwnerWritesFailureInsteadOfTimingOut()
+        {
+            System.Func<int, bool, bool, bool, bool> lost =
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.OwnerLostDuringWorld;
+            Assert.IsFalse(lost(0, true, false, false), "Lobby should still join");
+            Assert.IsFalse(lost(2, false, false, false), "No owner has been observed yet");
+            Assert.IsFalse(lost(2, true, true, false), "Real scene synchronization may despawn temporarily");
+            Assert.IsFalse(lost(2, true, false, true), "Owner still present");
+            Assert.IsTrue(lost(2, true, false, false), "Despawned owner must report FAIL now");
+            Assert.IsTrue(lost(8, true, false, false), "Return leg still requires the owner");
+            Assert.IsFalse(lost(9, true, false, false), "Normal final shutdown is not a travel error");
+        }
+
+        [Test]
         public void DiverControllerMatchesTheWrittenWalkLimits()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefabPath);
