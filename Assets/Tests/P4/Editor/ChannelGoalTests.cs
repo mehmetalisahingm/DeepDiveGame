@@ -30,6 +30,35 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void NextMilestoneBarIsHonestAtBoundariesWithoutChangingTenMillionRatio()
+        {
+            var fresh = ChannelGoal.Of(0);
+            Assert.AreEqual(0, fresh.PreviousMilestone);
+            Assert.AreEqual(100, fresh.RemainingToNext);
+            Assert.AreEqual(0f, fresh.MilestoneRatio, 0.0001f);
+
+            var first = ChannelGoal.Of(50);
+            Assert.AreEqual(0.5f, first.MilestoneRatio, 0.0001f);
+            Assert.AreEqual(50, first.RemainingToNext);
+            Assert.AreEqual(0.000005f, first.Ratio, 0.0000001f,
+                "the actual ten-million progress must never be visually inflated");
+
+            var newlyReached = ChannelGoal.Of(100);
+            Assert.AreEqual(100, newlyReached.PreviousMilestone);
+            Assert.AreEqual(1000, newlyReached.NextMilestone);
+            Assert.AreEqual(0f, newlyReached.MilestoneRatio, 0.0001f,
+                "a completed milestone starts the next segment");
+            Assert.AreEqual(900, newlyReached.RemainingToNext);
+
+            Assert.AreEqual(0.5f, ChannelGoal.Of(550).MilestoneRatio, 0.0001f);
+            Assert.AreEqual(0f, ChannelGoal.Of(-5).MilestoneRatio, 0.0001f);
+            var done = ChannelGoal.Of(ChannelGoal.TargetFollowers);
+            Assert.AreEqual(1f, done.MilestoneRatio);
+            Assert.AreEqual(0, done.RemainingToNext);
+            Assert.AreEqual(1f, ChannelGoal.Of(int.MaxValue).MilestoneRatio);
+        }
+
+        [Test]
         public void TheGoalLineIsReadableAndHonestAboutScale()
         {
             Assert.AreEqual("KANAL  hedef 10.000.000: %0,0   sonraki: 100", ChannelGoal.Describe(0));
