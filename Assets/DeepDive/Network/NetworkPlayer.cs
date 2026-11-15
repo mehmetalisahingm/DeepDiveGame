@@ -981,6 +981,10 @@ namespace DeepDive.Network
         public void Teleport(Pose pose)
         {
             if (!IsServer) return;
+            // #207 diagnostic: correlate the server-authoritative scene/home teleport
+            // with the owner's subsequent sampled position. No movement/QA changes.
+            if (Debug.isDebugBuild)
+                Debug.Log($"P207_SERVER_TELEPORT owner={OwnerClientId} object={NetworkObjectId} frame={Time.frameCount} t={Time.realtimeSinceStartupAsDouble:F6} before={transform.position} target={pose.position}");
             input.ClearMotion();
             gravityVelocity = 0;
             controller.enabled = false;
