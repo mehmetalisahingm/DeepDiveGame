@@ -180,6 +180,17 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void PhysicalChannelBoardOnlyShowsTheRealMirroredFollowerCount()
+        {
+            Assert.AreEqual("KANAL", HomeChannelBoardDisplay.Label(false, 123),
+                "a stale or absent mirror must never be presented as earned progress");
+            Assert.AreEqual("KANAL\n0\nTAKIPCI", HomeChannelBoardDisplay.Label(true, -9));
+            Assert.AreEqual("KANAL\n27\nTAKIPCI", HomeChannelBoardDisplay.Label(true, 27));
+            Assert.AreEqual("KANAL\n10.000.000\nTAKIPCI",
+                HomeChannelBoardDisplay.Label(true, 10000000));
+        }
+
+        [Test]
         public void TheRigPlacesItOnceOnTheHomeOriginAndTheTargetsStayTheRigs()
         {
             ContinuousTownScene.With(scene =>
@@ -188,6 +199,8 @@ namespace DeepDive.P4.Tests
                 HomeSceneSetup.EnsureRig(scene);   // idempotent
                 var roots = scene.GetRootGameObjects().Where(r => r.name == HomeDressing.RootName).ToArray();
                 Assert.AreEqual(1, roots.Length, "one dressing");
+                Assert.AreEqual(1, roots[0].GetComponents<HomeChannelBoardDisplay>().Length,
+                    "one visual-only channel board mirror across repeated scene rig builds");
                 Assert.AreEqual(ContinuousTownLayout.HomeOrigin.x, roots[0].transform.position.x, 1e-3f);
                 Assert.AreEqual(ContinuousTownLayout.HomeOrigin.y, roots[0].transform.position.y, 1e-3f);
                 Assert.AreEqual(ContinuousTownLayout.HomeOrigin.z, roots[0].transform.position.z, 1e-3f);
