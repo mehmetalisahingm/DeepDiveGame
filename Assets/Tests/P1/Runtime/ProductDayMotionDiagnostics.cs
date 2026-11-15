@@ -14,8 +14,12 @@ namespace DeepDive.P1.Lab
             public int frame, frameGap, step, substep, waypoint, day, locomotion;
             public ulong networkObject;
             public bool seated, swimming, host, owner;
+            // #207 diagnostics: actual render-frame interval and local controller state.
+            // Samples stay observational; neither velocity nor acceptance thresholds change.
+            public bool controllerEnabled, controllerGrounded;
             public string phase;
             public float x,y,z,previousX,previousY,previousZ,distance,metresPerRealSecond;
+            public float frameDelta, fixedDelta, controllerVelocityX, controllerVelocityY, controllerVelocityZ;
         }
         private readonly Queue<MotionSample> motionHistory=new Queue<MotionSample>();
         private double motionAt, motionFixedAt, motionServerAt, motionGap, motionFixedGap, motionServerGap;
@@ -60,6 +64,8 @@ namespace DeepDive.P1.Lab
             motionAt=real;motionFixedAt=fixedAt;motionServerAt=serverAt;motionFrameAt=frame;
             report.maxMotionSampleGap=Math.Max(report.maxMotionSampleGap,motionGap);
             var position=local.transform.position;
+            var controller=local.GetComponent<CharacterController>();
+            var controllerVelocity=controller != null ? controller.velocity : Vector3.zero;
             if(motionHistory.Count==128)motionHistory.Dequeue();
             motionHistory.Enqueue(new MotionSample{realTime=real,fixedTime=fixedAt,serverTime=serverAt,
                 realGap=motionGap,fixedGap=motionFixedGap,serverGap=motionServerGap,
@@ -67,6 +73,11 @@ namespace DeepDive.P1.Lab
                 day=sync.DayNumber.Value,networkObject=local.NetworkObjectId,
                 locomotion=local.Locomotion.Value,phase=adapter.Session.State.Phase.ToString(),
                 seated=local.Seated.Value,swimming=local.Swimming.Value,host=manager.IsServer,owner=local.IsOwner,
+                controllerEnabled=controller != null && controller.enabled,
+                controllerGrounded=controller != null && controller.isGrounded,
+                frameDelta=Time.unscaledDeltaTime,fixedDelta=Time.fixedDeltaTime,
+                controllerVelocityX=controllerVelocity.x,controllerVelocityY=controllerVelocity.y,
+                controllerVelocityZ=controllerVelocity.z,
                 previousX=previous.x,previousY=previous.y,previousZ=previous.z,
                 x=position.x,y=position.y,z=position.z,distance=distance,
                 metresPerRealSecond=motionGap>0? (float)(distance/motionGap):0f});
