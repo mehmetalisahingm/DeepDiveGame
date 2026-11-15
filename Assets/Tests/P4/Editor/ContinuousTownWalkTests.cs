@@ -104,6 +104,27 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RemoteDiverUsesLatencyAwareInterpolationWithoutRelaxingMovementOrPhysics()
+        {
+            // #207 world CI: a guest can receive 1.6m of authoritative snapshots
+            // in a single rendered frame. Smooth the REMOTE presentation using the
+            // NGO tick-latency-aware lerp, rather than weakening QA's 1.5m limit.
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefabPath);
+            Assert.IsNotNull(prefab, "NetworkDiver prefab missing");
+            var network = prefab.GetComponent<Unity.Netcode.Components.NetworkTransform>();
+            Assert.IsNotNull(network, "Diver requires a server-authoritative NetworkTransform");
+            Assert.IsTrue(network.Interpolate, "Remote players need client-side interpolation");
+            Assert.AreEqual(Unity.Netcode.Components.NetworkTransform.InterpolationTypes.Lerp,
+                network.PositionInterpolationType, "legacy interpolation does not adapt its buffered state latency");
+            Assert.AreEqual(0.5f, network.PositionMaxInterpolationTime, 0.0001f);
+            Assert.AreEqual(0.001f, network.PositionThreshold, 0.0001f,
+                "the authoritative position sync threshold must stay unchanged");
+            var controller = prefab.GetComponent<CharacterController>();
+            Assert.AreEqual(Radius, controller.radius, 1e-4f);
+            Assert.AreEqual(StepOffset, controller.stepOffset, 1e-4f);
+        }
+
+        [Test]
         public void TheHomeToWaterWalkHasGroundHeadroomAndWalkableSteps()
         {
             ContinuousTownScene.With(_ =>
