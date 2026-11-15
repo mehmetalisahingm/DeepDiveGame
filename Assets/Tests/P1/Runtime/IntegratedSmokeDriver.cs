@@ -3774,6 +3774,15 @@ namespace DeepDive.P1.Lab
             // next step is straight onto the platform (north, -z). Sending it to the wade lane instead walks it WEST along the ledge
             // and off the ramp into the water beside the shelf, where it pressed against the shelf's side wall for the rest of the
             // run and never sold (measured, recorder stopped at (-3.1, 7.9, -10.6)).
+            // #258: Shore_Ramp rises east to Shore_Ledge; its south side meets the platform as a wall that is 0.35-3.2 m
+            // high west of x 6.5 (P258RampSeamProbe), above the 0.30 m step. A diver on the ramp therefore climbs it
+            // east onto the ledge first. Heading south from the ramp stalled a returning boss guest at (6.00, -10.58).
+            if (ledge != null && Physics.Raycast(position + Vector3.up * 0.5f, Vector3.down, out var under, 1.5f, ~0,
+                    QueryTriggerInteraction.Ignore) && under.collider.name == "Shore_Ramp")
+            {
+                var lb = ledge.bounds;
+                return new Vector3(lb.min.x + 0.5f, lb.max.y, Mathf.Clamp(position.z, lb.min.z + 0.5f, lb.max.z - 0.5f));
+            }
             if (position.y >= strip.bounds.max.y - 0.35f) return new Vector3(position.x, position.y, northEdge - 0.6f);
 
             var lane = wade.transform.position.x;
