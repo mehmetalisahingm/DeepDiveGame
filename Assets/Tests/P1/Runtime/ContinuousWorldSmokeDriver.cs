@@ -47,7 +47,7 @@ namespace DeepDive.P1.Lab
         // first home-spawn movement; never changes the existing 1.5 m QA gate.
         private float motionTraceStart, motionSampleAt, motionLogAt, hostLogAt;
         private int motionSampleFrame;
-        private bool tracking, finished, leaving;
+        private bool tracking, finished, leaving, dockRearWaiting;
         private List<Vector3> route;
 
         private static string Arg(string key, string fallback = "")
@@ -373,8 +373,14 @@ namespace DeepDive.P1.Lab
             yield return shop + new Vector3(0f, 0f, 2.8f);
             yield return P(0f, -24f); yield return P(0f, -16f);
             // The S1 broken rowboat occupies the direct center beach crossing. Walk past its east end.
-            yield return P(9f, -16f); yield return P(9f, -12.5f); yield return P(9f, -9f);
-            yield return P(8.55f + (slot % 2) * 0.9f, -4.5f - (slot / 2) * 1f);
+            yield return P(9f, -16f); yield return P(9f, -12.5f);
+            // #207 four-process artifact 14173737944: rear slots 2/3 reached the
+            // narrow pier before slot 1 and physically blocked its passage.
+            // Stage rear slots on *opposite dry edges* of the authored dock,
+            // leaving the centre approach open for slots 0/1. Solo/two-player
+            // routes and the genuine physical walk are unchanged.
+            yield return expected == 4 && slot >= 2 ? DockRearStage(slot) : P(9f, -9f);
+            yield return DockStop(slot);
         }
         private IEnumerable<Vector3> Homeward()
         {
@@ -384,12 +390,51 @@ namespace DeepDive.P1.Lab
             yield return ContinuousTownLayout.HomeRig.Door; yield return H(4.95f, 5f);
             yield return H(4.95f, -2.5f); yield return H(2f + slot * 0.8f, -2.4f);
         }
+        // Bounds: continuous-world Zone_Dock x=[7,11]. The 0.7 m edge inset
+        // keeps the player's 0.35 m radius inside the authored walk surface.
+        public static Vector3 DockRearStage(int playerSlot) => P(playerSlot == 2 ? 7.7f : 10.3f, -9f);
+        public static Vector3 DockStop(int playerSlot) => P(8.55f + (playerSlot % 2) * 0.9f,
+            -4.5f - (playerSlot / 2) * 1f);
+        public static bool NearDockStop(int playerSlot, Vector3 position)
+        {
+            var stop = DockStop(playerSlot);
+            return Vector2.Distance(new Vector2(position.x, position.z), new Vector2(stop.x, stop.z)) < 0.48f;
+        }
+        private bool FrontRowDocked()
+        {
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
+            // Slots 0 and 1 are the host and first guest in this fixed 4-process
+            // smoke scenario. A missing or still-moving peer is never a PASS.
+            for (var front = 0; front <= 1; front++)
+            {
+                var avatar = players.FirstOrDefault(p => p.IsSpawned && p.OwnerClientId == (ulong)front);
+                if (avatar == null || !NearDockStop(front, avatar.transform.position)) return false;
+            }
+            return true;
+        }
         private HomeInteractionAnchor Bed() => FindObjectsByType<HomeInteractionAnchor>(FindObjectsSortMode.None)
             .Single(b => b.Kind == HomeInteractionKind.Bed && b.BedId == DayIds.Beds[slot]);
 
         private bool Follow()
         {
             if (waypoint >= route.Count) return true;
+            // Rear divers wait at their real side staging marks, not in the
+            // middle of the pier. Do not let either re-enter until both front
+            // players have physically reached their own dock endpoints.
+            if (step == 1 && expected == 4 && slot >= 2 && waypoint == route.Count - 1)
+            {
+                if (!FrontRowDocked())
+                {
+                    if (!dockRearWaiting)
+                        Debug.Log($"P207_DOCK_QUEUE_WAIT slot={slot} stage={local.transform.position} frontNotAtStops");
+                    dockRearWaiting = true;
+                    Stop();
+                    return false;
+                }
+                if (dockRearWaiting)
+                    Debug.Log($"P207_DOCK_QUEUE_RELEASE slot={slot} position={local.transform.position}");
+                dockRearWaiting = false;
+            }
             var target = route[waypoint];
             var heading = target - local.transform.position;
             var flat = new Vector2(heading.x, heading.z).magnitude;
