@@ -743,6 +743,25 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void FourRealRepairProcessesQueueHomeExitAfterRejoinAndMidnight()
+        {
+            // In the failed repair artifact the winner rejoined as network id 4;
+            // launch slot 2 is no longer a valid NGO owner ordering key.
+            // Real crew members must exit the one narrow west hallway in turn.
+            var door = ContinuousTownLayout.HomeRig.Door.z;
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.MustYieldHomeExit(1, 0, door - 1f),
+                "first guest waits until host actually clears the house");
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.MustYieldHomeExit(3, 1, -49.69f),
+                "rear guest waits for actual in-house front guest");
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.MustYieldHomeExit(4, 3, -50.35f),
+                "rejoined owner 4 queues behind owner 3");
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustYieldHomeExit(1, 4, -49.74f),
+                "later owner must not block the current leader");
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustYieldHomeExit(4, 3, door + 2.1f),
+                "release once the leader has walked clear of the real door");
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;
