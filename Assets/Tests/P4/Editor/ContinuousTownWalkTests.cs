@@ -743,6 +743,32 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void FourPlayerDockQueueLeavesTheCentreLaneOpenUntilFrontArrives()
+        {
+            // #207 real four-process evidence: player1 was still at (9.02,-6.37)
+            // while slots 2/3 already stood across the pier entrance at z=-5.7.
+            // Waiting rear players must stand off the centre line until the
+            // first two have physically reached distinct pier endpoints.
+            var left = DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockRearStage(2);
+            var right = DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockRearStage(3);
+            Assert.AreEqual(-9f, left.z, .001f);
+            Assert.AreEqual(-9f, right.z, .001f);
+            Assert.Less(left.x, 9f - 1f, "rear-left leaves centre lane clear");
+            Assert.Greater(right.x, 9f + 1f, "rear-right leaves centre lane clear");
+            Assert.Greater(left.x, ContinuousTownLayout.ZoneVolumes.DockMin.x + .35f);
+            Assert.Less(right.x, ContinuousTownLayout.ZoneVolumes.DockMax.x - .35f);
+            Assert.AreEqual(0.9f,
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockStop(1).x -
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockStop(0).x, .001f);
+            Assert.IsTrue(DeepDive.P1.Lab.ContinuousWorldSmokeDriver.NearDockStop(0,
+                new Vector3(8.58f, ContinuousTownLayout.WalkSurfaceY, -4.79f)),
+                "host has already finished physical movement in the failed artifact");
+            Assert.IsFalse(DeepDive.P1.Lab.ContinuousWorldSmokeDriver.NearDockStop(1,
+                new Vector3(9.02f, ContinuousTownLayout.WalkSurfaceY, -6.37f)),
+                "guest1 still physically approaching must not release rear row");
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;
