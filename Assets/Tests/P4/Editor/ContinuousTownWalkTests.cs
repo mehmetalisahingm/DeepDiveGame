@@ -153,6 +153,28 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RemoteDiverInterpolationKeepsTheStrictMotionGateUnchanged()
+        {
+            // QA #207 artifact 14224063376: owner 4 saw 1.519926 m
+            // in 0.179919 s in a single render frame. The server remains
+            // authoritative at 4 m/s; interpolate the visual owner snapshot
+            // rather than raising the 1.5 m genuine QA movement limit.
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(DiverPrefabPath);
+            Assert.IsNotNull(prefab);
+            var network = prefab.GetComponent<Unity.Netcode.Components.NetworkTransform>();
+            Assert.IsNotNull(network);
+            Assert.IsTrue(network.Interpolate);
+            Assert.AreEqual(Unity.Netcode.Components.NetworkTransform.InterpolationTypes.Lerp,
+                network.PositionInterpolationType);
+            Assert.AreEqual(.5f, network.PositionMaxInterpolationTime, .0001f);
+            Assert.AreEqual(.001f, network.PositionThreshold, .0001f,
+                "the authoritative position sync threshold must stay strict");
+            var controller = prefab.GetComponent<CharacterController>();
+            Assert.AreEqual(Radius, controller.radius, 1e-4f);
+            Assert.AreEqual(StepOffset, controller.stepOffset, 1e-4f);
+        }
+
+        [Test]
         public void TheHomeToWaterWalkHasGroundHeadroomAndWalkableSteps()
         {
             ContinuousTownScene.With(_ =>
