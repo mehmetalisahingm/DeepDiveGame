@@ -1,6 +1,7 @@
 using DeepDive.Economy;
 using DeepDive.Core.Contracts;
 using DeepDive.Network;
+using DeepDive.Media;
 using DeepDive.World;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -22,7 +23,12 @@ namespace DeepDive.Composition
         {
             if (!scene.IsValid() || !scene.isLoaded) return null;
             var existing = HomeSceneSetup.FindRoot(scene, RootName);
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                if (existing.GetComponent<HomeChannelBoardDisplay>() == null)
+                    existing.AddComponent<HomeChannelBoardDisplay>();
+                return existing;
+            }
             var prefab = Resources.Load<GameObject>(Resource);
             if (prefab == null)
             {
@@ -33,7 +39,40 @@ namespace DeepDive.Composition
             house.name = RootName;
             SceneManager.MoveGameObjectToScene(house, scene);
             house.transform.SetPositionAndRotation(ContinuousTownLayout.HomeOrigin, Quaternion.identity);
+            house.AddComponent<HomeChannelBoardDisplay>();
             return house;
+        }
+    }
+
+    // #259/#255: the physical PC corner should reflect the actual shared
+    // channel rather than showing a forever-static decorative "KANAL" sign.
+    // Strictly visual: polls the existing host-approved mirror, creates no new
+    // NetworkObject, RPC, income, subscriber count, save field or collision.
+    [DisallowMultipleComponent]
+    public sealed class HomeChannelBoardDisplay : MonoBehaviour
+    {
+        private const float RefreshSeconds = 0.5f;
+        private TextMesh boardText;
+        private float nextRefresh;
+
+        public static string Label(bool hasMirror, int followers) =>
+            hasMirror ? "KANAL\n" + ChannelGoal.Format(Mathf.Max(0, followers)) + "\nTAKIPCI" : "KANAL";
+
+        private void Update()
+        {
+            if (Time.unscaledTime < nextRefresh) return;
+            nextRefresh = Time.unscaledTime + RefreshSeconds;
+            if (boardText == null)
+            {
+                var board = transform.Find("PcCorner/ChannelBoard");
+                if (board == null) return;
+                boardText = board.GetComponentInChildren<TextMesh>(true);
+                if (boardText == null) return;
+            }
+            var mirror = MediaNetworkBinding.Mirrored;
+            var label = Label(MediaNetworkBinding.HasMirror && mirror != null,
+                mirror != null ? mirror.Followers : 0);
+            if (boardText.text != label) boardText.text = label;
         }
     }
 
