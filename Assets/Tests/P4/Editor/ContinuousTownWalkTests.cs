@@ -805,6 +805,16 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RepairQueueClearsAPlayerPushedIntoTheDoor()
+        {
+            var door = ContinuousTownLayout.HomeRig.Door.z;
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(3, -.24f, door - .34f));
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(0, .14f, door + .29f));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(3, 0f, door - 2f));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(2, 0f, door));
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;
