@@ -19,7 +19,8 @@ MonoBehaviour:
   weight:
     minGrams: 900
     maxGrams: 2600
-  swimSpeed: 1.2
-  fleeSpeed: 3.2
-  fleeRadius: 5
+  swimSpeed: 1.7
+  fleeSpeed: 4.2
+  fleeRadius: 6.5
   wanderRadius: 6
+  swimStyle: 2

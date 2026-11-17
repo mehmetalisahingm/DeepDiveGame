@@ -7,11 +7,27 @@ namespace DeepDive.World
     // water. Pure state object like FishHealth, so the maths is tested without NGO or a scene.
     // The host is the only caller (docs/plan/CONTRACTS.md: results-bearing decisions are the
     // host's); clients just receive the replicated transform.
+    // #311: what one fish knows of the others of its species nearby, gathered by the host each step. Empty for
+    // styles that ignore company.
+    public readonly struct FishCompany
+    {
+        public readonly IReadOnlyList<Vector3> Mates;
+        public readonly bool Alarmed;
+        public readonly Vector3 AlarmThreat;
+
+        public FishCompany(IReadOnlyList<Vector3> mates, bool alarmed, Vector3 alarmThreat)
+        {
+            Mates = mates;
+            Alarmed = alarmed;
+            AlarmThreat = alarmThreat;
+        }
+    }
+
     public sealed class FishMotion
     {
+        public const float SchoolRadius = 10f, AlarmRadius = 8f, MateSpacing = 0.9f, LurkerHideDistance = 0.4f;
         private const float ArriveDistance = 0.6f;
         private const float MinLookAhead = 0.75f;
-        private const float RepathSeconds = 4f;
         private const float VerticalWanderFactor = 0.5f;
         private const int WanderAttempts = 8;
         private const float Epsilon = 0.0001f;
@@ -33,20 +49,45 @@ namespace DeepDive.World
         public Vector3 Home => home;
         public Vector3 WanderTarget => wanderTarget;
         public bool IsFleeing { get; private set; }
+        // The diver this fish is running from (its own or a schoolmate's), while IsFleeing.
+        public Vector3 LastThreat { get; private set; }
+        public bool Hiding { get; private set; }
+        public SwimStyle Style => tuning.Style;
+
+        // Seconds between wander targets: cruisers hold a heading, schools re-form often.
+        public static float RepathSecondsFor(SwimStyle style) =>
+            style == SwimStyle.Cruiser ? 8f : style == SwimStyle.Lurker ? 6f : style == SwimStyle.School ? 3f : 4f;
 
         // Returns where the fish should be after deltaTime. Never returns a point outside the
         // water: when the only way forward would leave it, the fish holds position instead.
         public Vector3 Step(Vector3 position, IReadOnlyList<Vector3> threats, float deltaTime, IWaterBounds water,
-            float activityMultiplier = 1f)
+            float activityMultiplier = 1f, FishCompany company = default)
         {
             if (!IsFinite(position) || !IsFinite(deltaTime) || deltaTime <= 0f) return position;
 
             IsFleeing = TryFindNearestThreat(position, threats, tuning.FleeRadius, out var threat);
+            // A school bolts together: a mate running from a diver is reason enough.
+            if (!IsFleeing && tuning.Style == SwimStyle.School && company.Alarmed && IsFinite(company.AlarmThreat))
+            {
+                IsFleeing = true;
+                threat = company.AlarmThreat;
+            }
+            if (IsFleeing) LastThreat = threat;
+            Hiding = false;
+            // A lurker goes back to its rock, then stays put while the diver is near.
+            if (IsFleeing && tuning.Style == SwimStyle.Lurker &&
+                (home - position).sqrMagnitude <= LurkerHideDistance * LurkerHideDistance)
+            {
+                Hiding = true;
+                return position;
+            }
             // Activity only changes peaceful swimming; flee speed and water bounds remain unchanged.
             var safeActivity = float.IsNaN(activityMultiplier) || float.IsInfinity(activityMultiplier)
                 ? 1f : Mathf.Clamp(activityMultiplier, 1f, 1.5f);
             var speed = IsFleeing ? tuning.FleeSpeed : tuning.SwimSpeed * safeActivity;
-            var direction = IsFleeing ? FleeDirection(position, threat) : WanderDirection(position, deltaTime, water);
+            var direction = IsFleeing
+                ? (tuning.Style == SwimStyle.Lurker ? Direction(position, home) : FleeDirection(position, threat))
+                : WanderDirection(position, deltaTime, water, company);
             if (direction == Vector3.zero) return position;
 
             // Turn before touching the wall rather than after: probe a point ahead and steer
@@ -94,22 +135,64 @@ namespace DeepDive.World
             return away == Vector3.zero ? Vector3.forward : away;
         }
 
-        private Vector3 WanderDirection(Vector3 position, float deltaTime, IWaterBounds water)
+        private Vector3 WanderDirection(Vector3 position, float deltaTime, IWaterBounds water, FishCompany company)
         {
             repathTimer -= deltaTime;
             if (repathTimer <= 0f || (wanderTarget - position).sqrMagnitude <= ArriveDistance * ArriveDistance)
-                PickWanderTarget(water);
-            return Direction(position, wanderTarget);
+                PickWanderTarget(water, company);
+            var direction = Direction(position, wanderTarget);
+            if (tuning.Style != SwimStyle.School || company.Mates == null) return direction;
+            // Keep a body length from the nearest mates so the school does not collapse into one fish.
+            var push = Vector3.zero;
+            for (var i = 0; i < company.Mates.Count; i++)
+            {
+                var away = position - company.Mates[i];
+                var d = away.magnitude;
+                if (d > Epsilon && d < MateSpacing) push += away / d * (1f - d / MateSpacing);
+            }
+            return push == Vector3.zero ? direction : (direction + push * 2f).normalized;
+        }
+
+        // Where the school is: the mean of the mates within reach of this fish's home, or null when alone.
+        public static Vector3? SchoolCentre(Vector3 home, IReadOnlyList<Vector3> mates)
+        {
+            if (mates == null || mates.Count == 0) return null;
+            var sum = Vector3.zero;
+            var n = 0;
+            for (var i = 0; i < mates.Count; i++)
+            {
+                if (!IsFinite(mates[i]) || (mates[i] - home).sqrMagnitude > SchoolRadius * SchoolRadius) continue;
+                sum += mates[i];
+                n++;
+            }
+            return n == 0 ? (Vector3?)null : sum / n;
         }
 
         // Keeps wandering inside both the home radius and the water. Falls back to home, which
         // is where the fish was placed, so a bad roll never parks the target on dry land.
-        private void PickWanderTarget(IWaterBounds water)
+        private void PickWanderTarget(IWaterBounds water, FishCompany company = default)
         {
-            repathTimer = RepathSeconds;
+            repathTimer = RepathSecondsFor(tuning.Style);
+            var centre = home;
+            var radius = tuning.WanderRadius;
+            if (tuning.Style == SwimStyle.School && SchoolCentre(home, company.Mates) is Vector3 school)
+            {
+                // Most of the way to the school, in a tighter ring, so the group drifts together round its homes.
+                centre = Vector3.Lerp(home, school, 0.6f);
+                radius *= 0.5f;
+            }
             for (var attempt = 0; attempt < WanderAttempts; attempt++)
             {
-                var candidate = home + RandomOffset() * tuning.WanderRadius;
+                var offset = RandomOffset();
+                // A cruiser picks far points so it covers its range in long straight legs. Only the horizontal reach
+                // grows; the height keeps the usual flattened spread, so it never dives deeper than a wanderer.
+                var flat = new Vector2(offset.x, offset.z);
+                if (tuning.Style == SwimStyle.Cruiser && flat.sqrMagnitude > Epsilon * Epsilon)
+                {
+                    flat = flat.normalized * Mathf.Lerp(0.7f, 1f, (float)random.NextDouble()) * Mathf.Sqrt(Mathf.Max(0f, 1f - offset.y * offset.y));
+                    offset = new Vector3(flat.x, offset.y, flat.y);
+                }
+                var candidate = centre + offset * radius;
                 if (water == null || water.Contains(candidate))
                 {
                     wanderTarget = candidate;
