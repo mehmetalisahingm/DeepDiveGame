@@ -38,6 +38,7 @@ namespace DeepDive.P1.Lab
             public int slot, players, step, worldLoads, diveCount, soldCount, day, balance, income, boatParts, mapPlayers;
             public bool observedCarry, observedPlaced, cancelRecovered;
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
+            public int eastCourtLoops;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public bool cameraAutomaticLimit;
             public bool guestCameraPurchased, guestCameraClipVerified;
@@ -371,6 +372,7 @@ namespace DeepDive.P1.Lab
                     // (the reconnecting guest has a new NGO id) until they clear
                     // the genuine doorway; no teleport, speed or QA timeout change.
                     if (WaitForRepairHomeExitLane()) return;
+                    if (EastCourtWalk && substep == 0 && !EastCourtTick()) return;
                     if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
