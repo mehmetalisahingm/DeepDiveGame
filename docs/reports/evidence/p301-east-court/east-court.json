@@ -1,0 +1,255 @@
+{
+    "note": "Real scene, real controller values, scene closed unsaved. Walkers keep right and never give way.",
+    "radius": 0.3499999940395355,
+    "walkSpeed": 4.0,
+    "laneWidth": 3.5,
+    "courtWidth": 5.0,
+    "passes": [
+        {
+            "id": "one-out-north-back-south",
+            "allArrived": true,
+            "seconds": 10.15999984741211,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -22.5
+                    },
+                    "end": {
+                        "x": 9.203359603881836,
+                        "y": 8.479999542236329,
+                        "z": -33.74998474121094
+                    },
+                    "arrived": true,
+                    "seconds": 10.139999389648438,
+                    "metres": 40.640235900878909,
+                    "blockedFrames": 0,
+                    "minClearance": -1.0,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        },
+        {
+            "id": "one-out-south-back-north",
+            "allArrived": true,
+            "seconds": 10.15999984741211,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -33.75
+                    },
+                    "end": {
+                        "x": 9.203343391418457,
+                        "y": 8.479999542236329,
+                        "z": -22.500015258789064
+                    },
+                    "arrived": true,
+                    "seconds": 10.139999389648438,
+                    "metres": 40.64015197753906,
+                    "blockedFrames": 0,
+                    "minClearance": -1.0,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        },
+        {
+            "id": "two-meet-head-on",
+            "allArrived": true,
+            "seconds": 10.65999984741211,
+            "walkers": [
+                {
+                    "id": "cw",
+                    "start": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -23.200000762939454
+                    },
+                    "end": {
+                        "x": 9.186789512634278,
+                        "y": 8.480000495910645,
+                        "z": -33.04999542236328
+                    },
+                    "arrived": true,
+                    "seconds": 9.639999389648438,
+                    "metres": 38.64015197753906,
+                    "blockedFrames": 0,
+                    "minClearance": 0.5679637789726257,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "ccw",
+                    "start": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -34.45000076293945
+                    },
+                    "end": {
+                        "x": 9.2123441696167,
+                        "y": 8.479999542236329,
+                        "z": -21.800020217895509
+                    },
+                    "arrived": true,
+                    "seconds": 10.639999389648438,
+                    "metres": 42.64015197753906,
+                    "blockedFrames": 0,
+                    "minClearance": 0.5718474984169006,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        },
+        {
+            "id": "four-two-each-way",
+            "allArrived": true,
+            "seconds": 11.25999927520752,
+            "walkers": [
+                {
+                    "id": "cw-0",
+                    "start": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -22.950000762939454
+                    },
+                    "end": {
+                        "x": 9.204206466674805,
+                        "y": 8.479999542236329,
+                        "z": -33.29999542236328
+                    },
+                    "arrived": true,
+                    "seconds": 9.819999694824219,
+                    "metres": 39.36016845703125,
+                    "blockedFrames": 0,
+                    "minClearance": 0.1031491756439209,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "cw-1",
+                    "start": {
+                        "x": 7.800000190734863,
+                        "y": 8.479999542236329,
+                        "z": -21.600000381469728
+                    },
+                    "end": {
+                        "x": 9.171095848083496,
+                        "y": 8.479999542236329,
+                        "z": -32.56781768798828
+                    },
+                    "arrived": true,
+                    "seconds": 10.039999961853028,
+                    "metres": 40.04624938964844,
+                    "blockedFrames": 0,
+                    "minClearance": 0.03292602300643921,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "ccw-0",
+                    "start": {
+                        "x": 9.0,
+                        "y": 8.479999542236329,
+                        "z": -34.20000076293945
+                    },
+                    "end": {
+                        "x": 9.199128150939942,
+                        "y": 8.479999542236329,
+                        "z": -22.050024032592775
+                    },
+                    "arrived": true,
+                    "seconds": 10.460000038146973,
+                    "metres": 41.92017364501953,
+                    "blockedFrames": 0,
+                    "minClearance": 0.1363316774368286,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "ccw-1",
+                    "start": {
+                        "x": 7.800000190734863,
+                        "y": 8.479999542236329,
+                        "z": -34.650001525878909
+                    },
+                    "end": {
+                        "x": 9.12837028503418,
+                        "y": 8.480000495910645,
+                        "z": -21.32085418701172
+                    },
+                    "arrived": true,
+                    "seconds": 11.239999771118164,
+                    "metres": 44.89069747924805,
+                    "blockedFrames": 0,
+                    "minClearance": 0.032594919204711917,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        }
+    ],
+    "pushes": [
+        {
+            "id": "north-lane-to-north",
+            "from": {
+                "x": 18.0,
+                "y": 8.479999542236329,
+                "z": -22.5
+            },
+            "end": {
+                "x": 18.0,
+                "y": 8.479999542236329,
+                "z": -21.43000030517578
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "Edge_EastLaneNorthOuter"
+        },
+        {
+            "id": "court-to-east",
+            "from": {
+                "x": 24.0,
+                "y": 8.479999542236329,
+                "z": -28.0
+            },
+            "end": {
+                "x": 26.07000160217285,
+                "y": 8.479999542236329,
+                "z": -28.0
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "Edge_EastCourtEast"
+        },
+        {
+            "id": "south-lane-to-south",
+            "from": {
+                "x": 18.0,
+                "y": 8.479999542236329,
+                "z": -33.75
+            },
+            "end": {
+                "x": 18.0,
+                "y": 8.479999542236329,
+                "z": -35.06999969482422
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "Edge_EastLaneSouthOuter"
+        },
+        {
+            "id": "court-corner-north-east",
+            "from": {
+                "x": 24.0,
+                "y": 8.479999542236329,
+                "z": -23.0
+            },
+            "end": {
+                "x": 26.07000160217285,
+                "y": 8.479999542236329,
+                "z": -21.40656852722168
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "Edge_EastLaneNorthOuter"
+        }
+    ]
+}

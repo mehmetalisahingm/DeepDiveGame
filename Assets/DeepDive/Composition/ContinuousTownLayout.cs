@@ -93,9 +93,32 @@ namespace DeepDive.Composition
             public static readonly Vector3 DockMin = new Vector3(7f, 7.9f, -11f);
             public static readonly Vector3 DockMax = new Vector3(11f, 13f, -3.5f);
             public static readonly Vector3 TownMin = new Vector3(-15.75f, 7.9f, -55.8f);
-            public static readonly Vector3 TownMax = new Vector3(14.75f, 13f, -14.75f);
+            // #301: reaches east over the east neighbourhood (nothing else is walkable east of the arena wall).
+            public static readonly Vector3 TownMax = new Vector3(26.75f, 13f, -14.75f);
             public static readonly Vector3 CoastMin = new Vector3(-15f, 4.5f, -14.75f);
             public static readonly Vector3 CoastMax = new Vector3(15f, 13f, -3.5f);
+        }
+
+        // #301: a small neighbourhood east of the square. Two lanes leave the square through openings in its east fence,
+        // run round the east building (north of it and south of it) and meet in a court behind it, so a walker can go
+        // out by one lane and come back by the other. Lanes 3.5 m and the court 5 m wide: two divers pass, four do not jam.
+        public static class EastCourt
+        {
+            public const float LaneNorthMinZ = -24.5f, LaneNorthMaxZ = -21f;
+            public const float LaneSouthMinZ = -35.5f, LaneSouthMaxZ = -32f;
+            public const float CourtMinX = 21.5f, CourtMaxX = 26.5f;
+            public const float WestX = 14f;
+            // Where a walker stands in each lane mouth, in the court and on the far side of the building. The north lane is
+            // 3 m clear between the fence (z -21) and the building face (z -24), the south lane 3.5 m.
+            public static readonly Vector3 NorthMouth = new Vector3(13f, WalkSurfaceY, -22.5f);
+            public static readonly Vector3 SouthMouth = new Vector3(13f, WalkSurfaceY, -33.75f);
+            public static readonly Vector3 NorthLane = new Vector3(18f, WalkSurfaceY, -22.5f);
+            public static readonly Vector3 SouthLane = new Vector3(18f, WalkSurfaceY, -33.75f);
+            public static readonly Vector3 CourtNorth = new Vector3(24f, WalkSurfaceY, -22.5f);
+            public static readonly Vector3 CourtMiddle = new Vector3(24f, WalkSurfaceY, -28f);
+            public static readonly Vector3 CourtSouth = new Vector3(24f, WalkSurfaceY, -33.75f);
+            // The loop as walked: out by the north lane, round the court, back by the south lane.
+            public static readonly Vector3[] Loop = { NorthMouth, NorthLane, CourtNorth, CourtMiddle, CourtSouth, SouthLane, SouthMouth };
         }
 
         public enum BlockMaterial { Sand, Building }
@@ -134,7 +157,13 @@ namespace DeepDive.Composition
             Slab("MainStreet", new Vector2(0f, -22f), new Vector2(22f, 13f)),
             Slab("TownSquare", new Vector2(0f, -29f), new Vector2(28f, 14f)),
             Slab("HouseApproach", new Vector2(0f, -40f), new Vector2(7.5f, 12f)),
-            Slab("HomePlot", new Vector2(0f, -49f), new Vector2(15f, 13f))
+            Slab("HomePlot", new Vector2(0f, -49f), new Vector2(15f, 13f)),
+            // #301 east neighbourhood, flush with the square at 8.4.
+            SlabMinMax("EastLaneNorth", EastCourt.WestX, EastCourt.CourtMinX, EastCourt.LaneNorthMinZ, EastCourt.LaneNorthMaxZ),
+            SlabMinMax("EastLaneSouth", EastCourt.WestX, EastCourt.CourtMinX, EastCourt.LaneSouthMinZ, EastCourt.LaneSouthMaxZ),
+            SlabMinMax("EastCourt", EastCourt.CourtMinX, EastCourt.CourtMaxX, EastCourt.LaneSouthMinZ, EastCourt.LaneNorthMaxZ),
+            // The east building stands on its own plot between the lanes, so the lanes have no open side under it.
+            SlabMinMax("EastBuildingPlot", EastCourt.WestX, EastCourt.CourtMinX, EastCourt.LaneSouthMaxZ, EastCourt.LaneNorthMinZ)
         };
 
         // Physical facades outside the square's pedestrian area. No collider is placed over the paths or
@@ -182,7 +211,12 @@ namespace DeepDive.Composition
                     edges.Add(Edge("Edge_Town" + side + "South", mirror, -14.3f, -14.0f, -36.3f, -30.4f));
                     edges.Add(Edge("Edge_Town" + side + "North", mirror, -14.3f, -14.0f, -21.3f, -15.5f));
                 }
-                else edges.Add(Edge("Edge_Town" + side, mirror, -14.3f, -14.0f, -36.3f, -15.5f));
+                else
+                {
+                    // #301: the east fence opens onto the two lanes; between them the east building (on its plot) closes the side.
+                    edges.Add(Edge("Edge_Town" + side + "North", mirror, -14.3f, -14.0f, EastCourt.LaneNorthMaxZ, -15.5f));
+                    edges.Add(Edge("Edge_Town" + side + "South", mirror, -14.3f, -14.0f, -36.3f, EastCourt.LaneSouthMinZ));
+                }
                 edges.Add(Edge("Edge_SquareSouth" + side, mirror, -14.3f, -3.75f, -36.3f, -36.0f));
                 edges.Add(Edge("Edge_Approach" + side, mirror, -4.05f, -3.75f, -42.0f, -36.0f));
                 // Outside the facade line (z -42), so the house front stays open between the walls.
@@ -190,6 +224,10 @@ namespace DeepDive.Composition
                 edges.Add(Edge("Edge_Plot" + side, mirror, -7.8f, -7.5f, -55.8f, -41.7f));
             }
             edges.Add(Edge("Edge_PlotSouth", 1f, -7.8f, 7.8f, -55.8f, -55.5f));
+            // #301: the neighbourhood's outer sides drop into the void.
+            edges.Add(Edge("Edge_EastLaneNorthOuter", 1f, EastCourt.WestX + 0.3f, EastCourt.CourtMaxX + 0.3f, EastCourt.LaneNorthMaxZ, EastCourt.LaneNorthMaxZ + 0.3f));
+            edges.Add(Edge("Edge_EastCourtEast", 1f, EastCourt.CourtMaxX, EastCourt.CourtMaxX + 0.3f, EastCourt.LaneSouthMinZ - 0.3f, EastCourt.LaneNorthMaxZ + 0.3f));
+            edges.Add(Edge("Edge_EastLaneSouthOuter", 1f, EastCourt.WestX, EastCourt.CourtMaxX + 0.3f, EastCourt.LaneSouthMinZ - 0.3f, EastCourt.LaneSouthMinZ));
             return edges.ToArray();
         }
 
@@ -207,6 +245,9 @@ namespace DeepDive.Composition
             new TownBlock(name,
                 new Vector3(xz.x, WalkSurfaceY - SlabThickness / 2f, xz.y),
                 new Vector3(size.x, SlabThickness, size.y), BlockMaterial.Sand, true);
+
+        private static TownBlock SlabMinMax(string name, float minX, float maxX, float minZ, float maxZ) =>
+            Slab(name, new Vector2((minX + maxX) / 2f, (minZ + maxZ) / 2f), new Vector2(maxX - minX, maxZ - minZ));
 
         private static TownBlock Fill(string name, Vector2 xz, Vector2 size) =>
             new TownBlock(name,
