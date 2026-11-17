@@ -17,6 +17,7 @@ namespace DeepDive.P1.Lab
         private bool raceSent, disconnectSent, reconnectSent, midnightStarted;
         private float reconnectAt, clockRate, midnightObservedAt;
         private bool repairHomeExitWaiting;
+        private bool repairDoorCleared;
 
         // After a real mid-session reconnect the winning guest has a NEW NGO
         // OwnerClientId (e.g. 4, not slot 2). Order the physical home hallway
@@ -37,9 +38,13 @@ namespace DeepDive.P1.Lab
         // the same waypoint. Three capsules cannot occupy (0, -24) at once.
         public static float RepairRaceLane(int slot) => -1.8f - slot * 1.1f;
 
+        public static bool ShouldClearRepairDoor(int slot, float x, float z) =>
+            slot != 2 && Mathf.Abs(x - ContinuousTownLayout.HomeRig.Door.x) < 1f &&
+            z > ContinuousTownLayout.HomeRig.Door.z - .6f;
+
         private bool WaitForRepairHomeExitLane()
         {
-            if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0)
+            if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0 || repairDoorCleared)
                 return false;
             var blocker = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                 .FirstOrDefault(p => p != local && p.IsSpawned &&
@@ -62,6 +67,7 @@ namespace DeepDive.P1.Lab
         {
             if (repairPhase == value) return;
             repairPhase = value;
+            repairDoorCleared = false;
             // Rejoin and the product's morning placement begin inside the real house again.
             // Reuse the door/hallway route rather than heading through a wall to the beach.
             if ((value == 3 || value == 5) && local != null && local.transform.position.z < -39f) substep = 0;

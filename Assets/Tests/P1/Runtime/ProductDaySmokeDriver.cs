@@ -365,6 +365,12 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
+                    // If collision has already pushed a queued diver to the actual
+                    // doorway, clear it forward instead of steering back through
+                    // the crew towards the old in-house first waypoint.
+                    if (RepairInterruptions && repairPhase == 5 && substep == 0 && !repairDoorCleared &&
+                        ShouldClearRepairDoor(report.slot, local.transform.position.x, local.transform.position.z))
+                    { SetRoute(Outward().Skip(3)); repairDoorCleared = true; }
                     if (MustWaitForRepairCorridor(RepairInterruptions, repairPhase, expected, report.slot, sync.BoatPartsMask.Value))
                     { Stop(); return; }
                     // #207 four real processes: after repair midnight/rejoin, a
