@@ -16,6 +16,37 @@ namespace DeepDive.P1.Lab
         private ulong repairWinner;
         private bool raceSent, disconnectSent, reconnectSent, midnightStarted;
         private float reconnectAt, clockRate, midnightObservedAt;
+        private bool repairHomeExitWaiting;
+
+        // After a real mid-session reconnect the winning guest has a NEW NGO
+        // OwnerClientId (e.g. 4, not slot 2). Order the physical home hallway
+        // by current network owner id, rather than stale launch-slot numbers.
+        // In QA #207 artifact 14177597912 three guests all became stuck at
+        // the same first west hallway waypoint around (-4.5, -49.8).
+        public static bool MustYieldHomeExit(ulong movingOwner, ulong otherOwner, float otherZ) =>
+            movingOwner != 0 && otherOwner < movingOwner &&
+            otherZ < ContinuousTownLayout.HomeRig.Door.z + 2f;
+
+        private bool WaitForRepairHomeExitLane()
+        {
+            if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0)
+                return false;
+            var blocker = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .FirstOrDefault(p => p != local && p.IsSpawned &&
+                    MustYieldHomeExit(local.OwnerClientId, p.OwnerClientId, p.transform.position.z));
+            if (blocker == null)
+            {
+                if (repairHomeExitWaiting)
+                    Debug.Log($"P207_REPAIR_HOME_QUEUE_RELEASE owner={local.OwnerClientId} pos={local.transform.position}");
+                repairHomeExitWaiting = false;
+                return false;
+            }
+            if (!repairHomeExitWaiting)
+                Debug.Log($"P207_REPAIR_HOME_QUEUE_WAIT owner={local.OwnerClientId} blocker={blocker.OwnerClientId} pos={local.transform.position} blockerPos={blocker.transform.position}");
+            repairHomeExitWaiting = true;
+            Stop();
+            return true;
+        }
 
         private void SetRepairPhase(int value)
         {
