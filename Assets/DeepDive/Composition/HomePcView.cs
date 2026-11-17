@@ -344,12 +344,22 @@ namespace DeepDive.Composition
             // #255: the shared goal and where the channel stands (the host's follower count, as mirrored).
             var goal = ChannelGoal.Of(data.Followers);
             GUI.Label(new Rect(box.x + 10, box.y + 270, 380, 20), ChannelGoal.Describe(data.Followers));
+            // This bar describes only progress TO THE NEXT MILESTONE. The
+            // 10M percentage displayed at left stays honest and linear.
+            // Unlike the old 10M-only meter, this moves visibly from the
+            // very first earned followers without pretending 10M is close.
+            GUI.Label(new Rect(box.x + 400, box.y + 256, 250, 18),
+                goal.Reached ? "HEDEF TAMAM" :
+                "SONRAKI ESIK: " + ChannelGoal.Format(goal.NextMilestone));
             GUI.Box(new Rect(box.x + 400, box.y + 274, 250, 12), GUIContent.none);
             var barColor = GUI.color;
             GUI.color = goal.Reached ? new Color(0.45f, 0.95f, 0.45f) : new Color(0.35f, 0.8f, 0.95f);
-            GUI.DrawTexture(new Rect(box.x + 401, box.y + 275, 248f * Mathf.Max(goal.Ratio, goal.Followers > 0 ? 0.01f : 0f), 10), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(box.x + 401, box.y + 275, 248f * goal.MilestoneRatio, 10), Texture2D.whiteTexture);
             GUI.color = barColor;
-            y = box.y + 290;
+            GUI.Label(new Rect(box.x + 400, box.y + 288, 250, 17),
+                goal.Reached ? "10 milyon asildi" :
+                ChannelGoal.Format(goal.RemainingToNext) + " takipci kaldi");
+            y = box.y + 308;
             for (var i = data.Publications.Count - 1; i >= 0 && y < box.y + 410; i--, y += 20)
             {
                 var p = data.Publications[i];

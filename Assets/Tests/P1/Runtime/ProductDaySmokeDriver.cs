@@ -365,6 +365,12 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
+                    // #207 four real processes: after repair midnight/rejoin, a
+                    // simultaneous departure packs three capsules into the same
+                    // west home corridor. Yield physically to earlier live owners
+                    // (the reconnecting guest has a new NGO id) until they clear
+                    // the genuine doorway; no teleport, speed or QA timeout change.
+                    if (WaitForRepairHomeExitLane()) return;
                     if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
