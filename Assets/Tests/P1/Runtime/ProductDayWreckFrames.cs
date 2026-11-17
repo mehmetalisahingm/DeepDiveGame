@@ -11,7 +11,7 @@ namespace DeepDive.P1.Lab
     // #303 explicit development measurement (-WreckFrames with -OceanVideo):
     // - frame time at each wreck stop with the wreck's renderers shown and hidden, alternated in one binary, the same
     //   way #219 measured the sea bed. Renderers only, this process only; colliders and authority are untouched.
-    // - with -WreckNight, a LABELLED clock fixture: the host moves the day clock to 22:00 for the survey and puts the
+    // - with -WreckNight (also on -ReefGateFrames for #312), a LABELLED clock fixture: the host moves the day clock to 22:00 for the survey and puts the
     //   minute back afterwards, so the frames show the real night lighting. Fish AI, replication and lights stay real.
     public sealed partial class ProductDaySmokeDriver
     {
@@ -60,6 +60,40 @@ namespace DeepDive.P1.Lab
             if (++wreckScenario < WreckScenarios.Length) return false;
             wreckScenario = 0;
             foreach (var r in wreckRenderers) if (r != null) r.enabled = true;
+            return true;
+        }
+
+        // #312: the same alternation at each reef-gate stop, with the night glow's lights on and off.
+        private List<Light> glowLights;
+        private int glowScenario, glowFrame;
+
+        private bool GlowFrameStop()
+        {
+            if (glowLights == null)
+            {
+                QualitySettings.vSyncCount = 0;
+                Application.targetFrameRate = -1;
+                File.WriteAllText(output + ".glow-frames.csv", "stop,scenario,frames,mean_ms,p95_ms,max_ms,night,lights,gpu\n");
+                glowLights = SceneManager.GetSceneByName(ContinuousTownLayout.SceneName).GetRootGameObjects()
+                    .Where(r => r.name == ReefNightGlow.RootName).SelectMany(r => r.GetComponentsInChildren<Light>(true)).ToList();
+            }
+            if (glowLights.Count == 0) return true;
+            var lit = glowLights.Count(l => l != null && l.enabled);
+            if (glowFrame == 0) foreach (var l in glowLights) if (l != null) l.enabled = WreckScenarios[glowScenario] && l.intensity > 0.02f;
+            glowFrame++;
+            if (glowFrame <= WreckWarmFrames) return false;
+            wreckSamples.Add(Time.unscaledDeltaTime * 1000f);
+            if (wreckSamples.Count < WreckSampleFrames) return false;
+            wreckSamples.Sort();
+            File.AppendAllText(output + ".glow-frames.csv", string.Format(CultureInfo.InvariantCulture,
+                "{0},{1},{2},{3:F3},{4:F3},{5:F3},{6},{7},{8}\n", oceanWaypoint, WreckScenarios[glowScenario] ? "glow" : "dark",
+                wreckSamples.Count, wreckSamples.Average(), wreckSamples[(int)(wreckSamples.Count * .95f)],
+                wreckSamples[wreckSamples.Count - 1], WreckNight ? 1 : 0, lit, SystemInfo.graphicsDeviceName));
+            wreckSamples.Clear();
+            glowFrame = 0;
+            if (++glowScenario < WreckScenarios.Length) return false;
+            glowScenario = 0;
+            foreach (var l in glowLights) if (l != null) l.enabled = l.intensity > 0.02f;
             return true;
         }
     }
