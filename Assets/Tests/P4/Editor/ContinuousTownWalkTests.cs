@@ -810,6 +810,17 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RejoinedFourPlayerRepairWaitsForThePreviousRealPart()
+        {
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 2, 3));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 1, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 2, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(false, 5, 4, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 4, 4, 2, 1));
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;

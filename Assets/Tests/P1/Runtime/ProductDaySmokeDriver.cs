@@ -365,6 +365,8 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
+                    if (MustWaitForRepairCorridor(RepairInterruptions, repairPhase, expected, report.slot, sync.BoatPartsMask.Value))
+                    { Stop(); return; }
                     // #207 four real processes: after repair midnight/rejoin, a
                     // simultaneous departure packs three capsules into the same
                     // west home corridor. Yield physically to earlier live owners

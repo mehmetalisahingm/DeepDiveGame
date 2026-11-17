@@ -27,6 +27,12 @@ namespace DeepDive.P1.Lab
             movingOwner != 0 && otherOwner < movingOwner &&
             otherZ < ContinuousTownLayout.HomeRig.Door.z + 2f;
 
+        // The four-process interruption scenario has two remaining assigned
+        // repairs after midnight. Keep slot 2 out of the narrow rack corridor
+        // until slot 1 has physically finished its real repair.
+        public static bool MustWaitForRepairCorridor(bool interruptions, int phase, int players, int slot, int completedMask) =>
+            interruptions && phase == 5 && players == 4 && slot == 2 && (completedMask & (1 << 1)) == 0;
+
         private bool WaitForRepairHomeExitLane()
         {
             if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0)
