@@ -33,6 +33,10 @@ namespace DeepDive.P1.Lab
         public static bool MustWaitForRepairCorridor(bool interruptions, int phase, int players, int slot, int completedMask) =>
             interruptions && phase == 5 && players == 4 && slot == 2 && (completedMask & (1 << 1)) == 0;
 
+        // Match the separated outward legs instead of sending all guests to
+        // the same waypoint. Three capsules cannot occupy (0, -24) at once.
+        public static float RepairRaceLane(int slot) => -1.8f - slot * 1.1f;
+
         private bool WaitForRepairHomeExitLane()
         {
             if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0)
@@ -144,7 +148,7 @@ namespace DeepDive.P1.Lab
                 if (source == null) { Stop(); return false; }
                 var stand = source.transform.position + Vector3.back * 1.25f + Vector3.right * (report.slot == 1 ? -.6f : .6f);
                 stand.y = ContinuousTownLayout.WalkSurfaceY;
-                if (route == null) SetRoute(new[] { P(0, -24), P(0, -16), P(stand.x, -16), stand });
+                if (route == null) SetRoute(new[] { P(RepairRaceLane(report.slot), -24), P(RepairRaceLane(report.slot), -16), P(stand.x, -16), stand });
                 if (!Follow()) return false;
                 Aim(source.transform.position);
                 if (repairPhase == 1 && !raceSent && Settled())
@@ -180,7 +184,7 @@ namespace DeepDive.P1.Lab
                 return true;
             }
             var park = P(10 + report.slot * 1.2f, -23);
-            if (route == null) SetRoute(new[] { P(0, -24), park });
+            if (route == null) SetRoute(new[] { P(RepairRaceLane(report.slot), -24), park });
             Follow(); return false;
         }
     }

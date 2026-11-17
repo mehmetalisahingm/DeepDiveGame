@@ -821,6 +821,16 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RepairRaceGuestsUseSeparatedPhysicalApproachLanes()
+        {
+            var first = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(1);
+            var second = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(2);
+            var observer = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(3);
+            Assert.Greater(Mathf.Abs(first - second), .7f);
+            Assert.Greater(Mathf.Abs(second - observer), .7f);
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;
