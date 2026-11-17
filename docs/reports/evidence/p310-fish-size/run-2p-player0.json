@@ -1,0 +1,35 @@
+{
+ "fishSizes": [
+  "Fish_SeaBass sea_bass size=1.005 scaleX=1.005 lengthM=0.248 grams=1774",
+  "Fish_SeaBass_02 sea_bass size=1.088 scaleX=1.088 lengthM=0.268 grams=2252",
+  "Fish_SeaBass_03 sea_bass size=0.977 scaleX=0.977 lengthM=0.241 grams=1634",
+  "Fish_SeaBass_04 tuna size=1.070 scaleX=1.070 lengthM=0.257 grams=2142",
+  "Fish_SeaBass_05 tuna size=0.903 scaleX=0.903 lengthM=0.217 grams=1288",
+  "Fish_SeaBass_06 tuna size=0.932 scaleX=0.932 lengthM=0.224 grams=1416",
+  "Fish_SeaBass_07 red_snapper size=1.118 scaleX=1.118 lengthM=0.264 grams=2447",
+  "Fish_SeaBass_08 red_snapper size=1.122 scaleX=1.122 lengthM=0.265 grams=2471",
+  "Fish_SeaBass_09 red_snapper size=1.056 scaleX=1.056 lengthM=0.249 grams=2061",
+  "Fish_SeaBass_10 grouper size=0.829 scaleX=0.829 lengthM=0.214 grams=2281",
+  "Fish_SeaBass_11 grouper size=1.081 scaleX=1.081 lengthM=0.279 grams=5052",
+  "Fish_SeaBass_12 grouper size=1.081 scaleX=1.081 lengthM=0.279 grams=5047",
+  "Fish_SeaBass_13 lanternfish size=0.880 scaleX=0.880 lengthM=0.227 grams=409",
+  "Fish_SeaBass_14 lanternfish size=1.087 scaleX=1.087 lengthM=0.281 grams=771",
+  "Fish_SeaBass_15 lanternfish size=1.107 scaleX=1.107 lengthM=0.286 grams=813"
+ ],
+ "habitatViews": [
+  "sea_bass Fish_SeaBass at=(-0.91, 5.21, 3.73) shallow from=(-1.72, 9.37, -9.61) distance=14,0 size=1,005",
+  "tuna Fish_SeaBass_04 at=(-5.74, 3.60, 11.10) shallow from=(-2.95, 8.65, -1.60) distance=14,0 size=1,070",
+  "red_snapper Fish_SeaBass_07 at=(5.08, -1.94, 31.68) reef from=(2.50, 8.10, 25.70) distance=12,0 size=1,118",
+  "grouper Fish_SeaBass_10 at=(-10.53, -3.17, 26.55) reef from=(-4.78, 7.26, 27.46) distance=11,9 size=0,829",
+  "lanternfish Fish_SeaBass_14 at=(-11.16, -18.43, 60.90) deep from=(-10.04, -6.79, 56.17) distance=12,6 size=1,087",
+  "reward reward:day1:order-fish-quick 80"
+ ],
+ "habitatCaught": [
+  "sea_bass oxygen=118 at=(-6.71, 3.63, 4.75) shallow grams=1634",
+  "tuna oxygen=112 at=(-3.57, 4.96, 8.33) shallow grams=2142",
+  "red_snapper oxygen=99 at=(5.72, -1.74, 28.91) reef grams=2447",
+  "grouper oxygen=84 at=(-9.28, -3.40, 26.83) reef grams=2281",
+  "lanternfish oxygen=59 at=(-11.91, -18.38, 55.79) deep grams=409"
+ ],
+ "passed": true
+}

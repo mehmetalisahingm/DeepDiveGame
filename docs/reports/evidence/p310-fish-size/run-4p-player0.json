@@ -1,0 +1,28 @@
+{
+ "fishSizes": [
+  "Fish_SeaBass sea_bass size=1,000 scaleX=1,000 grams=1750",
+  "Fish_SeaBass_02 sea_bass size=1,033 scaleX=1,033 grams=1931",
+  "Fish_SeaBass_03 sea_bass size=1,084 scaleX=1,084 grams=2230",
+  "Fish_SeaBass_04 tuna size=0,918 scaleX=0,918 grams=1355",
+  "Fish_SeaBass_05 tuna size=0,932 scaleX=0,932 grams=1416",
+  "Fish_SeaBass_06 tuna size=1,046 scaleX=1,046 grams=2005",
+  "Fish_SeaBass_07 red_snapper size=0,822 scaleX=0,822 grams=972",
+  "Fish_SeaBass_08 red_snapper size=0,888 scaleX=0,888 grams=1227",
+  "Fish_SeaBass_09 red_snapper size=1,061 scaleX=1,061 grams=2093",
+  "Fish_SeaBass_10 grouper size=1,060 scaleX=1,060 grams=4763",
+  "Fish_SeaBass_11 grouper size=0,880 scaleX=0,880 grams=2722",
+  "Fish_SeaBass_12 grouper size=1,080 scaleX=1,080 grams=5039",
+  "Fish_SeaBass_13 lanternfish size=0,950 scaleX=0,950 grams=515",
+  "Fish_SeaBass_14 lanternfish size=1,042 scaleX=1,042 grams=678",
+  "Fish_SeaBass_15 lanternfish size=1,128 scaleX=1,128 grams=861"
+ ],
+ "habitatViews": [
+  "sea_bass Fish_SeaBass_02 at=(-10.38, 3.27, 6.11) shallow from=(-5.41, 9.08, -5.57) distance=14,0 size=1,033",
+  "tuna Fish_SeaBass_05 at=(-2.87, 4.41, 13.42) shallow from=(-6.49, 8.47, 0.52) distance=14,0 size=0,932",
+  "red_snapper Fish_SeaBass_08 at=(6.52, -2.05, 33.17) reef from=(2.02, 7.31, 25.37) distance=13,0 size=0,888",
+  "grouper Fish_SeaBass_10 at=(-10.42, -3.93, 26.42) reef from=(-5.33, 6.64, 28.81) distance=12,0 size=1,060",
+  "lanternfish Fish_SeaBass_13 at=(-8.92, -18.86, 58.12) deep from=(-9.65, -6.99, 57.27) distance=11,9 size=0,950",
+  "reward reward:day1:order-fish-quick 80"
+ ],
+ "passed": true
+}
