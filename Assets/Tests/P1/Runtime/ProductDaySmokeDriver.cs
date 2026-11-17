@@ -31,7 +31,7 @@ namespace DeepDive.P1.Lab
         private const string DoneMessage = "test/p46/product-done";
         [Serializable] public sealed class Report
         {
-            public List<string> habitatSeen = new List<string>(), habitatViews = new List<string>(), habitatCaught = new List<string>(), fishSizes = new List<string>();
+            public List<string> habitatSeen = new List<string>(), habitatViews = new List<string>(), habitatCaught = new List<string>(), fishSizes = new List<string>(), fishBehaviour = new List<string>();
             public int habitatBalance, habitatRewards, habitatFishSamples, habitatBelowFloor;
             public bool passed, reload, initialClean, homeSpawn, repaired, cameraBought, realClip,
                 clipPlayed, clipAdvanced, published, duplicateRefused, slept, morningHome, reloadClean, mapMoved, mapDocked;
