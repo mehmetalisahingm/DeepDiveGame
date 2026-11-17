@@ -1,0 +1,13 @@
+stop,scenario,frames,mean_ms,p95_ms,max_ms,night,lights,gpu
+3,glow,180,2.700,3.533,5.068,1,9,NVIDIA GeForce RTX 4060 Laptop GPU
+3,dark,180,2.715,3.906,9.770,1,0,NVIDIA GeForce RTX 4060 Laptop GPU
+3,glow,180,2.571,3.346,4.232,1,9,NVIDIA GeForce RTX 4060 Laptop GPU
+3,dark,180,2.790,3.728,10.167,1,0,NVIDIA GeForce RTX 4060 Laptop GPU
+4,glow,180,2.704,3.829,4.929,1,9,NVIDIA GeForce RTX 4060 Laptop GPU
+4,dark,180,2.857,3.998,5.567,1,0,NVIDIA GeForce RTX 4060 Laptop GPU
+4,glow,180,2.857,3.945,5.604,1,9,NVIDIA GeForce RTX 4060 Laptop GPU
+4,dark,180,2.953,3.982,5.829,1,0,NVIDIA GeForce RTX 4060 Laptop GPU
+5,glow,180,2.832,3.745,13.294,1,9,NVIDIA GeForce RTX 4060 Laptop GPU
+5,dark,180,2.823,3.990,5.221,1,0,NVIDIA GeForce RTX 4060 Laptop GPU
+5,glow,180,2.817,3.683,4.968,1,9,NVIDIA GeForce RTX 4060 Laptop GPU
+5,dark,180,3.032,4.640,6.691,1,0,NVIDIA GeForce RTX 4060 Laptop GPU
