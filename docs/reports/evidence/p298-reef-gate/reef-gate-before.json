@@ -1,0 +1,203 @@
+{
+    "note": "Real scene, real controller values, closed unsaved. Geometric line of sight with the underwater fog formula; no light, contrast or model.",
+    "openingWidth": 3.40000057220459,
+    "openingHeight": 2.4000000953674318,
+    "gateDepth": 1.7999999523162842,
+    "floorUnderGate": -8.030580520629883,
+    "gateCentre": {
+        "x": -7.000000476837158,
+        "y": -6.830580711364746,
+        "z": 30.0
+    },
+    "sights": [
+        {
+            "from": "wade-entry",
+            "eye": {
+                "x": -6.5,
+                "y": 7.5,
+                "z": -3.5
+            },
+            "distance": 36.43988800048828,
+            "visibility01": 0.25265881419181826,
+            "lineClear": false,
+            "blocker": "Seabed_Shallow",
+            "firstReadableAtMetres": 25.86577606201172
+        },
+        {
+            "from": "sea-bass-habitat",
+            "eye": {
+                "x": -4.0,
+                "y": 4.0,
+                "z": 8.0
+            },
+            "distance": 24.704280853271486,
+            "visibility01": 0.2523362636566162,
+            "lineClear": true,
+            "blocker": "",
+            "firstReadableAtMetres": 17.5274658203125
+        },
+        {
+            "from": "reef-shelf-edge",
+            "eye": {
+                "x": -6.0,
+                "y": 0.0,
+                "z": 18.0
+            },
+            "distance": 13.84401798248291,
+            "visibility01": 0.4449692666530609,
+            "lineClear": true,
+            "blocker": "",
+            "firstReadableAtMetres": 12.808533668518067
+        }
+    ],
+    "swims": [
+        {
+            "id": "north-level",
+            "through": false,
+            "stuck": true,
+            "metres": 15.794808387756348,
+            "seconds": 14.0,
+            "blockedFrames": 485
+        },
+        {
+            "id": "south-level",
+            "through": false,
+            "stuck": true,
+            "metres": 10.39651107788086,
+            "seconds": 14.0,
+            "blockedFrames": 552
+        },
+        {
+            "id": "north-dip",
+            "through": true,
+            "stuck": false,
+            "metres": 15.001216888427735,
+            "seconds": 5.059999942779541,
+            "blockedFrames": 0
+        },
+        {
+            "id": "south-dip",
+            "through": true,
+            "stuck": false,
+            "metres": 14.984872817993164,
+            "seconds": 5.0,
+            "blockedFrames": 0
+        }
+    ],
+    "nearbyFish": [
+        {
+            "species": "grouper",
+            "home": {
+                "x": -10.5,
+                "y": -3.5,
+                "z": 26.5
+            },
+            "distance": 5.965967178344727
+        },
+        {
+            "species": "grouper",
+            "home": {
+                "x": -10.0,
+                "y": -4.5,
+                "z": 33.0
+            },
+            "distance": 4.840620040893555
+        },
+        {
+            "species": "grouper",
+            "home": {
+                "x": -10.0,
+                "y": -4.5,
+                "z": 38.0
+            },
+            "distance": 8.856162071228028
+        }
+    ],
+    "floorAlongAxis": [
+        {
+            "x": 20.0,
+            "y": -3.795778512954712
+        },
+        {
+            "x": 21.0,
+            "y": -3.9159913063049318
+        },
+        {
+            "x": 22.0,
+            "y": -3.7246317863464357
+        },
+        {
+            "x": 23.0,
+            "y": -3.7033448219299318
+        },
+        {
+            "x": 24.0,
+            "y": -4.127450942993164
+        },
+        {
+            "x": 25.0,
+            "y": -4.882024765014648
+        },
+        {
+            "x": 26.0,
+            "y": -5.783870697021484
+        },
+        {
+            "x": 27.0,
+            "y": -6.937026023864746
+        },
+        {
+            "x": 28.0,
+            "y": -7.817004680633545
+        },
+        {
+            "x": 29.0,
+            "y": -7.976279258728027
+        },
+        {
+            "x": 30.0,
+            "y": -8.030580520629883
+        },
+        {
+            "x": 31.0,
+            "y": -8.06378173828125
+        },
+        {
+            "x": 32.0,
+            "y": -8.074936866760254
+        },
+        {
+            "x": 33.0,
+            "y": -7.924763202667236
+        },
+        {
+            "x": 34.0,
+            "y": -7.266559600830078
+        },
+        {
+            "x": 35.0,
+            "y": -6.922357082366943
+        },
+        {
+            "x": 36.0,
+            "y": -7.2447710037231449
+        },
+        {
+            "x": 37.0,
+            "y": -8.510974884033204
+        },
+        {
+            "x": 38.0,
+            "y": -9.377473831176758
+        },
+        {
+            "x": 39.0,
+            "y": -10.186797142028809
+        },
+        {
+            "x": 40.0,
+            "y": -11.065585136413575
+        }
+    ],
+    "openingTopY": -5.630580425262451
+}
