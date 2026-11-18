@@ -65,6 +65,17 @@ namespace DeepDive.World
             new Vector4(10f, 22f, 3f, 2.5f)
         };
 
+        // #303: a small wreck on the shallow sand in front of the beach, between the west wade and the town dock,
+        // clear of the boat keels, the fish homes and the reef. Its hull is one low box (the rest of the set is decor),
+        // so a diver bumps into what the fish bounds steer around.
+        public const float WreckX = 1.5f, WreckZ = 3f;
+        public const string WreckHullId = "shallow-wreck-hull";
+
+        public static readonly IReadOnlyList<Solid> WreckSolids = new[]
+        {
+            new Solid(WreckHullId, 1f, WreckX, WreckZ, new Vector3(4.9f, 1.6f, 2.1f))
+        };
+
         // #298: the first outcrop sat across the arch's south mouth, so a diver had to drop 4.3 m over the last 4 m
         // into it. A sand gully cut into that outcrop's north-east side, along the arch axis (x = ArchAxisX), lets the
         // approach go down over 5 m instead and arrive level with the opening. Rock either side, the outcrop's crest

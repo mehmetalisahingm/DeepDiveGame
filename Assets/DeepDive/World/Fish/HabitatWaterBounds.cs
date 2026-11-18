@@ -38,7 +38,11 @@ namespace DeepDive.World
             if (flat.sqrMagnitude > LeashFlat * LeashFlat) return false;
             if (point.y < SeabedProfile.FloorHeight(point.x, point.z) + FloorMargin) return false;
 
-            var solids = SeabedProfile.Solids;
+            return Clear(SeabedProfile.Solids, point) && Clear(SeabedProfile.WreckSolids, point);
+        }
+
+        private static bool Clear(System.Collections.Generic.IReadOnlyList<SeabedProfile.Solid> solids, Vector3 point)
+        {
             for (var i = 0; i < solids.Count; i++)
             {
                 var box = solids[i].Box;
