@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -12,6 +12,7 @@ if ($SharedHunt -and ($Players -ne 2 -or $RepairOnly -or $ActionVideo -or $Equip
 if ($SharedHunt) { $Render = $true } # The guest captures an actual clip; a null graphics device cannot do so.
 if ($HabitatHunt -and ($RepairOnly -or $HuntFirst -or $OceanVideo -or $EquipmentVideo -or $ActionVideo)) { throw 'HabitatHunt is its own short session without other probes.' }
 if ($SeabedFrames -and -not $OceanVideo) { throw 'SeabedFrames measures the ocean survey and requires OceanVideo.' }
+if ($ReefGateFrames -and (-not $OceanVideo -or $SeabedFrames)) { throw 'ReefGateFrames re-routes the ocean survey and requires OceanVideo without SeabedFrames.' }
 if ($OceanVideo -and ($Players -ne 2 -or $RepairOnly -or $HuntFirst -or $EquipmentVideo)) { throw 'OceanVideo requires the normal two-player product day without other visual probes.' }
 $productRoot=Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'P46-ProcessEvidence.ps1')
@@ -45,6 +46,7 @@ try {
         if ($EquipmentVideo) { $productArgs+=@('-p49-equipment-video','1') }
         if ($OceanVideo) { $productArgs+=@('-p411-ocean-video','1') }
         if ($SeabedFrames) { $productArgs+=@('-p219-seabed-frames','1') }
+        if ($ReefGateFrames) { $productArgs+=@('-p298-reef-gate-frames','1') }
         if ($HabitatHunt) { $productArgs+=@('-p219-habitat-hunt','1') }
         if ($ActionVideo) { $productArgs+=@('-p49-action-video','1') }
         if ($CameraAutoLimit) { $productArgs+=@('-p253-auto-limit','1') }

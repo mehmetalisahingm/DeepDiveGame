@@ -53,11 +53,22 @@ namespace DeepDive.Composition
             new Spot(Fan, 11f, 54f, 60f), new Spot(Mound, 11.5f, 58f, 10f), new Spot(Seagrass, 10f, 62f, 80f)
         };
 
+        // #298: a trail out from the west wade to the arch's south mouth, one piece every 3-4 m so the next shows
+        // through the fog from the last. Decor like the rest: no collider, nothing to collect.
+        public static readonly Spot[] ArchTrail =
+        {
+            new Spot(Seagrass, -6.6f, 3.5f, 20f, 1.3f), new Spot(Seagrass, -7.3f, 7f, 140f, 1.3f),
+            new Spot(Fan, -6.8f, 10.5f, 75f, 1.3f), new Spot(Mound, -7.2f, 14f, 200f, 1.2f),
+            new Spot(Fan, -6.8f, 17.5f, 100f, 1.4f), new Spot(Mound, -7.3f, 21f, 330f, 1.2f),
+            new Spot(Fan, -8.6f, 24.5f, 85f, 1.4f)
+        };
+
         public static readonly IReadOnlyList<Spot> Spots = Array.AsReadOnly(BuildSpots());
 
         private static Spot[] BuildSpots()
         {
             var spots = new List<Spot>(Decor);
+            spots.AddRange(ArchTrail);
             spots.Add(new Spot(ArchId, ArchX, ArchZ, 0f, ArchScale));
             for (var i = 0; i < SeabedProfile.Solids.Count; i++)
             {
