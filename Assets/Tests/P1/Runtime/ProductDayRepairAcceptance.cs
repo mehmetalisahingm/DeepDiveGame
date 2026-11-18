@@ -48,6 +48,12 @@ namespace DeepDive.P1.Lab
                 return false;
             var blocker = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                 .FirstOrDefault(p => p != local && p.IsSpawned &&
+                    // In this four-process scenario only owners 1 or 2 race and
+                    // reconnect, so owner 3 remains the unassigned observer.
+                    // A parked observer away from the doorway is not an exiting
+                    // queue member; one at the doorway must first clear it.
+                    !(expected == 4 && p.OwnerClientId == 3 &&
+                      !ShouldClearRepairDoor(3, p.transform.position.x, p.transform.position.z)) &&
                     MustYieldHomeExit(local.OwnerClientId, p.OwnerClientId, p.transform.position.z));
             if (blocker == null)
             {
