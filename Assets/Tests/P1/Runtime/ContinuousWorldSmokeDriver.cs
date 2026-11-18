@@ -243,8 +243,17 @@ namespace DeepDive.P1.Lab
                         // the shared east corridor caused physical body blocking in CI.
                         // Keep the proven one/two-player route untouched.
                         if (expected == 4)
+                        {
+                            // The scaled bed's exit pose is almost at the server's
+                            // interaction limit. The failed CI guest was 3.21 m
+                            // away while repeated genuine H requests were rejected.
+                            // Walk closer on the same clear lane; do not extend range.
+                            var bedCentre = bed.WorldPosition;
+                            bedCentre.y = exit.y;
+                            var bedStand = Vector3.MoveTowards(exit, bedCentre, .5f);
                             SetRoute(new[] { H(2f + slot * .8f, -2.4f),
-                                new Vector3(exit.x, exit.y, exit.z - .9f), exit });
+                                new Vector3(exit.x, exit.y, exit.z - .9f), bedStand });
+                        }
                         else
                             SetRoute(new[] { H(4.95f, -2.5f),
                                 new Vector3(H(4.95f, 0).x, exit.y, exit.z - .9f),
