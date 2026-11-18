@@ -33,6 +33,13 @@ namespace DeepDive.World
         }
     }
 
+    // #311: how a species moves when nobody chases it and how it reacts when somebody does.
+    // Wanderer: drifts round its home and runs straight away (the original rule).
+    // School: keeps close to the others of its species nearby, and bolts when one of them bolts.
+    // Cruiser: long, fast legs across a wide range; runs early and fast.
+    // Lurker: hugs its home rock; when threatened it darts back to it and holds there instead of running off.
+    public enum SwimStyle { Wanderer, School, Cruiser, Lurker }
+
     // Behaviour parameters the swim rules read. Distances are metres and speeds metres/second
     // (docs/plan/CONTRACTS.md: "Mesafe metre, sure saniye"). Invalid inspector values fall back
     // instead of producing a motionless or teleporting fish.
@@ -42,9 +49,11 @@ namespace DeepDive.World
         public readonly float FleeSpeed;
         public readonly float FleeRadius;
         public readonly float WanderRadius;
+        public readonly SwimStyle Style;
 
-        public SwimTuning(float swimSpeed, float fleeSpeed, float fleeRadius, float wanderRadius)
+        public SwimTuning(float swimSpeed, float fleeSpeed, float fleeRadius, float wanderRadius, SwimStyle style = SwimStyle.Wanderer)
         {
+            Style = System.Enum.IsDefined(typeof(SwimStyle), style) ? style : SwimStyle.Wanderer;
             SwimSpeed = Positive(swimSpeed, 1.5f);
             FleeSpeed = Positive(fleeSpeed, 3.5f);
             FleeRadius = Finite(fleeRadius) && fleeRadius > 0f ? fleeRadius : 0f;
@@ -81,13 +90,14 @@ namespace DeepDive.World
         [SerializeField] private float fleeSpeed = 3.5f;
         [SerializeField] private float fleeRadius = 6f;
         [SerializeField] private float wanderRadius = 8f;
+        [SerializeField] private SwimStyle swimStyle = SwimStyle.Wanderer;
 
         public string SpeciesId => speciesId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? speciesId : displayName;
         public SpeciesClass Class => speciesClass;
         public float MaxHealth => maxHealth;
         public WeightRange Weight => weight;
-        public SwimTuning Swim => new SwimTuning(swimSpeed, fleeSpeed, fleeRadius, wanderRadius);
+        public SwimTuning Swim => new SwimTuning(swimSpeed, fleeSpeed, fleeRadius, wanderRadius, swimStyle);
 
         public bool IsValid(out string error)
         {

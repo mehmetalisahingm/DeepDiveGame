@@ -21,5 +21,6 @@ MonoBehaviour:
     maxGrams: 6000
   swimSpeed: 1
   fleeSpeed: 2.8
-  fleeRadius: 3
+  fleeRadius: 5
   wanderRadius: 1.4
+  swimStyle: 3

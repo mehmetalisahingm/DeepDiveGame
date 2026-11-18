@@ -31,9 +31,17 @@ namespace DeepDive.World
         // Night behavior is decided only by the shared host clock; guests observe the
         // replicated state and the host-moved transform. No client-side fish AI.
         private readonly NetworkVariable<bool> nightActive = new NetworkVariable<bool>();
+        // #310: how big this specimen looks, from the weight the host rolled (FishSize). Written by the host only,
+        // read by every view, applied to the whole fish so the model and its collider agree.
+        private readonly NetworkVariable<float> sizeScale = new NetworkVariable<float>(1f);
+        private Vector3 baseScale;
+        private bool baseScaleKnown;
         private Light nightGlow;
 
         private readonly List<Vector3> threats = new List<Vector3>();
+        // #311: the host's live fish, so a schooling fish can find its mates without a scene search every step.
+        private static readonly List<FishActor> Live = new List<FishActor>();
+        private readonly List<Vector3> mates = new List<Vector3>();
         private readonly Collider[] threatBuffer = new Collider[16];
 
         private FishHealth state;
@@ -70,11 +78,34 @@ namespace DeepDive.World
         public bool NightActive => nightActive.Value;
         public bool NightGlowVisible => nightGlow != null && nightGlow.enabled;
         public bool IsFleeing => motion != null && motion.IsFleeing;
+        public bool IsHiding => motion != null && motion.Hiding;
+        public Vector3 Home => motion != null ? motion.Home : transform.position;
+        public SwimStyle Style => species != null ? species.Swim.Style : SwimStyle.Wanderer;
         public float LastSwimSpeed { get; private set; }
+        public float SizeScale => sizeScale.Value;
+
+        // The authored scale, read before NGO can sync the host's (already sized) transform onto this copy; taking it
+        // later would size a guest's fish twice.
+        private void Awake()
+        {
+            baseScale = transform.localScale;
+            baseScaleKnown = true;
+        }
+
+        private void ApplySize(float previous, float scale) => ApplySize(scale);
+
+        private void ApplySize(float scale)
+        {
+            if (!baseScaleKnown) { baseScale = transform.localScale; baseScaleKnown = true; }
+            transform.localScale = baseScale * (scale > 0f ? scale : 1f);
+        }
 
         public override void OnNetworkSpawn()
         {
             SetPresent(true);
+            sizeScale.OnValueChanged -= ApplySize;
+            sizeScale.OnValueChanged += ApplySize;
+            ApplySize(sizeScale.Value);
             if (species != null && species.SpeciesId == P45WorldRules.NightActiveSpeciesId)
             {
                 if (nightGlow == null) nightGlow = gameObject.AddComponent<Light>();
@@ -99,11 +130,14 @@ namespace DeepDive.World
             state = new FishHealth(species.MaxHealth);
             // Rolled once at spawn so the weight does not depend on when the fish dies.
             weightGrams = species.RollWeightGrams(random);
+            sizeScale.Value = FishSize.ScaleFor(weightGrams, species.Weight);
+            ApplySize(sizeScale.Value);
             specimenId = Guid.NewGuid().ToString("N");
             tuning = species.Swim;
             // Where the fish was placed is the home it wanders around.
             motion = new FishMotion(tuning, transform.position, random);
             habitat = new HabitatWaterBounds(SwimVolumeBounds.Instance, transform.position);
+            if (!Live.Contains(this)) Live.Add(this);
             health.Value = state.Health;
         }
 
@@ -123,7 +157,7 @@ namespace DeepDive.World
             nightActive.Value = activity > 1f;
             GatherThreats();
             var position = transform.position;
-            var next = motion.Step(position, threats, Time.fixedDeltaTime, habitat, activity);
+            var next = motion.Step(position, threats, Time.fixedDeltaTime, habitat, activity, GatherCompany(position));
             LastSwimSpeed = Vector3.Distance(position, next) / Time.fixedDeltaTime;
             if (next == position) return;
 
@@ -144,11 +178,41 @@ namespace DeepDive.World
         public override void OnNetworkDespawn()
         {
             SetPresent(false);
+            Live.Remove(this);
+            sizeScale.OnValueChanged -= ApplySize;
             // A living scene fish can despawn and respawn in the same frame at next dive.
             // Destroy is deferred; adding another Light then fails (only one is allowed).
             // Retain its component just like the renderer/collider, but never leave it lit.
             if (nightGlow != null) nightGlow.enabled = false;
             base.OnNetworkDespawn();
+        }
+
+        // The living fish of this species within school reach, and whether one of them is running from a diver close
+        // enough for this fish to notice. Only schooling species ask.
+        private FishCompany GatherCompany(Vector3 position)
+        {
+            if (motion.Style != SwimStyle.School) return default;
+            mates.Clear();
+            var alarmed = false;
+            var alarmThreat = Vector3.zero;
+            var nearestAlarm = float.MaxValue;
+            for (var i = 0; i < Live.Count; i++)
+            {
+                var other = Live[i];
+                if (other == this || other == null || other.motion == null || other.state == null || other.state.IsDead) continue;
+                if (other.species != species) continue;
+                var at = other.transform.position;
+                var distance = (at - position).sqrMagnitude;
+                if (distance > FishMotion.SchoolRadius * FishMotion.SchoolRadius) continue;
+                mates.Add(at);
+                if (other.motion.IsFleeing && distance < FishMotion.AlarmRadius * FishMotion.AlarmRadius && distance < nearestAlarm)
+                {
+                    alarmed = true;
+                    alarmThreat = other.motion.LastThreat;
+                    nearestAlarm = distance;
+                }
+            }
+            return new FishCompany(mates, alarmed, alarmThreat);
         }
 
         // Divers are found by their CharacterController rather than by Mehmet's NetworkPlayer

@@ -9,6 +9,14 @@ function Get-P46ProcessFailure($Entries) {
                 if (-not $entry.Process.HasExited) { continue }
                 return "Player $($entry.Slot) wrote invalid JSON: $($_.Exception.Message)"
             }
+            # ConvertFrom-Json accepts an empty stream as $null. During
+            # File.WriteAllText the reader can observe that transient state.
+            # Never treat it as a failed gameplay assertion; an exited writer
+            # must still supply a complete report with an explicit result.
+            if ($null -eq $data -or $null -eq $data.PSObject.Properties['passed']) {
+                if (-not $entry.Process.HasExited) { continue }
+                return "Player $($entry.Slot) wrote invalid JSON: missing passed result"
+            }
             if (-not $data.passed) { return "Player $($entry.Slot) failed: $($data.failure)" }
         }
         if ($entry.Process.HasExited) {

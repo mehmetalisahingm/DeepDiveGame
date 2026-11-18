@@ -31,7 +31,7 @@ namespace DeepDive.P1.Lab
         private const string DoneMessage = "test/p46/product-done";
         [Serializable] public sealed class Report
         {
-            public List<string> habitatSeen = new List<string>(), habitatViews = new List<string>(), habitatCaught = new List<string>();
+            public List<string> habitatSeen = new List<string>(), habitatViews = new List<string>(), habitatCaught = new List<string>(), fishSizes = new List<string>(), fishBehaviour = new List<string>();
             public int habitatBalance, habitatRewards, habitatFishSamples, habitatBelowFloor;
             public bool passed, reload, initialClean, homeSpawn, repaired, cameraBought, realClip,
                 clipPlayed, clipAdvanced, published, duplicateRefused, slept, morningHome, reloadClean, mapMoved, mapDocked;
@@ -366,6 +366,19 @@ namespace DeepDive.P1.Lab
             switch (step)
             {
                 case 1:
+                    // If collision has already pushed a queued diver to the actual
+                    // doorway, clear it forward instead of steering back through
+                    // the crew towards the old in-house first waypoint.
+                    if (RepairInterruptions && repairPhase == 5 && substep == 0 && !repairDoorCleared &&
+                        ShouldClearRepairDoor(report.slot, local.transform.position.x, local.transform.position.z))
+                    { SetRoute(Outward().Skip(3)); repairDoorCleared = true; }
+                    // Four players share only three real parts. The unassigned
+                    // observer stays put rather than blocking an active carrier.
+                    // If already pushed into the doorway, clear it first.
+                    if (RepairInterruptions && repairPhase == 5 && expected == 4 && report.slot == 3 && !repairDoorCleared && substep == 0)
+                    { Stop(); localDone = sync.BoatPartsDone.Value == 3; return; }
+                    if (MustWaitForRepairCorridor(RepairInterruptions, repairPhase, expected, report.slot, sync.BoatPartsMask.Value))
+                    { Stop(); return; }
                     // #207 four real processes: after repair midnight/rejoin, a
                     // simultaneous departure packs three capsules into the same
                     // west home corridor. Yield physically to earlier live owners

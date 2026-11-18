@@ -432,7 +432,8 @@ namespace DeepDive.P4.Tests
             {
                 threats[0] = threatAt(at);
                 var next = motion.Step(at, threats, Dt, bounds);
-                if (next == at) run.Stalled++;
+                // #311: a lurker holding at its rock on purpose is not a fish stuck against the bounds.
+                if (next == at && !motion.Hiding) run.Stalled++;
                 at = next;
                 run.Frames++;
                 run.Furthest = Mathf.Max(run.Furthest, Vector3.Distance(at, home));
