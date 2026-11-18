@@ -371,6 +371,11 @@ namespace DeepDive.P1.Lab
                     if (RepairInterruptions && repairPhase == 5 && substep == 0 && !repairDoorCleared &&
                         ShouldClearRepairDoor(report.slot, local.transform.position.x, local.transform.position.z))
                     { SetRoute(Outward().Skip(3)); repairDoorCleared = true; }
+                    // Four players share only three real parts. The unassigned
+                    // observer stays put rather than blocking an active carrier.
+                    // If already pushed into the doorway, clear it first.
+                    if (RepairInterruptions && repairPhase == 5 && expected == 4 && report.slot == 3 && !repairDoorCleared && substep == 0)
+                    { Stop(); localDone = sync.BoatPartsDone.Value == 3; return; }
                     if (MustWaitForRepairCorridor(RepairInterruptions, repairPhase, expected, report.slot, sync.BoatPartsMask.Value))
                     { Stop(); return; }
                     // #207 four real processes: after repair midnight/rejoin, a
