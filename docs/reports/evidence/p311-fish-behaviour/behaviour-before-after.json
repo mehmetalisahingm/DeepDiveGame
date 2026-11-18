@@ -1,0 +1,64 @@
+{
+ "before_all_wanderer_2p": {
+  "player0": [
+   "grouper style=Wanderer samples=974 speed=0.92 home=0.49 fleeing=0.000 hiding=0.000 spread=6.31",
+   "lanternfish style=Wanderer samples=1061 speed=0.91 home=1.79 fleeing=0.001 hiding=0.000 spread=5.76",
+   "red_snapper style=Wanderer samples=910 speed=1.21 home=2.69 fleeing=0.001 hiding=0.000 spread=6.17",
+   "sea_bass style=Wanderer samples=824 speed=1.23 home=2.84 fleeing=0.051 hiding=0.000 spread=8.76",
+   "tuna style=Wanderer samples=847 speed=1.22 home=2.80 fleeing=0.017 hiding=0.000 spread=7.02"
+  ],
+  "player1": [
+   "grouper style=Wanderer samples=692 speed=0.86 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.04",
+   "lanternfish style=Wanderer samples=762 speed=0.90 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=5.35",
+   "red_snapper style=Wanderer samples=626 speed=1.18 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=5.95",
+   "sea_bass style=Wanderer samples=541 speed=1.17 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=8.77",
+   "tuna style=Wanderer samples=564 speed=1.19 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.62"
+  ]
+ },
+ "after_2p": {
+  "player0": [
+   "grouper style=Lurker samples=1059 speed=0.90 home=0.50 fleeing=0.013 hiding=0.013 spread=7.16",
+   "lanternfish style=Wanderer samples=1147 speed=0.91 home=1.81 fleeing=0.001 hiding=0.000 spread=5.68",
+   "red_snapper style=Wanderer samples=993 speed=1.21 home=2.79 fleeing=0.002 hiding=0.000 spread=7.32",
+   "sea_bass style=School samples=887 speed=1.28 home=3.98 fleeing=0.122 hiding=0.000 spread=3.11",
+   "tuna style=Cruiser samples=911 speed=1.72 home=3.68 fleeing=0.040 hiding=0.000 spread=7.98"
+  ],
+  "player1": [
+   "grouper style=Lurker samples=732 speed=0.84 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.53",
+   "lanternfish style=Wanderer samples=774 speed=0.90 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=5.21",
+   "red_snapper style=Wanderer samples=669 speed=1.17 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.12",
+   "sea_bass style=School samples=560 speed=1.26 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=3.42",
+   "tuna style=Cruiser samples=584 speed=1.66 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=8.19"
+  ]
+ },
+ "after_4p": {
+  "player0": [
+   "grouper style=Lurker samples=972 speed=0.91 home=0.50 fleeing=0.019 hiding=0.017 spread=9.80",
+   "lanternfish style=Wanderer samples=1050 speed=0.91 home=1.78 fleeing=0.000 hiding=0.000 spread=5.95",
+   "red_snapper style=Wanderer samples=910 speed=1.21 home=2.77 fleeing=0.000 hiding=0.000 spread=6.39",
+   "sea_bass style=School samples=808 speed=1.19 home=3.42 fleeing=0.228 hiding=0.000 spread=2.40",
+   "tuna style=Cruiser samples=831 speed=1.70 home=3.49 fleeing=0.069 hiding=0.000 spread=6.98"
+  ],
+  "player1": [
+   "grouper style=Lurker samples=702 speed=0.84 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=8.75",
+   "lanternfish style=Wanderer samples=762 speed=0.89 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=5.59",
+   "red_snapper style=Wanderer samples=637 speed=1.17 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=6.16",
+   "sea_bass style=School samples=535 speed=1.14 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=2.64",
+   "tuna style=Cruiser samples=560 speed=1.60 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.96"
+  ],
+  "player2": [
+   "grouper style=Lurker samples=721 speed=0.84 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=9.01",
+   "lanternfish style=Wanderer samples=800 speed=0.88 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=5.73",
+   "red_snapper style=Wanderer samples=657 speed=1.18 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=6.28",
+   "sea_bass style=School samples=555 speed=1.14 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=2.59",
+   "tuna style=Cruiser samples=579 speed=1.62 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.62"
+  ],
+  "player3": [
+   "grouper style=Lurker samples=745 speed=0.84 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=9.24",
+   "lanternfish style=Wanderer samples=823 speed=0.88 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=5.88",
+   "red_snapper style=Wanderer samples=681 speed=1.18 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=6.37",
+   "sea_bass style=School samples=579 speed=1.15 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=2.55",
+   "tuna style=Cruiser samples=603 speed=1.64 home=-1.00 fleeing=-1.000 hiding=-1.000 spread=7.20"
+  ]
+ }
+}

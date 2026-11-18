@@ -17,6 +17,7 @@ namespace DeepDive.P1.Lab
         private bool raceSent, disconnectSent, reconnectSent, midnightStarted;
         private float reconnectAt, clockRate, midnightObservedAt;
         private bool repairHomeExitWaiting;
+        private bool repairDoorCleared;
 
         // After a real mid-session reconnect the winning guest has a NEW NGO
         // OwnerClientId (e.g. 4, not slot 2). Order the physical home hallway
@@ -27,12 +28,32 @@ namespace DeepDive.P1.Lab
             movingOwner != 0 && otherOwner < movingOwner &&
             otherZ < ContinuousTownLayout.HomeRig.Door.z + 2f;
 
+        // The four-process interruption scenario has two remaining assigned
+        // repairs after midnight. Keep slot 2 out of the narrow rack corridor
+        // until slot 1 has physically finished its real repair.
+        public static bool MustWaitForRepairCorridor(bool interruptions, int phase, int players, int slot, int completedMask) =>
+            interruptions && phase == 5 && players == 4 && slot == 2 && (completedMask & (1 << 1)) == 0;
+
+        // Match the separated outward legs instead of sending all guests to
+        // the same waypoint. Three capsules cannot occupy (0, -24) at once.
+        public static float RepairRaceLane(int slot) => -1.8f - slot * 1.1f;
+
+        public static bool ShouldClearRepairDoor(int slot, float x, float z) =>
+            slot != 2 && Mathf.Abs(x - ContinuousTownLayout.HomeRig.Door.x) < 1f &&
+            z > ContinuousTownLayout.HomeRig.Door.z - .6f;
+
         private bool WaitForRepairHomeExitLane()
         {
-            if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0)
+            if (!RepairInterruptions || repairPhase != 5 || substep != 0 || local == null || local.OwnerClientId == 0 || repairDoorCleared)
                 return false;
             var blocker = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
                 .FirstOrDefault(p => p != local && p.IsSpawned &&
+                    // In this four-process scenario only owners 1 or 2 race and
+                    // reconnect, so owner 3 remains the unassigned observer.
+                    // A parked observer away from the doorway is not an exiting
+                    // queue member; one at the doorway must first clear it.
+                    !(expected == 4 && p.OwnerClientId == 3 &&
+                      !ShouldClearRepairDoor(3, p.transform.position.x, p.transform.position.z)) &&
                     MustYieldHomeExit(local.OwnerClientId, p.OwnerClientId, p.transform.position.z));
             if (blocker == null)
             {
@@ -52,6 +73,7 @@ namespace DeepDive.P1.Lab
         {
             if (repairPhase == value) return;
             repairPhase = value;
+            repairDoorCleared = false;
             // Rejoin and the product's morning placement begin inside the real house again.
             // Reuse the door/hallway route rather than heading through a wall to the beach.
             if ((value == 3 || value == 5) && local != null && local.transform.position.z < -39f) substep = 0;
@@ -138,7 +160,7 @@ namespace DeepDive.P1.Lab
                 if (source == null) { Stop(); return false; }
                 var stand = source.transform.position + Vector3.back * 1.25f + Vector3.right * (report.slot == 1 ? -.6f : .6f);
                 stand.y = ContinuousTownLayout.WalkSurfaceY;
-                if (route == null) SetRoute(new[] { P(0, -24), P(0, -16), P(stand.x, -16), stand });
+                if (route == null) SetRoute(new[] { P(RepairRaceLane(report.slot), -24), P(RepairRaceLane(report.slot), -16), P(stand.x, -16), stand });
                 if (!Follow()) return false;
                 Aim(source.transform.position);
                 if (repairPhase == 1 && !raceSent && Settled())
@@ -174,7 +196,7 @@ namespace DeepDive.P1.Lab
                 return true;
             }
             var park = P(10 + report.slot * 1.2f, -23);
-            if (route == null) SetRoute(new[] { P(0, -24), park });
+            if (route == null) SetRoute(new[] { P(RepairRaceLane(report.slot), -24), park });
             Follow(); return false;
         }
     }

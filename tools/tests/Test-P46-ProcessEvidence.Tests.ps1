@@ -13,6 +13,17 @@ function Entry([string]$Name,[int]$Code) {
 }
 try {
     $crash=Entry 'crash' 17
+    $empty=Entry 'empty' 0
+    [IO.File]::WriteAllText($empty.Report, '')
+    $empty.Process.HasExited=$false
+    Assert-Evidence ($null -eq (Get-P46ProcessFailure @($empty))) 'Live empty report waits for writer'
+    $empty.Process.HasExited=$true
+    Assert-Evidence ((Get-P46ProcessFailure @($empty)) -like '*invalid JSON*') 'Exited empty report fails'
+    $empty.Process.HasExited=$false
+    [IO.File]::WriteAllText($empty.Report, '{}')
+    Assert-Evidence ($null -eq (Get-P46ProcessFailure @($empty))) 'Live incomplete report waits for writer'
+    $empty.Process.HasExited=$true
+    Assert-Evidence ((Get-P46ProcessFailure @($empty)) -like '*invalid JSON*') 'Exited incomplete report fails'
     Assert-Evidence ((Get-P46ProcessFailure @($crash)) -like '*code 17*') 'Crash detected without waiting for session timeout'
     Complete-P46ProcessEvidence @($crash) $evidenceRoot 'crash provenance' 1
     $report=Get-Content -LiteralPath $crash.Report -Raw|ConvertFrom-Json

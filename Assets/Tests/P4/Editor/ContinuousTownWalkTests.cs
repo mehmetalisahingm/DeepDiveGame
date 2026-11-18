@@ -765,6 +765,32 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void FourPlayerDockQueueLeavesTheCentreLaneOpenUntilFrontArrives()
+        {
+            // #207 real four-process evidence: player1 was still at (9.02,-6.37)
+            // while slots 2/3 already stood across the pier entrance at z=-5.7.
+            // Waiting rear players must stand off the centre line until the
+            // first two have physically reached distinct pier endpoints.
+            var left = DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockRearStage(2);
+            var right = DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockRearStage(3);
+            Assert.AreEqual(-9f, left.z, .001f);
+            Assert.AreEqual(-9f, right.z, .001f);
+            Assert.Less(left.x, 9f - 1f, "rear-left leaves centre lane clear");
+            Assert.Greater(right.x, 9f + 1f, "rear-right leaves centre lane clear");
+            Assert.Greater(left.x, ContinuousTownLayout.ZoneVolumes.DockMin.x + .35f);
+            Assert.Less(right.x, ContinuousTownLayout.ZoneVolumes.DockMax.x - .35f);
+            Assert.AreEqual(0.9f,
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockStop(1).x -
+                DeepDive.P1.Lab.ContinuousWorldSmokeDriver.DockStop(0).x, .001f);
+            Assert.IsTrue(DeepDive.P1.Lab.ContinuousWorldSmokeDriver.NearDockStop(0,
+                new Vector3(8.58f, ContinuousTownLayout.WalkSurfaceY, -4.79f)),
+                "host has already finished physical movement in the failed artifact");
+            Assert.IsFalse(DeepDive.P1.Lab.ContinuousWorldSmokeDriver.NearDockStop(1,
+                new Vector3(9.02f, ContinuousTownLayout.WalkSurfaceY, -6.37f)),
+                "guest1 still physically approaching must not release rear row");
+        }
+
+        [Test]
         public void FourRealRepairProcessesQueueHomeExitAfterRejoinAndMidnight()
         {
             // In the failed repair artifact the winner rejoined as network id 4;
@@ -781,6 +807,37 @@ namespace DeepDive.P4.Tests
                 "later owner must not block the current leader");
             Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustYieldHomeExit(4, 3, door + 2.1f),
                 "release once the leader has walked clear of the real door");
+        }
+
+        [Test]
+        public void RejoinedFourPlayerRepairWaitsForThePreviousRealPart()
+        {
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 2, 3));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 1, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 2, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(false, 5, 4, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 4, 4, 2, 1));
+        }
+
+        [Test]
+        public void RepairRaceGuestsUseSeparatedPhysicalApproachLanes()
+        {
+            var first = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(1);
+            var second = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(2);
+            var observer = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(3);
+            Assert.Greater(Mathf.Abs(first - second), .7f);
+            Assert.Greater(Mathf.Abs(second - observer), .7f);
+        }
+
+        [Test]
+        public void RepairQueueClearsAPlayerPushedIntoTheDoor()
+        {
+            var door = ContinuousTownLayout.HomeRig.Door.z;
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(3, -.24f, door - .34f));
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(0, .14f, door + .29f));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(3, 0f, door - 2f));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(2, 0f, door));
         }
 
         [Test]
