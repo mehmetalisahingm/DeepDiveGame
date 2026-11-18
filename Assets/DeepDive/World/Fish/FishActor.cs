@@ -31,6 +31,11 @@ namespace DeepDive.World
         // Night behavior is decided only by the shared host clock; guests observe the
         // replicated state and the host-moved transform. No client-side fish AI.
         private readonly NetworkVariable<bool> nightActive = new NetworkVariable<bool>();
+        // #310: how big this specimen looks, from the weight the host rolled (FishSize). Written by the host only,
+        // read by every view, applied to the whole fish so the model and its collider agree.
+        private readonly NetworkVariable<float> sizeScale = new NetworkVariable<float>(1f);
+        private Vector3 baseScale;
+        private bool baseScaleKnown;
         private Light nightGlow;
 
         private readonly List<Vector3> threats = new List<Vector3>();
@@ -71,10 +76,30 @@ namespace DeepDive.World
         public bool NightGlowVisible => nightGlow != null && nightGlow.enabled;
         public bool IsFleeing => motion != null && motion.IsFleeing;
         public float LastSwimSpeed { get; private set; }
+        public float SizeScale => sizeScale.Value;
+
+        // The authored scale, read before NGO can sync the host's (already sized) transform onto this copy; taking it
+        // later would size a guest's fish twice.
+        private void Awake()
+        {
+            baseScale = transform.localScale;
+            baseScaleKnown = true;
+        }
+
+        private void ApplySize(float previous, float scale) => ApplySize(scale);
+
+        private void ApplySize(float scale)
+        {
+            if (!baseScaleKnown) { baseScale = transform.localScale; baseScaleKnown = true; }
+            transform.localScale = baseScale * (scale > 0f ? scale : 1f);
+        }
 
         public override void OnNetworkSpawn()
         {
             SetPresent(true);
+            sizeScale.OnValueChanged -= ApplySize;
+            sizeScale.OnValueChanged += ApplySize;
+            ApplySize(sizeScale.Value);
             if (species != null && species.SpeciesId == P45WorldRules.NightActiveSpeciesId)
             {
                 if (nightGlow == null) nightGlow = gameObject.AddComponent<Light>();
@@ -99,6 +124,8 @@ namespace DeepDive.World
             state = new FishHealth(species.MaxHealth);
             // Rolled once at spawn so the weight does not depend on when the fish dies.
             weightGrams = species.RollWeightGrams(random);
+            sizeScale.Value = FishSize.ScaleFor(weightGrams, species.Weight);
+            ApplySize(sizeScale.Value);
             specimenId = Guid.NewGuid().ToString("N");
             tuning = species.Swim;
             // Where the fish was placed is the home it wanders around.
@@ -144,6 +171,7 @@ namespace DeepDive.World
         public override void OnNetworkDespawn()
         {
             SetPresent(false);
+            sizeScale.OnValueChanged -= ApplySize;
             // A living scene fish can despawn and respawn in the same frame at next dive.
             // Destroy is deferred; adding another Light then fails (only one is allowed).
             // Retain its component just like the renderer/collider, but never leave it lit.
