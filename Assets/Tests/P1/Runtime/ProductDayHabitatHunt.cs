@@ -39,6 +39,7 @@ namespace DeepDive.P1.Lab
                 stageDeadline = Time.realtimeSinceStartup + HabitatStageSeconds;
             }
             SampleFishAgainstTheFloor();
+            NoteFishSizes();
             NoteFishInView();
             if (Host && habitatIndex < HabitatOrder.Length) { HuntNextSpecies(); return false; }
             if (!Host && report.habitatSeen.Count < HabitatOrder.Length) { VisitNextSpecies(); return false; }
@@ -52,7 +53,8 @@ namespace DeepDive.P1.Lab
             if (inventory.Bags.TryGetValue(new PlayerId(local.OwnerClientId), out var bag) &&
                 bag.Items.Any(item => item.SpeciesId == species))
             {
-                report.habitatCaught.Add($"{species} oxygen={local.Oxygen.Value:0} at={local.transform.position} {BandAt(local.transform.position.y)}");
+                var caught = bag.Items.First(item => item.SpeciesId == species);
+                report.habitatCaught.Add($"{species} oxygen={local.Oxygen.Value:0} at={local.transform.position} {BandAt(local.transform.position.y)} grams={caught.WeightGrams}");
                 habitatIndex++;
                 aimAt = 0;
                 return;
@@ -138,9 +140,40 @@ namespace DeepDive.P1.Lab
                 if (!fish.GetComponentsInChildren<Renderer>().Any(r => r.enabled)) continue;
                 report.habitatSeen.Add(species);
                 report.habitatViews.Add($"{species} {fish.name} at={fish.transform.position} {BandAt(fish.transform.position.y)} " +
-                                        $"from={eye} distance={Vector3.Distance(target, eye):0.0}");
+                                        $"from={eye} distance={Vector3.Distance(target, eye):0.0} size={fish.SizeScale:0.000}");
                 CaptureView(".habitat-" + species + ".png");
             }
+        }
+
+        // #310: once the dive's fish are spawned, what this process shows for each: the replicated size and the scale
+        // actually on the transform. The host adds the weight it rolled, so the reports can be matched by fish name.
+        private bool fishSizesNoted;
+        private void NoteFishSizes()
+        {
+            if (fishSizesNoted) return;
+            var fishes = FindObjectsByType<FishActor>(FindObjectsSortMode.None).Where(f => f.IsSpawned && !f.IsDead).ToArray();
+            if (fishes.Length < P411FiveSpeciesRoster.Population) return;
+            fishSizesNoted = true;
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            foreach (var fish in fishes.OrderBy(f => f.name))
+                report.fishSizes.Add(string.Format(ci, "{0} {1} size={2:0.000} scaleX={3:0.000} lengthM={4:0.000}{5}", fish.name,
+                    fish.Species?.SpeciesId, fish.SizeScale, fish.transform.localScale.x, VisibleLength(fish),
+                    Host ? " grams=" + fish.WeightGrams : ""));
+        }
+
+        // The longest side of the fish's own model in metres, as drawn: mesh bounds in model space times the scale the
+        // renderer really has. Independent of which way the fish is swimming.
+        private static float VisibleLength(FishActor fish)
+        {
+            var length = 0f;
+            foreach (var renderer in fish.GetComponentsInChildren<Renderer>())
+            {
+                if (!renderer.enabled) continue;
+                var size = renderer.localBounds.size;
+                var scale = renderer.transform.lossyScale;
+                length = Mathf.Max(length, Mathf.Max(size.x * Mathf.Abs(scale.x), size.y * Mathf.Abs(scale.y), size.z * Mathf.Abs(scale.z)));
+            }
+            return length;
         }
 
         // On the host the fish position is the authority itself, and #219's bound is what keeps it above the floor.

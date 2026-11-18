@@ -1,0 +1,87 @@
+{
+ "sea_bass": [
+  {
+   "grams": 1634,
+   "scale": 0.977,
+   "lengthM": 0.241
+  },
+  {
+   "grams": 1774,
+   "scale": 1.005,
+   "lengthM": 0.248
+  },
+  {
+   "grams": 2252,
+   "scale": 1.088,
+   "lengthM": 0.268
+  }
+ ],
+ "tuna": [
+  {
+   "grams": 1288,
+   "scale": 0.903,
+   "lengthM": 0.217
+  },
+  {
+   "grams": 1416,
+   "scale": 0.932,
+   "lengthM": 0.224
+  },
+  {
+   "grams": 2142,
+   "scale": 1.07,
+   "lengthM": 0.257
+  }
+ ],
+ "red_snapper": [
+  {
+   "grams": 2061,
+   "scale": 1.056,
+   "lengthM": 0.249
+  },
+  {
+   "grams": 2447,
+   "scale": 1.118,
+   "lengthM": 0.264
+  },
+  {
+   "grams": 2471,
+   "scale": 1.122,
+   "lengthM": 0.265
+  }
+ ],
+ "grouper": [
+  {
+   "grams": 2281,
+   "scale": 0.829,
+   "lengthM": 0.214
+  },
+  {
+   "grams": 5047,
+   "scale": 1.081,
+   "lengthM": 0.279
+  },
+  {
+   "grams": 5052,
+   "scale": 1.081,
+   "lengthM": 0.279
+  }
+ ],
+ "lanternfish": [
+  {
+   "grams": 409,
+   "scale": 0.88,
+   "lengthM": 0.227
+  },
+  {
+   "grams": 771,
+   "scale": 1.087,
+   "lengthM": 0.281
+  },
+  {
+   "grams": 813,
+   "scale": 1.107,
+   "lengthM": 0.286
+  }
+ ]
+}

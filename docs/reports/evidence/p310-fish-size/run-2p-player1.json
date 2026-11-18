@@ -1,0 +1,28 @@
+{
+ "fishSizes": [
+  "Fish_SeaBass sea_bass size=1.005 scaleX=1.005 lengthM=0.254",
+  "Fish_SeaBass_02 sea_bass size=1.088 scaleX=1.088 lengthM=0.275",
+  "Fish_SeaBass_03 sea_bass size=0.977 scaleX=0.977 lengthM=0.247",
+  "Fish_SeaBass_04 tuna size=1.070 scaleX=1.070 lengthM=0.261",
+  "Fish_SeaBass_05 tuna size=0.903 scaleX=0.903 lengthM=0.220",
+  "Fish_SeaBass_06 tuna size=0.932 scaleX=0.932 lengthM=0.227",
+  "Fish_SeaBass_07 red_snapper size=1.118 scaleX=1.118 lengthM=0.264",
+  "Fish_SeaBass_08 red_snapper size=1.122 scaleX=1.122 lengthM=0.265",
+  "Fish_SeaBass_09 red_snapper size=1.056 scaleX=1.056 lengthM=0.249",
+  "Fish_SeaBass_10 grouper size=0.829 scaleX=0.829 lengthM=0.214",
+  "Fish_SeaBass_11 grouper size=1.081 scaleX=1.081 lengthM=0.279",
+  "Fish_SeaBass_12 grouper size=1.081 scaleX=1.081 lengthM=0.279",
+  "Fish_SeaBass_13 lanternfish size=0.880 scaleX=0.880 lengthM=0.227",
+  "Fish_SeaBass_14 lanternfish size=1.087 scaleX=1.087 lengthM=0.281",
+  "Fish_SeaBass_15 lanternfish size=1.107 scaleX=1.107 lengthM=0.286"
+ ],
+ "habitatViews": [
+  "sea_bass Fish_SeaBass at=(1.00, 5.23, 5.37) shallow from=(-1.82, 9.21, -7.75) distance=14,0 size=1,005",
+  "tuna Fish_SeaBass_04 at=(-4.63, 3.77, 11.77) shallow from=(-3.00, 8.80, -1.15) distance=14,0 size=1,070",
+  "red_snapper Fish_SeaBass_07 at=(6.49, -2.91, 27.28) reef from=(5.93, 5.72, 22.83) distance=9,7 size=1,118",
+  "grouper Fish_SeaBass_10 at=(-10.40, -3.73, 26.37) reef from=(-5.84, 4.80, 25.67) distance=9,7 size=0,829",
+  "lanternfish Fish_SeaBass_13 at=(-12.51, -20.11, 58.06) deep from=(-9.37, -9.48, 57.54) distance=11,1 size=0,880"
+ ],
+ "habitatCaught": [],
+ "passed": true
+}
