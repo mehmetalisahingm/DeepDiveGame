@@ -39,6 +39,7 @@ namespace DeepDive.P1.Lab
                 stageDeadline = Time.realtimeSinceStartup + HabitatStageSeconds;
             }
             SampleFishAgainstTheFloor();
+            SampleFishBehaviour();
             NoteFishSizes();
             NoteFishInView();
             if (Host && habitatIndex < HabitatOrder.Length) { HuntNextSpecies(); return false; }
@@ -99,7 +100,7 @@ namespace DeepDive.P1.Lab
                 .OrderBy(f => (f.transform.position - eye).sqrMagnitude).FirstOrDefault();
             if (fish == null) { Stop(); return; }
             var target = fish.GetComponent<Collider>().bounds.center;
-            if (Vector3.Distance(target, eye) > HabitatSightRange * 0.7f || !ClearFishLine(fish))
+            if (Vector3.Distance(target, eye) > SightRangeFor(species) * 0.7f || !ClearFishLine(fish))
                 SwimTo(target - (eye - local.transform.position));
             else Aim(target);
         }
@@ -123,6 +124,10 @@ namespace DeepDive.P1.Lab
             else MoveToward(new Vector3(target.x, HabitatSurfaceFeetY, target.z));
         }
 
+        // #311: the grouper's reaction (back to its rock) only shows inside its 5 m reach, so a visiting diver must come
+        // that close before it counts as seen; the host's samples then record the hiding.
+        private float SightRangeFor(string species) => !Host && species == "grouper" ? 5f : HabitatSightRange;
+
         // A species counts as seen when a live, rendered fish of it is inside this camera's view with a clear line.
         private void NoteFishInView()
         {
@@ -134,7 +139,7 @@ namespace DeepDive.P1.Lab
                 var species = fish.Species.SpeciesId;
                 if (report.habitatSeen.Contains(species)) continue;
                 var target = fish.GetComponent<Collider>().bounds.center;
-                if (Vector3.Distance(target, eye) > HabitatSightRange || !ClearFishLine(fish)) continue;
+                if (Vector3.Distance(target, eye) > SightRangeFor(species) || !ClearFishLine(fish)) continue;
                 var view = camera.WorldToViewportPoint(target);
                 if (view.z <= 0f || view.x < 0.1f || view.x > 0.9f || view.y < 0.1f || view.y > 0.9f) continue;
                 if (!fish.GetComponentsInChildren<Renderer>().Any(r => r.enabled)) continue;
@@ -159,6 +164,59 @@ namespace DeepDive.P1.Lab
                 report.fishSizes.Add(string.Format(ci, "{0} {1} size={2:0.000} scaleX={3:0.000} lengthM={4:0.000}{5}", fish.name,
                     fish.Species?.SpeciesId, fish.SizeScale, fish.transform.localScale.x, VisibleLength(fish),
                     Host ? " grams=" + fish.WeightGrams : ""));
+        }
+
+        // #311: every 0.25 s, per species, what this process sees: swim speed, how far from home (host only, where the
+        // home is known), how often running or hiding (host only), and for every process the spread of each species'
+        // live fish (mean distance between them), so a school reads as a school on every screen.
+        private sealed class BehaviourStats { public int Samples, Fleeing, Hiding, Spreads; public float Speed, HomeDistance, Spread; }
+        private readonly Dictionary<string, BehaviourStats> behaviour = new Dictionary<string, BehaviourStats>();
+        private readonly Dictionary<FishActor, Vector3> lastFishAt = new Dictionary<FishActor, Vector3>();
+        private float nextBehaviourSample;
+
+        private void SampleFishBehaviour()
+        {
+            if (Time.realtimeSinceStartup < nextBehaviourSample) return;
+            const float every = 0.25f;
+            nextBehaviourSample = Time.realtimeSinceStartup + every;
+            var live = FindObjectsByType<FishActor>(FindObjectsSortMode.None).Where(f => f.IsSpawned && !f.IsDead && f.Species != null).ToArray();
+            foreach (var group in live.GroupBy(f => f.Species.SpeciesId))
+            {
+                if (!behaviour.TryGetValue(group.Key, out var stats)) behaviour[group.Key] = stats = new BehaviourStats();
+                foreach (var fish in group)
+                {
+                    var at = fish.transform.position;
+                    if (lastFishAt.TryGetValue(fish, out var before))
+                    {
+                        stats.Samples++;
+                        stats.Speed += Vector3.Distance(before, at) / every;
+                        if (Host)
+                        {
+                            stats.HomeDistance += Vector3.Distance(fish.Home, at);
+                            if (fish.IsFleeing) stats.Fleeing++;
+                            if (fish.IsHiding) stats.Hiding++;
+                        }
+                    }
+                    lastFishAt[fish] = at;
+                }
+                var members = group.Select(f => f.transform.position).ToArray();
+                if (members.Length > 1)
+                {
+                    var sum = 0f; var pairs = 0;
+                    for (var i = 0; i < members.Length; i++)
+                        for (var j = i + 1; j < members.Length; j++) { sum += Vector3.Distance(members[i], members[j]); pairs++; }
+                    stats.Spread += sum / pairs; stats.Spreads++;
+                }
+            }
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            report.fishBehaviour = behaviour.OrderBy(b => b.Key).Select(b => string.Format(ci,
+                "{0} style={1} samples={2} speed={3:0.00} home={4:0.00} fleeing={5:0.000} hiding={6:0.000} spread={7:0.00}",
+                b.Key, live.FirstOrDefault(f => f.Species.SpeciesId == b.Key)?.Style.ToString() ?? "?", b.Value.Samples,
+                b.Value.Samples > 0 ? b.Value.Speed / b.Value.Samples : 0f,
+                Host && b.Value.Samples > 0 ? b.Value.HomeDistance / b.Value.Samples : -1f,
+                Host && b.Value.Samples > 0 ? (float)b.Value.Fleeing / b.Value.Samples : -1f,
+                Host && b.Value.Samples > 0 ? (float)b.Value.Hiding / b.Value.Samples : -1f,
+                b.Value.Spreads > 0 ? b.Value.Spread / b.Value.Spreads : -1f)).ToList();
         }
 
         // The longest side of the fish's own model in metres, as drawn: mesh bounds in model space times the scale the

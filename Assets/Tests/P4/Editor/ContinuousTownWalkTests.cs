@@ -784,6 +784,37 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RejoinedFourPlayerRepairWaitsForThePreviousRealPart()
+        {
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 2, 3));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 4, 1, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 5, 2, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(false, 5, 4, 2, 1));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.MustWaitForRepairCorridor(true, 4, 4, 2, 1));
+        }
+
+        [Test]
+        public void RepairRaceGuestsUseSeparatedPhysicalApproachLanes()
+        {
+            var first = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(1);
+            var second = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(2);
+            var observer = DeepDive.P1.Lab.ProductDaySmokeDriver.RepairRaceLane(3);
+            Assert.Greater(Mathf.Abs(first - second), .7f);
+            Assert.Greater(Mathf.Abs(second - observer), .7f);
+        }
+
+        [Test]
+        public void RepairQueueClearsAPlayerPushedIntoTheDoor()
+        {
+            var door = ContinuousTownLayout.HomeRig.Door.z;
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(3, -.24f, door - .34f));
+            Assert.IsTrue(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(0, .14f, door + .29f));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(3, 0f, door - 2f));
+            Assert.IsFalse(DeepDive.P1.Lab.ProductDaySmokeDriver.ShouldClearRepairDoor(2, 0f, door));
+        }
+
+        [Test]
         public void SmokeDriverStoreExitClearsFarDisplayCornerBeforeTurningNorth()
         {
             var y = ContinuousTownLayout.WalkSurfaceY;

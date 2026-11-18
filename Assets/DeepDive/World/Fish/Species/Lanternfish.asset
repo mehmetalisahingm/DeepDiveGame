@@ -23,3 +23,4 @@ MonoBehaviour:
   fleeSpeed: 2.6
   fleeRadius: 4
   wanderRadius: 4
+  swimStyle: 0
