@@ -205,7 +205,7 @@ namespace DeepDive.World
                 var distance = (at - position).sqrMagnitude;
                 if (distance > FishMotion.SchoolRadius * FishMotion.SchoolRadius) continue;
                 mates.Add(at);
-                if (other.motion.IsFleeing && distance < FishMotion.AlarmRadius * FishMotion.AlarmRadius && distance < nearestAlarm)
+                if (other.motion.SeesThreat && distance < FishMotion.AlarmRadius * FishMotion.AlarmRadius && distance < nearestAlarm)
                 {
                     alarmed = true;
                     alarmThreat = other.motion.LastThreat;

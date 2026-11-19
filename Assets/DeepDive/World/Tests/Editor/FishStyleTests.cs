@@ -56,6 +56,19 @@ namespace DeepDive.World.Tests
         }
 
         [Test]
+        public void ARunningSchoolmateDoesNotPassTheAlarmOn()
+        {
+            var diver = new Vector3(-20f, 0f, 0f);
+            var school = Motion(SwimStyle.School, Vector3.zero);
+            school.Step(Vector3.zero, NoThreats, 0.1f, Water, 1f, new FishCompany(new List<Vector3> { new Vector3(-2f, 0f, 0f) }, true, diver));
+            Assert.IsTrue(school.IsFleeing, "runs with the school");
+            Assert.IsFalse(school.SeesThreat, "but does not raise the alarm itself");
+            var seer = Motion(SwimStyle.School, Vector3.zero);
+            seer.Step(Vector3.zero, new List<Vector3> { new Vector3(2f, 0f, 0f) }, 0.1f, Water);
+            Assert.IsTrue(seer.SeesThreat, "a fish that sees the diver does");
+        }
+
+        [Test]
         public void ALurkerRunsHomeAndHoldsThereWhileTheDiverIsNear()
         {
             var home = Vector3.zero;
