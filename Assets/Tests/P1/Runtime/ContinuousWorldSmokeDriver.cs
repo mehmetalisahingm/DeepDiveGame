@@ -294,6 +294,21 @@ namespace DeepDive.P1.Lab
                     if (!local.Seated.Value && bedAnswer == "ETKILESIM HEDEFI YOK" &&
                         Time.realtimeSinceStartup >= nextBedRetry)
                     {
+                        // Another body or a delayed host correction may have
+                        // moved this owner out of reach after the first attempt.
+                        // Walk back to the real stand rather than sending the
+                        // same invalid ray until the existing deadline expires.
+                        if (expected == 4 && Vector3.Distance(local.transform.position, Bed().WorldPosition) > 2.9f)
+                        {
+                            var exit = Bed().ExitPose.position;
+                            exit.y = ContinuousTownLayout.WalkSurfaceY;
+                            var centre = Bed().WorldPosition;
+                            centre.y = exit.y;
+                            SetRoute(new[] { Vector3.MoveTowards(exit, centre, .5f) });
+                            waitUntil = 0;
+                            SetStep(7);
+                            return;
+                        }
                         Aim(Bed().GetComponent<Collider>().bounds.center);
                         HomeStatusField.SetValue(adapter.GetComponent<HomePlayerInteractionBinding>(), "");
                         typeof(HomePlayerInteractionBinding).GetMethod("SendRequest", BindingFlags.Instance | BindingFlags.NonPublic)
