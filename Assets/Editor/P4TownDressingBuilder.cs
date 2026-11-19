@@ -65,7 +65,8 @@ namespace DeepDive.EditorTools
 
                 Palm(props, "shore-palm-1", new Vector2(12.7f, -17.0f), 20f);
                 Palm(props, "shore-palm-2", new Vector2(-11.7f, -17.0f), 140f);
-                Palm(props, "shore-palm-3", new Vector2(12.8f, -34.2f), 80f);
+                // #301: was (12.8, -34.2), in the mouth of the south lane; now by the fence between the two lanes.
+                Palm(props, "shore-palm-3", new Vector2(12.9f, -27.4f), 80f);
                 Palm(props, "shore-palm-2", new Vector2(-12.5f, -34.2f), 200f);
                 Palm(props, "shore-palm-1", new Vector2(13.0f, -24.8f), 60f);
 
@@ -83,6 +84,13 @@ namespace DeepDive.EditorTools
                 Planter(props, "PlanterEast", new Vector2(4.6f, -31.9f));
                 Planter(props, "PlanterWest", new Vector2(-4.4f, -31.9f));
                 Planter(props, "PlanterApproachEast", new Vector2(3.0f, -37.4f));
+                // #301 east court: a planter in the middle to walk round, a lamp and a bench against its east fence, a palm in
+                // the far corner and crates in the other.
+                Planter(props, "PlanterEastCourt", new Vector2(24.0f, -28.0f));
+                Lamp(props, "LampEastCourt", new Vector2(26.0f, -26.2f), 180f);
+                Bench(props, "BenchEastCourt", new Vector2(25.4f, -29.8f), 270f);
+                Palm(props, "shore-palm-3", new Vector2(25.9f, -34.9f), 150f);
+                Cluster(props, "EastCourtCrates", new Vector2(22.7f, -34.3f), 10f);
 
                 var lighting = root.AddComponent<DressingLighting>();
                 lighting.Lamps = Lamps.ToArray(); lighting.Bulbs = Bulbs.ToArray();
