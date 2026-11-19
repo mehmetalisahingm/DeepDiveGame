@@ -14,7 +14,7 @@ if ($SharedHunt) { $Render = $true } # The guest captures an actual clip; a null
 if ($HabitatHunt -and ($RepairOnly -or $HuntFirst -or $OceanVideo -or $EquipmentVideo -or $ActionVideo)) { throw 'HabitatHunt is its own short session without other probes.' }
 if ($SeabedFrames -and -not $OceanVideo) { throw 'SeabedFrames measures the ocean survey and requires OceanVideo.' }
 if ($ReefGateFrames -and (-not $OceanVideo -or $SeabedFrames)) { throw 'ReefGateFrames re-routes the ocean survey and requires OceanVideo without SeabedFrames.' }
-if ($WreckNight -and -not $WreckFrames) { throw 'WreckNight is a labelled clock fixture for WreckFrames only.' }
+if ($WreckNight -and -not ($WreckFrames -or $ReefGateFrames)) { throw 'WreckNight is a labelled clock fixture for WreckFrames or ReefGateFrames only.' }
 if ($WreckFrames -and (-not $OceanVideo -or $SeabedFrames -or $ReefGateFrames)) { throw 'WreckFrames re-routes the ocean survey and requires OceanVideo without SeabedFrames or ReefGateFrames.' }
 if ($OceanVideo -and ($Players -ne 2 -or $RepairOnly -or $HuntFirst -or $EquipmentVideo)) { throw 'OceanVideo requires the normal two-player product day without other visual probes.' }
 $productRoot=Split-Path -Parent $PSScriptRoot

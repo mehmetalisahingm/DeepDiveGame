@@ -61,6 +61,7 @@ namespace DeepDive.P1.Lab
                 }
                 else if(ReefGateFrames)
                 {
+                    WreckNightFixture(true);
                     var gx=-7+report.slot*1.5f;
                     oceanRoute=new[]{P(9,-12.5f),P(-6.5f,-11.2f),new Vector3(-6.5f+report.slot,6.3f,-5),
                         new Vector3(gx,3,6),new Vector3(gx,1.5f,16),new Vector3(gx,-2,21.5f),
@@ -83,13 +84,14 @@ namespace DeepDive.P1.Lab
             if(Time.realtimeSinceStartup<oceanHold)return false;
             if(SeabedFrames && oceanWaypoint>=3 && oceanWaypoint<=5 && !SeabedFrameStop())return false;
             if(WreckFrames && oceanWaypoint>=3 && oceanWaypoint<=5 && !WreckFrameStop())return false;
+            if(ReefGateFrames && oceanWaypoint>=3 && oceanWaypoint<=5 && !GlowFrameStop())return false;
             if(oceanWaypoint>=3 && oceanWaypoint<=5)
             {report.oceanBands++;CaptureView((WreckFrames?".wreck-":ReefGateFrames?".reef-gate-":".ocean-band-")+report.oceanBands+".png");}
             if(oceanWaypoint==2 || oceanWaypoint==8)CaptureView(".ocean-surface-"+oceanWaypoint+".png");
             oceanWaypoint++;oceanHold=0;
             if(oceanWaypoint<oceanRoute.Length)return false;
             oceanCapturing=false;oceanSurveyDone=true;route=null;substep=1;
-            if(WreckFrames)WreckNightFixture(false);
+            if(WreckFrames||ReefGateFrames)WreckNightFixture(false);
             // Guest has finished its physical survey and waits in water while the host hunts.
             if(!Host){localDone=true;return false;}
             return true;
@@ -106,7 +108,7 @@ namespace DeepDive.P1.Lab
             if(oceanFirstTime==0){oceanFirstTime=ocean.VisualTime;oceanFirstHeight=height;}
             if(ocean.VisualTime-oceanFirstTime>.5f && Mathf.Abs(height-oceanFirstHeight)>.01f)report.oceanAnimated=true;
             // Held at a wreck stop the frame times are being measured; video frames would swamp them.
-            if(WreckFrames && oceanWaypoint>=3 && oceanWaypoint<=5 && oceanHold!=0)return;
+            if((WreckFrames||ReefGateFrames) && oceanWaypoint>=3 && oceanWaypoint<=5 && oceanHold!=0)return;
             if(Time.realtimeSinceStartup<nextOceanFrame)return;
             nextOceanFrame=Time.realtimeSinceStartup+.1f;
             var folder=output+".ocean-frames";Directory.CreateDirectory(folder);
