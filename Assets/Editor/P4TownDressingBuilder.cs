@@ -223,8 +223,8 @@ namespace DeepDive.EditorTools
             sign.rotation = Quaternion.Euler(0f, yaw, 0f);
             var wood = Kit("MI_WoodTrim");
             P410EquipmentStoreBuilder.Prim(sign, PrimitiveType.Cylinder, "Post", new Vector3(0f, 1.1f, 0f), new Vector3(0.1f, 1.1f, 0.1f), wood);
-            var board = P4SharedHouseBuilder.Mat("SignBoard", new Color(0.12f, 0.32f, 0.42f), 0.3f);
-            var arrow = P4SharedHouseBuilder.Mat("SignArrow", new Color(0.95f, 0.85f, 0.45f), 0.3f);
+            var board = P4SharedHouseBuilder.Mat("StreetSignBoard", new Color(0.12f, 0.32f, 0.42f), 0.3f);
+            var arrow = P4SharedHouseBuilder.Mat("StreetSignArrow", new Color(0.95f, 0.85f, 0.45f), 0.3f);
             Cube(sign, "Board", new Vector3(0.45f, 1.85f, 0f), new Vector3(1.1f, 0.34f, 0.06f), board);
             Cube(sign, "ArrowShaft", new Vector3(0.38f, 1.85f, 0.035f), new Vector3(0.6f, 0.08f, 0.02f), arrow);
             Cube(sign, "ArrowHeadUp", new Vector3(0.74f, 1.89f, 0.035f), new Vector3(0.2f, 0.06f, 0.02f), arrow, new Vector3(0f, 0f, -35f));
