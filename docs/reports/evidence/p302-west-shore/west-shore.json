@@ -1,0 +1,320 @@
+{
+    "note": "Real scene, real controller values, scene closed unsaved. Walkers keep right and never give way.",
+    "radius": 0.3499999940395355,
+    "walkSpeed": 4.0,
+    "walkWidth": 2.9499998092651369,
+    "rampSlopeDegrees": 7.125016689300537,
+    "terraceRise": 1.0,
+    "passes": [
+        {
+            "id": "one-up",
+            "allArrived": true,
+            "seconds": 7.639999866485596,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 0.0,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": -16.05499839782715,
+                        "y": 9.480000495910645,
+                        "z": 0.32644516229629519
+                    },
+                    "arrived": true,
+                    "seconds": 7.619999885559082,
+                    "metres": 30.55999183654785,
+                    "blockedFrames": 0,
+                    "minClearance": -1.0,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        },
+        {
+            "id": "one-down",
+            "allArrived": true,
+            "seconds": 7.639999866485596,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": -15.899999618530274,
+                        "y": 9.479999542236329,
+                        "z": 0.5
+                    },
+                    "end": {
+                        "x": -0.20332108438014985,
+                        "y": 8.480000495910645,
+                        "z": -13.501836776733399
+                    },
+                    "arrived": true,
+                    "seconds": 7.619999885559082,
+                    "metres": 30.559967041015626,
+                    "blockedFrames": 0,
+                    "minClearance": -1.0,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        },
+        {
+            "id": "two-pass-up-and-down",
+            "allArrived": true,
+            "seconds": 7.980000019073486,
+            "walkers": [
+                {
+                    "id": "up",
+                    "start": {
+                        "x": -0.0066662803292274479,
+                        "y": 8.479999542236329,
+                        "z": -12.900036811828614
+                    },
+                    "end": {
+                        "x": -15.649749755859375,
+                        "y": 9.479999542236329,
+                        "z": -0.09468420594930649
+                    },
+                    "arrived": true,
+                    "seconds": 7.299999713897705,
+                    "metres": 29.279970169067384,
+                    "blockedFrames": 0,
+                    "minClearance": 0.2162821888923645,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "down",
+                    "start": {
+                        "x": -16.31036376953125,
+                        "y": 9.479999542236329,
+                        "z": 0.9377224445343018
+                    },
+                    "end": {
+                        "x": -0.22750067710876466,
+                        "y": 8.479999542236329,
+                        "z": -14.102201461791993
+                    },
+                    "arrived": true,
+                    "seconds": 7.960000038146973,
+                    "metres": 31.919971466064454,
+                    "blockedFrames": 0,
+                    "minClearance": 0.20941084623336793,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        },
+        {
+            "id": "four-two-each-way",
+            "allArrived": true,
+            "seconds": 8.359999656677246,
+            "walkers": [
+                {
+                    "id": "up-0",
+                    "start": {
+                        "x": -0.004999709781259298,
+                        "y": 8.479999542236329,
+                        "z": -13.050027847290039
+                    },
+                    "end": {
+                        "x": -15.714941024780274,
+                        "y": 9.479999542236329,
+                        "z": 0.044292815029621127
+                    },
+                    "arrived": true,
+                    "seconds": 7.37999963760376,
+                    "metres": 29.585466384887697,
+                    "blockedFrames": 0,
+                    "minClearance": 0.008844554424285889,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "up-1",
+                    "start": {
+                        "x": 1.5,
+                        "y": 8.479999542236329,
+                        "z": -12.699999809265137
+                    },
+                    "end": {
+                        "x": -17.506898880004884,
+                        "y": 9.479999542236329,
+                        "z": 0.8199986219406128
+                    },
+                    "arrived": true,
+                    "seconds": 7.980000019073486,
+                    "metres": 31.180631637573243,
+                    "blockedFrames": 11,
+                    "minClearance": 0.29041343927383425,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "down-0",
+                    "start": {
+                        "x": -16.207773208618165,
+                        "y": 9.479999542236329,
+                        "z": 0.8282917737960815
+                    },
+                    "end": {
+                        "x": -0.23849010467529298,
+                        "y": 8.480000495910645,
+                        "z": -13.95227336883545
+                    },
+                    "arrived": true,
+                    "seconds": 7.859999656677246,
+                    "metres": 31.513280868530275,
+                    "blockedFrames": 0,
+                    "minClearance": 0.009380638599395752,
+                    "lowestY": 8.479999542236329
+                },
+                {
+                    "id": "down-1",
+                    "start": {
+                        "x": -17.100000381469728,
+                        "y": 9.479999542236329,
+                        "z": 1.100000023841858
+                    },
+                    "end": {
+                        "x": -0.17376257479190827,
+                        "y": 8.479999542236329,
+                        "z": -14.672750473022461
+                    },
+                    "arrived": true,
+                    "seconds": 8.34000015258789,
+                    "metres": 33.25404357910156,
+                    "blockedFrames": 0,
+                    "minClearance": 0.015372991561889649,
+                    "lowestY": 8.479999542236329
+                }
+            ]
+        }
+    ],
+    "pushes": [
+        {
+            "id": "landing-to-south",
+            "from": {
+                "x": -16.5,
+                "y": 8.479999542236329,
+                "z": -13.25
+            },
+            "end": {
+                "x": -16.5,
+                "y": 8.479999542236329,
+                "z": -14.070000648498536
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailLandingSouth"
+        },
+        {
+            "id": "landing-to-west",
+            "from": {
+                "x": -16.5,
+                "y": 8.479999542236329,
+                "z": -13.25
+            },
+            "end": {
+                "x": -17.56999969482422,
+                "y": 8.479999542236329,
+                "z": -13.25
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailLandingWest"
+        },
+        {
+            "id": "ramp-to-west",
+            "from": {
+                "x": -16.5,
+                "y": 8.979999542236329,
+                "z": -8.0
+            },
+            "end": {
+                "x": -17.56999969482422,
+                "y": 8.9827241897583,
+                "z": -8.0
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailRampWest"
+        },
+        {
+            "id": "ramp-to-east",
+            "from": {
+                "x": -16.5,
+                "y": 8.979999542236329,
+                "z": -8.0
+            },
+            "end": {
+                "x": -15.479999542236329,
+                "y": 8.9827241897583,
+                "z": -8.0
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailRampEast"
+        },
+        {
+            "id": "terrace-to-west",
+            "from": {
+                "x": -17.5,
+                "y": 9.479999542236329,
+                "z": -1.0
+            },
+            "end": {
+                "x": -19.57000160217285,
+                "y": 9.479999542236329,
+                "z": -1.0
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailTerraceWest"
+        },
+        {
+            "id": "terrace-to-north",
+            "from": {
+                "x": -17.5,
+                "y": 9.479999542236329,
+                "z": -1.0
+            },
+            "end": {
+                "x": -17.5,
+                "y": 9.479999542236329,
+                "z": 1.5700000524520875
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailTerraceNorth"
+        },
+        {
+            "id": "terrace-to-east-sea",
+            "from": {
+                "x": -17.5,
+                "y": 9.479999542236329,
+                "z": -1.0
+            },
+            "end": {
+                "x": -15.479999542236329,
+                "y": 9.479999542236329,
+                "z": -1.0
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailTerraceEast"
+        },
+        {
+            "id": "terrace-south-west",
+            "from": {
+                "x": -17.5,
+                "y": 9.479999542236329,
+                "z": -1.0
+            },
+            "end": {
+                "x": -19.445669174194337,
+                "y": 9.479999542236329,
+                "z": -3.6005680561065676
+            },
+            "heldByFence": true,
+            "fell": false,
+            "fence": "WestWalk_RailTerraceSouthWest"
+        }
+    ]
+}
