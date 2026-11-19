@@ -1,0 +1,581 @@
+{
+    "note": "Real scene, real controller values, scene closed unsaved. Walkers steer straight at waypoints and never give way.",
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "stepOffset": 0.30000001192092898,
+    "walkSpeed": 4.0,
+    "dockMin": {
+        "x": 8.0,
+        "y": 8.0,
+        "z": -7.0
+    },
+    "dockMax": {
+        "x": 10.0,
+        "y": 8.399999618530274,
+        "z": -3.5
+    },
+    "ledgeMin": {
+        "x": 7.0,
+        "y": 7.399999618530273,
+        "z": -11.0
+    },
+    "ledgeMax": {
+        "x": 11.0,
+        "y": 8.399999618530274,
+        "z": -7.0
+    },
+    "platformMax": {
+        "x": 14.75,
+        "y": 8.399999618530274,
+        "z": -11.0
+    },
+    "passes": [
+        {
+            "id": "four-out",
+            "allArrived": false,
+            "seconds": 30.0,
+            "walkers": [
+                {
+                    "id": "out-0",
+                    "start": {
+                        "x": -1.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 8.441306114196778,
+                        "y": 8.480000495910645,
+                        "z": -4.135985374450684
+                    },
+                    "arrived": true,
+                    "seconds": 5.659999847412109,
+                    "blockedFrames": 60,
+                    "minClearance": 0.0020543336868286134
+                },
+                {
+                    "id": "out-1",
+                    "start": {
+                        "x": -0.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 9.017852783203125,
+                        "y": 8.479999542236329,
+                        "z": -5.742856979370117
+                    },
+                    "arrived": false,
+                    "seconds": 0.0,
+                    "blockedFrames": 1306,
+                    "minClearance": 0.05721169710159302
+                },
+                {
+                    "id": "out-2",
+                    "start": {
+                        "x": 0.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 8.549599647521973,
+                        "y": 8.479999542236329,
+                        "z": -5.124660015106201
+                    },
+                    "arrived": true,
+                    "seconds": 3.799999952316284,
+                    "blockedFrames": 0,
+                    "minClearance": 0.06725519895553589
+                },
+                {
+                    "id": "out-3",
+                    "start": {
+                        "x": 1.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 9.449143409729004,
+                        "y": 8.479999542236329,
+                        "z": -5.120129585266113
+                    },
+                    "arrived": true,
+                    "seconds": 3.6599998474121095,
+                    "blockedFrames": 0,
+                    "minClearance": 0.12455928325653076
+                }
+            ]
+        },
+        {
+            "id": "two-back-two-out",
+            "allArrived": true,
+            "seconds": 5.699999809265137,
+            "walkers": [
+                {
+                    "id": "back-0",
+                    "start": {
+                        "x": 8.550000190734864,
+                        "y": 8.479999542236329,
+                        "z": -4.0
+                    },
+                    "end": {
+                        "x": 0.13789409399032594,
+                        "y": 8.479999542236329,
+                        "z": -13.393708229064942
+                    },
+                    "arrived": true,
+                    "seconds": 5.679999828338623,
+                    "blockedFrames": 80,
+                    "minClearance": 0.0010671615600585938
+                },
+                {
+                    "id": "back-1",
+                    "start": {
+                        "x": 9.449999809265137,
+                        "y": 8.479999542236329,
+                        "z": -5.0
+                    },
+                    "end": {
+                        "x": 1.1505216360092164,
+                        "y": 8.479999542236329,
+                        "z": -13.498022079467774
+                    },
+                    "arrived": true,
+                    "seconds": 4.420000076293945,
+                    "blockedFrames": 30,
+                    "minClearance": 0.0015488266944885254
+                },
+                {
+                    "id": "out-2",
+                    "start": {
+                        "x": -1.0,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 8.549338340759278,
+                        "y": 8.480000495910645,
+                        "z": -4.1956305503845219
+                    },
+                    "arrived": true,
+                    "seconds": 5.579999923706055,
+                    "blockedFrames": 55,
+                    "minClearance": 0.0015488266944885254
+                },
+                {
+                    "id": "out-3",
+                    "start": {
+                        "x": 2.0,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 9.449057579040528,
+                        "y": 8.479999542236329,
+                        "z": -5.167184352874756
+                    },
+                    "arrived": true,
+                    "seconds": 3.6399998664855959,
+                    "blockedFrames": 3,
+                    "minClearance": 0.00940549373626709
+                }
+            ]
+        },
+        {
+            "id": "beach-to-ramp-side-x5.0",
+            "allArrived": true,
+            "seconds": 1.6399999856948853,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 5.0,
+                        "y": 8.479999542236329,
+                        "z": -13.0
+                    },
+                    "end": {
+                        "x": 8.44408893585205,
+                        "y": 8.479999542236329,
+                        "z": -9.232914924621582
+                    },
+                    "arrived": true,
+                    "seconds": 1.6200000047683716,
+                    "blockedFrames": 0,
+                    "minClearance": 3.4028234663852887e38
+                }
+            ]
+        },
+        {
+            "id": "beach-to-ramp-side-x5.5",
+            "allArrived": true,
+            "seconds": 1.5199999809265137,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 5.5,
+                        "y": 8.479999542236329,
+                        "z": -13.0
+                    },
+                    "end": {
+                        "x": 8.452564239501954,
+                        "y": 8.479999542236329,
+                        "z": -9.23614501953125
+                    },
+                    "arrived": true,
+                    "seconds": 1.5,
+                    "blockedFrames": 0,
+                    "minClearance": 3.4028234663852887e38
+                }
+            ]
+        },
+        {
+            "id": "beach-to-ramp-side-x6.0",
+            "allArrived": true,
+            "seconds": 1.399999976158142,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 6.0,
+                        "y": 8.479999542236329,
+                        "z": -13.0
+                    },
+                    "end": {
+                        "x": 8.457176208496094,
+                        "y": 8.479999542236329,
+                        "z": -9.241748809814454
+                    },
+                    "arrived": true,
+                    "seconds": 1.3799999952316285,
+                    "blockedFrames": 0,
+                    "minClearance": 3.4028234663852887e38
+                }
+            ]
+        },
+        {
+            "id": "beach-to-ramp-side-x6.5",
+            "allArrived": true,
+            "seconds": 1.2799999713897706,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 6.5,
+                        "y": 8.479999542236329,
+                        "z": -13.0
+                    },
+                    "end": {
+                        "x": 8.455855369567871,
+                        "y": 8.480000495910645,
+                        "z": -9.252166748046875
+                    },
+                    "arrived": true,
+                    "seconds": 1.2599999904632569,
+                    "blockedFrames": 0,
+                    "minClearance": 3.4028234663852887e38
+                }
+            ]
+        },
+        {
+            "id": "four-beach-to-ramp-side",
+            "allArrived": true,
+            "seconds": 2.119999885559082,
+            "walkers": [
+                {
+                    "id": "s0",
+                    "start": {
+                        "x": 5.199999809265137,
+                        "y": 8.479999542236329,
+                        "z": -13.199999809265137
+                    },
+                    "end": {
+                        "x": 8.125142097473145,
+                        "y": 8.479999542236329,
+                        "z": -9.6270751953125
+                    },
+                    "arrived": true,
+                    "seconds": 1.5,
+                    "blockedFrames": 0,
+                    "minClearance": 0.028682827949523927
+                },
+                {
+                    "id": "s1",
+                    "start": {
+                        "x": 6.199999809265137,
+                        "y": 8.479999542236329,
+                        "z": -13.199999809265137
+                    },
+                    "end": {
+                        "x": 8.921638488769532,
+                        "y": 8.480000495910645,
+                        "z": -9.076264381408692
+                    },
+                    "arrived": true,
+                    "seconds": 1.459999918937683,
+                    "blockedFrames": 0,
+                    "minClearance": 0.30000001192092898
+                },
+                {
+                    "id": "s2",
+                    "start": {
+                        "x": 5.199999809265137,
+                        "y": 8.479999542236329,
+                        "z": -14.399999618530274
+                    },
+                    "end": {
+                        "x": 7.869045734405518,
+                        "y": 8.480000495910645,
+                        "z": -8.493538856506348
+                    },
+                    "arrived": true,
+                    "seconds": 1.7999999523162842,
+                    "blockedFrames": 0,
+                    "minClearance": 0.07845896482467652
+                },
+                {
+                    "id": "s3",
+                    "start": {
+                        "x": 6.199999809265137,
+                        "y": 8.479999542236329,
+                        "z": -14.399999618530274
+                    },
+                    "end": {
+                        "x": 10.176146507263184,
+                        "y": 8.479999542236329,
+                        "z": -10.404842376708985
+                    },
+                    "arrived": true,
+                    "seconds": 2.0999999046325685,
+                    "blockedFrames": 8,
+                    "minClearance": 0.02882283926010132
+                }
+            ]
+        },
+        {
+            "id": "ramp-side-to-beach",
+            "allArrived": true,
+            "seconds": 1.5199999809265137,
+            "walkers": [
+                {
+                    "id": "a",
+                    "start": {
+                        "x": 8.600000381469727,
+                        "y": 8.479999542236329,
+                        "z": -9.199999809265137
+                    },
+                    "end": {
+                        "x": 5.5073747634887699,
+                        "y": 8.479999542236329,
+                        "z": -12.876882553100586
+                    },
+                    "arrived": true,
+                    "seconds": 1.5,
+                    "blockedFrames": 0,
+                    "minClearance": 3.4028234663852887e38
+                }
+            ]
+        }
+    ],
+    "platformEdge": [
+        {
+            "x": 0.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.182154655456543,
+            "outsideCollider": "Seabed_Shallow",
+            "step": 3.2178449630737306
+        },
+        {
+            "x": 0.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.368999481201172,
+            "outsideCollider": "Shore_Ramp",
+            "step": 3.0310001373291017
+        },
+        {
+            "x": 1.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.602153778076172,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.7978458404541017
+        },
+        {
+            "x": 1.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.8353071212768559,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.564692497253418
+        },
+        {
+            "x": 2.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.0684614181518559,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.331538200378418
+        },
+        {
+            "x": 2.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.301614761352539,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.0983848571777345
+        },
+        {
+            "x": 3.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.534769058227539,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.8652305603027344
+        },
+        {
+            "x": 3.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.767922401428223,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.6320772171020508
+        },
+        {
+            "x": 4.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.001076698303223,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.3989229202270508
+        },
+        {
+            "x": 4.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.2342305183410648,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.165769100189209
+        },
+        {
+            "x": 5.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.193814277648926,
+            "outsideCollider": "Shore_RampApron",
+            "step": 0.20618534088134767
+        },
+        {
+            "x": 5.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.193814277648926,
+            "outsideCollider": "Shore_RampApron",
+            "step": 0.20618534088134767
+        },
+        {
+            "x": 6.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.193814277648926,
+            "outsideCollider": "Shore_RampApron",
+            "step": 0.20618534088134767
+        },
+        {
+            "x": 6.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.193814277648926,
+            "outsideCollider": "Shore_RampApron",
+            "step": 0.20618534088134767
+        },
+        {
+            "x": 7.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 7.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 8.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 8.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 9.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 9.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 10.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 10.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 11.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 11.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 3.4887442588806154,
+            "outsideCollider": "Seabed_Shallow",
+            "step": 4.911255359649658
+        },
+        {
+            "x": 12.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 3.487476110458374,
+            "outsideCollider": "Seabed_Shallow",
+            "step": 4.91252326965332
+        }
+    ]
+}
