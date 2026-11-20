@@ -84,6 +84,9 @@ namespace DeepDive.EditorTools
                 Planter(props, "PlanterEast", new Vector2(4.6f, -31.9f));
                 Planter(props, "PlanterWest", new Vector2(-4.4f, -31.9f));
                 Planter(props, "PlanterApproachEast", new Vector2(3.0f, -37.4f));
+                // #296: light the store's corner where the side street turns, and point the way from the square.
+                Lamp(props, "LampStoreCorner", new Vector2(-1.5f, -21.3f), 180f);
+                Signpost(props, "SignStoreStreet", new Vector2(-4.0f, -25.6f), -90f);
                 // #301 east court: a planter in the middle to walk round, a lamp and a bench against its east fence, a palm in
                 // the far corner and crates in the other.
                 Planter(props, "PlanterEastCourt", new Vector2(24.0f, -28.0f));
@@ -211,6 +214,23 @@ namespace DeepDive.EditorTools
             }
         }
 
+        // #296: a post with an arrow board in the store sign's colours, turned (`yaw`) to point along the side street.
+        private static void Signpost(Transform parent, string name, Vector2 xz, float yaw)
+        {
+            if (!Place(name, xz, 0.35f)) return;
+            var sign = Group(parent, name);
+            sign.position = new Vector3(xz.x, G, xz.y);
+            sign.rotation = Quaternion.Euler(0f, yaw, 0f);
+            var wood = Kit("MI_WoodTrim");
+            P410EquipmentStoreBuilder.Prim(sign, PrimitiveType.Cylinder, "Post", new Vector3(0f, 1.1f, 0f), new Vector3(0.1f, 1.1f, 0.1f), wood);
+            var board = P4SharedHouseBuilder.Mat("StreetSignBoard", new Color(0.12f, 0.32f, 0.42f), 0.3f);
+            var arrow = P4SharedHouseBuilder.Mat("StreetSignArrow", new Color(0.95f, 0.85f, 0.45f), 0.3f);
+            Cube(sign, "Board", new Vector3(0.45f, 1.85f, 0f), new Vector3(1.1f, 0.34f, 0.06f), board);
+            Cube(sign, "ArrowShaft", new Vector3(0.38f, 1.85f, 0.035f), new Vector3(0.6f, 0.08f, 0.02f), arrow);
+            Cube(sign, "ArrowHeadUp", new Vector3(0.74f, 1.89f, 0.035f), new Vector3(0.2f, 0.06f, 0.02f), arrow, new Vector3(0f, 0f, -35f));
+            Cube(sign, "ArrowHeadDown", new Vector3(0.74f, 1.81f, 0.035f), new Vector3(0.2f, 0.06f, 0.02f), arrow, new Vector3(0f, 0f, 35f));
+        }
+
         private static void Planter(Transform parent, string name, Vector2 xz)
         {
             if (!Place(name, xz, 0.7f)) return;
@@ -312,6 +332,9 @@ namespace DeepDive.EditorTools
             for (var z = -35f; z <= -17f; z += 2f) foreach (var x in new[] { -2f, 0f, 2f }) cells.Add(new Vector2(x, z));
             for (var z = -41f; z <= -37f; z += 2f) foreach (var x in new[] { -2f, 0f, 2f }) cells.Add(new Vector2(x, z));   // up to the house front (z -42); the floor beyond is the house's own
             foreach (var x in new[] { -11f, -9f }) foreach (var z in new[] { -20f, -18f }) cells.Add(new Vector2(x, z));
+            // #296: the side street joining the street axis to the store's door apron, clear of the store's corner.
+            foreach (var x in new[] { -7f, -5f, -3f }) foreach (var z in new[] { -20f, -18f }) cells.Add(new Vector2(x, z));
+            cells.Add(new Vector2(-3f, -22f)); cells.Add(new Vector2(-3f, -24f));
             foreach (var shop in ContinuousTownLayout.StorefrontPositions.Skip(1))
                 foreach (var dx in new[] { -1f, 1f }) foreach (var dz in new[] { 1f, 3f }) cells.Add(new Vector2(Mathf.Round(shop.x / 2f) * 2f + dx, shop.z + dz));
             var skipped = 0;
