@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$StoreStreet, [switch]$StoreStreetNight)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -10,6 +10,7 @@ if ($CameraAutoLimit -and ($RepairOnly -or $HabitatHunt)) { throw 'CameraAutoLim
 if ($GuestCameraLimit -and ($Players -ne 2 -or $RepairOnly -or $ActionVideo -or $EquipmentVideo -or $OceanVideo -or $CameraAutoLimit -or $HabitatHunt -or $HuntFirst)) { throw 'GuestCameraLimit requires two players and no other visual/repair mode.' }
 if ($SharedHunt -and ($Players -ne 2 -or $RepairOnly -or $ActionVideo -or $EquipmentVideo -or $OceanVideo -or $CameraAutoLimit -or $GuestCameraLimit -or $HabitatHunt -or $HuntFirst)) { throw 'SharedHunt requires two players and no other visual/repair mode.' }
 if ($EastCourtNight -and -not $EastCourt) { throw 'EastCourtNight is a labelled clock fixture for the EastCourt walk only.' }
+if ($WestShoreNight -and -not $WestShore) { throw 'WestShoreNight is a labelled clock fixture for the WestShore walk only.' }
 if ($StoreStreetNight -and -not $StoreStreet) { throw 'StoreStreetNight is a labelled clock fixture for the StoreStreet walk only.' }
 if ($SharedHunt) { $Render = $true } # The guest captures an actual clip; a null graphics device cannot do so.
 if ($HabitatHunt -and ($RepairOnly -or $HuntFirst -or $OceanVideo -or $EquipmentVideo -or $ActionVideo)) { throw 'HabitatHunt is its own short session without other probes.' }
@@ -54,6 +55,8 @@ try {
         if ($StoreStreetNight) { $productArgs+=@('-p296-night','1') }
         if ($EastCourt) { $productArgs+=@('-p301-east-court','1') }
         if ($EastCourtNight) { $productArgs+=@('-p301-night','1') }
+        if ($WestShore) { $productArgs+=@('-p302-west-shore','1') }
+        if ($WestShoreNight) { $productArgs+=@('-p302-night','1') }
         if ($ReefGateFrames) { $productArgs+=@('-p298-reef-gate-frames','1') }
         if ($WreckFrames) { $productArgs+=@('-p303-wreck-frames','1') }
         if ($WreckNight) { $productArgs+=@('-p303-wreck-night','1') }

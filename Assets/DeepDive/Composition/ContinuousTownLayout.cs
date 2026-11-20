@@ -104,8 +104,9 @@ namespace DeepDive.Composition
             public static readonly Vector3 TownMin = new Vector3(-15.75f, 7.9f, -55.8f);
             // #301: reaches east over the east neighbourhood (nothing else is walkable east of the arena wall).
             public static readonly Vector3 TownMax = new Vector3(26.75f, 13f, -14.75f);
-            public static readonly Vector3 CoastMin = new Vector3(-15f, 4.5f, -14.75f);
-            public static readonly Vector3 CoastMax = new Vector3(15f, 13f, -3.5f);
+            // #302: west and north far enough to hold the west shore walk and its terrace. Water still resolves to Sea first.
+            public static readonly Vector3 CoastMin = new Vector3(-20.5f, 4.5f, -14.75f);
+            public static readonly Vector3 CoastMax = new Vector3(15f, 13f, 2.5f);
         }
 
         // #301: a small neighbourhood east of the square. Two lanes leave the square through openings in its east fence,
@@ -212,7 +213,13 @@ namespace DeepDive.Composition
             foreach (var mirror in new[] { 1f, -1f })
             {
                 var side = mirror > 0 ? "West" : "East";
-                edges.Add(Edge("Edge_Beach" + side, mirror, -15.05f, -14.75f, -15.8f, -11.0f));
+                if (mirror > 0)
+                {
+                    // #302: the west fence opens onto the west shore walk (WestShoreWalk), z -14.5 .. -12.
+                    edges.Add(Edge("Edge_Beach" + side + "South", mirror, -15.05f, -14.75f, -15.8f, WestShoreWalk.OpeningMinZ));
+                    edges.Add(Edge("Edge_Beach" + side + "North", mirror, -15.05f, -14.75f, WestShoreWalk.OpeningMaxZ, -11.0f));
+                }
+                else edges.Add(Edge("Edge_Beach" + side, mirror, -15.05f, -14.75f, -15.8f, -11.0f));
                 edges.Add(Edge("Edge_BackFillSouth" + side, mirror, -14.75f, -14.0f, -15.8f, -15.5f));
                 if (mirror > 0)
                 {
@@ -302,6 +309,7 @@ namespace DeepDive.Composition
             BuildAnchors(parent);
             SuppliedTownArt.Town(parent);
             TownDressing.Place(parent);   // #171: fences, paving, lamps and props over the bare blocks (visual only)
+            WestShoreWalk.Build(scene);   // #302: the walk off the beach's west fence opening, built with the town it joins
             BuildZones(scene, parent);
 
             var services = FindRoot(scene, "TownServices");

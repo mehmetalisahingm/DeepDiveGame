@@ -40,6 +40,8 @@ namespace DeepDive.P1.Lab
             public bool repairRace, repairDisconnect, repairRejoin, repairMidnight;
             public int storeStreetWalks;
             public int eastCourtLoops;
+            public int westShoreWalks;
+            public float westShoreHighestY;
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public bool cameraAutomaticLimit;
             public bool guestCameraPurchased, guestCameraClipVerified;
@@ -388,6 +390,7 @@ namespace DeepDive.P1.Lab
                     if (WaitForRepairHomeExitLane()) return;
                     if (StoreStreetWalk && substep == 0 && !StoreStreetTick()) return;
                     if (EastCourtWalk && substep == 0 && !EastCourtTick()) return;
+                    if (WestShoreWalkOn && substep == 0 && !WestShoreTick()) return;
                     if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
