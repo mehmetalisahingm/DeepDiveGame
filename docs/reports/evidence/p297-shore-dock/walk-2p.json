@@ -1,0 +1,22 @@
+{
+ "player0": {
+  "passed": true,
+  "shoreRampWalks": 1,
+  "shoreRampLowestY": 8.401483535766602,
+  "shoreRampFrames": [
+   "shot 1 from=(6.31, 8.48, -14.92) walker=none",
+   "shot 2 from=(8.06, 8.48, -9.75) walker=client1 at=(6.61, 8.46, -10.86)",
+   "back allUp=True waited=0,0"
+  ]
+ },
+ "player1": {
+  "passed": true,
+  "shoreRampWalks": 1,
+  "shoreRampLowestY": 8.37189769744873,
+  "shoreRampFrames": [
+   "shot 1 from=(7.25, 8.48, -14.91) walker=none",
+   "shot 2 from=(8.89, 8.48, -9.14) walker=none",
+   "back allUp=False waited=25,0"
+  ]
+ }
+}
