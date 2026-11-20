@@ -92,11 +92,17 @@ namespace DeepDive.World
         [SerializeField] private float wanderRadius = 8f;
         [SerializeField] private SwimStyle swimStyle = SwimStyle.Wanderer;
 
+        [Header("Look")]
+        // #310: the length in metres a fish of this species' mid weight is drawn at (the model is scaled to it); lighter and
+        // heavier specimens then follow FishSize. 0 keeps the model's own size.
+        [SerializeField] private float referenceLengthMetres;
+
         public string SpeciesId => speciesId;
         public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? speciesId : displayName;
         public SpeciesClass Class => speciesClass;
         public float MaxHealth => maxHealth;
         public WeightRange Weight => weight;
+        public float ReferenceLengthMetres => float.IsNaN(referenceLengthMetres) || referenceLengthMetres < 0f ? 0f : referenceLengthMetres;
         public SwimTuning Swim => new SwimTuning(swimSpeed, fleeSpeed, fleeRadius, wanderRadius, swimStyle);
 
         public bool IsValid(out string error)
