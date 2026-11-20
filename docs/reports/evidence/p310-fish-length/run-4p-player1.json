@@ -1,0 +1,20 @@
+{
+ "fishSizes": [
+  "Fish_SeaBass sea_bass size=1.038 scaleX=1.858 lengthM=0.462",
+  "Fish_SeaBass_02 sea_bass size=1.120 scaleX=2.005 lengthM=0.498",
+  "Fish_SeaBass_03 sea_bass size=1.087 scaleX=1.947 lengthM=0.484",
+  "Fish_SeaBass_04 tuna size=0.978 scaleX=1.798 lengthM=0.435",
+  "Fish_SeaBass_05 tuna size=1.065 scaleX=1.959 lengthM=0.474",
+  "Fish_SeaBass_06 tuna size=1.047 scaleX=1.925 lengthM=0.466",
+  "Fish_SeaBass_07 red_snapper size=1.133 scaleX=2.161 lengthM=0.510",
+  "Fish_SeaBass_08 red_snapper size=1.128 scaleX=2.151 lengthM=0.508",
+  "Fish_SeaBass_09 red_snapper size=1.073 scaleX=2.047 lengthM=0.483",
+  "Fish_SeaBass_10 grouper size=1.139 scaleX=2.872 lengthM=0.741",
+  "Fish_SeaBass_11 grouper size=0.998 scaleX=2.517 lengthM=0.649",
+  "Fish_SeaBass_12 grouper size=0.897 scaleX=2.262 lengthM=0.583",
+  "Fish_SeaBass_13 lanternfish size=0.947 scaleX=0.947 lengthM=0.244",
+  "Fish_SeaBass_14 lanternfish size=1.104 scaleX=1.104 lengthM=0.285",
+  "Fish_SeaBass_15 lanternfish size=0.826 scaleX=0.826 lengthM=0.213"
+ ],
+ "passed": true
+}

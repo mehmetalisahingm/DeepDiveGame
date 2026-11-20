@@ -47,6 +47,15 @@ namespace DeepDive.Composition
         public static readonly Vector3 EquipmentStoreAisleNear = new Vector3(-11.9f, WalkSurfaceY, -23.85f);
         public static readonly Vector3 EquipmentStoreAisleFar = new Vector3(-11.9f, WalkSurfaceY, -26.45f);
 
+        // #296: the side street from the square to the store door. The straight line between them hugs the store's north-east
+        // corner (x -4.7, z -21.5), where walkers rubbed it and two going opposite ways jammed; this way keeps 1.6 m off it.
+        // The dressing paves it and lights the corner; walkers and tests follow it.
+        public static readonly Vector3[] StoreStreet =
+        {
+            new Vector3(0f, WalkSurfaceY, -29f), new Vector3(-2.5f, WalkSurfaceY, -24f), new Vector3(-3.2f, WalkSurfaceY, -20f),
+            EquipmentStoreDoorOutside
+        };
+
         public const string AnchorsName = "Anchors";
         public const string ZonesName = "Zones";
         public static readonly Vector3 TownSquareCenter = new Vector3(0f, WalkSurfaceY, -29f);

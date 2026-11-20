@@ -24,3 +24,4 @@ MonoBehaviour:
   fleeRadius: 5
   wanderRadius: 6
   swimStyle: 0
+  referenceLengthMetres: 0.45

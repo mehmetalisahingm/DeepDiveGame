@@ -88,8 +88,30 @@ namespace DeepDive.World
         // later would size a guest's fish twice.
         private void Awake()
         {
-            baseScale = transform.localScale;
+            baseScale = transform.localScale * ModelLengthFactor();
             baseScaleKnown = true;
+        }
+
+        // #310: how much the authored fish must grow for a mid-weight specimen to be the species' reference length.
+        public float ModelLengthFactor()
+        {
+            var reference = species != null ? species.ReferenceLengthMetres : 0f;
+            var model = DrawnLength();
+            return reference > 0f && model > 0.01f ? reference / model : 1f;
+        }
+
+        // The longest side of the model as authored, in metres, whichever way it faces.
+        public float DrawnLength()
+        {
+            var length = 0f;
+            foreach (var r in GetComponentsInChildren<Renderer>(true))
+            {
+                if (r is ParticleSystemRenderer) continue;
+                var size = r.localBounds.size;
+                var scale = r.transform.lossyScale;
+                length = Mathf.Max(length, Mathf.Max(size.x * Mathf.Abs(scale.x), size.y * Mathf.Abs(scale.y), size.z * Mathf.Abs(scale.z)));
+            }
+            return length;
         }
 
         private void ApplySize(float previous, float scale) => ApplySize(scale);
@@ -205,7 +227,7 @@ namespace DeepDive.World
                 var distance = (at - position).sqrMagnitude;
                 if (distance > FishMotion.SchoolRadius * FishMotion.SchoolRadius) continue;
                 mates.Add(at);
-                if (other.motion.IsFleeing && distance < FishMotion.AlarmRadius * FishMotion.AlarmRadius && distance < nearestAlarm)
+                if (other.motion.SeesThreat && distance < FishMotion.AlarmRadius * FishMotion.AlarmRadius && distance < nearestAlarm)
                 {
                     alarmed = true;
                     alarmThreat = other.motion.LastThreat;
