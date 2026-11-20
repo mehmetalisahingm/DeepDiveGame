@@ -52,6 +52,7 @@ namespace DeepDive.World
         // The diver this fish is running from (its own or a schoolmate's), while IsFleeing.
         public Vector3 LastThreat { get; private set; }
         public bool Hiding { get; private set; }
+        public bool SeesThreat { get; private set; }
         public SwimStyle Style => tuning.Style;
 
         // Seconds between wander targets: cruisers hold a heading, schools re-form often.
@@ -66,6 +67,9 @@ namespace DeepDive.World
             if (!IsFinite(position) || !IsFinite(deltaTime) || deltaTime <= 0f) return position;
 
             IsFleeing = TryFindNearestThreat(position, threats, tuning.FleeRadius, out var threat);
+            // Only a fish that sees the diver itself raises the alarm; one running because a mate ran does not, or two
+            // schoolmates would keep each other running long after the diver left.
+            SeesThreat = IsFleeing;
             // A school bolts together: a mate running from a diver is reason enough.
             if (!IsFleeing && tuning.Style == SwimStyle.School && company.Alarmed && IsFinite(company.AlarmThreat))
             {
