@@ -14,7 +14,7 @@ namespace DeepDive.Editor
 {
     // #297/#188 (Mehmet, 21 Nov): should the repair cradle move about 1 m south so the side apron is not cut off before the
     // boat is repaired? Read-only, on the real scene with the town and the apron built. For the cradle where it is and
-    // moved 0.6, 0.95 and 1.0 m south it places the broken hull's real collider (BoatRepairNetworkBinding: 2.4 x 0.4 x 5 m,
+    // moved 0.6, 0.95 and 1.0 m south (and 0.95 south, 0.6 east) it places the broken hull's real collider (BoatRepairNetworkBinding: 2.4 x 0.4 x 5 m,
     // yaw 90) and, for the crewed passes, a standing diver capsule on each of the four work points. Then real-size
     // CharacterControllers walk: one and four from the beach gate onto the apron and the ramp landing; four from the town
     // edge to the pier by the route audit's diagonal and by the corridors north and south of the hull; and each worker
@@ -23,7 +23,11 @@ namespace DeepDive.Editor
     public static class P297CradleShiftAudit
     {
         public const string OutputPath = "docs/reports/evidence/p297-shore-dock/cradle-shift.json";
-        private static readonly (string Id, float Z)[] Poses = { ("current", -12.6f), ("south-0.6", -13.2f), ("south-0.95", -13.55f), ("south-1.0", -13.6f) };
+        private static readonly (string Id, float X, float Z)[] Poses =
+        {
+            ("s1", 3.6f, -12.6f), ("south-0.6", 3.6f, -13.2f), ("south-0.95", 3.6f, -13.55f), ("south-1.0", 3.6f, -13.6f),
+            ("south-0.95-east-0.6", 4.2f, -13.55f)
+        };
         private const float HullWidth = 2.4f, HullLength = 5f, HullHeight = 0.4f, PlatformMinZ = -14.75f, PlatformNorthZ = -11f;
 
         [Serializable] public sealed class WorkPoint { public int index; public Vector3 at; public bool dry, free; public string blockedBy, ground; }
@@ -55,7 +59,7 @@ namespace DeepDive.Editor
                 foreach (var moving in P297ShoreDockAudit.All<Collider>(scene).Where(c => c.GetComponentInParent<Unity.Netcode.NetworkObject>() != null))
                     moving.enabled = false;
                 Physics.SyncTransforms();
-                foreach (var (id, z) in Poses) audit.poses.Add(Measure(id, new Vector3(DiveTestAreaRepairCradleSetup.CradlePosition.x, DiveTestAreaRepairCradleSetup.CradlePosition.y, z), diver, speed));
+                foreach (var (id, x, z) in Poses) audit.poses.Add(Measure(id, new Vector3(x, DiveTestAreaRepairCradleSetup.CradlePosition.y, z), diver, speed));
                 Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
                 File.WriteAllText(OutputPath, JsonUtility.ToJson(audit, true));
                 foreach (var p in audit.poses)
@@ -145,6 +149,7 @@ namespace DeepDive.Editor
                         }
                     Physics.SyncTransforms();
                     var tag = crewed ? "crew" : "empty";
+                    pose.passes.Add(P297ShoreDockAudit.Walk($"{tag}-town-gate", new List<(string, Vector2[])> { ("g", new[] { new Vector2(0f, -18f), gate, new Vector2(-3f, -12.5f) }) }, diver, speed));
                     pose.passes.Add(P297ShoreDockAudit.Walk($"{tag}-apron-1", new List<(string, Vector2[])> { ("a", Apron(1)) }, diver, speed));
                     pose.passes.Add(P297ShoreDockAudit.Walk($"{tag}-apron-4-single-file",
                         Enumerable.Range(0, 4).Select(k => ("a" + k, Apron(k))).ToList(), diver, speed));
@@ -177,11 +182,14 @@ namespace DeepDive.Editor
                     var target = new Vector2(work[i].x, work[i].z);
                     // Two ways from the drop: round the hull's east end and along its south side, or up the east end and
                     // along its north side; stern points (0, 1) then turn round the stern.
-                    var south = southRim - 0.6f;
+                    // Round the hull's real ends, 0.6 m off; the south way passes outside the south-side crew (0.75 m further).
+                    var eastX = cradle.x + HullLength / 2f + 0.6f;
+                    var westX = cradle.x - HullLength / 2f - 1.4f;
+                    var south = southRim - 0.6f - 0.75f;
                     var southWay = i < 2
-                        ? new[] { drop, new Vector2(7.2f, Mathf.Min(south, drop.y)), new Vector2(-0.4f, Mathf.Min(south, drop.y)), new Vector2(-0.4f, target.y), target }
-                        : new[] { drop, new Vector2(Mathf.Max(target.x, 6.6f), Mathf.Min(target.y, south)), target };
-                    var northWay = new[] { drop, new Vector2(6.6f, -14.0f), new Vector2(6.6f, north), new Vector2(-0.2f, north), new Vector2(-0.2f, target.y), target };
+                        ? new[] { drop, new Vector2(Mathf.Max(eastX, drop.x), south), new Vector2(westX, south), new Vector2(westX, target.y), target }
+                        : new[] { drop, new Vector2(Mathf.Max(eastX, drop.x), south), new Vector2(target.x, south), target };
+                    var northWay = new[] { drop, new Vector2(Mathf.Max(eastX, drop.x), north), new Vector2(westX, north), new Vector2(westX, target.y), target };
                     pose.passes.Add(P297ShoreDockAudit.Walk($"carry-drop-to-work-{i}-south", new List<(string, Vector2[])> { ("w" + i, southWay) }, diver, speed));
                     pose.passes.Add(P297ShoreDockAudit.Walk($"carry-drop-to-work-{i}-north", new List<(string, Vector2[])> { ("w" + i, northWay) }, diver, speed));
                     crew[i].SetActive(true);
