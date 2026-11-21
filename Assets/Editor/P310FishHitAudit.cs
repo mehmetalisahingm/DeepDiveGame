@@ -12,7 +12,7 @@ namespace DeepDive.Editor
     // #310 (Utku): how much easier the reference lengths make a harpoon hit. The harpoon is one server ray from the
     // eye (NetworkPlayer.HandleHarpoon), so a shot hits when that ray crosses the fish's collider. For one mid-weight
     // fish of each species this fires rays at the collider as authored (before #321) and again at the reference length
-    // (after), side-on and head-on, from 4, 8 and 12 m, with the aim scattered round the collider centre by a fixed
+    // (#321), and with the capsule FishActor now fits round the drawn body (fitted), side-on and head-on, from 4, 8 and 12 m, with the aim scattered round the collider centre by a fixed
     // angular error. The scatter is an illustration of an unsteady hand, not a measured player. Nothing is saved.
     public static class P310FishHitAudit
     {
@@ -52,16 +52,15 @@ namespace DeepDive.Editor
                     var before = Sample(fish, collider);
                     fish.transform.localScale = authored * factor;
                     var after = Sample(fish, collider);
-                    // For comparison only: the same capsule fitted round the drawn model at the reference length.
+                    // Mehmet's decision (21 Nov): the capsule FishActor now fits round the drawn body at runtime
+                    // (FishActor.BodyColliderTolerance headroom), here at the reference length.
                     var capsule = (CapsuleCollider)collider;
                     var (radius, height, direction, center) = (capsule.radius, capsule.height, capsule.direction, capsule.center);
                     var model = ModelBounds(fish);
-                    var local = Vector3.Scale(model.size, new Vector3(1f / fish.transform.lossyScale.x, 1f / fish.transform.lossyScale.y, 1f / fish.transform.lossyScale.z));
-                    var longest = local.x >= local.y && local.x >= local.z ? 0 : local.y >= local.z ? 1 : 2;
-                    capsule.direction = longest;
-                    capsule.height = local[longest];
-                    capsule.radius = Mathf.Max(local[(longest + 1) % 3], local[(longest + 2) % 3]) / 2f;
-                    capsule.center = fish.transform.InverseTransformPoint(model.center);
+                    if (!FishActor.FittedCapsule(fish.transform, fish.GetComponentsInChildren<Renderer>(true), FishActor.BodyColliderTolerance,
+                            out var fitCenter, out var fitRadius, out var fitHeight, out var fitDirection))
+                        throw new InvalidOperationException("P310_HIT_NO_BODY " + fish.name);
+                    (capsule.center, capsule.radius, capsule.height, capsule.direction) = (fitCenter, fitRadius, fitHeight, fitDirection);
                     var fitted = Sample(fish, collider);
                     (capsule.radius, capsule.height, capsule.direction, capsule.center) = (radius, height, direction, center);
                     fish.transform.localScale = authored;
@@ -82,7 +81,7 @@ namespace DeepDive.Editor
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
                 File.WriteAllText(OutputPath, JsonUtility.ToJson(audit, true));
-                foreach (var r in audit.rows.Where(r => r.scatterDegrees == ScatterDegrees[0] || r.distance == 8f))
+                foreach (var r in audit.rows.Where(r => r.distance == 8f))
                     Debug.Log($"P310_HIT {r.species} {r.view} d={r.distance} scatter={r.scatterDegrees} before={r.hitBefore:0.00} after={r.hitAfter:0.00} fitted={r.hitFitted:0.00} window={r.halfWindowDegBefore:0.00}->{r.halfWindowDegAfter:0.00}/{r.halfWindowDegFitted:0.00} model={r.modelAfter} collider={r.colliderAfter}");
                 Debug.Log("P310_HIT_WRITTEN " + OutputPath + " rows=" + audit.rows.Count);
             }

@@ -90,6 +90,58 @@ namespace DeepDive.World
         {
             baseScale = transform.localScale * ModelLengthFactor();
             baseScaleKnown = true;
+            FitColliderToBody();
+        }
+
+        // #310 (Mehmet, 21 Nov): the harpoon's ray hits this capsule, which was authored 1.1 m long round a 0.25 m model
+        // and grew with it to ~4.4x the drawn fish. It now wraps the drawn body (its length along the longest side, its
+        // radius the mean half of the other two) with this much headroom, in the fish's own space, so it still grows
+        // with the reference length and the specimen's size.
+        public const float BodyColliderTolerance = 1.2f;
+
+        public void FitColliderToBody()
+        {
+            if (!TryGetComponent<CapsuleCollider>(out var capsule)) return;
+            if (!FittedCapsule(transform, GetComponentsInChildren<Renderer>(true), BodyColliderTolerance,
+                    out var center, out var radius, out var height, out var direction)) return;
+            capsule.direction = direction;
+            capsule.center = center;
+            capsule.radius = radius;
+            capsule.height = height;
+        }
+
+        // The drawn body's box in `root`'s space, from each mesh's own bounds, then the capsule round it.
+        public static bool FittedCapsule(Transform root, IEnumerable<Renderer> renderers, float tolerance,
+            out Vector3 center, out float radius, out float height, out int direction)
+        {
+            center = Vector3.zero; radius = height = 0f; direction = 2;
+            var any = false;
+            var box = new Bounds();
+            var toRoot = root.worldToLocalMatrix;
+            foreach (var r in renderers)
+            {
+                Mesh mesh = null;
+                if (r is SkinnedMeshRenderer skinned) mesh = skinned.sharedMesh;
+                else if (r is MeshRenderer && r.TryGetComponent<MeshFilter>(out var filter)) mesh = filter.sharedMesh;
+                if (mesh == null) continue;
+                var b = mesh.bounds;
+                var toRootFromMesh = toRoot * r.transform.localToWorldMatrix;
+                for (var i = 0; i < 8; i++)
+                {
+                    var corner = b.center + Vector3.Scale(b.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                    var p = toRootFromMesh.MultiplyPoint3x4(corner);
+                    if (!any) { box = new Bounds(p, Vector3.zero); any = true; }
+                    else box.Encapsulate(p);
+                }
+            }
+            if (!any) return false;
+            var size = box.size;
+            direction = size.x >= size.y && size.x >= size.z ? 0 : size.y >= size.z ? 1 : 2;
+            var across = (size[(direction + 1) % 3] + size[(direction + 2) % 3]) / 4f;
+            radius = across * tolerance;
+            height = Mathf.Max(size[direction] * tolerance, radius * 2f);
+            center = box.center;
+            return radius > 0.001f;
         }
 
         // #310: how much the authored fish must grow for a mid-weight specimen to be the species' reference length.
