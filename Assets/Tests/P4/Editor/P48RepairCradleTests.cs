@@ -25,7 +25,7 @@ namespace DeepDive.P4.Tests
         private const float Dt = 0.02f;
         private const float WorkerSpacing = 1.06f;
 
-        private static readonly Vector3 Cradle = new Vector3(3.6f, 8.4f, -12.6f);
+        private static readonly Vector3 Cradle = new Vector3(4.2f, 8.4f, -13.55f);   // #297: 0.95 m south and 0.6 m east of S1
         private const float CradleYaw = 90f;
         private static readonly Vector3 Drop = new Vector3(7.5f, 8.4f, -14.5f);
         private static readonly Vector3 TownGate = new Vector3(0f, 8.4f, -13.5f);
@@ -43,6 +43,24 @@ namespace DeepDive.P4.Tests
             Assert.AreEqual("", RepairAnchorIds.Work(4));
             Assert.AreEqual("", RepairAnchorIds.Work(-1));
             CollectionAssert.IsEmpty(RepairAnchorIds.All.Intersect(WorldAnchorIds.All), "repair anchors must not alias town anchors");
+        }
+
+        // #297: the setup accepts the south work points on the town's back fill, which only exists once the town is built.
+        [Test]
+        public void TheSetupsTownBackFillBandIsTheBuiltTownsBackFill()
+        {
+            ContinuousTownScene.With(scene =>
+            {
+                var fill = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<Collider>(true))
+                    .Single(c => c.name == "Fill_BeachBack").bounds;
+                // The setup lives in DeepDive.World.Editor, which this test assembly does not reference.
+                var setup = Type.GetType("DeepDive.World.Editor.DiveTestAreaRepairCradleSetup, DeepDive.World.Editor", true);
+                float Const(string name) => (float)setup.GetField(name).GetValue(null);
+                Assert.AreEqual(Const("TownBackFillMinZ"), fill.min.z, 0.01f);
+                Assert.AreEqual(Const("TownBackFillMaxZ"), fill.max.z, 0.01f);
+                Assert.AreEqual(Const("TownBackFillHalfWidth"), fill.max.x, 0.01f);
+                Assert.AreEqual(WalkY, fill.max.y, 0.01f);
+            });
         }
 
         // ---- the authored anchors ----------------------------------------------------------------
