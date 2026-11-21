@@ -51,7 +51,8 @@ namespace DeepDive.World.Editor
 
         // #192: dry, outside the SwimVolume, free, >= 1.31 m off every corridor, walked clean from the
         // work points, the cradle and on to dock-town-1.
-        public static readonly Vector3 DropPosition = new Vector3(7.5f, 8.4f, -14.5f);
+        // #297: moved with the cradle (0.6 m east, 0.95 m south of #192's (7.5, -14.5)) so hull, crew and drop keep their S1 layout.
+        public static readonly Vector3 DropPosition = new Vector3(8.1f, 8.4f, -15.45f);
 
         public const float WorkerSpacing = 1.06f;
         public const float RimClearance = 0.45f;

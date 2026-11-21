@@ -27,7 +27,7 @@ namespace DeepDive.P4.Tests
 
         private static readonly Vector3 Cradle = new Vector3(4.2f, 8.4f, -13.55f);   // #297: 0.95 m south and 0.6 m east of S1
         private const float CradleYaw = 90f;
-        private static readonly Vector3 Drop = new Vector3(7.5f, 8.4f, -14.5f);
+        private static readonly Vector3 Drop = new Vector3(8.1f, 8.4f, -15.45f);   // #297: moved with the cradle
         private static readonly Vector3 TownGate = new Vector3(0f, 8.4f, -13.5f);
 
         // ---- the contract ------------------------------------------------------------------------
