@@ -198,6 +198,23 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void PhysicalChannelBoardLongMilestonesFitTheExistingPanel()
+        {
+            var empty = HomeChannelBoardDisplay.CharacterSize("KANAL");
+            Assert.AreEqual(0.06f, empty, 0.0001f);
+            foreach (var followers in new[] { 0, 27, 100, 9999999, 10000000, int.MaxValue })
+            {
+                var label = HomeChannelBoardDisplay.Label(true, followers);
+                var longest = label.Split('\n').Max(line => line.Length);
+                var size = HomeChannelBoardDisplay.CharacterSize(label);
+                Assert.Greater(size, 0.01f);
+                Assert.LessOrEqual(size, empty);
+                Assert.LessOrEqual(longest * size, 0.981f,
+                    "leave room for the actual 1.28 m channel board frame: " + followers);
+            }
+        }
+
+        [Test]
         public void TheRigPlacesItOnceOnTheHomeOriginAndTheTargetsStayTheRigs()
         {
             ContinuousTownScene.With(scene =>
