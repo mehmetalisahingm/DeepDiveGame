@@ -63,6 +63,21 @@ namespace DeepDive.Composition
                 (progress.Reached ? "HEDEF TAMAM" : "SONRAKI: " + ChannelGoal.Format(progress.NextMilestone));
         }
 
+        // The physical wall panel has a 1.28 m face. The long 10M milestone
+        // must fit without spilling outside the board when the text changes.
+        public static float CharacterSize(string label)
+        {
+            var longest = 0;
+            var line = 0;
+            foreach (var c in label ?? "")
+            {
+                if (c == '\n') { longest = Mathf.Max(longest, line); line = 0; }
+                else line++;
+            }
+            longest = Mathf.Max(longest, line);
+            return Mathf.Min(0.06f, 0.98f / Mathf.Max(1, longest));
+        }
+
         private void Update()
         {
             if (Time.unscaledTime < nextRefresh) return;
@@ -77,7 +92,11 @@ namespace DeepDive.Composition
             var mirror = MediaNetworkBinding.Mirrored;
             var label = Label(MediaNetworkBinding.HasMirror && mirror != null,
                 mirror != null ? mirror.Followers : 0);
-            if (boardText.text != label) boardText.text = label;
+            if (boardText.text != label)
+            {
+                boardText.text = label;
+                boardText.characterSize = CharacterSize(label);
+            }
         }
     }
 
