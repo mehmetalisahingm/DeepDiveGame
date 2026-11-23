@@ -44,7 +44,7 @@ namespace DeepDive.Composition
         }
     }
 
-    // #259/#255: the physical PC corner should reflect the actual shared
+    // #259/#255: the physical PC corner shows host-verified followers and the next real milestone; it should reflect the actual shared
     // channel rather than showing a forever-static decorative "KANAL" sign.
     // Strictly visual: polls the existing host-approved mirror, creates no new
     // NetworkObject, RPC, income, subscriber count, save field or collision.
@@ -55,8 +55,13 @@ namespace DeepDive.Composition
         private TextMesh boardText;
         private float nextRefresh;
 
-        public static string Label(bool hasMirror, int followers) =>
-            hasMirror ? "KANAL\n" + ChannelGoal.Format(Mathf.Max(0, followers)) + "\nTAKIPCI" : "KANAL";
+        public static string Label(bool hasMirror, int followers)
+        {
+            if (!hasMirror) return "KANAL"; // no progress before an actual host mirror is available
+            var progress = ChannelGoal.Of(followers);
+            return "KANAL\n" + ChannelGoal.Format(progress.Followers) + " TAKIPCI\n" +
+                (progress.Reached ? "HEDEF TAMAM" : "SONRAKI: " + ChannelGoal.Format(progress.NextMilestone));
+        }
 
         private void Update()
         {
