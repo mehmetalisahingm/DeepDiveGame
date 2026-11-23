@@ -61,7 +61,42 @@ namespace DeepDive.Composition
                 cashier.Configure(shop);
             }
             ShopShelfPresentation.BindStore(shop, store);
+            EnsureDisplayLabels(store);
             return binding;
+        }
+
+        // #249: make the ACTUAL prefab shelves legible in-world, using the existing
+        // catalog names instead of inventing prices. Cosmetic objects are created
+        // locally when the authored store is bound. No colliders, RPCs, stock,
+        // shop identifiers or networked objects are introduced.
+        private static void EnsureDisplayLabels(EquipmentStoreLayout store)
+        {
+            foreach (var display in store.Displays)
+            {
+                if (display.Anchor == null || display.Items <= 0 || display.Anchor.Find("DisplayLabel") != null)
+                    continue;
+                var title = ShopShelfPresentation.Label(display.EquipmentId);
+                if (string.IsNullOrEmpty(title)) continue;
+
+                var label = new GameObject("DisplayLabel");
+                label.transform.SetParent(display.Anchor, false);
+                // The centre table faces the entrance; wall shelves inherit their
+                // existing shelf rotation and face the shopping aisle.
+                var isCameraTable = display.Anchor.parent != null &&
+                    display.Anchor.parent.name == "Table_Center";
+                label.transform.localPosition = isCameraTable
+                    ? new Vector3(0f, 0.16f, -0.38f)
+                    : new Vector3(0f, -0.08f, -0.31f);
+                label.transform.localRotation = Quaternion.identity;
+                var mesh = label.AddComponent<TextMesh>();
+                mesh.text = title;
+                mesh.anchor = TextAnchor.MiddleCenter;
+                mesh.alignment = TextAlignment.Center;
+                mesh.fontSize = 100;
+                mesh.characterSize = isCameraTable ? 0.028f : 0.038f;
+                mesh.color = new Color(0.98f, 0.91f, 0.70f);
+                label.AddComponent<DepthTestedText>();
+            }
         }
 
         // Authored displays may not yet cover the full existing equipment catalog.
