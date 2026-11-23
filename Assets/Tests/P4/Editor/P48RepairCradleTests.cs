@@ -257,6 +257,55 @@ namespace DeepDive.P4.Tests
             },furnitureProxies:true);
         }
 
+        // #188 (Mehmet, 21 Nov): players ended up standing on the unrepaired hull. A diver-sized controller pushed at the
+        // hull's centre from twelve headings, from 2 m outside its rim, for 3 s each, never gets its feet onto its top.
+        [Test]
+        public void TheUnrepairedHullCannotBeClimbedFromAnySide()
+        {
+            WithScenery(scene =>
+            {
+                var site = BuildSite(scene);
+                var go = new GameObject("Test_P48_Climber");
+                SceneManager.MoveGameObjectToScene(go, scene);
+                try
+                {
+                    BoatHullSeatRules.TryGetDimensions(BoatHullKind.Rowboat, out var size);
+                    var pose = CradlePose();
+                    var cc = go.AddComponent<CharacterController>();
+                    cc.height = 1.8f; cc.radius = 0.35f; cc.center = new Vector3(0f, 0.9f, 0f);
+                    cc.slopeLimit = 45f; cc.stepOffset = 0.3f; cc.skinWidth = 0.08f;
+                    var climbed = new List<string>();
+                    for (var k = 0; k < 12; k++)
+                    {
+                        var dir = Quaternion.Euler(0f, k * 30f, 0f) * Vector3.forward;
+                        var local = Quaternion.Inverse(pose.rotation) * dir;
+                        var reach = Mathf.Abs(local.x) * size.Width / 2f + Mathf.Abs(local.z) * size.Length / 2f + 2f;
+                        var start = pose.position - dir * reach;
+                        go.transform.position = new Vector3(start.x, WalkY + 0.02f, start.z);
+                        Physics.SyncTransforms();
+                        var top = WalkY;
+                        var fall = 0f;
+                        for (var t = 0f; t < 3f; t += Dt)
+                        {
+                            fall = cc.isGrounded ? -1f : fall - 9.81f * Dt;
+                            cc.Move(dir * 4f * Dt + Vector3.up * fall * Dt);
+                            top = Mathf.Max(top, go.transform.position.y);
+                        }
+                        // Standing on it would put the feet at the hull's top (plus skin); pressed against its side at an
+                        // angle the controller can ride up the edge by up to its step offset and slides back when let go.
+                        if (top > WalkY + BoatRepairNetworkBinding.CradleHullHeight - 0.1f) climbed.Add($"heading {k * 30}: feet reached {top:0.00}");
+                    }
+                    CollectionAssert.IsEmpty(climbed, "a walker got onto the hull");
+                }
+                finally
+                {
+                    Object.DestroyImmediate(go);
+                    Object.DestroyImmediate(site);
+                    Physics.SyncTransforms();
+                }
+            }, furnitureProxies: true);
+        }
+
         // ---- helpers -----------------------------------------------------------------------------
 
         private static Pose CradlePose()
