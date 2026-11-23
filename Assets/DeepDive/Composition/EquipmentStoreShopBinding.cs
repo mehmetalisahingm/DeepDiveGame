@@ -86,7 +86,8 @@ namespace DeepDive.Composition
                     display.Anchor.parent.name == "Table_Center";
                 label.transform.localPosition = isCameraTable
                     ? new Vector3(0f, 0.16f, -0.38f)
-                    : new Vector3(0f, -0.08f, -0.31f);
+                    : new Vector3(0f, 0.05f, -0.31f);
+                // Keep shelf captions above the board and in front of the product hit boxes.
                 label.transform.localRotation = Quaternion.identity;
                 var mesh = label.AddComponent<TextMesh>();
                 mesh.text = title;
