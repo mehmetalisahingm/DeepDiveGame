@@ -180,14 +180,21 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
-        public void PhysicalChannelBoardOnlyShowsTheRealMirroredFollowerCount()
+        public void PhysicalChannelBoardShowsOnlyVerifiedProgressAndTheNextHonestMilestone()
         {
             Assert.AreEqual("KANAL", HomeChannelBoardDisplay.Label(false, 123),
                 "a stale or absent mirror must never be presented as earned progress");
-            Assert.AreEqual("KANAL\n0\nTAKIPCI", HomeChannelBoardDisplay.Label(true, -9));
-            Assert.AreEqual("KANAL\n27\nTAKIPCI", HomeChannelBoardDisplay.Label(true, 27));
-            Assert.AreEqual("KANAL\n10.000.000\nTAKIPCI",
-                HomeChannelBoardDisplay.Label(true, 10000000));
+            Assert.AreEqual("KANAL", HomeChannelBoardDisplay.Label(false, ChannelGoal.TargetFollowers),
+                "even an alleged completed campaign is not displayed without a mirror");
+            Assert.AreEqual("KANAL\n0 TAKIPCI\nSONRAKI: 100", HomeChannelBoardDisplay.Label(true, -9));
+            Assert.AreEqual("KANAL\n27 TAKIPCI\nSONRAKI: 100", HomeChannelBoardDisplay.Label(true, 27));
+            Assert.AreEqual("KANAL\n100 TAKIPCI\nSONRAKI: 1.000", HomeChannelBoardDisplay.Label(true, 100));
+            Assert.AreEqual("KANAL\n9.999.999 TAKIPCI\nSONRAKI: 10.000.000",
+                HomeChannelBoardDisplay.Label(true, 9999999));
+            Assert.AreEqual("KANAL\n10.000.000 TAKIPCI\nHEDEF TAMAM",
+                HomeChannelBoardDisplay.Label(true, ChannelGoal.TargetFollowers));
+            Assert.AreEqual("KANAL\n10.000.100 TAKIPCI\nHEDEF TAMAM",
+                HomeChannelBoardDisplay.Label(true, ChannelGoal.TargetFollowers + 100));
         }
 
         [Test]
