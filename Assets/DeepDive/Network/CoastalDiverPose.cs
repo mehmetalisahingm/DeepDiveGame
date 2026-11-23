@@ -20,6 +20,11 @@ namespace DeepDive.Network
         private PalmFrame leftPalm,rightPalm;
         private bool repairFingersApplied;
         private readonly Dictionary<Transform,Quaternion> fingerBind=new Dictionary<Transform,Quaternion>();
+        // #327: what each finger bone is, read once from its name. Transform.name allocates a new string on every read, and
+        // the held-equipment pose below ran four StartsWith/Contains over every bone of the rig each frame (7.9 KB of
+        // garbage per frame for the local first-person diver, the largest allocator in the world profile).
+        private struct Finger { public Transform Bone, Child; public bool Thumb, Curls, Left, Right; public int Segment; }
+        private Finger[] fingers = new Finger[0];
         public Vector3 RepairRightPalmPosition=>rightPalm.Hand!=null?rightPalm.Hand.TransformPoint(rightPalm.Center):transform.position;
         public Vector3 RepairLeftPalmPosition=>leftPalm.Hand!=null?leftPalm.Hand.TransformPoint(leftPalm.Center):transform.position;
         private void Awake()
@@ -38,6 +43,19 @@ namespace DeepDive.Network
             fingerBind.Clear();
             foreach(var finger in fingerBones)
                 if(IsFinger(finger)&&finger.childCount>0)fingerBind[finger]=finger.localRotation;
+            var found = new List<Finger>();
+            foreach (var bone in fingerBones)
+            {
+                if (bone.childCount == 0) continue;
+                var name = bone.name;
+                var curls = name.StartsWith("Index") || name.StartsWith("Middle") || name.StartsWith("Ring") || name.StartsWith("Pinky");
+                var thumb = name.StartsWith("Thumb");
+                if (!curls && !thumb) continue;
+                found.Add(new Finger { Bone = bone, Child = bone.GetChild(0), Thumb = thumb, Curls = curls,
+                    Left = name.EndsWith(".L"), Right = name.EndsWith(".R"),
+                    Segment = name.Contains("2.") ? 2 : name.Contains("3.") ? 3 : 1 });
+            }
+            fingers = found.ToArray();
         }
         private float equipmentLowering;
         private float waterLift;
@@ -53,7 +71,7 @@ namespace DeepDive.Network
             if (Model == null) return;
             Grip(leftPalm,leftArm,leftElbow,left,leftRotation,-1);
             Grip(rightPalm,rightArm,rightElbow,right,rightRotation,1);
-            Curl(leftPalm,".L",gripLeft);Curl(rightPalm,".R",true);
+            Curl(leftPalm,false,gripLeft);Curl(rightPalm,true,true);
             repairFingersApplied=true;
         }
 
@@ -76,22 +94,24 @@ namespace DeepDive.Network
             var wrist=target-palm.Hand.TransformVector(palm.Center);
             HoldWorld(upper,lower,palm.Hand,wrist,side);palm.Hand.rotation=orientation;
         }
-        private void Curl(PalmFrame palm,string side,bool gripping)
+        private void Curl(PalmFrame palm,bool right,bool gripping)
         {
             if(palm.Hand==null)return;
-            foreach(var pair in fingerBind)if(pair.Key.name.EndsWith(side))pair.Key.localRotation=pair.Value;
+            // The fingers are exactly fingerBind's bones (finger-named, with a child), in rig order.
+            foreach(var finger in fingers)if(right?finger.Right:finger.Left)finger.Bone.localRotation=fingerBind[finger.Bone];
             var normal=palm.Hand.TransformDirection(palm.Normal);
-            foreach(var finger in fingerBones)
+            foreach(var finger in fingers)
             {
-                if(!fingerBind.ContainsKey(finger)||!finger.name.EndsWith(side))continue;
-                var direction=finger.GetChild(0).position-finger.position;
-                bool thumb=finger.name.StartsWith("Thumb");
-                var toward=thumb?(palm.Hand.TransformPoint(palm.Center)-finger.position+normal*.025f).normalized:normal;
+                if(!(right?finger.Right:finger.Left))continue;
+                var bone=finger.Bone;
+                var direction=finger.Child.position-bone.position;
+                bool thumb=finger.Thumb;
+                var toward=thumb?(palm.Hand.TransformPoint(palm.Center)-bone.position+normal*.025f).normalized:normal;
                 var axis=Vector3.Cross(direction,toward);
                 if(axis.sqrMagnitude<.000001f)continue;
-                float angle=thumb?(finger.name.Contains("2.")?40:28):(finger.name.Contains("2.")?55:finger.name.Contains("3.")?65:35);
+                float angle=thumb?(finger.Segment==2?40:28):(finger.Segment==2?55:finger.Segment==3?65:35);
                 if(!gripping)angle*=.18f;
-                finger.rotation=Quaternion.AngleAxis(angle,axis.normalized)*finger.rotation;
+                bone.rotation=Quaternion.AngleAxis(angle,axis.normalized)*bone.rotation;
             }
         }
 
@@ -145,14 +165,13 @@ namespace DeepDive.Network
                 Hold(leftArm, leftElbow, leftHand, new Vector3(plank ? -.35f : camera ? -0.18f : -0.12f, y - (camera || plank ? 0 : 0.10f), (plank ? .57f : .43f)+zOffset), -1);
                 Aim(rightHand, rightIndex, camera ? Vector3.up : Vector3.forward);
                 Aim(leftHand, leftIndex, camera ? Vector3.up : Vector3.forward);
-                foreach (var finger in fingerBones)
+                foreach (var finger in fingers)
                 {
-                    if (finger.childCount == 0 || !(finger.name.StartsWith("Index") || finger.name.StartsWith("Middle") ||
-                        finger.name.StartsWith("Ring") || finger.name.StartsWith("Pinky"))) continue;
+                    if (!finger.Curls) continue;
                     var curl = camera
-                        ? finger.name.Contains("2.") ? Vector3.forward : finger.name.Contains("3.") ? Vector3.down : Vector3.back
-                        : finger.name.Contains("2.") ? Vector3.down : finger.name.Contains("3.") ? Vector3.back : Vector3.up;
-                    Aim(finger, finger.GetChild(0), curl);
+                        ? finger.Segment == 2 ? Vector3.forward : finger.Segment == 3 ? Vector3.down : Vector3.back
+                        : finger.Segment == 2 ? Vector3.down : finger.Segment == 3 ? Vector3.back : Vector3.up;
+                    Aim(finger.Bone, finger.Child, curl);
                 }
                 if (equipmentSocket != null)
                 {
