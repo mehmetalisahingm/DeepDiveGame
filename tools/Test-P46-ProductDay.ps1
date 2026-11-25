@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight, [switch]$Perf)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight, [switch]$Perf, [switch]$PerfProfile)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -70,6 +70,8 @@ try {
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
         # #327: -Perf renders every process at 1280x720 with the frame sampler (VSync off, uncapped: a labelled measurement fixture).
+        # #327: -PerfProfile also writes the host's development-player profiler capture (.raw) for P327ProfileDigest.
+        if ($PerfProfile -and $productSlot -eq 0) { $productArgs+=@('-profiler-enable','-profiler-log-file',('"{0}"' -f (Join-Path $productRun 'player0.raw')),'-profiler-maxusedmemory','1073741824') }
         if ($Perf) { $productArgs+=@('-screen-width','1280','-screen-height','720','-screen-fullscreen','0','-p327-perf','1','-p327-uncap','1') }
         elseif ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
         elseif ($productIsWindows -and -not ($RepairVideo -or $EquipmentVideo -or $OceanVideo -or $ActionVideo -or $HabitatHunt -or $Render)) { $productArgs+='-nographics' }

@@ -1,0 +1,488 @@
+{
+    "raw": "C:\\Users\\utkuu\\Desktop\\DeepDiveGame\\Logs\\P46-product-20261125-191630-510-1\\player0.raw",
+    "frames": 2000,
+    "topSelf": [
+        {
+            "marker": "DeepDive.P1.Lab.dll!DeepDive.P1.Lab::ProductDaySmokeDriver.Update() [Invoke]",
+            "selfMsPerFrame": 0.37218599870055915,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "WaitForJobGroupID",
+            "selfMsPerFrame": 0.22974859884100444,
+            "allocKbPerFrame": 0.0,
+            "calls": 35534
+        },
+        {
+            "marker": "PlayerLoop",
+            "selfMsPerFrame": 0.19742802415043116,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatMapView.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.13544884974136948,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "Material.SetPassFast",
+            "selfMsPerFrame": 0.12216039940893825,
+            "allocKbPerFrame": 0.0,
+            "calls": 301252
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatRepairNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.1076956995734945,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::ExplorationNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.09771939974091948,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.P1.Lab.dll!DeepDive.P1.Lab::ProductDaySmokeDriver.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.0967549997959286,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "Inl_On Record Render Graph",
+            "selfMsPerFrame": 0.08849449968524277,
+            "allocKbPerFrame": 0.0,
+            "calls": 2093
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::RecordingNetworkBridge.Update() [Invoke]",
+            "selfMsPerFrame": 0.08266004967410118,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::HomePlayerInteractionBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.07963999980594963,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIStyle.GetMeshInfo() [Invoke]",
+            "selfMsPerFrame": 0.07839679976803019,
+            "allocKbPerFrame": 0.0,
+            "calls": 42557
+        },
+        {
+            "marker": "ExecuteRenderQueueJob",
+            "selfMsPerFrame": 0.078044349711854,
+            "allocKbPerFrame": 0.0,
+            "calls": 3739
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::SafeReturnZone.Update() [Invoke]",
+            "selfMsPerFrame": 0.07137674973532558,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.World.dll!DeepDive.World::FishActor.FixedUpdate() [Invoke]",
+            "selfMsPerFrame": 0.06797579973146276,
+            "allocKbPerFrame": 0.0,
+            "calls": 5910
+        },
+        {
+            "marker": "UnityEngine.CoreModule.dll!::UpdateFunction.Invoke() [Invoke]",
+            "selfMsPerFrame": 0.0663694496765238,
+            "allocKbPerFrame": 0.0,
+            "calls": 14394
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::DayNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.05507489975728094,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "Profiler.FlushMemoryCounters",
+            "selfMsPerFrame": 0.0485774497538805,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::RecordingMediaCaptureBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.04667669977620244,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Day.dll!DeepDive.Day::DayManager.Update() [Invoke]",
+            "selfMsPerFrame": 0.04482754979265155,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "RenderLoop.CleanupNodeQueue",
+            "selfMsPerFrame": 0.04302009974585962,
+            "allocKbPerFrame": 0.0,
+            "calls": 12440
+        },
+        {
+            "marker": "RenderLoop.ScheduleDraw",
+            "selfMsPerFrame": 0.042148799785256419,
+            "allocKbPerFrame": 0.0,
+            "calls": 12553
+        },
+        {
+            "marker": "Inl_UniversalRenderPipeline.RenderSingleCameraInternal: OwnerCamera",
+            "selfMsPerFrame": 0.041593349779956049,
+            "allocKbPerFrame": 0.0,
+            "calls": 1999
+        },
+        {
+            "marker": "GUI.Repaint",
+            "selfMsPerFrame": 0.04152459979522973,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Economy.dll!DeepDive.Economy::EconomyPlayerSync.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.03734919981355779,
+            "allocKbPerFrame": 0.0,
+            "calls": 3998
+        },
+        {
+            "marker": "Inl_RenderCameraStack",
+            "selfMsPerFrame": 0.03723959985096008,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.BeginGUI() [Invoke]",
+            "selfMsPerFrame": 0.03266364968472044,
+            "allocKbPerFrame": 0.0,
+            "calls": 53986
+        },
+        {
+            "marker": "FindObjectsOfType",
+            "selfMsPerFrame": 0.03255184978642137,
+            "allocKbPerFrame": 0.0,
+            "calls": 29533
+        },
+        {
+            "marker": "GC.Collect",
+            "selfMsPerFrame": 0.03227134993672371,
+            "allocKbPerFrame": 0.0,
+            "calls": 83
+        },
+        {
+            "marker": "DeepDive.Network.dll!DeepDive.Network::CoastalDiverPose.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.02947419986134628,
+            "allocKbPerFrame": 0.0,
+            "calls": 3998
+        },
+        {
+            "marker": "Mono.JIT",
+            "selfMsPerFrame": 0.027962299867067488,
+            "allocKbPerFrame": 0.0,
+            "calls": 822
+        },
+        {
+            "marker": "Inl_Setup Light Constants",
+            "selfMsPerFrame": 0.027494599875062706,
+            "allocKbPerFrame": 0.0,
+            "calls": 2093
+        },
+        {
+            "marker": "BehaviourUpdate",
+            "selfMsPerFrame": 0.027181099836714567,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        },
+        {
+            "marker": "DeepDive.Network.dll!DeepDive.Network::NetworkPlayer.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.027126999861560764,
+            "allocKbPerFrame": 0.0,
+            "calls": 3998
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::PlayerActionView.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.024459899893030526,
+            "allocKbPerFrame": 0.0,
+            "calls": 1999
+        },
+        {
+            "marker": "ExecuteRenderGraph",
+            "selfMsPerFrame": 0.024101349893491717,
+            "allocKbPerFrame": 0.0,
+            "calls": 2093
+        },
+        {
+            "marker": "Inl_UniversalRenderPipeline.CreateCameraData",
+            "selfMsPerFrame": 0.0237256998878438,
+            "allocKbPerFrame": 0.0,
+            "calls": 2093
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::SuccessFeedbackView.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.02358879990551941,
+            "allocKbPerFrame": 0.0,
+            "calls": 3998
+        },
+        {
+            "marker": "Inl_ScriptableRenderContext.Submit",
+            "selfMsPerFrame": 0.023357899866998198,
+            "allocKbPerFrame": 0.0,
+            "calls": 2093
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::OceanPresentation.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.022816049887333067,
+            "allocKbPerFrame": 0.0,
+            "calls": 2000
+        }
+    ],
+    "topAlloc": [
+        {
+            "marker": "DeepDive.P1.Lab.dll!DeepDive.P1.Lab::ProductDaySmokeDriver.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 10.99809033203125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.P1.Lab.dll!DeepDive.P1.Lab::ProductDaySmokeDriver.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 8.6093203125,
+            "calls": 0
+        },
+        {
+            "marker": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIUtility.BeginGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 4.6706171875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Economy.dll!DeepDive.Economy::EconomyPlayerSync.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 2.1848623046875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Network.dll!DeepDive.Network::NetworkPlayer.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.9182958984375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Inventory.dll!DeepDive.Inventory::InventoryPlayerSync.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.8804189453125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatRepairHintView.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.725078125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Trip.dll!DeepDive.Trip::BoatTripPlayerSync.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.7242470703125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::HomePlayerInteractionBinding.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.67934765625,
+            "calls": 0
+        },
+        {
+            "marker": "UnityEngine.IMGUIModule.dll!UnityEngine::GUIStyle.GetMeshInfo() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.63562109375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Network.dll!DeepDive.Network::FirstSessionObjectiveView.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.6149267578125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatMapView.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.4516796875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::ExplorationNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.4478759765625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatRepairNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.4139375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::DayNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.3969248046875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::SuccessFeedbackView.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.38259765625,
+            "calls": 0
+        },
+        {
+            "marker": "Unity.RenderPipelines.Universal.Runtime.dll!UnityEngine.Rendering.Universal::UniversalRenderPipelineAsset.OnDisable() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.3593017578125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::RecordingMediaCaptureBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.300630859375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.P1.Lab.dll!DeepDive.P1.Lab::WorldPerfSampler.OnApplicationQuit() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.26211962890625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Day.dll!DeepDive.Day::DayManager.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.218640625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::RecordingWorldBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.2030859375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::RecordingNetworkBridge.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.1562958984375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.World.dll!DeepDive.World::FishActor.FixedUpdate() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.153515625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::CrewEnvironmentBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.1465078125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::LoadoutDiverBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.12575,
+            "calls": 0
+        },
+        {
+            "marker": "Inl_NRPRGComp_ExecuteInitializeResources",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.11580078125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::OceanPresentation.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.111296875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatTripNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.103328125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BossEncounterSessionBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.0787666015625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Network.dll!DeepDive.Network::NetworkPlayer.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.0605166015625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::SuccessFeedbackView.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.05906103515625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::CrewRoleEffectBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.05466015625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.World.dll!DeepDive.World::DeepProgressionWorldRuntime.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.04429296875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::SafeReturnZone.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.0390625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::HomePlayerInteractionBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.03904296875,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::ShopShelfPresentation.OnGUI() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.03740234375,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::MediaNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.0315625,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::BoatMapView.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.0309345703125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::DeepProgressionNetworkBinding.Update() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.030578125,
+            "calls": 0
+        },
+        {
+            "marker": "DeepDive.Composition.dll!DeepDive.Composition::PlayerActionView.LateUpdate() [Invoke]",
+            "selfMsPerFrame": 0.0,
+            "allocKbPerFrame": 0.025640625,
+            "calls": 0
+        }
+    ]
+}
