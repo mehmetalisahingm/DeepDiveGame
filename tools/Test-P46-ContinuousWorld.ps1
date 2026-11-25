@@ -18,7 +18,7 @@ try {
             elseif ($worldIsWindows -and -not $Render) { @('-nographics') }
             else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
         # -batchmode players draw nothing (GPU and render-thread time stay 0), so a -Perf run is a real visible window.
-        $worldArgs = $(if ($Perf) { @() } else { @('-batchmode') }) + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
+        $worldArgs = @(if (-not $Perf) { '-batchmode' }) + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
             '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port, '-p46-mute', 1,
             '-p1-report', ('"{0}"' -f $worldReport), '-logFile', ('"{0}"' -f $worldLog))
         # #327: -PerfProfile also writes the host's development-player profiler capture (Unity's own .raw) for P327ProfileDigest.

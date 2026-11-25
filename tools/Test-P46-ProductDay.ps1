@@ -42,7 +42,7 @@ try {
         $productReport=Join-Path $productRun "player$productSlot.json"
         $productLog=Join-Path $productRun "player$productSlot.log"
         # #327: -batchmode players draw nothing, so a -Perf run is a real visible window.
-        $productArgs=$(if ($Perf) { @() } else { @('-batchmode') }) + @('-p46-day-role',$(if ($productSlot -eq 0) {'host'} else {'client'}),
+        $productArgs=@(if (-not $Perf) { '-batchmode' }) + @('-p46-day-role',$(if ($productSlot -eq 0) {'host'} else {'client'}),
             '-p46-day-count',$Players,'-p46-day-slot',$productSlot,'-p46-day-port',$Port,
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
