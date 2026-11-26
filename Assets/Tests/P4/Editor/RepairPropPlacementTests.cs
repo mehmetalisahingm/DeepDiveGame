@@ -59,6 +59,39 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void RepairHudExplainsPhysicalStepsWithoutInventingProgress()
+        {
+            var carry = RepairCarryView.RepairInstruction(false, 2);
+            StringAssert.Contains("YUVAYA BAK", carry);
+            StringAssert.Contains("YERLESTIR", carry);
+            StringAssert.DoesNotContain("2/3", carry,
+                "carrying a board is not proof that nails have been accepted");
+            Assert.AreEqual("KESER: SOL TIK | ONAYLI CIVI 0/3 | Q: BIRAK",
+                RepairCarryView.RepairInstruction(true, -10));
+            Assert.AreEqual("KESER: SOL TIK | ONAYLI CIVI 2/3 | Q: BIRAK",
+                RepairCarryView.RepairInstruction(true, 2));
+            Assert.AreEqual("KESER: SOL TIK | ONAYLI CIVI 3/3 | Q: BIRAK",
+                RepairCarryView.RepairInstruction(true, 99),
+                "a cosmetic UI never displays more than the 3 physical nails");
+        }
+
+        [Test]
+        public void RepairHudStaysWithinSmallAndWideScreenBounds()
+        {
+            foreach (var size in new[] { new Vector2(320f, 480f), new Vector2(800f, 600f),
+                    new Vector2(1920f, 1080f) })
+            {
+                var hud = RepairCarryView.RepairHudRect(size.x, size.y);
+                Assert.GreaterOrEqual(hud.xMin, 0f);
+                Assert.GreaterOrEqual(hud.yMin, 0f);
+                Assert.LessOrEqual(hud.xMax, size.x);
+                Assert.LessOrEqual(hud.yMax, size.y);
+                Assert.Greater(hud.width, 0f);
+                Assert.Greater(hud.height, 0f);
+            }
+        }
+
+        [Test]
         public void UnassignedFinalArtIsExplicitAndSafe()
         {
             var catalog=ScriptableObject.CreateInstance<DiverPresentationCatalog>();
