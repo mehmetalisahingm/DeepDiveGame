@@ -46,6 +46,29 @@ namespace DeepDive.Media
         private const int MaxFrameBytes = 2 * 1024 * 1024;
         private const int MaxFileBytes = 256 * 1024 * 1024;
 
+        // Reject oversized or truncated files BEFORE allocating their payload.
+        // Keep the existing DDC1 limits and file format; this is not a new archive quota.
+        public static bool IsSupportedFileSize(long sizeBytes) => sizeBytes >= 28 && sizeBytes <= MaxFileBytes;
+
+        public static bool TryReadPayload(Stream stream, out byte[] bytes)
+        {
+            bytes = null;
+            if (stream == null || !stream.CanRead || !stream.CanSeek) return false;
+            var length = stream.Length - stream.Position;
+            if (!IsSupportedFileSize(length)) return false;
+            var payload = new byte[(int)length];
+            var offset = 0;
+            while (offset < payload.Length)
+            {
+                var count = stream.Read(payload, offset, payload.Length - offset);
+                if (count <= 0) return false;
+                offset += count;
+            }
+            if (stream.ReadByte() != -1) return false;
+            bytes = payload;
+            return true;
+        }
+
         public static string ClipIdForRecording(string recordingId)
         {
             if (string.IsNullOrWhiteSpace(recordingId)) return string.Empty;
@@ -123,7 +146,7 @@ namespace DeepDive.Media
         public static bool TryDecode(byte[] bytes, out ClipFileData data)
         {
             data = null;
-            if (bytes == null || bytes.Length < 28 || bytes.Length > MaxFileBytes) return false;
+            if (bytes == null || !IsSupportedFileSize(bytes.LongLength)) return false;
             try
             {
                 using var stream = new MemoryStream(bytes, false);

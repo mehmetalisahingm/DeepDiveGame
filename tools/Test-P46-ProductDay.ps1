@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight, [switch]$FishCloseUps)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight, [switch]$FishCloseUps, [switch]$ShoreRamp)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -57,6 +57,7 @@ try {
         if ($EastCourt) { $productArgs+=@('-p301-east-court','1') }
         if ($EastCourtNight) { $productArgs+=@('-p301-night','1') }
         if ($WestShore) { $productArgs+=@('-p302-west-shore','1') }
+        if ($ShoreRamp) { $productArgs+=@('-p297-shore-ramp','1') }
         if ($WestShoreNight) { $productArgs+=@('-p302-night','1') }
         if ($ReefGateFrames) { $productArgs+=@('-p298-reef-gate-frames','1') }
         if ($WreckFrames) { $productArgs+=@('-p303-wreck-frames','1') }
