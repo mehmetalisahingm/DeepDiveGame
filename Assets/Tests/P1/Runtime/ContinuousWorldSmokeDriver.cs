@@ -197,6 +197,7 @@ namespace DeepDive.P1.Lab
             if (Time.realtimeSinceStartup >= nextTrace)
             {
                 nextTrace = Time.realtimeSinceStartup + 5f;
+                Debug.Log($"P46_WORLD_TRAVEL step={step} waypoint={waypoint} position={local.transform.position} swimming={local.Swimming.Value}");
                 RecordTravelSample("travel");
             }
             if (Time.realtimeSinceStartup >= nextReport)
@@ -385,7 +386,7 @@ namespace DeepDive.P1.Lab
                 .Where(p => p.IsSpawned)
                 .OrderBy(p => p.OwnerClientId)
                 .Select(p => $"{p.OwnerClientId}:{p.transform.position.ToString("F3")}:swim={p.Swimming.Value}:seated={p.Seated.Value}");
-            var sample = $"P46_WORLD_TRAVEL reason={reason} t={Time.realtimeSinceStartup:F2} step={step} waypoint={waypoint} " +
+            var sample = $"P46_WORLD_EVIDENCE reason={reason} t={Time.realtimeSinceStartup:F2} step={step} waypoint={waypoint} " +
                 $"position={PositionForReport(local)} target={target} dockIndex={report.dockIndex} peers=[{string.Join(";", peers)}]";
             report.travelSamples.Add(sample);
             Debug.Log(sample);
