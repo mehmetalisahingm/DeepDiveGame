@@ -19,6 +19,8 @@ namespace DeepDive.Composition
         private Transform bagLeft,bagRight,crateLeft,crateRight;
         private PlayerActionMessage action;
         private double until;
+        public const double ActionDuration = 1.6;
+        private const double SeatGestureDuration = .65;
         private LineRenderer lanyard;
         private LineRenderer shoulderStrap;
         private Material cord;
@@ -64,7 +66,6 @@ namespace DeepDive.Composition
             if(trip!=null)
             {
                 seated=trip.IsSeated;RestoreBoatSeatPresentation(player,seated);
-                trip.MySeatId.OnValueChanged+=SeatChanged;
             }
         }
         // OnDisable clears the visual camera lift, but the authoritative seat ID
@@ -76,6 +77,9 @@ namespace DeepDive.Composition
             if(player==null || trip==null)return; // initial OnEnable precedes Awake
             seated=trip.IsSeated;
             seatTransition=0;
+            phaseKnown=false;
+            trip.MySeatId.OnValueChanged-=SeatChanged;
+            trip.MySeatId.OnValueChanged+=SeatChanged;
             RestoreBoatSeatPresentation(player,seated);
         }
         public static void RestoreBoatSeatPresentation(NetworkPlayer target,bool seatAssigned)
@@ -84,8 +88,13 @@ namespace DeepDive.Composition
         }
         private void SeatChanged(FixedString32Bytes before,FixedString32Bytes after)
         {
-            seated=after.Length>0;player.SetVisualBoatSeated(seated);
+            seated=after.Length>0;
+            if(!isActiveAndEnabled || player==null)return;
+            player.SetVisualBoatSeated(seated);
             if((before.Length>0)==seated)return;
+            // Real boarding or exit supersedes a previous pickup/delivery visual.
+            // It never changes the actual inventory, seat, root or accepted outcome.
+            until=0;ClearFish();
             seatTransition=seated?1:-1;seatAt=Now;
             if(seated)BoardCount++;else ExitCount++;
         }
@@ -106,9 +115,16 @@ namespace DeepDive.Composition
                 default: return null;
             }
         }
+        public static bool CanPresentAction(PlayerActionMessage value,double now,bool enabled)
+        {
+            return enabled && value.Valid(now) && now < value.At + ActionDuration;
+        }
+
         public void Play(PlayerActionMessage value)
         {
-            action=value;until=value.At+1.6;ClearFish();
+            if(player==null || !player.IsSpawned || !CanPresentAction(value,Now,isActiveAndEnabled))return;
+            seatTransition=0;
+            action=value;until=value.At+ActionDuration;ClearFish();
             equipmentAtStart=player.CurrentHeldEquipment;requestAtStart=player.LastActionRequestId.Value;
             if(value.Kind==PlayerVisualAction.Collect)
             {
@@ -193,7 +209,7 @@ namespace DeepDive.Composition
             // An accepted shot is free to interrupt this cosmetic recovery immediately.
             if(Now<until && player.LastActionRequestId.Value!=requestAtStart &&
                 player.LastActionKind.Value==(byte)PlayerActionKind.Harpoon)blocked=true;
-            ActiveKind=PlayerVisualAction.None;ContactExpected=false;
+            ActiveKind=PlayerVisualAction.None;ContactExpected=false;ActionAge=0;
             if(blocked){until=0;seatTransition=0;}
             var active=!blocked && Now<until;
             var holdingBag=active && action.Kind==PlayerVisualAction.Collect;
@@ -220,19 +236,20 @@ namespace DeepDive.Composition
             if(!active)
             {
                 ClearFish();
-                if(!blocked&&seatTransition!=0&&Now-seatAt<.65)
+                if(!blocked&&seatTransition!=0&&Now-seatAt<SeatGestureDuration)
                 {
                     ActiveKind=seatTransition>0?PlayerVisualAction.Board:PlayerVisualAction.Disembark;
-                    var age=Mathf.Clamp01((float)(Now-seatAt)/.65f);
+                    var age=Mathf.Clamp01((float)((Now-seatAt)/SeatGestureDuration));
                     ActionAge=age;
                     var lift=Mathf.Sin(age*Mathf.PI)*.12f;
                     var y=seated?.96f:1.15f;
                     Grips(Point(new Vector3(-.29f,y+lift,.32f)),Point(new Vector3(.29f,y+lift,.32f)),
                         Body.rotation*Quaternion.Euler(60,0,-20),Body.rotation*Quaternion.Euler(60,0,20),false);
                 }
+                else seatTransition=0;
                 return;
             }
-            ActiveKind=action.Kind;ActionAge=Mathf.Clamp01((float)(Now-action.At)/1.6f);
+            ActiveKind=action.Kind;ActionAge=Mathf.Clamp01((float)((Now-action.At)/ActionDuration));
             if(action.Kind==PlayerVisualAction.Deliver)Deliver();else Collect();
         }
         private void Collect()
@@ -292,8 +309,13 @@ namespace DeepDive.Composition
         private void ClearFish()
         {if(fish!=null)Destroy(fish);fish=null;foreach(var mesh in frozenMeshes)if(mesh!=null)Destroy(mesh);frozenMeshes=new Mesh[0];if(lanyard!=null)lanyard.enabled=false;}
         private void Hide()
-        {until=0;seatTransition=0;ActiveKind=PlayerVisualAction.None;ContactExpected=false;if(bag!=null)bag.SetActive(false);if(crate!=null)crate.SetActive(false);if(shoulderStrap!=null)shoulderStrap.enabled=false;ClearFish();}
-        private void OnDisable(){Hide();if(player!=null)player.SetVisualBoatSeated(false);}
+        {until=0;seatTransition=0;ActiveKind=PlayerVisualAction.None;ContactExpected=false;ActionAge=0;if(bag!=null)bag.SetActive(false);if(crate!=null)crate.SetActive(false);if(shoulderStrap!=null)shoulderStrap.enabled=false;ClearFish();}
+        private void OnDisable()
+        {
+            if(trip!=null)trip.MySeatId.OnValueChanged-=SeatChanged;
+            Hide();phaseKnown=false;
+            if(player!=null)player.SetVisualBoatSeated(false);
+        }
         private void OnDestroy()
         {
             if(trip!=null)trip.MySeatId.OnValueChanged-=SeatChanged;
