@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using DeepDive.Core.Contracts;
 using DeepDive.Media;
 using NUnit.Framework;
@@ -37,6 +38,29 @@ namespace DeepDive.P4.Tests
             var truncated = new byte[bytes.Length - 1];
             Buffer.BlockCopy(bytes, 0, truncated, 0, truncated.Length);
             Assert.IsFalse(RecordingClipFile.TryDecode(truncated, out _));
+        }
+
+        [Test]
+        public void PlaybackRejectsInvalidFileLengthsBeforeAllocatingAndKeepsValidBytes()
+        {
+            Assert.IsFalse(RecordingClipFile.IsSupportedFileSize(-1));
+            Assert.IsFalse(RecordingClipFile.IsSupportedFileSize(27));
+            Assert.IsTrue(RecordingClipFile.IsSupportedFileSize(28));
+            Assert.IsTrue(RecordingClipFile.IsSupportedFileSize(256L * 1024 * 1024));
+            Assert.IsFalse(RecordingClipFile.IsSupportedFileSize(256L * 1024 * 1024 + 1));
+            Assert.IsFalse(RecordingClipFile.IsSupportedFileSize(long.MaxValue));
+
+            var expected = RecordingClipFile.Encode(320, 180, 1f, new[] { Frame(0f, 1) });
+            using var valid = new MemoryStream(expected, false);
+            Assert.IsTrue(RecordingClipFile.TryReadPayload(valid, out var actual));
+            CollectionAssert.AreEqual(expected, actual);
+            Assert.IsTrue(RecordingClipFile.TryDecode(actual, out _));
+
+            using var shortFile = new MemoryStream(new byte[27], false);
+            Assert.IsFalse(RecordingClipFile.TryReadPayload(shortFile, out var rejected));
+            Assert.IsNull(rejected);
+            Assert.AreEqual(0, shortFile.Position, "invalid size is rejected before reading");
+            Assert.IsFalse(RecordingClipFile.TryReadPayload(null, out _));
         }
 
         [Test]
