@@ -62,6 +62,33 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void AuthoredDisplaysHaveReadableNonSolidCatalogLabelsWithoutDuplicates()
+        {
+            var binding = EquipmentStoreShopBinding.Bind(shop, layout);
+            Assert.NotNull(binding);
+            var expected = layout.Displays.Where(d => d.Anchor != null && d.Items > 0 &&
+                !string.IsNullOrEmpty(ShopShelfPresentation.Label(d.EquipmentId))).ToArray();
+            Assert.IsNotEmpty(expected);
+            foreach (var display in expected)
+            {
+                var sign = display.Anchor.Find("DisplayLabel");
+                Assert.NotNull(sign, display.EquipmentId + " must have an in-world name");
+                var mesh = sign.GetComponent<TextMesh>();
+                Assert.NotNull(mesh);
+                Assert.AreEqual(ShopShelfPresentation.Label(display.EquipmentId), mesh.text,
+                    "labels name the actual catalog item, not a made-up price");
+                Assert.IsEmpty(sign.GetComponentsInChildren<Collider>(true), "no new obstacle or raycast target");
+                Assert.IsEmpty(sign.GetComponentsInChildren<NetworkObject>(true), "visual-only, never networked");
+            }
+            var count = store.GetComponentsInChildren<TextMesh>(true)
+                .Count(m => m.gameObject.name == "DisplayLabel");
+            Assert.AreEqual(expected.Length, count);
+            Assert.AreSame(binding, EquipmentStoreShopBinding.Bind(shop, layout));
+            Assert.AreEqual(count, store.GetComponentsInChildren<TextMesh>(true)
+                .Count(m => m.gameObject.name == "DisplayLabel"), "repeat binding must not duplicate signs");
+        }
+
+        [Test]
         public void RealCounterTargetsTheSameEquipmentServiceAndPreservesHostReach()
         {
             Assert.NotNull(EquipmentStoreShopBinding.Bind(shop, layout));
