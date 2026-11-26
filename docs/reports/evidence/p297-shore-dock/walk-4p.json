@@ -1,0 +1,42 @@
+{
+ "player0": {
+  "passed": true,
+  "shoreRampWalks": 1,
+  "shoreRampLowestY": 8.401490211486816,
+  "shoreRampFrames": [
+   "shot 1 from=(6.31, 8.48, -14.92) walker=none",
+   "shot 2 from=(8.06, 8.48, -9.75) walker=client1 at=(6.61, 8.44, -10.84)",
+   "back allUp=True waited=7,2"
+  ]
+ },
+ "player1": {
+  "passed": true,
+  "shoreRampWalks": 1,
+  "shoreRampLowestY": 8.37343978881836,
+  "shoreRampFrames": [
+   "shot 1 from=(7.25, 8.48, -14.91) walker=client0 at=(6.71, 8.38, -10.62)",
+   "shot 2 from=(8.86, 8.48, -9.01) walker=client2 at=(6.99, 8.48, -10.04)",
+   "back allUp=True waited=3,9"
+  ]
+ },
+ "player2": {
+  "passed": true,
+  "shoreRampWalks": 1,
+  "shoreRampLowestY": 8.36181354522705,
+  "shoreRampFrames": [
+   "shot 1 from=(8.15, 8.48, -14.91) walker=client1 at=(6.69, 8.37, -10.59)",
+   "shot 2 from=(7.87, 8.48, -8.62) walker=client3 at=(6.63, 8.46, -10.87)",
+   "back allUp=True waited=0,0"
+  ]
+ },
+ "player3": {
+  "passed": true,
+  "shoreRampWalks": 1,
+  "shoreRampLowestY": 0.0,
+  "shoreRampFrames": [
+   "shot 1 from=(9.04, 8.48, -14.91) walker=none",
+   "shot 2 from=(10.04, 8.48, -10.42) walker=none",
+   "back allUp=False waited=25,0"
+  ]
+ }
+}

@@ -310,6 +310,7 @@ namespace DeepDive.Composition
             SuppliedTownArt.Town(parent);
             TownDressing.Place(parent);   // #171: fences, paving, lamps and props over the bare blocks (visual only)
             WestShoreWalk.Build(scene);   // #302: the walk off the beach's west fence opening, built with the town it joins
+            ShoreRampApron.Build(scene);   // #297: a sloped side join from the beach onto the dock ramp
             BuildZones(scene, parent);
 
             var services = FindRoot(scene, "TownServices");

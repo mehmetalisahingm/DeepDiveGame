@@ -42,6 +42,9 @@ namespace DeepDive.P1.Lab
             public int eastCourtLoops;
             public int westShoreWalks;
             public float westShoreHighestY;
+            public int shoreRampWalks;
+            public float shoreRampLowestY;
+            public List<string> shoreRampFrames = new List<string>();
             public bool cameraHudRecording, cameraHudTimerAdvanced, cameraHudStopped;
             public bool cameraAutomaticLimit;
             public bool guestCameraPurchased, guestCameraClipVerified;
@@ -391,6 +394,7 @@ namespace DeepDive.P1.Lab
                     if (StoreStreetWalk && substep == 0 && !StoreStreetTick()) return;
                     if (EastCourtWalk && substep == 0 && !EastCourtTick()) return;
                     if (WestShoreWalkOn && substep == 0 && !WestShoreTick()) return;
+                    if (ShoreRampWalk && substep == 0 && !ShoreRampTick()) return;
                     if (substep == 0 && !(RepairPurchase && purchaseHomeExited))
                     {
                         if (route == null) SetRoute(Outward());
