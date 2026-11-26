@@ -35,6 +35,38 @@ namespace DeepDive.P4.Tests
             finally { Object.DestroyImmediate(root); }
         }
 
+        [TestCase("SeaBass")]
+        [TestCase("Tuna")]
+        [TestCase("RedSnapper")]
+        [TestCase("Grouper")]
+        [TestCase("Lanternfish")]
+        public void DeadFishStopsAuthoredSwimClipsAndRespawnRestoresThem(string visual)
+        {
+            var prefab = Resources.Load<GameObject>("SuppliedKit/" + visual);
+            Assert.NotNull(prefab);
+            var root = Object.Instantiate(prefab);
+            try
+            {
+                var actor = root.AddComponent<FishActor>();
+                var clips = root.GetComponentsInChildren<Animation>(true);
+                Assert.IsNotEmpty(clips);
+                var enabled = System.Array.ConvertAll(clips, clip => clip.enabled);
+                var hidden = new GameObject("Authored disabled clip");
+                hidden.transform.SetParent(root.transform, false);
+                var disabledClip = hidden.AddComponent<Animation>();
+                disabledClip.enabled = false;
+                for (var dive = 0; dive < 3; dive++)
+                {
+                    actor.SetSwimPresentation(false);
+                    foreach (var clip in clips) Assert.IsFalse(clip.enabled);
+                    actor.SetSwimPresentation(true);
+                    for (var i = 0; i < clips.Length; i++) Assert.AreEqual(enabled[i], clips[i].enabled);
+                    Assert.IsFalse(disabledClip.enabled, "restore must preserve authored disabled visuals");
+                }
+            }
+            finally { Object.DestroyImmediate(root); }
+        }
+
         [Test]
         public void RetainedFishHidesWhileDespawnedAndRestoresOnlyAuthoredEnabledParts()
         {

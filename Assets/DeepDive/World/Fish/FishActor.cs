@@ -53,6 +53,35 @@ namespace DeepDive.World
         private Renderer[] visuals;
         private Collider[] colliders;
         private bool[] visualEnabled, colliderEnabled;
+        private Animation[] swimClips;
+        private Animator[] swimAnimators;
+        private bool[] clipEnabled, animatorEnabled;
+        private bool? swimPresentation;
+
+        // Cosmetic only: every peer reads replicated health, not its local host-only
+        // FishHealth instance. Preserve authored disabled components over scene reuse.
+        public void SetSwimPresentation(bool alive)
+        {
+            if (swimClips == null)
+            {
+                swimClips = GetComponentsInChildren<Animation>(true);
+                swimAnimators = GetComponentsInChildren<Animator>(true);
+                clipEnabled = Array.ConvertAll(swimClips, a => a.enabled);
+                animatorEnabled = Array.ConvertAll(swimAnimators, a => a.enabled);
+            }
+            if (swimPresentation == alive) return;
+            swimPresentation = alive;
+            for (var i = 0; i < swimClips.Length; i++)
+            {
+                var clip = swimClips[i];
+                if (clip == null) continue;
+                if (!alive) clip.Stop();
+                clip.enabled = alive && clipEnabled[i];
+                if (clip.enabled && clip.playAutomatically && clip.clip != null) clip.Play();
+            }
+            for (var i = 0; i < swimAnimators.Length; i++)
+                if (swimAnimators[i] != null) swimAnimators[i].enabled = alive && animatorEnabled[i];
+        }
 
         private void SetPresent(bool present)
         {
@@ -125,6 +154,8 @@ namespace DeepDive.World
         public override void OnNetworkSpawn()
         {
             SetPresent(true);
+            // A retained object may still hold its previous dead health until the host initializes it.
+            SetSwimPresentation(false);
             sizeScale.OnValueChanged -= ApplySize;
             sizeScale.OnValueChanged += ApplySize;
             ApplySize(sizeScale.Value);
@@ -161,6 +192,7 @@ namespace DeepDive.World
             habitat = new HabitatWaterBounds(SwimVolumeBounds.Instance, transform.position);
             if (!Live.Contains(this)) Live.Add(this);
             health.Value = state.Health;
+            SetSwimPresentation(true);
         }
 
         // Host-only. A dead fish is a catch lying on the ground, so it stops swimming the
@@ -194,12 +226,15 @@ namespace DeepDive.World
 
         private void LateUpdate()
         {
-            if (nightGlow != null) nightGlow.enabled = IsSpawned && nightActive.Value && !IsDead;
+            var alive = IsSpawned && health.Value > 0f;
+            SetSwimPresentation(alive);
+            if (nightGlow != null) nightGlow.enabled = alive && nightActive.Value;
         }
 
         public override void OnNetworkDespawn()
         {
             SetPresent(false);
+            SetSwimPresentation(false);
             Live.Remove(this);
             sizeScale.OnValueChanged -= ApplySize;
             // A living scene fish can despawn and respawn in the same frame at next dive.
@@ -287,6 +322,7 @@ namespace DeepDive.World
             // The same NetworkObject becomes a catch on death. Clear the replicated night
             // indicator immediately so clients never render a glowing dead fish.
             nightActive.Value = false;
+            SetSwimPresentation(false);
             var catchObject = GetComponent<CatchObject>();
             if (catchObject == null)
             {
