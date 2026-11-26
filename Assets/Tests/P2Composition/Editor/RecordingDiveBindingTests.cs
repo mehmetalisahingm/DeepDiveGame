@@ -86,14 +86,19 @@ public sealed class RecordingDiveBindingTests
         session.BeginReturn();
         Assert.IsFalse(RecordingClaim.IsBound);
         Assert.AreEqual(1, binding.PendingDiveCount);
+        Assert.IsTrue(binding.CanStillSettleDive("dive-1"));
         Assert.IsFalse(oldDirector.IsSettled);
         session.CompleteReturn(); EnterDive("dive-2");
         Assert.AreNotSame(oldDirector, binding.Director);
+        Assert.IsTrue(binding.CanStillSettleDive("dive-1"), "payment retry still owns old footage");
+        Assert.IsTrue(binding.CanStillSettleDive("dive-2"));
         Assert.AreEqual(0, binding.Director.ClaimCount);
         binding.SetPaymentHandler(Credit);
         Assert.AreEqual(1, credited.Count);
         Assert.AreEqual("dive-1", credited[0].DiveId);
         Assert.AreEqual(0, binding.PendingDiveCount);
+        Assert.IsFalse(binding.CanStillSettleDive("dive-1"));
+        Assert.IsTrue(binding.CanStillSettleDive("dive-2"));
         Assert.IsFalse(binding.Director.IsSettled);
     }
 
@@ -105,6 +110,17 @@ public sealed class RecordingDiveBindingTests
         Assert.IsFalse(RecordingClaim.IsBound);
         Assert.IsFalse(RecorderViews.IsBound(alice));
         Assert.AreEqual(PlayerActionResult.InvalidState, binding.TryClaim(default));
+    }
+
+    [Test] public void SettledUnsafeFootageIsNoLongerEligibleForMediaRetention()
+    {
+        binding.SetPaymentHandler(Credit);
+        EnterDive(); Register(alice, 4);
+        Assert.IsTrue(binding.CanStillSettleDive("dive-1"));
+        session.BeginReturn();
+        Assert.IsEmpty(credited);
+        Assert.IsFalse(binding.CanStillSettleDive("dive-1"));
+        Assert.IsFalse(binding.CanStillSettleDive(""));
     }
 
     [Test] public void NewRoomClearsPendingClaims_DisposeClearsPayment()
