@@ -1,0 +1,706 @@
+{
+ "note": "Real Windows player processes, ContinuousWorld 1/2/4 (tools/Test-P46-ContinuousWorld.ps1). dockIndex 0/1 far row, 2/3 near row; dockSeconds from the start of step 1. Old layout = each slot's fixed stop, rear slots first (-DockRush -DockFixed -DockReverse) before the per-diver lanes.",
+ "runs": {
+  "old-fixed-reverse (no lanes)": [
+   {
+    "run": "P46-world-20261123-214508-4",
+    "passed": false,
+    "players": [
+     {
+      "dockIndex": 0,
+      "dockMode": "fixed",
+      "dockSeconds": 0.0,
+      "dockReached": false,
+      "passed": false,
+      "completedStep": 1,
+      "position": "(9.23, 8.48, -5.46)",
+      "error": "Timed out at step 1 waypoint 13 position=(9.23, 8.48, -5.46) target=(8.55, 8.40, -4.50) bedRay= bedAnswer= inBed=False attempts=0",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=13,9 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "fixed",
+      "dockSeconds": 52.52875518798828,
+      "dockReached": true,
+      "passed": false,
+      "completedStep": 2,
+      "position": "missing",
+      "error": "Connection lost during world travel at step 2 waypoint 14",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=9,5 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 2,
+      "dockMode": "fixed",
+      "dockSeconds": 48.09579849243164,
+      "dockReached": true,
+      "passed": false,
+      "completedStep": 2,
+      "position": "missing",
+      "error": "Connection lost during world travel at step 2 waypoint 14",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=0,6 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "fixed",
+      "dockSeconds": 0.0,
+      "dockReached": false,
+      "passed": false,
+      "completedStep": 1,
+      "position": "missing",
+      "error": "Connection lost during world travel at step 1 waypoint 13",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=False waited=40,0 reverse=True"
+      ]
+     }
+    ]
+   },
+   {
+    "run": "P46-world-20261123-214900-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 0,
+      "dockMode": "fixed",
+      "dockSeconds": 58.27874755859375,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=17,2 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "fixed",
+      "dockSeconds": 56.28003692626953,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=12,9 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 2,
+      "dockMode": "fixed",
+      "dockSeconds": 51.615638732910156,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=4,2 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "fixed",
+      "dockSeconds": 90.00846099853516,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=False waited=40,0 reverse=True"
+      ]
+     }
+    ]
+   },
+   {
+    "run": "P46-world-20261123-215153-4",
+    "passed": false,
+    "players": [
+     {
+      "dockIndex": 0,
+      "dockMode": "fixed",
+      "dockSeconds": 0.0,
+      "dockReached": false,
+      "passed": false,
+      "completedStep": 1,
+      "position": "(9.22, 8.48, -5.44)",
+      "error": "Timed out at step 1 waypoint 13 position=(9.22, 8.48, -5.44) target=(8.55, 8.40, -4.50) bedRay= bedAnswer= inBed=False attempts=0",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=13,9 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "fixed",
+      "dockSeconds": 52.44729232788086,
+      "dockReached": true,
+      "passed": false,
+      "completedStep": 2,
+      "position": "missing",
+      "error": "Connection lost during world travel at step 2 waypoint 14",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=9,6 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 2,
+      "dockMode": "fixed",
+      "dockSeconds": 48.028568267822266,
+      "dockReached": true,
+      "passed": false,
+      "completedStep": 2,
+      "position": "missing",
+      "error": "Connection lost during world travel at step 2 waypoint 14",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=0,6 reverse=True"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "fixed",
+      "dockSeconds": 0.0,
+      "dockReached": false,
+      "passed": false,
+      "completedStep": 1,
+      "position": "missing",
+      "error": "Connection lost during world travel at step 1 waypoint 13",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=False waited=40,0 reverse=True"
+      ]
+     }
+    ]
+   }
+  ],
+  "farfirst-sim-1": [
+   {
+    "run": "P46-world-20261123-233319-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 2,
+      "dockMode": "far-first rank=2",
+      "dockSeconds": 56.79350662231445,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=17,9 reverse=False",
+       "P326_DOCK_CLAIM slot=0 rank=2 stop=2 at=(8.37, 8.48, -10.47)"
+      ]
+     },
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 54.74919891357422,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=12,8 reverse=False",
+       "P326_DOCK_CLAIM slot=1 rank=1 stop=0 at=(8.54, 8.48, -9.27)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 52.4859619140625,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=4,8 reverse=False",
+       "P326_DOCK_CLAIM slot=2 rank=1 stop=1 at=(9.54, 8.48, -9.29)"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "far-first rank=3",
+      "dockSeconds": 50.572811126708984,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=True waited=0,0 reverse=False",
+       "P326_DOCK_CLAIM slot=3 rank=2 stop=2 at=(9.60, 8.48, -10.48)",
+       "P326_DOCK_CLAIM slot=3 rank=3 stop=3 at=(9.41, 8.48, -9.58)"
+      ]
+     }
+    ]
+   }
+  ],
+  "farfirst-sim-2": [
+   {
+    "run": "P46-world-20261123-233537-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 2,
+      "dockMode": "far-first rank=2",
+      "dockSeconds": 52.838134765625,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=14,2 reverse=False",
+       "P326_DOCK_CLAIM slot=0 rank=2 stop=2 at=(8.36, 8.48, -10.47)"
+      ]
+     },
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 50.7685661315918,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=9,7 reverse=False",
+       "P326_DOCK_CLAIM slot=1 rank=1 stop=0 at=(8.54, 8.48, -9.27)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 48.511085510253906,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=0,5 reverse=False",
+       "P326_DOCK_CLAIM slot=2 rank=1 stop=1 at=(9.54, 8.48, -9.29)"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "far-first rank=3",
+      "dockSeconds": 46.70594787597656,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=True waited=0,0 reverse=False",
+       "P326_DOCK_CLAIM slot=3 rank=2 stop=2 at=(9.60, 8.48, -10.48)",
+       "P326_DOCK_CLAIM slot=3 rank=3 stop=3 at=(9.47, 8.48, -9.89)"
+      ]
+     }
+    ]
+   }
+  ],
+  "farfirst-sim-3": [
+   {
+    "run": "P46-world-20261123-233755-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 2,
+      "dockMode": "far-first rank=2",
+      "dockSeconds": 52.83491516113281,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=14,2 reverse=False",
+       "P326_DOCK_CLAIM slot=0 rank=2 stop=2 at=(8.37, 8.48, -10.47)"
+      ]
+     },
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 50.792484283447266,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=9,5 reverse=False",
+       "P326_DOCK_CLAIM slot=1 rank=1 stop=0 at=(8.54, 8.48, -9.28)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 48.544857025146484,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=0,6 reverse=False",
+       "P326_DOCK_CLAIM slot=2 rank=1 stop=1 at=(9.54, 8.48, -9.28)"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "far-first rank=3",
+      "dockSeconds": 46.70948791503906,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=True waited=0,0 reverse=False",
+       "P326_DOCK_CLAIM slot=3 rank=2 stop=2 at=(9.60, 8.48, -10.49)",
+       "P326_DOCK_CLAIM slot=3 rank=3 stop=3 at=(9.44, 8.48, -9.74)"
+      ]
+     }
+    ]
+   }
+  ],
+  "farfirst-rev-1": [
+   {
+    "run": "P46-world-20261123-234007-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 2,
+      "dockMode": "far-first rank=3",
+      "dockSeconds": 57.48898696899414,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=17,4 reverse=True",
+       "P326_DOCK_CLAIM slot=0 rank=3 stop=2 at=(8.38, 8.48, -10.47)"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "far-first rank=2",
+      "dockSeconds": 55.19519805908203,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=12,8 reverse=True",
+       "P326_DOCK_CLAIM slot=1 rank=2 stop=2 at=(8.50, 8.48, -9.28)",
+       "P326_DOCK_CLAIM slot=1 rank=2 stop=3 at=(8.50, 8.48, -8.73)"
+      ]
+     },
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=0",
+      "dockSeconds": 51.90458679199219,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=4,2 reverse=True",
+       "P326_DOCK_CLAIM slot=2 rank=0 stop=0 at=(9.54, 8.48, -9.29)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 50.299842834472656,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=True waited=0,0 reverse=True",
+       "P326_DOCK_CLAIM slot=3 rank=1 stop=1 at=(9.60, 8.48, -10.48)"
+      ]
+     }
+    ]
+   }
+  ],
+  "farfirst-rev-2": [
+   {
+    "run": "P46-world-20261123-234223-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 2,
+      "dockMode": "far-first rank=3",
+      "dockSeconds": 57.515342712402344,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=17,4 reverse=True",
+       "P326_DOCK_CLAIM slot=0 rank=3 stop=2 at=(8.38, 8.48, -10.47)"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "far-first rank=2",
+      "dockSeconds": 55.20931625366211,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=13,0 reverse=True",
+       "P326_DOCK_CLAIM slot=1 rank=2 stop=2 at=(8.51, 8.48, -9.28)",
+       "P326_DOCK_CLAIM slot=1 rank=2 stop=3 at=(8.51, 8.48, -8.76)"
+      ]
+     },
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=0",
+      "dockSeconds": 51.91875457763672,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=4,2 reverse=True",
+       "P326_DOCK_CLAIM slot=2 rank=0 stop=0 at=(9.54, 8.48, -9.29)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 50.32191467285156,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=True waited=0,0 reverse=True",
+       "P326_DOCK_CLAIM slot=3 rank=1 stop=1 at=(9.60, 8.48, -10.49)"
+      ]
+     }
+    ]
+   }
+  ],
+  "farfirst-rev-3": [
+   {
+    "run": "P46-world-20261123-234439-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 2,
+      "dockMode": "far-first rank=3",
+      "dockSeconds": 57.53073501586914,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=0 gathered=True waited=17,4 reverse=True",
+       "P326_DOCK_CLAIM slot=0 rank=3 stop=2 at=(8.38, 8.48, -10.48)"
+      ]
+     },
+     {
+      "dockIndex": 3,
+      "dockMode": "far-first rank=2",
+      "dockSeconds": 55.25163650512695,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=1 gathered=True waited=13,0 reverse=True",
+       "P326_DOCK_CLAIM slot=1 rank=2 stop=2 at=(8.52, 8.48, -9.28)",
+       "P326_DOCK_CLAIM slot=1 rank=2 stop=3 at=(8.51, 8.48, -8.77)"
+      ]
+     },
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=0",
+      "dockSeconds": 51.935272216796875,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=2 gathered=True waited=4,3 reverse=True",
+       "P326_DOCK_CLAIM slot=2 rank=0 stop=0 at=(9.54, 8.48, -9.28)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 50.30986785888672,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_RELEASE slot=3 gathered=True waited=0,0 reverse=True",
+       "P326_DOCK_CLAIM slot=3 rank=1 stop=1 at=(9.60, 8.48, -10.48)"
+      ]
+     }
+    ]
+   }
+  ],
+  "default-4p": [
+   {
+    "run": "P46-world-20261123-234656-4",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     },
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     },
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     },
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     }
+    ]
+   }
+  ],
+  "rush-2p": [
+   {
+    "run": "P46-world-20261123-234908-2",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": 0,
+      "dockMode": "far-first rank=0",
+      "dockSeconds": 39.552616119384766,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_CLAIM slot=0 rank=0 stop=0 at=(9.00, 8.48, -9.28)"
+      ]
+     },
+     {
+      "dockIndex": 1,
+      "dockMode": "far-first rank=1",
+      "dockSeconds": 40.076412200927734,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": [
+       "P326_DOCK_CLAIM slot=1 rank=1 stop=1 at=(9.00, 8.48, -9.28)"
+      ]
+     }
+    ]
+   }
+  ],
+  "default-2p": [
+   {
+    "run": "P46-world-20261123-235043-2",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     },
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     }
+    ]
+   }
+  ],
+  "default-1p": [
+   {
+    "run": "P46-world-20261123-235218-1",
+    "passed": true,
+    "players": [
+     {
+      "dockIndex": -1,
+      "dockMode": "",
+      "dockSeconds": 0.0,
+      "dockReached": true,
+      "passed": true,
+      "completedStep": 9,
+      "position": "missing",
+      "error": "",
+      "dockLog": []
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,41 @@
+{
+ "passed": true,
+ "slot": 0,
+ "habitatCaught": [
+  "sea_bass oxygen=117 at=(-6.40, 2.81, 11.09) shallow grams=2390 shots=101",
+  "tuna oxygen=111 at=(-1.90, 1.66, 8.58) shallow grams=2477 shots=97",
+  "red_snapper oxygen=90 at=(9.96, -4.13, 34.33) reef grams=2493 shots=194",
+  "grouper oxygen=68 at=(-9.04, -4.00, 32.98) reef grams=2162 shots=241",
+  "lanternfish oxygen=46 at=(-9.44, -18.34, 59.37) deep grams=835 shots=50"
+ ],
+ "habitatViews": [
+  "sea_bass Fish_SeaBass at=(-1.73, 5.12, 6.67) shallow from=(-1.80, 9.14, -6.69) distance=14,0 size=0,832",
+  "tuna Fish_SeaBass_04 at=(-2.71, 5.19, 7.16) shallow from=(-1.82, 9.01, -5.14) distance=12,9 size=0,911",
+  "closeup catch sea_bass Fish_SeaBass_03 distance=2,2 size=1,109",
+  "closeup catch tuna Fish_SeaBass_05 distance=2,2 size=1,123",
+  "red_snapper Fish_SeaBass_07 at=(8.47, -3.35, 30.34) reef from=(6.28, 7.20, 25.05) distance=12,0 size=0,853",
+  "closeup catch red_snapper Fish_SeaBass_08 distance=2,2 size=1,125",
+  "grouper Fish_SeaBass_11 at=(-9.40, -4.44, 32.95) reef from=(-4.56, 6.33, 35.05) distance=12,0 size=0,815",
+  "closeup catch grouper Fish_SeaBass_11 distance=2,2 size=0,815",
+  "lanternfish Fish_SeaBass_14 at=(-8.87, -19.10, 59.28) deep from=(-9.32, -7.58, 55.98) distance=12,0 size=1,116",
+  "closeup catch lanternfish Fish_SeaBass_14 distance=2,2 size=1,116",
+  "reward reward:day1:order-fish-quick 80"
+ ],
+ "fishSizes": [
+  "Fish_SeaBass sea_bass size=0.832 scaleX=1.490 lengthM=0.365 grams=1009",
+  "Fish_SeaBass_02 sea_bass size=0.939 scaleX=1.681 lengthM=0.411 grams=1449",
+  "Fish_SeaBass_03 sea_bass size=1.109 scaleX=1.987 lengthM=0.486 grams=2390",
+  "Fish_SeaBass_04 tuna size=0.911 scaleX=1.675 lengthM=0.398 grams=1323",
+  "Fish_SeaBass_05 tuna size=1.123 scaleX=2.065 lengthM=0.490 grams=2477",
+  "Fish_SeaBass_06 tuna size=1.052 scaleX=1.934 lengthM=0.460 grams=2037",
+  "Fish_SeaBass_07 red_snapper size=0.853 scaleX=1.628 lengthM=0.384 grams=1088",
+  "Fish_SeaBass_08 red_snapper size=1.125 scaleX=2.146 lengthM=0.506 grams=2493",
+  "Fish_SeaBass_09 red_snapper size=0.876 scaleX=1.671 lengthM=0.394 grams=1177",
+  "Fish_SeaBass_10 grouper size=0.841 scaleX=2.121 lengthM=0.547 grams=2382",
+  "Fish_SeaBass_11 grouper size=0.815 scaleX=2.054 lengthM=0.529 grams=2162",
+  "Fish_SeaBass_12 grouper size=1.013 scaleX=2.555 lengthM=0.659 grams=4163",
+  "Fish_SeaBass_13 lanternfish size=1.025 scaleX=1.025 lengthM=0.265 grams=647",
+  "Fish_SeaBass_14 lanternfish size=1.116 scaleX=1.116 lengthM=0.288 grams=835",
+  "Fish_SeaBass_15 lanternfish size=0.982 scaleX=0.982 lengthM=0.253 grams=568"
+ ]
+}
