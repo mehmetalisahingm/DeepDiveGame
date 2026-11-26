@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render, [switch]$DockRush, [switch]$DockFixed, [switch]$DockReverse)
+param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render, [switch]$Perf, [switch]$PerfProfile, [switch]$DockRush, [switch]$DockFixed, [switch]$DockReverse)
 $ErrorActionPreference = 'Stop'
 $worldRoot = Split-Path -Parent $PSScriptRoot
 $worldIsWindows = $env:OS -eq 'Windows_NT'
@@ -13,15 +13,21 @@ try {
     for ($worldSlot = 0; $worldSlot -lt $Players; $worldSlot++) {
         $worldReport = Join-Path $worldRun ("player$worldSlot.json")
         $worldLog = Join-Path $worldRun ("player$worldSlot.log")
-        $worldGraphics = if ($worldIsWindows -and -not $Render) { @('-nographics') }
+        # #327: -Perf renders every process at 1280x720 and turns on the frame sampler (VSync off, uncapped: a labelled measurement fixture).
+        $worldGraphics = if ($Perf) { @('-screen-width', '1280', '-screen-height', '720', '-screen-fullscreen', '0', '-p327-perf', 1, '-p327-uncap', 1) }
+            elseif ($worldIsWindows -and -not $Render) { @('-nographics') }
             else { @('-screen-width', '320', '-screen-height', '200', '-screen-fullscreen', '0') }
-        $worldArgs = @('-batchmode') + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
+        # -batchmode players draw nothing (GPU and render-thread time stay 0), so a -Perf run is a real visible window.
+        $worldArgs = @(if (-not $Perf) { '-batchmode' }) + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
             '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port, '-p46-mute', 1,
             '-p1-report', ('"{0}"' -f $worldReport), '-logFile', ('"{0}"' -f $worldLog))
         if ($DockRush) { $worldArgs += @('-p326-dock-rush', 1) }
         if ($DockFixed) { $worldArgs += @('-p326-dock-fixed', 1) }
         if ($DockReverse) { $worldArgs += @('-p326-dock-reverse', 1) }
-        if ($worldIsWindows) { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -WindowStyle Hidden -PassThru }
+        # #327: -PerfProfile also writes the host's development-player profiler capture (Unity's own .raw) for P327ProfileDigest.
+        if ($PerfProfile -and $worldSlot -eq 0) { $worldArgs += @('-profiler-enable', '-profiler-log-file', ('"{0}"' -f (Join-Path $worldRun 'player0.raw')), '-profiler-maxusedmemory', '1073741824') }
+        if ($worldIsWindows -and $Perf) { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -PassThru }
+        elseif ($worldIsWindows) { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -WindowStyle Hidden -PassThru }
         else { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -PassThru }
         $worldProcesses += [pscustomobject]@{Process=$worldProcess; Report=$worldReport; Slot=$worldSlot}
         # Reserve admission slots in a known order; this is not an actor position fixture.

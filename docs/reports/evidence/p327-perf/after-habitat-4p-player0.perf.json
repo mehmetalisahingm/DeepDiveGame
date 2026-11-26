@@ -1,0 +1,241 @@
+{
+    "build": "0.0.0-p0",
+    "unity": "6000.3.23f1",
+    "device": "Victus by HP Gaming Laptop 15-fa1xxx (HP)",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "graphicsApi": "Direct3D11",
+    "resolution": "1280x720",
+    "quality": "Ultra",
+    "cpuCores": 20,
+    "systemMemoryMb": 16024,
+    "gpuMemoryMb": 7956,
+    "vSyncCount": 0,
+    "targetFrameRate": -1,
+    "players": 0,
+    "uncapped": true,
+    "developmentBuild": true,
+    "counterGcAlloc": true,
+    "counterMainThread": true,
+    "counterRenderThread": true,
+    "counterGpu": true,
+    "seconds": 174.3797149658203,
+    "loadingSeconds": 12.480440139770508,
+    "monoUsedMb": 7.61328125,
+    "totalAllocatedMb": 114.91915130615235,
+    "totalReservedMb": 254.33203125,
+    "buckets": [
+        {
+            "key": "Coast/day",
+            "frames": 1318,
+            "over33": 1,
+            "over50": 1,
+            "gcCollections": 61,
+            "p50": 11.981993675231934,
+            "p95": 17.77069854736328,
+            "p99": 20.70439338684082,
+            "max": 85.63800048828125,
+            "mean": 12.367862701416016,
+            "allocKbPerFrame": 12.52503776550293,
+            "gcAllocKbPerFrame": 45.05866241455078,
+            "mainThreadMs": 12.331549644470215,
+            "renderThreadMs": 1.9471145868301392,
+            "gpuMs": 1.117815613746643
+        },
+        {
+            "key": "Dock/day",
+            "frames": 971,
+            "over33": 1,
+            "over50": 0,
+            "gcCollections": 46,
+            "p50": 10.106802940368653,
+            "p95": 14.73650074005127,
+            "p99": 17.369401931762697,
+            "max": 40.305702209472659,
+            "mean": 10.513078689575196,
+            "allocKbPerFrame": 11.130792617797852,
+            "gcAllocKbPerFrame": 44.903472900390628,
+            "mainThreadMs": 10.481478691101075,
+            "renderThreadMs": 1.780032753944397,
+            "gpuMs": 0.9161931276321411
+        },
+        {
+            "key": "Home/day",
+            "frames": 120,
+            "over33": 0,
+            "over50": 0,
+            "gcCollections": 7,
+            "p50": 14.20770263671875,
+            "p95": 23.4955997467041,
+            "p99": 29.073198318481447,
+            "max": 29.29559898376465,
+            "mean": 15.145133972167969,
+            "allocKbPerFrame": 14.666666984558106,
+            "gcAllocKbPerFrame": 57.41127014160156,
+            "mainThreadMs": 14.863116264343262,
+            "renderThreadMs": 1.8328115940093995,
+            "gpuMs": 0.5772714614868164
+        },
+        {
+            "key": "noPlayer",
+            "frames": 1,
+            "over33": 1,
+            "over50": 1,
+            "gcCollections": 0,
+            "p50": 57.17009735107422,
+            "p95": 57.17009735107422,
+            "p99": 57.17009735107422,
+            "max": 57.17009735107422,
+            "mean": 57.17009735107422,
+            "allocKbPerFrame": 44.0,
+            "gcAllocKbPerFrame": 91.94921875,
+            "mainThreadMs": 10.73069953918457,
+            "renderThreadMs": 2.271899938583374,
+            "gpuMs": 0.0
+        },
+        {
+            "key": "Sea/day",
+            "frames": 7109,
+            "over33": 14,
+            "over50": 7,
+            "gcCollections": 331,
+            "p50": 13.180499076843262,
+            "p95": 19.373201370239259,
+            "p99": 24.191999435424806,
+            "max": 202.7242889404297,
+            "mean": 13.755462646484375,
+            "allocKbPerFrame": 10.517372131347657,
+            "gcAllocKbPerFrame": 45.3525505065918,
+            "mainThreadMs": 13.716246604919434,
+            "renderThreadMs": 2.0384085178375246,
+            "gpuMs": 1.5344959497451783
+        },
+        {
+            "key": "Town/day",
+            "frames": 1470,
+            "over33": 4,
+            "over50": 3,
+            "gcCollections": 75,
+            "p50": 12.132497787475586,
+            "p95": 19.687103271484376,
+            "p99": 24.794998168945314,
+            "max": 70.25070190429688,
+            "mean": 12.914324760437012,
+            "allocKbPerFrame": 13.602721214294434,
+            "gcAllocKbPerFrame": 48.957584381103519,
+            "mainThreadMs": 12.85163688659668,
+            "renderThreadMs": 2.2097270488739015,
+            "gpuMs": 1.4457892179489136
+        },
+        {
+            "key": "Unknown/day",
+            "frames": 4035,
+            "over33": 2,
+            "over50": 1,
+            "gcCollections": 143,
+            "p50": 3.8492984771728517,
+            "p95": 6.893799781799316,
+            "p99": 8.342000007629395,
+            "max": 81.73649597167969,
+            "mean": 4.144794464111328,
+            "allocKbPerFrame": 12.444113731384278,
+            "gcAllocKbPerFrame": 27.230499267578126,
+            "mainThreadMs": 4.111085891723633,
+            "renderThreadMs": 0.7227321863174439,
+            "gpuMs": 0.17290017008781434
+        }
+    ],
+    "hitches": [
+        {
+            "time": 8.793001174926758,
+            "ms": 81.73649597167969,
+            "key": "Unknown/day",
+            "position": "(0.0, 0.0, 0.0)",
+            "gc": false
+        },
+        {
+            "time": 48.04285430908203,
+            "ms": 85.63800048828125,
+            "key": "Coast/day",
+            "position": "(-1.8, 8.5, -13.0)",
+            "gc": false
+        },
+        {
+            "time": 50.45530700683594,
+            "ms": 117.52540588378906,
+            "key": "Sea/day",
+            "position": "(-2.4, 7.5, -5.0)",
+            "gc": true
+        },
+        {
+            "time": 50.67974853515625,
+            "ms": 91.7636947631836,
+            "key": "Sea/day",
+            "position": "(-2.3, 7.4, -4.4)",
+            "gc": true
+        },
+        {
+            "time": 52.52094650268555,
+            "ms": 57.439598083496097,
+            "key": "Sea/day",
+            "position": "(-2.1, 7.2, -1.7)",
+            "gc": false
+        },
+        {
+            "time": 58.029788970947269,
+            "ms": 68.65380859375,
+            "key": "Sea/day",
+            "position": "(-3.2, 4.0, 6.3)",
+            "gc": false
+        },
+        {
+            "time": 72.20964813232422,
+            "ms": 164.72250366210938,
+            "key": "Sea/day",
+            "position": "(4.7, 5.4, 29.1)",
+            "gc": true
+        },
+        {
+            "time": 86.48464965820313,
+            "ms": 202.7242889404297,
+            "key": "Sea/day",
+            "position": "(-5.0, 4.7, 33.1)",
+            "gc": true
+        },
+        {
+            "time": 108.25093078613281,
+            "ms": 175.06910705566407,
+            "key": "Sea/day",
+            "position": "(-10.7, -9.1, 54.3)",
+            "gc": false
+        },
+        {
+            "time": 172.03915405273438,
+            "ms": 70.25070190429688,
+            "key": "Town/day",
+            "position": "(-3.2, 8.5, -27.2)",
+            "gc": true
+        },
+        {
+            "time": 172.10806274414063,
+            "ms": 68.6427001953125,
+            "key": "Town/day",
+            "position": "(-3.2, 8.5, -27.2)",
+            "gc": false
+        },
+        {
+            "time": 174.31814575195313,
+            "ms": 68.58749389648438,
+            "key": "Town/day",
+            "position": "(-3.2, 8.5, -27.2)",
+            "gc": false
+        },
+        {
+            "time": 174.36712646484376,
+            "ms": 57.17009735107422,
+            "key": "noPlayer",
+            "position": "(0.0, 0.0, 0.0)",
+            "gc": false
+        }
+    ]
+}

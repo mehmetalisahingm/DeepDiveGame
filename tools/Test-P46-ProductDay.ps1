@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight, [switch]$FishCloseUps, [switch]$ShoreRamp)
+param([ValidateSet(1,2,4)][int]$Players=1, [int]$Port=24777, [string]$BuildPath='', [switch]$RepairOnly, [switch]$RepairInterruptions, [switch]$RepairPurchase, [switch]$RepairVideo, [switch]$HuntFirst, [switch]$Mute, [switch]$AllowConcurrent, [ValidateRange(-1,3)][int]$FaultSlot=-1, [switch]$EquipmentVideo, [switch]$OceanVideo, [switch]$ActionVideo, [switch]$SeabedFrames, [switch]$HabitatHunt, [switch]$Render, [switch]$CameraAutoLimit, [switch]$GuestCameraLimit, [switch]$SharedHunt, [switch]$ReefGateFrames, [switch]$EastCourt, [switch]$EastCourtNight, [switch]$WreckFrames, [switch]$WreckNight, [switch]$WestShore, [switch]$WestShoreNight, [switch]$StoreStreet, [switch]$StoreStreetNight, [switch]$Perf, [switch]$PerfProfile, [switch]$FishCloseUps, [switch]$ShoreRamp)
 $ErrorActionPreference='Stop'
 if ($ActionVideo -and ($RepairOnly -or $HuntFirst -or $EquipmentVideo -or $OceanVideo)) { throw 'ActionVideo requires the normal product day without other visual probes.' }
 if ($RepairInterruptions -and (-not $RepairOnly -or $Players -ne 4)) { throw 'RepairInterruptions requires RepairOnly and four processes.' }
@@ -42,7 +42,8 @@ try {
     for ($productSlot=0;$productSlot -lt $Players;$productSlot++) {
         $productReport=Join-Path $productRun "player$productSlot.json"
         $productLog=Join-Path $productRun "player$productSlot.log"
-        $productArgs=@('-batchmode','-p46-day-role',$(if ($productSlot -eq 0) {'host'} else {'client'}),
+        # #327: -batchmode players draw nothing, so a -Perf run is a real visible window.
+        $productArgs=@(if (-not $Perf) { '-batchmode' }) + @('-p46-day-role',$(if ($productSlot -eq 0) {'host'} else {'client'}),
             '-p46-day-count',$Players,'-p46-day-slot',$productSlot,'-p46-day-port',$Port,
             '-p1-report',('"{0}"' -f $productReport),'-logFile',('"{0}"' -f $productLog))
         if ($RepairOnly) { $productArgs+=@('-p187-repair-only','1') }
@@ -57,12 +58,12 @@ try {
         if ($EastCourt) { $productArgs+=@('-p301-east-court','1') }
         if ($EastCourtNight) { $productArgs+=@('-p301-night','1') }
         if ($WestShore) { $productArgs+=@('-p302-west-shore','1') }
-        if ($ShoreRamp) { $productArgs+=@('-p297-shore-ramp','1') }
         if ($WestShoreNight) { $productArgs+=@('-p302-night','1') }
         if ($ReefGateFrames) { $productArgs+=@('-p298-reef-gate-frames','1') }
         if ($WreckFrames) { $productArgs+=@('-p303-wreck-frames','1') }
         if ($WreckNight) { $productArgs+=@('-p303-wreck-night','1') }
         if ($HabitatHunt) { $productArgs+=@('-p219-habitat-hunt','1') }
+        if ($ShoreRamp) { $productArgs+=@('-p297-shore-ramp','1') }
         if ($FishCloseUps) { $productArgs+=@('-p310-closeups','1') }
         if ($ActionVideo) { $productArgs+=@('-p49-action-video','1') }
         if ($CameraAutoLimit) { $productArgs+=@('-p253-auto-limit','1') }
@@ -71,11 +72,16 @@ try {
         if ($HuntFirst) { $productArgs+=@('-p188-hunt-first','1') }
         if ($Mute) { $productArgs+=@('-p46-mute','1') }
         if ($FaultSlot -ge 0) { $productArgs+=@('-p46-fault-slot',$FaultSlot) }
-        if ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
+        # #327: -Perf renders every process at 1280x720 with the frame sampler (VSync off, uncapped: a labelled measurement fixture).
+        # #327: -PerfProfile also writes the host's development-player profiler capture (.raw) for P327ProfileDigest.
+        if ($PerfProfile -and $productSlot -eq 0) { $productArgs+=@('-profiler-enable','-profiler-log-file',('"{0}"' -f (Join-Path $productRun 'player0.raw')),'-profiler-maxusedmemory','1073741824') }
+        if ($Perf) { $productArgs+=@('-screen-width','1280','-screen-height','720','-screen-fullscreen','0','-p327-perf','1','-p327-uncap','1') }
+        elseif ($productSlot -eq 0) { $productArgs+=@('-screen-width','960','-screen-height','540','-screen-fullscreen','0') }
         elseif ($productIsWindows -and -not ($RepairVideo -or $EquipmentVideo -or $OceanVideo -or $ActionVideo -or $HabitatHunt -or $Render)) { $productArgs+='-nographics' }
         else { $productArgs+=@('-screen-width','320','-screen-height','200','-screen-fullscreen','0') }
         if ($productIsWindows) {
-            $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru
+            if ($Perf) { $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -PassThru }
+            else { $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -WindowStyle Hidden -PassThru }
         } else {
             $productProcess=Start-Process -FilePath $productBuild -ArgumentList $productArgs -PassThru
         }

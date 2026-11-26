@@ -42,6 +42,17 @@ namespace DeepDive.Composition
 
         private bool visible = true;
         private float nextRefresh;
+        // #327: the map is shown by default and IMGUI calls OnGUI for layout, repaint and every input event; it drew the
+        // fog tiles and built its label strings on each (0.31 ms main thread and 1.3 KB garbage a frame in the world
+        // profile). It has no controls, so it now skips the layout pass, draws on repaint only and rebuilds a label only
+        // when what it says changes.
+        private string headerText, fogText, selfIconId;
+        private BoatTripPhase headerPhase = (BoatTripPhase)255;
+        private int fogTextRevision = -2;
+        private ulong selfIconFor = ulong.MaxValue;
+        private readonly Dictionary<string, string> playerLabels = new Dictionary<string, string>();
+
+        private void Awake() => useGUILayout = false;
         private BoatTripPlayerSync localSync;
         private ulong localId;
 
@@ -173,6 +184,7 @@ namespace DeepDive.Composition
 
         private void OnGUI()
         {
+            if (Event.current.type != EventType.Repaint) return;
             if (encyclopediaVisible) DrawEncyclopedia();
             if (!visible || LastIcons.Count == 0) return;
 
@@ -182,10 +194,18 @@ namespace DeepDive.Composition
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
             GUI.color = previous;
             DrawFog(rect);
-            GUI.Label(new Rect(rect.x + 4f, rect.y + 2f, MapSize, 20f), $"HARITA [{ToggleKey}]  sandal: {LastPhase}");
+            if (headerText == null || headerPhase != LastPhase)
+            { headerPhase = LastPhase; headerText = $"HARITA [{ToggleKey}]  sandal: {LastPhase}"; }
+            GUI.Label(new Rect(rect.x + 4f, rect.y + 2f, MapSize, 20f), headerText);
             if (LastFog.Count > 0)
-                GUI.Label(new Rect(rect.x + 4f, rect.y + MapSize - 20f, MapSize, 20f),
-                    $"kesif {ExplorationMapPresenter.DiscoveredCount(LastFog)}/{LastFog.Count}   ansiklopedi [{EncyclopediaKey}]");
+            {
+                if (fogText == null || fogTextRevision != fogRevision)
+                {
+                    fogTextRevision = fogRevision;
+                    fogText = $"kesif {ExplorationMapPresenter.DiscoveredCount(LastFog)}/{LastFog.Count}   ansiklopedi [{EncyclopediaKey}]";
+                }
+                GUI.Label(new Rect(rect.x + 4f, rect.y + MapSize - 20f, MapSize, 20f), fogText);
+            }
 
             for (var i = 0; i < LastIcons.Count; i++) DrawIcon(rect, LastIcons[i]);
         }
@@ -253,9 +273,13 @@ namespace DeepDive.Composition
             { color = new Color(0.4f, 1f, 0.5f, 0.45f); label = "DON"; size = 18f; }
             else if (icon.IconId.StartsWith(BoatMapPresenter.PlayerIconPrefix, System.StringComparison.Ordinal))
             {
-                var isSelf = icon.IconId == BoatMapPresenter.PlayerIconPrefix + localId;
+                if (selfIconId == null || selfIconFor != localId)
+                { selfIconFor = localId; selfIconId = BoatMapPresenter.PlayerIconPrefix + localId; }
+                var isSelf = icon.IconId == selfIconId;
                 color = isSelf ? Color.white : new Color(0.75f, 0.85f, 1f);
-                label = isSelf ? "sen" : "P" + icon.IconId.Substring(BoatMapPresenter.PlayerIconPrefix.Length);
+                if (isSelf) label = "sen";
+                else if (!playerLabels.TryGetValue(icon.IconId, out label))
+                    playerLabels[icon.IconId] = label = "P" + icon.IconId.Substring(BoatMapPresenter.PlayerIconPrefix.Length);
                 size = 7f;
             }
             else if (icon.IconId.StartsWith(TeamPingIconPrefix, System.StringComparison.Ordinal))
