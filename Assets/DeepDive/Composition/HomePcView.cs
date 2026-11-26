@@ -197,6 +197,8 @@ namespace DeepDive.Composition
     public sealed class HomePcView : MonoBehaviour
     {
         private const float ShowRange = 4f;
+        public const int ArchivePageSize = 9;
+        private int archivePage;
 
         public static bool PanelOpen { get; private set; }
         public static string Selected { get; private set; } = "";
@@ -287,6 +289,30 @@ namespace DeepDive.Composition
 
         public static void Select(string clipId) => Selected = clipId ?? "";
 
+        // The old fixed-height loop permanently hid every clip after the first ten.
+        // Newest-first pages expose the entire host mirror without changing rights.
+        public static int ArchivePageCount(int clipCount) =>
+            clipCount <= 0 ? 1 : 1 + (clipCount - 1) / ArchivePageSize;
+
+        public static int ArchiveIndex(int clipCount, int page, int row)
+        {
+            if (clipCount <= 0 || page < 0 || page >= ArchivePageCount(clipCount) ||
+                row < 0 || row >= ArchivePageSize) return -1;
+            var index = clipCount - 1 - page * ArchivePageSize - row;
+            return index >= 0 ? index : -1;
+        }
+
+        public static string ArchiveBudgetLabel(IReadOnlyList<ClipSave> clips)
+        {
+            decimal bytes = 0;
+            if (clips != null)
+                foreach (var clip in clips)
+                    if (clip != null && clip.SizeBytes > 0) bytes += clip.SizeBytes;
+            var used = (bytes / (1024m * 1024m)).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+            return "ARSIV " + (clips?.Count ?? 0) + "/" + ChannelAuthority.MaxArchivedClips +
+                " | " + used + "/" + (ChannelAuthority.MaxArchivedBytes / (1024L * 1024)) + " MiB";
+        }
+
         private void OnGUI()
         {
             DrawSettlementCard();
@@ -299,11 +325,16 @@ namespace DeepDive.Composition
             var box = new Rect(Screen.width * 0.5f - 330f, 60f, 660f, 420f);
             GUI.Box(box, $"EV PC  -  arsiv {data.Clips.Count} klip  |  kanal: {data.Followers} takipci");
 
-            GUI.Label(new Rect(box.x + 10, box.y + 24, 320, 20), "ARSIV");
+            GUI.Label(new Rect(box.x + 10, box.y + 24, 320, 20),
+                MediaNetworkBinding.HasMirror ? ArchiveBudgetLabel(data.Clips) : "ARSIV: HOST VERISI BEKLENIYOR");
+            var pages = ArchivePageCount(data.Clips.Count);
+            archivePage = Mathf.Clamp(archivePage, 0, pages - 1);
             var y = box.y + 44;
-            foreach (var clip in data.Clips)
+            for (var row = 0; row < ArchivePageSize; row++)
             {
-                if (y > box.y + 250) break;
+                var index = ArchiveIndex(data.Clips.Count, archivePage, row);
+                if (index < 0) break;
+                var clip = data.Clips[index];
                 var mine = clip.OwnerPlayerId == me;
                 var tag = published.Contains(clip.ClipId) ? " [yayinda]" : clip.Quality >= 1 && clip.SafeReturned && clip.MediaReady ? "" : " [ticari degil]";
                 if (clip.SpecimenKind == (byte)SpecimenProofKind.FilmAndCatch) tag += " [av+cekim]";
@@ -311,6 +342,13 @@ namespace DeepDive.Composition
                         $"{(mine ? "*" : " ")} gun {clip.DayNumber}  {Label(clip.SubjectId)}  {clip.DurationSeconds:0}s  Q{clip.Quality}{tag}"))
                     Select(clip.ClipId);
                 y += 22;
+            }
+
+            if (pages > 1)
+            {
+                if (archivePage > 0 && GUI.Button(new Rect(box.x + 10, box.y + 242, 90, 22), "YENIYE")) archivePage--;
+                GUI.Label(new Rect(box.x + 110, box.y + 244, 120, 20), (archivePage + 1) + "/" + pages);
+                if (archivePage + 1 < pages && GUI.Button(new Rect(box.x + 240, box.y + 242, 90, 22), "ESKIYE")) archivePage++;
             }
 
             var selected = data.Clips.Find(c => c.ClipId == Selected);
