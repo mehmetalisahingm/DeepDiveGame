@@ -462,8 +462,25 @@ namespace DeepDive.P1.Lab
             // Return west of the cradle; do not cut through its collision hull at x=0, z=-12.5.
             yield return P(0f, -16f); yield return P(0f, -24f); yield return P(0f, -36f);
             yield return ContinuousTownLayout.HomeRig.Door; yield return H(4.95f, 5f);
-            yield return H(4.95f, -2.5f); yield return H(2f + slot * 0.8f, -2.4f);
+            if (expected == 4)
+            {
+                // #207: host reached its final home stop but a peer remained
+                // at waypoint 8. Park off the approach lane instead of walking
+                // along the occupied row. This is a route hypothesis, not a
+                // proven fix to gameplay collision or network transport.
+                yield return H(4.95f, -.8f);
+                yield return HomeReturnApproach(slot);
+                yield return HomeReturnStop(slot);
+            }
+            else
+            {
+                yield return H(4.95f, -2.5f);
+                yield return HomeReturnStop(slot);
+            }
         }
+        public static Vector3 HomeReturnStop(int playerSlot) => H(2f + playerSlot * .8f, -2.4f);
+        public static Vector3 HomeReturnApproach(int playerSlot) => H(2f + playerSlot * .8f, -.8f);
+
         // Bounds: continuous-world Zone_Dock x=[7,11]. The 0.7 m edge inset
         // keeps the player's 0.35 m radius inside the authored walk surface.
         public static Vector3 DockRearStage(int playerSlot) => P(playerSlot == 2 ? 7.7f : 10.3f, -9f);
