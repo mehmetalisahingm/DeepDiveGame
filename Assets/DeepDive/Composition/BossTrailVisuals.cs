@@ -15,6 +15,18 @@ namespace DeepDive.Composition
 
         // How far a piece sits into the sand, the same as the reef kit.
         public const float BedOverlap = 0.15f;
+        // Reuse the existing shared daylight; six small, shadowless beacons
+        // illuminate wreck surfaces, not the progression/harpoon targets.
+        public const float BeaconRange = 2.5f, BeaconLift = .65f, BeaconNightIntensity = .8f;
+        public static float BeaconIntensity(float night) =>
+            BeaconNightIntensity * Mathf.Clamp01((night - .3f) / .5f);
+        public static Vector3 BeaconPosition(int index) => PositionOf(index) + Vector3.up * BeaconLift;
+        public static void ApplyBeacon(Light light, float night)
+        {
+            if (light == null) return;
+            light.intensity = BeaconIntensity(night);
+            light.enabled = light.intensity > .02f;
+        }
 
         // One kit piece per trail point, in TrailPoints order: broken dock planks near the reef, then cargo that
         // fell further down, then the anchor where the wreck's line points at the arena.
@@ -63,13 +75,44 @@ namespace DeepDive.Composition
 
             var root = new GameObject(RootName);
             SceneManager.MoveGameObjectToScene(root, scene);
+            var lights = new Light[PieceIds.Length];
             for (var i = 0; i < PieceIds.Length; i++)
             {
                 var piece = Object.Instantiate(prefabs[i], root.transform, false);
                 piece.name = "BossTrail_" + i.ToString("00") + "_" + PieceIds[i];
                 piece.transform.SetPositionAndRotation(PositionOf(i), Quaternion.Euler(0f, Yaws[i], 0f));
+                var beacon = new GameObject("WreckGlow_" + i.ToString("00"));
+                beacon.transform.SetParent(piece.transform, false);
+                beacon.transform.position = BeaconPosition(i);
+                var light = beacon.AddComponent<Light>();
+                light.type = LightType.Point;
+                light.range = BeaconRange;
+                light.color = new Color(.45f, .78f, .9f);
+                light.shadows = LightShadows.None;
+                ApplyBeacon(light, 0f);
+                lights[i] = light;
             }
+            root.AddComponent<BeaconDriver>().Lights = lights;
             Debug.Log("P258_BOSS_TRAIL_READY count=" + PieceIds.Length);
+        }
+
+        private sealed class BeaconDriver : MonoBehaviour
+        {
+            public Light[] Lights;
+            private float next;
+            private void Update()
+            {
+                if (Time.unscaledTime < next || Lights == null) return;
+                next = Time.unscaledTime + .5f;
+                var night = SharedDaylight.Night();
+                foreach (var light in Lights) ApplyBeacon(light, night);
+            }
+            private void OnDisable()
+            {
+                if (Lights == null) return;
+                foreach (var light in Lights) ApplyBeacon(light, 0f);
+                next = 0f;
+            }
         }
     }
 }
