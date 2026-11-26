@@ -1,0 +1,386 @@
+{
+    "note": "Real scene, real controller values, scene closed unsaved. Walkers steer straight at waypoints and never give way.",
+    "radius": 0.3499999940395355,
+    "height": 1.7999999523162842,
+    "stepOffset": 0.30000001192092898,
+    "walkSpeed": 4.0,
+    "dockMin": {
+        "x": 8.0,
+        "y": 8.0,
+        "z": -7.0
+    },
+    "dockMax": {
+        "x": 10.0,
+        "y": 8.399999618530274,
+        "z": -3.5
+    },
+    "ledgeMin": {
+        "x": 7.0,
+        "y": 7.399999618530273,
+        "z": -11.0
+    },
+    "ledgeMax": {
+        "x": 11.0,
+        "y": 8.399999618530274,
+        "z": -7.0
+    },
+    "platformMax": {
+        "x": 14.75,
+        "y": 8.399999618530274,
+        "z": -11.0
+    },
+    "passes": [
+        {
+            "id": "four-out",
+            "allArrived": false,
+            "seconds": 30.0,
+            "walkers": [
+                {
+                    "id": "out-0",
+                    "start": {
+                        "x": -1.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 8.441306114196778,
+                        "y": 8.480000495910645,
+                        "z": -4.135985374450684
+                    },
+                    "arrived": true,
+                    "seconds": 5.659999847412109,
+                    "blockedFrames": 60,
+                    "minClearance": 0.0020543336868286134
+                },
+                {
+                    "id": "out-1",
+                    "start": {
+                        "x": -0.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 9.017852783203125,
+                        "y": 8.479999542236329,
+                        "z": -5.742856979370117
+                    },
+                    "arrived": false,
+                    "seconds": 0.0,
+                    "blockedFrames": 1306,
+                    "minClearance": 0.05721169710159302
+                },
+                {
+                    "id": "out-2",
+                    "start": {
+                        "x": 0.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 8.549599647521973,
+                        "y": 8.479999542236329,
+                        "z": -5.124660015106201
+                    },
+                    "arrived": true,
+                    "seconds": 3.799999952316284,
+                    "blockedFrames": 0,
+                    "minClearance": 0.06725519895553589
+                },
+                {
+                    "id": "out-3",
+                    "start": {
+                        "x": 1.5,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 9.449143409729004,
+                        "y": 8.479999542236329,
+                        "z": -5.120129585266113
+                    },
+                    "arrived": true,
+                    "seconds": 3.6599998474121095,
+                    "blockedFrames": 0,
+                    "minClearance": 0.12455928325653076
+                }
+            ]
+        },
+        {
+            "id": "two-back-two-out",
+            "allArrived": true,
+            "seconds": 5.699999809265137,
+            "walkers": [
+                {
+                    "id": "back-0",
+                    "start": {
+                        "x": 8.550000190734864,
+                        "y": 8.479999542236329,
+                        "z": -4.0
+                    },
+                    "end": {
+                        "x": 0.13789409399032594,
+                        "y": 8.479999542236329,
+                        "z": -13.393708229064942
+                    },
+                    "arrived": true,
+                    "seconds": 5.679999828338623,
+                    "blockedFrames": 80,
+                    "minClearance": 0.0010671615600585938
+                },
+                {
+                    "id": "back-1",
+                    "start": {
+                        "x": 9.449999809265137,
+                        "y": 8.479999542236329,
+                        "z": -5.0
+                    },
+                    "end": {
+                        "x": 1.1505216360092164,
+                        "y": 8.479999542236329,
+                        "z": -13.498022079467774
+                    },
+                    "arrived": true,
+                    "seconds": 4.420000076293945,
+                    "blockedFrames": 30,
+                    "minClearance": 0.0015488266944885254
+                },
+                {
+                    "id": "out-2",
+                    "start": {
+                        "x": -1.0,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 8.549338340759278,
+                        "y": 8.480000495910645,
+                        "z": -4.1956305503845219
+                    },
+                    "arrived": true,
+                    "seconds": 5.579999923706055,
+                    "blockedFrames": 55,
+                    "minClearance": 0.0015488266944885254
+                },
+                {
+                    "id": "out-3",
+                    "start": {
+                        "x": 2.0,
+                        "y": 8.479999542236329,
+                        "z": -13.5
+                    },
+                    "end": {
+                        "x": 9.449057579040528,
+                        "y": 8.479999542236329,
+                        "z": -5.167184352874756
+                    },
+                    "arrived": true,
+                    "seconds": 3.6399998664855959,
+                    "blockedFrames": 3,
+                    "minClearance": 0.00940549373626709
+                }
+            ]
+        }
+    ],
+    "platformEdge": [
+        {
+            "x": 0.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.182154655456543,
+            "outsideCollider": "Seabed_Shallow",
+            "step": 3.2178449630737306
+        },
+        {
+            "x": 0.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.368999481201172,
+            "outsideCollider": "Shore_Ramp",
+            "step": 3.0310001373291017
+        },
+        {
+            "x": 1.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.602153778076172,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.7978458404541017
+        },
+        {
+            "x": 1.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 5.8353071212768559,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.564692497253418
+        },
+        {
+            "x": 2.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.0684614181518559,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.331538200378418
+        },
+        {
+            "x": 2.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.301614761352539,
+            "outsideCollider": "Shore_Ramp",
+            "step": 2.0983848571777345
+        },
+        {
+            "x": 3.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.534769058227539,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.8652305603027344
+        },
+        {
+            "x": 3.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 6.767922401428223,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.6320772171020508
+        },
+        {
+            "x": 4.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.001076698303223,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.3989229202270508
+        },
+        {
+            "x": 4.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.2342305183410648,
+            "outsideCollider": "Shore_Ramp",
+            "step": 1.165769100189209
+        },
+        {
+            "x": 5.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.467384338378906,
+            "outsideCollider": "Shore_Ramp",
+            "step": 0.9326152801513672
+        },
+        {
+            "x": 5.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.700538158416748,
+            "outsideCollider": "Shore_Ramp",
+            "step": 0.6994614601135254
+        },
+        {
+            "x": 6.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 7.933691501617432,
+            "outsideCollider": "Shore_Ramp",
+            "step": 0.4663081169128418
+        },
+        {
+            "x": 6.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.166845321655274,
+            "outsideCollider": "Shore_Ramp",
+            "step": 0.233154296875
+        },
+        {
+            "x": 7.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 7.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 8.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 8.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 9.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 9.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 10.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 10.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 11.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 8.399999618530274,
+            "outsideCollider": "Shore_Ledge",
+            "step": 0.0
+        },
+        {
+            "x": 11.5,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 3.4887442588806154,
+            "outsideCollider": "Seabed_Shallow",
+            "step": 4.911255359649658
+        },
+        {
+            "x": 12.0,
+            "z": -11.0,
+            "platformY": 8.399999618530274,
+            "outsideY": 3.487476110458374,
+            "outsideCollider": "Seabed_Shallow",
+            "step": 4.91252326965332
+        }
+    ]
+}
