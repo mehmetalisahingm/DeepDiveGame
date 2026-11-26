@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render)
+param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render, [switch]$DockRush, [switch]$DockFixed, [switch]$DockReverse)
 $ErrorActionPreference = 'Stop'
 $worldRoot = Split-Path -Parent $PSScriptRoot
 $worldIsWindows = $env:OS -eq 'Windows_NT'
@@ -18,6 +18,9 @@ try {
         $worldArgs = @('-batchmode') + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
             '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port, '-p46-mute', 1,
             '-p1-report', ('"{0}"' -f $worldReport), '-logFile', ('"{0}"' -f $worldLog))
+        if ($DockRush) { $worldArgs += @('-p326-dock-rush', 1) }
+        if ($DockFixed) { $worldArgs += @('-p326-dock-fixed', 1) }
+        if ($DockReverse) { $worldArgs += @('-p326-dock-reverse', 1) }
         if ($worldIsWindows) { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -WindowStyle Hidden -PassThru }
         else { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -PassThru }
         $worldProcesses += [pscustomobject]@{Process=$worldProcess; Report=$worldReport; Slot=$worldSlot}

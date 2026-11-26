@@ -144,6 +144,27 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void ReefPlantsUseActualWorldPositionForNaturalStaggeredMovement()
+        {
+            var atOrigin = ReefPlantSway.PhaseForPosition(Vector3.zero);
+            var east = ReefPlantSway.PhaseForPosition(new Vector3(2f, 0f, 0f));
+            var north = ReefPlantSway.PhaseForPosition(new Vector3(0f, 0f, 2f));
+            Assert.AreEqual(0f, atOrigin, 0.0001f);
+            Assert.AreNotEqual(atOrigin, east);
+            Assert.AreNotEqual(east, north);
+            Assert.AreEqual(east, ReefPlantSway.PhaseForPosition(new Vector3(2f, 90f, 0f)),
+                "swim depth does not change the horizontal current phase");
+
+            // A habitat-instantiated plant moved from origin before its first
+            // visible frame must use the final placement instead of origin phase.
+            var moved = ReefPlantSway.Lean(0.7f, 3.4f, 5f, east);
+            var stale = ReefPlantSway.Lean(0.7f, 3.4f, 5f, atOrigin);
+            Assert.Greater(Vector2.Distance(moved, stale), 0.2f);
+            Assert.LessOrEqual(Mathf.Abs(moved.x), 5.001f);
+            Assert.LessOrEqual(Mathf.Abs(moved.y), 5.001f);
+        }
+
+        [Test]
         public void ArchOpeningLetsADiverSwimThrough()
         {
             var arch = (GameObject)Object.Instantiate(Load("reef-rock-arch"));

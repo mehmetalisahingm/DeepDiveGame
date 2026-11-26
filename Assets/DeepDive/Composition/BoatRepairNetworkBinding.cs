@@ -34,9 +34,11 @@ namespace DeepDive.Composition
         public static Vector3 SlotLocal(int i) => new Vector3((i - 1) * .65f, .75f, -2.15f);
         public static Vector3 RackLocal(int i) => new Vector3(-.65f, .65f, -4.1f - i * .8f);
         public static Vector3 StandLocal(int i) => new Vector3((i - 1) * .65f, 0, i == 1 ? -4.2f : -3.8f);
-        // Low enough to stay under the slot triggers (y .35-1.15) so the E/hammer ray still reaches them
-        // (PickupRaycastRules treats solid geometry as an occluder), high enough not to be stepped over (stepOffset .3).
-        public const float CradleHullHeight = .4f;
+        // Low enough that the E/hammer ray, which crosses the rim about 1.1 m up, still meets each slot trigger
+        // (y .35-1.15) above the hull's top (PickupRaycastRules treats solid geometry as an occluder). #188 (21 Nov):
+        // high enough not to be climbed. At .4 the controller (stepOffset .3 + skin .08) got onto it from 5 of 12
+        // headings (P48RepairCradleTests.TheUnrepairedHullCannotBeClimbedFromAnySide).
+        public const float CradleHullHeight = .6f;
         // A leg counts as blocked when it passes within HitPad of the hull (capsule radius .35 + .05); a detour
         // then runs RoutePad off the rim: past a crew member on a south-side work point (.45 m off the rim) plus
         // two padded capsules (.86 m each side of contact).
@@ -152,14 +154,17 @@ namespace DeepDive.Composition
             {
                 var hitW = size.Width * .5f + HitPad;
                 var hitL = size.Length * .5f + HitPad;
+                var end = size.Length * .5f + RoutePad;
                 var a = hull.InverseTransformPoint(from);
                 var b = hull.InverseTransformPoint(to);
+                // #188: a work point straight behind an end (within the hull's width, between its rim and the lane), as
+                // the two stern points are. Racks and stands further out or to the side are not.
+                var behindEnd = Mathf.Abs(b.z) >= hitL && Mathf.Abs(b.z) < end && Mathf.Abs(b.x) < hitW;
                 if (Blocked(a, b, hitW, hitL))
                 {
                     // Local +x is the hull's south side at the S1 yaw (90); pick it from the cradle frame, not the world.
                     var side = Vector3.Dot(hull.right, Vector3.back) >= 0f ? 1f : -1f;
                     var line = side * (size.Width * .5f + RoutePad);
-                    var end = size.Length * .5f + RoutePad;
                     if (side * a.x < 0f && Mathf.Abs(a.z) < hitL)
                     {
                         // Local +z is east at the S1 yaw; pick the ledge end from the cradle frame, not the world.
@@ -169,7 +174,14 @@ namespace DeepDive.Composition
                     }
                     route.Add(Flat(hull.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(a.z, -end, end))), to.y));
                     route.Add(Flat(hull.TransformPoint(new Vector3(line, 0f, Mathf.Clamp(b.z, -end, end))), to.y));
+                    if (behindEnd) route.Add(Flat(hull.TransformPoint(new Vector3(b.x, 0f, Mathf.Sign(b.z) * end)), to.y));
                 }
+                // #188: such a point is reached from straight behind it, RoutePad off the
+                // rim, so a walker never slides along the rim past the crew on the other work point there (with the hull
+                // too high to ride over, that gap is narrower than a diver) and two walkers bound for the two stern points
+                // do not meet at the lane corner.
+                else if (behindEnd && Mathf.Abs(a.x - b.x) > .6f && Mathf.Abs(a.z) < end - .3f)
+                    route.Add(Flat(hull.TransformPoint(new Vector3(b.x, 0f, Mathf.Sign(b.z) * end)), to.y));
             }
             route.Add(to);
             return route;
