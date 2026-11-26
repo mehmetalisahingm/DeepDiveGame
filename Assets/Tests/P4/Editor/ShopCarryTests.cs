@@ -32,6 +32,27 @@ namespace DeepDive.P4.Tests
             finally { Object.DestroyImmediate(basket); Object.DestroyImmediate(rig); }
         }
 
+        [TestCase(0f)] [TestCase(37f)] [TestCase(135f)]
+        public void EveryCatalogSampleRestsOnTheSameLocalTrayFloorAtAnyHeading(float yaw)
+        {
+            var parent = new GameObject("rotated player");
+            parent.transform.SetPositionAndRotation(new Vector3(100, 8.4f, -80), Quaternion.Euler(0, yaw, 0));
+            try
+            {
+                foreach (var id in ShopShelfAnchor.ItemIds)
+                {
+                    var basket = ShopCarryView.CreateBasket(parent.transform, id);
+                    try
+                    {
+                        Assert.IsTrue(ShopCarryView.TryProductBounds(basket.transform.Find("SelectedProduct"), basket.transform, out var bounds), id);
+                        Assert.That(bounds.min.y, Is.EqualTo(-.06f).Within(.001f), id);
+                    }
+                    finally { Object.DestroyImmediate(basket); }
+                }
+            }
+            finally { Object.DestroyImmediate(parent); }
+        }
+
         [Test] public void EveryCatalogSampleFitsTheTrayAndHasNoGameplayOrSolidCollider()
         {
             foreach (var id in ShopShelfAnchor.ItemIds)
