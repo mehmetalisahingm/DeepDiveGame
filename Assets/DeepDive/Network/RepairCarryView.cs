@@ -149,11 +149,36 @@ namespace DeepDive.Network
                 GetComponent<PlayerPresentationView>()?.ApplyRepairGrips(left,right,leftRotation,rightRotation,finishing,board.activeSelf);
             }
         }
+        // #189: readable on small Windows layouts without hiding the repair
+        // sequence. Text is purely presentational; only host-published hits
+        // can advance the number (a rejected stroke never appears as progress).
+        public static string RepairInstruction(bool placed, int acceptedHits)
+        {
+            return placed
+                ? "KESER: SOL TIK | ONAYLI CIVI " + Mathf.Clamp(acceptedHits, 0, 3) + "/3 | Q: BIRAK"
+                : "TAHTA ELINDE | YUVAYA BAK + E: YERLESTIR | Q: BIRAK";
+        }
+
+        public static Rect RepairHudRect(float screenWidth, float screenHeight)
+        {
+            var width = Mathf.Max(0f, Mathf.Min(620f, screenWidth - 24f));
+            return new Rect(Mathf.Max(0f, (screenWidth - width) * .5f),
+                Mathf.Max(0f, screenHeight - 74f), width, 54f);
+        }
+
+        private GUIStyle repairHudStyle;
         private void OnGUI()
         {
-            if(player==null||!player.IsSpawned||!player.IsOwner||!player.RepairHandsBusy)return;
-            var text=player.RepairPlaced.Value?$"KESER: sol tik ({player.RepairHits.Value}/3) | Q: askiya birak":"TAHTA ELINDE: iskelede eslesen yuvaya bak + E | Q: ortak askiya birak";
-            GUI.Box(new Rect(20,Screen.height-62,620,38),text);
+            if (player == null || !player.IsSpawned || !player.IsOwner || !player.RepairHandsBusy) return;
+            if (repairHudStyle == null)
+                repairHudStyle = new GUIStyle(GUI.skin.box)
+                {
+                    wordWrap = true,
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 14
+                };
+            var text = RepairInstruction(player.RepairPlaced.Value, player.RepairHits.Value);
+            GUI.Box(RepairHudRect(Screen.width, Screen.height), text, repairHudStyle);
         }
         private void OnDestroy()
         {if(board!=null)Destroy(board);if(hammer!=null)Destroy(hammer);if(wood!=null)Destroy(wood);if(metal!=null)Destroy(metal);if(ownsImpact&&impact!=null)Destroy(impact);}
