@@ -27,6 +27,16 @@ namespace DeepDive.P4.Tests
                 Assert.Greater(p.y, SeabedProfile.FloorHeight(p.x, p.z), "above the sand at " + p);
         }
 
+        [TestCase(-1f,0f,true)]
+        [TestCase(.019f,.021f,true)]
+        [TestCase(.021f,.019f,true)]
+        [TestCase(.6f,.604f,false)]
+        [TestCase(.6f,.62f,true)]
+        public void SmallIntensityChangesStillRespectOnOffThreshold(float previous,float intensity,bool expected)
+        {
+            Assert.AreEqual(expected, ReefNightGlow.NeedsLightUpdate(previous,intensity));
+        }
+
         [Test]
         public void TheGlowIsOffByDayAndOnAtNight()
         {

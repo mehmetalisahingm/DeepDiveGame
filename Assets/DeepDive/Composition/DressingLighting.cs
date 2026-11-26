@@ -29,18 +29,41 @@ namespace DeepDive.Composition
         public void Apply(float night)
         {
             night = Mathf.Clamp01(night);
-            if (Mathf.Abs(night - shown) < 0.01f) return;
+            var first = shown < 0f;
+            var dark = night > .5f;
+            var bulb = night > .3f;
+            var lit = night > .02f;
+            var darkChanged = first || dark != (shown > .5f);
+            var bulbChanged = first || bulb != (shown > .3f);
+            var lampChanged = first || lit != (shown > .02f);
+            // Do not miss a threshold when the clock changes by less than
+            // the normal intensity update tolerance.
+            if (!darkChanged && !bulbChanged && !lampChanged && Mathf.Abs(night - shown) < .01f) return;
             shown = night;
-            var dark = night > 0.5f;
-            Swap(Panes, dark ? PaneNight : PaneDay);
-            Swap(Bulbs, night > 0.3f ? BulbOn : BulbOff);
-            Swap(Screens, dark ? ScreenNight : ScreenDay);
+            if (darkChanged)
+            {
+                Swap(Panes, dark ? PaneNight : PaneDay);
+                Swap(Screens, dark ? ScreenNight : ScreenDay);
+            }
+            if (bulbChanged) Swap(Bulbs, bulb ? BulbOn : BulbOff);
             foreach (var lamp in Lamps)
             {
                 if (lamp == null) continue;
                 lamp.intensity = LampIntensity * night;
-                lamp.enabled = night > 0.02f;
+                lamp.enabled = lit;
             }
+        }
+
+        private void OnDisable()
+        {
+            // A disabled driver must not leave active lights behind in the scene.
+            foreach (var lamp in Lamps)
+            {
+                if (lamp == null) continue;
+                lamp.enabled = false;
+            }
+            shown = -1f;
+            next = 0f;
         }
 
         private static void Swap(Renderer[] renderers, Material material)
