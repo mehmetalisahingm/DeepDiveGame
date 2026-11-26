@@ -26,6 +26,11 @@ namespace DeepDive.P1.Lab
         private static readonly string[] HabitatOrder = { "sea_bass", "tuna", "red_snapper", "grouper", "lanternfish" };
 
         private bool HabitatHunt => Arg("-p219-habitat-hunt") == "1";
+        // #310 (-FishCloseUps): each visiting diver comes inside the 5 m a fish lets it near before calling a species
+        // seen, and frames it there; the host frames each catch from the pickup reach.
+        private bool FishCloseUps => Arg("-p310-closeups") == "1";
+        private const float CloseUpSightRange = 5f;
+        private readonly HashSet<string> closeUpTaken = new HashSet<string>();
         private bool habitatStageExtended;
         private int habitatIndex;
         private float nextHabitatSample;
@@ -85,7 +90,15 @@ namespace DeepDive.P1.Lab
             Aim(target);
             if (Settled())
             {
-                if (available) Act(local.SubmitPickupLocal);
+                if (available)
+                {
+                    if (FishCloseUps && closeUpTaken.Add(species))
+                    {
+                        report.habitatViews.Add($"closeup catch {species} {fish.name} distance={distance:0.0} size={fish.SizeScale:0.000}");
+                        CaptureView(".closeup-catch-" + species + ".png");
+                    }
+                    Act(local.SubmitPickupLocal);
+                }
                 else Act(local.SubmitHarpoonLocal);
             }
         }
@@ -126,7 +139,8 @@ namespace DeepDive.P1.Lab
 
         // #311: the grouper's reaction (back to its rock) only shows inside its 5 m reach, so a visiting diver must come
         // that close before it counts as seen; the host's samples then record the hiding.
-        private float SightRangeFor(string species) => !Host && species == "grouper" ? 5f : HabitatSightRange;
+        private float SightRangeFor(string species) =>
+            !Host && (species == "grouper" || FishCloseUps) ? CloseUpSightRange : HabitatSightRange;
 
         // A species counts as seen when a live, rendered fish of it is inside this camera's view with a clear line.
         private void NoteFishInView()
@@ -146,7 +160,7 @@ namespace DeepDive.P1.Lab
                 report.habitatSeen.Add(species);
                 report.habitatViews.Add($"{species} {fish.name} at={fish.transform.position} {BandAt(fish.transform.position.y)} " +
                                         $"from={eye} distance={Vector3.Distance(target, eye):0.0} size={fish.SizeScale:0.000}");
-                CaptureView(".habitat-" + species + ".png");
+                CaptureView((FishCloseUps && !Host ? ".closeup-live-" : ".habitat-") + species + ".png");
             }
         }
 
