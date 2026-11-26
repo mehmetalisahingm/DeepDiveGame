@@ -24,6 +24,12 @@ namespace DeepDive.Composition
 
         public RecordingDirector Director { get; private set; }
         public int PendingDiveCount => pending.Count;
+
+        // Media may retain an older take while its safe-return claim waits for
+        // a payment backend. A settled/abandoned dive without a pending claim
+        // cannot subsequently mint another RecordingQueued result.
+        public bool CanStillSettleDive(string id) => !disposed && !string.IsNullOrEmpty(id) &&
+            (pending.ContainsKey(id) || (id == diveId && Director != null && !Director.IsSettled));
         public bool IsActive => !disposed && isAuthority() && session.State.Phase == SessionPhase.Dive &&
             !string.IsNullOrWhiteSpace(session.State.DiveId);
 

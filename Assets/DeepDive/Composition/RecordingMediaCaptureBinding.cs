@@ -33,7 +33,8 @@ namespace DeepDive.Composition
 
         private sealed class Pending
         {
-            public int DayNumber;
+            public int DayNumber, FrameCount;
+            public string DiveId;
             public float Duration;
             public List<ClipFramePacket> Frames;
             public byte[] Encoded;
@@ -68,6 +69,9 @@ namespace DeepDive.Composition
         private Func<string, bool> canPlay;
         private Func<string, bool> play;
         private double nextRetry;
+        private string mediaSessionId;
+        private readonly List<string> discardKeys = new List<string>();
+        private readonly HashSet<string> queuedKeys = new HashSet<string>(StringComparer.Ordinal);
         private bool warnedHeadless;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -112,12 +116,31 @@ namespace DeepDive.Composition
                 return;
             }
 
+            var sessionId = adapter.Session.State.SessionId;
+            if (!string.Equals(mediaSessionId, sessionId, StringComparison.Ordinal))
+            {
+                if (mediaSessionId != null) { active.Clear(); pending.Clear(); waiting.Clear(); submitted.Clear(); }
+                mediaSessionId = sessionId;
+            }
             TickCaptures();
             if (waiting.Count > 0 && ClipArchive.SubmitHandler != null && Time.realtimeSinceStartupAsDouble >= nextRetry)
             {
                 nextRetry = Time.realtimeSinceStartupAsDouble + 0.5;
                 foreach (var result in new List<RecordingResult>(waiting.Values)) TrySubmit(result);
             }
+            PruneSettledFootage();
+        }
+
+        private void PruneSettledFootage()
+        {
+            if (observed == null || pending.Count == 0) return;
+            queuedKeys.Clear();
+            foreach (var result in waiting.Values) queuedKeys.Add(Key(result.DiveId, result.PlayerId, result.SubjectId));
+            discardKeys.Clear();
+            foreach (var entry in pending)
+                if (!queuedKeys.Contains(entry.Key) && !observed.CanStillSettleDive(entry.Value.DiveId))
+                    discardKeys.Add(entry.Key);
+            foreach (var key in discardKeys) pending.Remove(key);
         }
 
         private void RefreshHooks()
@@ -195,7 +218,7 @@ namespace DeepDive.Composition
 
             pending[Key(take.DiveId, take.PlayerId, take.SubjectId)] = new Pending
             {
-                DayNumber = CurrentDay(),
+                DayNumber = CurrentDay(), DiveId = take.DiveId, FrameCount = capture.Frames.Count,
                 Duration = Mathf.Max(0.05f, (float)(now - capture.StartedAt)),
                 Frames = capture.Frames
             };
@@ -204,6 +227,9 @@ namespace DeepDive.Composition
         private void OnRecordingQueued(RecordingResult result)
         {
             if (adapter == null || !adapter.IsAuthority || string.IsNullOrWhiteSpace(result.RecordingId) || submitted.Contains(result.RecordingId)) return;
+            // TakeRegistered precedes settlement. No frames means no real clip,
+            // so don't retry an impossible headless/no-footage result forever.
+            if (!pending.ContainsKey(Key(result.DiveId, result.PlayerId, result.SubjectId))) return;
             waiting[result.RecordingId] = result;
             TrySubmit(result);
         }
@@ -212,7 +238,9 @@ namespace DeepDive.Composition
         {
             if (submitted.Contains(result.RecordingId)) { waiting.Remove(result.RecordingId); return; }
             var key = Key(result.DiveId, result.PlayerId, result.SubjectId);
-            if (!pending.TryGetValue(key, out var media) || media.Frames == null || media.Frames.Count == 0) return;
+            if (!pending.TryGetValue(key, out var media) || (media.Encoded == null &&
+                (media.Frames == null || media.Frames.Count == 0)))
+            { waiting.Remove(result.RecordingId); return; }
 
             // #101 ordering seam: RecordingMediaCaptureBinding and ExplorationNetworkBinding both consume
             // RecordingQueued. Media must not archive an Empty-by-default manifest merely because its handler
@@ -223,6 +251,8 @@ namespace DeepDive.Composition
             try
             {
                 media.Encoded ??= RecordingClipFile.Encode(Width, Height, media.Duration, media.Frames);
+                // Keep the immutable encoded payload for IO retries, not a second copy of every JPEG.
+                media.Frames = null;
                 media.Hash ??= RecordingClipFile.Sha256Hex(media.Encoded);
                 if (!RecordingClipFile.TryBuildManifest(result, media.DayNumber, media.Duration, media.Hash,
                         media.Encoded.LongLength, out var baseManifest)) return;
@@ -249,7 +279,7 @@ namespace DeepDive.Composition
                     submitted.Add(result.RecordingId);
                     waiting.Remove(result.RecordingId);
                     pending.Remove(key);
-                    Debug.Log($"P4_MEDIA_CLIP archived clip={manifest.ClipId} recording={result.RecordingId} frames={media.Frames.Count} bytes={media.Encoded.Length} specimen={manifest.Specimen.Kind}:{manifest.Specimen.WeightGrams}g");
+                    Debug.Log($"P4_MEDIA_CLIP archived clip={manifest.ClipId} recording={result.RecordingId} frames={media.FrameCount} bytes={media.Encoded.Length} specimen={manifest.Specimen.Kind}:{manifest.Specimen.WeightGrams}g");
                 }
                 else if (outcome == ClipArchiveOutcome.ArchiveFull)
                 {
@@ -471,7 +501,8 @@ namespace DeepDive.Composition
                 observed = null;
             }
             ClipPlayback.Unbind(canPlay);
-            active.Clear(); pending.Clear(); waiting.Clear();
+            active.Clear(); pending.Clear(); waiting.Clear(); submitted.Clear();
+            mediaSessionId = null;
             StopPlayback();
             if (readback != null) Destroy(readback);
             if (captureTarget != null) { captureTarget.Release(); Destroy(captureTarget); }
