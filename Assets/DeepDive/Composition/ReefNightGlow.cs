@@ -71,6 +71,10 @@ namespace DeepDive.Composition
 
         public static float IntensityFor(float night01) => NightIntensity * Mathf.Clamp01((night01 - 0.3f) / 0.5f);
 
+        public static bool NeedsLightUpdate(float previous, float intensity) =>
+            previous < 0f || (previous > .02f) != (intensity > .02f) ||
+            Mathf.Abs(intensity - previous) >= .01f;
+
         private sealed class Driver : MonoBehaviour
         {
             public Light[] Lights;
@@ -81,7 +85,7 @@ namespace DeepDive.Composition
                 if (Time.unscaledTime < next) return;
                 next = Time.unscaledTime + 0.5f;
                 var intensity = IntensityFor(SharedDaylight.Night());
-                if (Mathf.Abs(intensity - current) < 0.01f) return;
+                if (!NeedsLightUpdate(current, intensity)) return;
                 current = intensity;
                 foreach (var light in Lights)
                 {
@@ -89,6 +93,14 @@ namespace DeepDive.Composition
                     light.intensity = intensity;
                     light.enabled = intensity > 0.02f;
                 }
+            }
+
+            private void OnDisable()
+            {
+                if (Lights != null)
+                    foreach (var light in Lights) if (light != null) light.enabled = false;
+                current = -1f;
+                next = 0f;
             }
         }
     }

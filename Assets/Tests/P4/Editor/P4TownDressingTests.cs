@@ -169,6 +169,28 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
+        public void SlowDuskCrossesEveryLightingThresholdWithoutMissingTheTransition()
+        {
+            var dressing = Object.Instantiate(Prefab());
+            try
+            {
+                var lighting = dressing.GetComponent<DressingLighting>();
+                lighting.Apply(.019f);
+                Assert.IsTrue(lighting.Lamps.All(l => !l.enabled));
+                lighting.Apply(.021f);
+                Assert.IsTrue(lighting.Lamps.All(l => l.enabled));
+                lighting.Apply(.299f);
+                Assert.IsTrue(lighting.Bulbs.All(b => b.sharedMaterial == lighting.BulbOff));
+                lighting.Apply(.301f);
+                Assert.IsTrue(lighting.Bulbs.All(b => b.sharedMaterial == lighting.BulbOn));
+                lighting.Apply(.499f);
+                lighting.Apply(.501f);
+                Assert.AreEqual(.501f, lighting.Night, .0001f);
+            }
+            finally { Object.DestroyImmediate(dressing); }
+        }
+
+        [Test]
         public void TheTownPlacesItOnceAndOnlyRecoloursTheEdgeBlocks()
         {
             ContinuousTownScene.With(scene =>
