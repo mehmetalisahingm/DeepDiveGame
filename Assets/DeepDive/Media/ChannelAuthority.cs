@@ -10,7 +10,7 @@ namespace DeepDive.Media
     //
     // Rules:
     //  - Archive: a clip is added once per clipId (a capture retry is AlreadyArchived). The archive holds the clips' MEDIA, so it is
-    //    bounded (MaxArchivedClips) but never blocks the channel: when it is full, the oldest clip whose publication already settled
+    //    bounded by clip count and declared media bytes: when it is full, the oldest clip whose publication already settled
     //    (or that can never be published) is evicted and its media file deleted, while the publication record (subject, publication
     //    id, views, followers, income, settle id) is kept for good. A clip that could still be published or settled is never evicted.
     //  - Publish: only the clip's owner, only a commercial candidate (complete, safely returned, real subject,
@@ -26,6 +26,8 @@ namespace DeepDive.Media
     public sealed class ChannelAuthority : IMediaPersistence
     {
         public const int MaxArchivedClips = 128;
+        // #253: working budget for one campaign's referenced media, not a filesystem quota.
+        public const long MaxArchivedBytes = 1024L * 1024 * 1024;
         private const byte OpPublish = 1;
 
         public interface IRights
@@ -90,29 +92,50 @@ namespace DeepDive.Media
             if (!manifest.IsWellFormed) return ClipArchiveOutcome.Invalid;
             // A clip whose publication is already on record (even if its media was evicted) is never archived again.
             if (_clips.ContainsKey(manifest.ClipId) || IsPublished(manifest.ClipId)) return ClipArchiveOutcome.AlreadyArchived;
-            if (_clipOrder.Count >= MaxArchivedClips && !TryEvictOne()) return ClipArchiveOutcome.ArchiveFull;
+            if (!TryPlanEvictions(manifest.SizeBytes, out var victims)) return ClipArchiveOutcome.ArchiveFull;
+            foreach (var victim in victims)
+            {
+                _clips.Remove(victim);
+                _clipOrder.Remove(victim);
+                OnClipEvicted?.Invoke(victim);
+            }
             _clips[manifest.ClipId] = manifest;
             _clipOrder.Add(manifest.ClipId);
             Changed();
             return ClipArchiveOutcome.Added;
         }
 
-        // Oldest first: (1) a clip whose publication settled (its result is final, only the media goes), then (2) a clip that can never
-        // be published (not a commercial candidate, not published). A clip that is published and unsettled, or could still be published,
-        // is never evicted.
-        private bool TryEvictOne()
+        // Plan the entire eviction before touching the archive. A failed admission must not
+        // remove even an eligible clip. Settled media first, then non-commercial unpublished
+        // media, both oldest first. Unpublished commercial and unsettled clips stay protected.
+        private bool TryPlanEvictions(long incomingBytes, out List<string> victims)
         {
-            string victim = null;
-            foreach (var id in _clipOrder)
-                if (_publications.TryGetValue(ChannelIds.PublicationId(id), out var p) && !string.IsNullOrEmpty(p.SettledId)) { victim = id; break; }
-            if (victim == null)
+            victims = new List<string>();
+            if (incomingBytes < 0 || incomingBytes > MaxArchivedBytes) return false;
+            // Decimal safely sums even malformed legacy manifests containing very large long values.
+            decimal bytes = incomingBytes;
+            foreach (var id in _clipOrder) bytes += _clips[id].SizeBytes;
+            var count = _clipOrder.Count + 1;
+            bool Fits() => count <= MaxArchivedClips && bytes <= MaxArchivedBytes;
+            if (Fits()) return true;
+
+            for (var pass = 0; pass < 2; pass++)
+            {
                 foreach (var id in _clipOrder)
-                    if (!IsPublished(id) && !_clips[id].IsCommercialCandidate) { victim = id; break; }
-            if (victim == null) return false;
-            _clips.Remove(victim);
-            _clipOrder.Remove(victim);
-            OnClipEvicted?.Invoke(victim);
-            return true;
+                {
+                    var published = _publications.TryGetValue(ChannelIds.PublicationId(id), out var publication);
+                    var eligible = pass == 0
+                        ? published && !string.IsNullOrEmpty(publication.SettledId)
+                        : !published && !_clips[id].IsCommercialCandidate;
+                    if (!eligible) continue;
+                    victims.Add(id);
+                    bytes -= _clips[id].SizeBytes;
+                    count--;
+                    if (Fits()) return true;
+                }
+            }
+            victims.Clear();
+            return false;
         }
 
         public bool TryGetClip(string clipId, out ClipManifest manifest)
@@ -293,6 +316,8 @@ namespace DeepDive.Media
             _processed.Clear();
             _followers = Math.Max(0, data.Followers);
 
+            // Legacy saves over the new byte budget retain all previously accepted media.
+            // New admissions enforce the budget without deleting protected recordings at load.
             if (data.Clips != null)
                 foreach (var c in data.Clips)
                 {
