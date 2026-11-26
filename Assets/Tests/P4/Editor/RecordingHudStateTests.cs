@@ -16,6 +16,26 @@ public sealed class RecordingHudStateTests
     private void Reply(ulong request, RecordingCommand command, PlayerActionResult result, bool active) =>
         Apply.Invoke(bridge, new object[] { request, command, result, active, active ? 42UL : 0UL });
 
+    [TestCase(true,true,true,false,true)]
+    [TestCase(false,true,true,false,false)]
+    [TestCase(true,false,true,false,false)]
+    [TestCase(true,true,false,false,false)]
+    [TestCase(true,true,true,true,false)]
+    public void DelayedNetworkResultsRequireALiveGuestInDive(bool listening,bool diving,bool hasOwner,bool authority,bool expected)
+    {
+        Assert.AreEqual(expected,RecordingNetworkBridge.CanReceiveRecordingResult(listening,diving,hasOwner,authority));
+    }
+
+    [Test] public void LostOwnerResetClearsTimerAndStatus()
+    {
+        Reply(1,RecordingCommand.Start,PlayerActionResult.Accepted,true);
+        var reset=typeof(RecordingNetworkBridge).GetMethod("ResetLocalPresentation", BindingFlags.Instance | BindingFlags.NonPublic);
+        reset.Invoke(bridge,null);
+        Assert.IsFalse(bridge.IsRecordingLocal);
+        Assert.AreEqual(0,bridge.RecordingElapsedSeconds);
+        Assert.AreEqual(string.Empty,bridge.CurrentStatus);
+    }
+
     [Test] public void RejectedStartNeverTurnsOnRecordingTally()
     {
         Reply(1, RecordingCommand.Start, PlayerActionResult.InvalidTarget, false);

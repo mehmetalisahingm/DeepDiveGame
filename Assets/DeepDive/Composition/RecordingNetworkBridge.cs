@@ -115,11 +115,7 @@ namespace DeepDive.Composition
             EnsureMessaging();
             if (manager == null || !manager.IsListening)
             {
-                if (cameraHud != null) cameraHud.Hide();
-                cameraMode = false;
-                localRecording = false;
-                recordingStartedAt = 0;
-                localRecordingTarget = 0;
+                ResetLocalPresentation();
                 localRequestSequence = localLastAppliedRequest = 0;
                 lastRequestByPlayer.Clear();
                 activeTargetByPlayer.Clear();
@@ -131,16 +127,11 @@ namespace DeepDive.Composition
                 StopExpiredRecordings();
 
             var player = LocalPlayer();
-            if (player == null) { if (cameraHud != null) cameraHud.Hide(); return; }
-
             if (adapter.Session.State.Phase != SessionPhase.Dive)
             {
-                if (cameraMode || localRecording)
+                if (player != null && (cameraMode || localRecording))
                     player.SetHeldEquipmentLocal(HeldEquipmentMode.None);
-                if (cameraHud != null) cameraHud.Hide();
-                cameraMode = localRecording = false;
-                recordingStartedAt = 0;
-                localRecordingTarget = 0;
+                ResetLocalPresentation();
                 if (adapter.IsAuthority)
                 {
                     foreach (var activePlayer in FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None))
@@ -149,6 +140,7 @@ namespace DeepDive.Composition
                 activeTargetByPlayer.Clear();
                 return;
             }
+            if (player == null) { ResetLocalPresentation(); return; }
 
             if (Application.isFocused && Input.GetKeyDown(KeyCode.C))
             {
@@ -174,6 +166,19 @@ namespace DeepDive.Composition
             }
             else if (cameraHud != null) cameraHud.Hide();
         }
+
+        private void ResetLocalPresentation()
+        {
+            if (cameraHud != null) cameraHud.Hide();
+            cameraMode = localRecording = false;
+            recordingStartedAt = 0;
+            localRecordingTarget = 0;
+            localStatus = string.Empty;
+            localStatusUntil = 0;
+        }
+
+        public static bool CanReceiveRecordingResult(bool listening, bool diving, bool hasOwner, bool authority)
+            => listening && diving && hasOwner && !authority;
 
         private void EnsureMessaging()
         {
@@ -433,7 +438,10 @@ namespace DeepDive.Composition
 
         private void ResultReceived(ulong sender, FastBufferReader reader)
         {
-            if (adapter.IsAuthority || sender != NetworkManager.ServerClientId || reader.Length > 64 || !reader.TryBeginRead(22)) return;
+            if (sender != NetworkManager.ServerClientId || adapter == null || manager == null ||
+                !CanReceiveRecordingResult(manager.IsListening, adapter.Session.State.Phase == SessionPhase.Dive,
+                    LocalPlayer() != null, adapter.IsAuthority) ||
+                reader.Length > 64 || !reader.TryBeginRead(22)) return;
             reader.ReadValueSafe(out ulong requestId);
             reader.ReadValueSafe(out byte commandByte);
             reader.ReadValueSafe(out int resultInt);
