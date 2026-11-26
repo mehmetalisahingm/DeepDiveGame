@@ -20,6 +20,16 @@ namespace DeepDive.P4.Tests
         public void CuesFollowTheHostPublishedStateEdges(bool wasBusy, bool wasPlaced, bool busy, bool placed, bool struck, RepairCue expected) =>
             Assert.AreEqual(expected, RepairCarryView.CueFor(wasBusy, wasPlaced, busy, placed, struck));
 
+        [TestCase(false,0u,5u,false)]
+        [TestCase(true,5u,5u,false)]
+        [TestCase(true,5u,0u,false)]
+        [TestCase(true,5u,6u,true)]
+        [TestCase(false,5u,6u,false)]
+        public void OnlyFreshHostStrokeAfterBaselinePlaysImpact(bool primed,uint previous,uint current,bool expected)
+        {
+            Assert.AreEqual(expected,RepairCarryView.AcceptedStrokeAdvanced(primed,previous,current));
+        }
+
         private static AudioClip[] Clips()
         {
             var catalog = Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName);
