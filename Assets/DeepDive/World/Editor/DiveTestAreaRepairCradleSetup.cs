@@ -28,7 +28,11 @@ namespace DeepDive.World.Editor
         public const string RootName = "P48_RepairAnchors";
 
         // S1 (#188 decision, Mehmet 19 Oct): beach east, hull parallel to the shore, stern west.
-        public static readonly Vector3 CradlePosition = new Vector3(3.6f, 8.4f, -12.6f);
+        // #297 (Mehmet, 21 Nov): 0.95 m south of S1 (-12.6), the most that keeps the hull on Beach_Platform (south edge
+        // -14.75), so a 1.35 m corridor stays between its north rim and the side apron before the boat is repaired
+        // (P297CradleShiftAudit). Also 0.6 m east of S1 (3.6): moved south only, the work point behind the stern lands
+        // 0.6 m from the town gate (0, -13.5) and a crew member there blocks the gate walk.
+        public static readonly Vector3 CradlePosition = new Vector3(4.2f, 8.4f, -13.55f);
         public const float CradleYaw = 90f;
 
         // Work points in the cradle's frame (x across the hull, +x = south at yaw 90; z along it, stern at
@@ -47,7 +51,8 @@ namespace DeepDive.World.Editor
 
         // #192: dry, outside the SwimVolume, free, >= 1.31 m off every corridor, walked clean from the
         // work points, the cradle and on to dock-town-1.
-        public static readonly Vector3 DropPosition = new Vector3(7.5f, 8.4f, -14.5f);
+        // #297: moved with the cradle (0.6 m east, 0.95 m south of #192's (7.5, -14.5)) so hull, crew and drop keep their S1 layout.
+        public static readonly Vector3 DropPosition = new Vector3(8.1f, 8.4f, -15.45f);
 
         public const float WorkerSpacing = 1.06f;
         public const float RimClearance = 0.45f;
@@ -151,8 +156,9 @@ namespace DeepDive.World.Editor
             for (var i = 0; i < points.Length; i++)
             {
                 var feet = points[i];
-                if (!Physics.Raycast(feet + Vector3.up * 0.5f, Vector3.down, out var ground, 1f, ~0, QueryTriggerInteraction.Ignore) ||
-                    Mathf.Abs(ground.point.y - feet.y) > 0.01f || InSwimVolume(feet + Vector3.up * 0.05f))
+                var onScene = Physics.Raycast(feet + Vector3.up * 0.5f, Vector3.down, out var ground, 1f, ~0, QueryTriggerInteraction.Ignore) &&
+                              Mathf.Abs(ground.point.y - feet.y) <= 0.01f;
+                if ((!onScene && !OnTownBackFill(feet)) || InSwimVolume(feet + Vector3.up * 0.05f))
                     throw new InvalidOperationException($"P48_CRADLE_POINT_NOT_DRY index={i} at={feet}");
                 var blockers = Physics.OverlapCapsule(feet + Vector3.up * (0.35f + 0.08f), feet + Vector3.up * (1.8f - 0.35f), 0.35f, ~0, QueryTriggerInteraction.Ignore)
                     .Where(c => !RelocatedAtRunTime(c)).Select(c => c.name).ToArray();
@@ -168,6 +174,14 @@ namespace DeepDive.World.Editor
                         throw new InvalidOperationException($"P48_CRADLE_WORKERS_TOO_CLOSE a={j} b={i}");
             }
         }
+
+        // South of Beach_Platform (z -14.75) the town's back fill (ContinuousTownLayout "Fill_BeachBack", built at run time and
+        // so absent from the saved scene) carries the walk at the beach's height to z -15.5. P48RepairCradleTests checks this
+        // band against the built town and the standing room there with the town built.
+        public const float TownBackFillMinZ = -15.5f, TownBackFillMaxZ = -14.75f, TownBackFillHalfWidth = 14.75f;
+        private static bool OnTownBackFill(Vector3 feet) =>
+            Mathf.Abs(feet.y - CradlePosition.y) <= 0.01f && Mathf.Abs(feet.x) <= TownBackFillHalfWidth &&
+            feet.z >= TownBackFillMinZ && feet.z <= TownBackFillMaxZ;
 
         // The P3 service NPCs still stand on this beach in the saved scene; ContinuousTownLayout moves their
         // ServicePointAnchors to the storefronts on every load. P48RepairCradleTests checks the cradle against

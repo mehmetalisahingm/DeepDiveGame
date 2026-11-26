@@ -21,7 +21,7 @@ namespace DeepDive.Editor
         public const string OutputPath = "docs/reports/evidence/p297-shore-dock/shore-dock.json";
         private const float Dt = 0.02f;
 
-        [Serializable] public sealed class Walker { public string id; public Vector3 start, end; public bool arrived; public float seconds; public int blockedFrames; public float minClearance; }
+        [Serializable] public sealed class Walker { public string id; public Vector3 start, end; public bool arrived; public float seconds; public int blockedFrames; public float minClearance, maxY; }
         [Serializable] public sealed class Pass { public string id; public bool allArrived; public float seconds; public List<Walker> walkers = new List<Walker>(); }
         [Serializable] public sealed class Edge { public float x, z, platformY, outsideY; public string outsideCollider; public float step; }
         [Serializable] public sealed class Audit
@@ -109,7 +109,8 @@ namespace DeepDive.Editor
             }
         }
 
-        private static Pass Walk(string id, List<(string Id, Vector2[] Path)> routes, CharacterController template, float speed)
+        // Also used by P297CradleShiftAudit.
+        internal static Pass Walk(string id, List<(string Id, Vector2[] Path)> routes, CharacterController template, float speed)
         {
             var pass = new Pass { id = id };
             var walkers = new List<(Walker Report, CharacterController Cc, Vector2[] Path)>();
@@ -141,6 +142,7 @@ namespace DeepDive.Editor
                         cc.Move(new Vector3(step.x, -2f * Dt, step.y));
                         var moved = Vector2.Distance(here, new Vector2(cc.transform.position.x, cc.transform.position.z));
                         if (moved < step.magnitude * 0.5f) report.blockedFrames++;
+                        report.maxY = Mathf.Max(report.maxY, cc.transform.position.y);
                         for (var j = 0; j < walkers.Count; j++)
                             if (j != i) report.minClearance = Mathf.Min(report.minClearance,
                                 Vector3.Distance(cc.transform.position, walkers[j].Cc.transform.position) - 2f * template.radius);
@@ -175,7 +177,7 @@ namespace DeepDive.Editor
             return hit.point.y;
         }
 
-        private static IEnumerable<T> All<T>(Scene scene) where T : Component =>
+        internal static IEnumerable<T> All<T>(Scene scene) where T : Component =>
             scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<T>(true));
     }
 }

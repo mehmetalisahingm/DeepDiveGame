@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using DeepDive.Composition;
+using DeepDive.Core.Contracts;
 using DeepDive.Network;
+using DeepDive.World;
 using UnityEngine;
 
 namespace DeepDive.P1.Lab
@@ -13,7 +15,7 @@ namespace DeepDive.P1.Lab
     // behind are coming up). At each stop it waits up to 8 s for another player to be on the apron and then aims at that
     // player, so the frame shows someone walking it; with nobody there it frames the empty apron (the foot stop waits only
     // 1.5 s). Nobody starts back until everyone is up, then 2 s apart on two lanes, so the way back never crosses a climber's lane.
-    // Lanes and landing spots are the four P297ShoreDockAudit proved with the real controller;
+    // The route depends on the repair cradle (ShoreRampCorridorZ). Landing spots are the four P297ShoreDockAudit proved;
     // starts are 1.2 s apart. No teleport, no speed change.
     public sealed partial class ProductDaySmokeDriver
     {
@@ -33,30 +35,52 @@ namespace DeepDive.P1.Lab
             {
                 shoreRampStarted = true;
                 shoreRampStartAt = Time.realtimeSinceStartup + report.slot * 1.2f;
-                // Until the boat is repaired its hull sits on the beach cradle (x 1.1 .. 6.1, z -13.8 .. -11.4, 0.4 m high),
-                // 0.4 m short of the apron's foot, so the apron is reached through the sand east of the hull (x 6.1 .. 7):
-                // round the hull's south side, a hold spot each, then single file up x 6.6 onto the apron.
-                var footSpot = P(6.6f + report.slot * 0.9f, -14.9f);
                 var landing = new[] { P(8.3f, -9.6f), P(9.1f, -9.0f), P(8.0f, -8.4f), P(10.3f, -10.4f) }[report.slot];
-                var backX = 7.8f + (report.slot % 2) * 0.6f;
                 var points = new List<Vector3>
                 {
-                    H(-4.7f, -2f), H(-4.7f, 5f), ContinuousTownLayout.HomeRig.Door, P(0f, -36f), P(0f, -24f), P(-1.8f, -16f),
-                    P(0.3f, -15.1f), footSpot
+                    H(-4.7f, -2f), H(-4.7f, 5f), ContinuousTownLayout.HomeRig.Door, P(0f, -36f), P(0f, -24f), P(-1.8f, -16f)
                 };
-                var foot = points.Count - 1;
-                points.Add(P(6.6f, -13.2f));
-                points.Add(P(6.6f, -10.4f));   // up the apron's east half and onto the ramp
-                points.Add(landing);
-                var top = points.Count - 1;
-                shoreRampTop = top;
-                // Back over the ramp top and the platform and round the hull's south side, two lanes, 2 s apart.
-                var backZ = report.slot % 2 == 0 ? -14.8f : -15.35f;
-                points.Add(P(backX, -11.8f));
-                points.Add(P(backX, backZ));
-                points.Add(P(0.3f, backZ));
+                int foot, top;
+                var corridor = ShoreRampCorridorZ();
+                if (!float.IsNaN(corridor))
+                {
+                    // #297 moved cradle: through the town gate and single file along the corridor between the hull's north
+                    // rim and the platform edge, each to its own apron column; back the same way once everyone is up.
+                    var column = 5.0f + 0.5f * report.slot;
+                    points.Add(P(-0.6f, -13.5f));
+                    points.Add(P(-0.6f - 0.9f * report.slot, corridor));
+                    foot = points.Count - 1;
+                    points.Add(P(column, corridor));
+                    points.Add(P(column, -10.0f));   // up the apron onto the ramp
+                    points.Add(landing);
+                    top = points.Count - 1;
+                    points.Add(P(column, -10.2f));   // back down the apron
+                    points.Add(P(column, corridor));
+                    points.Add(P(-0.6f, corridor));
+                    points.Add(P(-0.6f, -13.5f));
+                }
+                else
+                {
+                    // S1 cradle: its hull (x 1.1 .. 6.1, z -13.8 .. -11.4, 0.4 m high) sits 0.4 m short of the apron's foot,
+                    // so the apron is reached through the sand east of the hull (x 6.1 .. 7): round the hull's south side,
+                    // a hold spot each, then single file up x 6.6 onto the apron; back over the ramp top on two lanes.
+                    var backX = 7.8f + (report.slot % 2) * 0.6f;
+                    points.Add(P(0.3f, -15.1f));
+                    points.Add(P(6.6f + report.slot * 0.9f, -14.9f));
+                    foot = points.Count - 1;
+                    points.Add(P(6.6f, -13.2f));
+                    points.Add(P(6.6f, -10.4f));
+                    points.Add(landing);
+                    top = points.Count - 1;
+                    var backZ = report.slot % 2 == 0 ? -14.8f : -15.35f;
+                    points.Add(P(backX, -11.8f));
+                    points.Add(P(backX, backZ));
+                    points.Add(P(0.3f, backZ));
+                }
                 points.Add(P(-1.8f, -16f));
                 points.Add(P(0f, -24f));
+                shoreRampTop = top;
+                report.shoreRampFrames.Add(float.IsNaN(corridor) ? "route=s1-south-of-hull" : $"route=north-corridor z={corridor:0.00}");
                 var apronMiddle = new Vector3((ShoreRampApron.MinX + ShoreRampApron.MaxX) / 2f, ShoreRampApron.PlatformTopY,
                     ShoreRampApron.SeamZ + ShoreRampApron.Run / 2f);
                 shoreRampShots[foot] = apronMiddle + Vector3.up * 0.9f;
@@ -115,6 +139,15 @@ namespace DeepDive.P1.Lab
                 report.shoreRampFrames.Add($"back allUp={allUp} waited={now - shoreRampUpSince:0.0}");
             }
             return now >= shoreRampReleaseAt;
+        }
+
+        // The middle of the walkable corridor between the cradle hull's north rim and the beach platform's edge (z -11),
+        // or NaN when it is under a metre wide (the S1 cradle leaves 0.4 m). The hull is 2.4 m across at the cradle's yaw.
+        private static float ShoreRampCorridorZ()
+        {
+            if (!WorldAnchors.TryGetPose(RepairAnchorIds.Cradle, out var cradle)) return float.NaN;
+            var rim = cradle.position.z + 1.2f;
+            return ShoreRampApron.SeamZ - rim >= 1.0f ? (rim + ShoreRampApron.SeamZ) / 2f : float.NaN;
         }
 
         // Another live player standing on the apron or where it meets the ramp.
