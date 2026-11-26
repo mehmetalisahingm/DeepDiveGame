@@ -47,25 +47,50 @@ namespace DeepDive.Composition
             ShopShelfPresentation.AddSample(sample.transform, itemId,
                 Resources.Load<DiverPresentationCatalog>(DiverPresentationCatalog.ResourceName));
             if (itemId.StartsWith("camera-")) sample.transform.localRotation = Quaternion.Euler(0, 180, 0);
-            var renderers = sample.GetComponentsInChildren<Renderer>();
-            if (renderers.Length > 0)
-            {
-                var bounds = renderers[0].bounds;
-                foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
-                sample.transform.localPosition = Vector3.up * (-.06f + bounds.size.y * .5f);
-            }
+            // Fit against the actual local bottom, not the height of a world AABB:
+            // imported pivots may be off-centre and players can face any direction.
+            if (TryProductBounds(sample.transform, root.transform, out var bounds))
+                sample.transform.localPosition += Vector3.up * (-.06f - bounds.min.y);
             foreach (var collider in root.GetComponentsInChildren<Collider>()) collider.enabled = false;
             return root;
         }
 
+        public static bool TryProductBounds(Transform product, Transform frame, out Bounds bounds)
+        {
+            bounds = default;
+            if (product == null || frame == null) return false;
+            var found = false;
+            foreach (var renderer in product.GetComponentsInChildren<Renderer>(true))
+            {
+                if (!renderer.enabled || !renderer.gameObject.activeInHierarchy) continue;
+                var local = renderer.localBounds;
+                var matrix = frame.worldToLocalMatrix * renderer.transform.localToWorldMatrix;
+                for (var i = 0; i < 8; i++)
+                {
+                    var corner = local.center + Vector3.Scale(local.extents,
+                        new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+                    var point = matrix.MultiplyPoint3x4(corner);
+                    if (!found) { bounds = new Bounds(point, Vector3.zero); found = true; }
+                    else bounds.Encapsulate(point);
+                }
+            }
+            return found;
+        }
+
         private void LateUpdate()
         {
-            var valid = player != null && player.IsSpawned && !player.Passive.Value && !player.Seated.Value &&
-                !player.Swimming.Value && !player.RepairHandsBusy && !player.RecordingPresentation.Value &&
-                (actions == null || actions.ActiveKind == PlayerVisualAction.None);
-            var id = valid ? player.SelectedShopItem.Value.ToString() : "";
+            if (player == null || !player.IsSpawned) { Clear(); return; }
+            var id = player.SelectedShopItem.Value.ToString();
             if (id.Length == 0 || Array.IndexOf(ShopShelfAnchor.ItemIds, id) < 0)
-            { Hide(); return; }
+            { Clear(); return; }
+            if (shown.Length > 0 && shown != id) Clear();
+            if (actions == null) actions = GetComponent<PlayerActionView>();
+            var valid = !player.Passive.Value && !player.Seated.Value && !player.Swimming.Value &&
+                !player.RepairHandsBusy && !player.RecordingPresentation.Value &&
+                (actions == null || actions.ActiveKind == PlayerVisualAction.None);
+            // A transient competing action hides the basket without losing an unpaid selection.
+            // Clearing the host mirror or despawning destroys the old cosmetic product.
+            if (!valid) { Hide(); return; }
             if (shown != id || basket == null)
             {
                 Clear(); basket = CreateBasket(transform, id);
@@ -94,7 +119,7 @@ namespace DeepDive.Composition
             }
             basket = null; product = left = right = null; shown = "";
         }
-        private void OnDisable() => Hide();
+        private void OnDisable() => Clear();
         private void OnDestroy() => Clear();
     }
 }
