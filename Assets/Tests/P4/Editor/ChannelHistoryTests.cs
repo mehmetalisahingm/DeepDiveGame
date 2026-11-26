@@ -23,6 +23,61 @@ namespace DeepDive.P4.Tests
         private static ClipManifest Clip(string id, int quality = 3, string subject = "sea_bass", int day = 1) =>
             new ClipManifest(id, "rec-" + id, "dive-1", day, Host, subject, quality, 12f, "h-" + id, 1000, true, true);
 
+        private static ClipManifest SizedClip(string id, int mib, int quality = 3) =>
+            new ClipManifest(id, "rec-" + id, "dive-1", 1, Host, "sea_bass", quality, 12f, "h-" + id,
+                mib * 1024L * 1024, true, true);
+
+        [Test]
+        public void ByteBudgetEvictsSeveralEligibleClipsEvenBelowTheCountLimit()
+        {
+            var channel = new ChannelAuthority();
+            var evicted = new List<string>();
+            channel.OnClipEvicted += evicted.Add;
+            Assert.AreEqual(ClipArchiveOutcome.Added, channel.Submit(SizedClip("junk1", 120, 0)));
+            Assert.AreEqual(ClipArchiveOutcome.Added, channel.Submit(SizedClip("junk2", 120, 0)));
+            for (var i = 0; i < 3; i++)
+                Assert.AreEqual(ClipArchiveOutcome.Added, channel.Submit(SizedClip("protected" + i, 250)));
+            Assert.AreEqual(ClipArchiveOutcome.Added, channel.Submit(SizedClip("new", 250)));
+            CollectionAssert.AreEqual(new[] { "junk1", "junk2" }, evicted);
+            Assert.AreEqual(4, channel.ClipCount);
+            Assert.LessOrEqual(channel.Clips().Sum(x => x.SizeBytes), ChannelAuthority.MaxArchivedBytes);
+            Assert.IsTrue(channel.TryGetClip("protected0", out _));
+        }
+
+        [Test]
+        public void ByteBudgetRefusalDoesNotPartiallyEvictOrChangeRevision()
+        {
+            var channel = new ChannelAuthority();
+            var evicted = new List<string>();
+            channel.OnClipEvicted += evicted.Add;
+            channel.Submit(SizedClip("junk", 100, 0));
+            for (var i = 0; i < 3; i++) channel.Submit(SizedClip("protected" + i, 250));
+            channel.Submit(SizedClip("protected-small", 150));
+            var revision = channel.Revision;
+            Assert.AreEqual(ClipArchiveOutcome.ArchiveFull, channel.Submit(SizedClip("new", 250)));
+            Assert.AreEqual(ClipArchiveOutcome.ArchiveFull, channel.Submit(SizedClip("too-big", 1025)));
+            Assert.AreEqual(revision, channel.Revision);
+            Assert.IsEmpty(evicted);
+            Assert.AreEqual(5, channel.ClipCount);
+            Assert.IsTrue(channel.TryGetClip("junk", out _));
+        }
+
+        [Test]
+        public void LegacyArchiveAboveByteBudgetIsPreservedButNewAdmissionsAreBounded()
+        {
+            var saved = new MediaSaveData();
+            for (var i = 0; i < 5; i++) saved.Clips.Add(ClipSave.From(SizedClip("old" + i, 250)));
+            var channel = new ChannelAuthority();
+            var evicted = new List<string>();
+            channel.OnClipEvicted += evicted.Add;
+            Assert.IsTrue(channel.RestoreMedia(saved));
+            Assert.AreEqual(5, channel.ClipCount);
+            Assert.AreEqual(ClipArchiveOutcome.AlreadyArchived, channel.Submit(SizedClip("old0", 250)));
+            Assert.AreEqual(ClipArchiveOutcome.ArchiveFull, channel.Submit(SizedClip("new", 1)));
+            Assert.IsEmpty(evicted);
+            Assert.AreEqual(5, channel.ExportMedia().Clips.Count);
+        }
+
         private sealed class Rig : ChannelAuthority.IRights
         {
             public GameObject Root;

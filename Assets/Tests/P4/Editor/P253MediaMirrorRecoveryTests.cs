@@ -1,10 +1,42 @@
 using DeepDive.Composition;
+using DeepDive.Core.Contracts;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace DeepDive.P4.Tests
 {
     public sealed class P253MediaMirrorRecoveryTests
     {
+        [Test]
+        public void ArchivePagesExposeEveryClipExactlyOnceNewestFirst()
+        {
+            Assert.AreEqual(1, HomePcView.ArchivePageCount(0));
+            Assert.AreEqual(-1, HomePcView.ArchiveIndex(0, 0, 0));
+            foreach (var count in new[] { 1, 9, 10, 18, 19, 128 })
+            {
+                var seen = new List<int>();
+                for (var page = 0; page < HomePcView.ArchivePageCount(count); page++)
+                    for (var row = 0; row < HomePcView.ArchivePageSize; row++)
+                    {
+                        var index = HomePcView.ArchiveIndex(count, page, row);
+                        if (index >= 0) seen.Add(index);
+                    }
+                Assert.AreEqual(count, seen.Count);
+                for (var i = 0; i < count; i++) Assert.AreEqual(count - 1 - i, seen[i]);
+            }
+            Assert.AreEqual(-1, HomePcView.ArchiveIndex(10, 2, 0));
+            Assert.AreEqual(-1, HomePcView.ArchiveIndex(10, 0, -1));
+        }
+
+        [Test]
+        public void ArchiveBudgetLabelUsesHostManifestSizesAndDoesNotClampLegacyUsage()
+        {
+            Assert.AreEqual("ARSIV 0/128 | 0.0/1024 MiB", HomePcView.ArchiveBudgetLabel(null));
+            var clips = new List<ClipSave> { new ClipSave { SizeBytes = 1024L * 1024 + 512 * 1024 },
+                new ClipSave { SizeBytes = 1024L * 1024 * 1024 } };
+            Assert.AreEqual("ARSIV 2/128 | 1025.5/1024 MiB", HomePcView.ArchiveBudgetLabel(clips));
+        }
+
         [TestCase(true, true, false, true, false, 10.0, 0.0, true)]
         [TestCase(true, true, false, true, false, 10.0, 12.0, false)]
         [TestCase(true, true, false, true, true, 10.0, 0.0, false)]

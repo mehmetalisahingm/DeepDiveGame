@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DeepDive.Composition;
 using DeepDive.Core.Contracts;
+using DeepDive.Media;
 using NUnit.Framework;
 using Unity.Netcode;
 using UnityEngine;
@@ -180,14 +181,38 @@ namespace DeepDive.P4.Tests
         }
 
         [Test]
-        public void PhysicalChannelBoardOnlyShowsTheRealMirroredFollowerCount()
+        public void PhysicalChannelBoardShowsOnlyVerifiedProgressAndTheNextHonestMilestone()
         {
             Assert.AreEqual("KANAL", HomeChannelBoardDisplay.Label(false, 123),
                 "a stale or absent mirror must never be presented as earned progress");
-            Assert.AreEqual("KANAL\n0\nTAKIPCI", HomeChannelBoardDisplay.Label(true, -9));
-            Assert.AreEqual("KANAL\n27\nTAKIPCI", HomeChannelBoardDisplay.Label(true, 27));
-            Assert.AreEqual("KANAL\n10.000.000\nTAKIPCI",
-                HomeChannelBoardDisplay.Label(true, 10000000));
+            Assert.AreEqual("KANAL", HomeChannelBoardDisplay.Label(false, ChannelGoal.TargetFollowers),
+                "even an alleged completed campaign is not displayed without a mirror");
+            Assert.AreEqual("KANAL\n0 TAKIPCI\nSONRAKI: 100", HomeChannelBoardDisplay.Label(true, -9));
+            Assert.AreEqual("KANAL\n27 TAKIPCI\nSONRAKI: 100", HomeChannelBoardDisplay.Label(true, 27));
+            Assert.AreEqual("KANAL\n100 TAKIPCI\nSONRAKI: 1.000", HomeChannelBoardDisplay.Label(true, 100));
+            Assert.AreEqual("KANAL\n9.999.999 TAKIPCI\nSONRAKI: 10.000.000",
+                HomeChannelBoardDisplay.Label(true, 9999999));
+            Assert.AreEqual("KANAL\n10.000.000 TAKIPCI\nHEDEF TAMAM",
+                HomeChannelBoardDisplay.Label(true, ChannelGoal.TargetFollowers));
+            Assert.AreEqual("KANAL\n10.000.100 TAKIPCI\nHEDEF TAMAM",
+                HomeChannelBoardDisplay.Label(true, ChannelGoal.TargetFollowers + 100));
+        }
+
+        [Test]
+        public void PhysicalChannelBoardLongMilestonesFitTheExistingPanel()
+        {
+            var empty = HomeChannelBoardDisplay.CharacterSize("KANAL");
+            Assert.AreEqual(0.06f, empty, 0.0001f);
+            foreach (var followers in new[] { 0, 27, 100, 9999999, 10000000, int.MaxValue })
+            {
+                var label = HomeChannelBoardDisplay.Label(true, followers);
+                var longest = label.Split('\n').Max(line => line.Length);
+                var size = HomeChannelBoardDisplay.CharacterSize(label);
+                Assert.Greater(size, 0.01f);
+                Assert.LessOrEqual(size, empty);
+                Assert.LessOrEqual(longest * size, 0.981f,
+                    "leave room for the actual 1.28 m channel board frame: " + followers);
+            }
         }
 
         [Test]

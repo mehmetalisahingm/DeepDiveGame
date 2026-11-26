@@ -399,7 +399,7 @@ namespace DeepDive.Composition
                 var size = new FileInfo(path).Length;
                 foreach (var clip in MediaNetworkBinding.Mirrored.Clips ?? new List<ClipSave>())
                     if (clip.ClipId == clipId && clip.SizeBytes > 0 && clip.SizeBytes != size) return false;
-                return size > 0;
+                return RecordingClipFile.IsSupportedFileSize(size);
             }
             catch (IOException) { return false; }
             catch (UnauthorizedAccessException) { return false; }
@@ -411,7 +411,9 @@ namespace DeepDive.Composition
             if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
             try
             {
-                var bytes = File.ReadAllBytes(path);
+                // A corrupt local file must not allocate arbitrary memory before the codec can reject it.
+                using var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (!RecordingClipFile.TryReadPayload(stream, out var bytes)) return false;
                 if (!RecordingClipFile.TryDecode(bytes, out var data)) return false;
                 foreach (var clip in MediaNetworkBinding.Mirrored.Clips ?? new List<ClipSave>())
                 {
