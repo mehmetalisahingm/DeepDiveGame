@@ -1,4 +1,4 @@
-param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render, [switch]$Perf, [switch]$PerfProfile)
+param([ValidateSet(1,2,4)][int]$Players = 2, [int]$Port = 19777, [string]$BuildPath = '', [switch]$Render, [switch]$Perf, [switch]$PerfProfile, [switch]$DockRush, [switch]$DockFixed, [switch]$DockReverse)
 $ErrorActionPreference = 'Stop'
 $worldRoot = Split-Path -Parent $PSScriptRoot
 $worldIsWindows = $env:OS -eq 'Windows_NT'
@@ -21,6 +21,9 @@ try {
         $worldArgs = @(if (-not $Perf) { '-batchmode' }) + $worldGraphics + @('-p46-world-role', $(if ($worldSlot -eq 0) {'host'} else {'client'}),
             '-p46-world-count', $Players, '-p46-world-slot', $worldSlot, '-p46-world-port', $Port, '-p46-mute', 1,
             '-p1-report', ('"{0}"' -f $worldReport), '-logFile', ('"{0}"' -f $worldLog))
+        if ($DockRush) { $worldArgs += @('-p326-dock-rush', 1) }
+        if ($DockFixed) { $worldArgs += @('-p326-dock-fixed', 1) }
+        if ($DockReverse) { $worldArgs += @('-p326-dock-reverse', 1) }
         # #327: -PerfProfile also writes the host's development-player profiler capture (Unity's own .raw) for P327ProfileDigest.
         if ($PerfProfile -and $worldSlot -eq 0) { $worldArgs += @('-profiler-enable', '-profiler-log-file', ('"{0}"' -f (Join-Path $worldRun 'player0.raw')), '-profiler-maxusedmemory', '1073741824') }
         if ($worldIsWindows -and $Perf) { $worldProcess = Start-Process -FilePath $worldBuild -ArgumentList $worldArgs -PassThru }
