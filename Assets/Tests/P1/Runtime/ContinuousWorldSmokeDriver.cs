@@ -28,6 +28,8 @@ namespace DeepDive.P1.Lab
             // #326: which pier-end stop this player took (0/1 far row, 2/3 near row), when it got there and how.
             public int dockIndex = -1;
             public float dockSeconds;
+            public Vector3 dockArrivalPosition;
+            public List<string> travelSamples = new List<string>();
             public string dockMode = "";
             public float distance, largestTravelStep;
             public string position, phase;
@@ -114,7 +116,7 @@ namespace DeepDive.P1.Lab
         {
             if (finished || adapter == null) return;
             if (Time.realtimeSinceStartup > deadline)
-            { Fail($"Timed out at step {step} waypoint {waypoint} position={PositionForReport(local)} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
+            { RecordTravelSample("timeout"); Fail($"Timed out at step {step} waypoint {waypoint} position={PositionForReport(local)} target={(route != null && waypoint < route.Count ? route[waypoint].ToString() : "none")} bedRay={report.bedRay} bedAnswer={report.bedAnswer} inBed={report.inBed} attempts={report.bedAttempts}"); return; }
             if (leaving)
             {
                 if (adapter.Connection.Status == ConnectionStatus.Offline) Finish();
@@ -196,6 +198,7 @@ namespace DeepDive.P1.Lab
             {
                 nextTrace = Time.realtimeSinceStartup + 5f;
                 Debug.Log($"P46_WORLD_TRAVEL step={step} waypoint={waypoint} position={local.transform.position} swimming={local.Swimming.Value}");
+                RecordTravelSample("travel");
             }
             if (Time.realtimeSinceStartup >= nextReport)
             {
@@ -217,6 +220,8 @@ namespace DeepDive.P1.Lab
                     if (DockRush && !dockClaimed && route != null && waypoint == route.Count - 1) ClaimDockStop();
                     if (!Follow()) return;
                     if (DockRush) report.dockSeconds = Time.realtimeSinceStartup - dockStepStart;
+                    report.dockArrivalPosition = local.transform.position;
+                    RecordTravelSample("dock-arrival");
                     report.dockReached = !local.Swimming.Value &&
                         Mathf.Abs(local.transform.position.y - ContinuousTownLayout.WalkSurfaceY) < 0.2f;
                     if (!report.dockReached) { Fail("Dock endpoint is not dry ground"); return; }
@@ -370,6 +375,23 @@ namespace DeepDive.P1.Lab
             }
         }
 
+        // #295/#326: capture the current peer positions and target on every existing
+        // five-second trace tick, at dock arrival and on timeout. No input or physics
+        // is changed, and a failed run retains the same acceptance thresholds.
+        private void RecordTravelSample(string reason)
+        {
+            var target = route != null && waypoint >= 0 && waypoint < route.Count
+                ? route[waypoint].ToString("F3") : "none";
+            var peers = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .Where(p => p.IsSpawned)
+                .OrderBy(p => p.OwnerClientId)
+                .Select(p => $"{p.OwnerClientId}:{p.transform.position.ToString("F3")}:swim={p.Swimming.Value}:seated={p.Seated.Value}");
+            var sample = $"P46_WORLD_EVIDENCE reason={reason} t={Time.realtimeSinceStartup:F2} step={step} waypoint={waypoint} " +
+                $"position={PositionForReport(local)} target={target} dockIndex={report.dockIndex} peers=[{string.Join(";", peers)}]";
+            report.travelSamples.Add(sample);
+            Debug.Log(sample);
+        }
+
         private void LateUpdate()
         {
             if (!finished && adapter != null && step == 9 && !adapter.IsAuthority && adapter.Connection.Status == ConnectionStatus.Offline) Finish();
@@ -440,8 +462,25 @@ namespace DeepDive.P1.Lab
             // Return west of the cradle; do not cut through its collision hull at x=0, z=-12.5.
             yield return P(0f, -16f); yield return P(0f, -24f); yield return P(0f, -36f);
             yield return ContinuousTownLayout.HomeRig.Door; yield return H(4.95f, 5f);
-            yield return H(4.95f, -2.5f); yield return H(2f + slot * 0.8f, -2.4f);
+            if (expected == 4)
+            {
+                // #207: host reached its final home stop but a peer remained
+                // at waypoint 8. Park off the approach lane instead of walking
+                // along the occupied row. This is a route hypothesis, not a
+                // proven fix to gameplay collision or network transport.
+                yield return H(4.95f, -.8f);
+                yield return HomeReturnApproach(slot);
+                yield return HomeReturnStop(slot);
+            }
+            else
+            {
+                yield return H(4.95f, -2.5f);
+                yield return HomeReturnStop(slot);
+            }
         }
+        public static Vector3 HomeReturnStop(int playerSlot) => H(2f + playerSlot * .8f, -2.4f);
+        public static Vector3 HomeReturnApproach(int playerSlot) => H(2f + playerSlot * .8f, -.8f);
+
         // Bounds: continuous-world Zone_Dock x=[7,11]. The 0.7 m edge inset
         // keeps the player's 0.35 m radius inside the authored walk surface.
         public static Vector3 DockRearStage(int playerSlot) => P(playerSlot == 2 ? 7.7f : 10.3f, -9f);
