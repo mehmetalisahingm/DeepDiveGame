@@ -44,7 +44,7 @@ namespace DeepDive.Composition
         }
     }
 
-    // #259/#255: the physical PC corner should reflect the actual shared
+    // #259/#255: the physical PC corner shows host-verified followers and the next real milestone; it should reflect the actual shared
     // channel rather than showing a forever-static decorative "KANAL" sign.
     // Strictly visual: polls the existing host-approved mirror, creates no new
     // NetworkObject, RPC, income, subscriber count, save field or collision.
@@ -55,8 +55,28 @@ namespace DeepDive.Composition
         private TextMesh boardText;
         private float nextRefresh;
 
-        public static string Label(bool hasMirror, int followers) =>
-            hasMirror ? "KANAL\n" + ChannelGoal.Format(Mathf.Max(0, followers)) + "\nTAKIPCI" : "KANAL";
+        public static string Label(bool hasMirror, int followers)
+        {
+            if (!hasMirror) return "KANAL"; // no progress before an actual host mirror is available
+            var progress = ChannelGoal.Of(followers);
+            return "KANAL\n" + ChannelGoal.Format(progress.Followers) + " TAKIPCI\n" +
+                (progress.Reached ? "HEDEF TAMAM" : "SONRAKI: " + ChannelGoal.Format(progress.NextMilestone));
+        }
+
+        // The physical wall panel has a 1.28 m face. The long 10M milestone
+        // must fit without spilling outside the board when the text changes.
+        public static float CharacterSize(string label)
+        {
+            var longest = 0;
+            var line = 0;
+            foreach (var c in label ?? "")
+            {
+                if (c == '\n') { longest = Mathf.Max(longest, line); line = 0; }
+                else line++;
+            }
+            longest = Mathf.Max(longest, line);
+            return Mathf.Min(0.06f, 0.98f / Mathf.Max(1, longest));
+        }
 
         private void Update()
         {
@@ -72,7 +92,11 @@ namespace DeepDive.Composition
             var mirror = MediaNetworkBinding.Mirrored;
             var label = Label(MediaNetworkBinding.HasMirror && mirror != null,
                 mirror != null ? mirror.Followers : 0);
-            if (boardText.text != label) boardText.text = label;
+            if (boardText.text != label)
+            {
+                boardText.text = label;
+                boardText.characterSize = CharacterSize(label);
+            }
         }
     }
 
