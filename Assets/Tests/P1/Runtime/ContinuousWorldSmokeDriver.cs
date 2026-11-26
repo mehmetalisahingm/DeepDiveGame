@@ -25,6 +25,10 @@ namespace DeepDive.P1.Lab
         {
             public bool passed, homeSpawn, shopOpened, dockReached, swam, pcOpened, slept, morningHome, earlySleepSummary, reloadClean;
             public int players, worldLoads, completedStep, firstDay, morningDay;
+            // #326: which pier-end stop this player took (0/1 far row, 2/3 near row), when it got there and how.
+            public int dockIndex = -1;
+            public float dockSeconds;
+            public string dockMode = "";
             public float distance, largestTravelStep;
             public string position, phase;
             public string bedRay="",bedAnswer="";
@@ -44,6 +48,25 @@ namespace DeepDive.P1.Lab
         private float deadline, nextReport, waitUntil, aimAt, nextTrace, nextBedRetry;
         private Vector3 previous;
         private bool tracking, finished, leaving, dockRearWaiting;
+        // #326 (-p326-dock-rush): no side staging for the rear slots and no waiting for the front row; everyone walks
+        // straight to the pier end. With -p326-dock-fixed each keeps its slot's stop (the old layout, to reproduce the
+        // jam); otherwise a diver reaching the pier root takes the farthest stop not already taken by someone ahead of
+        // it on the pier, as people fill a narrow jetty from its end, so a standing pair never seals the far row.
+        private static bool DockRush => Arg("-p326-dock-rush") == "1";
+        private static bool DockFixed => Arg("-p326-dock-fixed") == "1";
+        // Everyone first gathers on the sand short of the ledge and all leave together once the four are there; with
+        // -p326-dock-reverse the two bound for the far row (fixed slots 0/1) leave 1.5 s after the other two, the order
+        // that sealed the far row in #207's four-process artifact.
+        private static bool DockReverse => Arg("-p326-dock-reverse") == "1";
+        private static Vector3 DockGather(int playerSlot) => P(7.9f + 0.75f * playerSlot, -13.2f);
+        // Leaving the gather spots together, two lanes onto the ledge (west for the two western spots, east for the
+        // others), the inner diver of each pair in front and the outer 1.2 m behind, so no two divers ever head for the
+        // same point before the pier. Which stop each then takes is ClaimDockStop's.
+        private static Vector3 DockLane(int playerSlot) => P(playerSlot < 2 ? 8.45f : 9.55f,
+            playerSlot == 1 || playerSlot == 2 ? -9.0f : -10.2f);
+        private float dockReleaseAt, dockGatherSince;
+        private bool dockClaimed;
+        private float dockStepStart;
         private bool sawWorldOwner;
         private List<Vector3> route;
 
@@ -189,7 +212,11 @@ namespace DeepDive.P1.Lab
             {
                 case 1:
                     if (Time.realtimeSinceStartup < waitUntil) { Stop(); return; }
+                    if (dockStepStart <= 0f) dockStepStart = Time.realtimeSinceStartup;
+                    if (DockRush && expected == 4 && route != null && waypoint == route.Count - 2 && !DockReleased()) { Stop(); return; }
+                    if (DockRush && !dockClaimed && route != null && waypoint == route.Count - 1) ClaimDockStop();
                     if (!Follow()) return;
+                    if (DockRush) report.dockSeconds = Time.realtimeSinceStartup - dockStepStart;
                     report.dockReached = !local.Swimming.Value &&
                         Mathf.Abs(local.transform.position.y - ContinuousTownLayout.WalkSurfaceY) < 0.2f;
                     if (!report.dockReached) { Fail("Dock endpoint is not dry ground"); return; }
@@ -199,11 +226,14 @@ namespace DeepDive.P1.Lab
                     if (adapter.IsAuthority && AllAt(2) && state.Phase == SessionPhase.Prep) adapter.AdvancePhase();
                     if (state.Phase == SessionPhase.Dive)
                     {
+                        // #326: with stops taken on the pier, the stop (not the slot) orders both the departure and the
+                        // spot in the water, so the first to leave takes the eastern spot and nobody squeezes between two.
+                        var row = report.dockIndex >= 0 ? report.dockIndex : slot;
                         SetRoute(new[] { P(9f, -9f), P(9f, -12.5f), P(9f, -16f), P(0f, -16f), P(-6.5f, -11.2f),
-                            P(-6.5f, -8.7f), new Vector3(-7.6f + slot * 0.75f, 6f, -5f) });
+                            P(-6.5f, -8.7f), new Vector3(-7.6f + row * 0.75f, 6f, -5f) });
                         // On the 2m-wide pier the rear row leaves first, so it cannot trap
                         // the front row. No actor is placed outside the authored dock.
-                        waitUntil = Time.realtimeSinceStartup + (expected - 1 - slot) * 2f;
+                        waitUntil = Time.realtimeSinceStartup + (expected - 1 - row) * 2f;
                         SetStep(3);
                     }
                     break;
@@ -394,13 +424,14 @@ namespace DeepDive.P1.Lab
             yield return shop + new Vector3(0f, 0f, 2.8f);
             yield return P(0f, -24f); yield return P(0f, -16f);
             // The S1 broken rowboat occupies the direct center beach crossing. Walk past its east end.
-            yield return P(9f, -16f); yield return P(9f, -12.5f);
+            yield return P(9f, -16f); yield return DockRush && expected == 4 ? DockGather(slot) : P(9f, -12.5f);
             // #207 four-process artifact 14173737944: rear slots 2/3 reached the
             // narrow pier before slot 1 and physically blocked its passage.
             // Stage rear slots on *opposite dry edges* of the authored dock,
             // leaving the centre approach open for slots 0/1. Solo/two-player
             // routes and the genuine physical walk are unchanged.
-            yield return expected == 4 && slot >= 2 ? DockRearStage(slot) : P(9f, -9f);
+            yield return DockRush && expected == 4 ? DockLane(slot)
+                : expected == 4 && slot >= 2 ? DockRearStage(slot) : P(9f, -9f);
             yield return DockStop(slot);
         }
         private IEnumerable<Vector3> Homeward()
@@ -421,6 +452,62 @@ namespace DeepDive.P1.Lab
             var stop = DockStop(playerSlot);
             return Vector2.Distance(new Vector2(position.x, position.z), new Vector2(stop.x, stop.z)) < 0.48f;
         }
+        // Holds at the gather spot until all four stand at theirs (or 40 s), then leaves; reversed, slots 0/1 1.5 s later.
+        private bool DockReleased()
+        {
+            var now = Time.realtimeSinceStartup;
+            if (dockReleaseAt > 0f) return now >= dockReleaseAt;
+            if (dockGatherSince <= 0f) dockGatherSince = now;
+            var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None).Where(p => p.IsSpawned).ToArray();
+            // Counted: at a gather spot, or already past it towards the pier (a diver arriving last finds the others gone).
+            var gathered = players.Count(p =>
+                Enumerable.Range(0, expected).Any(i => Vector2.Distance(new Vector2(p.transform.position.x, p.transform.position.z),
+                    new Vector2(DockGather(i).x, DockGather(i).z)) < 0.6f) ||
+                (p.transform.position.z > -12.6f && Mathf.Abs(p.transform.position.x - 9f) < 2.2f)) >= expected;
+            if (!gathered && now - dockGatherSince < 40f) return false;
+            dockReleaseAt = now + (DockReverse && slot < 2 ? 1.5f : 0f);
+            Debug.Log($"P326_DOCK_RELEASE slot={slot} gathered={gathered} waited={now - dockGatherSince:0.0} reverse={DockReverse}");
+            return now >= dockReleaseAt;
+        }
+
+        // Which pier-end stop this diver walks to, re-decided every frame until it is within 0.6 m of it, as people on a
+        // narrow jetty sort themselves out: those on the pier or the ledge (z > -9.6) are ranked by how near the end they
+        // are (level within 0.2 m: lower slot first); the front pair takes the far row and the next pair the near row, and
+        // within a pair the western diver takes the western stop, so a pair never crosses. Every process ranks from the
+        // same replicated positions, so a clash from two slightly different snapshots does not outlast the next frame.
+        private void ClaimDockStop()
+        {
+            if (DockFixed) { dockClaimed = true; report.dockIndex = slot; report.dockMode = "fixed"; return; }
+            var me = local.transform.position;
+            var target = route[route.Count - 1];
+            if (report.dockIndex >= 0 && Vector2.Distance(new Vector2(me.x, me.z), new Vector2(target.x, target.z)) < 0.6f)
+            { dockClaimed = true; return; }
+            var onPier = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None)
+                .Where(p => p.IsSpawned && (p == local || (p.transform.position.z > -9.6f && Mathf.Abs(p.transform.position.x - 9f) < 2.2f)))
+                .ToList();
+            onPier.Sort((x, y) =>
+            {
+                var dz = y.transform.position.z - x.transform.position.z;
+                if (Mathf.Abs(dz) > 0.2f) return dz > 0f ? 1 : -1;
+                return x.OwnerClientId.CompareTo(y.OwnerClientId);
+            });
+            var rank = onPier.IndexOf(local);
+            var pairStart = rank - rank % 2;
+            var mate = rank % 2 == 0 ? pairStart + 1 : pairStart;
+            var west = mate >= onPier.Count || onPier[mate] == local || me.x <= onPier[mate].transform.position.x;
+            var row = Mathf.Min(pairStart / 2, 1);
+            var index = row * 2 + (west ? 0 : 1);
+            if (mate < onPier.Count && onPier[mate] != local && Mathf.Abs(me.x - onPier[mate].transform.position.x) < 0.05f)
+                index = row * 2 + (local.OwnerClientId < onPier[mate].OwnerClientId ? 0 : 1);
+            if (index != report.dockIndex)
+            {
+                Debug.Log($"P326_DOCK_CLAIM slot={slot} rank={rank} stop={index} at={me}");
+                report.dockIndex = index;
+                report.dockMode = "far-first rank=" + rank;
+                route[route.Count - 1] = DockStop(index);
+            }
+        }
+
         private bool FrontRowDocked()
         {
             var players = FindObjectsByType<NetworkPlayer>(FindObjectsSortMode.None);
@@ -442,7 +529,7 @@ namespace DeepDive.P1.Lab
             // Rear divers wait at their real side staging marks, not in the
             // middle of the pier. Do not let either re-enter until both front
             // players have physically reached their own dock endpoints.
-            if (step == 1 && expected == 4 && slot >= 2 && waypoint == route.Count - 1)
+            if (step == 1 && expected == 4 && slot >= 2 && waypoint == route.Count - 1 && !DockRush)
             {
                 if (!FrontRowDocked())
                 {
