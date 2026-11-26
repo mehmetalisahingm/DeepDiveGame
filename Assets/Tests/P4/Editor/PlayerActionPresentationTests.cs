@@ -87,6 +87,15 @@ namespace DeepDive.P4.Tests
             }
             finally {Object.DestroyImmediate(bag);Object.DestroyImmediate(rig);}
         }
+        [TestCase(10.0,true,true)]
+        [TestCase(11.59,true,true)]
+        [TestCase(11.61,true,false)]
+        [TestCase(10.0,false,false)]
+        [TestCase(9.0,true,false)]
+        public void ExpiredOrDisabledCosmeticsNeverStartAVisibleAction(double now,bool enabled,bool expected)
+        {
+            Assert.AreEqual(expected,PlayerActionView.CanPresentAction(Accepted(),now,enabled));
+        }
         [Test] public void ClientCannotForgeSuccessAndReplayDoesNotConsumeSequence()
         {
             var gate=new PlayerActionReceipt();var message=Accepted();
@@ -170,6 +179,7 @@ namespace DeepDive.P4.Tests
             Assert.That(prefab.GetComponentsInChildren<Renderer>(true).Length,Is.InRange(1,6));
         }
         [TestCase("sea_bass")] [TestCase("tuna")] [TestCase("red_snapper")]
+        [TestCase("grouper")] [TestCase("lanternfish")]
         public void FrozenCatchHasRealStaticGeometryAndKeepsItsCentreInHand(string species)
         {
             var fish=Object.Instantiate(Resources.Load<GameObject>(PlayerActionView.FishResource(species)));
@@ -192,6 +202,7 @@ namespace DeepDive.P4.Tests
             finally {Object.DestroyImmediate(fish);foreach(var mesh in owned)Object.DestroyImmediate(mesh);}
         }
         [TestCase("sea_bass")] [TestCase("tuna")] [TestCase("red_snapper")]
+        [TestCase("grouper")] [TestCase("lanternfish")]
         public void CaughtVisualUsesActualSpeciesAndHasNoNetworkOrPhysics(string species)
         {
             var prefab=Resources.Load<GameObject>(PlayerActionView.FishResource(species));Assert.That(prefab,Is.Not.Null);
