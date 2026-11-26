@@ -32,6 +32,9 @@ namespace DeepDive.Network
             if(wasBusy&&!busy&&!struck)return RepairCue.Drop;
             return RepairCue.None;
         }
+        // A reset to a smaller counter is a new baseline, not a hammer impact.
+        public static bool AcceptedStrokeAdvanced(bool primed, uint previous, uint current) =>
+            primed && current > previous;
         public bool UsesAuthoredArt {get;private set;}
         public Vector3 RightGripPosition => hammerGrip!=null?hammerGrip.position:transform.position;
         public float NailContactError {get;private set;}=float.PositiveInfinity;
@@ -66,6 +69,7 @@ namespace DeepDive.Network
             hammerGrip=RepairPropPlacement.Marker(hammer.transform,"GripPoint");
             toolContact=RepairPropPlacement.Marker(hammer.transform,"ToolContact");
             UsesAuthoredArt=catalog!=null&&catalog.RepairPlankPrefab!=null&&catalog.RepairHatchetPrefab!=null;
+            board.SetActive(false);hammer.SetActive(false);
             previousPosition=transform.position;
             audioSource=gameObject.AddComponent<AudioSource>(); audioSource.playOnAwake=false; audioSource.spatialBlend=player.IsOwner?0f:1f; audioSource.maxDistance=15;
             // Short prototype wood impact; final art/audio remains #189's delivery.
@@ -88,14 +92,21 @@ namespace DeepDive.Network
         private void LateUpdate()
         {
             if(board==null||player==null)return;
-            var struck=player.RepairStroke.Value!=stroke;
+            if(!player.IsSpawned || player.Passive.Value || player.Seated.Value)
+            {
+                ResetPresentation();return;
+            }
+            var currentStroke=player.RepairStroke.Value;
+            if(currentStroke<stroke) ResetPresentation();
+            var struck=AcceptedStrokeAdvanced(cuePrimed,stroke,currentStroke);
             if(struck)
             {
                 strikePart=player.RepairHandsBusy?player.RepairPartIndex.Value:rememberedPart;
                 strikeNail=player.RepairHandsBusy?Mathf.Clamp(player.RepairHits.Value-1,0,2):Mathf.Clamp(rememberedHits,0,2);
-                stroke=player.RepairStroke.Value;pulse=Time.unscaledTime+.28f;
+                pulse=Time.unscaledTime+.28f;
                 audioSource.PlayOneShot(impact);
             }
+            stroke=currentStroke;
             bool active=player.IsSpawned&&!player.Passive.Value&&player.RepairHandsBusy;
             bool finishing=player.IsSpawned&&!player.Passive.Value&&!player.Seated.Value&&Time.unscaledTime<pulse;
             var placedNow=active&&player.RepairPlaced.Value;
@@ -180,7 +191,19 @@ namespace DeepDive.Network
             var text = RepairInstruction(player.RepairPlaced.Value, player.RepairHits.Value);
             GUI.Box(RepairHudRect(Screen.width, Screen.height), text, repairHudStyle);
         }
+        private void ResetPresentation()
+        {
+            if(board!=null)board.SetActive(false);
+            if(hammer!=null)hammer.SetActive(false);
+            if(audioSource!=null)audioSource.Stop();
+            cuePrimed=wasBusy=wasPlaced=false;
+            if(player!=null)stroke=player.RepairStroke.Value;
+            pulse=0;rememberedPart=strikePart=-1;rememberedHits=strikeNail=0;
+            NailContactError=float.PositiveInfinity;
+            previousPosition=transform.position;
+        }
+        private void OnDisable()=>ResetPresentation();
         private void OnDestroy()
-        {if(board!=null)Destroy(board);if(hammer!=null)Destroy(hammer);if(wood!=null)Destroy(wood);if(metal!=null)Destroy(metal);if(ownsImpact&&impact!=null)Destroy(impact);}
+        {if(audioSource!=null)Destroy(audioSource);if(board!=null)Destroy(board);if(hammer!=null)Destroy(hammer);if(wood!=null)Destroy(wood);if(metal!=null)Destroy(metal);if(ownsImpact&&impact!=null)Destroy(impact);}
     }
 }
